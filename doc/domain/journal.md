@@ -63,6 +63,10 @@ If the posting time if before the recording time, it might have an effect on for
 
 The posting time of an adjustment operation at day closing is always the last second of that day. So event if that operation is posted while still inside the day, the day closing will be the same. This is, the last second of that day. In the case of an adjustment operation, the posting time and the operation time are identical. 
 
+#### Value Time
+
+The Date use to compute interests. This can be different from the posting date and can lead to the production of other type of balances.
+
 #### Operation Type
 
 The type of operation recorded here. The semantic of this information is determined by the consuming module.
