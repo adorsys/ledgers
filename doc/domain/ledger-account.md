@@ -1,36 +1,34 @@
-# Ledger - Account
+# Ledger Account
 
-## Account
+An account is used to group related posting lines. Each account has exactly one account type in the ledger's chart of account. Accounts are arranged in a tree structure. This tree structure is constrained by the tree structure of the account types in the chart of account.
 
-An account is used to group related journal entry lines.
+An account created as a descendant of the "Balance Sheet Account" can not reference a type that is descendant of a "P&L Account Type" 
 
 ## Account Properties
 
-### Chart of Account (coA)
+### Parent Account (parent)
 
-Information identifying the chart of account containing this account.
-
-### Parent Account (parentInCoA)
-
-Identifier of the parent of this account in the containing chart of account.
-
-This is essential for the classification of accounts. 
+Identifier of the parent of this account in the containing ledger. 
 
 The parent account must always be indicated. There are only two accounts without parent accounts:
-- The account "Estate Accounts" (aka. balance Sheet Account)
-- The account "P&L Account" (aka. Profit & Lost Accounts)
+- The account "Balance Sheet Account" with type "Balance Sheet Account Type"
+- The account "Profit and Lost Account" with type "Profit and Lost Account Type"
 
-Those accounts are always automatically created by the accounting module while creating the enclosing chart of account.
+Root account types are automatically created while creating the containing chart of account. Root accounts are always automatically created as well while creating the enclosing ledger.
 
-### Id in Chart Of Account (idInCoA)
+### Account Type
 
-Identifier of this account in the containing chart of account. This is generally the concatenation of the parent id and an numeric number that is unique is the scope of the parent.
+Reference to the account type from the ledger's chart of account.
+
+### Id in Ledger (path)
+
+Identifier of this account in the containing ledger. This is generally the concatenation of the parent id and an numeric number that is unique in the scope of the parent.
 
 The framework suggest two approaches for the generation of child ids.
 - Auto: the framework will increment a number that is stored in the parent record.
 - Suggested: The framework will check all existing children to make sure there is no conflicting child. 
 
-In both cases, the framework will proceed like concatenating the parentInCoA with the new id to produce a new idInCoA and mark the column unique.
+In both cases, the framework will proceed like concatenating the path with the new id to produce a new path and mark the column unique.
 
 ### Account Identifier
 
