@@ -21,7 +21,7 @@
 
     <groupId>de.adorsys.ledgers</groupId>
     <artifactId>ledgers</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>postings</module>
     </modules>
@@ -31,6 +31,12 @@
     <description>OpenSource Implementation Of Accounting Functionalities</description>
 
     <url>https://github.com/adorsys/ledgers</url>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.4.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
 
     <licenses>
         <license>
@@ -77,13 +83,6 @@
         <dependency.locations.enabled>false</dependency.locations.enabled>
         <ruleset.basedir>${project.basedir}</ruleset.basedir>
     </properties>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.8.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>

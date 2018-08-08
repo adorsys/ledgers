@@ -1,0 +1,18 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
+           user="Francis"
+           created="2018-08-07 20:58:24.232"
+           name="CoA"
+           valid_From="2018-08-07 20:58:24.232"/>
+
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITP-HxQq16OuGvw"
+			name="Sample Ledger Account Type"
+			parent="Sample Ledger Account Type"
+			valid_From="2018-08-07 20:58:24.232"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa="CoA" 
+			level="0"/>
+</dataset>
+
+
