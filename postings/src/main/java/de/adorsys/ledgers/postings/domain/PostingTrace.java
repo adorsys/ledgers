@@ -25,8 +25,10 @@ public class PostingTrace {
 	@Id
 	private String id;
 	
+	/*The source posting id*/
 	private String srcPstId;
 
+	/*The target posting id*/
 	private String tgtPstId;
 
 }

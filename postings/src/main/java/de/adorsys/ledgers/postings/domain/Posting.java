@@ -1,45 +1,73 @@
 package de.adorsys.ledgers.postings.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 
 import org.springframework.data.annotation.CreatedDate;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import de.adorsys.ledgers.postings.listener.CreatePostingListener;
+import de.adorsys.ledgers.postings.listener.RecordHashListener;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Singular;
 import lombok.ToString;
 
 @Entity
 @Getter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@EntityListeners({ CreatePostingListener.class, RecordHashListener.class })
+@JsonPropertyOrder(alphabetic = true)
 public class Posting {
 
-	/*The record id*/
+	/* The record id */
 	@Id
 	private String id;
 
 	/* The user (technically) recording this posting. */
-	private String recUser;
+	@Column(nullable = false, updatable = false)
+	private String recordUser;
 
 	/* The time of recording of this posting. */
 	@CreatedDate
-	private LocalDateTime recTime;
+	@Column(nullable = false, updatable = false)
+	@Setter
+	private LocalDateTime recordTime;
 
-	/* The antecedent identifier */
-	private String recAntId;
+	/* The antecedent identifier. Use for hash chaining */
+	private String recordAntecedentId;
+	private String recordAntecedentHash;
 
 	/*
 	 * The hash value of this posting. If is used by the system for integrity
 	 * check. A posting is never modified.
+	 * 
+	 * Aggregation of the UTF-8 String value of all fields by field name in
+	 * alphabetical order.
 	 */
-	private String recHash;
+	@Column(nullable = false, updatable = false)
+	@Setter
+	private String recordHash;
+	@Setter
+	private String recordHashAlg;
 
 	/*
 	 * The unique identifier of this business operation. The operation
@@ -53,9 +81,6 @@ public class Posting {
 
 	/* The time of occurrence of this operation. Set by the consuming module. */
 	private LocalDateTime oprTime;
-	
-	/*The hash value of the operation data*/
-	private String oprHash;
 
 	/*
 	 * The type of operation recorded here. The semantic of this information is
@@ -81,6 +106,7 @@ public class Posting {
 	 * second of that day. In the case of an adjustment operation, the posting
 	 * time and the operation time are identical.
 	 */
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime pstTime;
 
 	/*
@@ -93,7 +119,9 @@ public class Posting {
 	 * debit and the credit side of the posting. Some account statement will not
 	 * display mechanical postings while producing the user statement.
 	 */
-	private String pstType;
+	@Enumerated
+	@Column(nullable = false, updatable = false)
+	private PostingType pstType;
 
 	/*
 	 * The Date use to compute interests. This can be different from the posting
@@ -101,11 +129,8 @@ public class Posting {
 	 */
 	private LocalDateTime valTime;
 
-	@ElementCollection
-	  @CollectionTable(
-	        name="POSTING_LINE",
-	        joinColumns=@JoinColumn(name="POSTING_ID")
-	  )
-	private List<PostingLine> lines;
-
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "POSTING_LINE", joinColumns = @JoinColumn(name = "POSTING_ID"))
+	@Singular("line")
+	private List<PostingLine> lines = new ArrayList<>();
 }

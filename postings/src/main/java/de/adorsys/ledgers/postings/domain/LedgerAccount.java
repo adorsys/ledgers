@@ -1,12 +1,15 @@
 package de.adorsys.ledgers.postings.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import de.adorsys.ledgers.postings.utils.Ids;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,5 +48,31 @@ public class LedgerAccount extends LedgerEntity {
 		this.level = level;
 	}
 	
-	
+	public static LedgerAccount newChildInstance(String name, LocalDateTime validFrom, String user, LedgerAccount parent, LedgerAccountType type){
+		return new LedgerAccount(Ids.id(), 
+				name, 
+				validFrom, 
+				LocalDateTime.now(), 
+				user,
+				parent.getLedger(),
+				parent.getName(),
+				type.getName(),
+				parent.getLevel()+1);
+	}
+
+	public static LedgerAccount clone(LedgerAccount in) {
+		return new LedgerAccount(in.getId(), 
+				in.getName(), 
+				in.getValidFrom(), 
+				in.getCreated(), 
+				in.getUser(),
+				in.getLedger(),
+				in.getParent(),
+				in.getType(),
+				in.getLevel());
+	}
+
+	public static List<LedgerAccount> clone(List<LedgerAccount> in) {
+		return in.stream().map(coa -> clone(coa)).collect(Collectors.toList());
+	}
 }

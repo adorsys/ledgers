@@ -25,4 +25,12 @@ public class PostingLine {
 	@Enumerated
 	private PostingSide side;
 
+	/*
+	 * This is the account delivered by this posting. This field is generally
+	 * used to backup information associated with the posting if the 
+	 * account referenced is not present in the corresponding ledger.
+	 * 
+	 */
+	private String srcAccount;
+
 }

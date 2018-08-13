@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -57,4 +58,9 @@ public abstract class LedgerEntity {
 
 	@Column(nullable=false)
 	private String user;
+	
+	/*Valid to by posting date. After this date, the ledger entity can not be used.*/
+	@Column(nullable=false)
+	@Setter
+	private LocalDateTime validTo = LocalDateTime.of(2199, 01, 01, 0, 0, 0, 0);
 }

@@ -3,12 +3,16 @@
            user="Francis"
            created="2018-08-07 20:58:24.232"
            name="CoA"
-           valid_From="2018-08-07 20:58:24.232"/>
+           valid_From="2018-08-07 20:58:24.232"
+           valid_To="2199-01-01 00:00:00.000"
+           />
            
 	<LEDGER id="Zd0ND5YwSzGwIfZilhumPg" 
 			name="Sample Ledger"
 			valid_From="2018-08-07 20:58:24.232"
 			created="2018-08-07 20:58:24.232"
 			user="Sample User"
-			coa="CoA"/>
+			coa="CoA"
+           valid_To="2199-01-01 00:00:00.000"
+           />
 </dataset>
