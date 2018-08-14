@@ -51,7 +51,7 @@ public class ITLedgerAccountRepositoryTest {
 				.user("Sample User")
 				.validFrom(LocalDateTime.now())
 				.ledger(ledger.getName())
-				.type(ledgerAccountType.getName())
+				.accountType(ledgerAccountType.getName())
 				.parent("Sample Ledger Account").build();
 		ledgerAccountRepository.save(ledgerAccount);
 	}
@@ -64,7 +64,7 @@ public class ITLedgerAccountRepositoryTest {
 				.name("Sample Ledger Account")
 				.user("Sample User")
 				.parent("Sample Ledger Account")
-				.type(ledgerAccountType.getName())
+				.accountType(ledgerAccountType.getName())
 				.validFrom(LocalDateTime.now()).build();
 		ledgerAccountRepository.save(ledgerAccount);
 	}
@@ -93,7 +93,7 @@ public class ITLedgerAccountRepositoryTest {
 				.user("Sample User")
 				.validFrom(ledgerAccount.getValidFrom())
 				.parent(ledgerAccount.getName())
-				.type(ledgerAccountType.getName())
+				.accountType(ledgerAccountType.getName())
 				.ledger(ledgerAccount.getLedger()).build();
 		ledgerAccountRepository.save(ledgerAccount2);
 	}

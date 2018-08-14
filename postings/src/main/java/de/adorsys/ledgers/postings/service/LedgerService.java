@@ -43,7 +43,7 @@ public interface LedgerService {
 	 * @param referenceDate
 	 * @return
 	 */
-	public Optional<Ledger> findLedgertByName(LedgerName name, LocalDateTime referenceDate);
+	public Optional<Ledger> findLedgersByName(LedgerName name, LocalDateTime referenceDate);
 	
 	/**
 	 * Create a new Ledger account.

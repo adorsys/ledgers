@@ -70,4 +70,21 @@ public interface ChartOfAccountService {
 	 * @return an empty list of no ledger account type with given name found.
 	 */
 	public List<LedgerAccountType> findLedgerAccountTypes(LedgerAccountName name);
+
+	/**
+	 * Returns all valid children of this node.
+	 * @param parentName
+	 * @param referenceDate
+	 * @return
+	 */
+	List<LedgerAccountType> findChildLedgerAccountTypes(LedgerAccountName parentName, LocalDateTime referenceDate);
+
+	/**
+	 * Return all valid ledger account types attached to this coa.
+	 * 
+	 * @param coaName
+	 * @param referenceDate
+	 * @return
+	 */
+	List<LedgerAccountType> findCoaLedgerAccountTypes(ChartOfAccountName coaName, LocalDateTime referenceDate);
 }

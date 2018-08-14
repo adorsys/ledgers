@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import de.adorsys.ledgers.postings.basetypes.ChartOfAccountName;
 import de.adorsys.ledgers.postings.utils.Ids;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,7 +34,7 @@ public class ChartOfAccount extends LedgerEntity {
 	}
 
 	public static ChartOfAccount clone(ChartOfAccount in) {
-		return new ChartOfAccount(in.getId(), 
+		return in==null?null:new ChartOfAccount(in.getId(), 
 				in.getName(), 
 				in.getValidFrom(), 
 				in.getCreated(), in.getUser());
@@ -41,5 +42,9 @@ public class ChartOfAccount extends LedgerEntity {
 
 	public static List<ChartOfAccount> clone(List<ChartOfAccount> in) {
 		return in.stream().map(coa -> clone(coa)).collect(Collectors.toList());
+	}
+	
+	public ChartOfAccountName toName(){
+		return new ChartOfAccountName(getName());
 	}
 }

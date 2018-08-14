@@ -63,4 +63,8 @@ public abstract class LedgerEntity {
 	@Column(nullable=false)
 	@Setter
 	private LocalDateTime validTo = LocalDateTime.of(2199, 01, 01, 0, 0, 0, 0);
+	
+	/*The description of this entity*/
+	@Setter
+	private String desc;
 }

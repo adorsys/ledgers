@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import de.adorsys.ledgers.postings.basetypes.LedgerAccountName;
 import de.adorsys.ledgers.postings.utils.Ids;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,18 +34,18 @@ public class LedgerAccount extends LedgerEntity {
 	
 	/*Reference to the account type from the ledger's chart of account.*/
 	@Column(nullable=false)
-	private String type;
+	private String accountType;
 	
 	/*The detail level of this ledger account*/
 	private int level;
 
 	@Builder
 	public LedgerAccount(String id, String name, LocalDateTime validFrom, LocalDateTime created, String user,
-			String ledger, String parent, String type, int level) {
+			String ledger, String parent, String accountType, int level) {
 		super(id, name, validFrom, created, user);
 		this.ledger = ledger;
 		this.parent = parent;
-		this.type = type;
+		this.accountType = accountType;
 		this.level = level;
 	}
 	
@@ -61,18 +62,22 @@ public class LedgerAccount extends LedgerEntity {
 	}
 
 	public static LedgerAccount clone(LedgerAccount in) {
-		return new LedgerAccount(in.getId(), 
+		return in==null?null:new LedgerAccount(in.getId(), 
 				in.getName(), 
 				in.getValidFrom(), 
 				in.getCreated(), 
 				in.getUser(),
 				in.getLedger(),
 				in.getParent(),
-				in.getType(),
+				in.getAccountType(),
 				in.getLevel());
 	}
 
 	public static List<LedgerAccount> clone(List<LedgerAccount> in) {
-		return in.stream().map(coa -> clone(coa)).collect(Collectors.toList());
+		return in.stream().map(la -> clone(la)).collect(Collectors.toList());
+	}
+
+	public LedgerAccountName toName(){
+		return new LedgerAccountName(getName());
 	}
 }
