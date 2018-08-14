@@ -1,8 +1,6 @@
 package de.adorsys.ledgers.postings.domain;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -59,22 +57,6 @@ public class LedgerAccount extends LedgerEntity {
 				parent.getName(),
 				type.getName(),
 				parent.getLevel()+1);
-	}
-
-	public static LedgerAccount clone(LedgerAccount in) {
-		return in==null?null:new LedgerAccount(in.getId(), 
-				in.getName(), 
-				in.getValidFrom(), 
-				in.getCreated(), 
-				in.getUser(),
-				in.getLedger(),
-				in.getParent(),
-				in.getAccountType(),
-				in.getLevel());
-	}
-
-	public static List<LedgerAccount> clone(List<LedgerAccount> in) {
-		return in.stream().map(la -> clone(la)).collect(Collectors.toList());
 	}
 
 	public LedgerAccountName toName(){

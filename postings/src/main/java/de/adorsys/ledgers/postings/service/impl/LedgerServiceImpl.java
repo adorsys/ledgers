@@ -20,6 +20,7 @@ import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
+import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.NamePatterns;
 
@@ -99,18 +100,18 @@ public class LedgerServiceImpl implements LedgerService {
 					.build();
 			}
 		});
-		return Ledger.clone(newLedger);
+		return CloneUtils.cloneObject(newLedger, Ledger.class);
 	}
 
 	@Override
 	public List<Ledger> findLedgersByName(LedgerName name) {
-		return Ledger.clone(ledgerRepository.findByName(name.getValue()));
+		return CloneUtils.cloneList(ledgerRepository.findByName(name.getValue()), Ledger.class);
 	}
 
 	@Override
 	public Optional<Ledger> findLedgersByName(LedgerName name, LocalDateTime referenceDate) {
 		Ledger ledger = ledgerRepository.findFirstOptionalByNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(name.getValue(), referenceDate, referenceDate).orElse(null);
-		return Optional.ofNullable(Ledger.clone(ledger));
+		return Optional.ofNullable(CloneUtils.cloneObject(ledger, Ledger.class));
 	}
 
 	@Override
@@ -195,19 +196,19 @@ public class LedgerServiceImpl implements LedgerService {
 			.build();
 		newLedgerAccount = ledgerAccountRepository.save(newLedgerAccount);
 		
-		return LedgerAccount.clone(newLedgerAccount);
+		return CloneUtils.cloneObject(newLedgerAccount, LedgerAccount.class);
 	}
 
 	@Override
 	public Optional<LedgerAccount> findLedgerAccount(LedgerAccountName name, LocalDateTime referenceDate) {
 		LedgerAccount ledgerAccount = ledgerAccountRepository.findFirstOptionalByNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(
 				name.getValue(), referenceDate, referenceDate).orElse(null);
-		return Optional.ofNullable(LedgerAccount.clone(ledgerAccount));
+		return Optional.ofNullable(CloneUtils.cloneObject(ledgerAccount, LedgerAccount.class));
 	}
 
 	@Override
 	public List<LedgerAccount> findLedgerAccounts(LedgerAccountName name) {
-		return LedgerAccount.clone(ledgerAccountRepository.findByName(name.getValue()));
+		return CloneUtils.cloneList(ledgerAccountRepository.findByName(name.getValue()), LedgerAccount.class);
 	}
 	
 }

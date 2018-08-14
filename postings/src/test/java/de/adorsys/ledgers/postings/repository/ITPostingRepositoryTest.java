@@ -36,7 +36,7 @@ public class ITPostingRepositoryTest {
 			.oprId("oprId")
 			.oprDetails("oprDetails")
 			.pstTime(LocalDateTime.now())
-			.pstType(PostingType.STMT)
+			.pstType(PostingType.BAL_STMT)
 			.build();
 		
 		Posting saved = postingRepository.save(posting);

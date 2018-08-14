@@ -17,6 +17,7 @@ import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
+import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.Ids;
 
 @Service
@@ -88,13 +89,13 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 			});
 		}
 
-		return ChartOfAccount.clone(coa);
+		return CloneUtils.cloneObject(coa, ChartOfAccount.class);
 	}
 
 	@Override
 	public List<ChartOfAccount> findChartOfAccountsByName(ChartOfAccountName name) {
 		List<ChartOfAccount> found = chartOfAccountRepo.findByName(name.getValue());
-		return ChartOfAccount.clone(found);
+		return CloneUtils.cloneList(found, ChartOfAccount.class);
 	}
 
 	@Override
@@ -103,7 +104,7 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 				.findFirstOptionalByNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(name.getValue(),
 						referenceDate, referenceDate)
 				.orElse(null);
-		return Optional.ofNullable(ChartOfAccount.clone(coa));
+		return Optional.ofNullable(CloneUtils.cloneObject(coa, ChartOfAccount.class));
 	}
 
 	/**
@@ -140,7 +141,7 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 		LedgerAccountType lat = LedgerAccountType.newChildInstance(name.getValue(), validFrom, principal.getName(),
 				parentOptions.get());
 		LedgerAccountType saved = ledgerAccountTypeRepo.save(lat);
-		return LedgerAccountType.clone(saved);
+		return CloneUtils.cloneObject(saved, LedgerAccountType.class);
 	}
 
 	@Override
@@ -148,13 +149,13 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 		LedgerAccountType lat = ledgerAccountTypeRepo
 				.findFirstOptionalByNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(name.getValue(),
 						referenceDate, referenceDate).orElse(null);
-		return Optional.ofNullable(LedgerAccountType.clone(lat));
+		return Optional.ofNullable(CloneUtils.cloneObject(lat, LedgerAccountType.class));
 	}
 
 	@Override
 	public List<LedgerAccountType> findLedgerAccountTypes(LedgerAccountName name) {
 		List<LedgerAccountType> found = ledgerAccountTypeRepo.findByName(name.getValue());
-		return LedgerAccountType.clone(found);
+		return CloneUtils.cloneList(found, LedgerAccountType.class);
 	}
 
 	@Override
@@ -163,7 +164,7 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 		List<LedgerAccountType> found = ledgerAccountTypeRepo
 				.findByParentAndValidFromBeforeAndValidToAfterOrderByLevelDescValidFromDesc(parentName.getValue(),
 						referenceDate, referenceDate);
-		return LedgerAccountType.clone(found);
+		return CloneUtils.cloneList(found, LedgerAccountType.class);
 	}
 
 	@Override
@@ -171,6 +172,6 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 		List<LedgerAccountType> found = ledgerAccountTypeRepo
 				.findByCoaAndValidFromBeforeAndValidToAfterOrderByLevelDescValidFromDesc(coaName.getValue(),
 						referenceDate, referenceDate);
-		return LedgerAccountType.clone(found);
+		return CloneUtils.cloneList(found, LedgerAccountType.class);
 	}
 }

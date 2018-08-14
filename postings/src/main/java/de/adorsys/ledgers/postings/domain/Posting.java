@@ -18,6 +18,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import de.adorsys.ledgers.postings.basetypes.OperationId;
 import de.adorsys.ledgers.postings.listener.CreatePostingListener;
 import de.adorsys.ledgers.postings.listener.RecordHashListener;
 import lombok.AllArgsConstructor;
@@ -77,6 +78,7 @@ public class Posting {
 	 * an operation. Only one of them will be effective in the account statement
 	 * at any given time.
 	 */
+	@Column(nullable = false, updatable = false)
 	private String oprId;
 
 	/* The time of occurrence of this operation. Set by the consuming module. */
@@ -122,6 +124,11 @@ public class Posting {
 	@Enumerated
 	@Column(nullable = false, updatable = false)
 	private PostingType pstType;
+	
+	/*
+	 * The ledger governing this posting.
+	 */
+	private String ledger;
 
 	/*
 	 * The Date use to compute interests. This can be different from the posting
@@ -133,4 +140,8 @@ public class Posting {
 	@CollectionTable(name = "POSTING_LINE", joinColumns = @JoinColumn(name = "POSTING_ID"))
 	@Singular("line")
 	private List<PostingLine> lines = new ArrayList<>();
+	
+	public OperationId toOperationId(){
+		return new OperationId(oprId);
+	}
 }

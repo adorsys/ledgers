@@ -25,5 +25,5 @@ public interface PostingService {
 	 * @param id
 	 * @return
 	 */
-	public List<Posting> findPostingsByOperationId(OperationId id);
+	public List<Posting> findPostingsByOperationId(OperationId oprId);
 }

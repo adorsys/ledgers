@@ -10,6 +10,7 @@ import javax.persistence.MappedSuperclass;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,6 +30,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
+@EqualsAndHashCode
 @EntityListeners(AuditingEntityListener.class)
 public abstract class LedgerEntity {
 	
@@ -64,7 +66,8 @@ public abstract class LedgerEntity {
 	@Setter
 	private LocalDateTime validTo = LocalDateTime.of(2199, 01, 01, 0, 0, 0, 0);
 	
-	/*The description of this entity*/
+	/*The description of this entity
+	 * */
 	@Setter
 	private String desc;
 }
