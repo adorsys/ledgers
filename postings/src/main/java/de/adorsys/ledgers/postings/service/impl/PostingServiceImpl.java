@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.adorsys.ledgers.postings.basetypes.OperationId;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.domain.Posting;
 import de.adorsys.ledgers.postings.domain.PostingLine;
@@ -90,7 +89,7 @@ public class PostingServiceImpl implements PostingService {
 	}
 
 	@Override
-	public List<Posting> findPostingsByOperationId(OperationId oprId) {
-		return CloneUtils.cloneList(postingRepository.findByOprId(oprId.getValue()), Posting.class);
+	public List<Posting> findPostingsByOperationId(String oprId) {
+		return CloneUtils.cloneList(postingRepository.findByOprId(oprId), Posting.class);
 	}
 }

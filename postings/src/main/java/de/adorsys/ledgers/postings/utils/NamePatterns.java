@@ -1,9 +1,10 @@
 package de.adorsys.ledgers.postings.utils;
 
-import de.adorsys.ledgers.postings.basetypes.ChartOfAccountName;
-import de.adorsys.ledgers.postings.basetypes.LedgerAccountName;
-import de.adorsys.ledgers.postings.basetypes.LedgerAccountTypeName;
-import de.adorsys.ledgers.postings.basetypes.LedgerName;
+import org.springframework.stereotype.Service;
+
+import de.adorsys.ledgers.postings.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 
 /**
  * Construct name pattern by prefixing the ContainerName (Not the parent)
@@ -11,21 +12,20 @@ import de.adorsys.ledgers.postings.basetypes.LedgerName;
  * @author fpo
  *
  */
+@Service
 public class NamePatterns {
 
 	private static final String SEPARATOR = "#";
 
-	public LedgerAccountName toAccountName(ChartOfAccountName coaName, LedgerAccountTypeName latName, LedgerName ledgerName){
-		String latSuffix = null;
-		String prefix = coaName.getValue() + SEPARATOR;
-		if(latName.getValue().startsWith(prefix)) {
-			latSuffix = getSuffix(prefix,latName.getValue());
-		} else {
-			latSuffix = latName.getValue();
-		}
-		return new LedgerAccountName(buildObjectName(ledgerName.getValue(), latSuffix));
+	public String toAccountName(Ledger ledger, LedgerAccountType lat, String suffix){
+		if(suffix==null) suffix=getSuffix(lat.getCoa().getName(), lat.getName());
+		return buildObjectName(ledger.getName(), suffix);
 	}
 
+	public String toAccountTypeName(ChartOfAccount coa, String suffix){
+		return buildObjectName(coa.getName(), suffix);
+	}
+	
 	private String buildObjectName(String containerName, String suffix){
 		return containerName + SEPARATOR + suffix;
 	}

@@ -10,11 +10,8 @@ import javax.persistence.MappedSuperclass;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * The existence or value of a ledger entity is always considered relative to
@@ -27,47 +24,31 @@ import lombok.ToString;
  *
  */
 @MappedSuperclass
-@Getter
-@ToString
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode
 @EntityListeners(AuditingEntityListener.class)
-public abstract class LedgerEntity {
+public abstract class BaseEntity {
 	
-	public LedgerEntity(String id, String name, LocalDateTime validFrom, LocalDateTime created, String user) {
-		this.id = id;
-		this.name = name;
-		this.validFrom = validFrom;
-		this.created = created;
-		this.user = user;
-	}
-
 	/* Identifier */
 	@Id
 	private String id;
-	
-	/*Business identifier. Unique in the scope of it's validity. Name + from is unique.*/
-	@Column(nullable=false)
-	private String name;
-
-	/* Valid From, by posting date */
-	@Column(nullable=false)
-	private LocalDateTime validFrom;
 
 	@CreatedDate
-	@Column(nullable=false)
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime created;
 
 	@Column(nullable=false)
 	private String user;
-	
-	/*Valid to by posting date. After this date, the ledger entity can not be used.*/
-	@Column(nullable=false)
-	@Setter
-	private LocalDateTime validTo = LocalDateTime.of(2199, 01, 01, 0, 0, 0, 0);
-	
+
 	/*The description of this entity
 	 * */
-	@Setter
 	private String desc;
+
+	public BaseEntity(String id, LocalDateTime created, String user, String desc) {
+		super();
+		this.id = id;
+		this.created = created;
+		this.user = user;
+		this.desc = desc;
+	}
 }

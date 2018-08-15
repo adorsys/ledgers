@@ -6,13 +6,17 @@ import javax.persistence.Embeddable;
 import javax.persistence.Enumerated;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Embeddable
-@Getter
+@Data
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class PostingLine {
 	
 	/*The associated ledger account*/

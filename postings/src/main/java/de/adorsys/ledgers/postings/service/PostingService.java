@@ -2,7 +2,6 @@ package de.adorsys.ledgers.postings.service;
 
 import java.util.List;
 
-import de.adorsys.ledgers.postings.basetypes.OperationId;
 import de.adorsys.ledgers.postings.domain.Posting;
 
 public interface PostingService {
@@ -25,5 +24,5 @@ public interface PostingService {
 	 * @param id
 	 * @return
 	 */
-	public List<Posting> findPostingsByOperationId(OperationId oprId);
+	public List<Posting> findPostingsByOperationId(String oprId);
 }

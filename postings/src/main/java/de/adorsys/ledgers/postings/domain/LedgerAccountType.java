@@ -4,26 +4,21 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.ManyToOne;
 
-import de.adorsys.ledgers.postings.basetypes.LedgerAccountTypeName;
-import de.adorsys.ledgers.postings.utils.Ids;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
-@Getter
-@ToString(callSuper=true)
 @NoArgsConstructor
-@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"name", "validFrom"}, name="LedgerAccountType_name_validFrom_unique")})
-public class LedgerAccountType extends LedgerEntity {
+@Getter
+public class LedgerAccountType extends NamedEntity {
 	
 	/*Containing chart of account.*/
-	@Column(nullable=false)
-	private String coa;
+	/*The attached chart of account.*/
+	@ManyToOne(optional=false)
+	private ChartOfAccount coa;
 
 	/*For the root object, the parent carries the name of the object.*/
 	@Column(nullable=false)
@@ -31,29 +26,14 @@ public class LedgerAccountType extends LedgerEntity {
 
 	/*The detail level of this ledger account type*/
 	private int level;
-	
+
 	@Builder
-	public LedgerAccountType(String id, String name, LocalDateTime validFrom, LocalDateTime created, String user,
-			String coa, String parent, int level) {
-		super(id, name, validFrom, created, user);
+	public LedgerAccountType(String id, String name, LocalDateTime created, String user, String desc,
+			ChartOfAccount coa, String parent, int level) {
+		super(id, name, created, user, desc);
 		this.coa = coa;
 		this.parent = parent;
 		this.level = level;
 	}
 
-	public static LedgerAccountType newChildInstance(String name, LocalDateTime validFrom, String user, LedgerAccountType parent){
-		return new LedgerAccountType(Ids.id(), 
-				name, 
-				validFrom, 
-				LocalDateTime.now(), 
-				user,
-				parent.getCoa(),
-				parent.getName(),
-				parent.getLevel()+1);
-	}
-	
-	public LedgerAccountTypeName toName(){
-		return new LedgerAccountTypeName(getName());
-	}
-	
 }

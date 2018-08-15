@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import de.adorsys.ledgers.postings.basetypes.LedgerAccountName;
-import de.adorsys.ledgers.postings.basetypes.LedgerName;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 
@@ -31,19 +29,7 @@ public interface LedgerService {
 	 * @param name
 	 * @return
 	 */
-	public List<Ledger> findLedgersByName(LedgerName name);
-
-	/**
-	 * Find the ledger with the given name and current at the given reference time.
-	 * 
-	 * This is generally the ledger with the given name and the youngest validFrom time before the 
-	 * given reference date.
-	 * 
-	 * @param name
-	 * @param referenceDate
-	 * @return
-	 */
-	public Optional<Ledger> findLedgersByName(LedgerName name, LocalDateTime referenceDate);
+	public Optional<Ledger> findLedgerByName(String name);
 	
 	/**
 	 * Create a new Ledger account.
@@ -61,7 +47,7 @@ public interface LedgerService {
 	 * @param name
 	 * @return
 	 */
-	public Optional<LedgerAccount> findLedgerAccount(LedgerAccountName name, LocalDateTime referenceDate);
+	public Optional<LedgerAccount> findLedgerAccount(String name, LocalDateTime referenceDate);
 
 	/**
 	 * Loads all ledger accounts with the given name.
@@ -69,5 +55,5 @@ public interface LedgerService {
 	 * @param name
 	 * @return
 	 */
-	public List<LedgerAccount> findLedgerAccounts(LedgerAccountName name);
+	public List<LedgerAccount> findLedgerAccounts(String name);
 }

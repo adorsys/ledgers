@@ -18,7 +18,6 @@ import org.springframework.data.annotation.CreatedDate;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import de.adorsys.ledgers.postings.basetypes.OperationId;
 import de.adorsys.ledgers.postings.listener.CreatePostingListener;
 import de.adorsys.ledgers.postings.listener.RecordHashListener;
 import lombok.AllArgsConstructor;
@@ -140,8 +139,4 @@ public class Posting {
 	@CollectionTable(name = "POSTING_LINE", joinColumns = @JoinColumn(name = "POSTING_ID"))
 	@Singular("line")
 	private List<PostingLine> lines = new ArrayList<>();
-	
-	public OperationId toOperationId(){
-		return new OperationId(oprId);
-	}
 }

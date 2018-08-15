@@ -1,7 +1,5 @@
 package de.adorsys.ledgers.postings.repository;
 
-import java.time.LocalDateTime;
-
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -23,8 +21,8 @@ public class ITLedgerEntityRepositoryTest {
 	@Test
 	public void test_create_coa_create_timestamp_auto_generated() {
 		String id = Ids.id();
-		LocalDateTime now = LocalDateTime.now();
-		ChartOfAccount coa = ChartOfAccount.builder().id(id).name("CoA").user("Francis").validFrom(now).build();
+		
+		ChartOfAccount coa = ChartOfAccount.builder().id(id).name(id).user("Francis").build();
 		chartOfAccountRepository.save(coa);
 		coa = chartOfAccountRepository.findById(id).orElse(null);
 		Assume.assumeNotNull(coa);

@@ -1,10 +1,7 @@
 <dataset>
-    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
+    <CHART_OF_ACCOUNT id="ci8k8bcdTrCsi-F3sT3i-g"
            user="Francis"
            created="2018-08-07 20:58:24.232"
-           name="CoA"
-           valid_From="2018-08-07 20:58:24.232"
-           valid_To="2199-01-01 00:00:00.000"
+           name="CoA - ci8k8PDcTrCsi-F3sT3i-g"
            />
-
 </dataset>

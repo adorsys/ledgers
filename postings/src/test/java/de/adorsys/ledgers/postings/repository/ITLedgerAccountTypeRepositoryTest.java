@@ -1,10 +1,5 @@
 package de.adorsys.ledgers.postings.repository;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +12,9 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.PostingsApplication;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
@@ -30,6 +27,7 @@ import de.adorsys.ledgers.postings.utils.Ids;
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
 @DatabaseSetup("ITLedgerAccountTypeRepositoryTest-db-entries.xml")
+@DatabaseTearDown(value={"ITLedgerAccountTypeRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class ITLedgerAccountTypeRepositoryTest {
 
 	@Autowired
@@ -37,7 +35,6 @@ public class ITLedgerAccountTypeRepositoryTest {
 	
 	@Autowired
 	private LedgerAccountTypeRepository ledgerAccountTypeRepository;
-	private DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
 	@Test
 	public void test_create_ledger_account_type_ok() {
@@ -45,7 +42,7 @@ public class ITLedgerAccountTypeRepositoryTest {
 		Assume.assumeNotNull(coa);
 		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
 				.name("Sample Ledger Account Type").user("Sample User")
-				.validFrom(LocalDateTime.now()).coa(coa.getName()).parent("Sample Ledger Account Type").build();
+				.coa(coa).parent("Sample Ledger Account Type").build();
 		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
 
@@ -54,7 +51,7 @@ public class ITLedgerAccountTypeRepositoryTest {
 		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
 				.name("Sample Ledger Account Type").user("Sample User")
 				.parent("Sample Ledger Account Type")
-				.validFrom(LocalDateTime.now()).build();
+				.build();
 		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
 
@@ -65,43 +62,9 @@ public class ITLedgerAccountTypeRepositoryTest {
 		LedgerAccountType ledgerAccountType2 = LedgerAccountType.builder().id(Ids.id())
 				.name(ledgerAccountType.getName())
 				.user("Sample User")
-				.validFrom(ledgerAccountType.getValidFrom())
 				.parent(ledgerAccountType.getName())
 				.coa(ledgerAccountType.getCoa()).build();
 		ledgerAccountTypeRepository.save(ledgerAccountType2);
 	}
-	
-	String valid_before_08_12_id="805UO1hITPHxQq16OuGvw_BS_A_RC";
-	String valid_after_08_12_id="805UO1hITPHxQq16OuGvw_BS_A_RC0";
-	String payablesAccountTypeName = "Payables";
-	String liabilitiesAccountTypeName = "Liabilities";
-	@Test
-	public void test_find_by_parent_Liabilities_on_2018_08_10_returns_valid_to_2018_08_12() {
-		LocalDateTime refDate = LocalDateTime.parse("2018-08-10 20:58:24.232", formater);
-		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByParentAndValidFromBeforeAndValidToAfterOrderByLevelDescValidFromDesc(liabilitiesAccountTypeName, refDate, refDate);
-		Assert.assertEquals(3, found.size());
-		LedgerAccountType payablesAccType = null;
-		for (LedgerAccountType lat : found) {
-			if(payablesAccountTypeName.equals(lat.getName())) {
-				payablesAccType = lat;
-			}
-		}
-		Assert.assertNotNull(payablesAccType);
-		Assert.assertEquals(valid_before_08_12_id, payablesAccType.getId());
-	}
-	
-	@Test
-	public void test_find_by_parent_Liabilities_on_2018_08_14_returns_valid_to_2199_01_01() {
-		LocalDateTime refDate = LocalDateTime.parse("2018-08-14 20:58:24.232", formater);
-		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByParentAndValidFromBeforeAndValidToAfterOrderByLevelDescValidFromDesc(liabilitiesAccountTypeName, refDate, refDate);
-		Assert.assertEquals(3, found.size());
-		LedgerAccountType payablesAccType = null;
-		for (LedgerAccountType lat : found) {
-			if(payablesAccountTypeName.equals(lat.getName())) {
-				payablesAccType = lat;
-			}
-		}
-		Assert.assertNotNull(payablesAccType);
-		Assert.assertEquals(valid_after_08_12_id, payablesAccType.getId());
-	}
+
 }

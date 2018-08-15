@@ -14,7 +14,9 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.PostingsApplication;
 import de.adorsys.ledgers.postings.domain.Ledger;
@@ -28,6 +30,7 @@ import de.adorsys.ledgers.postings.utils.Ids;
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
 @DatabaseSetup("ITLedgerAccountRepositoryTest-db-entries.xml")
+@DatabaseTearDown(value={"ITLedgerAccountRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class ITLedgerAccountRepositoryTest {
 	
 	@Autowired
@@ -50,8 +53,8 @@ public class ITLedgerAccountRepositoryTest {
 				.name("Sample Ledger Account")
 				.user("Sample User")
 				.validFrom(LocalDateTime.now())
-				.ledger(ledger.getName())
-				.accountType(ledgerAccountType.getName())
+				.ledger(ledger)
+				.accountType(ledgerAccountType)
 				.parent("Sample Ledger Account").build();
 		ledgerAccountRepository.save(ledgerAccount);
 	}
@@ -64,7 +67,7 @@ public class ITLedgerAccountRepositoryTest {
 				.name("Sample Ledger Account")
 				.user("Sample User")
 				.parent("Sample Ledger Account")
-				.accountType(ledgerAccountType.getName())
+				.accountType(ledgerAccountType)
 				.validFrom(LocalDateTime.now()).build();
 		ledgerAccountRepository.save(ledgerAccount);
 	}
@@ -77,7 +80,7 @@ public class ITLedgerAccountRepositoryTest {
 				.name("Sample Ledger Account")
 				.user("Sample User")
 				.parent("Sample Ledger Account")
-				.ledger(ledger.getName())
+				.ledger(ledger)
 				.validFrom(LocalDateTime.now()).build();
 		ledgerAccountRepository.save(ledgerAccount);
 	}
@@ -93,7 +96,7 @@ public class ITLedgerAccountRepositoryTest {
 				.user("Sample User")
 				.validFrom(ledgerAccount.getValidFrom())
 				.parent(ledgerAccount.getName())
-				.accountType(ledgerAccountType.getName())
+				.accountType(ledgerAccountType)
 				.ledger(ledgerAccount.getLedger()).build();
 		ledgerAccountRepository.save(ledgerAccount2);
 	}

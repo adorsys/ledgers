@@ -1,30 +1,24 @@
 <dataset>
-    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
+    <CHART_OF_ACCOUNT id="ci8k8PDcxyzsi-F3sT3i-g"
            user="Francis"
            created="2018-08-07 20:58:24.232"
            name="CoA"
-           valid_From="2018-08-07 20:58:24.232"
-           valid_To="2199-01-01 00:00:00.000"
            />
 
 	<LEDGER_ACCOUNT_TYPE id="805UO1hITP-HxQq16OuGvw"
 			name="Sample Ledger Account Type"
 			parent="Sample Ledger Account Type"
-			valid_From="2018-08-07 20:58:24.232"
 			created="2018-08-07 20:58:24.232"
 			user="Sample User"
-			coa="CoA" 
+			coa_id="ci8k8PDcxyzsi-F3sT3i-g" 
 			level="0"
-           valid_To="2199-01-01 00:00:00.000"
            />
 
 	<LEDGER id="Zd0ND5YwSzGwIfZilhumPg" 
 			name="Sample Ledger"
-			valid_From="2018-08-07 20:58:24.232"
 			created="2018-08-07 20:58:24.232"
 			user="Sample User"
-			coa="CoA"
-           valid_To="2199-01-01 00:00:00.000"
+			coa_id="ci8k8PDcxyzsi-F3sT3i-g"
            />
 			
 	<LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q"
@@ -32,9 +26,9 @@
 			valid_From="2018-08-07 23:50:41.231"
 			created="2018-08-07 23:50:41.231"
 			user="Sample User"
-			ledger="Sample Ledger"
+			ledger_id="Zd0ND5YwSzGwIfZilhumPg"
 			parent="Sample Ledger Account"
-			account_Type="Sample Ledger Account Type"
+			account_Type_id="805UO1hITP-HxQq16OuGvw"
 			level="0"
            valid_To="2199-01-01 00:00:00.000"
            />
