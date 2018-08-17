@@ -70,6 +70,11 @@ public class LedgerServiceImpl implements LedgerService {
 	}
 
 	@Override
+	public Optional<Ledger> findLedgerById(String id) {
+		return ledgerRepository.findById(id);
+	}
+
+	@Override
 	public Optional<Ledger> findLedgerByName(String name) {
 		return Optional.ofNullable(CloneUtils.cloneObject(ledgerRepository.findOptionalByName(name).orElse(null), Ledger.class));
 	}
@@ -119,6 +124,11 @@ public class LedgerServiceImpl implements LedgerService {
 		newLedgerAccount = ledgerAccountRepository.save(newLedgerAccount);
 		
 		return CloneUtils.cloneObject(newLedgerAccount, LedgerAccount.class);
+	}
+
+	@Override
+	public Optional<LedgerAccount> findLedgerAccountById(String id) {
+		return ledgerAccountRepository.findById(id);
 	}
 
 	@Override

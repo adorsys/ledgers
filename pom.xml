@@ -24,6 +24,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>postings</module>
+		<module>postingserver</module>        
     </modules>
     <packaging>pom</packaging>
 
@@ -60,7 +61,7 @@
         </developer>
     </developers>
 
-    <properties>
+	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <springfox.version>2.8.0</springfox.version>

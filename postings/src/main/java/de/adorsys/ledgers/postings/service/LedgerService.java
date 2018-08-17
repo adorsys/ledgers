@@ -23,6 +23,8 @@ public interface LedgerService {
 	 */
 	public Ledger newLedger(Ledger ledger);
 	
+	public Optional<Ledger> findLedgerById(String id);
+	
 	/**
 	 * List all ledgers with the given name. These are generally different versions of the same ledger.
 	 * 
@@ -41,6 +43,8 @@ public interface LedgerService {
 	 */
 	public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount);
 	
+	public Optional<LedgerAccount> findLedgerAccountById(String id);
+
 	/**
 	 * Find the ledger account with the given name 
 	 * 
@@ -56,4 +60,5 @@ public interface LedgerService {
 	 * @return
 	 */
 	public List<LedgerAccount> findLedgerAccounts(String name);
+
 }

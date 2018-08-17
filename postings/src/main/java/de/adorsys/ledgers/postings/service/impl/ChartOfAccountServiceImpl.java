@@ -68,6 +68,11 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 
 		return CloneUtils.cloneObject(coa2, ChartOfAccount.class);
 	}
+	
+	@Override
+	public Optional<ChartOfAccount> findChartOfAccountsById(String id) {
+		return chartOfAccountRepo.findById(id);
+	}
 
 	@Override
 	public Optional<ChartOfAccount> findChartOfAccountsByName(String name) {
@@ -88,6 +93,11 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 		LedgerAccountType ledgerAccountType = new LedgerAccountType(Ids.id(), name, created, user, desc, parent.getCoa(), parent.getName(), parent.getLevel()+1);
 		LedgerAccountType saved = ledgerAccountTypeRepo.save(ledgerAccountType);
 		return CloneUtils.cloneObject(saved, LedgerAccountType.class);
+	}
+
+	@Override
+	public Optional<LedgerAccountType> findLedgerAccountTypeById(String id) {
+		return ledgerAccountTypeRepo.findById(id);
 	}
 
 	@Override

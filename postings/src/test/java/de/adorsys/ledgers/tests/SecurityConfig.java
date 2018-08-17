@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.postings;
+package de.adorsys.ledgers.tests;
 
 import java.security.Principal;
 

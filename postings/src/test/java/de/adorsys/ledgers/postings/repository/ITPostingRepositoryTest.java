@@ -13,11 +13,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.adorsys.ledgers.postings.PostingsApplication;
 import de.adorsys.ledgers.postings.domain.Posting;
 import de.adorsys.ledgers.postings.domain.PostingType;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
+import de.adorsys.ledgers.tests.PostingsApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)

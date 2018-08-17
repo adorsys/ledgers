@@ -28,6 +28,8 @@ public interface ChartOfAccountService {
 	 * @return an empty list if no chart of account with the given name.
 	 */
 	public Optional<ChartOfAccount> findChartOfAccountsByName(String name);
+	
+	public Optional<ChartOfAccount> findChartOfAccountsById(String id);	
 
 	/**
 	 * Create a new Ledger account type.
@@ -49,6 +51,8 @@ public interface ChartOfAccountService {
 	 */
 	public Optional<LedgerAccountType> findLedgerAccountType(String name);
 
+	public Optional<LedgerAccountType> findLedgerAccountTypeById(String id);
+	
 	/**
 	 * Returns all valid children of this node.
 	 * @param parentName
@@ -65,4 +69,5 @@ public interface ChartOfAccountService {
 	 * @return
 	 */
 	List<LedgerAccountType> findCoaLedgerAccountTypes(String coaName);
+
 }
