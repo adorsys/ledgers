@@ -3,12 +3,11 @@ package de.adorsys.ledgers.postingserver.controller;
 import java.net.URI;
 import java.util.List;
 
-import javax.websocket.server.PathParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +32,7 @@ public class ChartOfAccountController {
 	}
 
 	@GetMapping(path = "/coas/{id}")
-	public ResponseEntity<ChartOfAccount> findChartOfAccountsById(@PathParam("id")String id){
+	public ResponseEntity<ChartOfAccount> findChartOfAccountsById(@PathVariable("id")String id){
 		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 		return ResponseEntity.ok(coa);
 	}
@@ -68,7 +67,7 @@ public class ChartOfAccountController {
 	}
 	
 	@GetMapping(path = "/lat/{id}")
-	public ResponseEntity<LedgerAccountType> findLedgerAccountTypeById(@PathParam("id")String id){
+	public ResponseEntity<LedgerAccountType> findLedgerAccountTypeById(@PathVariable("id")String id){
 		LedgerAccountType lat = chartOfAccountService.findLedgerAccountTypeById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 		return ResponseEntity.ok(lat);
 	}
