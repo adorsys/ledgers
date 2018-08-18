@@ -4,12 +4,11 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.websocket.server.PathParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,7 +39,7 @@ public class LedgerController {
 	}
 	
 	@GetMapping(path = "/ledgers/{id}")
-	public ResponseEntity<Ledger> findLedgerById(@PathParam("id")String id){
+	public ResponseEntity<Ledger> findLedgerById(@PathVariable("id")String id){
 		Ledger ledger = ledgerService.findLedgerById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 		return ResponseEntity.ok(ledger);
 	}
@@ -73,7 +72,7 @@ public class LedgerController {
 	}
 
 	@GetMapping(path = "/accounts/{id}")
-	public ResponseEntity<LedgerAccount> findLedgerAccountById(@PathParam("id")String id){
+	public ResponseEntity<LedgerAccount> findLedgerAccountById(@PathVariable("id")String id){
 		LedgerAccount la = ledgerService.findLedgerAccountById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 		return ResponseEntity.ok(la);
 	}
