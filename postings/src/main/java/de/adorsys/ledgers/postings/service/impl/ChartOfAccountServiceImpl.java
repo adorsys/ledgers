@@ -118,4 +118,11 @@ public class ChartOfAccountServiceImpl implements ChartOfAccountService {
 		List<LedgerAccountType> found = ledgerAccountTypeRepo.findByCoaOrderByLevelDesc(coa);
 		return CloneUtils.cloneList(found, LedgerAccountType.class);
 	}
+
+	@Override
+	public List<LedgerAccountType> findCoaRootAccountTypes(String coaName) {
+		ChartOfAccount coa = chartOfAccountRepo.findOptionalByName(coaName).orElseThrow(()->new IllegalStateException(String.format("Chart of account with name %s not found", coaName)));
+		List<LedgerAccountType> found = ledgerAccountTypeRepo.findByCoaAndLevel(coa, 0);
+		return CloneUtils.cloneList(found, LedgerAccountType.class);
+	}
 }

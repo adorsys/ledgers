@@ -9,9 +9,11 @@ import javax.persistence.ManyToOne;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor
+@ToString(callSuper=true)
 public class Ledger extends NamedEntity {
 
 	/*The attached chart of account.*/

@@ -8,6 +8,7 @@ import javax.persistence.ManyToOne;
 
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * A financial statement will help draw time lines on ledgers. No changes are allowed 
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @NoArgsConstructor
+@ToString(callSuper=true)
 public class FinancialStmt extends NamedEntity {
 
 	/*Name of the containing ledger*/

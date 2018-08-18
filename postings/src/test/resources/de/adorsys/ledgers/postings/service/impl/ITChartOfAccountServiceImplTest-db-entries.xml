@@ -1,0 +1,93 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
+           user="Francis"
+           created="2018-08-07 20:58:24.232"
+           name="CoA"
+           />
+
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS"
+			name="Balance Sheet Accounts"
+			parent="Balance Sheet Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="0"
+           />
+
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_PL"
+			name="Profit and Lost Accounts"
+			parent="Profit and Lost Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="0"
+           />
+
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_A"
+			name="Asset Accounts"
+			parent="Balance Sheet Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="1"
+           />
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_L"
+			name="Liabilities"
+			parent="Balance Sheet Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="1"
+           />
+
+
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_A_FA"
+			name="Fixed Assets"
+			parent="Asset Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="2"
+           />
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_A_CA"
+			name="Receivables"
+			parent="Asset Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="2"
+           />
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_A_LA"
+			name="Liquid Assets"
+			parent="Asset Accounts"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="2"
+           />
+
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_L_EQ"
+			name="Equities"
+			parent="Liabilities"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="2"
+           />
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_A_BD"
+			name="Bonds"
+			parent="Liabilities"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="2"
+           />
+	<LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_A_RC"
+			name="Payables"
+			parent="Liabilities"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8PDcTrCsi-F3sT3i-g" 
+			level="2"
+           />
+</dataset>

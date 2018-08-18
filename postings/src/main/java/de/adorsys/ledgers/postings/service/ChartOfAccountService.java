@@ -70,4 +70,6 @@ public interface ChartOfAccountService {
 	 */
 	List<LedgerAccountType> findCoaLedgerAccountTypes(String coaName);
 
+	List<LedgerAccountType> findCoaRootAccountTypes(String coaName);
+
 }

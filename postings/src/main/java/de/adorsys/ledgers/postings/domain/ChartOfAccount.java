@@ -6,9 +6,11 @@ import javax.persistence.Entity;
 
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor
+@ToString(callSuper=true)
 public class ChartOfAccount extends NamedEntity{
 
 	@Builder

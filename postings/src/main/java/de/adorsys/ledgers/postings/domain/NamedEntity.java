@@ -7,6 +7,7 @@ import javax.persistence.MappedSuperclass;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * The existence or value of a ledger entity is always considered relative to
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
  */
 @MappedSuperclass
 @NoArgsConstructor
+@ToString(callSuper=true)
 public abstract class NamedEntity extends BaseEntity {
 	
 	/*Business identifier. Unique in the scope of it's validity. Name + from is unique.*/
