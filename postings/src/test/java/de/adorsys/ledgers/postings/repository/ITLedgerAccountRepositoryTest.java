@@ -3,6 +3,7 @@ package de.adorsys.ledgers.postings.repository;
 import java.time.LocalDateTime;
 
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,7 @@ public class ITLedgerAccountRepositoryTest {
 	}
 	
 	@Test(expected=DataIntegrityViolationException.class)
-	public void test_create_ledger_account_unique_constrain_violation_name_validFrom() {
+	public void test_create_ledger_account_unique_constrain_violation_ledger_name_validFrom() {
 		LedgerAccount ledgerAccount = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q").orElse(null);
 		Assume.assumeNotNull(ledgerAccount);
 		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITP-HxQq16OuGvw").orElse(null);
@@ -100,4 +101,17 @@ public class ITLedgerAccountRepositoryTest {
 				.ledger(ledgerAccount.getLedger()).build();
 		ledgerAccountRepository.save(ledgerAccount2);
 	}
+	
+	@Test
+	@Ignore
+	public void test_find_by_ledger_and_level_and_account_type_and_valid_from_before_and_valid_to_after(){
+		// TODO implement
+	}
+	
+	@Test
+	@Ignore
+	public void 	test_find_by_ledger_and_name_ok(){
+		// TODO implement		
+	}
+
 }

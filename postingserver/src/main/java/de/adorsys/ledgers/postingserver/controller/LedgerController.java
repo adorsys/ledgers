@@ -45,14 +45,14 @@ public class LedgerController {
 	}
 	
 	/**
-	 * List all ledgers with the given name. These are generally different versions of the same ledger.
+	 * Find the ledger with the given name. 
 	 * 
-	 * @param name
+	 * @param ledgerName
 	 * @return
 	 */
-	@GetMapping(path = "/ledgers", params={"name"})
-	public ResponseEntity<Ledger> findLedgerByName(@RequestParam(required=true, name="name")String name){
-		Ledger ledger = ledgerService.findLedgerByName(name).orElseThrow(() -> new ResourceNotFoundException(name));
+	@GetMapping(path = "/ledgers", params={"ledgerName"})
+	public ResponseEntity<Ledger> findLedgerByName(@RequestParam(required=true, name="ledgerName")String ledgerName){
+		Ledger ledger = ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new ResourceNotFoundException(ledgerName));
 		return ResponseEntity.ok(ledger);
 	}
 	
@@ -76,30 +76,62 @@ public class LedgerController {
 		LedgerAccount la = ledgerService.findLedgerAccountById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 		return ResponseEntity.ok(la);
 	}
-	
+
 	/**
 	 * Find the ledger account with the given name 
 	 * 
-	 * @param name
+	 * @param accountName
 	 * @return
 	 */
-	@GetMapping(path = "/accounts", params={"name","referenceDate"})
+	@GetMapping(path = "/ledgers/{ledgerId}/accounts", params={"accountName","referenceDate"})
 	public ResponseEntity<LedgerAccount> findLedgerAccount(
-			@RequestParam(required=true, name="name")String name, 
+			@PathParam("ledgerId")String ledgerId,
+			@RequestParam(required=true, name="accountName")String accountName, 
 			@RequestParam(required=true, name="referenceDate")LocalDateTime referenceDate){
-		LedgerAccount la = ledgerService.findLedgerAccount(name, referenceDate).orElseThrow(() -> new ResourceNotFoundException(name + "#" + referenceDate.toString()));
+		Ledger ledger = Ledger.builder().id(ledgerId).build();
+		LedgerAccount la = ledgerService.findLedgerAccount(ledger, accountName, referenceDate).orElseThrow(() -> new ResourceNotFoundException(accountName + "#" + referenceDate.toString()));
 		return ResponseEntity.ok(la);
 	}
 
 	/**
-	 * Loads all ledger accounts with the given name.
+	 * Find the ledger account with the given ledger name and account name and reference date. 
 	 * 
-	 * @param name
+	 * @param ledgerName
+	 * @param accountName
+	 * @param referenceDate
 	 * @return
 	 */
-	@GetMapping(path = "/accounts", params={"name"})
-	public ResponseEntity<List<LedgerAccount>> findLedgerAccounts(@RequestParam(required=true, name="name")String name){
-		List<LedgerAccount> accounts = ledgerService.findLedgerAccounts(name);
+	@GetMapping(path = "/accounts", params={"ledgerName", "accountName","referenceDate"})
+	public ResponseEntity<LedgerAccount> findLedgerAccountByName(
+			@RequestParam(required=true, name="ledgerName")String ledgerName,
+			@RequestParam(required=true, name="accountName")String accountName, 
+			@RequestParam(required=true, name="referenceDate")LocalDateTime referenceDate){
+		Ledger ledger = Ledger.builder().name(ledgerName).build();
+		LedgerAccount la = ledgerService.findLedgerAccount(ledger, accountName, referenceDate).orElseThrow(() -> new ResourceNotFoundException(accountName + "#" + referenceDate.toString()));
+		return ResponseEntity.ok(la);
+	}
+	
+	/**
+	 * Loads all ledger accounts with the given name.
+	 * 
+	 * @param accountName
+	 * @return
+	 */
+	@GetMapping(path = "/ledgers/{ledgerId}/accounts", params={"accountName"})
+	public ResponseEntity<List<LedgerAccount>> findLedgerAccounts(
+			@PathParam("ledgerId")String ledgerId,
+			@RequestParam(required=true, name="accountName")String accountName){
+		Ledger ledger = Ledger.builder().id(ledgerId).build();
+		List<LedgerAccount> accounts = ledgerService.findLedgerAccounts(ledger, accountName);
+		return ResponseEntity.ok(accounts);
+	}
+
+	@GetMapping(path = "/accounts", params={"ledgerName", "accountName"})
+	public ResponseEntity<List<LedgerAccount>> findLedgerAccountsByName(
+			@RequestParam(required=true, name="ledgerName")String ledgerName,
+			@RequestParam(required=true, name="accountName")String accountName){
+		Ledger ledger = Ledger.builder().name(ledgerName).build();
+		List<LedgerAccount> accounts = ledgerService.findLedgerAccounts(ledger, accountName);
 		return ResponseEntity.ok(accounts);
 	}
 }

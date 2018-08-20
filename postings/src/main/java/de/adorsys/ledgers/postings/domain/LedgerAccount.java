@@ -16,7 +16,7 @@ import lombok.ToString;
 @Entity
 @Getter
 @ToString(callSuper=true)
-@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"name", "validFrom"}, name="LedgerAccount_name_validFrom_unique")})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames = {"ledger_id", "name", "validFrom"}, name="LedgerAccount_ledger_name_validFrom_unique")})
 @NoArgsConstructor
 public class LedgerAccount extends TimeBasedEntity {
 	
@@ -37,9 +37,10 @@ public class LedgerAccount extends TimeBasedEntity {
 	private int level;
 
 	@Builder
-	public LedgerAccount(String id, String name, LocalDateTime created, String user, String desc,
-			LocalDateTime validFrom, Ledger ledger, String parent, LedgerAccountType accountType, int level) {
-		super(id, name, created, user, desc, validFrom);
+	public LedgerAccount(String id, LocalDateTime created, String user, String shortDesc, String longDesc, String name,
+			LocalDateTime validFrom, LocalDateTime validTo, Ledger ledger, String parent, LedgerAccountType accountType,
+			int level) {
+		super(id, created, user, shortDesc, longDesc, name, validFrom, validTo);
 		this.ledger = ledger;
 		this.parent = parent;
 		this.accountType = accountType;

@@ -17,20 +17,27 @@ public class NamePatterns {
 
 	private static final String SEPARATOR = "#";
 
-	public String toAccountName(Ledger ledger, LedgerAccountType lat, String suffix){
-		if(suffix==null) suffix=getSuffix(lat.getCoa().getName(), lat.getName());
+	public String toAccountName(Ledger ledger, String suffix){
+		if(suffix==null) throw new IllegalArgumentException("suffix can not be null");
+		if(suffix.trim().length()==0) throw new IllegalArgumentException("suffix can not be empty");
+		suffix = suffix.trim();
+		checkSuffixName(suffix);
 		return buildObjectName(ledger.getName(), suffix);
 	}
 
 	public String toAccountTypeName(ChartOfAccount coa, String suffix){
+		if(suffix==null) throw new IllegalArgumentException("suffix can not be null");
+		if(suffix.trim().length()==0) throw new IllegalArgumentException("suffix can not be empty");
+		suffix = suffix.trim();
+		checkSuffixName(suffix);
 		return buildObjectName(coa.getName(), suffix);
 	}
 	
+	private void checkSuffixName(String suffix) {
+		if(suffix.contains(SEPARATOR)) throw new IllegalArgumentException(String.format("Suffix %s can not contain separator char: %s", suffix, SEPARATOR));
+	}
+
 	private String buildObjectName(String containerName, String suffix){
 		return containerName + SEPARATOR + suffix;
-	}
-	
-	private String getSuffix(String containerName, String objectName){
-		return objectName.substring((containerName + SEPARATOR).length());
 	}
 }

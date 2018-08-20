@@ -39,7 +39,8 @@ public class ITFinancialStmtRepositoryTest {
 	@Test
 	public void test_create_financial_statement_ok() {
 		Ledger ledger = ledgerRepository.findById("Zd0ND5YabcGwIfZilhumPg").orElseThrow(()-> new IllegalStateException("Missing Ledger with id Zd0ND5YwSzGwIfZilhumPg"));
-		FinancialStmt financialStmt = new FinancialStmt(Ids.id(), "Sample Financial Statemen", LocalDateTime.now(), "Vladimir", "Like this", ledger, LocalDateTime.now(), "Sample posting id");
+		FinancialStmt financialStmt = new FinancialStmt(Ids.id(), LocalDateTime.now(), "Francis", "Sample Financial Statement", "Sample Financial Statement",
+				"Sample Financial Statement", ledger, LocalDateTime.now(), Ids.id());
 		financialStmtRepository.save(financialStmt);
 	}
 

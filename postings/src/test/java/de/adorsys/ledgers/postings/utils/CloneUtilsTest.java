@@ -17,8 +17,9 @@ public class CloneUtilsTest {
 			.id(Ids.id())
 			.name("Sample coa")
 			.user("Sample user")
+			.shortDesc("Sample coa short desc")
+			.longDesc("Sample coa long desc")
 			.build();
-		coa.setDesc("Sample descritpion");
 		
 		ChartOfAccount clone = CloneUtils.cloneObject(coa, ChartOfAccount.class);
 		

@@ -40,15 +40,18 @@ public abstract class BaseEntity {
 	@Column(nullable=false)
 	private String user;
 
-	/*The description of this entity
-	 * */
-	private String desc;
+	/*The short description of this entity*/
+	private String shortDesc;
 
-	public BaseEntity(String id, LocalDateTime created, String user, String desc) {
+	/*The long description of this entity*/
+	private String longDesc;
+	
+	public BaseEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc) {
 		super();
 		this.id = id;
 		this.created = created;
 		this.user = user;
-		this.desc = desc;
+		this.shortDesc = shortDesc;
+		this.longDesc = longDesc;
 	}
 }

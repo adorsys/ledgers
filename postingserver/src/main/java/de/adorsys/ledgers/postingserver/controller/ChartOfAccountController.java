@@ -24,9 +24,8 @@ public class ChartOfAccountController {
 	private ChartOfAccountService chartOfAccountService;
 
 	@PostMapping(path = "/coas")
-	public ResponseEntity<Void> newChartOfAccount(NewChartOfAccountRequest newChartOfAccountRequest, UriBuilder uri){
-		ChartOfAccount coa = chartOfAccountService.newChartOfAccount(
-				newChartOfAccountRequest.getChartOfAccount(), newChartOfAccountRequest.getRootAccountTypes());
+	public ResponseEntity<Void> newChartOfAccount(ChartOfAccount chartOfAccount, UriBuilder uri){
+		ChartOfAccount coa = chartOfAccountService.newChartOfAccount(chartOfAccount);
 		URI location = uri.path(coa.getId()).build();
 		return ResponseEntity.created(location).build();
 	}
@@ -60,8 +59,8 @@ public class ChartOfAccountController {
 	 * @return
 	 */
 	@PostMapping(path="/coas/{coaId}/lat")
-	public ResponseEntity<Void> newLedgerAccountType(NewLedgerAccountTypeRequest request, UriBuilder uri){
-		LedgerAccountType lat = chartOfAccountService.newLedgerAccountType(request.getParent(), request.getName(), request.getDesc());
+	public ResponseEntity<Void> newLedgerAccountType(LedgerAccountType ledgerAccountType, UriBuilder uri){
+		LedgerAccountType lat = chartOfAccountService.newLedgerAccountType(ledgerAccountType);
 		URI location = uri.path(lat.getId()).build();
 		return ResponseEntity.created(location).build();
 	}
@@ -78,9 +77,10 @@ public class ChartOfAccountController {
 	 * @param name
 	 * @return
 	 */
-	@GetMapping(path = "/lats", params={"name"})
-	public ResponseEntity<LedgerAccountType> findLedgerAccountType(@RequestParam(required=true, name="name")String name){
-		LedgerAccountType lat = chartOfAccountService.findLedgerAccountType(name).orElseThrow(() -> new ResourceNotFoundException(name));
+	@GetMapping(path = "/coas/{coaId}/lats", params={"name"})
+	public ResponseEntity<LedgerAccountType> findLedgerAccountType(@PathParam("coaId")String coaId, @RequestParam(required=true, name="name")String name){
+		ChartOfAccount coa = ChartOfAccount.builder().id(coaId).build();
+		LedgerAccountType lat = chartOfAccountService.findLedgerAccountType(coa, name).orElseThrow(() -> new ResourceNotFoundException(name));
 		return ResponseEntity.ok(lat);
 	}
 
@@ -90,9 +90,10 @@ public class ChartOfAccountController {
 	 * @param referenceDate
 	 * @return
 	 */
-	@GetMapping(path = "/lats/children", params={"name"})
-	public ResponseEntity<List<LedgerAccountType>> findChildLedgerAccountTypes(@RequestParam(required=true, name="name")String name){
-		List<LedgerAccountType> list = chartOfAccountService.findChildLedgerAccountTypes(name);
+	@GetMapping(path = "/coas/{coaId}/lats/children", params={"name"})
+	public ResponseEntity<List<LedgerAccountType>> findChildLedgerAccountTypes(@PathParam("coaId")String coaId, @RequestParam(required=true, name="name")String name){
+		ChartOfAccount coa = ChartOfAccount.builder().id(coaId).build();
+		List<LedgerAccountType> list = chartOfAccountService.findChildLedgerAccountTypes(coa, name);
 		return ResponseEntity.ok(list);
 	}
 
@@ -103,9 +104,10 @@ public class ChartOfAccountController {
 	 * @param referenceDate
 	 * @return
 	 */
-	@GetMapping(path = "/coas/lats", params={"name"})
-	public ResponseEntity<List<LedgerAccountType>> findCoaLedgerAccountTypes(@RequestParam(required=true, name="name")String name){
-		List<LedgerAccountType> list = chartOfAccountService.findCoaLedgerAccountTypes(name);
+	@GetMapping(path = "/coas/{coaId}/lats")
+	public ResponseEntity<List<LedgerAccountType>> findCoaLedgerAccountTypes(@PathParam("coaId")String coaId){
+		ChartOfAccount coa = ChartOfAccount.builder().id(coaId).build();
+		List<LedgerAccountType> list = chartOfAccountService.findCoaLedgerAccountTypes(coa);
 		return ResponseEntity.ok(list);
 	}
 

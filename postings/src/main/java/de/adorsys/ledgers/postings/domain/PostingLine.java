@@ -2,7 +2,9 @@ package de.adorsys.ledgers.postings.domain;
 
 import java.math.BigDecimal;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import lombok.AllArgsConstructor;
@@ -20,13 +22,17 @@ import lombok.ToString;
 public class PostingLine {
 	
 	/*The associated ledger account*/
+	@Column(nullable=false, updatable=false)
 	private String account;
 	
+	@Column(nullable=false, updatable=false)
 	private BigDecimal amount;
 	
+	@Column(nullable=false, updatable=false)
 	private String details;
 	
-	@Enumerated
+	@Column(nullable=false, updatable=false)
+	@Enumerated(EnumType.STRING)
 	private PostingSide side;
 
 	/*

@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.postings.repository;
 
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +43,44 @@ public class ITLedgerRepositoryTest {
 		Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2").user("Sample User").coa(coa).build();
 		ledgerRepository.save(ledger);
 	}
+	
+	@Test(expected=DataIntegrityViolationException.class)
+	@Ignore
+	public void test_create_ledger_no_coa() {
+		// @TODO implement
+	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	public void test_create_ledger_unique_constrain_violation_name_validFrom() {
+	@Ignore
+	public void test_create_ledger_no_name() {
+		// @TODO implement
+	}	
+
+	@Test(expected=DataIntegrityViolationException.class)
+	public void test_create_ledger_unique_constrain_violation_name() {
 		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
 		Assume.assumeNotNull(ledger);
 		ChartOfAccount coa = chartOfAccountRepository.findById(ledger.getCoa().getId()).orElse(null);
 		Assume.assumeNotNull(coa);
 		Ledger ledger2 = Ledger.builder().id(Ids.id()).name("Sample Ledger-0").user("Sample User").coa(coa).build();
 		ledgerRepository.save(ledger2);
+	}
+
+	@Test
+	@Ignore
+	public void test_find_by_coa_returns_n_records(){
+		// @TODO implement
+	}
+	
+	@Test
+	@Ignore
+	public void test_find_by_name_returns_one_record(){
+		// @TODO implement
+	}
+
+	@Test
+	@Ignore
+	public void test_find_by_name_not_found(){
+		// @TODO implement
 	}
 }
