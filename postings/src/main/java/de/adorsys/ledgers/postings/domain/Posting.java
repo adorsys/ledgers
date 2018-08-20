@@ -13,6 +13,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.springframework.data.annotation.CreatedDate;
 
@@ -127,7 +128,8 @@ public class Posting {
 	/*
 	 * The ledger governing this posting.
 	 */
-	private String ledger;
+	@ManyToOne(optional=false)
+	private Ledger ledger;
 
 	/*
 	 * The Date use to compute interests. This can be different from the posting

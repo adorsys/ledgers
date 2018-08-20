@@ -3,8 +3,8 @@ package de.adorsys.ledgers.postings.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeNotNull;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +22,6 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.LedgerAccountType;
-import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
 import de.adorsys.ledgers.tests.PostingsApplication;
@@ -40,30 +39,18 @@ public class ITChartOfAccountServiceImplTest {
 	
 	@Autowired
 	private LedgerAccountTypeRepository ledgerAccountTypeRepo;
-	
-	@Autowired
-	private ChartOfAccountRepository chartOfAccountRepository;
-
-	@Test
-	public void test_new_chart_of_account_root_account_types_reated() {
-		ChartOfAccount chartOfAccount = new ChartOfAccount(null, "COA:Loans", null, null, "Chart of account for loan business");
-		List<String> rootAccountTypeNames = Arrays.asList("Balance Sheet Accounts", "Profit & Lost Accounts");
-		ChartOfAccount coa = chartOfAccountService.newChartOfAccount(chartOfAccount, rootAccountTypeNames);
-		coa = chartOfAccountRepository.findById(coa.getId()).orElse(null);
-		assumeNotNull(coa);
-		List<LedgerAccountType> found = ledgerAccountTypeRepo.findByCoaAndLevel(coa, 0);
-		assertEquals(2, found.size());
-	}
 
 	@Test
 	public void test_find_coa_ledger_account_types(){
-		List<LedgerAccountType> found = chartOfAccountService.findCoaLedgerAccountTypes("CoA");
-		assertEquals(10, found.size());
+		Optional<ChartOfAccount> found = chartOfAccountService.findChartOfAccountsByName("CoA");
+		assertEquals(true, found.isPresent());
 	}
 
 	@Test
 	public void test_find_coa_root_account_types(){
-		List<LedgerAccountType> found = chartOfAccountService.findCoaRootAccountTypes("CoA");
+		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
+		assumeNotNull(coa);
+		List<LedgerAccountType> found = chartOfAccountService.findCoaAccountTypesByLevel(coa, 0);
 		assertEquals(2, found.size());
 	}
 	

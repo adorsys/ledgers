@@ -1,19 +1,16 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.domain.Posting;
 import de.adorsys.ledgers.postings.domain.PostingLine;
-import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
-import de.adorsys.ledgers.postings.repository.PostingRepository;
 import de.adorsys.ledgers.postings.service.PostingService;
 import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.DoubleEntryBookKeeping;
@@ -21,16 +18,7 @@ import de.adorsys.ledgers.postings.utils.Ids;
 
 @Service
 @Transactional
-public class PostingServiceImpl implements PostingService {
-	
-	@Autowired
-	private PostingRepository postingRepository;
-	
-	@Autowired
-	private LedgerAccountRepository ledgerAccountRepository;
-
-	@Autowired
-	private Principal principal;
+public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 	
 	@Override
 	public Posting newPosting(Posting posting) {
@@ -43,12 +31,15 @@ public class PostingServiceImpl implements PostingService {
 		// Reference date
 		LocalDateTime pstTime = posting.getPstTime();
 		
+		// Check ledger not null
+		Ledger ledger = loadLedger(posting.getLedger());
+		
 		// Validate existence of accounts and make sure they are all in the same ledger.
 		List<PostingLine> lines = posting.getLines();
 		for (PostingLine line : lines) {
 			Optional<LedgerAccount> accountOptions = ledgerAccountRepository
-					.findFirstOptionalByNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(
-							line.getAccount(), pstTime, pstTime);
+					.findFirstOptionalByLedgerAndNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(
+							ledger, line.getAccount(), pstTime, pstTime);
 			
 			if(!accountOptions.isPresent()){
 				// How do we proceed with missing accounts.
@@ -63,7 +54,8 @@ public class PostingServiceImpl implements PostingService {
 		}
 		
 		// find last record.
-		Posting antecedent = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(posting.getLedger()).orElse(new Posting());
+		Posting antecedent = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(
+				posting.getLedger()).orElse(new Posting());
 		
 
 		List<PostingLine> postingLines = CloneUtils.cloneList(posting.getLines(), PostingLine.class);

@@ -51,7 +51,7 @@ public interface LedgerService {
 	 * @param name
 	 * @return
 	 */
-	public Optional<LedgerAccount> findLedgerAccount(String name, LocalDateTime referenceDate);
+	public Optional<LedgerAccount> findLedgerAccount(Ledger ledger, String name, LocalDateTime referenceDate);
 
 	/**
 	 * Loads all ledger accounts with the given name.
@@ -59,6 +59,6 @@ public interface LedgerService {
 	 * @param name
 	 * @return
 	 */
-	public List<LedgerAccount> findLedgerAccounts(String name);
+	public List<LedgerAccount> findLedgerAccounts(Ledger ledger, String name);
 
 }

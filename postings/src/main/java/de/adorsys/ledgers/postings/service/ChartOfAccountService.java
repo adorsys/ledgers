@@ -19,7 +19,7 @@ public interface ChartOfAccountService {
 	 * @param chartOfAccount
 	 * @return
 	 */
-	public ChartOfAccount newChartOfAccount(ChartOfAccount chartOfAccount, List<String> rootAccountTypes);
+	public ChartOfAccount newChartOfAccount(ChartOfAccount chartOfAccount);
 	
 	/**
 	 * List all chart of accounts with the given name. These are generally different versions of the same chart of account.
@@ -36,12 +36,10 @@ public interface ChartOfAccountService {
 	 * 
 	 * While creating a ledger account type, the parent hat to be specified.
 	 * 
-	 * @param ledgerAccountType
-	 * @param name
-	 * @param desc
+	 * @param model
 	 * @return
 	 */
-	public LedgerAccountType newLedgerAccountType(LedgerAccountType parent, String name, String desc);
+	public LedgerAccountType newLedgerAccountType(LedgerAccountType model);
 	
 	/**
 	 * Find the ledger account type with the given name 
@@ -49,7 +47,7 @@ public interface ChartOfAccountService {
 	 * @param name
 	 * @return
 	 */
-	public Optional<LedgerAccountType> findLedgerAccountType(String name);
+	public Optional<LedgerAccountType> findLedgerAccountType(ChartOfAccount chartOfAccount, String name);
 
 	public Optional<LedgerAccountType> findLedgerAccountTypeById(String id);
 	
@@ -59,7 +57,7 @@ public interface ChartOfAccountService {
 	 * @param referenceDate
 	 * @return
 	 */
-	List<LedgerAccountType> findChildLedgerAccountTypes(String parentName);
+	List<LedgerAccountType> findChildLedgerAccountTypes(ChartOfAccount chartOfAccount, String parentName);
 
 	/**
 	 * Return all valid ledger account types attached to this coa.
@@ -68,8 +66,8 @@ public interface ChartOfAccountService {
 	 * @param referenceDate
 	 * @return
 	 */
-	List<LedgerAccountType> findCoaLedgerAccountTypes(String coaName);
+	List<LedgerAccountType> findCoaLedgerAccountTypes(ChartOfAccount chartOfAccount);
 
-	List<LedgerAccountType> findCoaRootAccountTypes(String coaName);
+	List<LedgerAccountType> findCoaAccountTypesByLevel(ChartOfAccount chartOfAccount, int level);
 
 }

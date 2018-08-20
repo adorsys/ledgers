@@ -45,7 +45,7 @@ public class ITChartOfAccountRepositoryTest {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	public void test_create_coa_unique_constrain_violation_name_validFrom() {
+	public void test_create_coa_unique_constrain_violation_name() {
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8bcdTrCsi-F3sT3i-g").orElse(null);
 		Assume.assumeNotNull(coa);
 		ChartOfAccount coa2 = ChartOfAccount.builder().id(Ids.id()).name(coa.getName()).user("Francis").build();

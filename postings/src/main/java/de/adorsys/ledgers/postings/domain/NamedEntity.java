@@ -24,13 +24,13 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public abstract class NamedEntity extends BaseEntity {
 	
-	/*Business identifier. Unique in the scope of it's validity. Name + from is unique.*/
-	@Column(nullable=false, unique=true)
+	/*Business identifier.  Always unique in a certain scope. Generally in the scope of it's container.*/
+	@Column(nullable=false)
 	@Getter
 	private String name;
 
-	public NamedEntity(String id, String name, LocalDateTime created, String user, String desc) {
-		super(id, created, user, desc);
+	public NamedEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc, String name) {
+		super(id, created, user, shortDesc, longDesc);
 		this.name = name;
 	}
 }

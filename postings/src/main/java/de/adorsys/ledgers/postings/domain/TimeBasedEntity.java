@@ -36,10 +36,11 @@ public abstract class TimeBasedEntity extends BaseEntity {
 	@Setter
 	private LocalDateTime validTo = LocalDateTime.of(2199, 01, 01, 0, 0, 0, 0);
 
-	public TimeBasedEntity(String id, String name, LocalDateTime created, String user, String desc,
-			LocalDateTime validFrom) {
-		super(id, created, user, desc);
+	public TimeBasedEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc,
+			String name, LocalDateTime validFrom, LocalDateTime validTo) {
+		super(id, created, user, shortDesc, longDesc);
 		this.name = name;
 		this.validFrom = validFrom;
+		this.validTo = validTo;
 	}
 }

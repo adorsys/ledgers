@@ -1,0 +1,15 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8zskTrCsi-F3sT3i-g"
+           user="Francis"
+           created="2018-08-07 20:58:24.232"
+           name="CoA"
+           />
+           
+	<LEDGER id="Zd0ND5YwSzGwIfZilhumPg" 
+			name="Sample Ledger-0"
+			created="2018-08-07 20:58:24.232"
+			user="Sample User"
+			coa_id="ci8k8zskTrCsi-F3sT3i-g"
+           />
+    <POSTING />
+</dataset>
