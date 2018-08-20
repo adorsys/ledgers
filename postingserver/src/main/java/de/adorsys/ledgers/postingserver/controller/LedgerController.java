@@ -39,9 +39,9 @@ public class LedgerController {
 		return ResponseEntity.created(location).build();
 	}
 	
-	@GetMapping(path = "/ledgers/{ledgerId}")
-	public ResponseEntity<Ledger> findLedgerById(@PathParam("ledgerId")String ledgerId){
-		Ledger ledger = ledgerService.findLedgerById(ledgerId).orElseThrow(() -> new ResourceNotFoundException(ledgerId));
+	@GetMapping(path = "/ledgers/{id}")
+	public ResponseEntity<Ledger> findLedgerById(@PathParam("id")String id){
+		Ledger ledger = ledgerService.findLedgerById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 		return ResponseEntity.ok(ledger);
 	}
 	
