@@ -8,6 +8,9 @@
 
 	<name>postingserver</name>
 	<description>Demo project for Spring Boot</description>
+	<properties>
+		<springfox-swagger.version>2.8.0</springfox-swagger.version>
+	</properties>
 
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
@@ -76,7 +79,21 @@
 			<artifactId>spring-test-dbunit</artifactId>
 			<version>1.2.1</version>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
+		<!-- Sprinfox and swagger UI-->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox-swagger.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox-swagger.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Sprinfox and swagger UI-->
 	</dependencies>
 
 	<build>
