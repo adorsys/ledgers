@@ -47,16 +47,24 @@ public class ITLedgerAccountRepositoryTest {
 	public void test_create_ledger_account_ok() {
 		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
 		Assume.assumeNotNull(ledger);
-		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITP-HxQq16OuGvw").orElse(null);
+		// Type of Liability Accounts
+		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS_3_0_0").orElse(null);
 		Assume.assumeNotNull(ledgerAccountType);
 		
-		LedgerAccount ledgerAccount = LedgerAccount.builder().id(Ids.id())
-				.name("Sample Ledger Account")
+		LedgerAccount ledgerAccount = LedgerAccount.builder()
+				.id(Ids.id())
+				.created(LocalDateTime.now())
 				.user("Sample User")
+				.shortDesc("Long lasting liability")
+				.longDesc("Long lasting liability (from 1 year to 3 years)")
+				.name("Long lasting liability")
 				.validFrom(LocalDateTime.now())
+				.validTo(LocalDateTime.now())
 				.ledger(ledger)
 				.accountType(ledgerAccountType)
-				.parent("Sample Ledger Account").build();
+				.parent("Sample Ledger Account")
+
+				.build();
 		ledgerAccountRepository.save(ledgerAccount);
 	}
 
