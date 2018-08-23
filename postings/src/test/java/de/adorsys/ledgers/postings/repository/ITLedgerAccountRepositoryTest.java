@@ -47,8 +47,8 @@ public class ITLedgerAccountRepositoryTest {
 	public void test_create_ledger_account_ok() {
 		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
 		Assume.assumeNotNull(ledger);
-		// Type of Liability Accounts
-		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS_3_0_0").orElse(null);
+		// Type of Balance sheet account
+		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
 		Assume.assumeNotNull(ledgerAccountType);
 		
 		LedgerAccount ledgerAccount = LedgerAccount.builder()
@@ -70,7 +70,7 @@ public class ITLedgerAccountRepositoryTest {
 
 	@Test(expected=DataIntegrityViolationException.class)
 	public void test_create_ledger_account_no_ledger() {
-		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITP-HxQq16OuGvw").orElse(null);
+		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
 		Assume.assumeNotNull(ledgerAccountType);
 		LedgerAccount ledgerAccount = LedgerAccount.builder().id(Ids.id())
 				.name("Sample Ledger Account")
@@ -96,9 +96,9 @@ public class ITLedgerAccountRepositoryTest {
 	
 	@Test(expected=DataIntegrityViolationException.class)
 	public void test_create_ledger_account_unique_constrain_violation_ledger_name_validFrom() {
-		LedgerAccount ledgerAccount = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q").orElse(null);
+		LedgerAccount ledgerAccount = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
 		Assume.assumeNotNull(ledgerAccount);
-		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITP-HxQq16OuGvw").orElse(null);
+		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
 		Assume.assumeNotNull(ledgerAccountType);
 		LedgerAccount ledgerAccount2 = LedgerAccount.builder().id(Ids.id())
 				.name(ledgerAccount.getName())
@@ -109,17 +109,4 @@ public class ITLedgerAccountRepositoryTest {
 				.ledger(ledgerAccount.getLedger()).build();
 		ledgerAccountRepository.save(ledgerAccount2);
 	}
-	
-	@Test
-	@Ignore
-	public void test_find_by_ledger_and_level_and_account_type_and_valid_from_before_and_valid_to_after(){
-		// TODO implement
-	}
-	
-	@Test
-	@Ignore
-	public void 	test_find_by_ledger_and_name_ok(){
-		// TODO implement		
-	}
-
 }
