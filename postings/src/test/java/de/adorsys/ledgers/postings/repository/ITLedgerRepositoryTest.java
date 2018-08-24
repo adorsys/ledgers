@@ -24,6 +24,7 @@ import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
 import java.util.List;
+import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -82,7 +83,10 @@ public class ITLedgerRepositoryTest {
 	
 	@Test
 	public void test_find_by_name_returns_one_record(){
-		// @TODO implement
+		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
+		Assume.assumeNotNull(ledger);
+		Optional<Ledger> opt = ledgerRepository.findOptionalByName(ledger.getName());
+		Assert.assertTrue(opt.isPresent());
 
 	}
 
