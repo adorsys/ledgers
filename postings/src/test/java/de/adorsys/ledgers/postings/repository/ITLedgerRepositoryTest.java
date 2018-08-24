@@ -91,8 +91,7 @@ public class ITLedgerRepositoryTest {
 	}
 
 	@Test
-	@Ignore
 	public void test_find_by_name_not_found(){
-		// @TODO implement
-	}
+		Optional<Ledger> opt = ledgerRepository.findOptionalByName("wrongName");
+		Assert.assertFalse(opt.isPresent());	}
 }
