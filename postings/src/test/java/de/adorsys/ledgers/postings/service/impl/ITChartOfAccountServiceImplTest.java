@@ -1,12 +1,16 @@
 package de.adorsys.ledgers.postings.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import de.adorsys.ledgers.postings.domain.BalanceSide;
+import de.adorsys.ledgers.postings.utils.Ids;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +83,37 @@ public class ITChartOfAccountServiceImplTest {
 
 	@Test
 	public void test_new_ledger_account_type(){
-		// TODO implements 
+		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
+		assumeNotNull(coa);
+
+		// root account type
+		LedgerAccountType newRootLedgerAccountType = LedgerAccountType.builder()
+				.id(Ids.id())
+				.coa(coa)
+				.created(LocalDateTime.now())
+				.user("Vladimir")
+				.level(1)
+				.balanceSide(BalanceSide.DC)
+				.name("My new test root account type")
+				.shortDesc("My new test account type short description")
+				.build();
+		LedgerAccountType returnedClone = this.chartOfAccountService.newLedgerAccountType(newRootLedgerAccountType);
+		assertNotNull(returnedClone);
+
+		// account type with parent
+		LedgerAccountType newLedgerAccountType = LedgerAccountType.builder()
+				.id(Ids.id())
+				.coa(coa)
+				.parent("BS")
+				.created(LocalDateTime.now())
+				.user("Vladimir")
+				.level(1)
+				.balanceSide(BalanceSide.D)
+				.name("My new test account type")
+				.shortDesc("My new test account type short description")
+				.build();
+		returnedClone = this.chartOfAccountService.newLedgerAccountType(newLedgerAccountType);
+		assertNotNull(returnedClone);
 	}
 
 	@Test
