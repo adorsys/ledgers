@@ -72,7 +72,9 @@ public class ITChartOfAccountServiceImplTest {
 	
 	@Test
 	public void test_find_chart_of_accounts_by_name(){
-		// TODO implements 
+		Optional<ChartOfAccount> coa = chartOfAccountService.findChartOfAccountsByName("CoA");
+		assertTrue(coa.isPresent());
+		//ibo am Werk gewesen
 	}
 
 	@Test
