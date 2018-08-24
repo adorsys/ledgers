@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.postings.repository;
 
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,6 +22,8 @@ import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
+
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -69,15 +72,18 @@ public class ITLedgerRepositoryTest {
 	}
 
 	@Test
-	@Ignore
 	public void test_find_by_coa_returns_n_records(){
-		// @TODO implement
+        Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
+        Assume.assumeNotNull(ledger);
+        ChartOfAccount coa = chartOfAccountRepository.findById(ledger.getCoa().getId()).orElse(null);
+        List<Ledger> list = ledgerRepository.findByCoa(coa);
+        Assert.assertEquals(2, list.size());
 	}
 	
 	@Test
-	@Ignore
 	public void test_find_by_name_returns_one_record(){
 		// @TODO implement
+
 	}
 
 	@Test
