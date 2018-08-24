@@ -52,9 +52,10 @@ public class ITLedgerRepositoryTest {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_no_name() {
-		// @TODO implement
+        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8zskTrCsi-F3sT3i-g").orElse(null);
+        Ledger ledger = Ledger.builder().id(Ids.id()).user("Sample User").coa(coa).build();
+        ledgerRepository.save(ledger);
 	}	
 
 	@Test(expected=DataIntegrityViolationException.class)
