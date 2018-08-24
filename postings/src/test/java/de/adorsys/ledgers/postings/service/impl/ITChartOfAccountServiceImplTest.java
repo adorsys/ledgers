@@ -56,11 +56,16 @@ public class ITChartOfAccountServiceImplTest {
 	
 	@Test
 	public void test_find_child_ledger_account_types(){
-		// TODO implements 
+		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
+		assumeNotNull(coa);
+
+		List<LedgerAccountType> childrenAccountTypes = chartOfAccountService.findChildLedgerAccountTypes(coa,"CoA#NULL");
+		assertEquals(2, childrenAccountTypes.size());
+
 	}
 
 	@Test
-	public void test_find_chart_of_accounts_by_id(){
+	public void test_find_chart_of_accounts_by_id() {
 		// TODO implements 
 	}
 	
