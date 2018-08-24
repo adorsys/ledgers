@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.postings.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
 
 import java.util.List;
@@ -61,12 +62,12 @@ public class ITChartOfAccountServiceImplTest {
 
 		List<LedgerAccountType> childrenAccountTypes = chartOfAccountService.findChildLedgerAccountTypes(coa,"CoA#NULL");
 		assertEquals(2, childrenAccountTypes.size());
-
 	}
 
 	@Test
 	public void test_find_chart_of_accounts_by_id() {
-		// TODO implements 
+		Optional<ChartOfAccount> coa = chartOfAccountService.findChartOfAccountsById("ci8k8PDcTrCsi-F3sT3i-g");
+		assertTrue(coa.isPresent());
 	}
 	
 	@Test
