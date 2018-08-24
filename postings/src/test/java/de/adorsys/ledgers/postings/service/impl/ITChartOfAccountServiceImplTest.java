@@ -41,9 +41,6 @@ public class ITChartOfAccountServiceImplTest {
 	
 	@Autowired
 	private ChartOfAccountService chartOfAccountService;
-	
-	@Autowired
-	private LedgerAccountTypeRepository ledgerAccountTypeRepo;
 
 	@Test
 	public void test_find_coa_ledger_account_types(){
