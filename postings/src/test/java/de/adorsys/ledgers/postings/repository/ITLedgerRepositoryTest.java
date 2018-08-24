@@ -45,9 +45,10 @@ public class ITLedgerRepositoryTest {
 	}
 	
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_no_coa() {
-		// @TODO implement
+		Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2").user("Sample User").build();
+		ledgerRepository.save(ledger);
+
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
