@@ -118,7 +118,8 @@ public class ITChartOfAccountServiceImplTest {
 
 	@Test
 	public void test_find_ledger_account_type_by_id(){
-		// TODO implements 
+		Optional<LedgerAccountType> ledgerAccountType = chartOfAccountService.findLedgerAccountTypeById("805UO1hITPHxQq16OuGvw_BS");
+		assertTrue(ledgerAccountType.isPresent());
 	}
 
 	@Test
