@@ -124,6 +124,10 @@ public class ITChartOfAccountServiceImplTest {
 
 	@Test
 	public void test_find_ledger_account_type(){
-		// TODO implements 
+		Optional<ChartOfAccount> coa = chartOfAccountService.findChartOfAccountsByName("CoA");
+		assertTrue(coa.isPresent());
+
+		Optional<LedgerAccountType> ledgerAccountType = chartOfAccountService.findLedgerAccountType(coa.get(), "BS");
+		assertTrue(ledgerAccountType.isPresent());
 	}
 }
