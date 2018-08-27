@@ -74,7 +74,7 @@ public class ITPostingRepositoryTest {
 
 	@Test
 	public void test_find_posting_by_operation_id() {
-		List<Posting> posting = postingRepository.findByOprId("findFirstOptionalByLedgerOrderByRecordTimeDesc");
+		List<Posting> posting = postingRepository.findByOprId("Zd0ND5YwSzGwIfZilhumPg_OPERATION");
 		assertEquals(1, posting.size());
 	}
 
