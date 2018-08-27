@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import javafx.geometry.Pos;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -45,6 +46,16 @@ public class ITPostingRepositoryTest {
 	
 	@Autowired
 	private LedgerRepository ledgerRepository;
+
+	@Test
+	public void test_create_posting_ok() {
+
+	}
+
+	@Test
+	public void test_load_posting_by_id_ok() {
+		Optional<Posting> posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING");
+	}
 	
 	@Test
 	public void test_posting_hash() throws NoSuchAlgorithmException, JsonProcessingException {
