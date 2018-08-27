@@ -80,9 +80,15 @@ public class ITLedgerAccountTypeRepositoryTest {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_account_type_no_parent() {
-		// @TODO implement
+		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+		assumeNotNull(coa);
+		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
+				.name("Sample Ledger Account Type").user("Sample User")
+				.coa(coa)
+				.balanceSide(BalanceSide.C)
+				.build();
+		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
 	
 	@Test(expected=DataIntegrityViolationException.class)
