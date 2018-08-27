@@ -18,7 +18,8 @@
 			opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION"
 			opr_details="Balance statement creation"
 			pst_time="2018-08-07 20:58:24.232"
-			pst_type="D"
+			pst_type="BAL_STMT"
 			ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+			record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
 	/>
 </dataset>

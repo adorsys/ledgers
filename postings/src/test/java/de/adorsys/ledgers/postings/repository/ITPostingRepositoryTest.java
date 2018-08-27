@@ -55,6 +55,7 @@ public class ITPostingRepositoryTest {
 	@Test
 	public void test_load_posting_by_id_ok() {
 		Optional<Posting> posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING");
+		Assume.assumeTrue(posting.isPresent());
 	}
 	
 	@Test
