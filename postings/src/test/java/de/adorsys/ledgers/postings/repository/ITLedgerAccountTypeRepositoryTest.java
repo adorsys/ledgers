@@ -57,17 +57,16 @@ public class ITLedgerAccountTypeRepositoryTest {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_account_type_unique_constrain_violation_coa_name() {
-		// TODO implement
-//		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITP-HxQq16OuGvw").orElse(null);
-//		assumeNotNull(ledgerAccountType);
-//		LedgerAccountType ledgerAccountType2 = LedgerAccountType.builder().id(Ids.id())
-//				.name(ledgerAccountType.getName())
-//				.user("Sample User")
-//				.parent(ledgerAccountType.getName())
-//				.coa(ledgerAccountType.getCoa()).build();
-//		ledgerAccountTypeRepository.save(ledgerAccountType2);
+		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
+		assumeNotNull(ledgerAccountType);
+		LedgerAccountType ledgerAccountType2 = LedgerAccountType.builder().id(Ids.id())
+				.name(ledgerAccountType.getName())
+				.user("Sample User")
+				.parent(ledgerAccountType.getName())
+				.coa(ledgerAccountType.getCoa()).build();
+		ledgerAccountTypeRepository.save(ledgerAccountType2);
+
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
