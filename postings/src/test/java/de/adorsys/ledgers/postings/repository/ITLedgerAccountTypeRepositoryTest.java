@@ -6,6 +6,7 @@ import static org.junit.Assume.assumeNotNull;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,13 +98,11 @@ public class ITLedgerAccountTypeRepositoryTest {
 	}
 
 	@Test
-	@Ignore
 	public void test_find_by_coa_and_name_returns_1_records(){
-		// @TODO implement
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
-//		List<LedgerAccountType> found = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, name);
-//		assertEquals(10, found.size());
+        Optional<LedgerAccountType> found = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "1.0.0");
+        Assert.assertTrue(found.isPresent());
 	}
 	
 	@Test
