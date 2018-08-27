@@ -49,7 +49,18 @@ public class ITPostingRepositoryTest {
 
 	@Test
 	public void test_create_posting_ok() {
-
+		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
+		Assume.assumeTrue(ledgerOptions.isPresent());
+		Posting posting = Posting.builder()
+				.id(Ids.id())
+				.recordUser("recUser")
+				.oprId("oprId")
+				.oprDetails("oprDetails")
+				.pstTime(LocalDateTime.now())
+				.pstType(PostingType.BAL_STMT)
+				.ledger(ledgerOptions.get())
+				.build();
+		postingRepository.save(posting);
 	}
 
 	@Test
@@ -57,7 +68,17 @@ public class ITPostingRepositoryTest {
 		Optional<Posting> posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING");
 		Assume.assumeTrue(posting.isPresent());
 	}
-	
+
+	@Test
+	public void test_find_posting_by_operation_id() {
+
+	}
+
+	@Test
+	public void test_find_first_optional_by_ledger_order_by_record_time_desc() {
+
+	}
+
 	@Test
 	public void test_posting_hash() throws NoSuchAlgorithmException, JsonProcessingException {
 		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
