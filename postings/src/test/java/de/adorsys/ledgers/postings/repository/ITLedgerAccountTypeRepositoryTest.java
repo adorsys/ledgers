@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeNotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -106,12 +107,11 @@ public class ITLedgerAccountTypeRepositoryTest {
 	}
 	
 	@Test
-	@Ignore
 	public void test_find_by_coa_and_parent(){
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
-		// @TODO implement
-	}
+		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByCoaAndParent(coa, "BS");
+		assertEquals(3, found.size());	}
 
 	@Test
 	public void test_find_by_coa_order_by_level_desc(){
@@ -128,4 +128,6 @@ public class ITLedgerAccountTypeRepositoryTest {
 		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByCoaAndLevel(coa, 0);
 		assertEquals(2, found.size());
 	}
+
+
 }
