@@ -2,6 +2,7 @@ package de.adorsys.ledgers.postings.repository;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import javafx.geometry.Pos;
@@ -29,6 +30,8 @@ import de.adorsys.ledgers.postings.domain.PostingType;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import de.adorsys.ledgers.tests.PostingsApplication;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -71,7 +74,8 @@ public class ITPostingRepositoryTest {
 
 	@Test
 	public void test_find_posting_by_operation_id() {
-
+		List<Posting> posting = postingRepository.findByOprId("findFirstOptionalByLedgerOrderByRecordTimeDesc");
+		assertEquals(1, posting.size());
 	}
 
 	@Test
