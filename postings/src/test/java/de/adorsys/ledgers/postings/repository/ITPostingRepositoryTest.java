@@ -52,8 +52,8 @@ public class ITPostingRepositoryTest {
 
 	@Test
 	public void test_create_posting_ok() {
-		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
-		Assume.assumeTrue(ledgerOptions.isPresent());
+		Optional<Ledger> ledgerOption = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
+		Assume.assumeTrue(ledgerOption.isPresent());
 		Posting posting = Posting.builder()
 				.id(Ids.id())
 				.recordUser("recUser")
@@ -61,7 +61,7 @@ public class ITPostingRepositoryTest {
 				.oprDetails("oprDetails")
 				.pstTime(LocalDateTime.now())
 				.pstType(PostingType.BAL_STMT)
-				.ledger(ledgerOptions.get())
+				.ledger(ledgerOption.get())
 				.build();
 		postingRepository.save(posting);
 	}
@@ -75,11 +75,18 @@ public class ITPostingRepositoryTest {
 	@Test
 	public void test_find_posting_by_operation_id() {
 		List<Posting> posting = postingRepository.findByOprId("Zd0ND5YwSzGwIfZilhumPg_OPERATION");
-		assertEquals(1, posting.size());
+		assertEquals(2, posting.size());
 	}
 
 	@Test
 	public void test_find_first_optional_by_ledger_order_by_record_time_desc() {
+		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
+		Assume.assumeNotNull(ledger);
+
+		Posting posting = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(ledger).orElse(null);
+		Assume.assumeNotNull(posting);
+		assertEquals("Zd0ND5YwSzGwIfZilhumPg_POSTING2", posting.getId());
+		System.out.println(posting.getId());
 
 	}
 
