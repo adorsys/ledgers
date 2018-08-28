@@ -11,6 +11,7 @@ import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.Ids;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -66,7 +67,9 @@ public class ITLedgerServiceImplTest {
 
     @Test
     public void test_find_ledger_by_id() {
-        // @TODO implement
+        Optional<Ledger> opt = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg");
+        Assert.assertTrue(opt.isPresent());
+
     }
     @Test
     public void test_find_ledger_by_name() {
