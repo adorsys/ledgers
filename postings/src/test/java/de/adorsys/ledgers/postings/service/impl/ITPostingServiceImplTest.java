@@ -57,6 +57,7 @@ public class ITPostingServiceImplTest {
                 .pstType(PostingType.BAL_STMT)
                 .ledger(ledgerOption.get())
                 .build();
-
+        Posting saved = postingService.newPosting(posting);
+        Assume.assumeNotNull(saved);
     }
 }

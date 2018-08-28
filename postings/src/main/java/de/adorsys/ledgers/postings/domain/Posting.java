@@ -4,16 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import org.springframework.data.annotation.CreatedDate;
 
@@ -121,7 +112,7 @@ public class Posting {
 	 * debit and the credit side of the posting. Some account statement will not
 	 * display mechanical postings while producing the user statement.
 	 */
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	private PostingType pstType;
 	
