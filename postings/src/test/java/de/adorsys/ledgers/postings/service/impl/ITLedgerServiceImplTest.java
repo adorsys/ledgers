@@ -9,6 +9,7 @@ import java.util.Optional;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.Ids;
 import org.junit.Assume;
 import org.junit.Ignore;
@@ -50,13 +51,17 @@ public class ITLedgerServiceImplTest {
     @Autowired
     private LedgerRepository ledgerRepository;
 
+    @Autowired
+    private LedgerService ledgerService;
+
     @Test
     public void test_new_ledger() {
-        // @TODO implement
-        /*ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
         Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2").user("Sample User").coa(coa).build();
-        ledgerRepository.save(ledger);
-        */
+
+        Ledger ledger2 = ledgerService.newLedger(ledger);
+        ledgerRepository.save(ledger2);
+
     }
 
     @Test
