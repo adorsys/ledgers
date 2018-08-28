@@ -73,7 +73,8 @@ public class ITLedgerServiceImplTest {
     }
     @Test
     public void test_find_ledger_by_name() {
-        // @TODO implement
+        Optional<Ledger> opt = ledgerService.findLedgerByName("Sample Ledger-0");
+        Assert.assertTrue(opt.isPresent());
     }
     @Test
     public void test_new_ledger_accounts() {
