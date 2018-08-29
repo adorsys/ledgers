@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeNotNull;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,17 +57,16 @@ public class ITLedgerAccountTypeRepositoryTest {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_account_type_unique_constrain_violation_coa_name() {
-		// TODO implement
-//		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITP-HxQq16OuGvw").orElse(null);
-//		assumeNotNull(ledgerAccountType);
-//		LedgerAccountType ledgerAccountType2 = LedgerAccountType.builder().id(Ids.id())
-//				.name(ledgerAccountType.getName())
-//				.user("Sample User")
-//				.parent(ledgerAccountType.getName())
-//				.coa(ledgerAccountType.getCoa()).build();
-//		ledgerAccountTypeRepository.save(ledgerAccountType2);
+		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
+		assumeNotNull(ledgerAccountType);
+		LedgerAccountType ledgerAccountType2 = LedgerAccountType.builder().id(Ids.id())
+				.name(ledgerAccountType.getName())
+				.user("Sample User")
+				.parent(ledgerAccountType.getName())
+				.coa(ledgerAccountType.getCoa()).build();
+		ledgerAccountTypeRepository.save(ledgerAccountType2);
+
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
@@ -78,40 +79,54 @@ public class ITLedgerAccountTypeRepositoryTest {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_account_type_no_parent() {
-		// @TODO implement
+		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+		assumeNotNull(coa);
+		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
+				.name("Sample Ledger Account Type").user("Sample User")
+				.coa(coa)
+				.balanceSide(BalanceSide.C)
+				.build();
+		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
 	
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_account_type_no_name() {
-		// @TODO implement
+		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+		assumeNotNull(coa);
+		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
+				.user("Sample User")
+				.coa(coa).parent("Sample Ledger Account Type")
+				.balanceSide(BalanceSide.C)
+				.build();
+		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}	
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@Ignore
 	public void test_create_ledger_account_type_no_balanceSide() {
-		// @TODO implement
+		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+		assumeNotNull(coa);
+		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
+				.name("Sample Ledger Account Type").user("Sample User")
+				.coa(coa).parent("Sample Ledger Account Type")
+				.build();
+		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
 
 	@Test
-	@Ignore
 	public void test_find_by_coa_and_name_returns_1_records(){
-		// @TODO implement
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
-//		List<LedgerAccountType> found = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, name);
-//		assertEquals(10, found.size());
+        Optional<LedgerAccountType> found = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "1.0.0");
+        Assert.assertTrue(found.isPresent());
 	}
 	
 	@Test
-	@Ignore
 	public void test_find_by_coa_and_parent(){
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
-		// @TODO implement
-	}
+		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByCoaAndParent(coa, "BS");
+		assertEquals(3, found.size());	}
 
 	@Test
 	public void test_find_by_coa_order_by_level_desc(){
@@ -128,4 +143,6 @@ public class ITLedgerAccountTypeRepositoryTest {
 		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByCoaAndLevel(coa, 0);
 		assertEquals(2, found.size());
 	}
+
+
 }
