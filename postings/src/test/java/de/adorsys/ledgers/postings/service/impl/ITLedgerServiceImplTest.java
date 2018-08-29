@@ -3,6 +3,7 @@ package de.adorsys.ledgers.postings.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeNotNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +61,9 @@ public class ITLedgerServiceImplTest {
     @Autowired
     private LedgerAccountRepository ledgerAccountRepository;
 
+    @Autowired
+    private  LedgerAccountTypeRepository ledgerAccountTypeRepository;
+
     @Test
     public void test_new_ledger() {
         ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
@@ -83,8 +87,34 @@ public class ITLedgerServiceImplTest {
     }
     @Test
     public void test_new_ledger_account() {
-        //LedgerAccount ledgerAccount= ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
-        //ledgerAccountRepository.save(ledgerAccount);
+        Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
+        Assert.assertNotNull(ledger);
+
+        LedgerAccount parentAccount= ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        Assert.assertNotNull(parentAccount);
+
+        LedgerAccountType accountType= ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
+        Assert.assertNotNull(accountType);
+
+        LocalDateTime validFrom = LocalDateTime.now();
+        LocalDateTime validTo = LocalDateTime.now();
+        LocalDateTime created = LocalDateTime.now();
+
+        LedgerAccount newLedgerAccount = LedgerAccount.builder()
+                                            .id(Ids.id())
+                                            .validFrom(validFrom)
+                                            .validTo(validTo)
+                                            .created(created)
+                                            .user("Sample user")
+                                            .ledger(ledger)
+                                            .parent(parentAccount.getId())
+                                            .accountType(accountType)
+                                            .level(parentAccount.getLevel() + 1)
+                                            .name("LedgerAccountNameTest")
+                                            .shortDesc("short description")
+                                            .build();
+
+        ledgerService.newLedgerAccount(newLedgerAccount);
     }
 
     @Test
@@ -94,10 +124,27 @@ public class ITLedgerServiceImplTest {
     }
     @Test
     public void test_find_ledger_account() {
-        // @TODO implement
+
+        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+        Assert.assertNotNull(coa);
+        Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
+        Assert.assertNotNull(ledger);
+        LedgerAccount ledgerAccount= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        Assert.assertNotNull(ledgerAccount);
+
+        Optional<LedgerAccount> opt = ledgerService.findLedgerAccount(ledgerAccount.getLedger(), ledgerAccount.getName(), ledgerAccount.getValidFrom());
+        Assert.assertTrue(opt.isPresent());
+
+
     }
     @Test
     public void test_find_n_ledger_accounts() {
-        // @TODO implement
+
+        LedgerAccount ledgerAccount= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        Assert.assertNotNull(ledgerAccount);
+
+        List<LedgerAccount> list= ledgerService.findLedgerAccounts(ledgerAccount.getLedger(), ledgerAccount.getName());
+        Assert.assertEquals(1, list.size());
+
     }
 }
