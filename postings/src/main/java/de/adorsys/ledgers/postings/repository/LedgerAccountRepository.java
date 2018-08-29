@@ -11,7 +11,7 @@ import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 public interface LedgerAccountRepository extends TimeBasedEntityRepository<LedgerAccount> {
 	/*Find root account by coa and validity*/
 	List<LedgerAccount> findByLedgerAndLevelAndAccountTypeAndValidFromBeforeAndValidToAfter(Ledger ledger, int level, LedgerAccountType accountType, LocalDateTime validFrom, LocalDateTime validTo);
-	
+
 	Optional<LedgerAccount> findFirstOptionalByLedgerAndNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(Ledger ledger, String name, LocalDateTime validFrom, LocalDateTime validTo);	
 
 	List<LedgerAccount> findByLedgerAndName(Ledger ledger, String name);
