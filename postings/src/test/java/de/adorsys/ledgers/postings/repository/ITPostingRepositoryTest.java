@@ -2,8 +2,10 @@ package de.adorsys.ledgers.postings.repository;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import javafx.geometry.Pos;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -29,6 +31,8 @@ import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -45,7 +49,47 @@ public class ITPostingRepositoryTest {
 	
 	@Autowired
 	private LedgerRepository ledgerRepository;
-	
+
+	@Test
+	public void test_create_posting_ok() {
+		Optional<Ledger> ledgerOption = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
+		Assume.assumeTrue(ledgerOption.isPresent());
+		Posting posting = Posting.builder()
+				.id(Ids.id())
+				.recordUser("recUser")
+				.oprId("oprId")
+				.oprDetails("oprDetails")
+				.pstTime(LocalDateTime.now())
+				.pstType(PostingType.BAL_STMT)
+				.ledger(ledgerOption.get())
+				.build();
+		postingRepository.save(posting);
+	}
+
+	@Test
+	public void test_load_posting_by_id_ok() {
+		Optional<Posting> posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING");
+		Assume.assumeTrue(posting.isPresent());
+	}
+
+	@Test
+	public void test_find_posting_by_operation_id() {
+		List<Posting> posting = postingRepository.findByOprId("Zd0ND5YwSzGwIfZilhumPg_OPERATION");
+		assertEquals(2, posting.size());
+	}
+
+	@Test
+	public void test_find_first_optional_by_ledger_order_by_record_time_desc() {
+		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
+		Assume.assumeNotNull(ledger);
+
+		Posting posting = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(ledger).orElse(null);
+		Assume.assumeNotNull(posting);
+		assertEquals("Zd0ND5YwSzGwIfZilhumPg_POSTING2", posting.getId());
+		System.out.println(posting.getId());
+
+	}
+
 	@Test
 	public void test_posting_hash() throws NoSuchAlgorithmException, JsonProcessingException {
 		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
