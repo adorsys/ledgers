@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
+import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.Ids;
@@ -55,6 +57,9 @@ public class ITLedgerServiceImplTest {
     @Autowired
     private LedgerService ledgerService;
 
+    @Autowired
+    private LedgerAccountRepository ledgerAccountRepository;
+
     @Test
     public void test_new_ledger() {
         ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
@@ -77,13 +82,15 @@ public class ITLedgerServiceImplTest {
         Assert.assertTrue(opt.isPresent());
     }
     @Test
-    public void test_new_ledger_accounts() {
-        // @TODO implement
+    public void test_new_ledger_account() {
+        //LedgerAccount ledgerAccount= ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        //ledgerAccountRepository.save(ledgerAccount);
     }
 
     @Test
     public void test_find_ledger_account_by_id() {
-        // @TODO implement
+        Optional<LedgerAccount> opt = ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS");
+        Assert.assertTrue(opt.isPresent());
     }
     @Test
     public void test_find_ledger_account() {
