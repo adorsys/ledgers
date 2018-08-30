@@ -14,7 +14,7 @@ The detail level of an account defines the granularity at which the balance of t
 
 Accounts are inherently classified by types. For example:
 
-- Estate Accounts (Level 0)
+- Balance Sheet Accounts (Level 0)
   - Asset Accounts (Level 1)
   - Liability Accounts (Level 1)
 
@@ -32,7 +32,7 @@ So defining a sub ledger boils down to :
 
 Consider the following chart of account:
 
-- Estate Accounts (Level 0)
+- Balance Sheet Accounts (Level 0)
   - Asset Accounts (Level 1)
     - Fixed Assets (Level 2)
     - Operating Assets (Level 2)
