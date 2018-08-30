@@ -60,7 +60,7 @@ Following three properties will generally be made unique in their combination.
 
 The type of this account. Generally, following account types are distinguished:
 
-- Estate Accounts
+- Balance Sheet Accounts
   - Asset Accounts
   - Liability Accounts
 
