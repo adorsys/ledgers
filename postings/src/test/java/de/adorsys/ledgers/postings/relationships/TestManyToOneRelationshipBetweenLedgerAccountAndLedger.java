@@ -39,4 +39,17 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedger {
     @Autowired
     LedgerRepository ledgerRepository;
 
+    @Test
+    public void test_2_ledger_accounts_same_ledger() {
+
+        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        Assert.assertNotNull(ledgerAccount1);
+
+        LedgerAccount ledgerAccount2 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_PL").orElse(null);
+        Assert.assertNotNull(ledgerAccount2);
+
+        // Ledger of 2 LedgerAccounts is the same
+        Assert.assertEquals(ledgerAccount1.getLedger().getId(), ledgerAccount2.getLedger().getId());
+    }
+
 }
