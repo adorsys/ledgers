@@ -54,7 +54,7 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedger {
     }
 
     @Test
-    public void test_ledger_accounts_has_one_ledger() {
+    public void test_ledger_account_has_one_ledger() {
 
         LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
         Assert.assertNotNull(ledgerAccount1);
