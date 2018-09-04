@@ -5,10 +5,8 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.tests.PostingsApplication;
@@ -21,6 +19,9 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import java.util.List;
+import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -51,5 +52,18 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedger {
         // Ledger of 2 LedgerAccounts is the same
         Assert.assertEquals(ledgerAccount1.getLedger().getId(), ledgerAccount2.getLedger().getId());
     }
+
+    @Test
+    public void test_ledger_accounts_has_one_ledger() {
+
+        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        Assert.assertNotNull(ledgerAccount1);
+
+        Optional<Ledger> opt = ledgerRepository.findById(ledgerAccount1.getLedger().getId());
+        Assert.assertTrue(opt.isPresent());
+
+    }
+
+
 
 }
