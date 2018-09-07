@@ -7,7 +7,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
+import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.tests.PostingsApplication;
@@ -20,6 +23,10 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import java.util.Optional;
+
+import static org.junit.Assume.assumeNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -39,6 +46,9 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedgerAccountType {
 
     @Autowired
     LedgerAccountTypeRepository ledgerAccountTypeRepository;
+
+    @Autowired
+    LedgerAccountRepository ledgerAccountRepository;
 
 
     @Test
@@ -60,13 +70,18 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedgerAccountType {
     @Test
     public void test_ledger_account_has_one_ledger_account_type() {
 
-        /*
-        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
-        Assert.assertNotNull(ledgerAccount1);
+        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+        assumeNotNull(coa);
 
-        Optional<Ledger> opt = ledgerRepository.findById(ledgerAccount1.getLedger().getId());
-        Assert.assertTrue(opt.isPresent());
-        */
+        LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "1.0.0").orElse(null);
+
+
+        LedgerAccount ledgerAccount = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS_1_0_0").orElse(null);
+        Assert.assertNotNull(ledgerAccount);
+
+        Assert.assertEquals(ledgerAccountType.getId(), ledgerAccount.getAccountType().getId());
+
+
 
     }
 
