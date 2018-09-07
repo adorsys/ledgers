@@ -118,6 +118,18 @@
 			name="BS"
 			short_desc="Balance Sheet Accounts"
            />
+	<LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh12_BS"
+					valid_From="2018-08-07 23:50:41.231"
+					valid_To="2199-01-01 00:00:00.000"
+					created="2018-08-07 23:50:41.231"
+					user="Sample User"
+					ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+					parent="GL#NULL"
+					account_Type_id="805UO1hITPHxQq16OuGvw_BS"
+					level="0"
+					name="B2"
+					short_desc="Balance Sheet Accounts"
+	/>
 	<LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_PL"
 			valid_From="2018-08-07 23:50:41.231"
            	valid_To="2199-01-01 00:00:00.000"
