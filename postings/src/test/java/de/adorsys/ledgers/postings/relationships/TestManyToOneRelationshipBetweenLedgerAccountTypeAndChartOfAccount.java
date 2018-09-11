@@ -7,7 +7,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
+import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
+import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.tests.PostingsApplication;
 import org.junit.Assert;
@@ -35,8 +38,24 @@ public class TestManyToOneRelationshipBetweenLedgerAccountTypeAndChartOfAccount 
     ChartOfAccountRepository chartOfAccountRepository;
 
     @Autowired
-    LedgerRepository ledgerRepository;
+    LedgerAccountTypeRepository ledgerAccountTypeRepository;
 
+    @Test
+    public void test_2_ledger_account_type_have_same_chart_of_account() {
+
+        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+        Assert.assertNotNull(coa);
+
+        LedgerAccountType ledgerAccountType1 = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "1.0.0").orElse(null);
+        Assert.assertNotNull(ledgerAccountType1);
+
+        LedgerAccountType ledgerAccountType2 = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "2.0.0").orElse(null);
+        Assert.assertNotNull(ledgerAccountType2);
+
+        Assert.assertEquals(ledgerAccountType1.getCoa().getId(), ledgerAccountType2.getCoa().getId());
+
+
+    }
 
 
 }
