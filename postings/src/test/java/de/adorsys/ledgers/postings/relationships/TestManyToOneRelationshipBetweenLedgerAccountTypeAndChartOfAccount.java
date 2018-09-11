@@ -57,5 +57,19 @@ public class TestManyToOneRelationshipBetweenLedgerAccountTypeAndChartOfAccount 
 
     }
 
+    @Test
+    public void test_ledger_account_type_has_one_chart_of_account() {
+
+        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+        Assert.assertNotNull(coa);
+
+        LedgerAccountType ledgerAccountType1 = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "1.0.0").orElse(null);
+        Assert.assertNotNull(ledgerAccountType1);
+
+        Assert.assertEquals(ledgerAccountType1.getCoa().getId(), coa.getId());
+
+
+    }
+
 
 }
