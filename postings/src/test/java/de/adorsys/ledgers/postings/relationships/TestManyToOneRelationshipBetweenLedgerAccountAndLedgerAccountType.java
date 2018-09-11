@@ -51,21 +51,7 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedgerAccountType {
     LedgerAccountRepository ledgerAccountRepository;
 
 
-    @Test
-    public void test_2_ledgers_accounts_have_same_ledger_account_tpye() {
-        /*ChartOfAccount coa = chartOfAccountRepository.findOptionalByName("IFRS").orElse(null);
-        Assert.assertNotNull(coa);
 
-        Ledger ledger1 = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
-        Assert.assertNotNull(ledger1);
-
-        Ledger ledger2 = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg1").orElse(null);
-        Assert.assertNotNull(ledger2);
-
-        // CoA of 2 ledgers is the same
-        Assert.assertEquals(ledger1.getCoa().getId(), ledger2.getCoa().getId());
-        */
-    }
 
     @Test
     public void test_ledger_account_has_one_ledger_account_type() {
