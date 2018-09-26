@@ -17,6 +17,8 @@ import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
 
+import javax.websocket.server.PathParam;
+
 @RestController
 public class ChartOfAccountController {
 	

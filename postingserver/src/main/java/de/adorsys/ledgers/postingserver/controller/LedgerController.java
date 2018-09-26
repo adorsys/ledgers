@@ -19,6 +19,8 @@ import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.service.LedgerService;
 
+import javax.websocket.server.PathParam;
+
 @RestController
 public class LedgerController {
 	

@@ -31,7 +31,7 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 		String user = principal.getName();
 		// Save new coa
 		coa = new ChartOfAccount(Ids.id(), created, user, coa.getShortDesc(), coa.getLongDesc(), coa.getName());
-		
+
 		// Return clone.
 		return CloneUtils.cloneObject(chartOfAccountRepo.save(coa), ChartOfAccount.class);
 	}
@@ -57,10 +57,10 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 	public LedgerAccountType newLedgerAccountType(LedgerAccountType model) {
 
 		// Load persistent instance of coa
-		ChartOfAccount coa = loadCoa(model.getCoa());		
+		ChartOfAccount coa = loadCoa(model.getCoa());
 		final String coaName = coa.getName();
 
-		// Load persistent instance of parent if specified. 
+		// Load persistent instance of parent if specified.
 		// If not specified, we will assume caller is creating a root account type
 		LedgerAccountType parent = null;
 		if (model.getParent() != null)
