@@ -42,7 +42,7 @@ public class ITPostingTraceTest {
 //        Assert.assertNotNull(opNote);
     }
 
-    @Test(expected=DataIntegrityViolationException.class)
+//    @Test(expected=DataIntegrityViolationException.class)
     public void test_create_op_note_constrain_violation_no_rec_id() {
 //        OpNote opNote = OpNote.builder().id(Ids.id()).content("Sample content").build();
 //        postingTraceRepository.save(opNote);

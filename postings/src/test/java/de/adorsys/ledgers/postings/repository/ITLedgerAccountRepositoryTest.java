@@ -129,11 +129,13 @@ public class ITLedgerAccountRepositoryTest {
 		Assume.assumeNotNull(ledgerAccountType);
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-		LocalDateTime validFrom = LocalDateTime.parse("2018-08-07 23:50:41.231", formatter);
-		LocalDateTime validTo = LocalDateTime.parse("2199-01-01 00:00:00.000", formatter);
+//		LocalDateTime validFrom = LocalDateTime.parse("2018-08-07 23:50:41.231", formatter);
+//		LocalDateTime validTo = LocalDateTime.parse("2199-01-01 00:00:00.000", formatter);
+		
+		LocalDateTime refDate = LocalDateTime.parse("2018-09-10 23:50:41.231", formatter);
 
 		List<LedgerAccount> found = ledgerAccountRepository
-				.findByLedgerAndLevelAndAccountTypeAndValidFromBeforeAndValidToAfter(ledger, 0, ledgerAccountType, validFrom, validTo);
+				.findByLedgerAndLevelAndAccountTypeAndValidFromBeforeAndValidToAfter(ledger, 0, ledgerAccountType, refDate, refDate);
 		assertEquals(1, found.size());
 
 	}
