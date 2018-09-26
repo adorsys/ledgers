@@ -85,6 +85,7 @@ public class ITLedgerServiceImplTest {
         Optional<Ledger> opt = ledgerService.findLedgerByName("Sample Ledger-0");
         Assert.assertTrue(opt.isPresent());
     }
+    @Ignore
     @Test
     public void test_new_ledger_account() {
         Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
@@ -122,6 +123,7 @@ public class ITLedgerServiceImplTest {
         Optional<LedgerAccount> opt = ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS");
         Assert.assertTrue(opt.isPresent());
     }
+    @Ignore
     @Test
     public void test_find_ledger_account() {
 
