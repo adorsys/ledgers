@@ -1,7 +1,5 @@
 package de.adorsys.ledgers.postings.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import de.adorsys.ledgers.postings.domain.Ledger;
@@ -51,14 +49,5 @@ public interface LedgerService {
 	 * @param name
 	 * @return
 	 */
-	public Optional<LedgerAccount> findLedgerAccount(Ledger ledger, String name, LocalDateTime referenceDate);
-
-	/**
-	 * Loads all ledger accounts with the given name.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public List<LedgerAccount> findLedgerAccounts(Ledger ledger, String name);
-
+	public Optional<LedgerAccount> findLedgerAccount(Ledger ledger, String name);
 }

@@ -29,8 +29,8 @@ public class LedgerAccountType extends NamedEntity {
 	private ChartOfAccount coa;
 
 	/* For the root object, the parent carries the name of the object. */
-	@Column(nullable = false)
-	private String parent;
+	@ManyToOne(optional = true)
+	private LedgerAccountType parent;
 
 	/* The detail level of this ledger account type */
 	private int level;
@@ -70,7 +70,7 @@ public class LedgerAccountType extends NamedEntity {
 	 */
 	@Builder
 	public LedgerAccountType(String id, LocalDateTime created, String user, String shortDesc, String longDesc,
-			String name, ChartOfAccount coa, String parent, int level, BalanceSide balanceSide) {
+			String name, ChartOfAccount coa, LedgerAccountType parent, int level, BalanceSide balanceSide) {
 		super(id, created, user, shortDesc, longDesc, name);
 		this.coa = coa;
 		this.parent = parent;

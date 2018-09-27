@@ -71,6 +71,18 @@ public class Posting {
 	 */
 	@Column(nullable = false, updatable = false)
 	private String oprId;
+	
+	/*
+	 * The id of the posting being modified by this posting.
+	 * 
+	 * Combining the operation id an the posting id shall be unique. This is
+	 * you can not override a posting without providing the id of that
+	 * posting.
+	 * 
+	 * While overriding a posting, make sure all accounts mentioned in any of the former 
+	 * operation appear. The account not intended to be used will then carry an amount of 0.
+	 */
+	private String srcPostingId;
 
 	/* The time of occurrence of this operation. Set by the consuming module. */
 	private LocalDateTime oprTime;
@@ -101,7 +113,7 @@ public class Posting {
 	 */
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime pstTime;
-
+	
 	/*
 	 * Some posting are mechanical and do not have an influence on the balance
 	 * of an account. Depending on the business logic of the product module,
@@ -122,6 +134,13 @@ public class Posting {
 	@ManyToOne(optional=false)
 	private Ledger ledger;
 
+	/*
+	 * This field is used to secure the timestamp of the ledger opening.
+	 * A posting time can not be carry a posting 
+	 */
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime lastClosing;
+	
 	/*
 	 * The Date use to compute interests. This can be different from the posting
 	 * date and can lead to the production of other type of balances.

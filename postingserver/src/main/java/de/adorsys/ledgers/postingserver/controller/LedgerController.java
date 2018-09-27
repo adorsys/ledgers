@@ -1,10 +1,11 @@
 package de.adorsys.ledgers.postingserver.controller;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.List;
+
+import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +19,6 @@ import org.springframework.web.util.UriBuilder;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.service.LedgerService;
-
-import javax.websocket.server.PathParam;
 
 @RestController
 public class LedgerController {
@@ -80,60 +79,39 @@ public class LedgerController {
 	}
 
 	/**
-	 * Find the ledger account with the given name 
-	 * 
-	 * @param accountName
-	 * @return
-	 */
-	@GetMapping(path = "/ledgers/{ledgerId}/accounts", params={"accountName","referenceDate"})
-	public ResponseEntity<LedgerAccount> findLedgerAccount(
-			@PathParam("ledgerId")String ledgerId,
-			@RequestParam(required=true, name="accountName")String accountName, 
-			@RequestParam(required=true, name="referenceDate")LocalDateTime referenceDate){
-		Ledger ledger = Ledger.builder().id(ledgerId).build();
-		LedgerAccount la = ledgerService.findLedgerAccount(ledger, accountName, referenceDate).orElseThrow(() -> new ResourceNotFoundException(accountName + "#" + referenceDate.toString()));
-		return ResponseEntity.ok(la);
-	}
-
-	/**
 	 * Find the ledger account with the given ledger name and account name and reference date. 
 	 * 
 	 * @param ledgerName
 	 * @param accountName
-	 * @param referenceDate
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	@GetMapping(path = "/accounts", params={"ledgerName", "accountName","referenceDate"})
+	@GetMapping(path = "/accounts", params={"ledgerName", "accountName"})
 	public ResponseEntity<LedgerAccount> findLedgerAccountByName(
 			@RequestParam(required=true, name="ledgerName")String ledgerName,
-			@RequestParam(required=true, name="accountName")String accountName, 
-			@RequestParam(required=true, name="referenceDate")LocalDateTime referenceDate){
+			@RequestParam(required=true, name="accountName")String accountName) throws NotFoundException{
 		Ledger ledger = Ledger.builder().name(ledgerName).build();
-		LedgerAccount la = ledgerService.findLedgerAccount(ledger, accountName, referenceDate).orElseThrow(() -> new ResourceNotFoundException(accountName + "#" + referenceDate.toString()));
-		return ResponseEntity.ok(la);
+		return ledgerAccount(ledger, accountName);
 	}
 	
 	/**
-	 * Loads all ledger accounts with the given name.
+	 * Find the ledger account with the given name 
 	 * 
 	 * @param accountName
 	 * @return
+	 * @throws NotFoundException 
 	 */
 	@GetMapping(path = "/ledgers/{ledgerId}/accounts", params={"accountName"})
-	public ResponseEntity<List<LedgerAccount>> findLedgerAccounts(
+	public ResponseEntity<LedgerAccount> findLedgerAccount(
 			@PathParam("ledgerId")String ledgerId,
-			@RequestParam(required=true, name="accountName")String accountName){
+			@RequestParam(required=true, name="accountName")String accountName) throws NotFoundException{
 		Ledger ledger = Ledger.builder().id(ledgerId).build();
-		List<LedgerAccount> accounts = ledgerService.findLedgerAccounts(ledger, accountName);
-		return ResponseEntity.ok(accounts);
+		return ledgerAccount(ledger, accountName);
 	}
 
-	@GetMapping(path = "/accounts", params={"ledgerName", "accountName"})
-	public ResponseEntity<List<LedgerAccount>> findLedgerAccountsByName(
-			@RequestParam(required=true, name="ledgerName")String ledgerName,
-			@RequestParam(required=true, name="accountName")String accountName){
-		Ledger ledger = Ledger.builder().name(ledgerName).build();
-		List<LedgerAccount> accounts = ledgerService.findLedgerAccounts(ledger, accountName);
-		return ResponseEntity.ok(accounts);
+	private ResponseEntity<LedgerAccount> ledgerAccount(Ledger ledger, String accountName) throws NotFoundException {
+		LedgerAccount ledgerAccount = ledgerService.findLedgerAccount(ledger, accountName)
+			.orElseThrow(() -> new NotFoundException());
+		return ResponseEntity.ok(ledgerAccount);
 	}
 }

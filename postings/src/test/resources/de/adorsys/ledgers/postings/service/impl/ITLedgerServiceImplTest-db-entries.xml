@@ -10,11 +10,11 @@
             created="2018-08-07 20:58:24.232"
             user="Sample User"
             coa_id="ci8k8PDcTrCsi-F3sT3i-g"
+            last_closing="2018-08-07 20:58:24.232"
     />
 
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="CoA#NULL"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="0"
@@ -24,12 +24,9 @@
     />
 
     <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_BS"
-                    valid_From="2018-08-07 23:50:41.231"
-                    valid_To="2199-01-01 00:00:00.000"
                     created="2018-08-07 23:50:41.231"
                     user="Sample User"
                     ledger_id="Zd0ND5YwSzGwIfZilhumPg"
-                    parent="GL#NULL"
                     account_Type_id="805UO1hITPHxQq16OuGvw_BS"
                     level="0"
                     name="BS"
@@ -38,7 +35,6 @@
 
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_PL"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="CoA#NULL"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="0"
@@ -49,7 +45,7 @@
 
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_1_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="BS"
+                         parent_id="805UO1hITPHxQq16OuGvw_BS"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"
@@ -59,7 +55,7 @@
     />
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_2_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="BS"
+                         parent_id="805UO1hITPHxQq16OuGvw_BS"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"
@@ -69,7 +65,7 @@
     />
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_BS_3_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="BS"
+                         parent_id="805UO1hITPHxQq16OuGvw_BS"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"
@@ -79,7 +75,7 @@
     />
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_PL_4_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="PL"
+                         parent_id="805UO1hITPHxQq16OuGvw_PL"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"
@@ -89,7 +85,7 @@
     />
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_PL_5_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="PL"
+                         parent_id="805UO1hITPHxQq16OuGvw_PL"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"
@@ -99,7 +95,7 @@
     />
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_PL_6_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="PL"
+                         parent_id="805UO1hITPHxQq16OuGvw_PL"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"
@@ -109,7 +105,7 @@
     />
     <LEDGER_ACCOUNT_TYPE id="805UO1hITPHxQq16OuGvw_PL_7_0_0"
                          coa_id="ci8k8PDcTrCsi-F3sT3i-g"
-                         parent="PL"
+                         parent_id="805UO1hITPHxQq16OuGvw_PL"
                          created="2018-08-07 20:58:24.232"
                          user="Sample User"
                          level="1"

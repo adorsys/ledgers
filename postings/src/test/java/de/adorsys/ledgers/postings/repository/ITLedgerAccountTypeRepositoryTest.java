@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class ITLedgerAccountTypeRepositoryTest {
 		assumeNotNull(coa);
 		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
 				.name("Sample Ledger Account Type").user("Sample User")
-				.coa(coa).parent("Sample Ledger Account Type")
+				.coa(coa)
 				.balanceSide(BalanceSide.C)
 				.build();
 		ledgerAccountTypeRepository.save(ledgerAccountType);
@@ -61,9 +61,9 @@ public class ITLedgerAccountTypeRepositoryTest {
 		LedgerAccountType ledgerAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
 		assumeNotNull(ledgerAccountType);
 		LedgerAccountType ledgerAccountType2 = LedgerAccountType.builder().id(Ids.id())
-				.name(ledgerAccountType.getName())
+				.name(ledgerAccountType.getName() + "01")
 				.user("Sample User")
-				.parent(ledgerAccountType.getName())
+				.parent(ledgerAccountType)
 				.coa(ledgerAccountType.getCoa()).build();
 		ledgerAccountTypeRepository.save(ledgerAccountType2);
 
@@ -71,21 +71,11 @@ public class ITLedgerAccountTypeRepositoryTest {
 
 	@Test(expected=DataIntegrityViolationException.class)
 	public void test_create_ledger_account_type_no_coa() {
+		LedgerAccountType parentAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
+		assumeNotNull(parentAccountType);
 		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
 				.name("Sample Ledger Account Type").user("Sample User")
-				.parent("Sample Ledger Account Type")
-				.build();
-		ledgerAccountTypeRepository.save(ledgerAccountType);
-	}
-
-	@Test(expected=DataIntegrityViolationException.class)
-	public void test_create_ledger_account_type_no_parent() {
-		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
-		assumeNotNull(coa);
-		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
-				.name("Sample Ledger Account Type").user("Sample User")
-				.coa(coa)
-				.balanceSide(BalanceSide.C)
+				.parent(parentAccountType)
 				.build();
 		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
@@ -94,9 +84,11 @@ public class ITLedgerAccountTypeRepositoryTest {
 	public void test_create_ledger_account_type_no_name() {
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
+		LedgerAccountType parentAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
+		assumeNotNull(parentAccountType);
 		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
 				.user("Sample User")
-				.coa(coa).parent("Sample Ledger Account Type")
+				.coa(coa).parent(parentAccountType)
 				.balanceSide(BalanceSide.C)
 				.build();
 		ledgerAccountTypeRepository.save(ledgerAccountType);
@@ -106,9 +98,11 @@ public class ITLedgerAccountTypeRepositoryTest {
 	public void test_create_ledger_account_type_no_balanceSide() {
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
+		LedgerAccountType parentAccountType = ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
+		assumeNotNull(parentAccountType);
 		LedgerAccountType ledgerAccountType = LedgerAccountType.builder().id(Ids.id())
 				.name("Sample Ledger Account Type").user("Sample User")
-				.coa(coa).parent("Sample Ledger Account Type")
+				.coa(coa).parent(parentAccountType)
 				.build();
 		ledgerAccountTypeRepository.save(ledgerAccountType);
 	}
@@ -125,7 +119,9 @@ public class ITLedgerAccountTypeRepositoryTest {
 	public void test_find_by_coa_and_parent(){
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
 		assumeNotNull(coa);
-		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByCoaAndParent(coa, "BS");
+        Optional<LedgerAccountType> bs = ledgerAccountTypeRepository.findOptionalByCoaAndName(coa, "BS");
+		Assume.assumeTrue(bs.isPresent());
+		List<LedgerAccountType> found = ledgerAccountTypeRepository.findByCoaAndParent(coa, bs.get());
 		assertEquals(3, found.size());	}
 
 	@Test

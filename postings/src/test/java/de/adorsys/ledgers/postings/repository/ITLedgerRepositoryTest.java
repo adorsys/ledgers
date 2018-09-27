@@ -23,6 +23,7 @@ import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,8 @@ public class ITLedgerRepositoryTest {
 	@Test
 	public void test_create_ledger_ok() {
 		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8zskTrCsi-F3sT3i-g").orElse(null);
-		Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2").user("Sample User").coa(coa).build();
+		Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2")
+				.user("Sample User").coa(coa).lastClosing(LocalDateTime.now()).build();
 		ledgerRepository.save(ledger);
 	}
 	

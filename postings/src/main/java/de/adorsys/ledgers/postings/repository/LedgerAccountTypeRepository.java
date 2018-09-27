@@ -24,7 +24,7 @@ public interface LedgerAccountTypeRepository extends NamedEntityRepository<Ledge
 	 * @param parent
 	 * @return
 	 */
-	List<LedgerAccountType> findByCoaAndParent(ChartOfAccount coa, String parent);
+	List<LedgerAccountType> findByCoaAndParent(ChartOfAccount coa, LedgerAccountType parent);
 	
 	/**
 	 * Resolve all ledger account type of this coa.

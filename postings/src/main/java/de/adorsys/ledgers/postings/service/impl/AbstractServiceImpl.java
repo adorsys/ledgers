@@ -90,7 +90,7 @@ public class AbstractServiceImpl {
 			ledgerAccountType = ledgerAccountTypeRepo.findById(accountType.getId())
 					.orElseThrow(()->new IllegalArgumentException(
 							String.format("Missing account type of ledger account with type with id %s", accountType.getId())));
-			if(ledgerAccountType.getCoa().getId().equals(coa.getId())){
+			if(!ledgerAccountType.getCoa().getId().equals(coa.getId())){
 				throw new IllegalArgumentException(
 						String.format("Account type with id %s hat another a the worng chart of account with id %s. Expected is %s", accountType.getId(), accountType.getCoa().getId(), coa.getId()));
 			}
