@@ -1,5 +1,6 @@
 # Journal
 
+<TODO>Rewrite this</TODO>
 A journal is an ordered set of records of financial operations. A single record in a journal is called a posting. The word posting is associated with the moment at which the recorded operation is effective in the ledger. Therefore, we distinguish between following moments:
 
 - The operation time: the moment at which this operation took place..
