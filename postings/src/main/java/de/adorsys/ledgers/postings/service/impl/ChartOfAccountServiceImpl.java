@@ -63,12 +63,20 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 		// Load persistent instance of parent if specified.
 		// If not specified, we will assume caller is creating a root account type
 		LedgerAccountType parent = null;
-		if (model.getParent() != null)
-			parent = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, model.getParent())
-					.orElseThrow(() -> new IllegalStateException(String.format(
-							"Missing ledger account type with chart of account name %s and account type name %s",
-							coaName, model.getParent())));
-		String parentName = parent != null ? parent.getName() : namePatterns.toAccountTypeName(coa, "NULL");
+		if (model.getParent() != null){
+			if(model.getParent().getId()!=null){
+				String parentId = model.getParent().getId();
+				parent = ledgerAccountTypeRepo.findById(parentId)
+						.orElseThrow(() -> new IllegalStateException(String.format(
+								"Missing ledger account type with id %s",parentId)));
+			} else if (model.getParent().getName()!=null){
+				String parentName = model.getParent().getName();
+				parent = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, parentName)
+						.orElseThrow(() -> new IllegalStateException(String.format(
+								"Missing ledger account type with chart of account name %s and account type name %s",
+								coaName, parentName)));
+			}
+		}
 
 		LocalDateTime created = LocalDateTime.now();
 		String user = principal.getName();
@@ -86,7 +94,7 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 
 		// Creae ledger account type object
 		LedgerAccountType ledgerAccountType = new LedgerAccountType(Ids.id(), created, user, model.getShortDesc(),
-				model.getLongDesc(), model.getName(), coa, parentName, level, model.getBalanceSide());
+				model.getLongDesc(), model.getName(), coa, parent, level, model.getBalanceSide());
 		
 		// persist and return clone.
 		return CloneUtils.cloneObject(ledgerAccountTypeRepo.save(ledgerAccountType), LedgerAccountType.class);
@@ -108,7 +116,11 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 	@Override
 	public List<LedgerAccountType> findChildLedgerAccountTypes(ChartOfAccount chartOfAccount, String parentName) {
 		ChartOfAccount coa = loadCoa(chartOfAccount);
-		List<LedgerAccountType> lats = ledgerAccountTypeRepo.findByCoaAndParent(coa, parentName);
+		LedgerAccountType parentAccountType = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, parentName)
+			.orElseThrow(() -> new IllegalArgumentException(String.format(
+				"Missing ledger account type with chart of account name %s and account type name %s",
+				coa.getName(), parentName)));
+		List<LedgerAccountType> lats = ledgerAccountTypeRepo.findByCoaAndParent(coa, parentAccountType);
 		return CloneUtils.cloneList(lats, LedgerAccountType.class);
 	}
 

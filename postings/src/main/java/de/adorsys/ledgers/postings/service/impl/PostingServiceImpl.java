@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,10 +26,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 		
 		// Check the ledger
 		DoubleEntryBookKeeping.validate(posting);
-				
-		// Reference date
-		LocalDateTime pstTime = posting.getPstTime();
-		
+
 		// Check ledger not null
 		Ledger ledger = loadLedger(posting.getLedger());
 		
@@ -38,18 +34,17 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 		List<PostingLine> lines = posting.getLines();
 		for (PostingLine line : lines) {
 			Optional<LedgerAccount> accountOptions = ledgerAccountRepository
-					.findFirstOptionalByLedgerAndNameAndValidFromBeforeAndValidToAfterOrderByValidFromDesc(
-							ledger, line.getAccount(), pstTime, pstTime);
+					.findOptionalByLedgerAndName(ledger, line.getAccount());
 			
 			if(!accountOptions.isPresent()){
-				// How do we proceed with missing accounts.
+				// TODO: How do we proceed with missing accounts.
 			}
 			
 			LedgerAccount ledgerAccount = accountOptions.get();
 
 			// Check account belongs to ledger.
 			if(ledgerAccount.getLedger().equals(posting.getLedger())){
-				// How do we proceed with invalide accounts.
+				// TODO: How do we proceed with invalide accounts.
 			}
 		}
 		
@@ -74,6 +69,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 			.recordTime(posting.getRecordTime())
 			.recordUser(principal.getName())
 			.valTime(posting.getValTime())
+			.lastClosing(posting.getLastClosing())
 			.build();
 		
 		Posting saved = postingRepository.save(p);

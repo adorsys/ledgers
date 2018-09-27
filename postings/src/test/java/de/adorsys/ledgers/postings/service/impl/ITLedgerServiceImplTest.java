@@ -1,27 +1,14 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeNotNull;
-
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
-import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
-import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
-import de.adorsys.ledgers.postings.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.service.LedgerService;
-import de.adorsys.ledgers.postings.utils.Ids;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -33,9 +20,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.domain.LedgerAccountType;
+import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
+import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
-import de.adorsys.ledgers.postings.service.ChartOfAccountService;
+import de.adorsys.ledgers.postings.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.service.LedgerService;
+import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -44,11 +37,7 @@ import de.adorsys.ledgers.tests.PostingsApplication;
         TransactionalTestExecutionListener.class,DbUnitTestExecutionListener.class})
 @DatabaseSetup("ITLedgerServiceImplTest-db-entries.xml")
 @DatabaseTearDown(value={"ITLedgerServiceImplTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
-
 public class ITLedgerServiceImplTest {
-
-
-
     @Autowired
     private ChartOfAccountRepository chartOfAccountRepository;
 
@@ -67,7 +56,9 @@ public class ITLedgerServiceImplTest {
     @Test
     public void test_new_ledger() {
         ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
-        Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2").user("Sample User").coa(coa).build();
+        Ledger ledger = Ledger.builder()
+        		.id(Ids.id()).name("Sample Ledger-2").user("Sample User")
+        		.coa(coa).lastClosing(LocalDateTime.now()).build();
 
         Ledger ledger2 = ledgerService.newLedger(ledger);
         ledgerRepository.save(ledger2);
@@ -85,7 +76,6 @@ public class ITLedgerServiceImplTest {
         Optional<Ledger> opt = ledgerService.findLedgerByName("Sample Ledger-0");
         Assert.assertTrue(opt.isPresent());
     }
-    @Ignore
     @Test
     public void test_new_ledger_account() {
         Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
@@ -97,18 +87,14 @@ public class ITLedgerServiceImplTest {
         LedgerAccountType accountType= ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
         Assert.assertNotNull(accountType);
 
-        LocalDateTime validFrom = LocalDateTime.now();
-        LocalDateTime validTo = LocalDateTime.now();
         LocalDateTime created = LocalDateTime.now();
 
         LedgerAccount newLedgerAccount = LedgerAccount.builder()
                                             .id(Ids.id())
-                                            .validFrom(validFrom)
-                                            .validTo(validTo)
                                             .created(created)
                                             .user("Sample user")
                                             .ledger(ledger)
-                                            .parent(parentAccount.getId())
+                                            .parent(parentAccount)
                                             .accountType(accountType)
                                             .level(parentAccount.getLevel() + 1)
                                             .name("LedgerAccountNameTest")
@@ -123,10 +109,8 @@ public class ITLedgerServiceImplTest {
         Optional<LedgerAccount> opt = ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS");
         Assert.assertTrue(opt.isPresent());
     }
-    @Ignore
     @Test
     public void test_find_ledger_account() {
-
         ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
         Assert.assertNotNull(coa);
         Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
@@ -134,19 +118,17 @@ public class ITLedgerServiceImplTest {
         LedgerAccount ledgerAccount= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
         Assert.assertNotNull(ledgerAccount);
 
-        Optional<LedgerAccount> opt = ledgerService.findLedgerAccount(ledgerAccount.getLedger(), ledgerAccount.getName(), ledgerAccount.getValidFrom());
+        Optional<LedgerAccount> opt = ledgerService.findLedgerAccount(ledgerAccount.getLedger(), ledgerAccount.getName());
         Assert.assertTrue(opt.isPresent());
-
-
     }
     @Test
     public void test_find_n_ledger_accounts() {
 
-        LedgerAccount ledgerAccount= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
-        Assert.assertNotNull(ledgerAccount);
+    		Optional<LedgerAccount> laOption= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS");
+        Assert.assertTrue(laOption.isPresent());
 
-        List<LedgerAccount> list= ledgerService.findLedgerAccounts(ledgerAccount.getLedger(), ledgerAccount.getName());
-        Assert.assertEquals(1, list.size());
-
+        LedgerAccount ledgerAccount = laOption.get();
+        laOption= ledgerService.findLedgerAccount(ledgerAccount.getLedger(), ledgerAccount.getName());
+        Assert.assertTrue(laOption.isPresent());
     }
 }

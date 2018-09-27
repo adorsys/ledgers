@@ -1,16 +1,8 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeNotNull;
-
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
-import de.adorsys.ledgers.postings.domain.*;
-import de.adorsys.ledgers.postings.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.repository.PostingRepository;
-import de.adorsys.ledgers.postings.utils.Ids;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,8 +18,11 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
-import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
-import de.adorsys.ledgers.postings.service.ChartOfAccountService;
+import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.Posting;
+import de.adorsys.ledgers.postings.domain.PostingType;
+import de.adorsys.ledgers.postings.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -56,6 +51,7 @@ public class ITPostingServiceImplTest {
                 .pstTime(LocalDateTime.now())
                 .pstType(PostingType.BAL_STMT)
                 .ledger(ledgerOption.get())
+                .lastClosing(LocalDateTime.of(2018, 1, 1, 0, 0))
                 .build();
         Posting saved = postingService.newPosting(posting);
         Assume.assumeNotNull(saved);

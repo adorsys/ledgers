@@ -1,11 +1,12 @@
 package de.adorsys.ledgers.postings.repository;
 
+import static org.junit.Assert.assertEquals;
+
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.Pos;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -30,8 +31,6 @@ import de.adorsys.ledgers.postings.domain.PostingType;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import de.adorsys.ledgers.tests.PostingsApplication;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -62,6 +61,7 @@ public class ITPostingRepositoryTest {
 				.pstTime(LocalDateTime.now())
 				.pstType(PostingType.BAL_STMT)
 				.ledger(ledgerOption.get())
+				.lastClosing(LocalDateTime.of(2018, 1, 1, 0, 0))
 				.build();
 		postingRepository.save(posting);
 	}
@@ -102,6 +102,7 @@ public class ITPostingRepositoryTest {
 			.pstTime(LocalDateTime.now())
 			.pstType(PostingType.BAL_STMT)
 			.ledger(ledgerOptions.get())
+			.lastClosing(LocalDateTime.of(2018, 1, 1, 0, 0))
 			.build();
 		
 		Posting saved = postingRepository.save(posting);

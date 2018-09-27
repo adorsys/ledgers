@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import de.adorsys.ledgers.postings.domain.BalanceSide;
-import de.adorsys.ledgers.postings.utils.Ids;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +23,11 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
+import de.adorsys.ledgers.postings.domain.BalanceSide;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.LedgerAccountType;
-import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
+import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -61,8 +60,8 @@ public class ITChartOfAccountServiceImplTest {
 		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
 		assumeNotNull(coa);
 
-		List<LedgerAccountType> childrenAccountTypes = chartOfAccountService.findChildLedgerAccountTypes(coa,"CoA#NULL");
-		assertEquals(2, childrenAccountTypes.size());
+		List<LedgerAccountType> childrenAccountTypes = chartOfAccountService.findChildLedgerAccountTypes(coa,"BS");
+		assertEquals(3, childrenAccountTypes.size());
 	}
 
 	@Test
@@ -101,7 +100,7 @@ public class ITChartOfAccountServiceImplTest {
 		LedgerAccountType newLedgerAccountType = LedgerAccountType.builder()
 				.id(Ids.id())
 				.coa(coa)
-				.parent("BS")
+				.parent(returnedClone)
 				.created(LocalDateTime.now())
 				.user("Vladimir")
 				.level(1)

@@ -11,6 +11,7 @@ import javax.persistence.UniqueConstraint;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
@@ -30,13 +31,16 @@ public class Ledger extends NamedEntity {
 	 * A posting time can not be carry a posting 
 	 */
 	@Column(nullable = false, updatable = false)
+	@Getter
+	@Setter
 	private LocalDateTime lastClosing;
 
 	@Builder
 	public Ledger(String id, LocalDateTime created, String user, String shortDesc, String longDesc, String name,
-			ChartOfAccount coa) {
+			ChartOfAccount coa, LocalDateTime lastClosing) {
 		super(id, created, user, shortDesc, longDesc, name);
 		this.coa = coa;
+		this.lastClosing = lastClosing;
 	}
 	
 }
