@@ -34,7 +34,12 @@ public class LedgerController {
 	 */
 	@PostMapping(path = "/ledgers")
 	public ResponseEntity<Void> newLedger(Ledger ledger, UriBuilder uri){
-		Ledger newLedger = ledgerService.newLedger(ledger);
+		Ledger newLedger;
+		try {
+			newLedger = ledgerService.newLedger(ledger);
+		} catch (de.adorsys.ledgers.postings.exception.NotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		URI location = uri.path(newLedger.getId()).build();
 		return ResponseEntity.created(location).build();
 	}
@@ -67,7 +72,12 @@ public class LedgerController {
 	 */
 	@PostMapping(path = "/accounts")
 	public ResponseEntity<Void> newLedgerAccount(@RequestBody LedgerAccount ledgerAccount, UriBuilder uri){
-		LedgerAccount newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount);
+		LedgerAccount newLedgerAccount;
+		try {
+			newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount);
+		} catch (de.adorsys.ledgers.postings.exception.NotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		URI location = uri.path(newLedgerAccount.getId()).build();
 		return ResponseEntity.created(location).build();
 	}

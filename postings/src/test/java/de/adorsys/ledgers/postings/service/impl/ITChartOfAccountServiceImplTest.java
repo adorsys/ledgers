@@ -29,6 +29,7 @@ import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -48,7 +49,7 @@ public class ITChartOfAccountServiceImplTest {
 	}
 
 	@Test
-	public void test_find_coa_root_account_types(){
+	public void test_find_coa_root_account_types() throws NotFoundException{
 		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
 		assumeNotNull(coa);
 		List<LedgerAccountType> found = chartOfAccountService.findCoaAccountTypesByLevel(coa, 0);
@@ -56,7 +57,7 @@ public class ITChartOfAccountServiceImplTest {
 	}
 	
 	@Test
-	public void test_find_child_ledger_account_types(){
+	public void test_find_child_ledger_account_types() throws NotFoundException{
 		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
 		assumeNotNull(coa);
 
@@ -78,7 +79,7 @@ public class ITChartOfAccountServiceImplTest {
 	}
 
 	@Test
-	public void test_new_ledger_account_type(){
+	public void test_new_ledger_account_type() throws NotFoundException{
 		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName("CoA").orElse(null);
 		assumeNotNull(coa);
 
@@ -119,7 +120,7 @@ public class ITChartOfAccountServiceImplTest {
 	}
 
 	@Test
-	public void test_find_ledger_account_type(){
+	public void test_find_ledger_account_type() throws NotFoundException{
 		Optional<ChartOfAccount> coa = chartOfAccountService.findChartOfAccountsByName("CoA");
 		assertTrue(coa.isPresent());
 

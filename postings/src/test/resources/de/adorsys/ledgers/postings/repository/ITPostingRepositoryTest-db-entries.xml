@@ -18,35 +18,35 @@
 			record_user="Vladimir"
 			record_time="2018-08-07 20:58:24.232"
 			opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION"
+			opr_seq_nbr="0"
 			opr_details="Balance statement creation"
 			pst_time="2018-08-07 20:58:24.232"
 			pst_type="BAL_STMT"
 			ledger_id="Zd0ND5YwSzGwIfZilhumPg"
 			record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
-			last_closing="2018-01-01 00:00:00.000"
 			/>
 	<POSTING
 			id="Zd0ND5YwSzGwIfZilhumPg_POSTING1"
 			record_user="Vladimir"
 			record_time="2018-10-07 20:58:24.232"
 			opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION"
+			opr_seq_nbr="0"
 			opr_details="Balance statement creation"
 			pst_time="2018-10-07 20:58:24.232"
 			pst_type="BAL_STMT"
 			ledger_id="Zd0ND5YwSzGwIfZilhumPg"
 			record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
-			last_closing="2018-01-01 00:00:00.000"
 			/>
 	<POSTING
 			id="Zd0ND5YwSzGwIfZilhumPg_POSTING2"
 			record_user="Vladimir"
 			record_time="2018-11-07 20:58:24.232"
 			opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION2"
+			opr_seq_nbr="0"
 			opr_details="Trial balance statement creation"
 			pst_time="2018-10-07 20:58:24.232"
 			pst_type="BAL_STMT"
 			ledger_id="Zd0ND5YwSzGwIfZilhumPg"
 			record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
-			last_closing="2018-01-01 00:00:00.000"
 	/>
 </dataset>

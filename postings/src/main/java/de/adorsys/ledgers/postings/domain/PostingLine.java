@@ -25,8 +25,8 @@ import lombok.ToString;
 public class PostingLine {
 	
 	/*The associated ledger account*/
-	@Column(nullable=false, updatable=false)
-	private String account;
+	@ManyToOne(optional=false)
+	private LedgerAccount account;
 	
 	@Column(nullable=false, updatable=false)
 	private BigDecimal amount;

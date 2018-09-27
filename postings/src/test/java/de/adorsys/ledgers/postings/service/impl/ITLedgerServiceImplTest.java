@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,7 @@ import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -54,7 +54,7 @@ public class ITLedgerServiceImplTest {
     private  LedgerAccountTypeRepository ledgerAccountTypeRepository;
 
     @Test
-    public void test_new_ledger() {
+    public void test_new_ledger() throws NotFoundException {
         ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
         Ledger ledger = Ledger.builder()
         		.id(Ids.id()).name("Sample Ledger-2").user("Sample User")
@@ -77,7 +77,7 @@ public class ITLedgerServiceImplTest {
         Assert.assertTrue(opt.isPresent());
     }
     @Test
-    public void test_new_ledger_account() {
+    public void test_new_ledger_account() throws NotFoundException {
         Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
         Assert.assertNotNull(ledger);
 

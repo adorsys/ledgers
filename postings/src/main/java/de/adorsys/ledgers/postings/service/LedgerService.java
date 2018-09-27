@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 /**
  * Service implementing all ledger functionalities.
@@ -18,8 +19,9 @@ public interface LedgerService {
 	 * 
 	 * @param ledger
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	public Ledger newLedger(Ledger ledger);
+	public Ledger newLedger(Ledger ledger) throws NotFoundException;
 	
 	public Optional<Ledger> findLedgerById(String id);
 	
@@ -38,8 +40,9 @@ public interface LedgerService {
 	 * 
 	 * @param ledgerAccount
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount);
+	public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount) throws NotFoundException;
 	
 	public Optional<LedgerAccount> findLedgerAccountById(String id);
 

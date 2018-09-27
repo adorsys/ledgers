@@ -11,8 +11,13 @@ public class CreatePostingListener {
 	@PrePersist
 	public void prePersist(Posting posting){
 		if(posting==null) return;
-		// Record hash set means nothing shall change aggain.
+		
+		// Set the id of this posting
+		posting.synchKeyData();
+		
+		// Record hash set means nothing shall change again.
 		if(posting.getRecordHash()!=null) return;// Just a copy. Skip
+		
 		posting.setRecordTime(LocalDateTime.now());
 	}
 }

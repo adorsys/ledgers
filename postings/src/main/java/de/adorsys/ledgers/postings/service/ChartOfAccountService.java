@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.LedgerAccountType;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 /**
  * Service implementing all chart of account functionalities.
@@ -38,36 +39,38 @@ public interface ChartOfAccountService {
 	 * 
 	 * @param model
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	public LedgerAccountType newLedgerAccountType(LedgerAccountType model);
+	public LedgerAccountType newLedgerAccountType(LedgerAccountType model) throws NotFoundException;
 	
 	/**
 	 * Find the ledger account type with the given name 
 	 * 
 	 * @param name
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	public Optional<LedgerAccountType> findLedgerAccountType(ChartOfAccount chartOfAccount, String name);
+	public Optional<LedgerAccountType> findLedgerAccountType(ChartOfAccount chartOfAccount, String name) throws NotFoundException;
 
 	public Optional<LedgerAccountType> findLedgerAccountTypeById(String id);
 	
 	/**
 	 * Returns all valid children of this node.
 	 * @param parentName
-	 * @param referenceDate
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	List<LedgerAccountType> findChildLedgerAccountTypes(ChartOfAccount chartOfAccount, String parentName);
+	List<LedgerAccountType> findChildLedgerAccountTypes(ChartOfAccount chartOfAccount, String parentName) throws NotFoundException;
 
 	/**
 	 * Return all valid ledger account types attached to this coa.
 	 * 
 	 * @param coaName
-	 * @param referenceDate
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	List<LedgerAccountType> findCoaLedgerAccountTypes(ChartOfAccount chartOfAccount);
+	List<LedgerAccountType> findCoaLedgerAccountTypes(ChartOfAccount chartOfAccount) throws NotFoundException;
 
-	List<LedgerAccountType> findCoaAccountTypesByLevel(ChartOfAccount chartOfAccount, int level);
+	List<LedgerAccountType> findCoaAccountTypesByLevel(ChartOfAccount chartOfAccount, int level) throws NotFoundException;
 
 }
