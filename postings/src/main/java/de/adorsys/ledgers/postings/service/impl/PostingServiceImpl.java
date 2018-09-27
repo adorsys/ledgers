@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.postings.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,40 +12,24 @@ import de.adorsys.ledgers.postings.domain.PostingLine;
 import de.adorsys.ledgers.postings.service.PostingService;
 import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.DoubleEntryBookKeeping;
-import de.adorsys.ledgers.postings.utils.Ids;
+import de.adorsys.ledgers.postings.utils.LedgerPolicies;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @Service
 @Transactional
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 	
 	@Override
-	public Posting newPosting(Posting posting) {
-		// TODO
+	public Posting newPosting(Posting posting) throws NotFoundException {
+		// Check ledger not null
+		Ledger ledger = loadLedger(posting.getLedger());
+		LedgerPolicies ledgerPolicies = new LedgerPolicies(ledger);
+
 		// check posting time is not before a closing.
+		ledgerPolicies.validatePostingTime(posting);
 		
 		// Check the ledger
 		DoubleEntryBookKeeping.validate(posting);
-
-		// Check ledger not null
-		Ledger ledger = loadLedger(posting.getLedger());
-		
-		// Validate existence of accounts and make sure they are all in the same ledger.
-		List<PostingLine> lines = posting.getLines();
-		for (PostingLine line : lines) {
-			Optional<LedgerAccount> accountOptions = ledgerAccountRepository
-					.findOptionalByLedgerAndName(ledger, line.getAccount());
-			
-			if(!accountOptions.isPresent()){
-				// TODO: How do we proceed with missing accounts.
-			}
-			
-			LedgerAccount ledgerAccount = accountOptions.get();
-
-			// Check account belongs to ledger.
-			if(ledgerAccount.getLedger().equals(posting.getLedger())){
-				// TODO: How do we proceed with invalide accounts.
-			}
-		}
 		
 		// find last record.
 		Posting antecedent = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(
@@ -54,22 +37,28 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 		
 
 		List<PostingLine> postingLines = CloneUtils.cloneList(posting.getLines(), PostingLine.class);
+		// Validate existence of accounts and make sure they are all in the same ledger.
+		for (PostingLine line : postingLines) {
+			LedgerAccount ledgerAccount = loadLedgerAccount(line.getAccount());
+			// Check account belongs to ledger.
+			ledgerPolicies.validateProperAccount(ledgerAccount);
+			line.setAccount(ledgerAccount);
+		}
+
 		Posting p = Posting.builder()
-			.id(Ids.id())
-			.ledger(posting.getLedger())
+			.ledger(ledger)
 			.lines(postingLines)
 			.oprDetails(posting.getOprDetails())
 			.oprId(posting.getOprId())
+			.oprSeqNbr(posting.getOprSeqNbr())
 			.oprTime(posting.getOprTime())
 			.oprType(posting.getOprType())
 			.pstTime(posting.getPstTime())
 			.pstType(posting.getPstType())
 			.recordAntecedentHash(antecedent.getRecordHash())
 			.recordAntecedentId(antecedent.getId())
-			.recordTime(posting.getRecordTime())
 			.recordUser(principal.getName())
 			.valTime(posting.getValTime())
-			.lastClosing(posting.getLastClosing())
 			.build();
 		
 		Posting saved = postingRepository.save(p);
@@ -80,4 +69,5 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 	public List<Posting> findPostingsByOperationId(String oprId) {
 		return CloneUtils.cloneList(postingRepository.findByOprId(oprId), Posting.class);
 	}
+	
 }

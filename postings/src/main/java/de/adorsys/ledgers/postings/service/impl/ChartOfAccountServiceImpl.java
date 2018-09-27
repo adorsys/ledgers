@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,9 +53,10 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 	/**
 	 * First check is ledger account with name is in database. If yes, set valid
 	 * to.
+	 * @throws NotFoundException 
 	 */
 	@Override
-	public LedgerAccountType newLedgerAccountType(LedgerAccountType model) {
+	public LedgerAccountType newLedgerAccountType(LedgerAccountType model) throws NotFoundException {
 
 		// Load persistent instance of coa
 		ChartOfAccount coa = loadCoa(model.getCoa());
@@ -67,12 +69,12 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 			if(model.getParent().getId()!=null){
 				String parentId = model.getParent().getId();
 				parent = ledgerAccountTypeRepo.findById(parentId)
-						.orElseThrow(() -> new IllegalStateException(String.format(
+						.orElseThrow(() -> new NotFoundException(String.format(
 								"Missing ledger account type with id %s",parentId)));
 			} else if (model.getParent().getName()!=null){
 				String parentName = model.getParent().getName();
 				parent = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, parentName)
-						.orElseThrow(() -> new IllegalStateException(String.format(
+						.orElseThrow(() -> new NotFoundException(String.format(
 								"Missing ledger account type with chart of account name %s and account type name %s",
 								coaName, parentName)));
 			}
@@ -107,14 +109,14 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 	}
 
 	@Override
-	public Optional<LedgerAccountType> findLedgerAccountType(ChartOfAccount chartOfAccount, String name) {
+	public Optional<LedgerAccountType> findLedgerAccountType(ChartOfAccount chartOfAccount, String name) throws NotFoundException {
 		ChartOfAccount coa = loadCoa(chartOfAccount);
 		LedgerAccountType lat = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, name).orElse(null);
 		return Optional.ofNullable(CloneUtils.cloneObject(lat, LedgerAccountType.class));
 	}
 
 	@Override
-	public List<LedgerAccountType> findChildLedgerAccountTypes(ChartOfAccount chartOfAccount, String parentName) {
+	public List<LedgerAccountType> findChildLedgerAccountTypes(ChartOfAccount chartOfAccount, String parentName) throws NotFoundException {
 		ChartOfAccount coa = loadCoa(chartOfAccount);
 		LedgerAccountType parentAccountType = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, parentName)
 			.orElseThrow(() -> new IllegalArgumentException(String.format(
@@ -125,14 +127,14 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 	}
 
 	@Override
-	public List<LedgerAccountType> findCoaLedgerAccountTypes(ChartOfAccount chartOfAccount) {
+	public List<LedgerAccountType> findCoaLedgerAccountTypes(ChartOfAccount chartOfAccount) throws NotFoundException {
 		ChartOfAccount coa = loadCoa(chartOfAccount);
 		List<LedgerAccountType> lats = ledgerAccountTypeRepo.findByCoaOrderByLevelDesc(coa);
 		return CloneUtils.cloneList(lats, LedgerAccountType.class);
 	}
 
 	@Override
-	public List<LedgerAccountType> findCoaAccountTypesByLevel(ChartOfAccount chartOfAccount, int level) {
+	public List<LedgerAccountType> findCoaAccountTypesByLevel(ChartOfAccount chartOfAccount, int level) throws NotFoundException {
 		ChartOfAccount coa = loadCoa(chartOfAccount);
 		List<LedgerAccountType> lats = ledgerAccountTypeRepo.findByCoaAndLevel(coa, level);
 		return CloneUtils.cloneList(lats, LedgerAccountType.class);

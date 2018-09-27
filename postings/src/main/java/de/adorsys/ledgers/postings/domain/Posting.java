@@ -4,7 +4,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.springframework.data.annotation.CreatedDate;
 
@@ -12,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.adorsys.ledgers.postings.listener.CreatePostingListener;
 import de.adorsys.ledgers.postings.listener.RecordHashListener;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,9 +32,7 @@ import lombok.ToString;
 @Entity
 @Getter
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @EntityListeners({ CreatePostingListener.class, RecordHashListener.class })
 @JsonPropertyOrder(alphabetic = true)
 public class Posting {
@@ -65,7 +72,7 @@ public class Posting {
 	 * The unique identifier of this business operation. The operation
 	 * identifier differs from the posting identifier in that it is not unique.
 	 * The same operation, can be repetitively posted if some conditions change.
-	 * The operation identifier will always be the sam for all the postings of
+	 * The operation identifier will always be the same for all the postings of
 	 * an operation. Only one of them will be effective in the account statement
 	 * at any given time.
 	 */
@@ -73,16 +80,19 @@ public class Posting {
 	private String oprId;
 	
 	/*
-	 * The id of the posting being modified by this posting.
+	 * The sequence number of the operation processed by this posting.
 	 * 
-	 * Combining the operation id an the posting id shall be unique. This is
-	 * you can not override a posting without providing the id of that
+	 * A single operation can be overridden many times as long as the enclosing
+	 * as long as the enclosing ledger is not closed. These overriding happens 
+	 * synchronously. Each single one increasing the sequence number of the former 
 	 * posting.
 	 * 
-	 * While overriding a posting, make sure all accounts mentioned in any of the former 
-	 * operation appear. The account not intended to be used will then carry an amount of 0.
+	 * This is, the posting id is always a concatenation between the operation id
+	 * and the sequence number.
+	 * 
 	 */
-	private String srcPostingId;
+	@Column(nullable = false, updatable = false)
+	private int oprSeqNbr = 0;
 
 	/* The time of occurrence of this operation. Set by the consuming module. */
 	private LocalDateTime oprTime;
@@ -133,13 +143,6 @@ public class Posting {
 	 */
 	@ManyToOne(optional=false)
 	private Ledger ledger;
-
-	/*
-	 * This field is used to secure the timestamp of the ledger opening.
-	 * A posting time can not be carry a posting 
-	 */
-	@Column(nullable = false, updatable = false)
-	private LocalDateTime lastClosing;
 	
 	/*
 	 * The Date use to compute interests. This can be different from the posting
@@ -151,4 +154,34 @@ public class Posting {
 	@CollectionTable(name = "POSTING_LINE", joinColumns = @JoinColumn(name = "POSTING_ID"))
 	@Singular("line")
 	private List<PostingLine> lines = new ArrayList<>();
+	
+	/*
+	 * Called to synch ti posting id with the value of the 
+	 * operation id and operation sequence.
+	 */
+	public void synchKeyData(){
+		id = oprId + "_" + oprSeqNbr;
+		recordTime = LocalDateTime.now();
+	}
+
+	@Builder
+	public Posting(String recordUser, String recordAntecedentId,
+			String recordAntecedentHash, String oprId, int oprSeqNbr, 
+			LocalDateTime oprTime, String oprType, 
+			String oprDetails, LocalDateTime pstTime, PostingType pstType,
+			Ledger ledger, LocalDateTime valTime, List<PostingLine> lines) {
+		this.recordUser = recordUser;
+		this.recordAntecedentId = recordAntecedentId;
+		this.recordAntecedentHash = recordAntecedentHash;
+		this.oprId = oprId;
+		this.oprSeqNbr = oprSeqNbr;
+		this.oprTime = oprTime;
+		this.oprType = oprType;
+		this.oprDetails = oprDetails;
+		this.pstTime = pstTime;
+		this.pstType = pstType;
+		this.ledger = ledger;
+		this.valTime = valTime;
+		this.lines = lines!=null?lines:new ArrayList<>();
+	}
 }

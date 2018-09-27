@@ -1,8 +1,11 @@
 package de.adorsys.ledgers.postings.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +25,6 @@ import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)

@@ -22,8 +22,8 @@ import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.Posting;
 import de.adorsys.ledgers.postings.domain.PostingType;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -40,18 +40,16 @@ public class ITPostingServiceImplTest {
     PostingServiceImpl postingService;
 
     @Test
-    public void test_newPosting_ok() {
+    public void test_newPosting_ok() throws NotFoundException {
         Optional<Ledger> ledgerOption = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
         Assume.assumeTrue(ledgerOption.isPresent());
         Posting posting = Posting.builder()
-                .id(Ids.id())
                 .recordUser("recUser")
                 .oprId("oprId")
                 .oprDetails("oprDetails")
                 .pstTime(LocalDateTime.now())
                 .pstType(PostingType.BAL_STMT)
                 .ledger(ledgerOption.get())
-                .lastClosing(LocalDateTime.of(2018, 1, 1, 0, 0))
                 .build();
         Posting saved = postingService.newPosting(posting);
         Assume.assumeNotNull(saved);

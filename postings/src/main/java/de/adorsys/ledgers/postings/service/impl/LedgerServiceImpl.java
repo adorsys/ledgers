@@ -13,6 +13,7 @@ import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.Ids;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @Service
 @Transactional
@@ -20,9 +21,10 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 
 	/**
 	 * Creates a new ledger.
+	 * @throws NotFoundException 
 	 */
 	@Override
-	public Ledger newLedger(Ledger ledger) {
+	public Ledger newLedger(Ledger ledger) throws NotFoundException {
 		ChartOfAccount coa = loadCoa(ledger.getCoa());
 		LocalDateTime created = LocalDateTime.now();
 		String user = principal.getName();
@@ -43,41 +45,36 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 	}
 
 	@Override
-	public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount) {
+	public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount) throws NotFoundException {
 		// User
 		String user = principal.getName();
 
 		// Validations
 		if(ledgerAccount.getName()==null)
 			throw new IllegalArgumentException(String.format("Missing model name."));
-		
-		Ledger ledger = loadLedger(ledgerAccount.getLedger());
-		ChartOfAccount coa = ledger.getCoa();
-		
 
 		LedgerAccount parentAccount = null;
-		if(ledgerAccount.getParent()!=null){
-			if(ledgerAccount.getParent().getId()!=null){
-				String parentAccountId = ledgerAccount.getParent().getId();
-				parentAccount = ledgerAccountRepository.findById(parentAccountId)
-						.orElseThrow(()-> new IllegalArgumentException(String.format("Missing corrsponding parent with id %s",
-								parentAccountId)));
-			} else if (ledgerAccount.getParent().getName()!=null){
-				String parentAccountName = ledgerAccount.getParent().getName();
-				parentAccount = ledgerAccountRepository.findOptionalByLedgerAndName(ledger, parentAccountName)
-						.orElseThrow(()-> new IllegalArgumentException(String.format("Missing corrsponding parent from ledger %s with name %s",
-								ledger.getName() ,parentAccountName)));
-			}
-		}
+		if(ledgerAccount.getParent()!=null)
+			parentAccount = loadLedgerAccount(ledgerAccount.getParent());
 
 		// Check level Set it to 0 if root account type
 		int level = parentAccount != null ? parentAccount.getLevel() + 1 : 0;
 
 		// Load the ledger account type of ledger account
-		LedgerAccountType accountType = loadAccountType(coa, ledgerAccount.getAccountType());
-
-		LedgerAccount la = new LedgerAccount(Ids.id(), LocalDateTime.now(),user, ledgerAccount.getShortDesc(), ledgerAccount.getLongDesc(), ledgerAccount.getName(),
-				ledger, parentAccount, accountType, level);
+		LedgerAccountType accountType = loadAccountType(ledgerAccount.getAccountType());
+		
+		LedgerAccount la = LedgerAccount.builder()
+			.id(Ids.id())
+			.created(LocalDateTime.now())
+			.user(user)
+			.shortDesc(ledgerAccount.getShortDesc())
+			.longDesc(ledgerAccount.getLongDesc())
+			.name(ledgerAccount.getName())
+			.ledger(parentAccount.getLedger())
+			.parent(parentAccount)
+			.accountType(accountType)
+			.level(level)
+			.build();
 
 		return CloneUtils.cloneObject(ledgerAccountRepository.save(la), LedgerAccount.class);
 	}

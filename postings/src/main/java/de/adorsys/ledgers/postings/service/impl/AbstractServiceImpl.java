@@ -4,9 +4,13 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import de.adorsys.ledgers.postings.domain.BaseEntity;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
+import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.domain.LedgerAccountType;
+import de.adorsys.ledgers.postings.domain.NamedEntity;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
@@ -15,10 +19,9 @@ import de.adorsys.ledgers.postings.repository.PostingRepository;
 import de.adorsys.ledgers.postings.utils.NamePatterns;
 
 public class AbstractServiceImpl {
-
 	@Autowired
 	protected PostingRepository postingRepository;
-	
+
 	@Autowired
 	protected LedgerAccountRepository ledgerAccountRepository;
 
@@ -37,73 +40,92 @@ public class AbstractServiceImpl {
 	@Autowired
 	protected LedgerRepository ledgerRepository;
 
-	protected Ledger loadLedger(Ledger model){
+	protected Ledger loadLedger(Ledger model) throws NotFoundException {
 		if (model == null)
-			throw new IllegalArgumentException(String.format("Missing field ledger in model object"));
-
-		Ledger ledger = null;
-		if (model.getId() != null)
-			ledger = ledgerRepository.findById(model.getId()).orElseThrow(() -> new IllegalArgumentException(
-					String.format("Can not find ledger with id %s", model.getId())));
-
-		if (model.getName() != null)
-			ledger = ledgerRepository.findOptionalByName(model.getName())
-					.orElseThrow(() -> new IllegalArgumentException(
-							String.format("Can not find ledger with name %s", model.getName())));
-		
-		if (ledger == null)
-			throw new IllegalArgumentException(String.format(
-					"Field ledger in model object must specify either the id or the name of an existing ledger."));
-		
-		return ledger;
-	}
-	
-	protected ChartOfAccount loadCoa(ChartOfAccount model){
-		if (model == null)
-			throw new IllegalArgumentException(String.format("Missing field chart of account in model object"));
-
-		ChartOfAccount coa = null;
+			throw nullInfo();
 
 		if (model.getId() != null)
-			coa = chartOfAccountRepo.findById(model.getId()).orElseThrow(() -> new IllegalArgumentException(
-					String.format("Can not find chart of account with id %s", model.getId())));
+			return ledgerRepository.findById(model.getId()).orElseThrow(() -> notFoundById(model));
 
 		if (model.getName() != null)
-			coa = chartOfAccountRepo.findOptionalByName(model.getName())
-					.orElseThrow(() -> new IllegalArgumentException(
-							String.format("Can not find chart of account with name %s", model.getName())));
-		
-		if (coa == null)
-			throw new IllegalArgumentException(String.format(
-					"Field chart of account in model object must specify either the id or the name of an existing chart of account."));
-		
-		return coa;
+			return ledgerRepository.findOptionalByName(model.getName())
+					.orElseThrow(() -> notFoundByNameAndContainer(model, null));
+
+		throw insufficientInfo(model);
 	}
-	
-	protected LedgerAccountType loadAccountType(ChartOfAccount coa, LedgerAccountType accountType){
-		// Load the ledger account type of ledger account
-		if (accountType == null)
-			throw new IllegalArgumentException(String.format("Missing account type in model."));
-		
-		LedgerAccountType ledgerAccountType = null;
-		if(accountType.getId()!=null){
-			ledgerAccountType = ledgerAccountTypeRepo.findById(accountType.getId())
-					.orElseThrow(()->new IllegalArgumentException(
-							String.format("Missing account type of ledger account with type with id %s", accountType.getId())));
-			if(!ledgerAccountType.getCoa().getId().equals(coa.getId())){
-				throw new IllegalArgumentException(
-						String.format("Account type with id %s hat another a the worng chart of account with id %s. Expected is %s", accountType.getId(), accountType.getCoa().getId(), coa.getId()));
-			}
-		} else if (accountType.getName()!=null){
-			ledgerAccountType = ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, accountType.getName())
-					.orElseThrow(()->new IllegalArgumentException(
-							String.format("Missing account type with coa %s and type name %s and valid at date %s", coa.getName(), accountType.getName())));
+
+	protected ChartOfAccount loadCoa(ChartOfAccount model) throws NotFoundException {
+		if (model == null)
+			throw nullInfo();
+
+		if (model.getId() != null)
+			return chartOfAccountRepo.findById(model.getId()).orElseThrow(() -> notFoundById(model));
+
+		if (model.getName() != null)
+			return chartOfAccountRepo.findOptionalByName(model.getName())
+					.orElseThrow(() -> notFoundByNameAndContainer(model, null));
+
+		throw insufficientInfo(model);
+	}
+
+	protected LedgerAccountType loadAccountType(LedgerAccountType model) throws NotFoundException {
+		if (model == null)
+			throw nullInfo();
+
+		if (model.getId() != null)
+			return ledgerAccountTypeRepo.findById(model.getId()).orElseThrow(() -> notFoundById(model));
+
+		if (model.getCoa() != null && model.getName() != null) {
+			ChartOfAccount coa = loadCoa(model.getCoa());
+			return ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, model.getName())
+					.orElseThrow(() -> notFoundByNameAndContainer(model, coa));
 		}
-		if (ledgerAccountType == null)
-			throw new IllegalArgumentException(String.format(
-					"Field account type in model object must specify either the id or the name of an existing account type."));
+
+		throw insufficientInfo(model);
+	}
+
+	/*
+	 * Load the ledger account. Using the following logic in the given order. 1-
+	 * If the Id is provided, we use find by id. 2- If the ledger and the name
+	 * is provided, we use them to load the account.
+	 */
+	protected LedgerAccount loadLedgerAccount(LedgerAccount model) throws NotFoundException {
+		if (model == null)
+			throw nullInfo();
+
+		if (model.getId() != null) 
+			return ledgerAccountRepository.findById(model.getId())
+					.orElseThrow(() -> notFoundById(model));
 		
-		return accountType;
+		if (model.getLedger() != null && model.getName() != null) {
+			Ledger loadedLedger = loadLedger(model.getLedger());
+			return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, model.getName())
+					.orElseThrow(() -> notFoundByNameAndContainer(model, loadedLedger));
+		}
 		
+		throw insufficientInfo(model);
+	}
+
+	private IllegalArgumentException insufficientInfo(Object modelObject) {
+		return new IllegalArgumentException(
+				String.format("Model Object does not provide sufficient information for loading original instance. %s",
+						modelObject.toString()));
+	}
+
+	private IllegalArgumentException nullInfo() {
+		return new IllegalArgumentException("Model object can not be null");
+	}
+
+	private NotFoundException notFoundById(BaseEntity model) {
+		return new NotFoundException(
+				String.format("Entity of type %s and id %s not found.", model.getClass().getName(), model.getId()));
+	}
+
+	private NotFoundException notFoundByNameAndContainer(NamedEntity model, NamedEntity container) {
+		if (container == null)
+			return new NotFoundException(
+					String.format("Entity of type %s and name %s", model.getClass().getName(), model.getName()));
+		return new NotFoundException(String.format("Entity of type %s and name %s from container %s not found.",
+				model.getClass().getName(), model.getName(), container.getName()));
 	}
 }

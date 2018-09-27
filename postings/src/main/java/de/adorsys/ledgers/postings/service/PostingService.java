@@ -2,6 +2,8 @@ package de.adorsys.ledgers.postings.service;
 
 import java.util.List;
 
+import de.adorsys.ledgers.postings.exception.NotFoundException;
+
 import de.adorsys.ledgers.postings.domain.Posting;
 
 public interface PostingService {
@@ -15,8 +17,9 @@ public interface PostingService {
 	 * 
 	 * @param posting
 	 * @return
+	 * @throws NotFoundException 
 	 */
-	public Posting newPosting(Posting posting);
+	public Posting newPosting(Posting posting) throws NotFoundException;
 	
 	/**
 	 * Listing all postings associated with this operation id.

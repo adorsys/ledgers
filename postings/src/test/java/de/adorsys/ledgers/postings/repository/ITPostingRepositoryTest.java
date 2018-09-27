@@ -28,7 +28,6 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.Posting;
 import de.adorsys.ledgers.postings.domain.PostingType;
-import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import de.adorsys.ledgers.tests.PostingsApplication;
 
@@ -54,14 +53,12 @@ public class ITPostingRepositoryTest {
 		Optional<Ledger> ledgerOption = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
 		Assume.assumeTrue(ledgerOption.isPresent());
 		Posting posting = Posting.builder()
-				.id(Ids.id())
 				.recordUser("recUser")
 				.oprId("oprId")
 				.oprDetails("oprDetails")
 				.pstTime(LocalDateTime.now())
 				.pstType(PostingType.BAL_STMT)
 				.ledger(ledgerOption.get())
-				.lastClosing(LocalDateTime.of(2018, 1, 1, 0, 0))
 				.build();
 		postingRepository.save(posting);
 	}
@@ -95,21 +92,19 @@ public class ITPostingRepositoryTest {
 		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
 		Assume.assumeTrue(ledgerOptions.isPresent());
 		Posting posting = Posting.builder()
-			.id(Ids.id())
 			.recordUser("recUser")
 			.oprId("oprId")
 			.oprDetails("oprDetails")
 			.pstTime(LocalDateTime.now())
 			.pstType(PostingType.BAL_STMT)
 			.ledger(ledgerOptions.get())
-			.lastClosing(LocalDateTime.of(2018, 1, 1, 0, 0))
 			.build();
 		
 		Posting saved = postingRepository.save(posting);
 		
 		String writeValueAsString = om.writeValueAsString(saved);
 		
-		Posting found = postingRepository.findById(posting.getId()).orElse(null);
+		Posting found = postingRepository.findById(saved.getId()).orElse(null);
 		String recHash = found.getRecordHash();
 
 		String writeValueAsString2 = om.writeValueAsString(found);
