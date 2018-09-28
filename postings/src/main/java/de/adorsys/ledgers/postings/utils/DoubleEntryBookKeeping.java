@@ -13,16 +13,8 @@ public class DoubleEntryBookKeeping {
 		BigDecimal sumDebit = BigDecimal.ZERO;
 		BigDecimal sumCredit = BigDecimal.ZERO;
 		for (PostingLine line : lines) {
-			switch (line.getSide()) {
-			case C:
-				sumCredit = sumCredit.add(line.getAmount());
-				break;
-			case D:
-				sumDebit = sumDebit.add(line.getAmount());
-				break;
-			default:
-				throw new IllegalArgumentException(String.format("Unknown jorunal side %s", line.getSide()));
-			}
+			sumDebit = sumDebit.add(line.getDebitAmount());
+			sumCredit = sumCredit.add(line.getCreditAmount());
 		}
 		
 		if(!sumDebit.equals(sumCredit))
