@@ -1,9 +1,10 @@
 package de.adorsys.ledgers.postings.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import de.adorsys.ledgers.postings.exception.NotFoundException;
-
+import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.domain.Posting;
 
 public interface PostingService {
@@ -28,4 +29,14 @@ public interface PostingService {
 	 * @return
 	 */
 	public List<Posting> findPostingsByOperationId(String oprId);
+	
+	/**
+	 * Compute the balance of a ledger account.
+	 * 
+	 * @param ledgerAccount : the ledger account for which the balance shal be computed.
+	 * @param refTime the time at which this balance has to be computed.
+	 * @return 
+	 * @throws NotFoundException 
+	 */
+	public Posting balanceTx(LedgerAccount ledgerAccount, LocalDateTime refTime) throws NotFoundException;
 }

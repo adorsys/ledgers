@@ -15,6 +15,7 @@ import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.repository.PostingRepository;
 import de.adorsys.ledgers.postings.utils.NamePatterns;
 
@@ -39,6 +40,9 @@ public class AbstractServiceImpl {
 
 	@Autowired
 	protected LedgerRepository ledgerRepository;
+	
+	@Autowired
+	protected PostingLineRepository postingLineRepository;
 
 	protected Ledger loadLedger(Ledger model) throws NotFoundException {
 		if (model == null)

@@ -4,39 +4,48 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 
+import de.adorsys.ledgers.postings.utils.Ids;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Embeddable
-@Data
+@Entity
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 public class PostingLine {
+	
+	/* The record id */
+	@Id
+	private String id;
+
+	@ManyToOne(optional=false)
+	private Posting posting;
 	
 	/*The associated ledger account*/
 	@ManyToOne(optional=false)
 	private LedgerAccount account;
 	
 	@Column(nullable=false, updatable=false)
-	private BigDecimal amount;
+	private BigDecimal debitAmount;
+
+	@Column(nullable=false, updatable=false)
+	private BigDecimal creditAmount;
 	
 	@Column(nullable=false, updatable=false)
 	private String details;
-	
-	@Column(nullable=false, updatable=false)
-	@Enumerated(EnumType.STRING)
-	private PostingSide side;
 
 	/*
 	 * This is the account delivered by this posting. This field is generally
@@ -69,6 +78,9 @@ public class PostingLine {
 	@Setter
 	private String oprId;
 
+	@Column(nullable = false, updatable = false)
+	private int oprSeqNbr = 0;
+	
 	/*
 	 * This is the time from which the posting is effective in this account
 	 * statement.
@@ -93,18 +105,32 @@ public class PostingLine {
 	private PostingType pstType;
 	
 	/*
+	 * This is the status of the posting. 
+	 */
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, updatable = false)
+	private PostingStatus pstStatus = PostingStatus.POSTED;
+
+	/*
 	 * The ledger governing this posting.
 	 */
 	@ManyToOne(optional=false)
 	@Setter
 	private Ledger ledger;
-
-	/*
-	 * This field is used to secure the timestamp of the ledger opening.
-	 * A posting time can not be carry a posting 
-	 */
-	@Column(nullable = false, updatable = false)
-	@Setter
-	private LocalDateTime lastClosing;
 	
+	private void synchPosting(){
+		this.recordTime = this.posting.getRecordTime();
+		this.oprId = this.posting.getOprId();
+		this.oprSeqNbr = this.posting.getOprSeqNbr();
+		this.pstTime = this.posting.getPstTime();
+		this.pstType = this.posting.getPstType();
+		this.pstStatus = this.posting.getPstStatus();
+		this.ledger = this.posting.getLedger();
+	}
+
+	@PrePersist
+	public void prePersist(){
+		id = Ids.id();
+		synchPosting();
+	}
 }

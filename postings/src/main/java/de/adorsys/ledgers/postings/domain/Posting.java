@@ -1,27 +1,25 @@
 package de.adorsys.ledgers.postings.domain;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CollectionTable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import org.springframework.data.annotation.CreatedDate;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.adorsys.ledgers.postings.listener.CreatePostingListener;
-import de.adorsys.ledgers.postings.listener.RecordHashListener;
+import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +31,6 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-@EntityListeners({ CreatePostingListener.class, RecordHashListener.class })
 @JsonPropertyOrder(alphabetic = true)
 public class Posting {
 
@@ -46,9 +43,6 @@ public class Posting {
 	private String recordUser;
 
 	/* The time of recording of this posting. */
-	@CreatedDate
-	@Column(nullable = false, updatable = false)
-	@Setter
 	private LocalDateTime recordTime;
 
 	/* The antecedent identifier. Use for hash chaining */
@@ -62,7 +56,6 @@ public class Posting {
 	 * Aggregation of the UTF-8 String value of all fields by field name in
 	 * alphabetical order.
 	 */
-	@Column(nullable = false, updatable = false)
 	@Setter
 	private String recordHash;
 	@Setter
@@ -139,6 +132,13 @@ public class Posting {
 	private PostingType pstType;
 	
 	/*
+	 * This is the status of the posting. Can be used to book 
+	 */
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, updatable = false)
+	private PostingStatus pstStatus = PostingStatus.POSTED;
+	
+	/*
 	 * The ledger governing this posting.
 	 */
 	@ManyToOne(optional=false)
@@ -150,25 +150,15 @@ public class Posting {
 	 */
 	private LocalDateTime valTime;
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "POSTING_LINE", joinColumns = @JoinColumn(name = "POSTING_ID"))
+	@OneToMany(fetch=FetchType.EAGER, cascade={CascadeType.REFRESH, CascadeType.REMOVE})
 	@Singular("line")
 	private List<PostingLine> lines = new ArrayList<>();
 	
-	/*
-	 * Called to synch ti posting id with the value of the 
-	 * operation id and operation sequence.
-	 */
-	public void synchKeyData(){
-		id = oprId + "_" + oprSeqNbr;
-		recordTime = LocalDateTime.now();
-	}
-
 	@Builder
 	public Posting(String recordUser, String recordAntecedentId,
 			String recordAntecedentHash, String oprId, int oprSeqNbr, 
 			LocalDateTime oprTime, String oprType, 
-			String oprDetails, LocalDateTime pstTime, PostingType pstType,
+			String oprDetails, LocalDateTime pstTime, PostingType pstType, PostingStatus pstStatus,
 			Ledger ledger, LocalDateTime valTime, List<PostingLine> lines) {
 		this.recordUser = recordUser;
 		this.recordAntecedentId = recordAntecedentId;
@@ -183,5 +173,25 @@ public class Posting {
 		this.ledger = ledger;
 		this.valTime = valTime;
 		this.lines = lines!=null?lines:new ArrayList<>();
+		this.pstStatus = pstStatus!=null?pstStatus:PostingStatus.POSTED;
 	}
+	
+	private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
+
+	public Posting hash(){
+		if(recordHash!=null) throw new IllegalStateException("Can not update a posting.");
+		recordTime = LocalDateTime.now();
+		try {
+			recordHash = RECORD_HASH_HELPER.computeRecHash(this);
+		} catch (NoSuchAlgorithmException | JsonProcessingException e) {
+			throw new IllegalStateException(e);
+		}
+		return this;
+	}
+	
+	@PrePersist
+	public void prePersist(){
+		id = oprId + "_" + oprSeqNbr;
+	}
+	
 }

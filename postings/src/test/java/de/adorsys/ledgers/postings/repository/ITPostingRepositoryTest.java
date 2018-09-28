@@ -101,6 +101,7 @@ public class ITPostingRepositoryTest {
 			.build();
 		
 		Posting saved = postingRepository.save(posting);
+		saved = postingRepository.save(saved.hash());
 		
 		String writeValueAsString = om.writeValueAsString(saved);
 		

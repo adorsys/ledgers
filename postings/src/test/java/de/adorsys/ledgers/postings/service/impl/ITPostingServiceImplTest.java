@@ -54,4 +54,9 @@ public class ITPostingServiceImplTest {
         Posting saved = postingService.newPosting(posting);
         Assume.assumeNotNull(saved);
     }
+    
+    @Test
+    public void test_newPostingLine_ok(){
+    		
+    }
 }
