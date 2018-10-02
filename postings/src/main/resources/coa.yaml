@@ -368,4 +368,193 @@
               - account:
                   name: Reserves
                   number: 1409
+        - account_type: 
+        	name: Receivables on Custody Operations
+        	class: 16
+        	level: 2
+        	children: 
+              - account:
+                  name: Receivables on equity securities from custody operations
+                  number: 1601
+              - account:
+                  name: Receivables on debt securities from custody operations
+                  number: 1602
+              - account:
+                  name: Receivables on derivatives from custody operations
+                  number: 1603
+        - account_type: 
+            name: Acquired Assets
+            class: 17
+            level: 2
+            children:
+              - account:
+                  name: Loans
+                  number: 1701
+              - account:
+                  name: Property
+                  number: 1702
+              - account:
+                  name: Stocks
+                  number: 1703
+              - account:
+                  name: Bonds and other long term securities
+                  number: 1704
+              - account:
+                  name: Other assets
+                  number: 1705
+              - account:
+                  name: Reserves
+                  number: 1709
+        - account_type: 
+            name: Fixed Assets
+            class: 18
+            level: 2
+            children:
+              - account:
+                  name: Land
+                  number: 1801
+              - account:
+                  name: Buildings
+                  number: 1803
+              - account:
+                  name: Depreciation to date
+                  number: 1804
+              - account:
+                  name: Finance (capital) leases
+                  number: 1805
+              - account:
+                  name: Depreciation to date
+                  number: 1806
+              - account:
+                  name: Machinery and equipment
+                  number: 1807
+              - account:
+                  name: Depreciation to date
+                  number: 1808
+              - account:
+                  name: Computers
+                  number: 1809
+              - account:
+                  name: Depreciation to date
+                  number: 1810
+              - account:
+                  name: Furniture & fittings
+                  number: 1811
+              - account:
+                  name: Depreciation to date
+                  number: 1812
+              - account:
+                  name: Vehicles
+                  number: 1813
+              - account:
+                  name: Depreciation to date
+                  number: 1814
+              - account:
+                  name: Other fixed assets
+                  number: 1815
+              - account:
+                  name: Depreciation to date
+                  number: 1816
+              - account:
+                  name: Assets under construction
+                  number: 1830
+        - account_type: 
+            name: Intangible Assets
+            class: 18
+            level: 2
+            children:
+              - account:
+                  name: Goodwill
+                  number: 1851
+              - account:
+                  name: Patents/Trademarks
+                  number: 1852
+              - account:
+                  name: Concessions
+                  number: 1853
+              - account:
+                  name: Computer programs (Software)
+                  number: 1854
+              - account:
+                  name: Accumulated amortization - Goodwill
+                  number: 1855
+              - account:
+                  name: Accumulated amortization - Patents/Trademarks
+                  number: 1856
+              - account:
+                  name: Accumulated amortization - Concessions
+                  number: 1857
+              - account:
+                  name: Accumulated amortization - Other
+                  number: 1858
+              - account:
+                  name: Other
+                  number: 1859
+              - account:
+                  name: Accumulated amortization - Software
+                  number: 1860
+        - account_type: 
+            name: Interest Receivable
+            class: 19
+            level: 2
+            children:
+              - account:
+                  name: Accrued interest receivable: Loans
+                  number: 1901
+              - account:
+                  name: Accrued interest receivable: Securities
+                  number: 1902
+              - account:
+                  name: Accrued interest receivable: Other
+                  number: 1903
+              - account:
+                  name: Overdue interest receivable
+                  number: 1904
+              - account:
+                  name: Reserves
+                  number: 1909
+        - account_type: 
+            name: Other Assets
+            class: 19
+            level: 2
+            children:
+              - account:
+                  name: Other accrued income earned, not yet collected
+                  number: 1911
+              - account:
+                  name: Receivables from agency activities
+                  number: 1912
+              - account:
+                  name: Advance payments (prepaid assets)
+                  number: 1913
+              - account:
+                  name: Other receivables
+                  number: 1914
+              - account:
+                  name: Maternity / sick pay payments receivable from Government
+                  number: 1915
+              - account:
+                  name: Due from blocked FX savings
+                  number: 1916
+              - account:
+                  name: Suspense account
+                  number: 1917
+              - account:
+                  name: Other assets
+                  number: 1918
+              - account:
+                  name: Deferred tax asset
+                  number: 1920
+              - account:
+                  name: Other tax related assets
+                  number: 1921
+              - account:
+                  name: Reserves
+                  number: 1929
+              - account:
+                  name: Reserves for losses based on market risks
+                  number: 1939
+              - account:
+                  name: Reserves for losses based on country risk
+                  number: 1949
     - account_type:
