@@ -499,13 +499,13 @@
             level: 2
             children:
               - account:
-                  name: Accrued interest receivable: Loans
+                  name: Accrued interest receivable&#58; Loans
                   number: 1901
               - account:
-                  name: Accrued interest receivable: Securities
+                  name: Accrued interest receivable&#58; Securities
                   number: 1902
               - account:
-                  name: Accrued interest receivable: Other
+                  name: Accrued interest receivable&#58; Other
                   number: 1903
               - account:
                   name: Overdue interest receivable
@@ -711,16 +711,16 @@
                   name: Demand deposits for payment and coverage under guarantees
                   number: 2336
               - account:
-                  name: Non profit organisations: domestic - Non-Interest bearing
+                  name: Non profit organisations&#58; domestic - Non-Interest bearing
                   number: 2339
               - account:
-                  name: Non profit organisations: domestic - Interest bearing
+                  name: Non profit organisations&#58; domestic - Interest bearing
                   number: 2340
               - account:
-                  name: Non profit organisations: foreign - Non-Interest bearing
+                  name: Non profit organisations&#58; foreign - Non-Interest bearing
                   number: 2341
               - account:
-                  name: Non profit organisations: foreign - Interest bearing
+                  name: Non profit organisations&#58; foreign - Interest bearing
                   number: 2342
               - account:
                   name: Other - Non-Interest bearing
@@ -945,16 +945,16 @@
                   name: Natural persons (households), non-residents, Interest bearing
                   number: 2534
               - account:
-                  name: Non profit organisations: domestic - Non-Interest bearing
+                  name: Non profit organisations&#58; domestic - Non-Interest bearing
                   number: 2539
               - account:
-                  name: Non profit organisations: domestic - Interest bearing
+                  name: Non profit organisations&#58; domestic - Interest bearing
                   number: 2540
               - account:
-                  name: Non profit organisations: foreign - Non-Interest bearing
+                  name: Non profit organisations&#58; foreign - Non-Interest bearing
                   number: 2541
               - account:
-                  name: Non profit organisations: foreign - Interest bearing
+                  name: Non profit organisations&#58; foreign - Interest bearing
                   number: 2542
               - account:
                   name: Other - Non-Interest bearing
@@ -1204,13 +1204,13 @@
               level: 2
               children:
                 - account:
-                    name: Accrued interest payable: deposits
+                    name: Accrued interest payable&#58; deposits
                     number: 2901
                 - account:
-                    name: Accrued interest payable: securities
+                    name: Accrued interest payable&#58; securities
                     number: 2902
                 - account:
-                    name: Accrued interest payable: other
+                    name: Accrued interest payable&#58; other
                     number: 2903
                 - account:
                     name: Overdue Interest
@@ -1234,25 +1234,25 @@
                     name: Dividends payable
                     number: 2910
                 - account:
-                    name: Payroll: salaries
+                    name: Payroll&#58; salaries
                     number: 2911
                 - account:
-                    name: Payroll: PIO
+                    name: Payroll&#58; PIO
                     number: 2912
                 - account:
-                    name: Payroll: Health
+                    name: Payroll&#58; Health
                     number: 2913
                 - account:
-                    name: Payroll: Unemployment
+                    name: Payroll&#58; Unemployment
                     number: 2914
                 - account:
-                    name: Payroll: Other
+                    name: Payroll&#58; Other
                     number: 2915
                 - account:
-                    name: Payroll: Municipal construction land
+                    name: Payroll&#58; Municipal construction land
                     number: 2916
                 - account:
-                    name: Payroll: Court judgments
+                    name: Payroll&#58; Court judgments
                     number: 2917
                 - account:
                     name: Due to citizens for blocked FX savings
