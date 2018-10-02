@@ -1,0 +1,60 @@
+- account_type:
+    name: BS
+    level: 0
+    children:
+    - account_type:
+        name: ASSETS
+        class: 1
+        level: 1
+        children:
+        - account_type:
+            name: Cash and Cash Equivalents
+            class: 11
+            level: 2
+            children:
+              - account:
+                name: Cash in vault
+                number: 1001
+              - account:
+                name: Cash in ATM
+                number: 1002
+              - account:
+                name: Cash in transit
+                number: 1003
+              - account:
+                name: Damaged notes
+                number: 1004
+              - account:
+                name: Travellers cheques
+                number: 1005
+              - account:
+                name: Items for collection&#58; cheques
+                number: 1006
+              - account:
+                name: Items for collection&#58; Plastic cards
+                number: 1007
+              - account:
+                name: Items for collection&#58; Other
+                number: 1008
+              - account:
+                name: Settlement / Correspondent Accounts/Nostro Accounts
+                number: 1009
+              - account:
+                name: Gyro accounts
+                number: 1010
+              - account:
+                name: Precious metals
+                number: 1011
+              - account:
+                name: Other cash
+                number: 1012
+              - account:
+                name: Coverage under letters of credit with foreign banks
+                number: 1013
+              - account:
+                name: Coverage under guarantees with foreign banks
+                number: 1014
+              - account:
+                name: Clients’ funds from custody operations
+                number: 1015
+    - account_type:
