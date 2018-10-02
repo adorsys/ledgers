@@ -183,4 +183,149 @@
             - account: 
             	name: Reserves
             	number: 1199
+        - account_type:
+                name: Loans to Banks and Other Credit and Financial Institutions
+                class: 12
+                level: 2
+                children:
+                - account:
+                	name: Loans to Central Bank of Montenegro
+                	number: 1201
+                - account:
+                	name: Loans to other central banks
+                	number: 1202
+                - account:
+                	name: State owned domestic banks
+                	number: 1203
+                - account:
+                	name: Privately owned domestic banks
+                	number: 1204
+                - account:
+                	name: Foreign banks / credit and financial institutions
+                	number: 1205
+                - account:
+                	name: State owned domestic credit and financial institutions
+                	number: 1206
+                - account:
+                	name: Privately owned domestic credit and financial institutions
+                	number: 1207
+                - account:
+                	name: Other
+                	number: 1208
+                - account:
+                	name: Reserves
+                	number: 1209
+        - account_type:
+                name: Loans to Non Financial Institutions and Other Clients
+                class: 12
+                level: 2
+                children:
+                - account:
+                	name: State owned companies
+                	number: 1251
+                - account:
+                	name: Foreign companies
+                	number: 1253
+                - account:
+                	name: Publicly owned organisations / local authorities
+                	number: 1254
+                - account:
+                	name: Staff Loans
+                	number: 1256
+                - account:
+                	name: Non profit organisations&#58; foreign
+                	number: 1257
+                - account:
+                	name: Non profit organisations&#58; domestic
+                	number: 1258
+                - account:
+                	name: Privately owned insurance companies
+                	number: 1259
+                - account:
+                	name: Privately owned companies
+                	number: 1261
+                - account:
+                	name: Entrepreneurs (one owner)
+                	number: 1262
+                - account:
+                	name: Consumer loans, resident
+                	number: 1264
+                - account:
+                	name: Consumer loans, non-resident
+                	number: 1265
+                - account:
+                	name: Credit cards, resident
+                	number: 1266
+                - account:
+                	name: Credit cards, non-resident
+                	number: 1267
+                - account:
+                	name: Reserves
+                	number: 1269
+        - account_type:
+                name: Loans to the Government, Municipalities and Agencies
+                class: 12
+                level: 2
+                children:
+                - account:
+                	name: Government of Montenegro
+                	number: 1271
+                - account:
+                	name: Municipalities
+                	number: 1272
+                - account:
+                	name: Government agencies
+                	number: 1273
+                - account:
+                	name: State owned insurance companies
+                	number: 1274
+                - account:
+                	name: Other
+                	number: 1278
+                - account:
+                	name: Reserves
+                	number: 1279
+        - account_type:
+                name: Loans to Funds
+                class: 12
+                level: 2
+                children:
+                - account:
+                	name: Development Fund
+                	number: 1281
+                - account:
+                	name: Employment Bureau
+                	number: 1282
+                - account:
+                	name: Health Fund
+                	number: 1283
+                - account:
+                	name: Pension Funds - Public
+                	number: 1284
+                - account:
+                	name: Pension Funds - Private
+                	number: 1285
+                - account:
+                	name: Privatization Funds
+                	number: 1286
+                - account:
+                	name: Investment Funds
+                	number: 1287
+                - account:
+                	name: Other Funds
+                	number: 1288
+                - account:
+                	name: Reserves
+                	number: 1289
+        - account_type:
+                name: Loans Purchased for Trading (Securitization)
+                class: 12
+                level: 2
+                children:
+                - account: 
+                	name: Loans Purchased for Trading (Securitization)
+                	number: 1291
+                - account: 
+                	name: Reserves
+                	number: 1292
     - account_type:
