@@ -1281,3 +1281,59 @@
                 - account:
                     name: Special suspense account (opening and closing general ledger)
                     number: 2999
+     - account_type:
+        name: CAPITAL AND RESERVES
+        class: 3
+        level: 1
+        children:
+          	- account: 
+                name: Issued capital – ordinary shares
+                number: 3001
+          	- account: 
+                name: Issued capital – preferred shares
+                number: 3002
+          	- account: 
+                name: Share premium
+                number: 3003
+          	- account: 
+                name: Treasury stock
+                number: 3004
+          	- account: 
+                name: General reserve
+                number: 3005
+          	- account: 
+                name: Revaluation reserve
+                number: 3006
+          	- account: 
+                name: Other reserves
+                number: 3007
+          	- account: 
+                name: Profit and Loss: accumulated prior years
+                number: 3008
+          	- account: 
+                name: Profit and Loss: current year
+                number: 3009
+          	- account: 
+                name: Unrealized gains/losses
+                number: 3012
+          	- account: 
+                name: Reserve for acquired own shares (treasury stock)
+                number: 3014
+          	- account: 
+                name: Membership fees (CU only)
+                number: 3015
+          	- account: 
+                name: Donated equity for loan fund: accumulated (MFI only)
+                number: 3021
+          	- account: 
+                name: Donated equity for loan fund: current (MFI only)
+                number: 3022
+          	- account: 
+                name: Donations for Operations: Accumulated (MFI only)
+                number: 3023
+          	- account: 
+                name: Donations for Operations: Current (MFI only)
+                number: 3024
+          	- account: 
+                name: Income Summary (temporary)
+                number: 3999
