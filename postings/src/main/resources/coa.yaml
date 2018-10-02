@@ -96,276 +96,276 @@
             class: 11
             level: 2
             children:
-            - account:
-            	name: Interest rate related contracts
-            	number: 1161
-            - account:
-            	name: Foreign exchange rate related contracts
-            	number: 1162
-            - account:
-            	name: Contracts related to price of equity securities
-            	number: 1163
-            - account:
-            	name: Other contracts that meet the definition of derivatives in accordance with IAS 39
-            	number: 1164
+              - account:
+                  name: Interest rate related contracts
+                  number: 1161
+              - account:
+                  name: Foreign exchange rate related contracts
+                  number: 1162
+              - account:
+                  name: Contracts related to price of equity securities
+                  number: 1163
+              - account:
+                  name: Other contracts that meet the definition of derivatives in accordance with IAS 39
+                  number: 1164
         - account_type:
             name: Derivative Financial Assets Used as Collateral (Fair Value of Derivative)
             class: 11
             level: 2
             children:
-            - account:
-            	name: Interest rate related contracts
-            	number: 1165
-            - account:
-            	name: Foreign exchange rate related contracts
-            	number: 1166
-            - account:
-            	name: Contracts related to price of equity securities
-            	number: 1167
-            - account:
-            	name: Other contracts that meet the definition of derivatives in accordance with IAS 39
-            	number: 1168
+              - account:
+                  name: Interest rate related contracts
+                  number: 1165
+              - account:
+                  name: Foreign exchange rate related contracts
+                  number: 1166
+              - account:
+                  name: Contracts related to price of equity securities
+                  number: 1167
+              - account:
+                  name: Other contracts that meet the definition of derivatives in accordance with IAS 39
+                  number: 1168
         - account_type:
             name: Trading Securities
             class: 11
             level: 2
             children:
-            - account:
-            	name: Government of Montenegro
-            	number: 1171
-            - account:
-            	name: Municipalities
-            	number: 1172
-            - account:
-            	name: Other issuers, stocks in companies that are involved in financial operations
-            	number: 1173
-            - account:
-            	name: Other issuers, stocks in companies that are involved in non financial operations
-            	number: 1174
-            - account:
-            	name: Other issuers (not stocks)
-            	number: 1175
-            - account:
-            	name: Non amortized discount
-            	number: 1177
-            - account:
-            	name: Non amortized premium
-            	number: 1178
-            - account:
-            	name: Reserves
-            	number: 1179
+              - account:
+                  name: Government of Montenegro
+                  number: 1171
+              - account:
+                  name: Municipalities
+                  number: 1172
+              - account:
+                  name: Other issuers, stocks in companies that are involved in financial operations
+                  number: 1173
+              - account:
+                  name: Other issuers, stocks in companies that are involved in non financial operations
+                  number: 1174
+              - account:
+                  name: Other issuers (not stocks)
+                  number: 1175
+              - account:
+                  name: Non amortized discount
+                  number: 1177
+              - account:
+                  name: Non amortized premium
+                  number: 1178
+              - account:
+                  name: Reserves
+                  number: 1179
         - account_type:
             name: Available for Sale Securities
             class: 11
             level: 2
             children:
-            - account:
-            	name: Government of Montenegro
-            	number: 1191
-            - account:
-            	name: Municipalities
-            	number: 1192
-            - account:
-            	name: Other issuers, stocks in companies that are involved in financial operations
-            	number: 1193
-            - account:
-            	name: Other issuers, stocks in companies that are involved in non financial operations
-            	number: 1194
-            - account:
-            	name: Other issuers (not stocks)
-            	number: 1195
-            - account: 
-            	name: Non amortized discount
-            	number: 1197
-            - account: 
-            	name: Non amortized premium
-            	number: 1198
-            - account: 
-            	name: Reserves
-            	number: 1199
+              - account:
+                  name: Government of Montenegro
+                  number: 1191
+              - account:
+                  name: Municipalities
+                  number: 1192
+              - account:
+                  name: Other issuers, stocks in companies that are involved in financial operations
+                  number: 1193
+              - account:
+                  name: Other issuers, stocks in companies that are involved in non financial operations
+                  number: 1194
+              - account:
+                  name: Other issuers (not stocks)
+                  number: 1195
+              - account:
+                  name: Non amortized discount
+                  number: 1197
+              - account:
+                  name: Non amortized premium
+                  number: 1198
+              - account:
+                  name: Reserves
+                  number: 1199
         - account_type:
             name: Loans to Banks and Other Credit and Financial Institutions
             class: 12
             level: 2
             children:
-            - account:
-                name: Loans to Central Bank of Montenegro
-                number: 1201
-            - account:
-                name: Loans to other central banks
-                number: 1202
-            - account:
-                name: State owned domestic banks
-                number: 1203
-            - account:
-                name: Privately owned domestic banks
-                number: 1204
-            - account:
-                name: Foreign banks / credit and financial institutions
-                number: 1205
-            - account:
-                name: State owned domestic credit and financial institutions
-                number: 1206
-            - account:
-                name: Privately owned domestic credit and financial institutions
-                number: 1207
-            - account:
-                name: Other
-                number: 1208
-            - account:
-                name: Reserves
-                number: 1209
+              - account:
+                  name: Loans to Central Bank of Montenegro
+                  number: 1201
+              - account:
+                  name: Loans to other central banks
+                  number: 1202
+              - account:
+                  name: State owned domestic banks
+                  number: 1203
+              - account:
+                  name: Privately owned domestic banks
+                  number: 1204
+              - account:
+                  name: Foreign banks / credit and financial institutions
+                  number: 1205
+              - account:
+                  name: State owned domestic credit and financial institutions
+                  number: 1206
+              - account:
+                  name: Privately owned domestic credit and financial institutions
+                  number: 1207
+              - account:
+                  name: Other
+                  number: 1208
+              - account:
+                  name: Reserves
+                  number: 1209
         - account_type:
             name: Loans to Non Financial Institutions and Other Clients
             class: 12
             level: 2
             children:
-            - account:
-                name: State owned companies
-                number: 1251
-            - account:
-                name: Foreign companies
-                number: 1253
-            - account:
-                name: Publicly owned organisations / local authorities
-                number: 1254
-            - account:
-                name: Staff Loans
-                number: 1256
-            - account:
-                name: Non profit organisations&#58; foreign
-                number: 1257
-            - account:
-                name: Non profit organisations&#58; domestic
-                number: 1258
-            - account:
-                name: Privately owned insurance companies
-                number: 1259
-            - account:
-                name: Privately owned companies
-                number: 1261
-            - account:
-                name: Entrepreneurs (one owner)
-                number: 1262
-            - account:
-                name: Consumer loans, resident
-                number: 1264
-            - account:
-                name: Consumer loans, non-resident
-                number: 1265
-            - account:
-                name: Credit cards, resident
-                number: 1266
-            - account:
-                name: Credit cards, non-resident
-                number: 1267
-            - account:
-                name: Reserves
-                number: 1269
+              - account:
+                  name: State owned companies
+                  number: 1251
+              - account:
+                  name: Foreign companies
+                  number: 1253
+              - account:
+                  name: Publicly owned organisations / local authorities
+                  number: 1254
+              - account:
+                  name: Staff Loans
+                  number: 1256
+              - account:
+                  name: Non profit organisations&#58; foreign
+                  number: 1257
+              - account:
+                  name: Non profit organisations&#58; domestic
+                  number: 1258
+              - account:
+                  name: Privately owned insurance companies
+                  number: 1259
+              - account:
+                  name: Privately owned companies
+                  number: 1261
+              - account:
+                  name: Entrepreneurs (one owner)
+                  number: 1262
+              - account:
+                  name: Consumer loans, resident
+                  number: 1264
+              - account:
+                  name: Consumer loans, non-resident
+                  number: 1265
+              - account:
+                  name: Credit cards, resident
+                  number: 1266
+              - account:
+                  name: Credit cards, non-resident
+                  number: 1267
+              - account:
+                  name: Reserves
+                  number: 1269
         - account_type:
             name: Loans to the Government, Municipalities and Agencies
             class: 12
             level: 2
             children:
-            - account:
-                name: Government of Montenegro
-                number: 1271
-            - account:
-                name: Municipalities
-                number: 1272
-            - account:
-                name: Government agencies
-                number: 1273
-            - account:
-                name: State owned insurance companies
-                number: 1274
-            - account:
-                name: Other
-                number: 1278
-            - account:
-                name: Reserves
-                number: 1279
+              - account:
+                  name: Government of Montenegro
+                  number: 1271
+              - account:
+                  name: Municipalities
+                  number: 1272
+              - account:
+                  name: Government agencies
+                  number: 1273
+              - account:
+                  name: State owned insurance companies
+                  number: 1274
+              - account:
+                  name: Other
+                  number: 1278
+              - account:
+                  name: Reserves
+                  number: 1279
         - account_type:
             name: Loans to Funds
             class: 12
             level: 2
             children:
-            - account:
-                name: Development Fund
-                number: 1281
-            - account:
-                name: Employment Bureau
-                number: 1282
-            - account:
-                name: Health Fund
-                number: 1283
-            - account:
-                name: Pension Funds - Public
-                number: 1284
-            - account:
-                name: Pension Funds - Private
-                number: 1285
-            - account:
-                name: Privatization Funds
-                number: 1286
-            - account:
-                name: Investment Funds
-                number: 1287
-            - account:
-                name: Other Funds
-                number: 1288
-            - account:
-                name: Reserves
-                number: 1289
+              - account:
+                  name: Development Fund
+                  number: 1281
+              - account:
+                  name: Employment Bureau
+                  number: 1282
+              - account:
+                  name: Health Fund
+                  number: 1283
+              - account:
+                  name: Pension Funds - Public
+                  number: 1284
+              - account:
+                  name: Pension Funds - Private
+                  number: 1285
+              - account:
+                  name: Privatization Funds
+                  number: 1286
+              - account:
+                  name: Investment Funds
+                  number: 1287
+              - account:
+                  name: Other Funds
+                  number: 1288
+              - account:
+                  name: Reserves
+                  number: 1289
         - account_type:
             name: Loans Purchased for Trading (Securitization)
             class: 12
             level: 2
             children:
-            - account:
-                name: Loans Purchased for Trading (Securitization)
-                number: 1291
-            - account:
-                name: Reserves
-                number: 1292
-        - account_type: 
+              - account:
+                  name: Loans Purchased for Trading (Securitization)
+                  number: 1291
+              - account:
+                  name: Reserves
+                  number: 1292
+        - account_type:
         	name: Servicing Rights
         	class: 13
         	level: 2
-        	children: 
-        	- account: 
-        		name: Servicing rights
-        		number: 1301
-        	- account: 
-        		name: Accumulated amortization of servicing rights
-        		number: 1302
-        	- account: 
-        		name: Valuation reserve for servicing rights
-        		number: 1309
-        - account_type: 
+        	children:
+              - account:
+                  name: Servicing rights
+                  number: 1301
+              - account:
+                  name: Accumulated amortization of servicing rights
+                  number: 1302
+              - account:
+                  name: Valuation reserve for servicing rights
+                  number: 1309
+        - account_type:
         	name: Securities Held to Maturity
         	class: 14
         	level: 2
-        	children: 
-        	- account: 
-        		name: Government of Montenegro
-        		number: 1401
-        	- account: 
-        		name: Municipalities
-        		number: 1402
-        	- account: 
-        		name: Other issuers, not stock
-        		number: 1404
-        	- account: 
-        		name: Foreign securities held to maturity
-        		number: 1405
-        	- account: 
-        		name: Non amortized discount
-        		number: 1407
-        	- account: 
-        		name: Non amortized premium
-        		number: 1408
-        	- account: 
-        		name: Reserves
-        		number: 1409
+        	children:
+              - account:
+                  name: Government of Montenegro
+                  number: 1401
+              - account:
+                  name: Municipalities
+                  number: 1402
+              - account:
+                  name: Other issuers, not stock
+                  number: 1404
+              - account:
+                  name: Foreign securities held to maturity
+                  number: 1405
+              - account:
+                  name: Non amortized discount
+                  number: 1407
+              - account:
+                  name: Non amortized premium
+                  number: 1408
+              - account:
+                  name: Reserves
+                  number: 1409
     - account_type:
