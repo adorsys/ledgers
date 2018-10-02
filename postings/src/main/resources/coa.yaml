@@ -9,52 +9,178 @@
         children:
         - account_type:
             name: Cash and Cash Equivalents
+            class: 10
+            level: 2
+            children:
+              - account:
+                  name: Cash in vault
+                  number: 1001
+              - account:
+                  name: Cash in ATM
+                  number: 1002
+              - account:
+                  name: Cash in transit
+                  number: 1003
+              - account:
+                  name: Damaged notes
+                  number: 1004
+              - account:
+                  name: Travellers cheques
+                  number: 1005
+              - account:
+                  name: Items for collection&#58; cheques
+                  number: 1006
+              - account:
+                  name: Items for collection&#58; Plastic cards
+                  number: 1007
+              - account:
+                  name: Items for collection&#58; Other
+                  number: 1008
+              - account:
+                  name: Settlement / Correspondent Accounts/Nostro Accounts
+                  number: 1009
+              - account:
+                  name: Gyro accounts
+                  number: 1010
+              - account:
+                  name: Precious metals
+                  number: 1011
+              - account:
+                  name: Other cash
+                  number: 1012
+              - account:
+                  name: Coverage under letters of credit with foreign banks
+                  number: 1013
+              - account:
+                  name: Coverage under guarantees with foreign banks
+                  number: 1014
+              - account:
+                  name: Clients’ funds from custody operations
+                  number: 1015
+        - account_type:
+            name: Deposits with Central Banks
             class: 11
             level: 2
             children:
               - account:
-                name: Cash in vault
-                number: 1001
+                  name: Deposits with CBM - Non-Interest bearing
+                  number: 1103
               - account:
-                name: Cash in ATM
-                number: 1002
+                  name: Deposits with CBM - Interest bearing
+                  number: 1104
               - account:
-                name: Cash in transit
-                number: 1003
+                  name: Deposits with other Central Banks - Non-Interest bearing
+                  number: 1107
               - account:
-                name: Damaged notes
-                number: 1004
+                  name: Deposits with other Central Banks - Interest bearing
+                  number: 1108
+        - account_type:
+            name: Purchase and Resell Operations
+            class: 11
+            level: 2
+            children:
               - account:
-                name: Travellers cheques
-                number: 1005
+                  name: Interest rate related contracts
+                  number: 1161
               - account:
-                name: Items for collection&#58; cheques
-                number: 1006
+                  name: Foreign exchange rate related contracts
+                  number: 1162
               - account:
-                name: Items for collection&#58; Plastic cards
-                number: 1007
+                  name: Contracts related to price of equity securities
+                  number: 1163
               - account:
-                name: Items for collection&#58; Other
-                number: 1008
-              - account:
-                name: Settlement / Correspondent Accounts/Nostro Accounts
-                number: 1009
-              - account:
-                name: Gyro accounts
-                number: 1010
-              - account:
-                name: Precious metals
-                number: 1011
-              - account:
-                name: Other cash
-                number: 1012
-              - account:
-                name: Coverage under letters of credit with foreign banks
-                number: 1013
-              - account:
-                name: Coverage under guarantees with foreign banks
-                number: 1014
-              - account:
-                name: Clients’ funds from custody operations
-                number: 1015
+                  name: Other contracts that meet the definition of derivatives in accordance with IAS 39
+                  number: 1164
+        - account_type:
+            name: Derivative Financial Assets Held for Trading (Fair Value of Derivative)
+            class: 11
+            level: 2
+            children:
+            - account:
+            	name: Interest rate related contracts
+            	number: 1161
+            - account:
+            	name: Foreign exchange rate related contracts
+            	number: 1162
+            - account:
+            	name: Contracts related to price of equity securities
+            	number: 1163
+            - account:
+            	name: Other contracts that meet the definition of derivatives in accordance with IAS 39
+            	number: 1164
+        - account_type:
+            name: Derivative Financial Assets Used as Collateral (Fair Value of Derivative)
+            class: 11
+            level: 2
+            children:
+            - account:
+            	name: Interest rate related contracts
+            	number: 1165
+            - account:
+            	name: Foreign exchange rate related contracts
+            	number: 1166
+            - account:
+            	name: Contracts related to price of equity securities
+            	number: 1167
+            - account:
+            	name: Other contracts that meet the definition of derivatives in accordance with IAS 39
+            	number: 1168
+        - account_type:
+            name: Trading Securities
+            class: 11
+            level: 2
+            children:
+            - account:
+            	name: Government of Montenegro
+            	number: 1171
+            - account:
+            	name: Municipalities
+            	number: 1172
+            - account:
+            	name: Other issuers, stocks in companies that are involved in financial operations
+            	number: 1173
+            - account:
+            	name: Other issuers, stocks in companies that are involved in non financial operations
+            	number: 1174
+            - account:
+            	name: Other issuers (not stocks)
+            	number: 1175
+            - account:
+            	name: Non amortized discount
+            	number: 1177
+            - account:
+            	name: Non amortized premium
+            	number: 1178
+            - account:
+            	name: Reserves
+            	number: 1179
+        - account_type:
+            name: Available for Sale Securities
+            class: 11
+            level: 2
+            children:
+            - account:
+            	name: Government of Montenegro
+            	number: 1191
+            - account:
+            	name: Municipalities
+            	number: 1192
+            - account:
+            	name: Other issuers, stocks in companies that are involved in financial operations
+            	number: 1193
+            - account:
+            	name: Other issuers, stocks in companies that are involved in non financial operations
+            	number: 1194
+            - account:
+            	name: Other issuers (not stocks)
+            	number: 1195
+            - account: 
+            	name: Non amortized discount
+            	number: 1197
+            - account: 
+            	name: Non amortized premium
+            	number: 1198
+            - account: 
+            	name: Reserves
+            	number: 1199
     - account_type:
