@@ -18,6 +18,8 @@ import javax.persistence.PrePersist;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import lombok.Builder;
@@ -27,6 +29,16 @@ import lombok.Setter;
 import lombok.Singular;
 import lombok.ToString;
 
+/**
+ * The word posting is associated with the moment at which the recorded
+ * operation is effective in the ledger. Therefore, we distinguish between
+ * following moments: 
+ * - The operation time: the moment at which this operation took place.. 
+ * - The posting time: the moment at which this operation is
+ * effectively posted to the ledger (e.g. having influence of an account balance). 
+ * - The recording time: the moment at which this operation is recorded in the
+ * journal.
+ */
 @Entity
 @Getter
 @ToString
@@ -71,17 +83,17 @@ public class Posting {
 	 */
 	@Column(nullable = false, updatable = false)
 	private String oprId;
-	
+
 	/*
 	 * The sequence number of the operation processed by this posting.
 	 * 
 	 * A single operation can be overridden many times as long as the enclosing
-	 * as long as the enclosing ledger is not closed. These overriding happens 
-	 * synchronously. Each single one increasing the sequence number of the former 
-	 * posting.
+	 * as long as the enclosing ledger is not closed. These overriding happens
+	 * synchronously. Each single one increasing the sequence number of the
+	 * former posting.
 	 * 
-	 * This is, the posting id is always a concatenation between the operation id
-	 * and the sequence number.
+	 * This is, the posting id is always a concatenation between the operation
+	 * id and the sequence number.
 	 * 
 	 */
 	@Column(nullable = false, updatable = false)
@@ -115,8 +127,9 @@ public class Posting {
 	 * time and the operation time are identical.
 	 */
 	@Column(nullable = false, updatable = false)
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime pstTime;
-	
+
 	/*
 	 * Some posting are mechanical and do not have an influence on the balance
 	 * of an account. Depending on the business logic of the product module,
@@ -130,36 +143,35 @@ public class Posting {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	private PostingType pstType;
-	
+
 	/*
-	 * This is the status of the posting. Can be used to book 
+	 * This is the status of the posting. Can be used to book
 	 */
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	private PostingStatus pstStatus = PostingStatus.POSTED;
-	
+
 	/*
 	 * The ledger governing this posting.
 	 */
-	@ManyToOne(optional=false)
+	@ManyToOne(optional = false)
 	private Ledger ledger;
-	
+
 	/*
 	 * The Date use to compute interests. This can be different from the posting
 	 * date and can lead to the production of other type of balances.
 	 */
 	private LocalDateTime valTime;
 
-	@OneToMany(fetch=FetchType.EAGER, cascade={CascadeType.REFRESH, CascadeType.REMOVE})
+	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REFRESH, CascadeType.REMOVE })
 	@Singular("line")
 	private List<PostingLine> lines = new ArrayList<>();
-	
+
 	@Builder
-	public Posting(String recordUser, String recordAntecedentId,
-			String recordAntecedentHash, String oprId, int oprSeqNbr, 
-			LocalDateTime oprTime, String oprType, 
-			String oprDetails, LocalDateTime pstTime, PostingType pstType, PostingStatus pstStatus,
-			Ledger ledger, LocalDateTime valTime, List<PostingLine> lines) {
+	public Posting(String recordUser, String recordAntecedentId, String recordAntecedentHash, String oprId,
+			int oprSeqNbr, LocalDateTime oprTime, String oprType, String oprDetails, LocalDateTime pstTime,
+			PostingType pstType, PostingStatus pstStatus, Ledger ledger, LocalDateTime valTime,
+			List<PostingLine> lines) {
 		this.recordUser = recordUser;
 		this.recordAntecedentId = recordAntecedentId;
 		this.recordAntecedentHash = recordAntecedentHash;
@@ -172,14 +184,15 @@ public class Posting {
 		this.pstType = pstType;
 		this.ledger = ledger;
 		this.valTime = valTime;
-		this.lines = lines!=null?lines:new ArrayList<>();
-		this.pstStatus = pstStatus!=null?pstStatus:PostingStatus.POSTED;
+		this.lines = lines != null ? lines : new ArrayList<>();
+		this.pstStatus = pstStatus != null ? pstStatus : PostingStatus.POSTED;
 	}
-	
+
 	private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
 
-	public Posting hash(){
-		if(recordHash!=null) throw new IllegalStateException("Can not update a posting.");
+	public Posting hash() {
+		if (recordHash != null)
+			throw new IllegalStateException("Can not update a posting.");
 		recordTime = LocalDateTime.now();
 		try {
 			recordHash = RECORD_HASH_HELPER.computeRecHash(this);
@@ -188,10 +201,10 @@ public class Posting {
 		}
 		return this;
 	}
-	
+
 	@PrePersist
-	public void prePersist(){
+	public void prePersist() {
 		id = oprId + "_" + oprSeqNbr;
 	}
-	
+
 }

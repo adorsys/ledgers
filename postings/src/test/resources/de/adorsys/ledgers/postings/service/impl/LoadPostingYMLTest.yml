@@ -1,0 +1,17 @@
+- oprId: "sales_inv_001"
+  oprDetails: "Customer place product orders, on credit."
+  pstTime: 2018-08-07T20:58:24.232
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1.8.1
+      shortDesc: "Trade Receivables" 
+    debitAmount: 4200.00
+    creditAmount: 0.00
+  - account:
+      name: 4.1.1
+      shortDesc: "Products" 
+    debitAmount: 0.00
+    creditAmount: 4200.00
+    

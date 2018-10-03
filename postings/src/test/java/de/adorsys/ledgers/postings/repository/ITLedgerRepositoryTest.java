@@ -43,7 +43,8 @@ public class ITLedgerRepositoryTest {
 	
 	@Test
 	public void test_create_ledger_ok() {
-		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8zskTrCsi-F3sT3i-g").orElse(null);
+		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
+		Assume.assumeNotNull(coa);
 		Ledger ledger = Ledger.builder().id(Ids.id()).name("Sample Ledger-2")
 				.user("Sample User").coa(coa).lastClosing(LocalDateTime.now()).build();
 		ledgerRepository.save(ledger);

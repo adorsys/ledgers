@@ -43,10 +43,10 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedger {
     @Test
     public void test_2_ledger_accounts_same_ledger() {
 
-        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS_1_0_0").orElse(null);
         Assert.assertNotNull(ledgerAccount1);
 
-        LedgerAccount ledgerAccount2 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_PL").orElse(null);
+        LedgerAccount ledgerAccount2 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS_2_0_0").orElse(null);
         Assert.assertNotNull(ledgerAccount2);
 
         // Ledger of 2 LedgerAccounts is the same
@@ -56,7 +56,7 @@ public class TestManyToOneRelationshipBetweenLedgerAccountAndLedger {
     @Test
     public void test_ledger_account_has_one_ledger() {
 
-        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
+        LedgerAccount ledgerAccount1 = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS_1_0_0").orElse(null);
         Assert.assertNotNull(ledgerAccount1);
 
         Optional<Ledger> opt = ledgerRepository.findById(ledgerAccount1.getLedger().getId());

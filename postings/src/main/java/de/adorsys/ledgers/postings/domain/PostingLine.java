@@ -44,7 +44,6 @@ public class PostingLine {
 	@Column(nullable=false, updatable=false)
 	private BigDecimal creditAmount;
 	
-	@Column(nullable=false, updatable=false)
 	private String details;
 
 	/*
@@ -118,6 +117,9 @@ public class PostingLine {
 	@Setter
 	private Ledger ledger;
 	
+	@Column(nullable = false, updatable = false)
+	private String accName;
+	
 	private void synchPosting(){
 		this.recordTime = this.posting.getRecordTime();
 		this.oprId = this.posting.getOprId();
@@ -126,6 +128,7 @@ public class PostingLine {
 		this.pstType = this.posting.getPstType();
 		this.pstStatus = this.posting.getPstStatus();
 		this.ledger = this.posting.getLedger();
+		this.accName = this.account.getName();
 	}
 
 	@PrePersist

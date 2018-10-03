@@ -10,6 +10,12 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * All accounts used by a company are defined in a chart of account.
+ * 
+ * @author fpo
+ *
+ */
 @Entity
 @NoArgsConstructor
 @ToString(callSuper = true)

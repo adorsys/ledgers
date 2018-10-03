@@ -6,14 +6,15 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.adorsys.ledgers.postings.domain.AccountCategory;
+import de.adorsys.ledgers.postings.domain.BalanceSide;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.LedgerAccountType;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.Ids;
-import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @Service
 @Transactional
@@ -54,15 +55,34 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 			throw new IllegalArgumentException(String.format("Missing model name."));
 
 		LedgerAccount parentAccount = null;
-		if(ledgerAccount.getParent()!=null)
+		Ledger ledger = null;
+		if(ledgerAccount.getParent()!=null){
 			parentAccount = loadLedgerAccount(ledgerAccount.getParent());
-
-		// Check level Set it to 0 if root account type
-		int level = parentAccount != null ? parentAccount.getLevel() + 1 : 0;
-
-		// Load the ledger account type of ledger account
-		LedgerAccountType accountType = loadAccountType(ledgerAccount.getAccountType());
+			ledger = parentAccount.getLedger();
+		} else {
+			ledger = loadLedger(ledgerAccount.getLedger());
+		}
 		
+		AccountCategory category = null;
+		if(ledgerAccount.getCategory()!=null){
+			category = ledgerAccount.getCategory();
+		} else if (parentAccount!=null){
+			category = parentAccount.getCategory();
+		} else {
+			throw new IllegalArgumentException(String.format("Missing category for: " + ledgerAccount.getShortDesc()));
+		}
+		
+		BalanceSide bs = null;
+		if(ledgerAccount.getBalanceSide()!=null){
+			bs =  ledgerAccount.getBalanceSide();
+		} else if (parentAccount!=null){
+			bs = parentAccount.getBalanceSide();
+		} else if (category!=null){
+			bs = category.getDefaultBs();
+		} else {
+			throw new IllegalArgumentException(String.format("Missing category for: " + ledgerAccount.getShortDesc()));
+		}
+
 		LedgerAccount la = LedgerAccount.builder()
 			.id(Ids.id())
 			.created(LocalDateTime.now())
@@ -70,10 +90,11 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 			.shortDesc(ledgerAccount.getShortDesc())
 			.longDesc(ledgerAccount.getLongDesc())
 			.name(ledgerAccount.getName())
-			.ledger(parentAccount.getLedger())
+			.ledger(ledger)
+			.coa(ledger.getCoa())
 			.parent(parentAccount)
-			.accountType(accountType)
-			.level(level)
+			.category(category)
+			.balanceSide(bs)
 			.build();
 
 		return CloneUtils.cloneObject(ledgerAccountRepository.save(la), LedgerAccount.class);
