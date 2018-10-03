@@ -16,7 +16,10 @@ public enum AccountCategory {
 	EX("Expense",BalanceSide.Dr),
 	AS("Asset",BalanceSide.Dr),
 	LI("Liability",BalanceSide.Cr),
-	EQ("Equity",BalanceSide.Cr);
+	EQ("Equity",BalanceSide.Cr),
+	NOOP("Non-Operating Income or Expenses",BalanceSide.DrCr),
+	NORE("Non-Operating Revenue",BalanceSide.Cr),
+	NOEX("Non-Operating Expenses",BalanceSide.Dr);
 	
 	private final String desc;
 	private final BalanceSide defaultBs;

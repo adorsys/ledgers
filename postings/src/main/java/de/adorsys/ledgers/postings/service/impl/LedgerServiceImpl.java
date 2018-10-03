@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.adorsys.ledgers.postings.domain.AccountCategory;
+import de.adorsys.ledgers.postings.domain.BalanceSide;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
@@ -53,8 +55,33 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 			throw new IllegalArgumentException(String.format("Missing model name."));
 
 		LedgerAccount parentAccount = null;
-		if(ledgerAccount.getParent()!=null)
+		Ledger ledger = null;
+		if(ledgerAccount.getParent()!=null){
 			parentAccount = loadLedgerAccount(ledgerAccount.getParent());
+			ledger = parentAccount.getLedger();
+		} else {
+			ledger = loadLedger(ledgerAccount.getLedger());
+		}
+		
+		AccountCategory category = null;
+		if(ledgerAccount.getCategory()!=null){
+			category = ledgerAccount.getCategory();
+		} else if (parentAccount!=null){
+			category = parentAccount.getCategory();
+		} else {
+			throw new IllegalArgumentException(String.format("Missing category for: " + ledgerAccount.getShortDesc()));
+		}
+		
+		BalanceSide bs = null;
+		if(ledgerAccount.getBalanceSide()!=null){
+			bs =  ledgerAccount.getBalanceSide();
+		} else if (parentAccount!=null){
+			bs = parentAccount.getBalanceSide();
+		} else if (category!=null){
+			bs = category.getDefaultBs();
+		} else {
+			throw new IllegalArgumentException(String.format("Missing category for: " + ledgerAccount.getShortDesc()));
+		}
 
 		LedgerAccount la = LedgerAccount.builder()
 			.id(Ids.id())
@@ -63,11 +90,11 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 			.shortDesc(ledgerAccount.getShortDesc())
 			.longDesc(ledgerAccount.getLongDesc())
 			.name(ledgerAccount.getName())
-			.ledger(parentAccount.getLedger())
-			.coa(ledgerAccount.getLedger().getCoa())
+			.ledger(ledger)
+			.coa(ledger.getCoa())
 			.parent(parentAccount)
-			.category(ledgerAccount.getCategory())
-			.balanceSide(ledgerAccount.getBalanceSide()!=null?ledgerAccount.getBalanceSide():ledgerAccount.getCategory().getDefaultBs())
+			.category(category)
+			.balanceSide(bs)
 			.build();
 
 		return CloneUtils.cloneObject(ledgerAccountRepository.save(la), LedgerAccount.class);
