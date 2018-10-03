@@ -18,18 +18,17 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
+import de.adorsys.ledgers.postings.domain.AccountCategory;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.LedgerAccountType;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
-import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
-import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
@@ -49,9 +48,6 @@ public class ITLedgerServiceImplTest {
 
     @Autowired
     private LedgerAccountRepository ledgerAccountRepository;
-
-    @Autowired
-    private  LedgerAccountTypeRepository ledgerAccountTypeRepository;
 
     @Test
     public void test_new_ledger() throws NotFoundException {
@@ -84,9 +80,6 @@ public class ITLedgerServiceImplTest {
         LedgerAccount parentAccount= ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
         Assert.assertNotNull(parentAccount);
 
-        LedgerAccountType accountType= ledgerAccountTypeRepository.findById("805UO1hITPHxQq16OuGvw_BS").orElse(null);
-        Assert.assertNotNull(accountType);
-
         LocalDateTime created = LocalDateTime.now();
 
         LedgerAccount newLedgerAccount = LedgerAccount.builder()
@@ -95,10 +88,9 @@ public class ITLedgerServiceImplTest {
                                             .user("Sample user")
                                             .ledger(ledger)
                                             .parent(parentAccount)
-                                            .accountType(accountType)
-                                            .level(parentAccount.getLevel() + 1)
                                             .name("LedgerAccountNameTest")
                                             .shortDesc("short description")
+                                            .category(AccountCategory.LI)
                                             .build();
 
         ledgerService.newLedgerAccount(newLedgerAccount);

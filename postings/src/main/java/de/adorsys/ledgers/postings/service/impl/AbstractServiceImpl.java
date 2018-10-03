@@ -8,16 +8,13 @@ import de.adorsys.ledgers.postings.domain.BaseEntity;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.domain.NamedEntity;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
-import de.adorsys.ledgers.postings.repository.LedgerAccountTypeRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.repository.PostingRepository;
-import de.adorsys.ledgers.postings.utils.NamePatterns;
 
 public class AbstractServiceImpl {
 	@Autowired
@@ -30,13 +27,7 @@ public class AbstractServiceImpl {
 	protected ChartOfAccountRepository chartOfAccountRepo;
 
 	@Autowired
-	protected LedgerAccountTypeRepository ledgerAccountTypeRepo;
-
-	@Autowired
 	protected Principal principal;
-
-	@Autowired
-	protected NamePatterns namePatterns;
 
 	@Autowired
 	protected LedgerRepository ledgerRepository;
@@ -68,22 +59,6 @@ public class AbstractServiceImpl {
 		if (model.getName() != null)
 			return chartOfAccountRepo.findOptionalByName(model.getName())
 					.orElseThrow(() -> notFoundByNameAndContainer(model, null));
-
-		throw insufficientInfo(model);
-	}
-
-	protected LedgerAccountType loadAccountType(LedgerAccountType model) throws NotFoundException {
-		if (model == null)
-			throw nullInfo();
-
-		if (model.getId() != null)
-			return ledgerAccountTypeRepo.findById(model.getId()).orElseThrow(() -> notFoundById(model));
-
-		if (model.getCoa() != null && model.getName() != null) {
-			ChartOfAccount coa = loadCoa(model.getCoa());
-			return ledgerAccountTypeRepo.findOptionalByCoaAndName(coa, model.getName())
-					.orElseThrow(() -> notFoundByNameAndContainer(model, coa));
-		}
 
 		throw insufficientInfo(model);
 	}

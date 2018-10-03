@@ -9,11 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.LedgerAccountType;
+import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.Ids;
-import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 @Service
 @Transactional
@@ -57,12 +56,6 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 		if(ledgerAccount.getParent()!=null)
 			parentAccount = loadLedgerAccount(ledgerAccount.getParent());
 
-		// Check level Set it to 0 if root account type
-		int level = parentAccount != null ? parentAccount.getLevel() + 1 : 0;
-
-		// Load the ledger account type of ledger account
-		LedgerAccountType accountType = loadAccountType(ledgerAccount.getAccountType());
-		
 		LedgerAccount la = LedgerAccount.builder()
 			.id(Ids.id())
 			.created(LocalDateTime.now())
@@ -71,9 +64,10 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 			.longDesc(ledgerAccount.getLongDesc())
 			.name(ledgerAccount.getName())
 			.ledger(parentAccount.getLedger())
+			.coa(ledgerAccount.getLedger().getCoa())
 			.parent(parentAccount)
-			.accountType(accountType)
-			.level(level)
+			.category(ledgerAccount.getCategory())
+			.balanceSide(ledgerAccount.getBalanceSide()!=null?ledgerAccount.getBalanceSide():ledgerAccount.getCategory().getDefaultBs())
 			.build();
 
 		return CloneUtils.cloneObject(ledgerAccountRepository.save(la), LedgerAccount.class);
