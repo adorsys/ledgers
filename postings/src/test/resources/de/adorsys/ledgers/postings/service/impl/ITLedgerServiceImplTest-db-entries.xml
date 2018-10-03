@@ -17,7 +17,7 @@
             created="2018-08-07 23:50:41.231"
             user="Sample User"
             ledger_id="Zd0ND5YwSzGwIfZilhumPg"
-          	balance_side="CR"
+          	balance_side="Cr"
           	category="EQ"
             name="BS"
             short_desc="Balance Sheet Accounts"

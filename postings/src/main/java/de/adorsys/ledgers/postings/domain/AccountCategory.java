@@ -12,11 +12,11 @@ package de.adorsys.ledgers.postings.domain;
  *
  */
 public enum AccountCategory {
-	RE("Revenue",BalanceSide.CR),
-	EX("Expense",BalanceSide.DR),
-	AS("Asset",BalanceSide.DR),
-	LI("Liability",BalanceSide.CR),
-	EQ("Equity",BalanceSide.CR);
+	RE("Revenue",BalanceSide.Cr),
+	EX("Expense",BalanceSide.Dr),
+	AS("Asset",BalanceSide.Dr),
+	LI("Liability",BalanceSide.Cr),
+	EQ("Equity",BalanceSide.Cr);
 	
 	private final String desc;
 	private final BalanceSide defaultBs;
