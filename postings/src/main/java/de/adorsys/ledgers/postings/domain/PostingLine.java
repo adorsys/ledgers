@@ -44,7 +44,6 @@ public class PostingLine {
 	@Column(nullable=false, updatable=false)
 	private BigDecimal creditAmount;
 	
-	@Column(nullable=false, updatable=false)
 	private String details;
 
 	/*

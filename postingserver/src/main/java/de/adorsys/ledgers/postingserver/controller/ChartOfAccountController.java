@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriBuilder;
 
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
-import de.adorsys.ledgers.postings.domain.LedgerAccountType;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 
@@ -50,88 +49,4 @@ public class ChartOfAccountController {
 		ChartOfAccount coa = chartOfAccountService.findChartOfAccountsByName(name).orElseThrow(() -> new ResourceNotFoundException(name));
 		return ResponseEntity.ok(coa);
 	}
-
-	/**
-	 * Create a new Ledger account type.
-	 * 
-	 * While creating a ledger account type, the parent hat to be specified.
-	 * 
-	 * @param ledgerAccountType
-	 * @param name
-	 * @param desc
-	 * @return
-	 */
-	@PostMapping(path="/coas/{coaId}/lat")
-	public ResponseEntity<Void> newLedgerAccountType(LedgerAccountType ledgerAccountType, UriBuilder uri){
-		LedgerAccountType lat;
-		try {
-			lat = chartOfAccountService.newLedgerAccountType(ledgerAccountType);
-		} catch (NotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
-		}
-		URI location = uri.path(lat.getId()).build();
-		return ResponseEntity.created(location).build();
-	}
-	
-	@GetMapping(path = "/lat/{id}")
-	public ResponseEntity<LedgerAccountType> findLedgerAccountTypeById(@PathVariable("id")String id){
-		LedgerAccountType lat = chartOfAccountService.findLedgerAccountTypeById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-		return ResponseEntity.ok(lat);
-	}
-	
-	/**
-	 * Find the ledger account type with the given name 
-	 * 
-	 * @param name
-	 * @return
-	 */
-	@GetMapping(path = "/coas/{coaId}/lats", params={"name"})
-	public ResponseEntity<LedgerAccountType> findLedgerAccountType(@PathParam("coaId")String coaId, @RequestParam(required=true, name="name")String name){
-		ChartOfAccount coa = ChartOfAccount.builder().id(coaId).build();
-		LedgerAccountType lat;
-		try {
-			lat = chartOfAccountService.findLedgerAccountType(coa, name).orElseThrow(() -> new ResourceNotFoundException(name));
-		} catch (NotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
-		}
-		return ResponseEntity.ok(lat);
-	}
-
-	/**
-	 * Returns all valid children of this node.
-	 * @param parentName
-	 * @param referenceDate
-	 * @return
-	 */
-	@GetMapping(path = "/coas/{coaId}/lats/children", params={"name"})
-	public ResponseEntity<List<LedgerAccountType>> findChildLedgerAccountTypes(@PathParam("coaId")String coaId, @RequestParam(required=true, name="name")String name){
-		ChartOfAccount coa = ChartOfAccount.builder().id(coaId).build();
-		List<LedgerAccountType> list;
-		try {
-			list = chartOfAccountService.findChildLedgerAccountTypes(coa, name);
-		} catch (NotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
-		}
-		return ResponseEntity.ok(list);
-	}
-
-	/**
-	 * Return all valid ledger account types attached to this coa.
-	 * 
-	 * @param coaName
-	 * @param referenceDate
-	 * @return
-	 */
-	@GetMapping(path = "/coas/{coaId}/lats")
-	public ResponseEntity<List<LedgerAccountType>> findCoaLedgerAccountTypes(@PathParam("coaId")String coaId){
-		ChartOfAccount coa = ChartOfAccount.builder().id(coaId).build();
-		List<LedgerAccountType> list;
-		try {
-			list = chartOfAccountService.findCoaLedgerAccountTypes(coa);
-		} catch (NotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
-		}
-		return ResponseEntity.ok(list);
-	}
-
 }

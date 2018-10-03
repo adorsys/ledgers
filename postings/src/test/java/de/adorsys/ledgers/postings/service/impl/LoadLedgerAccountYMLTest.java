@@ -11,23 +11,25 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.adorsys.ledgers.postings.domain.AccountCategory;
 import de.adorsys.ledgers.postings.domain.BalanceSide;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 
-public class YMLTest {
+public class LoadLedgerAccountYMLTest {
 	private ObjectMapper mapper = new ObjectMapper();
 	
 	@Before
 	public void before(){
         final YAMLFactory ymlFactory = new YAMLFactory();
+        mapper.registerModule(new JavaTimeModule());
         mapper = new ObjectMapper(ymlFactory);
 	}
 	
 	@Test
 	public void testReadYml() throws JsonParseException, JsonMappingException, IOException{
-		InputStream inputStream = YMLTest.class.getResourceAsStream("test.yml");
+		InputStream inputStream = LoadLedgerAccountYMLTest.class.getResourceAsStream("LoadLedgerAccountYMLTest.yml");
 		LedgerAccount[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccount[].class);
 		Assert.assertNotNull(ledgerAccounts);
 		Assert.assertTrue(ledgerAccounts.length==2);

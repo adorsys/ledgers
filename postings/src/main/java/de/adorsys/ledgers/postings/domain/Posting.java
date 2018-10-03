@@ -18,6 +18,8 @@ import javax.persistence.PrePersist;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import lombok.Builder;
@@ -125,6 +127,7 @@ public class Posting {
 	 * time and the operation time are identical.
 	 */
 	@Column(nullable = false, updatable = false)
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime pstTime;
 
 	/*

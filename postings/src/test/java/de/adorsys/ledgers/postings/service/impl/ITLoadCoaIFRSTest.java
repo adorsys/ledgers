@@ -56,7 +56,7 @@ public class ITLoadCoaIFRSTest {
         Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
         Assume.assumeNotNull(ledger);
 
-        InputStream inputStream = YMLTest.class.getResourceAsStream("ITLoadCoaIFRSTest-coa.yml");
+        InputStream inputStream = LoadLedgerAccountYMLTest.class.getResourceAsStream("ITLoadCoaIFRSTest-coa.yml");
 		LedgerAccount[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccount[].class);
 		for (LedgerAccount ledgerAccount : ledgerAccounts) {
 			
