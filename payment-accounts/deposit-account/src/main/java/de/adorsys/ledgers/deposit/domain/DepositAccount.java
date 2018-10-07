@@ -8,9 +8,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
-import de.adorsys.aspsp.xs2a.spi.domain.account.SpiAccountStatus;
-import de.adorsys.aspsp.xs2a.spi.domain.account.SpiAccountType;
-import de.adorsys.aspsp.xs2a.spi.domain.account.SpiUsageType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,13 +18,13 @@ import lombok.NoArgsConstructor;
 public class DepositAccount {
     @Id
     private String id;
-    
+
     /*
      * International Bank Account Number
      * 2 letters CountryCode + 2 digits checksum + BBAN
      * DE89 3704 0044 0532 0130 00 (Sample for Germany)
      */
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String iban;
 
     /*
@@ -35,16 +32,16 @@ public class DepositAccount {
      * 00499113606980 (Adorsys tel nr)
      */
     private String msisdn;
-    @Column(nullable=false)
+    @Column(nullable = false)
     private Currency currency;
     private String name;
     private String product;
     @Enumerated(EnumType.STRING)
-    private SpiAccountType accountType;
-    
+    private AccountType accountType;
+
     @Enumerated(EnumType.STRING)
-    @Column(name="account_status", nullable=false)
-    private SpiAccountStatus accountStatus = SpiAccountStatus.ENABLED;
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus = AccountStatus.ENABLED;
 
     /*
      * SWIFT
@@ -55,16 +52,16 @@ public class DepositAccount {
     private String linkedAccounts;
     /*
      * This defines whether the account is owned by an organization or by a private person.
-     * 
+     *
      * This might have a impact on the account access permissions are managed.
-     * 
+     *
      * This correspond the XS2A {@link SpiUsageType}
-     * 
+     *
      * @author fpo
      *
      */
     @Enumerated(EnumType.STRING)
-    private SpiUsageType usageType;
+    private AccountUsage usageType;
     /*
      * Specifications that might be provided by the ASPSP
      * - characteristics of the account
@@ -73,23 +70,21 @@ public class DepositAccount {
     private String details;
 
     @Builder
-	public DepositAccount(String id, String iban, String msisdn, Currency currency, String name, String product,
-			SpiAccountType accountType, SpiAccountStatus accountStatus, String bic, String linkedAccounts,
-			SpiUsageType usageType, String details) {
-		super();
-		this.id = id;
-		this.iban = iban;
-		this.msisdn = msisdn;
-		this.currency = currency;
-		this.name = name;
-		this.product = product;
-		this.accountType = accountType;
-		this.accountStatus = accountStatus;
-		this.bic = bic;
-		this.linkedAccounts = linkedAccounts;
-		this.usageType = usageType;
-		this.details = details;
-	}
-    
-    
+    public DepositAccount(String id, String iban, String msisdn, Currency currency, String name, String product,
+                          AccountType accountType, AccountStatus accountStatus, String bic, String linkedAccounts,
+                          AccountUsage usageType, String details) {
+        super();
+        this.id = id;
+        this.iban = iban;
+        this.msisdn = msisdn;
+        this.currency = currency;
+        this.name = name;
+        this.product = product;
+        this.accountType = accountType;
+        this.accountStatus = accountStatus;
+        this.bic = bic;
+        this.linkedAccounts = linkedAccounts;
+        this.usageType = usageType;
+        this.details = details;
+    }
 }

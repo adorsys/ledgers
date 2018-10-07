@@ -15,5 +15,4 @@ public enum BalanceType {
     FORWARD_AVAILABLE,
     NONINVOICED,
     AVAILABLE
-
 }

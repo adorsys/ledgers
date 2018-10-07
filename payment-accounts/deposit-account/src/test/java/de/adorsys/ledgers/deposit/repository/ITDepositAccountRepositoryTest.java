@@ -5,13 +5,13 @@ import static org.junit.Assert.fail;
 import java.util.Currency;
 import java.util.UUID;
 
+import de.adorsys.ledgers.deposit.domain.AccountStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import de.adorsys.aspsp.xs2a.spi.domain.account.SpiAccountStatus;
 import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.test.DapositAccountApplication;
 
@@ -28,14 +28,15 @@ public class ITDepositAccountRepositoryTest {
 	private DepositAccountRepository repository;
 	@Test
 	public void test_create_deposit_account_ok() {
+
 		DepositAccount da = DepositAccount.builder()
 			.id(UUID.randomUUID().toString())
 			.iban("345234523")
 			.currency(Currency.getInstance("EUR"))
-			.accountStatus(SpiAccountStatus.ENABLED)
+			.accountStatus(AccountStatus.ENABLED)
 			.build();
-		repository.save(da);
 
+		repository.save(da);
 	}
 
 }
