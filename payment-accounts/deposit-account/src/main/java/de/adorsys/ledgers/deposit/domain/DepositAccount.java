@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +17,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames = { "iban", "currency" }, name = "DepositAccount_iban_currency_unique")
+})
 public class DepositAccount {
     @Id
     private String id;
