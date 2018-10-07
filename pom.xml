@@ -24,7 +24,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>postings</module>
-		<module>postingserver</module>        
+		<module>postingserver</module>
+		<module>payment-accounts</module>
     </modules>
     <packaging>pom</packaging>
 
