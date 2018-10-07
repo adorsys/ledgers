@@ -26,6 +26,7 @@
         <module>postings</module>
 		<module>postingserver</module>
 		<module>payment-accounts</module>
+		<module>ledgers-utils</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -1,0 +1,49 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsiF3sT3ig"
+                      user="Serhii"
+                      created="2018-10-07 00:00:00.000"
+                      name="CoA-Deposit"
+    />
+
+    <LEDGER id="Zd0ND5YwSzGwIfZilhumPg"
+            name="Ledger-Deposit"
+            created="2018-10-07 00:00:00.000"
+            user="Serhii"
+            coa_id="ci8k8PDcTrCsiF3sT3ig"
+            last_closing="2018-10-07 00:00:00.000"
+    />
+
+    <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_AS"
+            created="2018-10-07 00:00:00.000"
+            user="Serhii"
+            coa_id="ci8k8PDcTrCsiF3sT3ig"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+          	balance_side="Dr"
+          	category="AS"
+            name="Assets"
+            short_desc="Asset Accounts"
+    />
+
+    <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_LI"
+            created="2018-10-07 00:00:00.000"
+            user="Serhii"
+            coa_id="ci8k8PDcTrCsiF3sT3ig"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+          	balance_side="Cr"
+          	category="LI"
+            name="Liabilities"
+            short_desc="Liability Accounts"
+    />
+
+    <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_Deposits"
+            created="2018-10-07 00:00:00.000"
+            user="Serhii"
+            coa_id="ci8k8PDcTrCsiF3sT3ig"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+            parent_id="xVgaTPMcRty9ik3BTQDh1Q_LI"
+          	balance_side="Cr"
+          	category="LI"
+            name="Deposits"
+            short_desc="Customer Deposit Accounts"
+    />
+</dataset>

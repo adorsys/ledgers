@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.deposit.repository;
 
 import java.util.Currency;
-import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Assume;
@@ -22,10 +21,11 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.deposit.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.domain.DepositAccount;
-import de.adorsys.ledgers.deposit.test.DapositAccountApplication;
+import de.adorsys.ledgers.deposit.test.DepositAccountApplication;
+import de.adorsys.ledgers.utils.Ids;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=DapositAccountApplication.class)
+@SpringBootTest(classes=DepositAccountApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
@@ -39,7 +39,7 @@ public class ITDepositAccountRepositoryTest {
 	public void test_create_deposit_account_ok() {
 
 		DepositAccount da = DepositAccount.builder()
-			.id(UUID.randomUUID().toString())
+			.id(Ids.id())
 			.iban("345234523")
 			.currency(Currency.getInstance("EUR"))
 			.accountStatus(AccountStatus.ENABLED)
@@ -66,7 +66,7 @@ public class ITDepositAccountRepositoryTest {
 		DepositAccount depositAccount = repository.findById("ci8k8PDcTrCsiF3sT3ig").orElse(null);
 		Assume.assumeNotNull(depositAccount);
 		DepositAccount da = DepositAccount.builder()
-				.id(UUID.randomUUID().toString())
+				.id(Ids.id())
 				.iban(depositAccount.getIban())
 				.currency(depositAccount.getCurrency())
 				.accountStatus(AccountStatus.ENABLED)

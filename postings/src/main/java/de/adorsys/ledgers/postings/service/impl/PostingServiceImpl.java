@@ -16,10 +16,10 @@ import de.adorsys.ledgers.postings.domain.PostingStatus;
 import de.adorsys.ledgers.postings.domain.PostingType;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.PostingService;
-import de.adorsys.ledgers.postings.utils.CloneUtils;
 import de.adorsys.ledgers.postings.utils.DoubleEntryBookKeeping;
-import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.postings.utils.LedgerPolicies;
+import de.adorsys.ledgers.utils.CloneUtils;
+import de.adorsys.ledgers.utils.Ids;
 
 @Service
 @Transactional

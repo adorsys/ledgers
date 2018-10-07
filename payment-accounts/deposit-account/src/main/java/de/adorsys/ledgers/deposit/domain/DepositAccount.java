@@ -11,11 +11,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
+@Getter
 @NoArgsConstructor
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames = { "iban", "currency" }, name = "DepositAccount_iban_currency_unique")

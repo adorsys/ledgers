@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.postings.utils;
+package de.adorsys.ledgers.utils;
 
 import java.io.IOException;
 import java.util.List;

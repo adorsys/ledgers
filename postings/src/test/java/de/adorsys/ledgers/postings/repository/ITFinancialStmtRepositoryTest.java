@@ -18,8 +18,8 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.domain.FinancialStmt;
 import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.utils.Ids;
 import de.adorsys.ledgers.tests.PostingsApplication;
+import de.adorsys.ledgers.utils.Ids;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)

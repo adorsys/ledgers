@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
-import de.adorsys.ledgers.postings.utils.CloneUtils;
-import de.adorsys.ledgers.postings.utils.Ids;
+import de.adorsys.ledgers.utils.CloneUtils;
+import de.adorsys.ledgers.utils.Ids;
 
 @Service
 @Transactional
