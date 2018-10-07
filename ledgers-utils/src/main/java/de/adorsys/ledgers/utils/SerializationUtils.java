@@ -10,4 +10,8 @@ public class SerializationUtils {
 	        throws JsonProcessingException{
 		return OBJECT_MAPPER.writeValueAsBytes(value);
 	}
+	public static String writeValueAsString(Object value)
+	        throws JsonProcessingException{
+		return OBJECT_MAPPER.writeValueAsString(value);
+	}
 }

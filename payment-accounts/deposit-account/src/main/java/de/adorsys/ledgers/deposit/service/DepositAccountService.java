@@ -5,7 +5,6 @@ import de.adorsys.ledgers.postings.exception.NotFoundException;
 
 public interface DepositAccountService {
 
-	DepositAccount createDepositAccount(DepositAccount depositAccount, String ledgerName,
-			String depositParentAccountNumber) throws NotFoundException;
+	DepositAccount createDepositAccount(DepositAccount depositAccount);
 
 }
