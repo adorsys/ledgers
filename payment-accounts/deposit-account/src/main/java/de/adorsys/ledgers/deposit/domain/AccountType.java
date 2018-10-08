@@ -64,7 +64,6 @@ public enum AccountType {
 
     static {
         AccountType[] var0 = values();
-        int var1 = var0.length;
 
         for (AccountType accountType : var0) {
             container.put(accountType.getValue(), accountType);

@@ -6,8 +6,9 @@ import java.util.Base64.Encoder;
 import java.util.UUID;
 
 public class Ids {
-	private static Encoder URL_ENCODER = Base64.getUrlEncoder();
-	
+	private static final Encoder URL_ENCODER = Base64.getUrlEncoder();
+
+	@SuppressWarnings("PMD")
 	public static String id() {
 		UUID uuid = UUID.randomUUID();
 		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);

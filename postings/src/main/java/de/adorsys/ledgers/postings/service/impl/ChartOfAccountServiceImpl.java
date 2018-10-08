@@ -28,10 +28,10 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
 		LocalDateTime created = LocalDateTime.now();
 		String user = principal.getName();
 		// Save new coa
-		coa = new ChartOfAccount(Ids.id(), created, user, coa.getShortDesc(), coa.getLongDesc(), coa.getName());
+		ChartOfAccount chartOfAccount = new ChartOfAccount(Ids.id(), created, user, coa.getShortDesc(), coa.getLongDesc(), coa.getName());
 
 		// Return clone.
-		return CloneUtils.cloneObject(chartOfAccountRepo.save(coa), ChartOfAccount.class);
+		return CloneUtils.cloneObject(chartOfAccountRepo.save(chartOfAccount), ChartOfAccount.class);
 	}
 
 	@Override

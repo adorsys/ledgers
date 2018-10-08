@@ -36,30 +36,30 @@ public class AbstractServiceImpl {
 	protected PostingLineRepository postingLineRepository;
 
 	protected Ledger loadLedger(Ledger model) throws NotFoundException {
-		if (model == null)
+		if (model == null) {
 			throw nullInfo();
-
-		if (model.getId() != null)
+		}
+		if (model.getId() != null) {
 			return ledgerRepository.findById(model.getId()).orElseThrow(() -> notFoundById(model));
-
-		if (model.getName() != null)
+		}
+		if (model.getName() != null) {
 			return ledgerRepository.findOptionalByName(model.getName())
-					.orElseThrow(() -> notFoundByNameAndContainer(model, null));
-
+					       .orElseThrow(() -> notFoundByNameAndContainer(model, null));
+		}
 		throw insufficientInfo(model);
 	}
 
 	protected ChartOfAccount loadCoa(ChartOfAccount model) throws NotFoundException {
-		if (model == null)
+		if (model == null) {
 			throw nullInfo();
-
-		if (model.getId() != null)
+		}
+		if (model.getId() != null) {
 			return chartOfAccountRepo.findById(model.getId()).orElseThrow(() -> notFoundById(model));
-
-		if (model.getName() != null)
+		}
+		if (model.getName() != null) {
 			return chartOfAccountRepo.findOptionalByName(model.getName())
-					.orElseThrow(() -> notFoundByNameAndContainer(model, null));
-
+					       .orElseThrow(() -> notFoundByNameAndContainer(model, null));
+		}
 		throw insufficientInfo(model);
 	}
 
@@ -69,19 +69,18 @@ public class AbstractServiceImpl {
 	 * is provided, we use them to load the account.
 	 */
 	protected LedgerAccount loadLedgerAccount(LedgerAccount model) throws NotFoundException {
-		if (model == null)
+		if (model == null) {
 			throw nullInfo();
-
-		if (model.getId() != null) 
+		}
+		if (model.getId() != null) {
 			return ledgerAccountRepository.findById(model.getId())
-					.orElseThrow(() -> notFoundById(model));
-		
+					       .orElseThrow(() -> notFoundById(model));
+		}
 		if (model.getLedger() != null && model.getName() != null) {
 			Ledger loadedLedger = loadLedger(model.getLedger());
 			return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, model.getName())
 					.orElseThrow(() -> notFoundByNameAndContainer(model, loadedLedger));
 		}
-		
 		throw insufficientInfo(model);
 	}
 
@@ -101,9 +100,10 @@ public class AbstractServiceImpl {
 	}
 
 	private NotFoundException notFoundByNameAndContainer(NamedEntity model, NamedEntity container) {
-		if (container == null)
+		if (container == null) {
 			return new NotFoundException(
 					String.format("Entity of type %s and name %s", model.getClass().getName(), model.getName()));
+		}
 		return new NotFoundException(String.format("Entity of type %s and name %s from container %s not found.",
 				model.getClass().getName(), model.getName(), container.getName()));
 	}

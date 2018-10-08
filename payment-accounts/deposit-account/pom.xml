@@ -10,6 +10,7 @@
 	
 	<properties>
         <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
+		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>
 
 	<dependencies>

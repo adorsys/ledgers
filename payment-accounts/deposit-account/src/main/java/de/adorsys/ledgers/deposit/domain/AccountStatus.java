@@ -47,7 +47,6 @@ public enum AccountStatus {
 
     static {
         AccountStatus[] var0 = values();
-        int var1 = var0.length;
 
         for (AccountStatus accountStatus : var0) {
             container.put(accountStatus.getValue(), accountStatus);

@@ -46,7 +46,6 @@ public enum AccountUsage {
 
     static {
         AccountUsage[] var0 = values();
-        int var1 = var0.length;
 
         for (AccountUsage usageType : var0) {
             container.put(usageType.getValue(), usageType);

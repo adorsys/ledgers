@@ -6,7 +6,13 @@
 		<artifactId>ledgers</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+
 	<artifactId>ledgers-utils</artifactId>
+
+	<properties>
+		<ruleset.basedir>..</ruleset.basedir>
+	</properties>
+
 	<dependencies>
 
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
