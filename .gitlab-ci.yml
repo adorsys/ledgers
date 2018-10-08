@@ -34,9 +34,6 @@ variables: &variables
 # reusable yaml anchors
 # ------------------------------------------------------------------
 
-.java_artifacts: &java_artifacts
-  - "spi-mock/target/spi-mock*jar"
-
 .build_java: &build_java
   image: "adorsys/openjdk-build-base:8"
   script:
@@ -59,7 +56,7 @@ build_package:
   stage: "build"
   artifacts:
     paths:
-    <<: *java_artifacts
+    - "spi-mock/target/spi-mock*jar"
     - "qa/pmd/pmd-ruleset.xml"
     - "**/**/*/pmd.html"
     - "**/*/pmd.xml"
