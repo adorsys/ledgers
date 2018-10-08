@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.adorsys.ledgers.postings.domain.OpNote;
 import de.adorsys.ledgers.tests.PostingsApplication;
-import de.adorsys.ledgers.utils.Ids;
+import de.adorsys.ledgers.util.Ids;
 
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;

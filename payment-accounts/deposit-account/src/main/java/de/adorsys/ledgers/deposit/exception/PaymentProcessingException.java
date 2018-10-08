@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.domain;
+package de.adorsys.ledgers.deposit.exception;
 
-import lombok.Data;
+public class PaymentProcessingException extends Exception {
+    public PaymentProcessingException() {
+    }
 
-@Data
-public class SinglePayment extends BasePayment {
-    private String paymentId;
-    private String endToEndIdentification;
-    private Amount instructedAmount;
-    private AccountReference creditorAccount;
-    private String creditorAgent;
-    private String creditorName;
-    private Address creditorAddress;
-    private String remittanceInformationUnstructured;
-    protected PaymentProduct paymentProduct;
+    public PaymentProcessingException(String message) {
+        super(message);
+    }
+
+    public PaymentProcessingException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

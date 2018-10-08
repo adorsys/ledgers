@@ -22,7 +22,7 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.deposit.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.test.DepositAccountApplication;
-import de.adorsys.ledgers.utils.Ids;
+import de.adorsys.ledgers.util.Ids;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=DepositAccountApplication.class)

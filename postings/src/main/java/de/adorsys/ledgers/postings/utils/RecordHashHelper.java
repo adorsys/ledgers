@@ -7,8 +7,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.adorsys.ledgers.postings.domain.Posting;
 import de.adorsys.ledgers.postings.domain.PostingTrace;
-import de.adorsys.ledgers.utils.Base16;
-import de.adorsys.ledgers.utils.SerializationUtils;
+import de.adorsys.ledgers.util.Base16;
+import de.adorsys.ledgers.util.SerializationUtils;
 
 public class RecordHashHelper {
 

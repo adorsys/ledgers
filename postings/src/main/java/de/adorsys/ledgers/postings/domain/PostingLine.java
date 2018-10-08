@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 
-import de.adorsys.ledgers.utils.Ids;
+import de.adorsys.ledgers.util.Ids;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

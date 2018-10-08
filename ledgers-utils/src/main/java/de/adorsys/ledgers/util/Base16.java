@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.utils;
+package de.adorsys.ledgers.util;
 
 import com.google.common.io.BaseEncoding;
 

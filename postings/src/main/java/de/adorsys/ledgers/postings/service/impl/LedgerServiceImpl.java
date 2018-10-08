@@ -13,8 +13,8 @@ import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
-import de.adorsys.ledgers.utils.CloneUtils;
-import de.adorsys.ledgers.utils.Ids;
+import de.adorsys.ledgers.util.CloneUtils;
+import de.adorsys.ledgers.util.Ids;
 
 @Service
 @Transactional

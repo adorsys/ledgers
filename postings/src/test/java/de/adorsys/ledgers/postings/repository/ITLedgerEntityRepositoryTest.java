@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.tests.PostingsApplication;
-import de.adorsys.ledgers.utils.Ids;
+import de.adorsys.ledgers.util.Ids;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)

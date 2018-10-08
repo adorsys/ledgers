@@ -18,8 +18,8 @@ import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.PostingService;
 import de.adorsys.ledgers.postings.utils.DoubleEntryBookKeeping;
 import de.adorsys.ledgers.postings.utils.LedgerPolicies;
-import de.adorsys.ledgers.utils.CloneUtils;
-import de.adorsys.ledgers.utils.Ids;
+import de.adorsys.ledgers.util.CloneUtils;
+import de.adorsys.ledgers.util.Ids;
 
 @Service
 @Transactional

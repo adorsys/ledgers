@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.utils;
+package de.adorsys.ledgers.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

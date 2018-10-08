@@ -17,16 +17,11 @@
 package de.adorsys.ledgers.deposit.domain;
 
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 @Data
-public class SinglePayment extends BasePayment {
-    private String paymentId;
-    private String endToEndIdentification;
-    private Amount instructedAmount;
-    private AccountReference creditorAccount;
-    private String creditorAgent;
-    private String creditorName;
-    private Address creditorAddress;
-    private String remittanceInformationUnstructured;
-    protected PaymentProduct paymentProduct;
+public abstract class BasePayment {
+    @NotNull
+    private AccountReference debtorAccount;
+    private TransactionStatus transactionStatus;
 }

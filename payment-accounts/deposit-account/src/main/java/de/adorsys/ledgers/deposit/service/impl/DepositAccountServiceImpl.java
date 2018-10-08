@@ -2,9 +2,14 @@ package de.adorsys.ledgers.deposit.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.adorsys.ledgers.deposit.domain.BasePayment;
+import de.adorsys.ledgers.deposit.domain.BulkPayment;
+import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +29,9 @@ import de.adorsys.ledgers.postings.domain.PostingType;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.service.PostingService;
-import de.adorsys.ledgers.utils.CloneUtils;
-import de.adorsys.ledgers.utils.Ids;
-import de.adorsys.ledgers.utils.SerializationUtils;
+import de.adorsys.ledgers.util.CloneUtils;
+import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
 public class DepositAccountServiceImpl implements DepositAccountService {
@@ -79,48 +84,119 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
     @Override
-    public SinglePayment executeSinglePaymentWithoutSca(SinglePayment payment, String ledgerName) throws NotFoundException, JsonProcessingException {
-        LocalDateTime now = LocalDateTime.now();
-        String oprDetails = SerializationUtils.writeValueAsString(payment);
+    public SinglePayment executeSinglePayment(SinglePayment payment, String ledgerName) throws PaymentProcessingException {
+
+        String oprDetails;
+
+        try {
+            oprDetails = SerializationUtils.writeValueAsString(payment);
+        } catch (JsonProcessingException e) {
+            throw new PaymentProcessingException("Payment object can't be serialized");
+        }
         Ledger ledger = depositAccountConfigService.getLedger();
 
         // Validation debtor account number
-        String iban = payment.getDebtorAccount().getIban();
-//        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
-        LedgerAccount debtorLedgerAccount = ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
+        LedgerAccount debtorLedgerAccount = getDebtorLedgerAccount(ledger, payment);
 
         String creditorIban = payment.getCreditorAccount().getIban();
         LedgerAccount creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
 
+        BigDecimal amount = payment.getInstructedAmount().getAmount();
 
-        PostingLine debitLine = PostingLine.builder()
-                                        .details(oprDetails)
-                                        .account(debtorLedgerAccount)
-                                        .debitAmount(payment.getInstructedAmount().getAmount())
-                                        .creditAmount(BigDecimal.ZERO)
-                                        .build();
+        PostingLine debitLine = getDebitLine(oprDetails, debtorLedgerAccount, amount);
 
-        PostingLine creditLine = PostingLine.builder()
-                                         .details(oprDetails)
-                                         .account(creditLedgerAccount)
-                                         .debitAmount(BigDecimal.ZERO)
-                                         .creditAmount(payment.getInstructedAmount().getAmount())
-                                         .build();
+        PostingLine creditLine = getCreditLine(oprDetails, creditLedgerAccount, amount);
+
         List<PostingLine> lines = Arrays.asList(debitLine, creditLine);
 
-        Posting posting = Posting.builder()
-                                  .oprId(Ids.id())
-                                  .oprTime(now)
-                                  .oprDetails(oprDetails)
-                                  .pstTime(now)
-                                  .pstType(PostingType.BUSI_TX)
-                                  .pstStatus(PostingStatus.POSTED)
-                                  .ledger(ledger)
-                                  .valTime(now)
-                                  .lines(lines)
-                                  .build();
+        Posting posting = getPosting(oprDetails, ledger, lines);
 
-        postingService.newPosting(posting);
+        try {
+            postingService.newPosting(posting);
+        } catch (NotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage());
+        }
         return null;
+    }
+
+    @NotNull
+    private LedgerAccount getDebtorLedgerAccount(Ledger ledger, BasePayment payment) throws PaymentProcessingException {
+        String iban = payment.getDebtorAccount().getIban();
+//        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
+        return ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new PaymentProcessingException("Ledger account was not found by iban=" + iban));
+    }
+
+    private PostingLine getDebitLine(String oprDetails, LedgerAccount debtorLedgerAccount, BigDecimal amount) {
+        return PostingLine.builder()
+                       .details(oprDetails)
+                       .account(debtorLedgerAccount)
+                       .debitAmount(amount)
+                       .creditAmount(BigDecimal.ZERO)
+                       .build();
+    }
+
+    private PostingLine getCreditLine(String oprDetails, LedgerAccount creditLedgerAccount, BigDecimal amount) {
+        return PostingLine.builder()
+                       .details(oprDetails)
+                       .account(creditLedgerAccount)
+                       .debitAmount(BigDecimal.ZERO)
+                       .creditAmount(amount)
+                       .build();
+    }
+
+    @Override
+    public SinglePayment executeBulkPayment(BulkPayment payment, String ledgerName) throws PaymentProcessingException {
+
+        String oprDetails;
+        try {
+            oprDetails = SerializationUtils.writeValueAsString(payment);
+        } catch (JsonProcessingException e) {
+            throw new PaymentProcessingException("Payment object can't be serialized");
+        }
+        Ledger ledger = depositAccountConfigService.getLedger();
+
+        // Validation debtor account number
+        LedgerAccount debtorLedgerAccount = getDebtorLedgerAccount(ledger, payment);
+
+//        todo: how we should proceed with batchBookingPreferred = true ?
+
+        List<PostingLine> lines = new ArrayList<>();
+
+        for (SinglePayment singlePayment : payment.getPayments()) {
+
+            String creditorIban = singlePayment.getCreditorAccount().getIban();
+
+            LedgerAccount creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+
+            PostingLine debitLine = getDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+            lines.add(debitLine);
+
+            PostingLine creditLine = getCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+            lines.add(creditLine);
+        }
+
+        Posting posting = getPosting(oprDetails, ledger, lines);
+
+        try {
+            postingService.newPosting(posting);
+        } catch (NotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage());
+        }
+        return null;
+    }
+
+    private Posting getPosting(String oprDetails, Ledger ledger, List<PostingLine> lines) {
+        LocalDateTime now = LocalDateTime.now();
+        return Posting.builder()
+                       .oprId(Ids.id())
+                       .oprTime(now)
+                       .oprDetails(oprDetails)
+                       .pstTime(now)
+                       .pstType(PostingType.BUSI_TX)
+                       .pstStatus(PostingStatus.POSTED)
+                       .ledger(ledger)
+                       .valTime(now)
+                       .lines(lines)
+                       .build();
     }
 }

@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.utils;
+package de.adorsys.ledgers.util;
 
 import java.nio.ByteBuffer;
 import java.util.Base64;
