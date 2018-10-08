@@ -24,6 +24,10 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<ruleset.basedir>..</ruleset.basedir>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>

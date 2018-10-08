@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CloneUtils {
-	private static ObjectMapper objectMapper = new ObjectMapper();
+	private static ObjectMapper objectMapper;
 	static {
 		objectMapper = new ObjectMapper();
 		objectMapper.findAndRegisterModules();
