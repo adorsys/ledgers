@@ -26,7 +26,7 @@ variables: &variables
   # Build variables         #
   ###########################
 
-  JAVA_TOOL_OPTIONS: "-Xmx250M"
+#  JAVA_TOOL_OPTIONS: "-Xmx250M"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 
