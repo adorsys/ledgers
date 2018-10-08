@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.aspspspi;
+package de.adorsys.ledgers.deposit.domain;
 
-public enum SpiResponseStatus {
-    SUCCESS,
-    TECHNICAL_FAILURE,
-    UNAUTHORIZED_FAILURE,
-    LOGICAL_FAILURE,
-    NOT_SUPPORTED
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+public enum PaymentType {
+    SINGLE("payments"),
+    BULK("bulk-payments"),
+    PERIODIC("periodic-payments");
+
+    private String paymentType;
+
+    @JsonCreator
+    PaymentType(String paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public String getSpiPaymentType() {
+        return paymentType;
+    }
 }

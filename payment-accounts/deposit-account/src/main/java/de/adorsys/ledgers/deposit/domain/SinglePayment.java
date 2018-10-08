@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.aspspspi;
+package de.adorsys.ledgers.deposit.domain;
 
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.Currency;
-
-@Slf4j
-@Value
-public class SpiAmount {
-    private Currency currency;
-    private BigDecimal amount;
+@Data
+public class SinglePayment {
+    private String paymentId;
+    private String endToEndIdentification;
+    private AccountReference debtorAccount;
+    private Amount instructedAmount;
+    private AccountReference creditorAccount;
+    private String creditorAgent;
+    private String creditorName;
+    private Address creditorAddress;
+    private String remittanceInformationUnstructured;
+    private TransactionStatus paymentStatus;
+    protected PaymentProduct paymentProduct;
 }

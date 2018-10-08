@@ -14,14 +14,17 @@
 
 	<dependencies>
 
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-utils</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+		<!-- project dependencies -->
+
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>postings</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-utils</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -82,8 +85,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 
-		 -->
 		<dependency>
 			<groupId>org.dbunit</groupId>
 			<artifactId>dbunit</artifactId>

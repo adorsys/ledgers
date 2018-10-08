@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.aspspspi;
+package de.adorsys.ledgers.deposit.domain;
 
-import lombok.*;
-import lombok.experimental.NonFinal;
-import org.springframework.data.annotation.Id;
-
-import java.util.Currency;
+import lombok.Value;
 
 @Value
-@AllArgsConstructor
-public class SpiAccountReference {
-    @Id
-    @Setter
-    @NonFinal
-    private String iban;
-    private String bban;
-    private String pan;
-    private String maskedPan;
-    private String msisdn;
-    private Currency currency;
+public class Address {
+    private String street;
+    private String buildingNumber;
+    private String city;
+    private String postalCode;
+    private String country;
 }

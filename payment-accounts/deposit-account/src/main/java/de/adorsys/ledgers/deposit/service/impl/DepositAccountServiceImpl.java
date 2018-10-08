@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.adorsys.ledgers.deposit.aspspspi.AspspConsentData;
-import de.adorsys.ledgers.deposit.aspspspi.SpiResponse;
-import de.adorsys.ledgers.deposit.aspspspi.SpiSinglePayment;
+import de.adorsys.ledgers.deposit.domain.SinglePayment;
 import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.service.DepositAccountConfigService;
@@ -78,7 +76,8 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 		
 	}
 	
-    public SpiResponse<SpiSinglePayment> executePaymentWithoutSca(SpiSinglePayment payment, AspspConsentData aspspConsentData, String ledgerName) throws NotFoundException, JsonProcessingException {
+    @Override
+    public SinglePayment executeSinglePaymentWithoutSca(SinglePayment payment, String ledgerName) throws NotFoundException, JsonProcessingException {
     	LocalDateTime now = LocalDateTime.now();
     	String oprDetails = SerializationUtils.writeValueAsString(payment);
 		Ledger ledger = depositAccountConfigService.getLedger();
@@ -100,6 +99,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 			.debitAmount(payment.getInstructedAmount().getAmount())
 			.creditAmount(BigDecimal.ZERO)
 			.build();
+
 		PostingLine creditLine = PostingLine.builder()
 				.details(oprDetails)
 				.account(creditLedgerAccount)
@@ -119,8 +119,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     			.valTime(now)
     			.lines(lines)
     			.build();
-    	
-		
+
 		Posting newPosting = postingService.newPosting(posting);
         return null;
     }

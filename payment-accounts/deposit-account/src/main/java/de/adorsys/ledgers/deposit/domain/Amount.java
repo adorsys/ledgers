@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.aspspspi;
+package de.adorsys.ledgers.deposit.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum SpiPaymentType {
-    SINGLE("payments"),
-    BULK("bulk-payments"),
-    PERIODIC("periodic-payments");
+import java.math.BigDecimal;
+import java.util.Currency;
 
-    private String paymentType;
-
-    @JsonCreator
-    SpiPaymentType(String paymentType) {
-        this.paymentType = paymentType;
-    }
-
-    public String getSpiPaymentType() {
-        return paymentType;
-    }
+@Slf4j
+@Value
+public class Amount {
+    private Currency currency;
+    private BigDecimal amount;
 }

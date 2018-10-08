@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.aspspspi;
+package de.adorsys.ledgers.deposit.domain;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum SpiPaymentProduct {
+public enum PaymentProduct {
     SEPA("sepa-credit-transfers"),
     INSTANT_SEPA("instant-sepa-credit-transfers"),
     TARGET2("target-2-payments"),
@@ -28,14 +28,14 @@ public enum SpiPaymentProduct {
 
     private String value;
 
-    private static Map<String, SpiPaymentProduct> container = new HashMap<>();
+    private static Map<String, PaymentProduct> container = new HashMap<>();
 
     static {
         Arrays.stream(values())
             .forEach(product -> container.put(product.getValue(), product));
     }
 
-    SpiPaymentProduct(String value) {
+    PaymentProduct(String value) {
         this.value = value;
     }
 
@@ -43,7 +43,7 @@ public enum SpiPaymentProduct {
         return value;
     }
 
-    public static SpiPaymentProduct getByValue(String value) {
+    public static PaymentProduct getByValue(String value) {
         return container.get(value);
     }
 }

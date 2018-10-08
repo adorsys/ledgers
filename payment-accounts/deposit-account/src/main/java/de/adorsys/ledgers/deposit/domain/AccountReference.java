@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.aspspspi;
+package de.adorsys.ledgers.deposit.domain;
 
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.NonFinal;
+import org.springframework.data.annotation.Id;
 
-@Data
-public class SpiSinglePayment {
-    private String paymentId;
-    private String endToEndIdentification;
-    private SpiAccountReference debtorAccount;
-    private SpiAmount instructedAmount;
-    private SpiAccountReference creditorAccount;
-    private String creditorAgent;
-    private String creditorName;
-    private SpiAddress creditorAddress;
-    private String remittanceInformationUnstructured;
-    private SpiTransactionStatus paymentStatus;
-    protected SpiPaymentProduct paymentProduct;
+import java.util.Currency;
+
+@Value
+@AllArgsConstructor
+public class AccountReference {
+    @Id
+    @Setter
+    @NonFinal
+    private String iban;
+    private String bban;
+    private String pan;
+    private String maskedPan;
+    private String msisdn;
+    private Currency currency;
 }
