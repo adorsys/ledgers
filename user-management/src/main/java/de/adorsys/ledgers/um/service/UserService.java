@@ -19,12 +19,15 @@ package de.adorsys.ledgers.um.service;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.um.domain.User;
 import de.adorsys.ledgers.um.exception.UserAlreadyExistsException;
+import de.adorsys.ledgers.um.exception.UserNotFoundException;
+
+import java.util.Optional;
 
 public interface UserService {
 
     User create(User user) throws UserAlreadyExistsException;
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
-    void addAccount(String userEmail, LedgerAccount account);
+    void addAccount(String userEmail, LedgerAccount account) throws UserNotFoundException;
 }
