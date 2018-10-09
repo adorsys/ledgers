@@ -103,13 +103,13 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
         BigDecimal amount = payment.getInstructedAmount().getAmount();
 
-        PostingLine debitLine = getDebitLine(oprDetails, debtorLedgerAccount, amount);
+        PostingLine debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, amount);
 
-        PostingLine creditLine = getCreditLine(oprDetails, creditLedgerAccount, amount);
+        PostingLine creditLine = buildCreditLine(oprDetails, creditLedgerAccount, amount);
 
         List<PostingLine> lines = Arrays.asList(debitLine, creditLine);
 
-        Posting posting = getPosting(oprDetails, ledger, lines);
+        Posting posting = buildPosting(oprDetails, ledger, lines);
 
         try {
             postingService.newPosting(posting);
@@ -117,31 +117,6 @@ public class DepositAccountServiceImpl implements DepositAccountService {
             throw new PaymentProcessingException(e.getMessage());
         }
         return null;
-    }
-
-    @NotNull
-    private LedgerAccount getDebtorLedgerAccount(Ledger ledger, BasePayment payment) throws PaymentProcessingException {
-        String iban = payment.getDebtorAccount().getIban();
-//        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
-        return ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new PaymentProcessingException("Ledger account was not found by iban=" + iban));
-    }
-
-    private PostingLine getDebitLine(String oprDetails, LedgerAccount debtorLedgerAccount, BigDecimal amount) {
-        return PostingLine.builder()
-                       .details(oprDetails)
-                       .account(debtorLedgerAccount)
-                       .debitAmount(amount)
-                       .creditAmount(BigDecimal.ZERO)
-                       .build();
-    }
-
-    private PostingLine getCreditLine(String oprDetails, LedgerAccount creditLedgerAccount, BigDecimal amount) {
-        return PostingLine.builder()
-                       .details(oprDetails)
-                       .account(creditLedgerAccount)
-                       .debitAmount(BigDecimal.ZERO)
-                       .creditAmount(amount)
-                       .build();
     }
 
     @Override
@@ -168,14 +143,14 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
             LedgerAccount creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
 
-            PostingLine debitLine = getDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+            PostingLine debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
             lines.add(debitLine);
 
-            PostingLine creditLine = getCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+            PostingLine creditLine = buildCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
             lines.add(creditLine);
         }
 
-        Posting posting = getPosting(oprDetails, ledger, lines);
+        Posting posting = buildPosting(oprDetails, ledger, lines);
 
         try {
             postingService.newPosting(posting);
@@ -185,7 +160,31 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         return null;
     }
 
-    private Posting getPosting(String oprDetails, Ledger ledger, List<PostingLine> lines) {
+    private PostingLine buildCreditLine(String oprDetails, LedgerAccount creditLedgerAccount, BigDecimal amount) {
+        return buildPostingLine(oprDetails, creditLedgerAccount, BigDecimal.ZERO, amount);
+    }
+
+    private PostingLine buildDebitLine(String oprDetails, LedgerAccount debtorLedgerAccount, BigDecimal amount) {
+        return buildPostingLine(oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
+    }
+
+    private PostingLine buildPostingLine(String oprDetails, LedgerAccount creditLedgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
+        return PostingLine.builder()
+                       .details(oprDetails)
+                       .account(creditLedgerAccount)
+                       .debitAmount(debitAmount)
+                       .creditAmount(creditAmount)
+                       .build();
+    }
+
+    @NotNull
+    private LedgerAccount getDebtorLedgerAccount(Ledger ledger, BasePayment payment) throws PaymentProcessingException {
+        String iban = payment.getDebtorAccount().getIban();
+//        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
+        return ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new PaymentProcessingException("Ledger account was not found by iban=" + iban));
+    }
+
+    private Posting buildPosting(String oprDetails, Ledger ledger, List<PostingLine> lines) {
         LocalDateTime now = LocalDateTime.now();
         return Posting.builder()
                        .oprId(Ids.id())
