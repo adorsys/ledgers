@@ -46,10 +46,10 @@ public class User {
     @NotNull
     private String pin;
 
-//    @ManyToMany
-//    @JoinTable(name = "user_ledger_account",
-//            joinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id"),
-//            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-//    )
-//    private List<LedgerAccount> accounts;
+    @ManyToMany
+    @JoinTable(name = "user_ledger_account",
+            joinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    )
+    private List<LedgerAccount> accounts;
 }
