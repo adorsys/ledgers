@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByEmail(userEmail);
         userOptional.orElseThrow(() -> new UserNotFoundException(String.format("User with email %s was not found", userEmail)));
         User user = userOptional.get();
-        user.getAccounts().add(account);
+//        user.getAccounts().add(account);
         userRepository.save(user);
     }
 }

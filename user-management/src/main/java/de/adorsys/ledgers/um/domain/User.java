@@ -17,28 +17,27 @@
 package de.adorsys.ledgers.um.domain;
 
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.List;
 
-@Getter
+@Data
+@Entity
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @NotNull
     private String email;
     @NotNull
     private String pin;
-    @ManyToMany
-    @JoinTable(name = "user_ledger_account",
-            joinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "email")
-    )
-    private List<LedgerAccount> accounts;
+//    @ManyToMany
+//    @JoinTable(name = "user_ledger_account",
+//            joinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id"),
+//            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "email")
+//    )
+//    private List<LedgerAccount> accounts;
 }

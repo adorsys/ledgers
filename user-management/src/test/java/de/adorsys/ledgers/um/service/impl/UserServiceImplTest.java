@@ -37,15 +37,15 @@ public class UserServiceImplTest {
         }
     }
 
-    @Test
-    public void create_user_with_the_same_email() throws UserAlreadyExistsException {
-        User vladimir = User.builder()
-                .email("vne@adorsys.de")
-                .pin("12345678")
-                .build();
-
-        userService.create(vladimir);
-    }
+//    @Test
+//    public void create_user_with_the_same_email() throws UserAlreadyExistsException {
+//        User vladimir = User.builder()
+//                .email("vne@adorsys.de")
+//                .pin("12345678")
+//                .build();
+//
+//        userService.create(vladimir);
+//    }
 
     @Test
     public void findByEmail() {
