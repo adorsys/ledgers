@@ -7,6 +7,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -26,6 +27,7 @@ import lombok.NoArgsConstructor;
 @MappedSuperclass
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 	
@@ -45,13 +47,4 @@ public abstract class BaseEntity {
 
 	/*The long description of this entity*/
 	private String longDesc;
-	
-	public BaseEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc) {
-		super();
-		this.id = id;
-		this.created = created;
-		this.user = user;
-		this.shortDesc = shortDesc;
-		this.longDesc = longDesc;
-	}
 }
