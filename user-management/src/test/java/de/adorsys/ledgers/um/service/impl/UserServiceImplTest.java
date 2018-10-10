@@ -5,7 +5,6 @@ import de.adorsys.ledgers.um.domain.User;
 import de.adorsys.ledgers.um.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.repository.UserRepository;
-import de.adorsys.ledgers.um.service.UserService;
 import de.adorsys.ledgers.util.MD5Util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import sun.security.provider.MD5;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +22,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

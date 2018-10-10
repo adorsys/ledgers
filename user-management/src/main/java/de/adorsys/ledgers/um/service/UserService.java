@@ -30,5 +30,5 @@ public interface UserService {
 
     boolean authorize(String id, String pin, String accountId) throws UserNotFoundException;
 
-    void addAccount(String id, LedgerAccount account) throws UserNotFoundException;
+    void addAccount(String login, LedgerAccount account) throws UserNotFoundException;
 }

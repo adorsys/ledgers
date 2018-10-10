@@ -28,6 +28,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = "login", name = "user_login_unique"),
         @UniqueConstraint(columnNames = "email", name = "user_email_unique")
@@ -46,10 +47,10 @@ public class User {
     @NotNull
     private String pin;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_ledger_account",
-            joinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
     )
     private List<LedgerAccount> accounts;
 }
