@@ -41,6 +41,12 @@
 			<artifactId>guava</artifactId>
 			<version>20.0</version>
 		</dependency>
+
+		<!-- test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
 		
 	</dependencies>
 </project>

@@ -22,13 +22,13 @@ import de.adorsys.ledgers.um.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 public interface UserService {
 
     User create(User user) throws UserAlreadyExistsException;
 
-    Optional<User> findByEmail(String email);
+    boolean authorize(String id, String pin) throws UserNotFoundException;
 
-    void addAccount(String userEmail, LedgerAccount account) throws UserNotFoundException;
+    boolean authorize(String id, String pin, String accountId) throws UserNotFoundException;
+
+    void addAccount(String id, LedgerAccount account) throws UserNotFoundException;
 }

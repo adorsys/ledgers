@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.um.repository;
+package de.adorsys.ledgers.deposit.domain;
 
-import de.adorsys.ledgers.um.domain.User;
-import org.springframework.data.repository.CrudRepository;
-import java.util.Optional;
+import lombok.Data;
+import java.time.LocalDate;
 
-public interface UserRepository extends CrudRepository<User, String> {
-
-    Optional<User> findByLogin(String login);
-
-    boolean existsByLoginAndEmail(String login, String email);
+@Data
+public class PeriodicPayment extends SinglePayment {
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String executionRule;
+    private FrequencyCode frequency; // TODO consider using an enum similar to FrequencyCode based on the the "EventFrequency7Code" of ISO 20022
+    private byte dayOfExecution; //Day here max 31
 }

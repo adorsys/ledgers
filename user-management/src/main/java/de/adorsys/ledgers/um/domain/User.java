@@ -18,26 +18,38 @@ package de.adorsys.ledgers.um.domain;
 
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import lombok.*;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Data
-@Entity
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = "login", name = "user_login_unique"),
+        @UniqueConstraint(columnNames = "email", name = "user_email_unique")
+})
 public class User {
     @Id
+    @Column(name = "user_id")
+    private String id;
+
+    @NotNull
+    private String login;
+
     @NotNull
     private String email;
+
     @NotNull
     private String pin;
+
 //    @ManyToMany
 //    @JoinTable(name = "user_ledger_account",
 //            joinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id"),
-//            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "email")
+//            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
 //    )
 //    private List<LedgerAccount> accounts;
 }

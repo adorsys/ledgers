@@ -22,9 +22,12 @@ import de.adorsys.ledgers.um.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.repository.UserRepository;
 import de.adorsys.ledgers.um.service.UserService;
+import de.adorsys.ledgers.util.MD5Util;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,24 +42,55 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User user) throws UserAlreadyExistsException {
+        String login = user.getLogin();
         String email = user.getEmail();
-        if (userRepository.existsById(email)) {
-            throw new UserAlreadyExistsException(String.format("User with email %s already exists", email));
+
+        if (userRepository.existsByLoginAndEmail(login, email)) {
+            throw new UserAlreadyExistsException(String.format("User with login=%s or email=%s already exists", login, email));
         }
-        return userRepository.save(user);
+
+        User newUser = User.builder()
+                               .id(user.getId())
+                               .login(login)
+                               .email(email)
+                               .pin(MD5Util.encode(user.getPin()))
+                               .accounts(user.getAccounts())
+                               .build();
+
+        return userRepository.save(newUser);
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public boolean authorize(String login, String pin) throws UserNotFoundException {
+        User user = getUser(login);
+        return MD5Util.verify(pin, user.getPin());
     }
 
     @Override
-    public void addAccount(String userEmail, LedgerAccount account) throws UserNotFoundException {
-        Optional<User> userOptional = userRepository.findByEmail(userEmail);
-        userOptional.orElseThrow(() -> new UserNotFoundException(String.format("User with email %s was not found", userEmail)));
-        User user = userOptional.get();
-//        user.getAccounts().add(account);
+    public boolean authorize(String login, String pin, String accountId) throws UserNotFoundException {
+        User user = getUser(login);
+        boolean pinVerified = MD5Util.verify(pin, user.getPin());
+        long count = user.getAccounts().stream().filter(a -> a.getId().equals(accountId)).count();
+        return pinVerified && count > 0;
+    }
+
+    @Override
+    public void addAccount(String login, LedgerAccount account) throws UserNotFoundException {
+        User user = getUser(login);
+        List<LedgerAccount> accounts = user.getAccounts();
+        accounts.add(account);
         userRepository.save(user);
+    }
+
+    @NotNull
+    private User getUser(String login) throws UserNotFoundException {
+        Optional<User> userOptional = userRepository.findByLogin(login);
+        userOptional.orElseThrow(() -> userNotFoundException(login));
+        return userOptional.get();
+    }
+
+    @NotNull
+    private UserNotFoundException userNotFoundException(String login) {
+        return new UserNotFoundException(String.format("User with login %s was not found", login));
     }
 }
