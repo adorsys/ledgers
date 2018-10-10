@@ -18,7 +18,6 @@ package de.adorsys.ledgers.um.domain;
 
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import lombok.*;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;

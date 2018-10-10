@@ -20,7 +20,6 @@ import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.um.domain.User;
 import de.adorsys.ledgers.um.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.exception.UserNotFoundException;
-import org.springframework.stereotype.Service;
 
 public interface UserService {
 
