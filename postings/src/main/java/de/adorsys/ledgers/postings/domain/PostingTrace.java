@@ -18,97 +18,94 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * 
  * Posting traces a used to keep references on input posting
  * while making some aggregation of balance calculation.
- * 
+ * <p>
  * We document statements like balances, balance sheets using posting as well.
  * Since posting never change, any statement produced by this module can be
  * reproduced or checked for integrity.
- * 
+ * <p>
  * Each trace entry keeps reference of an antecedent posting trace.
- * 
+ * <p>
  * The hash value of this posting also includes:
  * - The hash value of the input posting
  * - The hash value of the antecedent posting trace.
- * 
+ * <p>
  * Here we record the posting used and not the operation used.
- * 
- * @author fpo
  *
+ * @author fpo
  */
 @Entity
 @Getter
 @ToString
 @NoArgsConstructor
 public class PostingTrace {
-	
-	@Id
-	private String id;
-	
-	/*
-	 * The position of the target posting in the list.
-	 */
-	@Column(nullable = false, updatable = false)
-	private int pos;
-	
-	/*The source posting id*/
-	@Column(nullable = false, updatable = false)
-	private String srcPstId;
-	
-	/*The hash value of the src posting*/
-	@Column(nullable = false, updatable = false)
-	private String srcPstHash;
+    private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
 
-	/*The target posting id. Posting receiving.*/
-	@Column(nullable = false, updatable = false)
-	private String tgtPstId;
-	
-	/*Id of the antecedent trace.*/
-	private String antTraceId;
+    @Id
+    private String id;
 
-	/*Hash value of the antecedent trace.*/
-	private String antTraceHash;
+    /*
+     * The position of the target posting in the list.
+     */
+    @Column(nullable = false, updatable = false)
+    private int pos;
 
-	@Column(nullable = false, updatable = false)
-	private LocalDateTime recordTime;
-	
-	/*
-	 *The hash value of this trace 
-	 */
-	@Setter
-	@Column(nullable = false, updatable = false)
-	private String hash;
+    /*The source posting id*/
+    @Column(nullable = false, updatable = false)
+    private String srcPstId;
 
-	@Setter
-	@Column(nullable = false, updatable = false)
-	private String hashAlg;
-	
-	@Builder
-	public PostingTrace(String id, int pos, String srcPstId, String srcPstHash, String tgtPstId, String antTraceId,
-			String antTraceHash) {
-		super();
-		this.id = id;
-		this.pos = pos;
-		this.srcPstId = srcPstId;
-		this.srcPstHash = srcPstHash;
-		this.tgtPstId = tgtPstId;
-		this.antTraceId = antTraceId;
-		this.antTraceHash = antTraceHash;
-	}
-	
-	private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
+    /*The hash value of the src posting*/
+    @Column(nullable = false, updatable = false)
+    private String srcPstHash;
 
-	@PrePersist
-	public void hash() {
-		if (hash != null)
-			throw new IllegalStateException("Can not update a posting trace.");
-		recordTime = LocalDateTime.now();
-		try {
-			hash = RECORD_HASH_HELPER.computeRecHash(this);
-		} catch (NoSuchAlgorithmException | JsonProcessingException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-	
+    /*The target posting id. Posting receiving.*/
+    @Column(nullable = false, updatable = false)
+    private String tgtPstId;
+
+    /*Id of the antecedent trace.*/
+    private String antTraceId;
+
+    /*Hash value of the antecedent trace.*/
+    private String antTraceHash;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime recordTime;
+
+    /*
+     *The hash value of this trace
+     */
+    @Setter
+    @Column(nullable = false, updatable = false)
+    private String hash;
+
+    @Setter
+    @Column(nullable = false, updatable = false)
+    private String hashAlg;
+
+    @Builder
+    public PostingTrace(String id, int pos, String srcPstId, String srcPstHash, String tgtPstId, String antTraceId,
+                        String antTraceHash) {
+        super();
+        this.id = id;
+        this.pos = pos;
+        this.srcPstId = srcPstId;
+        this.srcPstHash = srcPstHash;
+        this.tgtPstId = tgtPstId;
+        this.antTraceId = antTraceId;
+        this.antTraceHash = antTraceHash;
+    }
+
+    @PrePersist
+    public void hash() {
+        if (hash != null) {
+            throw new IllegalStateException("Can not update a posting trace.");
+        }
+        recordTime = LocalDateTime.now();
+        try {
+            hash = RECORD_HASH_HELPER.computeRecHash(this);
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }

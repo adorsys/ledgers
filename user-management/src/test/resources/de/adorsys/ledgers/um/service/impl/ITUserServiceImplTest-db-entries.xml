@@ -1,0 +1,35 @@
+<dataset>
+    <USER
+            user_id="1"
+            login="vne"
+            email="vne@adorsys.de"
+            pin="12345678"
+    />
+
+    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsiF3sT3ig"
+                      user="Serhii"
+                      created="2018-10-07 00:00:00.000"
+                      name="CoA-Deposit"
+    />
+
+    <LEDGER id="Zd0ND5YwSzGwIfZilhumPg"
+            name="Ledger-Deposit"
+            created="2018-10-07 00:00:00.000"
+            user="Serhii"
+            coa_id="ci8k8PDcTrCsiF3sT3ig"
+            last_closing="2018-10-07 00:00:00.000"
+    />
+
+    <LEDGER_ACCOUNT id="ledger_account_1"
+                    created="2018-10-07 00:00:00.000"
+                    user="Serhii"
+                    coa_id="ci8k8PDcTrCsiF3sT3ig"
+                    ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+                    balance_side="Cr"
+                    category="LI"
+                    name="Liabilities"
+                    short_desc="Liability Accounts"
+    />
+    <USER_LEDGER_ACCOUNT/>
+
+</dataset>

@@ -15,6 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
+@Getter
 @NoArgsConstructor
 @ToString(callSuper=true)
 /* The name property of a chart of account must be unique. */

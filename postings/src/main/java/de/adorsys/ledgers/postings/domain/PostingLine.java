@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 
-import de.adorsys.ledgers.postings.utils.Ids;
+import de.adorsys.ledgers.util.Ids;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,6 +44,10 @@ public class PostingLine {
 	@Column(nullable=false, updatable=false)
 	private BigDecimal creditAmount;
 	
+	/*
+	 * This is the json representation of the transaction as posted for the
+	 * product module.
+	 */
 	private String details;
 
 	/*
@@ -120,6 +124,12 @@ public class PostingLine {
 	@Column(nullable = false, updatable = false)
 	private String accName;
 	
+	/*
+	 * The Date use to compute interests. This can be different from the posting
+	 * date and can lead to the production of other type of balances.
+	 */
+	private LocalDateTime valTime;
+	
 	private void synchPosting(){
 		this.recordTime = this.posting.getRecordTime();
 		this.oprId = this.posting.getOprId();
@@ -129,6 +139,7 @@ public class PostingLine {
 		this.pstStatus = this.posting.getPstStatus();
 		this.ledger = this.posting.getLedger();
 		this.accName = this.account.getName();
+		this.valTime = this.posting.getValTime();
 	}
 
 	@PrePersist

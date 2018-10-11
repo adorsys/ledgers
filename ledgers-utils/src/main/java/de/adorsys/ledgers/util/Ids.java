@@ -1,19 +1,19 @@
-package de.adorsys.ledgers.postings.utils;
+package de.adorsys.ledgers.util;
 
 import java.nio.ByteBuffer;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.UUID;
 
-import org.apache.commons.codec.binary.Base64;
-
 public class Ids {
+	private static final Encoder URL_ENCODER = Base64.getUrlEncoder();
 
-	private static Base64 base64 = new Base64();
-
+	@SuppressWarnings("PMD")
 	public static String id() {
 		UUID uuid = UUID.randomUUID();
 		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
 		bb.putLong(uuid.getMostSignificantBits());
 		bb.putLong(uuid.getLeastSignificantBits());
-		return base64.encodeBase64URLSafeString(bb.array());
+		return URL_ENCODER.encodeToString(bb.array());
 	}
 }
