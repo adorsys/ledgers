@@ -23,8 +23,9 @@
     <artifactId>ledgers</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
+        <module>app</module>
         <module>postings</module>
-        <module>postingserver</module>
+        <module>posting-server</module>
         <module>payment-accounts</module>
         <module>ledgers-utils</module>
         <module>user-management</module>

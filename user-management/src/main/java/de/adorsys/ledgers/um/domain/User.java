@@ -28,7 +28,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "login", name = "user_login_unique"),
         @UniqueConstraint(columnNames = "email", name = "user_email_unique")
 })
