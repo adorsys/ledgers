@@ -37,8 +37,9 @@ variables: &variables
 .build_java: &build_java
   image: "adorsys/openjdk-build-base:8"
   script:
-    - mvn clean install pmd:pmd pmd:check javadoc:javadoc
+    - mvn clean install pmd:pmd pmd:check
 
+#    - mvn clean install pmd:pmd pmd:check javadoc:javadoc
 # Build docker images and put them to GITLAB repo
 #.build_docker_image: &build_docker_image
 #  script:

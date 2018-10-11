@@ -102,7 +102,7 @@
 			<artifactId>springfox-swagger2</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<!-- Sprinfox and swagger UI-->
+
 	</dependencies>
 
 	<build>
