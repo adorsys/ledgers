@@ -38,12 +38,15 @@ public class User {
     private String id;
 
     @NotNull
+    @Column(nullable=false)
     private String login;
 
     @NotNull
+    @Column(nullable=false)
     private String email;
 
     @NotNull
+    @Column(nullable=false)
     private String pin;
 
     @ManyToMany(fetch = FetchType.EAGER)
