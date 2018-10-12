@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -27,7 +26,6 @@ import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.test.DepositAccountApplication;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
-import de.adorsys.ledgers.postings.service.LedgerService;
 
 @Ignore
 @RunWith(SpringJUnit4ClassRunner.class)

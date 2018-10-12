@@ -6,7 +6,7 @@
 		<artifactId>ledgers</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>app</artifactId>
+	<artifactId>ledgers-app</artifactId>
 	
 	<properties>
 		<ruleset.basedir>..</ruleset.basedir>

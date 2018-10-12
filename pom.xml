@@ -23,7 +23,7 @@
     <artifactId>ledgers</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
-        <module>app</module>
+        <module>ledgers-app</module>
         <module>postings</module>
         <module>posting-server</module>
         <module>payment-accounts</module>
