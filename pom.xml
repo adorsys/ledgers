@@ -24,6 +24,13 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>ledgers-app</module>
+        <module>ledgers-service-api</module>
+        <module>ledgers-service-impl</module>
+        <module>ledgers-db-api</module>
+        <module>ledgers-db-impl</module>
+        <module>ledgers-rest-server</module>
+
+        <!-- out dated -->
         <module>postings</module>
         <module>posting-server</module>
         <module>payment-accounts</module>
@@ -72,6 +79,7 @@
         <spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
         <springfox-swagger2.version>2.8.0</springfox-swagger2.version>
         <swagger-annotations.version>1.5.17</swagger-annotations.version>
+        <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -160,8 +168,34 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+
+        <!-- other dependencies -->
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- test dependencies -->
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
@@ -205,6 +239,7 @@
             <id>release</id>
             <build>
                 <plugins>
+
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -216,6 +251,7 @@
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -229,6 +265,7 @@
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -245,6 +282,7 @@
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
@@ -261,10 +299,13 @@
                             </execution>
                         </executions>
                     </plugin>
+
                 </plugins>
             </build>
         </profile>
+
     </profiles>
+
     <distributionManagement>
         <repository>
             <id>sonatype</id>
@@ -275,4 +316,5 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
 </project>
