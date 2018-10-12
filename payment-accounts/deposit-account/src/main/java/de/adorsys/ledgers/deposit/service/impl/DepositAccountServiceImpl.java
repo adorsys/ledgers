@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.adorsys.ledgers.deposit.domain.BasePayment;
-import de.adorsys.ledgers.deposit.domain.BulkPayment;
+import de.adorsys.ledgers.deposit.domain.*;
 import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.adorsys.ledgers.deposit.domain.SinglePayment;
-import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.service.DepositAccountService;
@@ -84,7 +81,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
     @Override
-    public SinglePayment executeSinglePayment(SinglePayment payment, String ledgerName) throws PaymentProcessingException {
+    public PaymentResult executeSinglePaymentWithoutSca(SinglePayment payment) throws PaymentProcessingException {
 
         String oprDetails;
 
@@ -120,7 +117,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
     @Override
-    public SinglePayment executeBulkPayment(BulkPayment payment, String ledgerName) throws PaymentProcessingException {
+    public PaymentResult executeBulkPaymentWithoutSca(BulkPayment payment) throws PaymentProcessingException {
 
         String oprDetails;
         try {
