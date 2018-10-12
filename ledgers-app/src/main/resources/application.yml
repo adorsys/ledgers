@@ -1,0 +1,22 @@
+server:
+  port: 8086
+
+#logging.level.org.springframework: ERROR
+logging.level.org.postgresql: INFO
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ledgers
+    username: ledgers
+    password: ledgers
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibrenate.globally_quoted_identifiers: true
+      hibernate.jdbc.lob.non_contextual_creation: true
+
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE

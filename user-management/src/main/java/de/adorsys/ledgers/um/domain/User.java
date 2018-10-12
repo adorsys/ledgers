@@ -28,7 +28,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "login", name = "user_login_unique"),
         @UniqueConstraint(columnNames = "email", name = "user_email_unique")
 })
@@ -38,12 +38,15 @@ public class User {
     private String id;
 
     @NotNull
+    @Column(nullable=false)
     private String login;
 
     @NotNull
+    @Column(nullable=false)
     private String email;
 
     @NotNull
+    @Column(nullable=false)
     private String pin;
 
     @ManyToMany(fetch = FetchType.EAGER)
