@@ -14,8 +14,6 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     properties:
       hibrenate.globally_quoted_identifiers: true
       hibernate.jdbc.lob.non_contextual_creation: true
