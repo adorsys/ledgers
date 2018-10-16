@@ -39,12 +39,15 @@ public abstract class BaseEntity {
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime created;
 
+//	todo: seems this property should be moved from base class
 	@Column(nullable=false)
 	private String user;
 
+	//	todo: seems this property should be moved from base class
 	/*The short description of this entity*/
 	private String shortDesc;
 
+	//	todo: seems this property should be moved from base class
 	/*The long description of this entity*/
 	private String longDesc;
 }

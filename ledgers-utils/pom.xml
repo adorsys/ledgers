@@ -26,11 +26,6 @@
 		<!-- other dependencies -->
 
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>23.0</version>
@@ -42,12 +37,5 @@
 			<version>3.0</version>
 		</dependency>
 
-		<!-- test dependencies -->
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		
 	</dependencies>
 </project>

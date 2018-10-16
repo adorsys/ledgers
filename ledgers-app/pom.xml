@@ -5,6 +5,7 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ledgers-app</artifactId>
 	
@@ -18,25 +19,45 @@
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-rest-server</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-service-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-service-impl</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-db-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-db-impl</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- dependencies below should be removed -->
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>postings</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>posting-server</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>deposit-account</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>user-management</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -54,17 +75,6 @@
 			<artifactId>postgresql</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-		</dependency>
-
 		<!-- test dependencies -->
 
 		<dependency>
@@ -76,12 +86,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 
