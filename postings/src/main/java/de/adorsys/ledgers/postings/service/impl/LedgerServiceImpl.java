@@ -1,20 +1,19 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import de.adorsys.ledgers.postings.domain.AccountCategory;
 import de.adorsys.ledgers.postings.domain.BalanceSide;
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -27,10 +26,15 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
      */
     @Override
     public Ledger newLedger(Ledger ledger) throws NotFoundException {
-        ChartOfAccount coa = loadCoa(ledger.getCoa());
-        LocalDateTime created = LocalDateTime.now();
-        String user = principal.getName();
-        Ledger newLedger = new Ledger(Ids.id(), created, user, ledger.getShortDesc(), ledger.getLongDesc(), ledger.getName(), coa, ledger.getLastClosing());
+        Ledger newLedger = new Ledger(
+                Ids.id(),
+                LocalDateTime.now(),
+                principal.getName(),
+                ledger.getShortDesc(),
+                ledger.getLongDesc(),
+                ledger.getName(),
+                loadCoa(ledger.getCoa()),
+                ledger.getLastClosing());
         Ledger savedLedger = ledgerRepository.save(newLedger);
 
         return CloneUtils.cloneObject(savedLedger, Ledger.class);
@@ -38,61 +42,54 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 
     @Override
     public Optional<Ledger> findLedgerById(String id) {
-        return Optional.ofNullable(CloneUtils.cloneObject(ledgerRepository.findById(id).orElse(null), Ledger.class));
+        return ledgerRepository.findById(id)
+                       .map(l -> CloneUtils.cloneObject(l, Ledger.class));
     }
 
     @Override
     public Optional<Ledger> findLedgerByName(String name) {
-        return Optional.ofNullable(CloneUtils.cloneObject(ledgerRepository.findOptionalByName(name).orElse(null), Ledger.class));
+        return ledgerRepository.findOptionalByName(name)
+                       .map(l -> CloneUtils.cloneObject(l, Ledger.class));
     }
 
     @Override
     public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount) throws NotFoundException {
         // Validations
-        if (ledgerAccount.getName() == null) {
+        if (StringUtils.isBlank(ledgerAccount.getName())) {
             throw new IllegalArgumentException("Missing model name.");
         }
 
         // User
-        String user = principal.getName();
-
         LedgerAccount parentAccount = getParentAccount(ledgerAccount);
-
         Ledger ledger = getLedger(ledgerAccount, parentAccount);
-
         AccountCategory category = getAccountCategory(ledgerAccount, parentAccount);
-
-        BalanceSide balanceSide = getBalanceSide(ledgerAccount, parentAccount, category);
-
         LedgerAccount newLedgerAccount = LedgerAccount.builder()
-                                   .id(Ids.id())
-                                   .created(LocalDateTime.now())
-                                   .user(user)
-                                   .shortDesc(ledgerAccount.getShortDesc())
-                                   .longDesc(ledgerAccount.getLongDesc())
-                                   .name(ledgerAccount.getName())
-                                   .ledger(ledger)
-                                   .coa(ledger.getCoa())
-                                   .parent(parentAccount)
-                                   .category(category)
-                                   .balanceSide(balanceSide)
-                                   .build();
+                                                 .id(Ids.id())
+                                                 .created(LocalDateTime.now())
+                                                 .user(principal.getName())
+                                                 .shortDesc(ledgerAccount.getShortDesc())
+                                                 .longDesc(ledgerAccount.getLongDesc())
+                                                 .name(ledgerAccount.getName())
+                                                 .ledger(ledger)
+                                                 .coa(ledger.getCoa())
+                                                 .parent(parentAccount)
+                                                 .category(category)
+                                                 .balanceSide(getBalanceSide(ledgerAccount, parentAccount, category))
+                                                 .build();
 
         return CloneUtils.cloneObject(ledgerAccountRepository.save(newLedgerAccount), LedgerAccount.class);
     }
 
     private LedgerAccount getParentAccount(LedgerAccount ledgerAccount) throws NotFoundException {
-        return ledgerAccount.getParent() != null ? loadLedgerAccount(ledgerAccount.getParent()) : null;
+        return ledgerAccount.getParent() != null
+                       ? loadLedgerAccount(ledgerAccount.getParent())
+                       : null;
     }
 
     private Ledger getLedger(LedgerAccount ledgerAccount, LedgerAccount parentAccount) throws NotFoundException {
-        Ledger ledger;
-        if (ledgerAccount.getParent() != null) {
-            ledger = parentAccount.getLedger();
-        } else {
-            ledger = loadLedger(ledgerAccount.getLedger());
-        }
-        return ledger;
+        return ledgerAccount.getParent() != null
+                       ? parentAccount.getLedger()
+                       : loadLedger(ledgerAccount.getLedger());
     }
 
     private BalanceSide getBalanceSide(LedgerAccount ledgerAccount, LedgerAccount parentAccount, AccountCategory category) {
@@ -110,17 +107,14 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
     }
 
     private AccountCategory getAccountCategory(LedgerAccount ledgerAccount, LedgerAccount parentAccount) {
+        return Optional.ofNullable(ledgerAccount.getCategory())
+                       .orElseGet(() -> getAccountCategoryFromParent(parentAccount, ledgerAccount.getShortDesc()));
+    }
 
-        AccountCategory category;
-
-        if (ledgerAccount.getCategory() != null) {
-            category = ledgerAccount.getCategory();
-        } else if (parentAccount != null) {
-            category = parentAccount.getCategory();
-        } else {
-            throw new IllegalArgumentException("Missing category for: " + ledgerAccount.getShortDesc());
-        }
-        return category;
+    private AccountCategory getAccountCategoryFromParent(LedgerAccount parentAccount, String shortDescription) {
+        return Optional.ofNullable(parentAccount)
+                       .map(LedgerAccount::getCategory)
+                       .orElseThrow(() -> new IllegalArgumentException("Missing category for: " + shortDescription));
     }
 
     @Override
@@ -130,8 +124,8 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 
     @Override
     public Optional<LedgerAccount> findLedgerAccount(Ledger ledger, String name) {
-        LedgerAccount ledgerAccount = ledgerAccountRepository
-                                              .findOptionalByLedgerAndName(ledger, name).orElse(null);
-        return Optional.ofNullable(CloneUtils.cloneObject(ledgerAccount, LedgerAccount.class));
+        return ledgerAccountRepository
+                       .findOptionalByLedgerAndName(ledger, name)
+                       .map(l -> CloneUtils.cloneObject(l, LedgerAccount.class));
     }
 }

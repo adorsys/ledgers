@@ -3,6 +3,7 @@ package de.adorsys.ledgers.postings.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -116,7 +117,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
                                   .pstStatus(PostingStatus.POSTED)
                                   .pstTime(refTime)
                                   .pstType(PostingType.BAL_STMT)
-                                  .lines(Arrays.asList(postingLine))
+                                  .lines(Collections.singletonList(postingLine))
                                   .build();
 
         return newPosting(posting);

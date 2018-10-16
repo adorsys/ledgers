@@ -1,56 +1,67 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Optional;
-
+import de.adorsys.ledgers.postings.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.repository.*;
+import de.adorsys.ledgers.postings.service.ChartOfAccountService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
-import de.adorsys.ledgers.postings.service.ChartOfAccountService;
-import de.adorsys.ledgers.tests.PostingsApplication;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=PostingsApplication.class)
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
-    TransactionalTestExecutionListener.class,DbUnitTestExecutionListener.class})
-@DatabaseSetup("ITChartOfAccountServiceImplTest-db-entries.xml")
-@DatabaseTearDown(value={"ITChartOfAccountServiceImplTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+@RunWith(MockitoJUnitRunner.class)
 public class ITChartOfAccountServiceImplTest {
-	
-	@Autowired
-	private ChartOfAccountService chartOfAccountService;
+    private static final String USER_NAME = "TestName";
+    private static final String COA_NAME = "TestCoA";
+    private static final String COA_ID = "zzz-WWW-zzz";
+    private static final ChartOfAccount COA = ChartOfAccount.builder().id(COA_ID).name(COA_NAME).created(LocalDateTime.now()).user(USER_NAME).build();
+    @InjectMocks
+    private ChartOfAccountService chartOfAccountService = new ChartOfAccountServiceImpl();
+    @Mock
+    private ChartOfAccountRepository chartOfAccountRepo;
+    @Mock
+    private Principal principal;
 
-	@Test
-	public void test_find_coa_by_name(){
-		Optional<ChartOfAccount> found = chartOfAccountService.findChartOfAccountsByName("CoA");
-		assertEquals(true, found.isPresent());
-	}
+    @Test
+    public void newChartOfAccount() {
+        when(principal.getName()).thenReturn(USER_NAME);
+        when(chartOfAccountRepo.save(any())).thenReturn(COA);
+        //When
+        ChartOfAccount result = chartOfAccountService.newChartOfAccount(COA);
+        //Then
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(COA);
 
-	@Test
-	public void test_find_chart_of_accounts_by_id() {
-		Optional<ChartOfAccount> coa = chartOfAccountService.findChartOfAccountsById("ci8k8PDcTrCsi-F3sT3i-g");
-		assertTrue(coa.isPresent());
-	}
-	
-	@Test
-	public void test_find_chart_of_accounts_by_name(){
-		Optional<ChartOfAccount> coa = chartOfAccountService.findChartOfAccountsByName("CoA");
-		assertTrue(coa.isPresent());
-		//ibo am Werk gewesen
-	}
+    }
 
+    @Test
+    public void findChartOfAccountsById() {
+        when(chartOfAccountRepo.findById(anyString())).thenReturn(Optional.of(COA));
+        when(chartOfAccountRepo.save(any())).thenReturn(COA);
+        //When
+        Optional<ChartOfAccount> result = chartOfAccountService.findChartOfAccountsById(COA_ID);
+        //Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(COA);
+    }
+
+    @Test
+    public void findChartOfAccountsByName() {
+        when(chartOfAccountRepo.findOptionalByName(anyString())).thenReturn(Optional.of(COA));
+        //When
+        Optional<ChartOfAccount> result = chartOfAccountService.findChartOfAccountsByName(COA_NAME);
+        //Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(COA);
+    }
 }

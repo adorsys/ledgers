@@ -10,12 +10,6 @@ public class SecurityConfig {
 
 	@Bean
 	public Principal getPrincipal(){
-		return new Principal() {
-			
-			@Override
-			public String getName() {
-				return "anonymous";
-			}
-		};
+		return () -> "anonymous";
 	}
 }

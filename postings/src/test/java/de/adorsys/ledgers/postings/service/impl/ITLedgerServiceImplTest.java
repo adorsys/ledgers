@@ -1,126 +1,118 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
-
-import de.adorsys.ledgers.postings.domain.AccountCategory;
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
-import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.*;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
-import de.adorsys.ledgers.tests.PostingsApplication;
 import de.adorsys.ledgers.util.Ids;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=PostingsApplication.class)
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
-        TransactionalTestExecutionListener.class,DbUnitTestExecutionListener.class})
-@DatabaseSetup("ITLedgerServiceImplTest-db-entries.xml")
-@DatabaseTearDown(value={"ITLedgerServiceImplTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ITLedgerServiceImplTest {
-    @Autowired
+    private static final String LEDGER_ID = "Ledger Id";
+    private static final LocalDateTime DATE_TIME = LocalDateTime.now();
+    private static final String NAME = "Mr. Jones";
+
+    @InjectMocks
+    private LedgerService ledgerService = new LedgerServiceImpl();
+
+    @Mock
     private ChartOfAccountRepository chartOfAccountRepository;
-
-    @Autowired
+    @Mock
     private LedgerRepository ledgerRepository;
-
-    @Autowired
-    private LedgerService ledgerService;
-
-    @Autowired
+    @Mock
     private LedgerAccountRepository ledgerAccountRepository;
+    @Mock
+    private Principal principal;
 
     @Test
-    public void test_new_ledger() throws NotFoundException {
-        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
-        Ledger ledger = Ledger.builder()
-        		.id(Ids.id()).name("Sample Ledger-2").user("Sample User")
-        		.coa(coa).lastClosing(LocalDateTime.now()).build();
-
-        Ledger ledger2 = ledgerService.newLedger(ledger);
-        ledgerRepository.save(ledger2);
-
+    public void newLedger() throws NotFoundException {
+        when(ledgerRepository.save(any())).thenReturn(getLedger());
+        when(chartOfAccountRepository.findById(any())).thenReturn(Optional.of(getChartOfAccount()));
+        when(principal.getName()).thenReturn(NAME);
+        //When
+        Ledger result = ledgerService.newLedger(getLedger());
+        //Then
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(getLedger());
     }
 
     @Test
-    public void test_find_ledger_by_id() {
-        Optional<Ledger> opt = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg");
-        Assert.assertTrue(opt.isPresent());
-
-    }
-    @Test
-    public void test_find_ledger_by_name() {
-        Optional<Ledger> opt = ledgerService.findLedgerByName("Sample Ledger-0");
-        Assert.assertTrue(opt.isPresent());
-    }
-    @Test
-    public void test_new_ledger_account() throws NotFoundException {
-        Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
-        Assert.assertNotNull(ledger);
-
-        LedgerAccount parentAccount= ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
-        Assert.assertNotNull(parentAccount);
-
-        LocalDateTime created = LocalDateTime.now();
-
-        LedgerAccount newLedgerAccount = LedgerAccount.builder()
-                                            .id(Ids.id())
-                                            .created(created)
-                                            .user("Sample user")
-                                            .ledger(ledger)
-                                            .parent(parentAccount)
-                                            .name("LedgerAccountNameTest")
-                                            .shortDesc("short description")
-                                            .category(AccountCategory.LI)
-                                            .build();
-
-        ledgerService.newLedgerAccount(newLedgerAccount);
+    public void findLedgerById() {
+        when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
+        //When
+        Optional<Ledger> result = ledgerService.findLedgerById(LEDGER_ID);
+        //Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(getLedger());
     }
 
     @Test
-    public void test_find_ledger_account_by_id() {
-        Optional<LedgerAccount> opt = ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS");
-        Assert.assertTrue(opt.isPresent());
+    public void findLedgerByName() {
+        when(ledgerRepository.findOptionalByName(any())).thenReturn(Optional.of(getLedger()));
+        //When
+        Optional<Ledger> result = ledgerService.findLedgerByName(NAME);
+        //Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(getLedger());
     }
-    @Test
-    public void test_find_ledger_account() {
-        ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
-        Assert.assertNotNull(coa);
-        Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
-        Assert.assertNotNull(ledger);
-        LedgerAccount ledgerAccount= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS").orElse(null);
-        Assert.assertNotNull(ledgerAccount);
 
-        Optional<LedgerAccount> opt = ledgerService.findLedgerAccount(ledgerAccount.getLedger(), ledgerAccount.getName());
-        Assert.assertTrue(opt.isPresent());
+    @Test
+    public void newLedgerAccount() throws NotFoundException {
+        when(ledgerAccountRepository.save(any())).thenReturn(getLedgerAccount());
+        when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
+        //When
+        LedgerAccount result = ledgerService.newLedgerAccount(getLedgerAccount());
+        //Then
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(getLedgerAccount());
     }
+
     @Test
-    public void test_find_n_ledger_accounts() {
+    public void findLedgerAccountById() {
+        when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(getLedgerAccount()));
+        //When
+        Optional<LedgerAccount> result = ledgerService.findLedgerAccountById(LEDGER_ID);
+        //Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(getLedgerAccount());
+    }
 
-    		Optional<LedgerAccount> laOption= ledgerService.findLedgerAccountById("xVgaTPMcRty9ik3BTQDh1Q_BS");
-        Assert.assertTrue(laOption.isPresent());
+    @Test
+    public void findLedgerAccount() {
+        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(),anyString())).thenReturn(Optional.of(getLedgerAccount()));
+        //When
+        Optional<LedgerAccount> result = ledgerService.findLedgerAccount(getLedger(), LEDGER_ID);
+        //Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(getLedgerAccount());
+    }
 
-        LedgerAccount ledgerAccount = laOption.get();
-        laOption= ledgerService.findLedgerAccount(ledgerAccount.getLedger(), ledgerAccount.getName());
-        Assert.assertTrue(laOption.isPresent());
+    private LedgerAccount getLedgerAccount() {
+        return new LedgerAccount(LEDGER_ID, DATE_TIME, "User", "Some short description", "Some long description", NAME, getLedger(), null, getChartOfAccount(), BalanceSide.Cr, AccountCategory.AS);
+    }
+
+    private Ledger getLedger() {
+        return new Ledger(LEDGER_ID, DATE_TIME, "User", "Some short description", "Some long description", NAME, getChartOfAccount(), DATE_TIME);
+    }
+
+    private ChartOfAccount getChartOfAccount() {
+        return new ChartOfAccount("id", DATE_TIME, NAME, "Some short description", "Some long description", NAME);
     }
 }

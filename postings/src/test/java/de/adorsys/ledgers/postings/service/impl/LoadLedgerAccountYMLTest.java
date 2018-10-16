@@ -28,11 +28,11 @@ public class LoadLedgerAccountYMLTest {
 	}
 	
 	@Test
-	public void testReadYml() throws JsonParseException, JsonMappingException, IOException{
+	public void testReadYml() throws IOException{
 		InputStream inputStream = LoadLedgerAccountYMLTest.class.getResourceAsStream("LoadLedgerAccountYMLTest.yml");
 		LedgerAccount[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccount[].class);
 		Assert.assertNotNull(ledgerAccounts);
-		Assert.assertTrue(ledgerAccounts.length==2);
+		Assert.assertEquals(2, ledgerAccounts.length);
 		Assert.assertEquals("1",ledgerAccounts[0].getName());
 		Assert.assertEquals("Assets",ledgerAccounts[0].getShortDesc());
 		Assert.assertEquals(AccountCategory.AS, ledgerAccounts[0].getCategory());
