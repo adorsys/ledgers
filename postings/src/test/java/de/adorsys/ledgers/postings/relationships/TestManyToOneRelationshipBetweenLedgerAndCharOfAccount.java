@@ -28,7 +28,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 @DatabaseSetup("TestManyToOneRelationshipBetweenLedgerAndCharOfAccount-db-entries.xml")
 @DatabaseTearDown(value={"TestManyToOneRelationshipBetweenLedgerAndCharOfAccount-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class TestManyToOneRelationshipBetweenLedgerAndCharOfAccount {
-
+//TODO check if necessary
     @Autowired
     ChartOfAccountRepository chartOfAccountRepository;
 

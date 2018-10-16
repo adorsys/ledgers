@@ -27,23 +27,23 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
 
+    @InjectMocks
+    private UserServiceImpl userService;
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
-    private UserServiceImpl userService;
     private static final String LOGIN = "speex";
     private static final String EMAIL = "spe@adorsys.com.ua";
     private static final String PIN = "1234";
     private static final String LEDGER_ACCOUNT_ID = "1234567890";
     private static final LedgerAccount LEDGER_ACCOUNT = LedgerAccount.builder().id(LEDGER_ACCOUNT_ID).build();
     private static final User USER = User.builder()
-                                            .id("1")
-                                            .login(LOGIN)
-                                            .pin(PIN)
-                                            .email(EMAIL)
-                                            .accounts(Collections.singletonList(LEDGER_ACCOUNT))
-                                            .build();
+                                             .id("1")
+                                             .login(LOGIN)
+                                             .pin(PIN)
+                                             .email(EMAIL)
+                                             .accounts(Collections.singletonList(LEDGER_ACCOUNT))
+                                             .build();
 
 
     @Test
