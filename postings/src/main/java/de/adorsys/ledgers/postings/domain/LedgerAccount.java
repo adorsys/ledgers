@@ -46,7 +46,7 @@ public class LedgerAccount extends NamedEntity {
 	/*
 	 * The Chart of account defining this ledger account.
 	 * 
-	 * This can be inherited from the parent account. Muss always
+	 * This can be inherited from the parent account. Must always
 	 * be the same as the parent chart of account if any.
 	 */
 	@ManyToOne(optional = false)

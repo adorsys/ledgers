@@ -5,6 +5,7 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ledgers-db-api</artifactId>
 	
@@ -15,6 +16,12 @@
 	<dependencies>
 
 		<!-- project dependencies -->
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>postings</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 		<!-- spring dependencies -->
 

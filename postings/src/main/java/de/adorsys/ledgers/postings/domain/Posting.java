@@ -25,7 +25,6 @@ import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.Singular;
 import lombok.ToString;
 
@@ -44,7 +43,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @JsonPropertyOrder(alphabetic = true)
-public class Posting {
+public class Posting extends HashRecord {
     private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
 
     /* The record id */
@@ -57,22 +56,6 @@ public class Posting {
 
     /* The time of recording of this posting. */
     private LocalDateTime recordTime;
-
-    /* The antecedent identifier. Use for hash chaining */
-    private String recordAntecedentId;
-    private String recordAntecedentHash;
-
-    /*
-     * The hash value of this posting. If is used by the system for integrity
-     * check. A posting is never modified.
-     *
-     * Aggregation of the UTF-8 String value of all fields by field name in
-     * alphabetical order.
-     */
-    @Setter
-    private String recordHash;
-    @Setter
-    private String recordHashAlg;
 
     /*
      * The unique identifier of this business operation. The operation
@@ -89,7 +72,7 @@ public class Posting {
      * The sequence number of the operation processed by this posting.
      *
      * A single operation can be overridden many times as long as the enclosing
-     * as long as the enclosing ledger is not closed. These overriding happens
+     * ledger is not closed. These overriding happens
      * synchronously. Each single one increasing the sequence number of the
      * former posting.
      *
@@ -164,6 +147,7 @@ public class Posting {
      */
     private LocalDateTime valTime;
 
+//    todo: add description to this field
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @Singular("line")
     private List<PostingLine> lines = new ArrayList<>();
@@ -174,8 +158,8 @@ public class Posting {
                    PostingType pstType, PostingStatus pstStatus, Ledger ledger, LocalDateTime valTime,
                    List<PostingLine> lines) {
         this.recordUser = recordUser;
-        this.recordAntecedentId = recordAntecedentId;
-        this.recordAntecedentHash = recordAntecedentHash;
+        this.antecedentId = recordAntecedentId;
+        this.antecedentHash = recordAntecedentHash;
         this.oprId = oprId;
         this.oprSeqNbr = oprSeqNbr;
         this.oprTime = oprTime;
@@ -190,12 +174,12 @@ public class Posting {
     }
 
     public Posting hash() {
-        if (recordHash != null) {
+        if (hash != null) {
             throw new IllegalStateException("Can not update a posting.");
         }
         recordTime = LocalDateTime.now();
         try {
-            recordHash = RECORD_HASH_HELPER.computeRecHash(this);
+            hash = RECORD_HASH_HELPER.computeRecHash(this);
         } catch (NoSuchAlgorithmException | JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

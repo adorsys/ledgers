@@ -52,7 +52,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
                             .oprType(posting.getOprType())
                             .pstTime(posting.getPstTime())
                             .pstType(posting.getPstType())
-                            .recordAntecedentHash(antecedent.getRecordHash())
+                            .recordAntecedentHash(antecedent.getHash())
                             .recordAntecedentId(antecedent.getId())
                             .recordUser(principal.getName())
                             .valTime(posting.getValTime())

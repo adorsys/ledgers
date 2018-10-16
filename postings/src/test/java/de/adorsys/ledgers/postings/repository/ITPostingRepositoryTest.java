@@ -106,13 +106,13 @@ public class ITPostingRepositoryTest {
 		String writeValueAsString = om.writeValueAsString(saved);
 		
 		Posting found = postingRepository.findById(saved.getId()).orElse(null);
-		String recHash = found.getRecordHash();
+		String recHash = found.getHash();
 
 		String writeValueAsString2 = om.writeValueAsString(found);
 		Assert.assertEquals(writeValueAsString, writeValueAsString2);
 		
 		RecordHashHelper recordHashHelper = new RecordHashHelper();
-		found.setRecordHash(null);
+		found.setHash(null);
 		String computedRecHash = recordHashHelper.computeRecHash(found);
 		
 		Assert.assertEquals(recHash, computedRecHash);

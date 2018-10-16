@@ -5,6 +5,7 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ledgers-service-impl</artifactId>
 	
@@ -22,9 +23,20 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-db-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- spring dependencies -->
 
 		<!-- other dependencies -->
+
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-jdk8</artifactId>
+		</dependency>
 
 		<!-- test dependencies -->
 
@@ -47,7 +59,6 @@
 								<bannedDependencies>
 									<excludes>
 										<exclude>de.adorsys.ledgers:ledgers-app</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-db-api</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-db-impl</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-rest-server</exclude>
 									</excludes>
