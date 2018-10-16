@@ -39,7 +39,7 @@ import de.adorsys.ledgers.tests.PostingsApplication;
 @DatabaseSetup("ITLoadCoaIFRSTest-db-entries.xml")
 @DatabaseTearDown(value={"ITLoadCoaIFRSTest-db-delete.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class ITLoadCoaIFRSTest {
-	
+	//TODO Ask @fpo of this test
 	private ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
@@ -52,7 +52,7 @@ public class ITLoadCoaIFRSTest {
 	}
 	
 	@Test
-	public void test_load_coa_ok() throws JsonParseException, JsonMappingException, IOException, NotFoundException{
+	public void test_load_coa_ok() throws IOException, NotFoundException{
         Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
         Assume.assumeNotNull(ledger);
 

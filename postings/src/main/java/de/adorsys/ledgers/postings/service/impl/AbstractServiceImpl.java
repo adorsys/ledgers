@@ -40,7 +40,8 @@ public class AbstractServiceImpl {
 			throw nullInfo();
 		}
 		if (model.getId() != null) {
-			return ledgerRepository.findById(model.getId()).orElseThrow(() -> notFoundById(model));
+			return ledgerRepository.findById(model.getId())
+					       .orElseThrow(() -> notFoundById(model));
 		}
 		if (model.getName() != null) {
 			return ledgerRepository.findOptionalByName(model.getName())
@@ -54,7 +55,8 @@ public class AbstractServiceImpl {
 			throw nullInfo();
 		}
 		if (model.getId() != null) {
-			return chartOfAccountRepo.findById(model.getId()).orElseThrow(() -> notFoundById(model));
+			return chartOfAccountRepo.findById(model.getId())
+                           .orElseThrow(() -> notFoundById(model));
 		}
 		if (model.getName() != null) {
 			return chartOfAccountRepo.findOptionalByName(model.getName())
@@ -84,6 +86,7 @@ public class AbstractServiceImpl {
 		throw insufficientInfo(model);
 	}
 
+	//TODO consider creating of exception builder with all necessary classes
 	private IllegalArgumentException insufficientInfo(Object modelObject) {
 		return new IllegalArgumentException(
 				String.format("Model Object does not provide sufficient information for loading original instance. %s",

@@ -1,8 +1,10 @@
 package de.adorsys.ledgers.postingserver.controller;
 
-import static io.restassured.RestAssured.get;
-import static org.hamcrest.Matchers.equalTo;
-
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import de.adorsys.ledgers.postingserver.PostingserverApplication;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,12 +17,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
-
-import de.adorsys.ledgers.postingserver.PostingserverApplication;
+import static io.restassured.RestAssured.get;
+import static org.hamcrest.Matchers.equalTo;
 
 
 @Ignore
@@ -31,7 +29,7 @@ import de.adorsys.ledgers.postingserver.PostingserverApplication;
 @DatabaseSetup("ChartOfAccountControllerTest-db-entries.xml")
 @DatabaseTearDown(value={"ChartOfAccountControllerTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class ChartOfAccountControllerTest {
-	
+	//TODO what does this test? @fpo
 	@LocalServerPort
     private int port;
 	
@@ -44,6 +42,7 @@ public class ChartOfAccountControllerTest {
 	
 	@Test
 	public void test_load_coa() {
-		get(urlPrefix + "/coas/ci8k8bcdTrCsi-F3sT3i-g").then().assertThat().body("name", equalTo("CoA"));
+		get(urlPrefix + "/coas/ci8k8bcdTrCsi-F3sT3i-g").then()
+				.assertThat().body("name", equalTo("CoA"));
 	}
 }

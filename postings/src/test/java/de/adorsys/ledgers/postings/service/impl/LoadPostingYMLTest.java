@@ -33,7 +33,7 @@ public class LoadPostingYMLTest {
 		InputStream inputStream = LoadPostingYMLTest.class.getResourceAsStream("LoadPostingYMLTest.yml");
 		Posting[] postings = mapper.readValue(inputStream, Posting[].class);
 		Assert.assertNotNull(postings);
-		Assert.assertTrue(postings.length==1);
+		Assert.assertEquals(1, postings.length);
 //		Assert.assertEquals("1",ledgerAccounts[0].getName());
 //		Assert.assertEquals("Assets",ledgerAccounts[0].getShortDesc());
 //		Assert.assertEquals(AccountCategory.AS, ledgerAccounts[0].getCategory());
