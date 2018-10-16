@@ -14,7 +14,6 @@ import de.adorsys.ledgers.postings.utils.RecordHashHelper;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -39,7 +38,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-public class PostingTrace {
+public class PostingTrace extends HashRecord {
     private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
 
     @Id
@@ -63,25 +62,8 @@ public class PostingTrace {
     @Column(nullable = false, updatable = false)
     private String tgtPstId;
 
-    /*Id of the antecedent trace.*/
-    private String antTraceId;
-
-    /*Hash value of the antecedent trace.*/
-    private String antTraceHash;
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime recordTime;
-
-    /*
-     *The hash value of this trace
-     */
-    @Setter
-    @Column(nullable = false, updatable = false)
-    private String hash;
-
-    @Setter
-    @Column(nullable = false, updatable = false)
-    private String hashAlg;
 
     @Builder
     public PostingTrace(String id, int pos, String srcPstId, String srcPstHash, String tgtPstId, String antTraceId,
@@ -92,8 +74,8 @@ public class PostingTrace {
         this.srcPstId = srcPstId;
         this.srcPstHash = srcPstHash;
         this.tgtPstId = tgtPstId;
-        this.antTraceId = antTraceId;
-        this.antTraceHash = antTraceHash;
+        this.antecedentId = antTraceId;
+        this.antecedentHash = antTraceHash;
     }
 
     @PrePersist

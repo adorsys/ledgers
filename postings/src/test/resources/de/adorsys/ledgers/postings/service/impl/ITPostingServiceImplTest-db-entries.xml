@@ -24,7 +24,7 @@
             pst_type="BAL_STMT"
 			pst_status="POSTED"
             ledger_id="Zd0ND5YwSzGwIfZilhumPg"
-            record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
+            hash="6b1672f7edf8c371860136271f89b41f22dc122a"
     />
     <POSTING
             id="Zd0ND5YwSzGwIfZilhumPg_POSTING1"
@@ -37,7 +37,7 @@
             pst_type="BAL_STMT"
 			pst_status="POSTED"
             ledger_id="Zd0ND5YwSzGwIfZilhumPg"
-            record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
+            hash="6b1672f7edf8c371860136271f89b41f22dc122a"
     />
     <POSTING
             id="Zd0ND5YwSzGwIfZilhumPg_POSTING2"
@@ -50,6 +50,6 @@
             pst_type="BAL_STMT"
 			pst_status="POSTED"
             ledger_id="Zd0ND5YwSzGwIfZilhumPg"
-            record_hash="6b1672f7edf8c371860136271f89b41f22dc122a"
+            hash="6b1672f7edf8c371860136271f89b41f22dc122a"
     />
 </dataset>
