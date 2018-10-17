@@ -9,7 +9,8 @@
 # Cash and Cash Equivalents
 - shortDesc: Cash and Cash Equivalents
   name: 1000
-  parent: 1 
+  parent: 1
+
 
 - shortDesc: Cash in vault
   name: 1001
@@ -142,13 +143,16 @@
   
 - shortDesc: Interest rate related contracts
   name: 1161
-  parent: 1160  
+  parent: 1160
+ 
 - shortDesc: Foreign exchange rate related contracts
   name: 1162
-  parent: 1160  
+  parent: 1160
+ 
 - shortDesc: Contracts related to price of equity securities
   name: 1163
-  parent: 1160  
+  parent: 1160
+ 
 - shortDesc: Other contracts that meet the definition of derivatives in accordance with IAS 39
   name: 1164
   parent: 1160
@@ -176,7 +180,7 @@
   name: 1170
   parent: 1
 
-- shortDesc: Government of Montenegro
+- shortDesc: Government
   name: 1171
   parent: 1170
 - shortDesc: Municipalities
@@ -206,7 +210,7 @@
   name: 1190
   parent: 1
 
-- shortDesc: Government of Montenegro
+- shortDesc: Government
   name: 1191
   parent: 1190
 - shortDesc: Municipalities
@@ -317,7 +321,7 @@
   name: 1270
   parent: 1
 
-- shortDesc: Government of Montenegro
+- shortDesc: Government
   name: 1271
   parent: 1270
 - shortDesc: Municipalities
@@ -401,7 +405,7 @@
   name: 1400
   parent: 1
 
-- shortDesc: Government of Montenegro
+- shortDesc: Government
   name: 1401
   parent: 1400
 - shortDesc: Municipalities
@@ -499,36 +503,46 @@
 
 - shortDesc: Receivables on equity securities from custody operations
   name: 1601
-  parent: 1600  
+  parent: 1600
+ 
 - shortDesc: Receivables on debt securities from custody operations 
   name: 1602
-  parent: 1600  
+  parent: 1600
+ 
 - shortDesc: Receivables on derivatives from custody operations 
   name: 1603
-  parent: 1600  
+  parent: 1600
+ 
 
 # Acquired Assets
 - shortDesc: Acquired Assets
   name: 1700
-  parent: 1  
+  parent: 1
+ 
 - shortDesc: Loans
   name: 1701
-  parent: 1700  
+  parent: 1700
+ 
 - shortDesc: Property
   name: 1702
-  parent: 1700  
+  parent: 1700
+ 
 - shortDesc: Stocks
   name: 1703
-  parent: 1700  
+  parent: 1700
+ 
 - shortDesc: Bonds and other long term securities
   name: 1704
-  parent: 1700  
+  parent: 1700
+ 
 - shortDesc: Other assets
   name: 1705
-  parent: 1700  
+  parent: 1700
+ 
 - shortDesc: Reserves
   name: 1709
-  parent: 1700  
+  parent: 1700
+ 
 
 # Fixed Assets
 - shortDesc: Fixed Assets
@@ -869,10 +883,10 @@
   name: G2345
   parent: 2
 
-- shortDesc: Government of Montenegro - Non-Interest bearing
+- shortDesc: Government - Non-Interest bearing
   name: 2345
   parent: G2345
-- shortDesc: Government of Montenegro - Interest bearing
+- shortDesc: Government - Interest bearing
   name: 2346
   parent: G2345
 - shortDesc: Municipalities - Non-Interest bearing
@@ -1109,10 +1123,10 @@
   name: G2545
   parent: 2
 
-- shortDesc: Government of Montenegro - Non-Interest bearing
+- shortDesc: Government - Non-Interest bearing
   name: 2545
   parent: G2545
-- shortDesc: Government of Montenegro - Interest bearing
+- shortDesc: Government - Interest bearing
   name: 2546
   parent: G2545
 - shortDesc: Municipalities - Non-Interest bearing
@@ -1257,7 +1271,7 @@
   name: 2700
   parent: 2
 
-- shortDesc: Government of Montenegro
+- shortDesc: Government
   name: 2701
   parent: 2700
 - shortDesc: Government institutions and agencies
@@ -1328,7 +1342,8 @@
   parent: 2820
 - shortDesc: Foreign exchange rate related contracts
   name: 2822
-  parent: 2820  
+  parent: 2820
+ 
 - shortDesc: Contracts that relate to price of equity securities
   name: 2823
   parent: 2820
@@ -1493,10 +1508,1308 @@
   name: 3999
   parent: 3
   
-# Capital and reserves
-- shortDesc: Capital and reserves
-  name: 4
-  category: EQ
+# Income statement accounts
+
+# Interest Income
+- shortDesc: Interest Income
+  name: 40
+  category: RE
   balanceSide: Cr
+
+# Banks ## Interest Income
+- shortDesc: Banks
+  name: 401
+  parent: 40
+
+- shortDesc: Short term funds
+  name: 4011
+  parent: 401
+- shortDesc: Repurchase operations
+  name: 4012
+  parent: 401
+- shortDesc: Securities held to maturity
+  name: 4014
+  parent: 401
+- shortDesc: Loans
+  name: 4015
+  parent: 401
+- shortDesc: Trading securities
+  name: 4016
+  parent: 401
+- shortDesc: Available for sale securities
+  name: 4017
+  parent: 401
+- shortDesc: Other
+  name: 4019
+  parent: 401
+
+# Other Financial Institutions ## Interest Income
+- shortDesc: Other Financial Institutions
+  name: 402
+  parent: 40
+
+- shortDesc: Short term funds
+  name: 4021
+  parent: 402
+- shortDesc: Repurchase operations
+  name: 4022
+  parent: 402
+- shortDesc: Securities held to maturity
+  name: 4024
+  parent: 402
+- shortDesc: Loans
+  name: 4025
+  parent: 402
+- shortDesc: Trading securities
+  name: 4026
+  parent: 402
+- shortDesc: Available for sale securities
+  name: 4027
+  parent: 402
+- shortDesc: Other
+  name: 4029
+  parent: 402
+
+# Government ## Interest Income
+- shortDesc: Government
+  name: 403
+  parent: 40
+
+- shortDesc: Short term funds
+  name: 4031
+  parent: 403
+- shortDesc: Repurchase operations
+  name: 4032
+  parent: 403
+- shortDesc: Securities held to maturity
+  name: 4034
+  parent: 403
+- shortDesc: Loans
+  name: 4035
+  parent: 403
+- shortDesc: Trading securities
+  name: 4036
+  parent: 403
+- shortDesc: Available for sale securities
+  name: 4037
+  parent: 403
+- shortDesc: Other
+  name: 4039
+  parent: 403
+
+# Municipalities ## Interest Income
+- shortDesc: Municipalities
+  name: 404
+  parent: 40
+
+- shortDesc: Short term funds
+  name: 4041
+  parent: 404
+- shortDesc: Repurchase operations
+  name: 4042
+  parent: 404
+- shortDesc: Securities held to maturity 
+  name: 4044
+  parent: 404
+- shortDesc: Loans
+  name: 4045
+  parent: 404
+- shortDesc: Trading securities
+  name: 4046
+  parent: 404
+- shortDesc: Available for sale securities
+  name: 4047
+  parent: 404
+- shortDesc: Other
+  name: 4049
+  parent: 404
+
+# Companies ## Interest Income
+- shortDesc: Companies
+  name: 405
+  parent: 40
+
+- shortDesc: Short term funds
+  name: 4051
+  parent: 405
+- shortDesc: Repurchase operations
+  name: 4052
+  parent: 405
+- shortDesc: Securities held to maturity
+  name: 4054
+  parent: 405
+- shortDesc: Loans
+  name: 4055
+  parent: 405
+- shortDesc: Trading securities
+  name: 4056
+  parent: 405
+- shortDesc: Available for sale securities
+  name: 4057
+  parent: 405
+- shortDesc: Other
+  name: 4059
+  parent: 405
+
+# Natural Persons ## Interest Income
+- shortDesc: Natural Persons
+  name: 406
+  parent: 40
+
+- shortDesc: Short term funds
+  name: 4061
+  parent: 406
+- shortDesc: Loans
+  name: 4065
+  parent: 406
+- shortDesc: Other
+  name: 4069
+  parent: 406
+
+# Other ## Interest Income
+- shortDesc: Other
+  name: 407
+  parent: 40
+
+- shortDesc: Other
+  name: 4070
+  parent: 407
+
+# Interest Expense
+- shortDesc: Interest Income
+  name: 41
+  category: EX
+  balanceSide: Dr
+
+# Banks ## Interest Expense
+- shortDesc: Banks
+  name: 411
+  parent: 41
+
+- shortDesc: Deposits
+  name: 4111
+  parent: 411
+- shortDesc: Repurchase operations
+  name: 4112
+  parent: 411
+- shortDesc: Other borrowings
+  name: 4115
+  parent: 411
+- shortDesc: Other
+  name: 4119
+  parent: 411
+
+# Other Financial Institutions ## Interest Expense
+- shortDesc: Other Financial Institutions
+  name: 412
+  parent: 41
+
+- shortDesc: Deposits
+  name: 4121
+  parent: 412
+- shortDesc: Repurchase operations
+  name: 4122
+  parent: 412
+- shortDesc: Other borrowings
+  name: 4125
+  parent: 412
+- shortDesc: Other
+  name: 4129
+  parent: 412
+
+# Government ## Interest Expense
+- shortDesc: Government
+  name: 413
+  parent: 41
+
+- shortDesc: Deposits
+  name: 4131
+  parent: 413
+- shortDesc: Repurchase operations
+  name: 4132
+  parent: 413
+- shortDesc: Other borrowings
+  name: 4135
+  parent: 413
+- shortDesc: Other
+  name: 4139
+  parent: 413
+
+# Municipalities ## Interest Expense
+- shortDesc: Municipalities
+  name: 414
+  parent: 41
+
+- shortDesc: Deposits
+  name: 4141
+  parent: 414
+- shortDesc: Repurchase operations
+  name: 4142
+  parent: 414
+- shortDesc: Other borrowings
+  name: 4145
+  parent: 414
+- shortDesc: Other
+  name: 4149
+  parent: 414
+
+# Companies ## Interest Expense
+- shortDesc: Companies
+  name: 415
+  parent: 41
+
+- shortDesc: Deposits
+  name: 4151
+  parent: 415
+- shortDesc: Repurchase operations
+  name: 4152
+  parent: 415
+- shortDesc: Other borrowings
+  name: 4155
+  parent: 415
+- shortDesc: Other
+  name: 4159
+  parent: 415
+
+# Natural Persons ## Interest Expense
+- shortDesc: Natural Persons
+  name: 416
+  parent: 41
+
+- shortDesc: Deposits
+  name: 4161
+  parent: 416
+- shortDesc: Other
+  name: 4169
+  parent: 416
+
+# Other ## Interest Expense
+- shortDesc: Other
+  name: 417
+  parent: 41
+
+- shortDesc: Interest on subordinated debt
+  name: 4171
+  parent: 417
+- shortDesc: Other
+  name: 4175
+  parent: 417
+
+
+# Fee and Commission Income
+- shortDesc: Fee and Commission Income
+  name: 43
+  category: RE
+  balanceSide: Cr
+
+# Banks ## Fee and Commission Income
+- shortDesc: Banks
+  name: 431
+  parent: 43
+
+- shortDesc: Loans
+  name: 4311
+  parent: 431
+- shortDesc: Off balance sheet dealings
+  name: 4312
+  parent: 431
+- shortDesc: Other services
+  name: 4313
+  parent: 431
+- shortDesc: Other
+  name: 4314
+  parent: 431
+
+# Other Financial Institutions ## Fee and Commission Income
+- shortDesc: Other Financial Institutions
+  name: 432
+  parent: 43
+
+- shortDesc: Loans 
+  name: 4321
+  parent: 432
+- shortDesc: Off balance sheet dealings
+  name: 4322
+  parent: 432
+- shortDesc: Other services
+  name: 4323
+  parent: 432
+- shortDesc: Other
+  name: 4324
+  parent: 432
+
+# Government ## Fee and Commission Income
+- shortDesc: Government
+  name: 433
+  parent: 43
+
+- shortDesc: Loans
+  name: 4331
+  parent: 433
+- shortDesc: Off balance sheet dealings
+  name: 4332
+  parent: 433
+- shortDesc: Other services
+  name: 4333
+  parent: 433
+- shortDesc: Other
+  name: 4334
+  parent: 433
+
+# Municipalities ## Fee and Commission Income
+- shortDesc: Municipalities
+  name: 434
+  parent: 43
+
+- shortDesc: Loans
+  name: 4341
+  parent: 434
+- shortDesc: Off balance sheet dealings
+  name: 4342
+  parent: 434
+- shortDesc: Other services
+  name: 4343
+  parent: 434
+- shortDesc: Other
+  name: 4344
+  parent: 434
+
+# Companies ## Fee and Commission Income
+- shortDesc: Companies
+  name: 435
+  parent: 43
+
+- shortDesc: Loans
+  name: 4351
+  parent: 435
+- shortDesc: Off balance sheet dealings
+  name: 4352
+  parent: 435
+- shortDesc: Other services
+  name: 4353
+  parent: 435
+- shortDesc: Other
+  name: 4354
+  parent: 435
+
+# Natural Persons ## Fee and Commission Income
+- shortDesc: Natural Persons
+  name: 436
+  parent: 43
+
+- shortDesc: Loans
+  name: 4361
+  parent: 436
+- shortDesc: Off balance sheet dealings
+  name: 4362
+  parent: 436
+- shortDesc: Other services
+  name: 4363
+  parent: 436
+- shortDesc: Other
+  name: 4364
+  parent: 436
+
+# Other ## Fee and Commission Income
+- shortDesc: Other
+  name: 437
+  parent: 43
+
+- shortDesc: Other
+  name: 4371
+  parent: 437
+
+# Fee and Commission Expense
+- shortDesc: Fee and Commission Expense
+  name: 45
+  category: EX
+  balanceSide: Dr
+
+# Banks ## Fee and Commission Expense
+- shortDesc: Banks
+  name: 451
+  parent: 45
+
+- shortDesc: Loans
+  name: 4511
+  parent: 451
+- shortDesc: Off balance sheet dealings 
+  name: 4512
+  parent: 451
+- shortDesc: Payment system expense to CBM
+  name: 4513
+  parent: 451
+- shortDesc: Payment system expense to other banks
+  name: 4514
+  parent: 451
+- shortDesc: Other
+  name: 4515
+  parent: 451
+
+# Other Financial Institutions ## Fee and Commission Expense
+- shortDesc: Other Financial Institutions
+  name: 452
+  parent: 45
+
+- shortDesc: Loans
+  name: 4521
+  parent: 452
+- shortDesc: Off balance sheet dealings
+  name: 4522
+  parent: 452
+- shortDesc: Other services
+  name: 4523
+  parent: 452
+- shortDesc: Other
+  name: 4524
+  parent: 452
+
+# From Government ## Fee and Commission Expense
+- shortDesc: From Government
+  name: 453
+  parent: 45
+
+- shortDesc: Loans
+  name: 4531
+  parent: 453
+- shortDesc: Off balance sheet dealings
+  name: 4532
+  parent: 453
+- shortDesc: Other services
+  name: 4533
+  parent: 453
+- shortDesc: Other
+  name: 4534
+  parent: 453
+
+# Municipalities ## Fee and Commission Expense
+- shortDesc: Municipalities
+  name: 454
+  parent: 45
+
+- shortDesc: Loans
+  name: 4541
+  parent: 454
+- shortDesc: Off balance sheet dealings
+  name: 4542
+  parent: 454
+- shortDesc: Other services
+  name: 4543
+  parent: 454
+- shortDesc: Other
+  name: 4544
+  parent: 454
+
+# Companies ## Fee and Commission Expense
+- shortDesc: Companies
+  name: 455
+  parent: 45
+
+- shortDesc: Loans
+  name: 4551
+  parent: 455
+- shortDesc: Off balance sheet dealings
+  name: 4552
+  parent: 455
+- shortDesc: Other services
+  name: 4553
+  parent: 455
+- shortDesc: Other
+  name: 4554
+  parent: 455
+
+# Natural Persons ## Fee and Commission Expense
+- shortDesc: Natural Persons
+  name: 456
+  parent: 45
+
+- shortDesc: Loans
+  name: 4561
+  parent: 456
+- shortDesc: Off balance sheet dealings
+  name: 4562
+  parent: 456
+- shortDesc: Other services
+  name: 4563
+  parent: 456
+- shortDesc: Other
+  name: 4564
+  parent: 456
+
+# Other ## Fee and Commission Expense
+- shortDesc: Other
+  name: 457
+  parent: 45
+  
+- shortDesc: Other 
+  name: 4570
+  parent: 457
+
+
+# Gains and Losses (Operating Income)
+- shortDesc: Gains and Losses 
+  name: 46
+  category: RE
+  balanceSide: Cr
+
+# Net Gains (Losses) from Trading Securities, Derivatives, Foreign Currencies (Spot Transactions) and Interest Rate Swaps ## Gains and Losses
+- shortDesc: Net Gains (Losses) from Trading Securities, Derivatives, Foreign Currencies (Spot Transactions) and Interest Rate Swaps
+  name: 462
+  parent: 46
+
+- shortDesc: Net income from trading securities - stock
+  name: 4620
+  parent: 462
+- shortDesc: Net income from trading securities - not stock
+  name: 4622
+  parent: 462
+- shortDesc: Net gains (losses) from derivatives trading
+  name: 4624
+  parent: 462
+- shortDesc: Net gains (losses) from FX dealings (spot transactions)
+  name: 4625
+  parent: 462
+- shortDesc: Net gains (losses) from interest rate swap contract
+  name: 4626
+  parent: 462
+
+# Net Gains (Losses) on Available for Sale Securities ## Gains and Losses
+- shortDesc: Net Gains (Losses) on Available for Sale Securities
+  name: 470
+  parent: 46
+
+- shortDesc: From Government
+  name: 4730
+  parent: 470
+- shortDesc: From municipalities
+  name: 4740
+  parent: 470
+- shortDesc: Other issuers, stock
+  name: 4770
+  parent: 470
+- shortDesc: Other issuers, not stock
+  name: 4790
+  parent: 470
+
+# Net Gains (Losses) on Held to Maturity Securities ## Gains and Losses
+- shortDesc: Net Gains (Losses) on Held to Maturity Securities
+  name: 4800
+  parent: 46
+
+- shortDesc: From Government
+  name: 4830
+  parent: 4800
+- shortDesc: From municipalities
+  name: 4840
+  parent: 4800
+- shortDesc: Other issuers, not stock
+  name: 4870
+  parent: 4800
+
+# Net Gains (Losses) on Other Equity Investments ## Gains and Losses
+- shortDesc: Net Gains (Losses) on Other Equity Investments
+  name: 489
+  parent: 46
+
+- shortDesc: Net gains (losses) on equity investments (significant influence)
+  name: 4894
+  parent: 489
+- shortDesc: Net gains (losses) on equity investments (control)
+  name: 4896
+  parent: 489
+
+# Gains and Losses from Foreign Exchange ## Gains and Losses
+- shortDesc: Gains and Losses from Foreign Exchange
+  name: 4900
+  parent: 46
+
+- shortDesc: Gains from revaluation of foreign exchange
+  name: 4901
+  parent: 4900
+- shortDesc: Other gains from foreign exchange
+  name: 4902
+  parent: 4900
+- shortDesc: Losses from revaluation of foreign exchange
+  name: 4911
+  parent: 4900
+- shortDesc: Other losses from foreign exchange
+  name: 4912
+  parent: 4900
+
+# Net Gains (Losses) from Repurchase Operations ## Gains and Losses
+- shortDesc: Net Gains (Losses) from Repurchase Operations
+  name: 4915
+  parent: 46
+
+- shortDesc: Net gains (losses) from repurchase operations
+  name: 4916
+  parent: 4915
+- shortDesc: Net gains (losses) from custody operations
+  name: 4917
+  parent: 4915 
+
+# Income/Expense Related to Securitization and Servicing ## Gains and Losses
+- shortDesc: Income/Expense Related to Securitization and Servicing
+  name: 4920
+  parent: 46
+
+- shortDesc: Amortization expense on servicing rights
+  name: 4925
+  parent: 4920
+- shortDesc: Servicing for others - Income
+  name: 4926
+  parent: 4920
+- shortDesc: Servicing for others - Expense
+  name: 4927
+  parent: 4920
+
+# Dividend Income  ## Gains and Losses
+- shortDesc: Dividend Income
+  name: 4930
+  parent: 46
+
+- shortDesc: Trading Securities
+  name: 4931
+  parent: 4930
+- shortDesc: Available for Sale Securities
+  name: 4932
+  parent: 4930
+- shortDesc: Other
+  name: 4933
+  parent: 4930
+
+# Other
+- shortDesc: Other
+  name: 499
+  parent: 46
+
+- shortDesc: Other operating income
+  name: 4990
+  parent: 499
+- shortDesc: Other non operating income
+  name: 4995
+  parent: 499
+- shortDesc: Donations for operations, fixed assets & in-kind donations (MFI only)
+  name: 4997
+  parent: 499
+- shortDesc: Deferred donations (MFI only)
+  name: 4998
+  parent: 499
+
+# Operating Expenses
+- shortDesc: Operating Expenses
+  name: 50
+  category: EX
+  balanceSide: Dr
+
+# Salaries and related costs
+- shortDesc: Salaries and related costs
+  name: 500
+  parent: 50
+
+- shortDesc: Wages & Salaries
+  name: 5001
+  parent: 500
+- shortDesc: Sick pay
+  name: 5002
+  parent: 500
+- shortDesc: Holiday pay
+  name: 5003
+  parent: 500
+- shortDesc: Employee benefits
+  name: 5004
+  parent: 500
+- shortDesc: Employee training
+  name: 5005
+  parent: 500
+- shortDesc: Maternity pay
+  name: 5011
+  parent: 500
+- shortDesc: Pensions
+  name: 5012
+  parent: 500
+- shortDesc: Health insurance
+  name: 5013
+  parent: 500
+- shortDesc: Unemployment insurance
+  name: 5014
+  parent: 500
+- shortDesc: Travel and entertaining
+  name: 5021
+  parent: 500
+- shortDesc: Training
+  name: 5022
+  parent: 500
+- shortDesc: Trade Union costs
+  name: 5023
+  parent: 500
+- shortDesc: Payroll related taxes
+  name: 5024
+  parent: 500
+- shortDesc: Meals
+  name: 5025
+  parent: 500
+- shortDesc: Travel to/from office
+  name: 5026
+  parent: 500
+- shortDesc: Other payroll related costs
+  name: 5027
+  parent: 500
+
+# Occupancy Expenses
+- shortDesc: Occupancy Expenses
+  name: 505
+  parent: 50
+
+- shortDesc: Rent 
+  name: 5051
+  parent: 505
+- shortDesc: Building repairs and maintenance
+  name: 5052
+  parent: 505
+- shortDesc: Security (physical)
+  name: 5053
+  parent: 505
+- shortDesc: Electricity
+  name: 5054
+  parent: 505
+- shortDesc: Heating oil
+  name: 5055
+  parent: 505
+- shortDesc: Water
+  name: 5056
+  parent: 505
+- shortDesc: Cleaning (janitorial services)
+  name: 5057
+  parent: 505
+- shortDesc: Computer and equipment maintenance
+  name: 5058
+  parent: 505
+- shortDesc: Operating leases
+  name: 5059
+  parent: 505
+- shortDesc: Occupancy related taxes
+  name: 5060
+  parent: 505
+- shortDesc: Motor vehicle expenses
+  name: 5081
+  parent: 505
+- shortDesc: Insurance
+  name: 5082
+  parent: 505
+
+# Depreciation and Amortization
+- shortDesc: Depreciation and Amortization
+  name: 510
+  parent: 50
+
+- shortDesc: Buildings
+  name: 5102
+  parent: 510
+- shortDesc: Finance (capital) leases
+  name: 5103
+  parent: 510
+- shortDesc: Machinery and Equipment
+  name: 5104
+  parent: 510
+- shortDesc: Furniture & Fittings
+  name: 5105
+  parent: 510
+- shortDesc: Vehicles
+  name: 5106
+  parent: 510
+- shortDesc: Computers
+  name: 5107
+  parent: 510
+- shortDesc: Software
+  name: 5108
+  parent: 510
+- shortDesc: Other tangible assets depreciation/amortization
+  name: 5129
+  parent: 510
+- shortDesc: Goodwill
+  name: 5131
+  parent: 510
+- shortDesc: Patents/Trademarks
+  name: 5132
+  parent: 510
+- shortDesc: Concessions
+  name: 5133
+  parent: 510
+- shortDesc: Other intangible assets amortization
+  name: 5139
+  parent: 510
+
+# Professional Fees and Expenses
+- shortDesc: Professional Fees and Expenses
+  name: 520
+  parent: 50
+
+- shortDesc: Audit
+  name: 5201
+  parent: 520
+- shortDesc: Data processing services
+  name: 5202
+  parent: 520
+- shortDesc: Legal costs
+  name: 5203
+  parent: 520
+- shortDesc: Other professional fees
+  name: 5204
+  parent: 520
+- shortDesc: Customs and freight forwarding costs
+  name: 5205
+  parent: 520
+- shortDesc: Lawyer services related fees
+  name: 5206
+  parent: 520
+- shortDesc: Securities related fees
+  name: 5207
+  parent: 520
+- shortDesc: Scholarship fees
+  name: 5208
+  parent: 520
+- shortDesc: Intellectual services related fees
+  name: 5209
+  parent: 520
+- shortDesc: Accommodation related fees
+  name: 5210
+  parent: 520
+- shortDesc: Consultant services
+  name: 5211
+  parent: 520
+
+# Other
+- shortDesc: Other
+  name: 530
+  parent: 50
+
+- shortDesc: Telephone
+  name: 5301
+  parent: 530
+- shortDesc: Network
+  name: 5302
+  parent: 530
+- shortDesc: Postage
+  name: 5303
+  parent: 530
+- shortDesc: Stationery
+  name: 5304
+  parent: 530
+- shortDesc: Subscriptions and donations
+  name: 5305
+  parent: 530
+- shortDesc: Municipal services
+  name: 5306
+  parent: 530
+- shortDesc: Laundry
+  name: 5307
+  parent: 530
+- shortDesc: Entertainment expense
+  name: 5308
+  parent: 530
+- shortDesc: Fuel
+  name: 5309
+  parent: 530
+- shortDesc: Expandable supplies
+  name: 5310
+  parent: 530
+- shortDesc: Publications
+  name: 5321
+  parent: 530
+- shortDesc: Advertising & marketing
+  name: 5322
+  parent: 530
+- shortDesc: Printing and photocopying
+  name: 5323
+  parent: 530
+- shortDesc: Value added taxes
+  name: 5324
+  parent: 530
+- shortDesc: Other tax expenses
+  name: 5325
+  parent: 530
+- shortDesc: Miscellaneous expenses
+  name: 5399
+  parent: 530
+- shortDesc: Travel expenses and per diems
+  name: 5400
+  parent: 530
+- shortDesc: Impairment of assets
+  name: 5401
+  parent: 530
+- shortDesc: Current tax
+  name: 5501
+  parent: 530
+- shortDesc: Deferred tax expensed in the current period
+  name: 5511
+  parent: 530
+- shortDesc: Gain on disposal of property, plant and equipment
+  name: 5522
+  parent: 530
+- shortDesc: Loss on disposal of property, plant and equipment
+  name: 5523
+  parent: 530
+
+# Provisions for Losses
+- shortDesc: Provisions for Losses
+  name: 560
+  parent: 50
+
+- shortDesc: Specific provisions for loan losses
+  name: 5601
+  parent: 560
+- shortDesc: General provisions for loan losses
+  name: 5610
+  parent: 560
+- shortDesc: Provision for losses on interbank deposits with financial institutions
+  name: 5611
+  parent: 560
+- shortDesc: Provision for losses on sale and repurchase operations
+  name: 5612
+  parent: 560
+- shortDesc: Provision for losses on trading securities
+  name: 5613
+  parent: 560
+- shortDesc: Provision for losses on available for sale securities
+  name: 5614
+  parent: 560
+- shortDesc: Provision for losses on securities held to maturity
+  name: 5615
+  parent: 560
+- shortDesc: Provision for losses on bank receivables on acceptances and bills of exchange outstanding
+  name: 5616
+  parent: 560
+- shortDesc: Provision for losses on assets for resale
+  name: 5617
+  parent: 560
+- shortDesc: Provision for losses on interest receivable
+  name: 5618
+  parent: 560
+- shortDesc: Provision for losses on off-balance sheet items
+  name: 5619
+  parent: 560
+- shortDesc: Other provisions expense
+  name: 5620
+  parent: 560
+- shortDesc: Provision for losses on equity investments in associates (significant influence)
+  name: 5621
+  parent: 560
+- shortDesc: Provision for losses on equity investments in subsidiaries
+  name: 5622
+  parent: 560
+- shortDesc: Provision for losses on loans purchased for trade
+  name: 5623
+  parent: 560
+- shortDesc: Provision for losses based on revaluation reserves for servicing rights 
+  name: 5624
+  parent: 560
+
+# Non-Operating and Extraordinary Expenses
+- shortDesc: Non-Operating and Extraordinary Expenses
+  name: 564
+  category: NOEX
+  balanceSide: Dr
+
+- shortDesc: Non-operating expenses
+  name: 5641
+  parent: 564
+- shortDesc: Realization of other activities (MFI only)
+  name: 5643
+  parent: 564
+- shortDesc: Prior year adjustments
+  name: 5651
+  parent: 564
+- shortDesc: Extraordinary expenses
+  name: 5661
+  parent: 564
+
+# Extraordinary income
+- shortDesc: Extraordinary income
+  name: 5660
+  category: NORE
+  balanceSide: Cr
+
+# off balance sheet
+- shortDesc: off balance sheet
+  name: 9
+  category: AS
+  balanceSide: DrCr
+
+# Guarantees Given to
+- shortDesc: Guarantees Given to
+  name: 9000
+  parent: 9
+
+- shortDesc: Banks
+  name: 9010
+  parent: 9000
+- shortDesc: Other financial institutions
+  name: 9020
+  parent: 9000
+- shortDesc: Government
+  name: 9030
+  parent: 9000
+- shortDesc: Municipalities
+  name: 9040
+  parent: 9000
+- shortDesc: Companies
+  name: 9050
+  parent: 9000
+- shortDesc: Natural persons
+  name: 9060
+  parent: 9000
+- shortDesc: Other
+  name: 9070
+  parent: 9000
+
+# Guarantees Received From
+- shortDesc: Guarantees Received From
+  name: 9100
+  parent: 9
+
+- shortDesc: Banks
+  name: 9110
+  parent: 9100
+- shortDesc: Other financial institutions
+  name: 9120
+  parent: 9100
+- shortDesc: Government
+  name: 9130
+  parent: 9100
+- shortDesc: Municipalities
+  name: 9140
+  parent: 9100
+- shortDesc: Companies
+  name: 9150
+  parent: 9100
+- shortDesc: Natural persons
+  name: 9160
+  parent: 9100
+- shortDesc: Other
+  name: 9170
+  parent: 9100
+
+# Letters of Credit
+- shortDesc: Letters of Credit
+  name: 9200
+  parent: 9
+
+- shortDesc: Confirmed
+  name: 9210
+  parent: 9200
+- shortDesc: Uncovered
+  name: 9220
+  parent: 9200
+
+
+# Bills of Exchange
+- shortDesc: Bills of Exchange
+  name: 9300
+  parent: 9
+
+- shortDesc: Issued
+  name: 9310
+  parent: 9300
+
+# Credit Obligations Given
+- shortDesc: Credit Obligations Given
+  name: 9400
+  parent: 9
+
+- shortDesc: Banks
+  name: 9410
+  parent: 9400
+- shortDesc: Other 
+  name: 9420
+  parent: 9400
+
+# Credit Obligations Received
+- shortDesc: Credit Obligations Received
+  name: 9500
+  parent: 9
+
+- shortDesc: Banks
+  name: 9510
+  parent: 9500
+- shortDesc: Other
+  name: 9520
+  parent: 9400
+- shortDesc: Custody operations
+  name: 9530
+  parent: 9400
+
+# Loans Written Off
+- shortDesc: Loans Written Off
+  name: 9600
+  parent: 9
+
+- shortDesc: Principal
+  name: 9610
+  parent: 9600
+- shortDesc: Interest
+  name: 9615
+  parent: 9600
+- shortDesc: Accrued Interest
+  name: 9620
+  parent: 9600
+
+# Collateral Received
+- shortDesc: Collateral Received
+  name: 9700
+  parent: 9
+
+- shortDesc: Property
+  name: 9710
+  parent: 9700
+- shortDesc: Securities
+  name: 9720
+  parent: 9700
+- shortDesc: Other
+  name: 9730
+  parent: 9700
+- shortDesc: Given
+  name: 9740
+  parent: 9700
+
+
+# Financial Derivative Contracts Held for Trading (Detailed Active Accounts)
+- shortDesc: Financial Derivative Contracts Held for Trading (Detailed Active Accounts)
+  name: 9750
+  parent: 9
+
+- shortDesc: Interest Rate Related Financial Derivative Contracts
+  name: 9751
+  parent: 9750
+- shortDesc: Foreign exchange rate related derivative contracts
+  name: 9752
+  parent: 9750
+- shortDesc: Financial derivative contracts that relate to price of equity securities
+  name: 9753
+  parent: 9750
+- shortDesc: Other financial derivative contracts that meet the derivative definition in accordance with IAS 39
+  name: 9754
+  parent: 9750
+
+
+# Financial Derivative Contracts Held as Collateral (Detailed Active Accounts)
+- shortDesc: Financial Derivative Contracts Held as Collateral (Detailed Active Accounts)
+  name: G9755
+  parent: 9
+
+- shortDesc: Interest Rate Related Financial Derivative Contracts
+  name: 9755
+  parent: G9755
+- shortDesc: Foreign exchange rate related derivative contracts
+  name: 9756
+  parent: G9755
+- shortDesc: Financial derivative contracts that relate to price of equity securities
+  name: 9757
+  parent: G9755
+- shortDesc: Other financial derivative contracts that meet the derivative definition in accordance with IAS 39
+  name: 9758
+  parent: G9755
+- shortDesc: Financial derivative contracts (counter item to detailed inactive accounts)
+  name: 9759
+  parent: G9755
+
+
+# Financial Derivative Contracts Held as Collateral (Detailed Active Accounts)
+- shortDesc: Financial Derivative Contracts Held as Collateral (Detailed Active Accounts)
+  name: G9760
+  parent: 9
+
+- shortDesc: Interest Rate Related Financial Derivative Contracts
+  name: 9760
+  parent: G9760
+- shortDesc: Foreign exchange rate related derivative contracts
+  name: 9761
+  parent: G9760
+- shortDesc: Financial derivative contracts that relate to price of equity securities
+  name: 9762
+  parent: G9760
+- shortDesc: Other financial derivative contracts that meet the derivative definition in accordance with IAS 39
+  name: 9763
+  parent: G9760
+
+
+# Financial Derivative Contracts Held as Collateral (Detailed Inactive Accounts)
+- shortDesc: Financial Derivative Contracts Held as Collateral (Detailed Inactive Accounts)
+  name: G9764
+  parent: 9
+
+- shortDesc: Interest Rate Related Financial Derivative Contracts
+  name: 9764
+  parent: G9764
+- shortDesc: Foreign exchange rate related derivative contracts
+  name: 9765
+  parent: G9764
+- shortDesc: Financial derivative contracts that relate to price of equity securities
+  name: 9766
+  parent: G9764
+- shortDesc: Other financial derivative contracts that meet the derivative definition in accordance with IAS 39
+  name: 9767
+  parent: G9764
+- shortDesc: Financial derivative contracts (counter item to detailed active accounts)
+  name: 9768
+  parent: G9764
+- shortDesc: Other credit off balance sheet items in domestic currency
+  name: 9769
+  parent: G9764
+- shortDesc: Other credit off balance sheet items in foreign currency
+  name: 9770
+  parent: G9764
+
+
+# Assets Held in Trust
+- shortDesc: Assets Held in Trust
+  name: 9800
+  parent: 9
+
+- shortDesc: Securities and valuables of clients for safekeeping
+  name: 9810
+  parent: 9800
+- shortDesc: Other assets held for safekeeping
+  name: 9820
+  parent: 9800
+- shortDesc: Managed securities
+  name: 9830
+  parent: 9800
+- shortDesc: Managed other assets - including Agency loans
+  name: 9840
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9900
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9910
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9920
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9930
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9940
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9950
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9960
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9970
+  parent: 9800
+- shortDesc: Memorandum Account
+  name: 9980
+  parent: 9800
+- shortDesc: Other debit off balance sheet items in domestic currency
+  name: 9990
+  parent: 9800
+- shortDesc: Other debit off balance sheet items in foreign currency 
+  name: 9991
+  parent: 9800
 
   
