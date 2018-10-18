@@ -19,23 +19,16 @@ package de.adorsys.ledgers.db.um.repository;
 import de.adorsys.ledgers.db.um.converter.UserPOConverter;
 import de.adorsys.ledgers.db.um.domain.UserEntity;
 import de.adorsys.ledgers.db.um.domain.UserPO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
+@AllArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
-
     private final UserJpaRepository repository;
-
     private final UserPOConverter converter;
-
-    @Autowired
-    public UserRepositoryImpl(UserJpaRepository repository, UserPOConverter converter) {
-        this.repository = repository;
-        this.converter = converter;
-    }
 
     @Override
     public Optional<UserPO> findByLogin(String login) {
