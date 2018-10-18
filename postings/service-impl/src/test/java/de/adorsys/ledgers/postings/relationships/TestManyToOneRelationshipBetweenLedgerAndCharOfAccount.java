@@ -11,6 +11,7 @@ import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.tests.PostingsApplication;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
