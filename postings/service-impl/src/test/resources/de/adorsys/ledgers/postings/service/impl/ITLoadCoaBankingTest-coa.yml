@@ -1,0 +1,23 @@
+# Chart of account of a bank
+
+# Assets
+- shortDesc: Assets
+  name: 1
+  category: AS
+  balanceSide: Dr
+
+# Cash and Cash Equivalents
+- shortDesc: Cash and Cash Equivalents
+  name: 1000
+  parent: 1
+
+
+- shortDesc: Cash in vault
+  name: 1001
+  parent: 1000
+- shortDesc: Cash in ATM
+  name: 1002
+  parent: 1000
+- shortDesc: Cash in transit
+  name: 1003
+  parent: 1000
