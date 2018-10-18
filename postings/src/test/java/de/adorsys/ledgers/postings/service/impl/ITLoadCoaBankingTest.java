@@ -53,7 +53,7 @@ public class ITLoadCoaBankingTest {
 	}
 	
 	@Test
-	public void test_load_coa_ok() throws JsonParseException, JsonMappingException, IOException, NotFoundException{
+	public void test_load_coa_ok() throws IOException, NotFoundException{
         Ledger ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
         Assume.assumeNotNull(ledger);
 
