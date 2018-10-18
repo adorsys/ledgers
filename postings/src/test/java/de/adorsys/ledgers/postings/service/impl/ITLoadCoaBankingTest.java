@@ -76,9 +76,9 @@ public class ITLoadCoaBankingTest {
 			}
 		}
 		
-		LedgerAccount la = ledgerService.findLedgerAccount(ledger, "1301").orElse(null);
+		LedgerAccount la = ledgerService.findLedgerAccount(ledger, "1003").orElse(null);
 		Assume.assumeNotNull(la);
-		Assert.assertEquals("Servicing rights",la.getShortDesc());
+		Assert.assertEquals("Cash in transit",la.getShortDesc());
 		Assert.assertEquals(AccountCategory.AS, la.getCategory());
 		Assert.assertEquals(BalanceSide.Dr, la.getBalanceSide());
 	}
