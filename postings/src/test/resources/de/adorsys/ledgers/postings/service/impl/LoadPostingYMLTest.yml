@@ -1,3 +1,4 @@
+# Test for loading a single posting. 
 - oprId: "sales_inv_001"
   oprDetails: "Customer place product orders, on credit."
   pstTime: 2018-08-07T20:58:24.232

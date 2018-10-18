@@ -1,0 +1,21 @@
+# Testing the computation of a simple balance.
+# We use the chart of account from the file: ITLoadCoaBankingTest-coa.yml
+# The name of out business is SimpleBank
+# Initial Capital of the Bank. Deposit with the central bank
+- oprId: "deposit_with_central_bank_001"
+  oprDetails: "Initial deposit in the central bank account of SimpleBank"
+  pstTime: 2018-10-15T22:40:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 110
+      shortDesc: "Deposits with Central Banks" 
+    debitAmount: 1000000.00
+    creditAmount: 0.00
+  - account:
+      name: 4.1.1
+      shortDesc: "Products" 
+    debitAmount: 0.00
+    creditAmount: 4200.00
+    
