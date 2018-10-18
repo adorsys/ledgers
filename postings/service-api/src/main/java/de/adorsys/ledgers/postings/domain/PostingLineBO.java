@@ -11,7 +11,7 @@ public class PostingLineBO {
 	private PostingBO posting;
 	
 	/*The associated ledger account*/
-	private LedgerAccount account;
+	private LedgerAccountBO account;
 	
 	private BigDecimal debitAmount;
 
@@ -87,4 +87,132 @@ public class PostingLineBO {
 	 * date and can lead to the production of other type of balances.
 	 */
 	private LocalDateTime valTime;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public PostingBO getPosting() {
+		return posting;
+	}
+
+	public void setPosting(PostingBO posting) {
+		this.posting = posting;
+	}
+
+	public LedgerAccountBO getAccount() {
+		return account;
+	}
+
+	public void setAccount(LedgerAccountBO account) {
+		this.account = account;
+	}
+
+	public BigDecimal getDebitAmount() {
+		return debitAmount;
+	}
+
+	public void setDebitAmount(BigDecimal debitAmount) {
+		this.debitAmount = debitAmount;
+	}
+
+	public BigDecimal getCreditAmount() {
+		return creditAmount;
+	}
+
+	public void setCreditAmount(BigDecimal creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
+	public String getDetails() {
+		return details;
+	}
+
+	public void setDetails(String details) {
+		this.details = details;
+	}
+
+	public String getSrcAccount() {
+		return srcAccount;
+	}
+
+	public void setSrcAccount(String srcAccount) {
+		this.srcAccount = srcAccount;
+	}
+
+	public LocalDateTime getRecordTime() {
+		return recordTime;
+	}
+
+	public void setRecordTime(LocalDateTime recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	public String getOprId() {
+		return oprId;
+	}
+
+	public void setOprId(String oprId) {
+		this.oprId = oprId;
+	}
+
+	public int getOprSeqNbr() {
+		return oprSeqNbr;
+	}
+
+	public void setOprSeqNbr(int oprSeqNbr) {
+		this.oprSeqNbr = oprSeqNbr;
+	}
+
+	public LocalDateTime getPstTime() {
+		return pstTime;
+	}
+
+	public void setPstTime(LocalDateTime pstTime) {
+		this.pstTime = pstTime;
+	}
+
+	public PostingTypeBO getPstType() {
+		return pstType;
+	}
+
+	public void setPstType(PostingTypeBO pstType) {
+		this.pstType = pstType;
+	}
+
+	public PostingStatusBO getPstStatus() {
+		return pstStatus;
+	}
+
+	public void setPstStatus(PostingStatusBO pstStatus) {
+		this.pstStatus = pstStatus;
+	}
+
+	public LedgerBO getLedger() {
+		return ledger;
+	}
+
+	public void setLedger(LedgerBO ledger) {
+		this.ledger = ledger;
+	}
+
+	public String getAccName() {
+		return accName;
+	}
+
+	public void setAccName(String accName) {
+		this.accName = accName;
+	}
+
+	public LocalDateTime getValTime() {
+		return valTime;
+	}
+
+	public void setValTime(LocalDateTime valTime) {
+		this.valTime = valTime;
+	}
 }

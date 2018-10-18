@@ -15,8 +15,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
@@ -27,7 +25,7 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.domain.AccountCategory;
 import de.adorsys.ledgers.postings.domain.BalanceSide;
 import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.tests.PostingsApplication;
@@ -61,8 +59,8 @@ public class ITLoadCoaBankingTest {
         LegAccYamlModel[] ledgerAccounts = mapper.readValue(inputStream, LegAccYamlModel[].class);
 		for (LegAccYamlModel model : ledgerAccounts) {
 			try {
-				LedgerAccount parent = model.getParent()==null?null:LedgerAccount.builder().ledger(ledger).name(model.getParent()).build();
-				LedgerAccount ledgerAccount = LedgerAccount.builder()
+				LedgerAccountBO parent = model.getParent()==null?null:LedgerAccountBO.builder().ledger(ledger).name(model.getParent()).build();
+				LedgerAccountBO ledgerAccount = LedgerAccountBO.builder()
 						.shortDesc(model.getShortDesc())
 						.name(model.getName())
 						.balanceSide(model.getBalanceSide())
@@ -76,7 +74,7 @@ public class ITLoadCoaBankingTest {
 			}
 		}
 		
-		LedgerAccount la = ledgerService.findLedgerAccount(ledger, "1003").orElse(null);
+		LedgerAccountBO la = ledgerService.findLedgerAccount(ledger, "1003").orElse(null);
 		Assume.assumeNotNull(la);
 		Assert.assertEquals("Cash in transit",la.getShortDesc());
 		Assert.assertEquals(AccountCategory.AS, la.getCategory());

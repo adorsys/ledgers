@@ -4,13 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import de.adorsys.ledgers.postings.domain.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.PostingLine;
-import de.adorsys.ledgers.postings.domain.PostingStatus;
-import de.adorsys.ledgers.postings.domain.PostingType;
 
 public interface PostingLineRepository extends PagingAndSortingRepository<PostingLine, String> {
 	
@@ -27,10 +23,10 @@ public interface PostingLineRepository extends PagingAndSortingRepository<Postin
 			PostingType ldgClsng, PostingStatus pstStatus, LocalDateTime refTime);
 
 	List<PostingLine> findByAccountAndPstTypeInAndPstStatusAndPstTimeGreaterThanAndPstTimeLessThanEqual(
-			LedgerAccount ledgerAccount, List<PostingType> txTypes, PostingStatus pstStatus, LocalDateTime pstTime,
-			LocalDateTime refTime);
+            LedgerAccount ledgerAccount, List<PostingType> txTypes, PostingStatus pstStatus, LocalDateTime pstTime,
+            LocalDateTime refTime);
 
 	@Query("SELECT SUM(l.debitAmount), SUM(l.creditAmount) FROM PostingLine l WHERE l.account= :account AND l.pstType IN :txTypes AND l.pstStatus=:pstStatus AND l.pstTime>:lastClosing AND l.pstTime<=:refTime")
 	List<BigDecimal> computeBalance(LedgerAccount account, List<PostingType> txTypes, PostingStatus pstStatus, LocalDateTime lastClosing,
-			LocalDateTime refTime);
+                                    LocalDateTime refTime);
 }

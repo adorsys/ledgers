@@ -6,8 +6,6 @@ import de.adorsys.ledgers.postings.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.service.LedgerService;
-import de.adorsys.ledgers.util.Ids;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -78,7 +76,7 @@ public class ITLedgerServiceImplTest {
         when(ledgerAccountRepository.save(any())).thenReturn(getLedgerAccount());
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         //When
-        LedgerAccount result = ledgerService.newLedgerAccount(getLedgerAccount());
+        LedgerAccountBO result = ledgerService.newLedgerAccount(getLedgerAccount());
         //Then
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(getLedgerAccount());
@@ -88,7 +86,7 @@ public class ITLedgerServiceImplTest {
     public void findLedgerAccountById() {
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(getLedgerAccount()));
         //When
-        Optional<LedgerAccount> result = ledgerService.findLedgerAccountById(LEDGER_ID);
+        Optional<LedgerAccountBO> result = ledgerService.findLedgerAccountById(LEDGER_ID);
         //Then
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(getLedgerAccount());
@@ -98,14 +96,14 @@ public class ITLedgerServiceImplTest {
     public void findLedgerAccount() {
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(),anyString())).thenReturn(Optional.of(getLedgerAccount()));
         //When
-        Optional<LedgerAccount> result = ledgerService.findLedgerAccount(getLedger(), LEDGER_ID);
+        Optional<LedgerAccountBO> result = ledgerService.findLedgerAccount(getLedger(), LEDGER_ID);
         //Then
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(getLedgerAccount());
     }
 
-    private LedgerAccount getLedgerAccount() {
-        return new LedgerAccount(LEDGER_ID, DATE_TIME, "User", "Some short description", "Some long description", NAME, getLedger(), null, getChartOfAccount(), BalanceSide.Cr, AccountCategory.AS);
+    private LedgerAccountBO getLedgerAccount() {
+        return new LedgerAccountBO(LEDGER_ID, DATE_TIME, "User", "Some short description", "Some long description", NAME, getLedger(), null, getChartOfAccount(), BalanceSide.Cr, AccountCategory.AS);
     }
 
     private Ledger getLedger() {

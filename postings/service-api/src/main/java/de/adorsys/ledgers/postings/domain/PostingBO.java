@@ -108,4 +108,116 @@ public class PostingBO extends HashRecordBO {
 
 //    todo: add description to this field
     private List<PostingLineBO> lines = new ArrayList<>();
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRecordUser() {
+        return recordUser;
+    }
+
+    public void setRecordUser(String recordUser) {
+        this.recordUser = recordUser;
+    }
+
+    public LocalDateTime getRecordTime() {
+        return recordTime;
+    }
+
+    public void setRecordTime(LocalDateTime recordTime) {
+        this.recordTime = recordTime;
+    }
+
+    public String getOprId() {
+        return oprId;
+    }
+
+    public void setOprId(String oprId) {
+        this.oprId = oprId;
+    }
+
+    public int getOprSeqNbr() {
+        return oprSeqNbr;
+    }
+
+    public void setOprSeqNbr(int oprSeqNbr) {
+        this.oprSeqNbr = oprSeqNbr;
+    }
+
+    public LocalDateTime getOprTime() {
+        return oprTime;
+    }
+
+    public void setOprTime(LocalDateTime oprTime) {
+        this.oprTime = oprTime;
+    }
+
+    public String getOprType() {
+        return oprType;
+    }
+
+    public void setOprType(String oprType) {
+        this.oprType = oprType;
+    }
+
+    public String getOprDetails() {
+        return oprDetails;
+    }
+
+    public void setOprDetails(String oprDetails) {
+        this.oprDetails = oprDetails;
+    }
+
+    public LocalDateTime getPstTime() {
+        return pstTime;
+    }
+
+    public void setPstTime(LocalDateTime pstTime) {
+        this.pstTime = pstTime;
+    }
+
+    public PostingTypeBO getPstType() {
+        return pstType;
+    }
+
+    public void setPstType(PostingTypeBO pstType) {
+        this.pstType = pstType;
+    }
+
+    public PostingStatusBO getPstStatus() {
+        return pstStatus;
+    }
+
+    public void setPstStatus(PostingStatusBO pstStatus) {
+        this.pstStatus = pstStatus;
+    }
+
+    public LedgerBO getLedger() {
+        return ledger;
+    }
+
+    public void setLedger(LedgerBO ledger) {
+        this.ledger = ledger;
+    }
+
+    public LocalDateTime getValTime() {
+        return valTime;
+    }
+
+    public void setValTime(LocalDateTime valTime) {
+        this.valTime = valTime;
+    }
+
+    public List<PostingLineBO> getLines() {
+        return lines;
+    }
+
+    public void setLines(List<PostingLineBO> lines) {
+        this.lines = lines;
+    }
 }

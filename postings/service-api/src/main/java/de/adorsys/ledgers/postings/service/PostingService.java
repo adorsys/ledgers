@@ -3,9 +3,10 @@ package de.adorsys.ledgers.postings.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.domain.PostingBO;
 import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.exception.PostingNotFoundException;
 
 public interface PostingService {
@@ -21,7 +22,7 @@ public interface PostingService {
      * @return
      * @throws PostingNotFoundException
      */
-    PostingBO newPosting(PostingBO posting) throws PostingNotFoundException;
+    PostingBO newPosting(PostingBO posting) throws PostingNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException;
 
     /**
      * Listing all postings associated with this operation id.
@@ -39,5 +40,5 @@ public interface PostingService {
      * @return
      * @throws LedgerAccountNotFoundException
      */
-    PostingBO balanceTx(LedgerAccount ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException;
+    PostingBO balanceTx(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException;
 }

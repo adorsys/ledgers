@@ -1,10 +1,9 @@
 package de.adorsys.ledgers.postings.exception;
 
 public class LedgerAccountNotFoundException extends Exception {
-	private static final long serialVersionUID = -1713219984198663520L;
+    private static final long serialVersionUID = -1713219984198663520L;
 
-	public LedgerAccountNotFoundException(String message) {
-		super(message);
-	}
-
+    public LedgerAccountNotFoundException(String id) {
+        super(String.format("Ledger Account with id %s not found.", id));
+    }
 }

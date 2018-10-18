@@ -15,8 +15,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
@@ -27,7 +25,7 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.domain.AccountCategory;
 import de.adorsys.ledgers.postings.domain.BalanceSide;
 import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.tests.PostingsApplication;
@@ -57,20 +55,20 @@ public class ITLoadCoaIFRSTest {
         Assume.assumeNotNull(ledger);
 
         InputStream inputStream = LoadLedgerAccountYMLTest.class.getResourceAsStream("ITLoadCoaIFRSTest-coa.yml");
-		LedgerAccount[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccount[].class);
-		for (LedgerAccount ledgerAccount : ledgerAccounts) {
+		LedgerAccountBO[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccountBO[].class);
+		for (LedgerAccountBO ledgerAccount : ledgerAccounts) {
 			
 			if(ledgerAccount.getName()==null)Assert.fail("Missing account name for "+ ledgerAccount.getShortDesc());
 			String name = ledgerAccount.getName();
 
-			LedgerAccount parent = null;
+			LedgerAccountBO parent = null;
 			if(name.contains(".")){
 				String parentName = name.substring(0, name.lastIndexOf('.'));
-				parent = LedgerAccount.builder()
+				parent = LedgerAccountBO.builder()
 						.ledger(ledger)
 						.name(parentName).build();
 			}
-			ledgerAccount = LedgerAccount.builder()
+			ledgerAccount = LedgerAccountBO.builder()
 					.shortDesc(ledgerAccount.getShortDesc())
 					.name(ledgerAccount.getName())
 					.balanceSide(ledgerAccount.getBalanceSide())
@@ -81,7 +79,7 @@ public class ITLoadCoaIFRSTest {
 			ledgerService.newLedgerAccount(ledgerAccount);
 		}
 		
-		LedgerAccount la = ledgerService.findLedgerAccount(ledger, "4.2").orElse(null);
+		LedgerAccountBO la = ledgerService.findLedgerAccount(ledger, "4.2").orElse(null);
 		Assume.assumeNotNull(la);
 		Assert.assertEquals("Services",la.getShortDesc());
 		Assert.assertEquals(AccountCategory.RE, la.getCategory());

@@ -71,8 +71,8 @@ public class LedgerAccount extends NamedEntity {
 
 	@Builder
 	public LedgerAccount(String id, LocalDateTime created, String user, String shortDesc, String longDesc, String name,
-			Ledger ledger, LedgerAccount parent, ChartOfAccount coa, BalanceSide balanceSide,
-			AccountCategory category) {
+                         Ledger ledger, LedgerAccount parent, ChartOfAccount coa, BalanceSide balanceSide,
+                         AccountCategory category) {
 		super(id, created, user, shortDesc, longDesc, name);
 		this.ledger = ledger;
 		this.parent = parent;

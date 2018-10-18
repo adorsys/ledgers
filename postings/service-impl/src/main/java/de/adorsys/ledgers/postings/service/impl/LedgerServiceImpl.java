@@ -1,25 +1,27 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-
-import de.adorsys.ledgers.postings.domain.AccountCategory;
-import de.adorsys.ledgers.postings.domain.BalanceSide;
-import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.LedgerBO;
+import de.adorsys.ledgers.postings.converter.LedgerMapper;
+import de.adorsys.ledgers.postings.domain.*;
+import de.adorsys.ledgers.postings.exception.ChartOfAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
-import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
+import org.apache.commons.lang3.StringUtils;
 
-public class LedgerServiceImpl2 extends AbstractServiceImpl implements LedgerService {
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-	@Override
-	public LedgerBO newLedger(LedgerBO ledger) throws LedgerNotFoundException {
+public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerService {
+
+    private final LedgerMapper ledgerMapper;
+
+    public LedgerServiceImpl(LedgerMapper ledgerMapper) {
+        this.ledgerMapper = ledgerMapper;
+    }
+
+    @Override
+    public LedgerBO newLedger(LedgerBO ledger) throws ChartOfAccountNotFoundException {
         Ledger newLedger = new Ledger(
                 Ids.id(),
                 LocalDateTime.now(),
@@ -31,21 +33,28 @@ public class LedgerServiceImpl2 extends AbstractServiceImpl implements LedgerSer
                 ledger.getLastClosing());
         Ledger savedLedger = ledgerRepository.save(newLedger);
 
-        return CloneUtils.cloneObject(savedLedger, LedgerBO.class);
-	}
+        return ledgerMapper.toLedgerBO(savedLedger);
+    }
 
-	@Override
-	public Optional<LedgerBO> findLedgerById(String id) {
+    @Override
+    public Optional<LedgerBO> findLedgerById(String id) {
         return ledgerRepository.findById(id)
-                .map(l -> CloneUtils.cloneObject(l, LedgerBO.class));
-	}
+                       .map(ledgerMapper::toLedgerBO);
+    }
 
-	@Override
-	public Optional<LedgerBO> findLedgerByName(String name) {
+    @Override
+    public Optional<LedgerBO> findLedgerByName(String name) {
+        return ledgerRepository.findOptionalByName(name)
+                       .map(ledgerMapper::toLedgerBO);
+    }
+
+    @Override
+    public LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccountBO) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         // Validations
-        if (StringUtils.isBlank(ledgerAccount.getName())) {
+        if (StringUtils.isBlank(ledgerAccountBO.getName())) {
             throw new IllegalArgumentException("Missing model name.");
         }
+        LedgerAccount ledgerAccount = ledgerAccountMapper.toLedgerAccount(ledgerAccountBO);
 
         // User
         LedgerAccount parentAccount = getParentAccount(ledgerAccount);
@@ -65,27 +74,30 @@ public class LedgerServiceImpl2 extends AbstractServiceImpl implements LedgerSer
                                                  .balanceSide(getBalanceSide(ledgerAccount, parentAccount, category))
                                                  .build();
 
-        return CloneUtils.cloneObject(ledgerAccountRepository.save(newLedgerAccount), LedgerBO.class);
-	}
+        return ledgerAccountMapper.toLedgerAccountBO(ledgerAccountRepository.save(newLedgerAccount));
+    }
 
-	@Override
-	public LedgerAccount newLedgerAccount(LedgerAccount ledgerAccount) throws LedgerAccountNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Optional<LedgerAccountBO> findLedgerAccountById(String id) {
+        return ledgerAccountRepository.findById(id)
+                       .map(ledgerAccountMapper::toLedgerAccountBO);
+    }
 
-	@Override
-	public Optional<LedgerAccount> findLedgerAccountById(String id) {
-        return ledgerAccountRepository.findById(id);
-	}
-
-	@Override
-	public Optional<LedgerAccount> findLedgerAccount(LedgerBO ledger, String name) {
+    @Override
+    public Optional<LedgerAccountBO> findLedgerAccount(LedgerBO ledgerBO, String name) throws LedgerNotFoundException {
+        Ledger ledger = ledgerMapper.toLedger(ledgerBO);
         return ledgerAccountRepository
-                .findOptionalByLedgerAndName(ledger, name)
-	}
+                       .findOptionalByLedgerAndName(loadLedger(ledger), name)
+                       .map(ledgerAccountMapper::toLedgerAccountBO);
+    }
 
-    private Ledger getLedger(LedgerAccount ledgerAccount, LedgerAccount parentAccount) throws NotFoundException {
+    private LedgerAccount getParentAccount(LedgerAccount ledgerAccount) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+        return ledgerAccount.getParent() != null
+                       ? loadLedgerAccount(ledgerAccount.getParent())
+                       : null;
+    }
+
+    private Ledger getLedger(LedgerAccount ledgerAccount, LedgerAccount parentAccount) throws LedgerNotFoundException {
         return ledgerAccount.getParent() != null
                        ? parentAccount.getLedger()
                        : loadLedger(ledgerAccount.getLedger());

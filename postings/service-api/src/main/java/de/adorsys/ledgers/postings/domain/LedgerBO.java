@@ -12,4 +12,20 @@ public class LedgerBO extends NamedBO {
 	 * A posting time can not be carry a posting 
 	 */
 	private LocalDateTime lastClosing;
+
+	public ChartOfAccountBO getCoa() {
+		return coa;
+	}
+
+	public void setCoa(ChartOfAccountBO coa) {
+		this.coa = coa;
+	}
+
+	public LocalDateTime getLastClosing() {
+		return lastClosing;
+	}
+
+	public void setLastClosing(LocalDateTime lastClosing) {
+		this.lastClosing = lastClosing;
+	}
 }

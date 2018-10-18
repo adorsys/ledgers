@@ -7,15 +7,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.adorsys.ledgers.postings.domain.AccountCategory;
 import de.adorsys.ledgers.postings.domain.BalanceSide;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
 
 public class LoadLedgerAccountYMLTest {
 	private ObjectMapper mapper = new ObjectMapper();
@@ -30,7 +28,7 @@ public class LoadLedgerAccountYMLTest {
 	@Test
 	public void testReadYml() throws IOException{
 		InputStream inputStream = LoadLedgerAccountYMLTest.class.getResourceAsStream("LoadLedgerAccountYMLTest.yml");
-		LedgerAccount[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccount[].class);
+		LedgerAccountBO[] ledgerAccounts = mapper.readValue(inputStream, LedgerAccountBO[].class);
 		Assert.assertNotNull(ledgerAccounts);
 		Assert.assertEquals(2, ledgerAccounts.length);
 		Assert.assertEquals("1",ledgerAccounts[0].getName());
