@@ -12,10 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.domain.Posting;
+import de.adorsys.ledgers.postings.domain.PostingBO;
 import de.adorsys.ledgers.postings.domain.PostingLine;
 import de.adorsys.ledgers.postings.domain.PostingStatus;
 import de.adorsys.ledgers.postings.domain.PostingType;
+import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
+import de.adorsys.ledgers.postings.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.service.PostingService;
 import de.adorsys.ledgers.postings.utils.DoubleEntryBookKeeping;
 import de.adorsys.ledgers.postings.utils.LedgerPolicies;
@@ -27,7 +30,7 @@ import de.adorsys.ledgers.util.Ids;
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
     @Override
-    public Posting newPosting(Posting posting) throws NotFoundException {
+	public PostingBO newPosting(PostingBO posting) throws PostingNotFoundException {
         // Check ledger not null
         Ledger ledger = loadLedger(posting.getLedger());
         LedgerPolicies ledgerPolicies = new LedgerPolicies(ledger);
@@ -87,12 +90,13 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     @Override
-    public List<Posting> findPostingsByOperationId(String oprId) {
-        return CloneUtils.cloneList(postingRepository.findByOprId(oprId), Posting.class);
+    public List<PostingBO> findPostingsByOperationId(String oprId) {
+        return CloneUtils.cloneList(postingRepository.findByOprId(oprId), PostingBO.class);
     }
 
     @Override
-    public Posting balanceTx(LedgerAccount ledgerAccount, LocalDateTime refTime) throws NotFoundException {
+	public PostingBO balanceTx(LedgerAccount ledgerAccount, LocalDateTime refTime)
+			throws LedgerAccountNotFoundException {
         PostingLine baseLine = postingLineRepository
                                        .findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(
                                                ledgerAccount, PostingType.LDG_CLSNG, PostingStatus.POSTED, refTime);

@@ -14,7 +14,7 @@ public class CloneUtils {
         objectMapper.findAndRegisterModules();
     }
 
-    public static <T> T cloneObject(T in, Class<T> type) {
+    public static <T> T cloneObject(Object in, Class<T> type) {
         if (in == null) {
             return null;
         }
@@ -26,7 +26,7 @@ public class CloneUtils {
         }
     }
 
-    public static <T> List<T> cloneList(List<T> in, Class<T> type) {
+    public static <T> List<T> cloneList(List<?> in, Class<T> type) {
         return in.stream().map(t -> cloneObject(t, type)).collect(Collectors.toList());
     }
 }
