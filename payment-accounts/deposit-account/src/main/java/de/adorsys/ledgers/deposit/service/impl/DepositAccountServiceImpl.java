@@ -1,49 +1,35 @@
 package de.adorsys.ledgers.deposit.service.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.adorsys.ledgers.deposit.domain.*;
 import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.service.DepositAccountService;
-import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.Posting;
-import de.adorsys.ledgers.postings.domain.PostingLine;
-import de.adorsys.ledgers.postings.domain.PostingStatus;
-import de.adorsys.ledgers.postings.domain.PostingType;
+import de.adorsys.ledgers.postings.domain.*;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.service.PostingService;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.SerializationUtils;
+import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class DepositAccountServiceImpl implements DepositAccountService {
-
-    @Autowired
-    private DepositAccountRepository depositAccountRepository;
-
-    @Autowired
-    private LedgerService ledgerService;
-
-    @Autowired
-    private PostingService postingService;
-
-    @Autowired
-    private DepositAccountConfigService depositAccountConfigService;
+    private final DepositAccountRepository depositAccountRepository;
+    private final LedgerService ledgerService;
+    private final PostingService postingService;
+    private final DepositAccountConfigService depositAccountConfigService;
 
     @Override
     public DepositAccount createDepositAccount(DepositAccount depositAccount) {

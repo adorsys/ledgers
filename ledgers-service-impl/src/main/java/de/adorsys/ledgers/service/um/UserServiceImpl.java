@@ -16,8 +16,8 @@
 
 package de.adorsys.ledgers.service.um;
 
-import de.adorsys.ledgers.db.um.repository.UserRepository;
 import de.adorsys.ledgers.db.um.domain.UserPO;
+import de.adorsys.ledgers.db.um.repository.UserRepository;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.service.um.converter.UserConverter;
 import de.adorsys.ledgers.service.um.domain.UserBO;
@@ -33,9 +33,7 @@ import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
-
     private final UserConverter userConverter;
 
     @Autowired

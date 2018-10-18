@@ -10,6 +10,7 @@ import de.adorsys.ledgers.deposit.service.DepositAccountService;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.exception.NotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
+import de.adorsys.ledgers.postings.service.PostingService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,12 +24,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ITDepositAccountServiceImplTest extends DepositAccountServiceImpl {
+public class ITDepositAccountServiceImplTest{
     private static final String LEDGER_ACCOUNT_ID = "1234567890";
     private static final LedgerAccount LEDGER_ACCOUNT = LedgerAccount.builder().id(LEDGER_ACCOUNT_ID).build();
 
     @InjectMocks
-    private DepositAccountService depositAccountService = new DepositAccountServiceImpl();
+    private DepositAccountServiceImpl depositAccountService;
 
     @Mock
     private DepositAccountRepository depositAccountRepository;

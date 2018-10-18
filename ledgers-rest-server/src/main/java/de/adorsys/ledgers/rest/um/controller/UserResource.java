@@ -23,7 +23,7 @@ import de.adorsys.ledgers.service.um.UserService;
 import de.adorsys.ledgers.service.um.domain.UserBO;
 import de.adorsys.ledgers.service.um.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.service.um.exception.UserNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,6 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping(UserResource.USERS)
 public class UserResource {
 
@@ -38,17 +39,11 @@ public class UserResource {
     private final UserService userService;
     private final UserTOConverter converter;
 
-    @Autowired
-    public UserResource(UserService userService, UserTOConverter converter) {
-        this.userService = userService;
-        this.converter = converter;
-    }
-
     @PostMapping
     ResponseEntity<Void> createUser(@RequestBody UserTO user) {
         try {
             UserBO bo = converter.toUserBO(user);
-            UserBO userBO = null;
+            UserBO userBO;
             userBO = userService.create(bo);
             URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getId()).build().toUri();
             return ResponseEntity.created(uri).build();
@@ -60,7 +55,7 @@ public class UserResource {
     @GetMapping("{id}")
     ResponseEntity<UserTO> getUser(@PathVariable String id) {
         try {
-            UserBO userBO = null;
+            UserBO userBO;
             userBO = userService.findById(id);
             return ResponseEntity.ok(converter.toUserTO(userBO));
         } catch (UserNotFoundException e) {

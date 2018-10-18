@@ -1,32 +1,24 @@
 package de.adorsys.ledgers.rest.posting.controller;
 
-import java.net.URI;
-
-import javax.websocket.server.PathParam;
-
-import de.adorsys.ledgers.rest.exception.NotFoundRestException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriBuilder;
-
 import de.adorsys.ledgers.postings.domain.Ledger;
 import de.adorsys.ledgers.postings.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.service.LedgerService;
+import de.adorsys.ledgers.rest.exception.NotFoundRestException;
+import lombok.AllArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriBuilder;
+
+import javax.websocket.server.PathParam;
+import java.net.URI;
 
 @RestController
+@AllArgsConstructor
 public class LedgerController {
-	
-	@Autowired
-	private LedgerService ledgerService;
-	
-	/**
+	private final LedgerService ledgerService;
+
+		/**
 	 * Creates a new Ledger.
 	 * 
 	 * @param ledger
