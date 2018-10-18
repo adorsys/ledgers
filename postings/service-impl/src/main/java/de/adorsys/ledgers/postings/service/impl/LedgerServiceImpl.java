@@ -7,11 +7,14 @@ import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Service
 public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerService {
 
     private final LedgerMapper ledgerMapper;

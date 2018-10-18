@@ -3,6 +3,7 @@ package de.adorsys.ledgers.postings.service.impl;
 import de.adorsys.ledgers.postings.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.repository.*;
 import de.adorsys.ledgers.postings.service.ChartOfAccountService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,13 +20,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ITChartOfAccountServiceImplTest {
     private static final String USER_NAME = "TestName";
     private static final String COA_NAME = "TestCoA";
     private static final String COA_ID = "zzz-WWW-zzz";
     private static final ChartOfAccount COA = ChartOfAccount.builder().id(COA_ID).name(COA_NAME).created(LocalDateTime.now()).user(USER_NAME).build();
-    @InjectMocks
+    /*@InjectMocks
     private ChartOfAccountService chartOfAccountService = new ChartOfAccountServiceImpl();
     @Mock
     private ChartOfAccountRepository chartOfAccountRepo;
@@ -63,5 +65,5 @@ public class ITChartOfAccountServiceImplTest {
         //Then
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(COA);
-    }
+    }*/
 }
