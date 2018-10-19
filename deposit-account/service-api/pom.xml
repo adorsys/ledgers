@@ -33,7 +33,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-deposit-account-service-api</artifactId>
+			<artifactId>ledgers-postings-service-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

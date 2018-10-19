@@ -21,7 +21,9 @@
 	</parent>
 	<modules>
 		<module>service-api</module>
+<!--  
 		<module>service-impl</module>
+-->
 	</modules>
 	<packaging>pom</packaging>
 	<artifactId>ledgers-deposit-account</artifactId>
