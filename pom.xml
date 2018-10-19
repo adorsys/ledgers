@@ -204,6 +204,9 @@
 					</rulesets>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
+					<excludes>
+						<exclude>de.adorsys.ledgers.postings.converter/*Impl.*</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 
