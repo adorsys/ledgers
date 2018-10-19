@@ -204,9 +204,9 @@
 					</rulesets>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
-					<!--excludes>
-						<exclude>.*/converter/*Impl.*</exclude>
-					</excludes-->
+					<excludeRoots>
+                        <excludeRoot>../service-impl/target/generated-sources/annotations/</excludeRoot>
+                    </excludeRoots>
 				</configuration>
 			</plugin>
 
