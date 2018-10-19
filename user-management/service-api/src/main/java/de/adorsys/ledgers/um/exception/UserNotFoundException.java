@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.rest.um.converter;
+package de.adorsys.ledgers.um.exception;
 
-import de.adorsys.ledgers.rest.um.domain.UserTO;
-import de.adorsys.ledgers.um.domain.UserBO;
-import org.mapstruct.Mapper;
+public class UserNotFoundException extends Exception {
 
-@Mapper(componentModel = "spring")
-public interface UserTOConverter {
+    public UserNotFoundException() {
+    }
 
-    UserTO toUserTO(UserBO user);
-
-    UserBO toUserBO(UserTO user);
+    public UserNotFoundException(String message) {
+        super(message);
+    }
 }
