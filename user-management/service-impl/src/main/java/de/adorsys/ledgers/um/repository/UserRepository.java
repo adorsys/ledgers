@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.rest.um.converter;
+package de.adorsys.ledgers.um.repository;
 
-import de.adorsys.ledgers.rest.um.domain.UserTO;
-import de.adorsys.ledgers.um.domain.UserBO;
-import org.mapstruct.Mapper;
+import de.adorsys.ledgers.um.domain.UserEntity;
+import org.springframework.data.repository.CrudRepository;
 
-@Mapper(componentModel = "spring")
-public interface UserTOConverter {
+import java.util.Optional;
 
-    UserTO toUserTO(UserBO user);
+public interface UserRepository extends CrudRepository<UserEntity, String> {
 
-    UserBO toUserBO(UserTO user);
+    Optional<UserEntity> findFirstByLogin(String login);
 }

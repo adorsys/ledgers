@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.rest.um.converter;
+package de.adorsys.ledgers.um.exception;
 
-import de.adorsys.ledgers.rest.um.domain.UserTO;
 import de.adorsys.ledgers.um.domain.UserBO;
-import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
-public interface UserTOConverter {
+public class UserAlreadyExistsException extends Exception {
 
-    UserTO toUserTO(UserBO user);
+    public static final String ERROR_MESSAGE = "User with such login=%s or email=%s already exists";
 
-    UserBO toUserBO(UserTO user);
+    public UserAlreadyExistsException() {
+    }
+
+    public UserAlreadyExistsException(UserBO user) {
+        this(String.format(ERROR_MESSAGE, user.getLogin(), user.getEmail()));
+    }
+
+    public UserAlreadyExistsException(String message) {
+        super(message);
+    }
 }

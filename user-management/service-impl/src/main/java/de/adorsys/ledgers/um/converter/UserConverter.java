@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.rest.um.converter;
+package de.adorsys.ledgers.um.converter;
 
-import de.adorsys.ledgers.rest.um.domain.UserTO;
 import de.adorsys.ledgers.um.domain.UserBO;
+import de.adorsys.ledgers.um.domain.UserEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface UserTOConverter {
+public interface UserConverter {
 
-    UserTO toUserTO(UserBO user);
+    UserBO toUserBO(UserEntity user);
 
-    UserBO toUserBO(UserTO user);
+    UserEntity toUserPO(UserBO user);
 }

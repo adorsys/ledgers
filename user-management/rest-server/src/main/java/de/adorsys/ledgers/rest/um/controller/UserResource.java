@@ -19,11 +19,10 @@ package de.adorsys.ledgers.rest.um.controller;
 import de.adorsys.ledgers.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.rest.um.converter.UserTOConverter;
 import de.adorsys.ledgers.rest.um.domain.UserTO;
-import de.adorsys.ledgers.um.UserService;
+import de.adorsys.ledgers.um.service.UserService;
 import de.adorsys.ledgers.um.domain.UserBO;
 import de.adorsys.ledgers.um.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.exception.UserNotFoundException;
-import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,13 +30,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping(UserResource.USERS)
 public class UserResource {
 
     public static final String USERS = "/users/";
     private final UserService userService;
     private final UserTOConverter converter;
+
+    public UserResource(UserService userService, UserTOConverter converter) {
+        this.userService = userService;
+        this.converter = converter;
+    }
 
     @PostMapping
     ResponseEntity<Void> createUser(@RequestBody UserTO user) {
