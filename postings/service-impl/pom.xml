@@ -26,7 +26,7 @@
 	</parent>
 
 	<properties>
-		<ruleset.basedir>..</ruleset.basedir>
+		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>
 
 	<dependencies>
