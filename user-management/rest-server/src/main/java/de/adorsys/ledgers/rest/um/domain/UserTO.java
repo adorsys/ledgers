@@ -20,8 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class UserTO {
     private String id;
 
