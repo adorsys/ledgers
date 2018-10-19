@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,10 +62,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean authorize(String login, String pin, String accountId) throws UserNotFoundException {
         UserEntity user = getUser(login);
-        boolean pinVerified = MD5Util.verify(pin, user.getPin());
-//        long count = user.getAccounts().stream().filter(a -> a.getId().equals(accountId)).count();
+        //        long count = user.getAccounts().stream().filter(a -> a.getId().equals(accountId)).count();
 //        return pinVerified && count > 0;
-        return pinVerified;
+        return MD5Util.verify(pin, user.getPin());
     }
 
 //    @Override

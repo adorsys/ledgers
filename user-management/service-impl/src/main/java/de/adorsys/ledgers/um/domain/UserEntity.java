@@ -19,7 +19,6 @@ package de.adorsys.ledgers.um.domain;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
