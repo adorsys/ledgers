@@ -17,6 +17,7 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
 	</parent>
 	<modules>
 		<module>service-api</module>

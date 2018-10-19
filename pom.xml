@@ -204,9 +204,9 @@
 					</rulesets>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
-					<excludes>
+					<!--excludes>
 						<exclude>.*/converter/*Impl.*</exclude>
-					</excludes>
+					</excludes-->
 				</configuration>
 			</plugin>
 
