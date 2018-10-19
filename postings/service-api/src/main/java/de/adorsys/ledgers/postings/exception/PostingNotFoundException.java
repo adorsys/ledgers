@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.postings.exception;
 
-import de.adorsys.ledgers.postings.domain.LedgerBO;
 import de.adorsys.ledgers.postings.domain.PostingBO;
 
 public class PostingNotFoundException extends Exception {

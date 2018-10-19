@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.util.CloneUtils.cloneObject;
-
 @Service
 @Transactional
 public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements ChartOfAccountService {

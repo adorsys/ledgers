@@ -39,4 +39,52 @@ public class PostingTraceBO extends HashRecordBO {
     private String tgtPstId;
 
     private LocalDateTime recordTime;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getPos() {
+        return pos;
+    }
+
+    public void setPos(int pos) {
+        this.pos = pos;
+    }
+
+    public String getSrcPstId() {
+        return srcPstId;
+    }
+
+    public void setSrcPstId(String srcPstId) {
+        this.srcPstId = srcPstId;
+    }
+
+    public String getSrcPstHash() {
+        return srcPstHash;
+    }
+
+    public void setSrcPstHash(String srcPstHash) {
+        this.srcPstHash = srcPstHash;
+    }
+
+    public String getTgtPstId() {
+        return tgtPstId;
+    }
+
+    public void setTgtPstId(String tgtPstId) {
+        this.tgtPstId = tgtPstId;
+    }
+
+    public LocalDateTime getRecordTime() {
+        return recordTime;
+    }
+
+    public void setRecordTime(LocalDateTime recordTime) {
+        this.recordTime = recordTime;
+    }
 }
