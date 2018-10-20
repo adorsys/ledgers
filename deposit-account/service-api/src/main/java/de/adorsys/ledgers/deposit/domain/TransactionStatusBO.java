@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-public enum TransactionStatus {
+public enum TransactionStatusBO {
 
     ACCP("AcceptedCustomerProfile"),  //Preceding check of technical validation was successful. Customer profile check was also successful
     ACSC("AcceptedSettlementCompleted"),  //Settlement on the debtor's account has been completed. Usage : this can be used by the first agent to report to the debtor that the transaction has been completed. Warning : this status is provided for transaction status reasons, not for financial information. It can only be used after bilateral agreement"),
@@ -31,7 +31,7 @@ public enum TransactionStatus {
 
     private String name;
 
-    TransactionStatus(String name) {
+    TransactionStatusBO(String name) {
         this.name = name;
     }
 

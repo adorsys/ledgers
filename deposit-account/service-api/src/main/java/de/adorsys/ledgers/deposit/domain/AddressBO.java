@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-public class Address {
+public class AddressBO {
     private String street;
     private String buildingNumber;
     private String city;

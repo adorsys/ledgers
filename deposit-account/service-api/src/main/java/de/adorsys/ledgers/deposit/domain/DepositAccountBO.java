@@ -3,7 +3,7 @@ package de.adorsys.ledgers.deposit.domain;
 import java.util.Currency;
 
 
-public class DepositAccount {
+public class DepositAccountBO {
 
     private String id;
 
@@ -24,9 +24,9 @@ public class DepositAccount {
     private String name;
     private String product;
 
-    private AccountType accountType;
+    private AccountTypeBO accountType;
 
-    private AccountStatus accountStatus = AccountStatus.ENABLED;
+    private AccountStatusBO accountStatus = AccountStatusBO.ENABLED;
 
     /*
      * SWIFT
@@ -46,7 +46,7 @@ public class DepositAccount {
      *
      */
 
-    private AccountUsage usageType;
+    private AccountUsageBO usageType;
     /*
      * Specifications that might be provided by the ASPSP
      * - characteristics of the account
@@ -89,16 +89,16 @@ public class DepositAccount {
 	public void setProduct(String product) {
 		this.product = product;
 	}
-	public AccountType getAccountType() {
+	public AccountTypeBO getAccountType() {
 		return accountType;
 	}
-	public void setAccountType(AccountType accountType) {
+	public void setAccountType(AccountTypeBO accountType) {
 		this.accountType = accountType;
 	}
-	public AccountStatus getAccountStatus() {
+	public AccountStatusBO getAccountStatus() {
 		return accountStatus;
 	}
-	public void setAccountStatus(AccountStatus accountStatus) {
+	public void setAccountStatus(AccountStatusBO accountStatus) {
 		this.accountStatus = accountStatus;
 	}
 	public String getBic() {
@@ -113,10 +113,10 @@ public class DepositAccount {
 	public void setLinkedAccounts(String linkedAccounts) {
 		this.linkedAccounts = linkedAccounts;
 	}
-	public AccountUsage getUsageType() {
+	public AccountUsageBO getUsageType() {
 		return usageType;
 	}
-	public void setUsageType(AccountUsage usageType) {
+	public void setUsageType(AccountUsageBO usageType) {
 		this.usageType = usageType;
 	}
 	public String getDetails() {

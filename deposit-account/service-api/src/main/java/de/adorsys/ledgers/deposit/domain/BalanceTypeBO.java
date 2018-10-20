@@ -6,7 +6,7 @@ package de.adorsys.ledgers.deposit.domain;
  * @author fpo
  *
  */
-public enum BalanceType {
+public enum BalanceTypeBO {
     CLOSING_BOOKED,
     EXPECTED,
     AUTHORISED,

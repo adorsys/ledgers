@@ -19,7 +19,7 @@ package de.adorsys.ledgers.deposit.domain;
 /**
  * The following codes from the \"EventFrequency7Code\" of ISO 20022 are supported. - \"Daily\" - \"Weekly\" - \"EveryTwoWeeks\" - \"Monthly\" - \"EveryTwoMonths\" - \"Quarterly\" - \"SemiAnnual\" - \"Annual\"
  */
-public enum FrequencyCode {
+public enum FrequencyCodeBO {
 
     DAILY("Daily"),
 
@@ -39,13 +39,13 @@ public enum FrequencyCode {
 
     private String value;
 
-    FrequencyCode(String value) {
+    FrequencyCodeBO(String value) {
         this.value = value;
     }
 
     
-    public static FrequencyCode fromValue(String text) {
-        for (FrequencyCode b : FrequencyCode.values()) {
+    public static FrequencyCodeBO fromValue(String text) {
+        for (FrequencyCodeBO b : FrequencyCodeBO.values()) {
             if (String.valueOf(b.value).equalsIgnoreCase(text)) {
                 return b;
             }

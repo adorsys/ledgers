@@ -16,19 +16,22 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-public enum PaymentType {
-    SINGLE("payments"),
-    BULK("bulk-payments"),
-    PERIODIC("periodic-payments");
+import java.math.BigDecimal;
+import java.util.Currency;
 
-    private String paymentType;
-
-    
-    PaymentType(String paymentType) {
-        this.paymentType = paymentType;
-    }
-
-    public String getSpiPaymentType() {
-        return paymentType;
-    }
+public class AmountBO {
+    private Currency currency;
+    private BigDecimal amount;
+	public Currency getCurrency() {
+		return currency;
+	}
+	public void setCurrency(Currency currency) {
+		this.currency = currency;
+	}
+	public BigDecimal getAmount() {
+		return amount;
+	}
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
 }

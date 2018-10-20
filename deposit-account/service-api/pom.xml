@@ -14,7 +14,6 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>ledgers-deposit-account-service-api</artifactId>
-	<packaging>jar</packaging>
 
 	<description>Deposit Account Service API</description>
 

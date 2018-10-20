@@ -20,32 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum AccountType {
-    CACC("Current"),
-    CASH("CashPayment"),
-    CHAR("Charges"),
-    CISH("CashIncome"),
-    COMM("Commission"),
-    CPAC("ClearingParticipantSettlementAccount"),
-    LLSV("LimitedLiquiditySavingsAccount"),
-    LOAN("Loan"),
-    MGLD("Marginal Lending"),
-    MOMA("Money Market"),
-    NREX("NonResidentExternal"),
-    ODFT("Overdraft"),
-    ONDP("OverNightDeposit"),
-    OTHR("OtherAccount"),
-    SACC("Settlement"),
-    SLRY("Salary"),
-    SVGS("Savings"),
-    TAXE("Tax"),
-    TRAN("TransactingAccount"),
-    TRAS("Cash Trading");
+public enum AccountStatusBO {
+    ENABLED("enabled"),
+    DELETED("deleted"),
+    BLOCKED("blocked");
 
-    private static final Map<String, AccountType> container = new HashMap<>();
+    private static final Map<String, AccountStatusBO> container = new HashMap<>();
     private String value;
 
-    private AccountType(String value) {
+    private AccountStatusBO(String value) {
         this.value = value;
     }
 
@@ -53,15 +36,15 @@ public enum AccountType {
         return this.value;
     }
 
-    public static Optional<AccountType> getByValue(String value) {
+    public static Optional<AccountStatusBO> getByValue(String value) {
         return Optional.ofNullable(container.get(value));
     }
 
     static {
-        AccountType[] var0 = values();
+        AccountStatusBO[] var0 = values();
 
-        for (AccountType accountType : var0) {
-            container.put(accountType.getValue(), accountType);
+        for (AccountStatusBO accountStatus : var0) {
+            container.put(accountStatus.getValue(), accountStatus);
         }
     }
 }

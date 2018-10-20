@@ -1,33 +1,36 @@
 package de.adorsys.ledgers.deposit.service.impl;
 
-import de.adorsys.ledgers.deposit.domain.AccountStatus;
-import de.adorsys.ledgers.deposit.domain.AccountType;
-import de.adorsys.ledgers.deposit.domain.AccountUsage;
-import de.adorsys.ledgers.deposit.domain.DepositAccount;
-import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
-import de.adorsys.ledgers.deposit.service.DepositAccountConfigService;
-import de.adorsys.ledgers.deposit.service.DepositAccountService;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.exception.NotFoundException;
-import de.adorsys.ledgers.postings.service.LedgerService;
-import de.adorsys.ledgers.postings.service.PostingService;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Currency;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import de.adorsys.ledgers.deposit.domain.DepositAccount;
+import de.adorsys.ledgers.deposit.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
+import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
+import de.adorsys.ledgers.deposit.service.DepositAccountConfigService;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.service.LedgerService;
+import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ITDepositAccountServiceImplTest{
     private static final String LEDGER_ACCOUNT_ID = "1234567890";
-    private static final LedgerAccount LEDGER_ACCOUNT = LedgerAccount.builder().id(LEDGER_ACCOUNT_ID).build();
-
+    private static final LedgerAccountBO LEDGER_ACCOUNT = newLedgerAccountBO(LEDGER_ACCOUNT_ID);
+    
+    private static LedgerAccountBO newLedgerAccountBO(String id) {
+    	LedgerAccountBO l = new LedgerAccountBO();
+    	l.setId(id);
+    	return l;
+    }
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
 
@@ -39,28 +42,20 @@ public class ITDepositAccountServiceImplTest{
     private DepositAccountConfigService depositAccountConfigService;
 
     @Test
-    public void test_create_customer_bank_account_ok() throws NotFoundException {
+    public void test_create_customer_bank_account_ok() throws LedgerAccountNotFoundException, LedgerNotFoundException, PaymentProcessingException {
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(LEDGER_ACCOUNT);
         when(ledgerService.newLedgerAccount(any())).thenReturn(LEDGER_ACCOUNT);
-        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount());
+        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(DepositAccount.class));
 
         //Given
-        DepositAccount da = getDepositAccount();
+        DepositAccountBO da = getDepositAccount(DepositAccountBO.class);
         //When
-        DepositAccount createdDepositAccount = depositAccountService.createDepositAccount(da);
+        DepositAccountBO createdDepositAccount = depositAccountService.createDepositAccount(da);
         //Then
         assertThat(createdDepositAccount).isNotNull();
     }
-
-    private DepositAccount getDepositAccount() {
-        return DepositAccount.builder()
-                       .iban("DE91100000000123456789")
-                       .currency(Currency.getInstance("EUR"))
-                       .name("Account mykola")
-                       .product("Deposit Account")
-                       .accountType(AccountType.CASH)
-                       .accountStatus(AccountStatus.ENABLED)
-                       .usageType(AccountUsage.PRIV)
-                       .details("Mykola's Account").build();
+    
+    private <T> T getDepositAccount(Class<T> t) {
+    	return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/deposit/service/impl/ITDepositAccountServiceImplTest.yml", t);
     }
 }

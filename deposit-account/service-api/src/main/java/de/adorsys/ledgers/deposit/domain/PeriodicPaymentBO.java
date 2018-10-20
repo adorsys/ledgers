@@ -18,11 +18,11 @@ package de.adorsys.ledgers.deposit.domain;
 
 import java.time.LocalDate;
 
-public class PeriodicPayment extends SinglePayment {
+public class PeriodicPaymentBO extends SinglePaymentBO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String executionRule;
-    private FrequencyCode frequency; // TODO consider using an enum similar to FrequencyCode based on the the "EventFrequency7Code" of ISO 20022
+    private FrequencyCodeBO frequency; // TODO consider using an enum similar to FrequencyCode based on the the "EventFrequency7Code" of ISO 20022
     private byte dayOfExecution; //Day here max 31
 	public LocalDate getStartDate() {
 		return startDate;
@@ -42,10 +42,10 @@ public class PeriodicPayment extends SinglePayment {
 	public void setExecutionRule(String executionRule) {
 		this.executionRule = executionRule;
 	}
-	public FrequencyCode getFrequency() {
+	public FrequencyCodeBO getFrequency() {
 		return frequency;
 	}
-	public void setFrequency(FrequencyCode frequency) {
+	public void setFrequency(FrequencyCodeBO frequency) {
 		this.frequency = frequency;
 	}
 	public byte getDayOfExecution() {

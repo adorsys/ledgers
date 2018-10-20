@@ -16,19 +16,19 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-public abstract class BasePayment {
-    private AccountReference debtorAccount;
-    private TransactionStatus transactionStatus;
-	public AccountReference getDebtorAccount() {
-		return debtorAccount;
-	}
-	public void setDebtorAccount(AccountReference debtorAccount) {
-		this.debtorAccount = debtorAccount;
-	}
-	public TransactionStatus getTransactionStatus() {
-		return transactionStatus;
-	}
-	public void setTransactionStatus(TransactionStatus transactionStatus) {
-		this.transactionStatus = transactionStatus;
-	}
+public enum PaymentTypeBO {
+    SINGLE("payments"),
+    BULK("bulk-payments"),
+    PERIODIC("periodic-payments");
+
+    private String paymentType;
+
+    
+    PaymentTypeBO(String paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public String getSpiPaymentType() {
+        return paymentType;
+    }
 }

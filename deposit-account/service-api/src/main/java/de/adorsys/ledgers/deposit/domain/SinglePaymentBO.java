@@ -16,16 +16,16 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-public class SinglePayment extends BasePayment {
+public class SinglePaymentBO extends BasePaymentBO {
     private String paymentId;
     private String endToEndIdentification;
-    private Amount instructedAmount;
-    private AccountReference creditorAccount;
+    private AmountBO instructedAmount;
+    private AccountReferenceBO creditorAccount;
     private String creditorAgent;
     private String creditorName;
-    private Address creditorAddress;
+    private AddressBO creditorAddress;
     private String remittanceInformationUnstructured;
-    protected PaymentProduct paymentProduct;
+    protected PaymentProductBO paymentProduct;
 	public String getPaymentId() {
 		return paymentId;
 	}
@@ -38,16 +38,16 @@ public class SinglePayment extends BasePayment {
 	public void setEndToEndIdentification(String endToEndIdentification) {
 		this.endToEndIdentification = endToEndIdentification;
 	}
-	public Amount getInstructedAmount() {
+	public AmountBO getInstructedAmount() {
 		return instructedAmount;
 	}
-	public void setInstructedAmount(Amount instructedAmount) {
+	public void setInstructedAmount(AmountBO instructedAmount) {
 		this.instructedAmount = instructedAmount;
 	}
-	public AccountReference getCreditorAccount() {
+	public AccountReferenceBO getCreditorAccount() {
 		return creditorAccount;
 	}
-	public void setCreditorAccount(AccountReference creditorAccount) {
+	public void setCreditorAccount(AccountReferenceBO creditorAccount) {
 		this.creditorAccount = creditorAccount;
 	}
 	public String getCreditorAgent() {
@@ -62,10 +62,10 @@ public class SinglePayment extends BasePayment {
 	public void setCreditorName(String creditorName) {
 		this.creditorName = creditorName;
 	}
-	public Address getCreditorAddress() {
+	public AddressBO getCreditorAddress() {
 		return creditorAddress;
 	}
-	public void setCreditorAddress(Address creditorAddress) {
+	public void setCreditorAddress(AddressBO creditorAddress) {
 		this.creditorAddress = creditorAddress;
 	}
 	public String getRemittanceInformationUnstructured() {
@@ -74,10 +74,10 @@ public class SinglePayment extends BasePayment {
 	public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
 		this.remittanceInformationUnstructured = remittanceInformationUnstructured;
 	}
-	public PaymentProduct getPaymentProduct() {
+	public PaymentProductBO getPaymentProduct() {
 		return paymentProduct;
 	}
-	public void setPaymentProduct(PaymentProduct paymentProduct) {
+	public void setPaymentProduct(PaymentProductBO paymentProduct) {
 		this.paymentProduct = paymentProduct;
 	}
     

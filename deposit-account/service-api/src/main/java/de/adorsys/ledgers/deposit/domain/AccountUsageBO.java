@@ -20,15 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum AccountStatus {
-    ENABLED("enabled"),
-    DELETED("deleted"),
-    BLOCKED("blocked");
+public enum AccountUsageBO {
+    PRIV("PRIV"),
+    ORGA("ORGA");
 
-    private static final Map<String, AccountStatus> container = new HashMap<>();
+    private static final Map<String, AccountUsageBO> container = new HashMap<>();
     private String value;
 
-    private AccountStatus(String value) {
+    
+    private AccountUsageBO(String value) {
         this.value = value;
     }
 
@@ -36,15 +36,16 @@ public enum AccountStatus {
         return this.value;
     }
 
-    public static Optional<AccountStatus> getByValue(String value) {
+    
+    public static Optional<AccountUsageBO> getByValue(String value) {
         return Optional.ofNullable(container.get(value));
     }
 
     static {
-        AccountStatus[] var0 = values();
+        AccountUsageBO[] var0 = values();
 
-        for (AccountStatus accountStatus : var0) {
-            container.put(accountStatus.getValue(), accountStatus);
+        for (AccountUsageBO usageType : var0) {
+            container.put(usageType.getValue(), usageType);
         }
     }
 }

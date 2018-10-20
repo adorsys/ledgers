@@ -16,16 +16,16 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-import static de.adorsys.ledgers.deposit.domain.ResultStatus.SUCCESS;
+import static de.adorsys.ledgers.deposit.domain.ResultStatusBO.SUCCESS;
 
 import java.util.List;
 
-public class PaymentResult {
+public class PaymentResultBO {
 
     /**
      * A status of execution result. Is used to provide correct answer to TPP.
      */
-    private ResultStatus responseStatus;
+    private ResultStatusBO responseStatus;
 
     /**
      * An optional message that can be returned to explain response status in details.

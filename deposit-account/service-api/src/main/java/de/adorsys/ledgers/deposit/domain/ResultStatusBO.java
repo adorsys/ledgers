@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.exception;
+package de.adorsys.ledgers.deposit.domain;
 
-public class PaymentProcessingException extends Exception {
-    public PaymentProcessingException() {
-    }
-
-    public PaymentProcessingException(String message) {
-        super(message);
-    }
-
-    public PaymentProcessingException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public enum ResultStatusBO {
+    SUCCESS,
+    TECHNICAL_FAILURE,
+    UNAUTHORIZED_FAILURE,
+    LOGICAL_FAILURE,
+    NOT_SUPPORTED
 }

@@ -18,7 +18,7 @@ package de.adorsys.ledgers.deposit.domain;
 
 import java.util.Currency;
 
-public class AccountReference {
+public class AccountReferenceBO {
     private String iban;
     private String bban;
     private String pan;

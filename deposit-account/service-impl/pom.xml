@@ -13,7 +13,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>ledgers-postings-service-impl</artifactId>
+	<artifactId>ledgers-deposit-account-service-impl</artifactId>
 	<packaging>jar</packaging>
 
 	<description>Deposit Account Service Impl module</description>
@@ -22,12 +22,11 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-deposit-account</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+		<relativePath>..</relativePath>
 	</parent>
 
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
-
 	</properties>
 
 	<dependencies>
@@ -46,6 +45,11 @@
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-deposit-account-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-postings-service-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -77,6 +81,11 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>pro.javatar.commons</groupId>
+			<artifactId>javatar-commons</artifactId>
 		</dependency>
 
 		<dependency>

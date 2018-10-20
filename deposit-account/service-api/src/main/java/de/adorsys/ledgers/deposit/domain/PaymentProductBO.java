@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum PaymentProduct {
+public enum PaymentProductBO {
     SEPA("sepa-credit-transfers"),
     INSTANT_SEPA("instant-sepa-credit-transfers"),
     TARGET2("target-2-payments"),
@@ -28,14 +28,14 @@ public enum PaymentProduct {
 
     private String value;
 
-    private static Map<String, PaymentProduct> container = new HashMap<>();
+    private static Map<String, PaymentProductBO> container = new HashMap<>();
 
     static {
         Arrays.stream(values())
             .forEach(product -> container.put(product.getValue(), product));
     }
 
-    PaymentProduct(String value) {
+    PaymentProductBO(String value) {
         this.value = value;
     }
 
@@ -43,7 +43,7 @@ public enum PaymentProduct {
         return value;
     }
 
-    public static PaymentProduct getByValue(String value) {
+    public static PaymentProductBO getByValue(String value) {
         return container.get(value);
     }
 }

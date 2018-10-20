@@ -1,27 +1,43 @@
 package de.adorsys.ledgers.deposit.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.adorsys.ledgers.deposit.domain.*;
+
+import de.adorsys.ledgers.deposit.domain.BasePayment;
+import de.adorsys.ledgers.deposit.domain.BulkPayment;
+import de.adorsys.ledgers.deposit.domain.BulkPaymentBO;
+import de.adorsys.ledgers.deposit.domain.DepositAccount;
+import de.adorsys.ledgers.deposit.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.domain.SinglePayment;
+import de.adorsys.ledgers.deposit.domain.SinglePaymentBO;
 import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.service.DepositAccountService;
-import de.adorsys.ledgers.postings.domain.*;
-import de.adorsys.ledgers.postings.exception.NotFoundException;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.domain.LedgerBO;
+import de.adorsys.ledgers.postings.domain.PostingBO;
+import de.adorsys.ledgers.postings.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.domain.PostingStatusBO;
+import de.adorsys.ledgers.postings.domain.PostingTypeBO;
+import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.postings.service.PostingService;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.SerializationUtils;
 import lombok.AllArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -31,22 +47,23 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     private final PostingService postingService;
     private final DepositAccountConfigService depositAccountConfigService;
 
-    @Override
-    public DepositAccount createDepositAccount(DepositAccount depositAccount) {
-        LedgerAccount depositParentAccount = depositAccountConfigService.getDepositParentAccount();
+	@Override
+	public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO) throws PaymentProcessingException {
+		DepositAccount depositAccount = CloneUtils.cloneObject(depositAccountBO, DepositAccount.class);
+        LedgerAccountBO depositParentAccount = depositAccountConfigService.getDepositParentAccount();
 
         // Business logic
 
-        LedgerAccount ledgerAccount = LedgerAccount.builder()
-                                              .parent(depositParentAccount)
-                                              .name(depositAccount.getIban())
-                                              .build();
+        LedgerAccountBO ledgerAccount = new LedgerAccountBO();
+        ledgerAccount.setParent(depositParentAccount);
+        ledgerAccount.setName(depositAccount.getIban());
+
 
         try {
-            ledgerService.newLedgerAccount(ledgerAccount);
-        } catch (NotFoundException e) {
-            throw new IllegalStateException(e);// TODO Deal with this
-        }
+			ledgerService.newLedgerAccount(ledgerAccount);
+		} catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage(), e);
+		}
 
         DepositAccount da = DepositAccount.builder()
                                     .id(Ids.id())
@@ -63,122 +80,144 @@ public class DepositAccountServiceImpl implements DepositAccountService {
                                     .build();
 
         DepositAccount saved = depositAccountRepository.save(da);
-        return CloneUtils.cloneObject(saved, DepositAccount.class);
+        return CloneUtils.cloneObject(saved, DepositAccountBO.class);
     }
 
-    @Override
-    public PaymentResult executeSinglePaymentWithoutSca(SinglePayment payment) throws PaymentProcessingException {
-
+	@Override
+	public PaymentResultBO executeSinglePaymentWithoutSca(SinglePaymentBO paymentBO) throws PaymentProcessingException {
+		SinglePayment payment = CloneUtils.cloneObject(paymentBO, SinglePayment.class);
+		
         String oprDetails;
 
         try {
             oprDetails = SerializationUtils.writeValueAsString(payment);
         } catch (JsonProcessingException e) {
-            throw new PaymentProcessingException("Payment object can't be serialized");
+            throw new PaymentProcessingException("Payment object can't be serialized", e);
         }
-        Ledger ledger = depositAccountConfigService.getLedger();
+        LedgerBO ledger = depositAccountConfigService.getLedger();
 
         // Validation debtor account number
-        LedgerAccount debtorLedgerAccount = getDebtorLedgerAccount(ledger, payment);
+        LedgerAccountBO debtorLedgerAccount;
+		try {
+			debtorLedgerAccount = getDebtorLedgerAccount(ledger, payment);
+		} catch (LedgerNotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage(), e);
+		}
 
         String creditorIban = payment.getCreditorAccount().getIban();
-        LedgerAccount creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+        LedgerAccountBO creditLedgerAccount;
+		try {
+			creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+		} catch (LedgerNotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage(), e);
+		}
 
         BigDecimal amount = payment.getInstructedAmount().getAmount();
 
-        PostingLine debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, amount);
+        PostingLineBO debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, amount);
 
-        PostingLine creditLine = buildCreditLine(oprDetails, creditLedgerAccount, amount);
+        PostingLineBO creditLine = buildCreditLine(oprDetails, creditLedgerAccount, amount);
 
-        List<PostingLine> lines = Arrays.asList(debitLine, creditLine);
+        List<PostingLineBO> lines = Arrays.asList(debitLine, creditLine);
 
-        Posting posting = buildPosting(oprDetails, ledger, lines);
+        PostingBO posting = buildPosting(oprDetails, ledger, lines);
 
         try {
-            postingService.newPosting(posting);
-        } catch (NotFoundException e) {
+			postingService.newPosting(posting);
+		} catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException e) {
             throw new PaymentProcessingException(e.getMessage());
-        }
+		}
         return null;
     }
 
-    @Override
-    public PaymentResult executeBulkPaymentWithoutSca(BulkPayment payment) throws PaymentProcessingException {
-
+	@Override
+	public PaymentResultBO executeBulkPaymentWithoutSca(BulkPaymentBO paymentBO) throws PaymentProcessingException {
+		BulkPayment payment = CloneUtils.cloneObject(paymentBO, BulkPayment.class);
         String oprDetails;
         try {
             oprDetails = SerializationUtils.writeValueAsString(payment);
         } catch (JsonProcessingException e) {
             throw new PaymentProcessingException("Payment object can't be serialized");
         }
-        Ledger ledger = depositAccountConfigService.getLedger();
+        LedgerBO ledger = depositAccountConfigService.getLedger();
 
         // Validation debtor account number
-        LedgerAccount debtorLedgerAccount = getDebtorLedgerAccount(ledger, payment);
+        LedgerAccountBO debtorLedgerAccount;
+		try {
+			debtorLedgerAccount = getDebtorLedgerAccount(ledger, payment);
+		} catch (LedgerNotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage(), e);
+		}
 
 //        todo: how we should proceed with batchBookingPreferred = true ?
 
-        List<PostingLine> lines = new ArrayList<>();
+        List<PostingLineBO> lines = new ArrayList<>();
 
         for (SinglePayment singlePayment : payment.getPayments()) {
 
             String creditorIban = singlePayment.getCreditorAccount().getIban();
 
-            LedgerAccount creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+            LedgerAccountBO creditLedgerAccount;
+			try {
+				creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+			} catch (LedgerNotFoundException e) {
+	            throw new PaymentProcessingException(e.getMessage(), e);
+			}
 
-            PostingLine debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+            PostingLineBO debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
             lines.add(debitLine);
 
-            PostingLine creditLine = buildCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+            PostingLineBO creditLine = buildCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
             lines.add(creditLine);
         }
 
-        Posting posting = buildPosting(oprDetails, ledger, lines);
-
+        PostingBO posting = buildPosting(oprDetails, ledger, lines);
         try {
-            postingService.newPosting(posting);
-        } catch (NotFoundException e) {
-            throw new PaymentProcessingException(e.getMessage());
-        }
+			postingService.newPosting(posting);
+		} catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage(), e);
+		}
+
         return null;
     }
 
-    private PostingLine buildCreditLine(String oprDetails, LedgerAccount creditLedgerAccount, BigDecimal amount) {
+    private PostingLineBO buildCreditLine(String oprDetails, LedgerAccountBO creditLedgerAccount, BigDecimal amount) {
         return buildPostingLine(oprDetails, creditLedgerAccount, BigDecimal.ZERO, amount);
     }
 
-    private PostingLine buildDebitLine(String oprDetails, LedgerAccount debtorLedgerAccount, BigDecimal amount) {
+    private PostingLineBO buildDebitLine(String oprDetails, LedgerAccountBO debtorLedgerAccount, BigDecimal amount) {
         return buildPostingLine(oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
     }
 
-    private PostingLine buildPostingLine(String oprDetails, LedgerAccount creditLedgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
-        return PostingLine.builder()
-                       .details(oprDetails)
-                       .account(creditLedgerAccount)
-                       .debitAmount(debitAmount)
-                       .creditAmount(creditAmount)
-                       .build();
+    private PostingLineBO buildPostingLine(String oprDetails, LedgerAccountBO creditLedgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
+    	PostingLineBO p = new PostingLineBO();
+		p.setDetails(oprDetails);
+		p.setAccount(creditLedgerAccount);
+		p.setDebitAmount(debitAmount);
+		p.setCreditAmount(creditAmount);
+		return p;
     }
 
     @NotNull
-    private LedgerAccount getDebtorLedgerAccount(Ledger ledger, BasePayment payment) throws PaymentProcessingException {
+    private LedgerAccountBO getDebtorLedgerAccount(LedgerBO ledger, BasePayment payment) throws PaymentProcessingException, LedgerNotFoundException {
         String iban = payment.getDebtorAccount().getIban();
 //        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
         return ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new PaymentProcessingException("Ledger account was not found by iban=" + iban));
     }
 
-    private Posting buildPosting(String oprDetails, Ledger ledger, List<PostingLine> lines) {
+    private PostingBO buildPosting(String oprDetails, LedgerBO ledger, List<PostingLineBO> lines) {
         LocalDateTime now = LocalDateTime.now();
-        return Posting.builder()
-                       .oprId(Ids.id())
-                       .oprTime(now)
-                       .oprDetails(oprDetails)
-                       .pstTime(now)
-                       .pstType(PostingType.BUSI_TX)
-                       .pstStatus(PostingStatus.POSTED)
-                       .ledger(ledger)
-                       .valTime(now)
-                       .lines(lines)
-                       .build();
+        PostingBO p = new PostingBO();
+		p.setOprId(Ids.id());
+		p.setOprTime(now);
+		p.setOprDetails(oprDetails);
+		p.setPstTime(now);
+		p.setPstType(PostingTypeBO.BUSI_TX);
+		p.setPstStatus(PostingStatusBO.POSTED);
+		p.setLedger(ledger);
+		p.setValTime(now);
+		p.setLines(lines);
+		return p;
     }
+
 }

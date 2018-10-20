@@ -16,10 +16,19 @@
 
 package de.adorsys.ledgers.deposit.domain;
 
-public enum ResultStatus {
-    SUCCESS,
-    TECHNICAL_FAILURE,
-    UNAUTHORIZED_FAILURE,
-    LOGICAL_FAILURE,
-    NOT_SUPPORTED
+public abstract class BasePaymentBO {
+    private AccountReferenceBO debtorAccount;
+    private TransactionStatusBO transactionStatus;
+	public AccountReferenceBO getDebtorAccount() {
+		return debtorAccount;
+	}
+	public void setDebtorAccount(AccountReferenceBO debtorAccount) {
+		this.debtorAccount = debtorAccount;
+	}
+	public TransactionStatusBO getTransactionStatus() {
+		return transactionStatus;
+	}
+	public void setTransactionStatus(TransactionStatusBO transactionStatus) {
+		this.transactionStatus = transactionStatus;
+	}
 }

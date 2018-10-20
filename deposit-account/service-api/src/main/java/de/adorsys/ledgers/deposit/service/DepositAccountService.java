@@ -1,16 +1,16 @@
 package de.adorsys.ledgers.deposit.service;
 
-import de.adorsys.ledgers.deposit.domain.BulkPayment;
-import de.adorsys.ledgers.deposit.domain.DepositAccount;
-import de.adorsys.ledgers.deposit.domain.PaymentResult;
-import de.adorsys.ledgers.deposit.domain.SinglePayment;
+import de.adorsys.ledgers.deposit.domain.BulkPaymentBO;
+import de.adorsys.ledgers.deposit.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.domain.SinglePaymentBO;
 import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
 
 public interface DepositAccountService {
 
-	DepositAccount createDepositAccount(DepositAccount depositAccount);
+	DepositAccountBO createDepositAccount(DepositAccountBO depositAccount) throws PaymentProcessingException;
 
-	PaymentResult executeSinglePaymentWithoutSca(SinglePayment payment) throws PaymentProcessingException;
+	PaymentResultBO executeSinglePaymentWithoutSca(SinglePaymentBO payment) throws PaymentProcessingException;
 
-	PaymentResult executeBulkPaymentWithoutSca(BulkPayment payment) throws PaymentProcessingException;
+	PaymentResultBO executeBulkPaymentWithoutSca(BulkPaymentBO payment) throws PaymentProcessingException;
 }

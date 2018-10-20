@@ -19,7 +19,7 @@ package de.adorsys.ledgers.deposit.domain;
 import java.time.LocalDate;
 import java.util.List;
 
-public class BulkPayment extends BasePayment {
+public class BulkPaymentBO extends BasePaymentBO {
     /*
      * If this element equals "true", the PSU prefers only one booking entry. If this element equals "false", the PSU prefers individual booking of all contained individual transactions. The ASPSP will follow this preference according to contracts agreed on with the PSU.
      */
@@ -27,7 +27,7 @@ public class BulkPayment extends BasePayment {
 
     private LocalDate requestedExecutionDate;
 
-    List<SinglePayment> payments;
+    List<SinglePaymentBO> payments;
 
 	public Boolean getBatchBookingPreferred() {
 		return batchBookingPreferred;
@@ -45,11 +45,11 @@ public class BulkPayment extends BasePayment {
 		this.requestedExecutionDate = requestedExecutionDate;
 	}
 
-	public List<SinglePayment> getPayments() {
+	public List<SinglePaymentBO> getPayments() {
 		return payments;
 	}
 
-	public void setPayments(List<SinglePayment> payments) {
+	public void setPayments(List<SinglePaymentBO> payments) {
 		this.payments = payments;
 	}
 
