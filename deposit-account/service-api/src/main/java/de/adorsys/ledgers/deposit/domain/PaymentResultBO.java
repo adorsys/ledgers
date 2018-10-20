@@ -20,7 +20,7 @@ import static de.adorsys.ledgers.deposit.domain.ResultStatusBO.SUCCESS;
 
 import java.util.List;
 
-public class PaymentResultBO {
+public class PaymentResultBO<T> {
 
     /**
      * A status of execution result. Is used to provide correct answer to TPP.

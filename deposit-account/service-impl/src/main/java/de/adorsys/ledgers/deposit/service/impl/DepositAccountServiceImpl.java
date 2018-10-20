@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.adorsys.ledgers.deposit.domain.BasePayment;
+import de.adorsys.ledgers.deposit.domain.PaymentSource;
 import de.adorsys.ledgers.deposit.domain.BulkPayment;
 import de.adorsys.ledgers.deposit.domain.BulkPaymentBO;
 import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.domain.SinglePayment;
+import de.adorsys.ledgers.deposit.domain.PaymentTarget;
 import de.adorsys.ledgers.deposit.domain.SinglePaymentBO;
 import de.adorsys.ledgers.deposit.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.repository.DepositAccountRepository;
@@ -84,8 +84,8 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
 	@Override
-	public PaymentResultBO executeSinglePaymentWithoutSca(SinglePaymentBO paymentBO) throws PaymentProcessingException {
-		SinglePayment payment = CloneUtils.cloneObject(paymentBO, SinglePayment.class);
+	public PaymentResultBO<SinglePaymentBO> executeSinglePaymentWithoutSca(SinglePaymentBO paymentBO) throws PaymentProcessingException {
+		PaymentTarget payment = CloneUtils.cloneObject(paymentBO, PaymentTarget.class);
 		
         String oprDetails;
 
@@ -131,7 +131,18 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
 	@Override
-	public PaymentResultBO executeBulkPaymentWithoutSca(BulkPaymentBO paymentBO) throws PaymentProcessingException {
+	public PaymentResultBO<List<SinglePaymentBO> > executeSinglePaymentsWithoutSca(List<SinglePaymentBO> paymentBOList) throws PaymentProcessingException {
+		
+		for (SinglePaymentBO singlePaymentBO : paymentBOList) {
+			executeSinglePaymentWithoutSca(singlePaymentBO);
+		}
+		
+		PaymentResultBO result;
+		return result;
+	}
+
+	@Override
+	public PaymentResultBO<BulkPaymentBO> executeBulkPaymentWithoutSca(BulkPaymentBO paymentBO) throws PaymentProcessingException {
 		BulkPayment payment = CloneUtils.cloneObject(paymentBO, BulkPayment.class);
         String oprDetails;
         try {
@@ -153,7 +164,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
         List<PostingLineBO> lines = new ArrayList<>();
 
-        for (SinglePayment singlePayment : payment.getPayments()) {
+        for (PaymentTarget singlePayment : payment.getPayments()) {
 
             String creditorIban = singlePayment.getCreditorAccount().getIban();
 
@@ -199,7 +210,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
     @NotNull
-    private LedgerAccountBO getDebtorLedgerAccount(LedgerBO ledger, BasePayment payment) throws PaymentProcessingException, LedgerNotFoundException {
+    private LedgerAccountBO getDebtorLedgerAccount(LedgerBO ledger, PaymentSource payment) throws PaymentProcessingException, LedgerNotFoundException {
         String iban = payment.getDebtorAccount().getIban();
 //        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
         return ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new PaymentProcessingException("Ledger account was not found by iban=" + iban));

@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.deposit.service;
 
+import java.util.List;
+
 import de.adorsys.ledgers.deposit.domain.BulkPaymentBO;
 import de.adorsys.ledgers.deposit.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.domain.PaymentResultBO;
@@ -13,4 +15,7 @@ public interface DepositAccountService {
 	PaymentResultBO executeSinglePaymentWithoutSca(SinglePaymentBO payment) throws PaymentProcessingException;
 
 	PaymentResultBO executeBulkPaymentWithoutSca(BulkPaymentBO payment) throws PaymentProcessingException;
+
+	PaymentResultBO executeSinglePaymentsWithoutSca(List<SinglePaymentBO> paymentBOList)
+			throws PaymentProcessingException;
 }
