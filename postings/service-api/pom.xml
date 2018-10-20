@@ -15,7 +15,6 @@
     <artifactId>ledgers-postings-service-api</artifactId>
     <packaging>jar</packaging>
 
-    <name>ledgers-postings-service-api</name>
     <description>Posting module</description>
 
     <parent>

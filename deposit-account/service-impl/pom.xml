@@ -16,7 +16,6 @@
 	<artifactId>ledgers-postings-service-impl</artifactId>
 	<packaging>jar</packaging>
 
-	<name>ledgers-deposit-account-service-impl</name>
 	<description>Deposit Account Service Impl module</description>
 
 	<parent>

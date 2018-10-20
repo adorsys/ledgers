@@ -26,6 +26,5 @@
 	<packaging>pom</packaging>
 	<artifactId>ledgers-postings</artifactId>
 
-	<name>Ledgers Postings</name>
 
 </project>

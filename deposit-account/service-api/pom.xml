@@ -16,7 +16,6 @@
 	<artifactId>ledgers-deposit-account-service-api</artifactId>
 	<packaging>jar</packaging>
 
-	<name>ledgers-deposit-accpount-api</name>
 	<description>Deposit Account Service API</description>
 
 	<parent>

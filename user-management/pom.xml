@@ -27,7 +27,6 @@
     <packaging>pom</packaging>
     <artifactId>ledgers-user-management</artifactId>
 
-    <name>Ledgers User Management</name>
 
     <properties>
         <ruleset.basedir>..</ruleset.basedir>
