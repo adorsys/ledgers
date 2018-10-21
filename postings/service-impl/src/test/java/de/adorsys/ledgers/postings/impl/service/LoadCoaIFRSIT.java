@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
