@@ -1,0 +1,26 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
+                      user="Francis"
+                      created="2018-08-07 20:58:24.232"
+                      name="CoA"
+    />
+
+    <LEDGER id="Zd0ND5YwSzGwIfZilhumPg"
+            name="Sample Ledger-0"
+            created="2018-08-07 20:58:24.232"
+            user="Sample User"
+            coa_id="ci8k8PDcTrCsi-F3sT3i-g"
+            last_closing="2018-08-07 20:58:24.232"
+    />
+
+    <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_BS"
+            created="2018-08-07 23:50:41.231"
+            user="Sample User"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+          	balance_side="Cr"
+          	category="EQ"
+            name="BS"
+            short_desc="Balance Sheet Accounts"
+            coa_id="ci8k8PDcTrCsi-F3sT3i-g"
+    />
+</dataset>

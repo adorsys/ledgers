@@ -1,0 +1,6 @@
+- shortDesc: "Assets"
+  name: 1
+  category: AS
+  balanceSide: Dr
+- shortDesc: "Property, Plant And Equipment"
+  name: 1.1

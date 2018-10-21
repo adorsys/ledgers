@@ -25,7 +25,7 @@
 		<module>repository</module>
 	</modules>
 	<packaging>pom</packaging>
-	<artifactId>ledgers-postings</artifactId>
+	<artifactId>ledgers-deposit-account</artifactId>
 
 
 </project>

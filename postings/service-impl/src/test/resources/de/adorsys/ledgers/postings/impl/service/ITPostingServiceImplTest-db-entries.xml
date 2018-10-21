@@ -1,0 +1,55 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8zskTrCsi-F3sT3i-g"
+                      user="Francis"
+                      created="2018-08-07 20:58:24.232"
+                      name="CoA"
+    />
+
+    <LEDGER id="Zd0ND5YwSzGwIfZilhumPg"
+            name="Sample Ledger-0"
+            created="2018-08-07 20:58:24.232"
+            user="Sample User"
+            coa_id="ci8k8zskTrCsi-F3sT3i-g"
+            last_closing="2018-08-07 20:58:24.232"
+    />
+
+    <POSTING
+            id="Zd0ND5YwSzGwIfZilhumPg_POSTING"
+            record_user="Vladimir"
+            record_time="2018-08-07 20:58:24.232"
+            opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION"
+			opr_seq_nbr="0"
+            opr_details="Balance statement creation"
+            pst_time="2018-08-07 20:58:24.232"
+            pst_type="BAL_STMT"
+			pst_status="POSTED"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+            hash="6b1672f7edf8c371860136271f89b41f22dc122a"
+    />
+    <POSTING
+            id="Zd0ND5YwSzGwIfZilhumPg_POSTING1"
+            record_user="Vladimir"
+            record_time="2018-10-07 20:58:24.232"
+            opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION"
+			opr_seq_nbr="0"
+            opr_details="Balance statement creation"
+            pst_time="2018-10-07 20:58:24.232"
+            pst_type="BAL_STMT"
+			pst_status="POSTED"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+            hash="6b1672f7edf8c371860136271f89b41f22dc122a"
+    />
+    <POSTING
+            id="Zd0ND5YwSzGwIfZilhumPg_POSTING2"
+            record_user="Vladimir"
+            record_time="2018-11-07 20:58:24.232"
+            opr_id="Zd0ND5YwSzGwIfZilhumPg_OPERATION2"
+			opr_seq_nbr="0"
+            opr_details="Trial balance statement creation"
+            pst_time="2018-10-07 20:58:24.232"
+            pst_type="BAL_STMT"
+			pst_status="POSTED"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+            hash="6b1672f7edf8c371860136271f89b41f22dc122a"
+    />
+</dataset>

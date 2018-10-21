@@ -13,19 +13,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<artifactId>ledgers-deposit-account-service-api</artifactId>
+
+	<description>Deposit Account Service API</description>
+
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
-		<artifactId>ledgers</artifactId>
+		<artifactId>ledgers-deposit-account</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+		<relativePath>..</relativePath>
 	</parent>
-	<modules>
-		<module>service-api</module>
-		<module>service-impl</module>
-		<module>repository</module>
-	</modules>
-	<packaging>pom</packaging>
-	<artifactId>ledgers-postings</artifactId>
 
+	<properties>
+		<ruleset.basedir>../..</ruleset.basedir>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-postings-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 </project>
