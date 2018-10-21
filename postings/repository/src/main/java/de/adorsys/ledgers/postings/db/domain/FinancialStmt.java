@@ -69,49 +69,6 @@ public class FinancialStmt extends NamedEntity {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((closed == null) ? 0 : closed.hashCode());
-		result = prime * result + ((ledger == null) ? 0 : ledger.hashCode());
-		result = prime * result + ((pstId == null) ? 0 : pstId.hashCode());
-		result = prime * result + ((pstTime == null) ? 0 : pstTime.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FinancialStmt other = (FinancialStmt) obj;
-		if (closed == null) {
-			if (other.closed != null)
-				return false;
-		} else if (!closed.equals(other.closed))
-			return false;
-		if (ledger == null) {
-			if (other.ledger != null)
-				return false;
-		} else if (!ledger.equals(other.ledger))
-			return false;
-		if (pstId == null) {
-			if (other.pstId != null)
-				return false;
-		} else if (!pstId.equals(other.pstId))
-			return false;
-		if (pstTime == null) {
-			if (other.pstTime != null)
-				return false;
-		} else if (!pstTime.equals(other.pstTime))
-			return false;
-		return true;
-	}
-
-	@Override
 	public String toString() {
 		return "FinancialStmt [ledger=" + ledger + ", pstTime=" + pstTime + ", pstId=" + pstId + ", closed=" + closed
 				+ "] [super: " + super.toString() + "]";

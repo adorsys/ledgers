@@ -46,36 +46,6 @@ public class Ledger extends NamedEntity {
 		this.lastClosing = lastClosing;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((coa == null) ? 0 : coa.hashCode());
-		result = prime * result + ((lastClosing == null) ? 0 : lastClosing.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Ledger other = (Ledger) obj;
-		if (coa == null) {
-			if (other.coa != null)
-				return false;
-		} else if (!coa.equals(other.coa))
-			return false;
-		if (lastClosing == null) {
-			if (other.lastClosing != null)
-				return false;
-		} else if (!lastClosing.equals(other.lastClosing))
-			return false;
-		return true;
-	}
 
 	@Override
 	public String toString() {

@@ -65,49 +65,6 @@ public abstract class HashRecord {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((antecedentHash == null) ? 0 : antecedentHash.hashCode());
-		result = prime * result + ((antecedentId == null) ? 0 : antecedentId.hashCode());
-		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
-		result = prime * result + ((hashAlg == null) ? 0 : hashAlg.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		HashRecord other = (HashRecord) obj;
-		if (antecedentHash == null) {
-			if (other.antecedentHash != null)
-				return false;
-		} else if (!antecedentHash.equals(other.antecedentHash))
-			return false;
-		if (antecedentId == null) {
-			if (other.antecedentId != null)
-				return false;
-		} else if (!antecedentId.equals(other.antecedentId))
-			return false;
-		if (hash == null) {
-			if (other.hash != null)
-				return false;
-		} else if (!hash.equals(other.hash))
-			return false;
-		if (hashAlg == null) {
-			if (other.hashAlg != null)
-				return false;
-		} else if (!hashAlg.equals(other.hashAlg))
-			return false;
-		return true;
-	}
-
-	@Override
 	public String toString() {
 		return "HashRecord [antecedentId=" + antecedentId + ", antecedentHash=" + antecedentHash + ", hash=" + hash
 				+ ", hashAlg=" + hashAlg + "]";

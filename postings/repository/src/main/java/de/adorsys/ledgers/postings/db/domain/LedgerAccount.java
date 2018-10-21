@@ -97,49 +97,6 @@ public class LedgerAccount extends NamedEntity {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((balanceSide == null) ? 0 : balanceSide.hashCode());
-		result = prime * result + ((category == null) ? 0 : category.hashCode());
-		result = prime * result + ((coa == null) ? 0 : coa.hashCode());
-		result = prime * result + ((ledger == null) ? 0 : ledger.hashCode());
-		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LedgerAccount other = (LedgerAccount) obj;
-		if (balanceSide != other.balanceSide)
-			return false;
-		if (category != other.category)
-			return false;
-		if (coa == null) {
-			if (other.coa != null)
-				return false;
-		} else if (!coa.equals(other.coa))
-			return false;
-		if (ledger == null) {
-			if (other.ledger != null)
-				return false;
-		} else if (!ledger.equals(other.ledger))
-			return false;
-		if (parent == null) {
-			if (other.parent != null)
-				return false;
-		} else if (!parent.equals(other.parent))
-			return false;
-		return true;
-	}
-
-	@Override
 	public String toString() {
 		return "LedgerAccount [ledger=" + ledger + ", parent=" + parent + ", coa=" + coa + ", balanceSide="
 				+ balanceSide + ", category=" + category + "] [super: " + super.toString() + "]";
