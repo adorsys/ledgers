@@ -10,7 +10,7 @@ import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.db.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -27,7 +27,7 @@ import java.util.Optional;
 
 @Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = PostingsApplication.class)
+@SpringBootTest(classes = PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})

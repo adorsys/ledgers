@@ -22,6 +22,7 @@
 	<modules>
 		<module>service-api</module>
 		<module>service-impl</module>
+		<module>repository</module>
 	</modules>
 	<packaging>pom</packaging>
 	<artifactId>ledgers-postings</artifactId>

@@ -32,11 +32,11 @@ import de.adorsys.ledgers.postings.db.domain.PostingStatus;
 import de.adorsys.ledgers.postings.db.domain.PostingType;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
-import de.adorsys.ledgers.postings.db.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=PostingsApplication.class)
+@SpringBootTest(classes=PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})

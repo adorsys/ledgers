@@ -12,11 +12,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
-import de.adorsys.ledgers.postings.db.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=PostingsApplication.class)
+@SpringBootTest(classes=PostingRepositoryApplication.class)
 public class LedgerEntityRepositoryIT {
 	@Autowired
 	private ChartOfAccountRepository chartOfAccountRepository;

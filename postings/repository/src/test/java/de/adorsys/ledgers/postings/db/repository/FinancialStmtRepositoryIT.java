@@ -20,11 +20,11 @@ import de.adorsys.ledgers.postings.db.domain.FinancialStmt;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.repository.FinancialStmtRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.db.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=PostingsApplication.class)
+@SpringBootTest(classes=PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})

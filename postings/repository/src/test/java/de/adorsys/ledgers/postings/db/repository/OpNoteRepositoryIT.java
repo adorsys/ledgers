@@ -19,7 +19,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.db.domain.OpNote;
-import de.adorsys.ledgers.postings.db.tests.PostingsApplication;
+import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
 
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -28,7 +28,7 @@ import de.adorsys.ledgers.util.Ids;
 @DatabaseSetup("OpNoteRepositoryTest-db-entries.xml")
 @DatabaseTearDown(value={"OpNoteRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes=PostingsApplication.class)
+@SpringBootTest(classes=PostingRepositoryApplication.class)
 public class OpNoteRepositoryIT {
 
 	@Autowired
