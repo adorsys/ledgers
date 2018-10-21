@@ -1,7 +1,24 @@
 package de.adorsys.ledgers.postings.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import de.adorsys.ledgers.postings.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.converter.PostingMapper;
-import de.adorsys.ledgers.postings.domain.*;
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.db.domain.Posting;
+import de.adorsys.ledgers.postings.db.domain.PostingLine;
+import de.adorsys.ledgers.postings.db.domain.PostingStatus;
+import de.adorsys.ledgers.postings.db.domain.PostingType;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.domain.PostingBO;
 import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.service.PostingService;
@@ -9,23 +26,17 @@ import de.adorsys.ledgers.postings.utils.DoubleEntryBookKeeping;
 import de.adorsys.ledgers.postings.utils.LedgerPolicies;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 @Transactional
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
     private final PostingMapper postingMapper;
+    private final LedgerAccountMapper ledgerAccountMapper;
 
-    public PostingServiceImpl(PostingMapper postingMapper) {
+    public PostingServiceImpl(PostingMapper postingMapper, LedgerAccountMapper ledgerAccountMapper) {
         this.postingMapper = postingMapper;
+        this.ledgerAccountMapper = ledgerAccountMapper;
     }
 
     @Override
@@ -42,7 +53,8 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     @Override
 	public PostingBO balanceTx(LedgerAccountBO ledgerAccountBO, LocalDateTime refTime)
             throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        LedgerAccount ledgerAccount = ledgerAccountMapper.toLedgerAccount(ledgerAccountBO);
+    	LedgerAccount ledgerAccount = loadLedgerAccount(ledgerAccountBO);
+        
         PostingLine baseLine = postingLineRepository
                                        .findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(
                                                ledgerAccount, PostingType.LDG_CLSNG, PostingStatus.POSTED, refTime);
@@ -51,30 +63,21 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         List<PostingType> txTypes = Arrays.asList(PostingType.BUSI_TX, PostingType.ADJ_TX);
         List<BigDecimal> balance = postingLineRepository.computeBalance(ledgerAccount, txTypes, PostingStatus.POSTED, baseLine.getPstTime(), refTime);
 
-        Posting bp = baseLine.getPosting();
+		LedgerAccount account = ledgerAccount;
+		BigDecimal debitAmount = baseLine.getDebitAmount().add(balance.get(0));
+		BigDecimal creditAmount = baseLine.getCreditAmount().add(balance.get(1));
+		String details = baseLine.getDetails();
+		String srcAccount = null;
+		PostingLine postingLine = new PostingLine(null, null, account, debitAmount, creditAmount, details, srcAccount);
 
-        PostingLine postingLine = PostingLine.builder()
-                                          .account(ledgerAccount)
-                                          .debitAmount(baseLine.getDebitAmount().add(balance.get(0)))
-                                          .creditAmount(baseLine.getCreditAmount().add(balance.get(1)))
-                                          .details(baseLine.getDetails())
-                                          .build();
-
-        Posting posting = Posting.builder()
-                                  .ledger(bp.getLedger())
-                                  .oprId(Ids.id())
-                                  .oprTime(refTime)
-                                  .pstStatus(PostingStatus.POSTED)
-                                  .pstTime(refTime)
-                                  .pstType(PostingType.BAL_STMT)
-                                  .lines(Collections.singletonList(postingLine))
-                                  .build();
+		Posting posting = new Posting(null, null, null, Ids.id(), 0, refTime, null, null, refTime, PostingType.BAL_STMT, PostingStatus.POSTED, ledgerAccount.getLedger(), refTime, Collections.singletonList(postingLine));
 
         return newPostingBOInternal(posting);
     }
 
     private PostingBO newPostingBOInternal(Posting posting) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         // Check ledger not null
+    	if(posting.getLedger()==null) throw insufficientInfo(posting);
         Ledger ledger = loadLedger(posting.getLedger());
         LedgerPolicies ledgerPolicies = new LedgerPolicies(ledger);
 
@@ -89,21 +92,8 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
                 posting.getLedger()).orElse(new Posting());
 
         List<PostingLine> postingLines = CloneUtils.cloneList(posting.getLines(), PostingLine.class);
-
-        Posting p = Posting.builder()
-                            .ledger(ledger)
-                            .oprDetails(posting.getOprDetails())
-                            .oprId(posting.getOprId())
-                            .oprSeqNbr(posting.getOprSeqNbr())
-                            .oprTime(posting.getOprTime())
-                            .oprType(posting.getOprType())
-                            .pstTime(posting.getPstTime())
-                            .pstType(posting.getPstType())
-                            .recordAntecedentHash(antecedent.getHash())
-                            .recordAntecedentId(antecedent.getId())
-                            .recordUser(principal.getName())
-                            .valTime(posting.getValTime())
-                            .build();
+        Posting p = new Posting(principal.getName(), antecedent.getId(), antecedent.getHash(), posting.getOprId(), posting.getOprSeqNbr(), 
+        		posting.getOprTime(), posting.getOprType(), posting.getOprDetails(), posting.getPstTime(), posting.getPstType(), PostingStatus.POSTED, ledger, posting.getValTime(), null);
 
         Posting saved = postingRepository.save(p);
 
@@ -113,13 +103,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
             // Check account belongs to ledger.
             ledgerPolicies.validateProperAccount(ledgerAccount);
 
-            PostingLine pl = PostingLine.builder()
-                                     .account(ledgerAccount)
-                                     .debitAmount(line.getDebitAmount())
-                                     .creditAmount(line.getCreditAmount())
-                                     .details(line.getDetails())
-                                     .srcAccount(line.getSrcAccount())
-                                     .posting(saved).build();
+            PostingLine pl =new PostingLine(null, saved, ledgerAccount, line.getDebitAmount(), line.getCreditAmount(), line.getDetails(), line.getSrcAccount()); 
             postingLineRepository.save(pl);
         }
 

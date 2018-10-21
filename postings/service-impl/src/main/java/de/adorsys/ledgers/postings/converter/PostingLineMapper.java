@@ -1,12 +1,19 @@
 package de.adorsys.ledgers.postings.converter;
 
-import de.adorsys.ledgers.postings.domain.PostingLine;
+import org.springframework.stereotype.Component;
+
+import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.domain.PostingLineBO;
-import org.mapstruct.Mapper;
+import de.adorsys.ledgers.util.CloneUtils;
 
-@Mapper(componentModel = "spring")
-public interface PostingLineMapper {
-    PostingLineBO toPostingLineBO(PostingLine posting);
+@Component
+public class PostingLineMapper {
+	
+    PostingLineBO toPostingLineBO(PostingLine posting) {
+    	return CloneUtils.cloneObject(posting, PostingLineBO.class);
+    }
 
-    PostingLine toPostingLine(PostingLineBO posting);
+    PostingLine toPostingLine(PostingLineBO posting) {
+    	return CloneUtils.cloneObject(posting, PostingLine.class);    	
+    }
 }

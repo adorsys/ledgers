@@ -1,21 +1,25 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import de.adorsys.ledgers.postings.converter.LedgerAccountMapper;
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
+import java.security.Principal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
+import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
+import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
+import de.adorsys.ledgers.postings.db.repository.PostingRepository;
 import de.adorsys.ledgers.postings.domain.ChartOfAccountBO;
-import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.domain.LedgerBO;
 import de.adorsys.ledgers.postings.exception.ChartOfAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.security.Principal;
 
 public class AbstractServiceImpl {
-    @Autowired
-    LedgerAccountMapper ledgerAccountMapper;
 
     @Autowired
     protected PostingRepository postingRepository;
@@ -56,6 +60,21 @@ public class AbstractServiceImpl {
      * If the Id is provided, we use find by id. 2- If the ledger and the name
      * is provided, we use them to load the account.
      */
+    protected LedgerAccount loadLedgerAccount(LedgerAccountBO model) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+        if (model == null) {
+            throw nullInfo();
+        }
+        if (model.getId() != null) {
+            return ledgerAccountRepository.findById(model.getId())
+                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getId()));
+        }
+        if (model.getLedger() != null && model.getName() != null) {
+            Ledger loadedLedger = loadLedger(model.getLedger());
+            return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, model.getName())
+                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getId()));
+        }
+        throw insufficientInfo(model);
+    }
     protected LedgerAccount loadLedgerAccount(LedgerAccount model) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         if (model == null) {
             throw nullInfo();
@@ -72,23 +91,33 @@ public class AbstractServiceImpl {
         throw insufficientInfo(model);
     }
 
-    public Ledger loadLedger(Ledger model) throws LedgerNotFoundException {
+    protected Ledger loadLedger(LedgerBO model) throws LedgerNotFoundException {
         if (model == null) {
             throw nullInfo();
         }
-        if (model.getId() != null) {
-            return ledgerRepository.findById(model.getId())
-                           .orElseThrow(() -> new LedgerNotFoundException(model.getId()));
+        return loadLedgerByIdOrName(model.getId(), model.getName());
+    }
+    protected Ledger loadLedger(Ledger model) throws LedgerNotFoundException {
+        if (model == null) {
+            throw nullInfo();
         }
-        if (model.getName() != null) {
-            return ledgerRepository.findOptionalByName(model.getName())
-                           .orElseThrow(() -> new LedgerNotFoundException(model.getName(), model.getId()));
-        }
-        throw insufficientInfo(model);
+        return loadLedgerByIdOrName(model.getId(), model.getName());
     }
 
+    private Ledger loadLedgerByIdOrName(String id, String name) throws LedgerNotFoundException {
+        if (id != null) {
+            return ledgerRepository.findById(id)
+                           .orElseThrow(() -> new LedgerNotFoundException(id));
+        }
+        if (name != null) {
+            return ledgerRepository.findOptionalByName(name)
+                           .orElseThrow(() -> new LedgerNotFoundException(name,id));
+        }
+        throw insufficientInfo(String.format("id %s and name %s", id, name));
+    }
+    
     //TODO consider creating of exception builder with all necessary classes
-    private IllegalArgumentException insufficientInfo(Object modelObject) {
+    protected IllegalArgumentException insufficientInfo(Object modelObject) {
         return new IllegalArgumentException(
                 String.format("Model Object does not provide sufficient information for loading original instance. %s",
                         modelObject.toString()));

@@ -1,8 +1,8 @@
 package de.adorsys.ledgers.postings.utils;
 
-import de.adorsys.ledgers.postings.domain.Ledger;
-import de.adorsys.ledgers.postings.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.domain.Posting;
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.db.domain.Posting;
 
 public class LedgerPolicies {
 

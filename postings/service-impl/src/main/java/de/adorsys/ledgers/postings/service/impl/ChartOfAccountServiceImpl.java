@@ -1,15 +1,16 @@
 package de.adorsys.ledgers.postings.service.impl;
 
-import de.adorsys.ledgers.postings.converter.ChartOfAccountMapper;
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
-import de.adorsys.ledgers.postings.domain.ChartOfAccountBO;
-import de.adorsys.ledgers.postings.service.ChartOfAccountService;
-import de.adorsys.ledgers.util.Ids;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import de.adorsys.ledgers.postings.converter.ChartOfAccountMapper;
+import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.domain.ChartOfAccountBO;
+import de.adorsys.ledgers.postings.service.ChartOfAccountService;
+import de.adorsys.ledgers.util.Ids;
 
 @Service
 @Transactional
@@ -41,7 +42,6 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
     @Override
     public Optional<ChartOfAccountBO> findChartOfAccountsById(String id) {
         return chartOfAccountRepo.findById(id)
-                       .map(chartOfAccountRepo::save)
                        .map(chartOfAccountMapper::toChartOfAccountBO);
     }
 

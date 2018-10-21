@@ -3,8 +3,8 @@ package de.adorsys.ledgers.postings.utils;
 import java.math.BigDecimal;
 import java.util.List;
 
-import de.adorsys.ledgers.postings.domain.Posting;
-import de.adorsys.ledgers.postings.domain.PostingLine;
+import de.adorsys.ledgers.postings.db.domain.Posting;
+import de.adorsys.ledgers.postings.db.domain.PostingLine;
 
 public class DoubleEntryBookKeeping {
 

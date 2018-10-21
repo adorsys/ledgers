@@ -1,12 +1,19 @@
 package de.adorsys.ledgers.postings.converter;
 
-import de.adorsys.ledgers.postings.domain.ChartOfAccount;
+import org.springframework.stereotype.Component;
+
+import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.domain.ChartOfAccountBO;
-import org.mapstruct.Mapper;
+import de.adorsys.ledgers.util.CloneUtils;
 
-@Mapper(componentModel = "spring")
-public interface ChartOfAccountMapper {
-    ChartOfAccountBO toChartOfAccountBO(ChartOfAccount coa);
+@Component
+public class ChartOfAccountMapper {
+	
+    public ChartOfAccountBO toChartOfAccountBO(ChartOfAccount coa) {
+    	return CloneUtils.cloneObject(coa, ChartOfAccountBO.class);
+    }
 
-    ChartOfAccount toChartOfAccount(ChartOfAccountBO coa);
+    public ChartOfAccount toChartOfAccount(ChartOfAccountBO coa) {
+    	return CloneUtils.cloneObject(coa, ChartOfAccount.class);
+    }
 }

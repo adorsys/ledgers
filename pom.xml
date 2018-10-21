@@ -70,6 +70,8 @@
 		<lombok-plugin.version>1.16.22</lombok-plugin.version>
 		<hamcrest-library.version>1.3</hamcrest-library.version>
 		<javatar-commons.version>0.4</javatar-commons.version>
+		<!-- automatically run annotation processors within the incremental compilation -->
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 	</properties>
 
 	<dependencyManagement>
@@ -173,7 +175,7 @@
 			<artifactId>annotations</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<!-- test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -214,8 +216,8 @@
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
 					<excludeRoots>
-                        <excludeRoot>../service-impl/target/generated-sources/annotations/</excludeRoot>
-                    </excludeRoots>
+						<excludeRoot>../service-impl/target/generated-sources/annotations/</excludeRoot>
+					</excludeRoots>
 				</configuration>
 			</plugin>
 
@@ -241,6 +243,25 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.1</version>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

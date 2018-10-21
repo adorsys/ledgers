@@ -11,9 +11,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import de.adorsys.ledgers.postings.domain.Posting;
+import de.adorsys.ledgers.postings.db.domain.Posting;
 
 public class LoadPostingYMLTest {
 	private ObjectMapper mapper = new ObjectMapper();

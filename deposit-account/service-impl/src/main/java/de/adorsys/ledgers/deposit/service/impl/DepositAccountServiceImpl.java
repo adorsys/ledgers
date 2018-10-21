@@ -11,11 +11,10 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.adorsys.ledgers.deposit.domain.PaymentSource;
-import de.adorsys.ledgers.deposit.domain.BulkPayment;
 import de.adorsys.ledgers.deposit.domain.BulkPaymentBO;
 import de.adorsys.ledgers.deposit.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.domain.PaymentEntity;
 import de.adorsys.ledgers.deposit.domain.PaymentResultBO;
 import de.adorsys.ledgers.deposit.domain.PaymentTarget;
 import de.adorsys.ledgers.deposit.domain.SinglePaymentBO;
@@ -85,7 +84,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
 	@Override
 	public PaymentResultBO<SinglePaymentBO> executeSinglePaymentWithoutSca(SinglePaymentBO paymentBO) throws PaymentProcessingException {
-		PaymentTarget payment = CloneUtils.cloneObject(paymentBO, PaymentTarget.class);
+		PaymentEntity payment = CloneUtils.cloneObject(paymentBO, PaymentEntity.class);
 		
         String oprDetails;
 
@@ -104,7 +103,8 @@ public class DepositAccountServiceImpl implements DepositAccountService {
             throw new PaymentProcessingException(e.getMessage(), e);
 		}
 
-        String creditorIban = payment.getCreditorAccount().getIban();
+		PaymentTarget paymentTarget = payment.getTargets().get(0);
+        String creditorIban = paymentTarget.getCreditorAccount().getIban();
         LedgerAccountBO creditLedgerAccount;
 		try {
 			creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
@@ -112,7 +112,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
             throw new PaymentProcessingException(e.getMessage(), e);
 		}
 
-        BigDecimal amount = payment.getInstructedAmount().getAmount();
+        BigDecimal amount = paymentTarget.getInstructedAmount().getAmount();
 
         PostingLineBO debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, amount);
 
@@ -137,13 +137,13 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 			executeSinglePaymentWithoutSca(singlePaymentBO);
 		}
 		
-		PaymentResultBO result;
+		PaymentResultBO result = null;// TODO
 		return result;
 	}
 
 	@Override
 	public PaymentResultBO<BulkPaymentBO> executeBulkPaymentWithoutSca(BulkPaymentBO paymentBO) throws PaymentProcessingException {
-		BulkPayment payment = CloneUtils.cloneObject(paymentBO, BulkPayment.class);
+		PaymentEntity payment = CloneUtils.cloneObject(paymentBO, PaymentEntity.class);
         String oprDetails;
         try {
             oprDetails = SerializationUtils.writeValueAsString(payment);
@@ -164,7 +164,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
         List<PostingLineBO> lines = new ArrayList<>();
 
-        for (PaymentTarget singlePayment : payment.getPayments()) {
+        for (PaymentTarget singlePayment : payment.getTargets()) {
 
             String creditorIban = singlePayment.getCreditorAccount().getIban();
 
@@ -210,7 +210,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
     @NotNull
-    private LedgerAccountBO getDebtorLedgerAccount(LedgerBO ledger, PaymentSource payment) throws PaymentProcessingException, LedgerNotFoundException {
+    private LedgerAccountBO getDebtorLedgerAccount(LedgerBO ledger, PaymentEntity payment) throws PaymentProcessingException, LedgerNotFoundException {
         String iban = payment.getDebtorAccount().getIban();
 //        DepositAccount debtorDepositAccount = depositAccountRepository.findByIban(iban).orElseThrow(() -> new NotFoundException("TODO Map some error"));
         return ledgerService.findLedgerAccount(ledger, iban).orElseThrow(() -> new PaymentProcessingException("Ledger account was not found by iban=" + iban));

@@ -44,5 +44,100 @@ public class PaymentEntity {
 
 	@OneToMany
 	private List<PaymentTarget> targets;
-	
+
+	public String getPaymentId() {
+		return paymentId;
+	}
+
+	public void setPaymentId(String paymentId) {
+		this.paymentId = paymentId;
+	}
+
+	public Boolean getBatchBookingPreferred() {
+		return batchBookingPreferred;
+	}
+
+	public void setBatchBookingPreferred(Boolean batchBookingPreferred) {
+		this.batchBookingPreferred = batchBookingPreferred;
+	}
+
+	public LocalDate getRequestedExecutionDate() {
+		return requestedExecutionDate;
+	}
+
+	public void setRequestedExecutionDate(LocalDate requestedExecutionDate) {
+		this.requestedExecutionDate = requestedExecutionDate;
+	}
+
+	public PaymentTypeBO getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(PaymentTypeBO paymentType) {
+		this.paymentType = paymentType;
+	}
+
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
+	public LocalDate getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getExecutionRule() {
+		return executionRule;
+	}
+
+	public void setExecutionRule(String executionRule) {
+		this.executionRule = executionRule;
+	}
+
+	public FrequencyCode getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(FrequencyCode frequency) {
+		this.frequency = frequency;
+	}
+
+	public byte getDayOfExecution() {
+		return dayOfExecution;
+	}
+
+	public void setDayOfExecution(byte dayOfExecution) {
+		this.dayOfExecution = dayOfExecution;
+	}
+
+	public AccountReference getDebtorAccount() {
+		return debtorAccount;
+	}
+
+	public void setDebtorAccount(AccountReference debtorAccount) {
+		this.debtorAccount = debtorAccount;
+	}
+
+	public TransactionStatus getTransactionStatus() {
+		return transactionStatus;
+	}
+
+	public void setTransactionStatus(TransactionStatus transactionStatus) {
+		this.transactionStatus = transactionStatus;
+	}
+
+	public List<PaymentTarget> getTargets() {
+		return targets;
+	}
+
+	public void setTargets(List<PaymentTarget> targets) {
+		this.targets = targets;
+	}
 }

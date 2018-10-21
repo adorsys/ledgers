@@ -1,25 +1,37 @@
 package de.adorsys.ledgers.postings.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import de.adorsys.ledgers.postings.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.converter.LedgerMapper;
-import de.adorsys.ledgers.postings.domain.*;
+import de.adorsys.ledgers.postings.db.domain.AccountCategory;
+import de.adorsys.ledgers.postings.db.domain.BalanceSide;
+import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.domain.AccountCategoryBO;
+import de.adorsys.ledgers.postings.domain.BalanceSideBO;
+import de.adorsys.ledgers.postings.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.domain.LedgerBO;
 import de.adorsys.ledgers.postings.exception.ChartOfAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerService {
 
     private final LedgerMapper ledgerMapper;
+    private final LedgerAccountMapper ledgerAccountMapper;
 
-    public LedgerServiceImpl(LedgerMapper ledgerMapper) {
+    public LedgerServiceImpl(LedgerMapper ledgerMapper, LedgerAccountMapper ledgerAccountMapper) {
         this.ledgerMapper = ledgerMapper;
+        this.ledgerAccountMapper = ledgerAccountMapper;
     }
 
     @Override
@@ -51,31 +63,35 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
     }
 
     @Override
-    public LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccountBO) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    public LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccount) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         // Validations
-        if (StringUtils.isBlank(ledgerAccountBO.getName())) {
+        if (StringUtils.isBlank(ledgerAccount.getName())) {
             throw new IllegalArgumentException("Missing model name.");
         }
-        LedgerAccount ledgerAccount = ledgerAccountMapper.toLedgerAccount(ledgerAccountBO);
 
         // User
         LedgerAccount parentAccount = getParentAccount(ledgerAccount);
-        Ledger ledger = getLedger(ledgerAccount, parentAccount);
-        AccountCategory category = getAccountCategory(ledgerAccount, parentAccount);
-        LedgerAccount newLedgerAccount = LedgerAccount.builder()
-                                                 .id(Ids.id())
-                                                 .created(LocalDateTime.now())
-                                                 .user(principal.getName())
-                                                 .shortDesc(ledgerAccount.getShortDesc())
-                                                 .longDesc(ledgerAccount.getLongDesc())
-                                                 .name(ledgerAccount.getName())
-                                                 .ledger(ledger)
-                                                 .coa(ledger.getCoa())
-                                                 .parent(parentAccount)
-                                                 .category(category)
-                                                 .balanceSide(getBalanceSide(ledgerAccount, parentAccount, category))
-                                                 .build();
-
+        Ledger ledger =  parentAccount!=null
+        		? parentAccount.getLedger()
+        				: loadLedger(ledgerAccount.getLedger());
+        		
+        AccountCategory category = ledgerAccount.getCategory()!=null
+        		? AccountCategory.valueOf(ledgerAccount.getCategory().name())
+        				: getAccountCategoryFromParent(parentAccount, ledgerAccount.getShortDesc());
+        
+        BalanceSide balanceSide = ledgerAccount.getBalanceSide()!=null
+        		? BalanceSide.valueOf(ledgerAccount.getBalanceSide().name())
+        				: getBalanceSide(parentAccount, category, ledgerAccount.getShortDesc());
+        		
+        String id = Ids.id();
+		LocalDateTime created = LocalDateTime.now();
+		String user = principal.getName();
+		String shortDesc = ledgerAccount.getShortDesc();
+		String longDesc = ledgerAccount.getLongDesc();
+		String name = ledgerAccount.getName();
+		LedgerAccount parent = parentAccount;
+		ChartOfAccount coa = ledger.getCoa();
+		LedgerAccount newLedgerAccount = new LedgerAccount(id, created, user, shortDesc, longDesc, name, ledger, parent, coa, balanceSide, category);
         return ledgerAccountMapper.toLedgerAccountBO(ledgerAccountRepository.save(newLedgerAccount));
     }
 
@@ -93,35 +109,22 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
                        .map(ledgerAccountMapper::toLedgerAccountBO);
     }
 
-    private LedgerAccount getParentAccount(LedgerAccount ledgerAccount) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    private LedgerAccount getParentAccount(LedgerAccountBO ledgerAccount) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         return ledgerAccount.getParent() != null
                        ? loadLedgerAccount(ledgerAccount.getParent())
                        : null;
     }
 
-    private Ledger getLedger(LedgerAccount ledgerAccount, LedgerAccount parentAccount) throws LedgerNotFoundException {
-        return ledgerAccount.getParent() != null
-                       ? parentAccount.getLedger()
-                       : loadLedger(ledgerAccount.getLedger());
-    }
-
-    private BalanceSide getBalanceSide(LedgerAccount ledgerAccount, LedgerAccount parentAccount, AccountCategory category) {
+    private BalanceSide getBalanceSide(LedgerAccount parentAccount, AccountCategory category, String shortDesc) {
         BalanceSide balanceSide;
-        if (ledgerAccount.getBalanceSide() != null) {
-            balanceSide = ledgerAccount.getBalanceSide();
-        } else if (parentAccount != null) {
+        if (parentAccount != null) {
             balanceSide = parentAccount.getBalanceSide();
         } else if (category != null) {
             balanceSide = category.getDefaultBs();
         } else {
-            throw new IllegalArgumentException("Missing category for: " + ledgerAccount.getShortDesc());
+            throw new IllegalArgumentException("Missing category for: " + shortDesc);
         }
         return balanceSide;
-    }
-
-    private AccountCategory getAccountCategory(LedgerAccount ledgerAccount, LedgerAccount parentAccount) {
-        return Optional.ofNullable(ledgerAccount.getCategory())
-                       .orElseGet(() -> getAccountCategoryFromParent(parentAccount, ledgerAccount.getShortDesc()));
     }
 
     private AccountCategory getAccountCategoryFromParent(LedgerAccount parentAccount, String shortDescription) {
