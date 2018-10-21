@@ -17,11 +17,9 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 
 @Embeddable
 public class Amount {

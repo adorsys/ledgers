@@ -53,6 +53,7 @@ public enum FrequencyCodeBO {
         return null;
     }
 
+    @Override
     public String toString() {
         return String.valueOf(value);
     }

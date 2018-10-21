@@ -32,6 +32,8 @@ public class PaymentResultBO<T> {
      * XS2A Service may use it to provide the error explanation to TPP
      */
     private List<String> messages;
+    
+    private T paymentResult;
 
     public boolean hasError() {
         return responseStatus != SUCCESS;
@@ -40,4 +42,30 @@ public class PaymentResultBO<T> {
     public boolean isSuccessful() {
         return responseStatus == SUCCESS;
     }
+
+	public ResultStatusBO getResponseStatus() {
+		return responseStatus;
+	}
+
+	public void setResponseStatus(ResultStatusBO responseStatus) {
+		this.responseStatus = responseStatus;
+	}
+
+	public List<String> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(List<String> messages) {
+		this.messages = messages;
+	}
+
+	public T getPaymentResult() {
+		return paymentResult;
+	}
+
+	public void setPaymentResult(T paymentResult) {
+		this.paymentResult = paymentResult;
+	}
+	
+    
 }

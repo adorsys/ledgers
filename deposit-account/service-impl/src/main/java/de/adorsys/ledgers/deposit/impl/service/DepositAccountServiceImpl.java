@@ -144,8 +144,8 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 			executeSinglePaymentWithoutSca(singlePaymentBO);
 		}
 		
-		PaymentResultBO result = null;// TODO
-		return result;
+//		PaymentResultBO result = null;// TODO
+		return null;
 	}
 
 	@Override
@@ -172,21 +172,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         List<PostingLineBO> lines = new ArrayList<>();
 
         for (PaymentTarget singlePayment : payment.getTargets()) {
-
-            String creditorIban = singlePayment.getCreditorAccount().getIban();
-
-            LedgerAccountBO creditLedgerAccount;
-			try {
-				creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
-			} catch (LedgerNotFoundException e) {
-	            throw new PaymentProcessingException(e.getMessage(), e);
-			}
-
-            PostingLineBO debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
-            lines.add(debitLine);
-
-            PostingLineBO creditLine = buildCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
-            lines.add(creditLine);
+            processSingleTarget(oprDetails, ledger, debtorLedgerAccount, lines,singlePayment);
         }
 
         PostingBO posting = buildPosting(oprDetails, ledger, lines);
@@ -198,6 +184,24 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
         return null;
     }
+
+	private void processSingleTarget(String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount,
+			final List<PostingLineBO> lines, PaymentTarget singlePayment) throws PaymentProcessingException {
+		String creditorIban = singlePayment.getCreditorAccount().getIban();
+
+		LedgerAccountBO creditLedgerAccount;
+		try {
+			creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+		} catch (LedgerNotFoundException e) {
+		    throw new PaymentProcessingException(e.getMessage(), e);
+		}
+
+		PostingLineBO debitLine = buildDebitLine(oprDetails, debtorLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+		lines.add(debitLine);
+
+		PostingLineBO creditLine = buildCreditLine(oprDetails, creditLedgerAccount, singlePayment.getInstructedAmount().getAmount());
+		lines.add(creditLine);
+	}
 
     private PostingLineBO buildCreditLine(String oprDetails, LedgerAccountBO creditLedgerAccount, BigDecimal amount) {
         return buildPostingLine(oprDetails, creditLedgerAccount, BigDecimal.ZERO, amount);

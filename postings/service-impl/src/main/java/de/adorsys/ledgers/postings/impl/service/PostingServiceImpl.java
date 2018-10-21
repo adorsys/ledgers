@@ -20,7 +20,6 @@ import de.adorsys.ledgers.postings.db.domain.Posting;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.db.domain.PostingStatus;
 import de.adorsys.ledgers.postings.db.domain.PostingType;
-import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.postings.impl.utils.DoubleEntryBookKeeping;
 import de.adorsys.ledgers.postings.impl.utils.LedgerPolicies;
@@ -32,11 +31,9 @@ import de.adorsys.ledgers.util.Ids;
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
     private final PostingMapper postingMapper;
-    private final LedgerAccountMapper ledgerAccountMapper;
 
-    public PostingServiceImpl(PostingMapper postingMapper, LedgerAccountMapper ledgerAccountMapper) {
+    public PostingServiceImpl(PostingMapper postingMapper) {
         this.postingMapper = postingMapper;
-        this.ledgerAccountMapper = ledgerAccountMapper;
     }
 
     @Override
@@ -77,7 +74,9 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
     private PostingBO newPostingBOInternal(Posting posting) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         // Check ledger not null
-    	if(posting.getLedger()==null) throw insufficientInfo(posting);
+    	if(posting.getLedger()==null) { 
+    		throw insufficientInfo(posting);
+    	}
         Ledger ledger = loadLedger(posting.getLedger());
         LedgerPolicies ledgerPolicies = new LedgerPolicies(ledger);
 
