@@ -8,7 +8,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -35,14 +34,13 @@ import de.adorsys.ledgers.util.Ids;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LedgerServiceImplTest {
-	private static final String LEDGER_ID = "Ledger Id";
 	private static final LocalDateTime DATE_TIME = LocalDateTime.now();
 	private static final String USER_NAME = "Mr. Jones";
 	private static final ChartOfAccount COA = new ChartOfAccount(Ids.id(), DATE_TIME, USER_NAME,
 			"Some short description", "Some long description", "COA");
-	private static final Ledger LEDGER = new Ledger(LEDGER_ID, DATE_TIME, "User", "Some short description",
+	private static final Ledger LEDGER = new Ledger(Ids.id(), DATE_TIME, "User", "Some short description",
 			"Some long description", "Ledger", COA, DATE_TIME);
-	private static final LedgerAccount LEDGER_ACCOUNT = new LedgerAccount(LEDGER_ID, DATE_TIME, "User",
+	private static final LedgerAccount LEDGER_ACCOUNT = new LedgerAccount(Ids.id(), DATE_TIME, "User",
 			"Some short description", "Some long description", USER_NAME, LEDGER, null, COA, BalanceSide.Cr,
 			AccountCategory.AS);
 	private static final LedgerMapper ledgerMapper = new LedgerMapper();
@@ -80,10 +78,10 @@ public class LedgerServiceImplTest {
 		assertThat(result.getCoa()).isNotNull();
 	}
 
-	@Ignore
 	@Test
-	public void newLedgerAccount() throws LedgerAccountNotFoundException, LedgerNotFoundException {
+	public void new_ledgerAccount_must_produce_id_created_user_copy_other_fields() throws LedgerAccountNotFoundException, LedgerNotFoundException {
 		when(ledgerAccountRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(principal.getName()).thenReturn(USER_NAME);
 		when(ledgerRepository.findById(any())).thenReturn(Optional.of(LEDGER));
 		// When
 		LedgerAccountBO result = ledgerService.newLedgerAccount(ledgerAccountMapper.toLedgerAccountBO(LEDGER_ACCOUNT));
