@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.um.db.domain;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
@@ -19,6 +21,15 @@ public class SCAMethod {
     @NotNull
     @Column(nullable = false)
     private String methodValue;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private UserEntity user;
+
+    public UserEntity getUser() {
+        return user;
+    }
 
     public String getId() {
         return id;
