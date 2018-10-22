@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.service;
+package de.adorsys.ledgers.middleware.service.exception;
 
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+public class PaymentNotFoundMiddlewareException extends Exception {
 
-public interface MiddlewareService {
+    public PaymentNotFoundMiddlewareException() {}
 
-    PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
+    public PaymentNotFoundMiddlewareException(String message) {
+        super(message);
+    }
+
+    public PaymentNotFoundMiddlewareException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

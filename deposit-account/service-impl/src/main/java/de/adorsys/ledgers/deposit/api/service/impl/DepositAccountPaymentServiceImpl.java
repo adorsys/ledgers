@@ -37,7 +37,7 @@ public class DepositAccountPaymentServiceImpl implements DepositAccountPaymentSe
     private final PaymentRepository paymentRepository;
 
     @Override
-    public PaymentResultBO<TransactionStatusBO> getPaymentStatus(String paymentId) throws PaymentNotFoundException {
+    public PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException {
         Optional<Payment> payment = paymentRepository.findById(paymentId);
         TransactionStatus transactionStatus = payment
                                                       .map(Payment::getTransactionStatus)

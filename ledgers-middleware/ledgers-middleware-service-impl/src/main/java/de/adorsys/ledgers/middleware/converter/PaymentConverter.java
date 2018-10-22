@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.service;
+package de.adorsys.ledgers.middleware.converter;
 
+import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import org.mapstruct.Mapper;
 
-public interface MiddlewareService {
+@Mapper(componentModel = "spring")
+public interface PaymentConverter {
 
-    PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
+    PaymentResultTO toPaymentResultTO(PaymentResultBO bo);
+
+    PaymentResultBO toPaymentResultBO(PaymentResultTO to);
 }

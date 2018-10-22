@@ -53,6 +53,8 @@
 	</developers>
 
 	<properties>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
 		<ruleset.basedir>${project.basedir}</ruleset.basedir>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -73,6 +75,7 @@
         <mockito.version>1.10.19</mockito.version>
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+        <slf4j.version>1.7.25</slf4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -107,6 +110,14 @@
 				<artifactId>springfox-swagger-ui</artifactId>
 				<version>${springfox-swagger2.version}</version>
 			</dependency>
+
+            <!-- logging dependencies -->
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
 
 			<!-- other dependencies -->
 
@@ -169,7 +180,14 @@
 
 	<dependencies>
 
-		<!-- other dependencies -->
+        <!-- logging dependencies -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- other dependencies -->
 
 		<dependency>
 			<groupId>org.jetbrains</groupId>

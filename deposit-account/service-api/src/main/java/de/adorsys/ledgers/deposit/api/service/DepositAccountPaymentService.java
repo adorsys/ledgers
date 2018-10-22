@@ -22,5 +22,5 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 
 public interface DepositAccountPaymentService {
 
-    PaymentResultBO<TransactionStatusBO> getPaymentStatus(String paymentId) throws PaymentNotFoundException;
+    PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException;
 }

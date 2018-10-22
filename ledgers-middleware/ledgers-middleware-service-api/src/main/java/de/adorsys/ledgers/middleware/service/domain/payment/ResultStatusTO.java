@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.service;
+package de.adorsys.ledgers.middleware.service.domain.payment;
 
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
-
-public interface MiddlewareService {
-
-    PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
+public enum ResultStatusTO {
+    SUCCESS,
+    TECHNICAL_FAILURE,
+    UNAUTHORIZED_FAILURE,
+    LOGICAL_FAILURE,
+    NOT_SUPPORTED
 }

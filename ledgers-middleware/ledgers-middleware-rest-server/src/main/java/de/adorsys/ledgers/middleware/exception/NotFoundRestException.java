@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.service;
+package de.adorsys.ledgers.middleware.exception;
 
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import org.springframework.http.HttpStatus;
 
-public interface MiddlewareService {
+public class NotFoundRestException extends RestException {
 
-    PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
+    public NotFoundRestException() { }
+
+    public NotFoundRestException(String message) {
+        super(message);
+    }
+
+    @Override
+    public HttpStatus getStatus() {
+        return HttpStatus.NOT_FOUND;
+    }
+
+    @Override
+    public String getCode() {
+        return "404_NotFoundRestException";
+    }
 }

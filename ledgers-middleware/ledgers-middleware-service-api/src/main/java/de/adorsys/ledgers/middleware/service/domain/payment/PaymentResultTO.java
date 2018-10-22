@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.api.domain;
-
-import static de.adorsys.ledgers.deposit.api.domain.ResultStatusBO.SUCCESS;
+package de.adorsys.ledgers.middleware.service.domain.payment;
 
 import java.util.List;
 
-public class PaymentResultBO<T> {
+import static de.adorsys.ledgers.middleware.service.domain.payment.ResultStatusTO.SUCCESS;
+
+public class PaymentResultTO<T> {
 
     /**
      * A status of execution result. Is used to provide correct answer to TPP.
      */
-    private ResultStatusBO responseStatus;
+    private ResultStatusTO responseStatus;
 
-	public PaymentResultBO() {
-	}
+    public PaymentResultTO() {
+    }
 
-	public PaymentResultBO(T paymentResult) {
-		this.paymentResult = paymentResult;
-		setResponseStatus(SUCCESS);
-	}
+    public PaymentResultTO(T paymentResult) {
+        this.paymentResult = paymentResult;
+        setResponseStatus(SUCCESS);
+    }
 
-	/**
+    /**
      * An optional message that can be returned to explain response status in details.
      * XS2A Service may use it to provide the error explanation to TPP
      */
     private List<String> messages;
-    
+
     private T paymentResult;
 
     public boolean hasError() {
@@ -51,27 +51,27 @@ public class PaymentResultBO<T> {
         return responseStatus == SUCCESS;
     }
 
-	public ResultStatusBO getResponseStatus() {
-		return responseStatus;
-	}
+    public ResultStatusTO getResponseStatus() {
+        return responseStatus;
+    }
 
-	public void setResponseStatus(ResultStatusBO responseStatus) {
-		this.responseStatus = responseStatus;
-	}
+    public void setResponseStatus(ResultStatusTO responseStatus) {
+        this.responseStatus = responseStatus;
+    }
 
-	public List<String> getMessages() {
-		return messages;
-	}
+    public List<String> getMessages() {
+        return messages;
+    }
 
-	public void setMessages(List<String> messages) {
-		this.messages = messages;
-	}
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
+    }
 
-	public T getPaymentResult() {
-		return paymentResult;
-	}
+    public T getPaymentResult() {
+        return paymentResult;
+    }
 
-	public void setPaymentResult(T paymentResult) {
-		this.paymentResult = paymentResult;
-	}
+    public void setPaymentResult(T paymentResult) {
+        this.paymentResult = paymentResult;
+    }
 }
