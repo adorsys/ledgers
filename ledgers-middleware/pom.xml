@@ -24,10 +24,12 @@
 
 	<artifactId>ledgers-middleware</artifactId>
 
+    <name>ledgers-middleware</name>
+
 	<modules>
-		<module>service-api</module>
-		<module>service-impl</module>
-		<module>rest-server</module>
+		<module>ledgers-middleware-service-api</module>
+		<module>ledgers-middleware-service-impl</module>
+		<module>ledgers-middleware-rest-server</module>
 	</modules>
 
 </project>

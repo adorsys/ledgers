@@ -7,8 +7,10 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
+
 	<artifactId>ledgers-middleware-service-api</artifactId>
-	
+	<name>ledgers-middleware-service-api</name>
+
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>

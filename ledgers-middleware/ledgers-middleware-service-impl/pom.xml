@@ -7,8 +7,10 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>ledgers-middleware-rest-server</artifactId>
-	
+
+	<artifactId>ledgers-middleware-service-impl</artifactId>
+	<name>ledgers-middleware-service-impl</name>
+
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>
@@ -23,30 +25,17 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- spring dependencies -->
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<!-- Sprinfox and swagger UI-->
-
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<scope>compile</scope>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -76,8 +65,7 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-middleware-app</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-middleware-service-impl</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-middleware-rest-server</exclude>
 									</excludes>
 								</bannedDependencies>
 							</rules>
