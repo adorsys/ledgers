@@ -50,6 +50,13 @@ public class UserEntity {
 //    )
 //    private List<LedgerAccount> accounts;
 
+ /*   @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_ledger_account",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
+    )
+    private List<LedgerAccount> accounts;
+*/
 
     public String getId() {
         return id;
