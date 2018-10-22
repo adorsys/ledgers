@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import de.adorsys.ledgers.deposit.impl.mappers.DepositAccountMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,12 +43,16 @@ public class ITDepositAccountServiceImplTest{
     private LedgerService ledgerService;
     @Mock
     private DepositAccountConfigService depositAccountConfigService;
+    @Mock
+    private DepositAccountMapper depositAccountMapper;
 
     @Test
     public void test_create_customer_bank_account_ok() throws LedgerAccountNotFoundException, LedgerNotFoundException, PaymentProcessingException {
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(LEDGER_ACCOUNT);
         when(ledgerService.newLedgerAccount(any())).thenReturn(LEDGER_ACCOUNT);
         when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(DepositAccount.class));
+        when(depositAccountMapper.toDepositAccount(any())).thenReturn(getDepositAccount(DepositAccount.class));
+        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccount(DepositAccountBO.class));
 
         //Given
         DepositAccountBO da = getDepositAccount(DepositAccountBO.class);
