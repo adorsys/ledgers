@@ -1,14 +1,15 @@
-package de.adorsys.ledgers.deposit.impl.service;
+package de.adorsys.ledgers.deposit.api.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
@@ -19,6 +20,7 @@ import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import org.mockito.runners.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,10 +54,10 @@ public class ITDepositAccountServiceImplTest{
         //When
         DepositAccountBO createdDepositAccount = depositAccountService.createDepositAccount(da);
         //Then
-        assertThat(createdDepositAccount).isNotNull();
+        assertThat(createdDepositAccount, is(CoreMatchers.notNullValue()));
     }
     
     private <T> T getDepositAccount(Class<T> t) {
-    	return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/deposit/service/impl/ITDepositAccountServiceImplTest.yml", t);
+    	return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/deposit/api/service/impl/ITDepositAccountServiceImplTest.yml", t);
     }
 }

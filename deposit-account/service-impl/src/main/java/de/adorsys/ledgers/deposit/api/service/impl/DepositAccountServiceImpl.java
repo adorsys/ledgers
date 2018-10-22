@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.deposit.impl.service;
+package de.adorsys.ledgers.deposit.api.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

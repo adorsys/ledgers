@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.deposit.impl.test;
+package de.adorsys.ledgers.deposit.api.service.impl.test;
 
 import java.security.Principal;
 

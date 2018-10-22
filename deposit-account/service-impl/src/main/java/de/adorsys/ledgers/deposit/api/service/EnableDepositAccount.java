@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.deposit.impl;
+package de.adorsys.ledgers.deposit.api.service;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

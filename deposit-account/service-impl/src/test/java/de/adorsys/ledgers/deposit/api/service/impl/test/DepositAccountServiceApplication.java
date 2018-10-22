@@ -1,9 +1,6 @@
-package de.adorsys.ledgers.deposit.impl.test;
+package de.adorsys.ledgers.deposit.api.service.impl.test;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import de.adorsys.ledgers.deposit.impl.EnableDepositAccount;
 
 //@SpringBootApplication
 //@EnableDepositAccount

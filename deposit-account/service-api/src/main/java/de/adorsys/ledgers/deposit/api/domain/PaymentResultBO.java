@@ -27,7 +27,15 @@ public class PaymentResultBO<T> {
      */
     private ResultStatusBO responseStatus;
 
-    /**
+	public PaymentResultBO() {
+	}
+
+	public PaymentResultBO(T paymentResult) {
+		this.paymentResult = paymentResult;
+		setResponseStatus(SUCCESS);
+	}
+
+	/**
      * An optional message that can be returned to explain response status in details.
      * XS2A Service may use it to provide the error explanation to TPP
      */

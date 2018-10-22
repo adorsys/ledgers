@@ -1,4 +1,4 @@
-package de.adorsys.ledgers;/*
+/*
  * Copyright 2018-2018 adorsys GmbH & Co KG
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,16 @@ package de.adorsys.ledgers;/*
  * limitations under the License.
  */
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+package de.adorsys.ledgers.middleware.service;
 
-@SpringBootApplication
-public class LedgersApplication {
 
-    public static void main(String[] args) {
-        new SpringApplicationBuilder(LedgersApplication.class).run(args);
+import org.springframework.stereotype.Service;
+
+@Service
+public class MiddlewareServiceImpl implements MiddlewareService {
+
+    @Override
+    public void getPaymentStatus(String paymentId) {
+//        todo: @spe implement
     }
 }

@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.impl.domain;
+package de.adorsys.ledgers.middleware.resource;
 
-public enum ResultStatus {
-    SUCCESS,
-    TECHNICAL_FAILURE,
-    UNAUTHORIZED_FAILURE,
-    LOGICAL_FAILURE,
-    NOT_SUPPORTED
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/payments")
+public class PaymentResource {
+
+
+    private final MiddlewareService middlewareService;
+
+    public PaymentResource(MiddlewareService middlewareService) {
+        this.middlewareService = middlewareService;
+    }
 }
