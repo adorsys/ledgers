@@ -19,12 +19,17 @@
 		<version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
 	</parent>
-	<modules>
-		<module>service-api</module>
-		<module>service-impl</module>
-		<module>repository</module>
-	</modules>
+
 	<packaging>pom</packaging>
-	<artifactId>ledgers-deposit-account</artifactId>
+
+	<artifactId>ledgers-middleware</artifactId>
+
+    <name>ledgers-middleware</name>
+
+	<modules>
+		<module>ledgers-middleware-service-api</module>
+		<module>ledgers-middleware-service-impl</module>
+		<module>ledgers-middleware-rest-server</module>
+	</modules>
 
 </project>
