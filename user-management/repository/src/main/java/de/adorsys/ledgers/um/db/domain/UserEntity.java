@@ -19,6 +19,7 @@ package de.adorsys.ledgers.um.db.domain;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -49,6 +50,13 @@ public class UserEntity {
 //            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
 //    )
 //    private List<LedgerAccount> accounts;
+
+//    @OneToMany(fetch = FetchType.EAGER)
+//    @JoinTable(name = "user_sca",
+//            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
+//    )
+//    private List<SCAMethod> scaMethods;
 
 
     public String getId() {
