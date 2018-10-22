@@ -30,11 +30,11 @@ import java.util.Optional;
 @Service
 public class DepositAccountPaymentServiceImpl implements DepositAccountPaymentService {
 
+    private final PaymentRepository paymentRepository;
+
     public DepositAccountPaymentServiceImpl(PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
     }
-
-    private final PaymentRepository paymentRepository;
 
     @Override
     public PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException {

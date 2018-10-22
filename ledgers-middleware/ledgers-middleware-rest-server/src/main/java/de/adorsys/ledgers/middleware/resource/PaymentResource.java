@@ -20,6 +20,8 @@ import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/payments")
 public class PaymentResource {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentResource.class);
 
     private final MiddlewareService middlewareService;
 
@@ -36,11 +39,11 @@ public class PaymentResource {
     }
 
     @GetMapping("/{id}/status")
-    public PaymentResultTO getPaymentStatusById(@PathVariable String id){
+    public PaymentResultTO getPaymentStatusById(@PathVariable String id) {
         try {
             return middlewareService.getPaymentStatusById(id);
         } catch (PaymentNotFoundMiddlewareException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         }
     }
