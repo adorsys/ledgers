@@ -2,9 +2,10 @@ package de.adorsys.ledgers.um.db.domain;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "sca_methods", uniqueConstraints = @UniqueConstraint(columnNames={"method_type", "method_value"}))
 public class SCAMethod {
 
     @Id

@@ -51,12 +51,12 @@ public class UserEntity {
 //    )
 //    private List<LedgerAccount> accounts;
 
-//    @OneToMany(fetch = FetchType.EAGER)
-//    @JoinTable(name = "user_sca",
-//            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
-//    )
-//    private List<SCAMethod> scaMethods;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_sca",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
+    )
+    private List<SCAMethod> scaMethods;
 
 
     public String getId() {
