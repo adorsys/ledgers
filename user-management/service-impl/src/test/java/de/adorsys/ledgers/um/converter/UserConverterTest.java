@@ -1,7 +1,9 @@
 package de.adorsys.ledgers.um.converter;
 
-import de.adorsys.ledgers.um.domain.UserBO;
-import de.adorsys.ledgers.um.domain.UserEntity;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.impl.converter.UserConverter;
+
 import org.junit.Test;
 import org.mapstruct.factory.Mappers;
 
