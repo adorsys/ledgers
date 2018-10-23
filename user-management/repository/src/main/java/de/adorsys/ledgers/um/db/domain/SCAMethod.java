@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "sca_methods", uniqueConstraints = @UniqueConstraint(columnNames={"method_type", "method_value"}))
+@Table(name = "sca_methods", uniqueConstraints = @UniqueConstraint(name = "method_type_method_value_unique", columnNames={"method_type", "method_value"}))
 public class SCAMethod {
 
     @Id
@@ -15,11 +15,11 @@ public class SCAMethod {
     private String id;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(name = "method_type", nullable = false)
     private String methodType;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(name = "method_value", nullable = false)
     private String methodValue;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
