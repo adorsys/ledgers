@@ -1,5 +1,5 @@
 package de.adorsys.ledgers.sca.domain;
 
-public enum AuthCodeStatus {
+public enum AuthCodeStatusBO {
 	NEW, USED, EXPIRED;
 }

@@ -12,7 +12,7 @@ public class SCAOperationBO {
 	int validitySeconds;
 	/*The hash of auth code and opData*/
 	String authCodeHash;
-	AuthCodeStatus status;
+	AuthCodeStatusBO status;
 	String hashAlg;
 	LocalDateTime created;
 	LocalDateTime statusTime;
