@@ -27,8 +27,13 @@ public class SCAMethod {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
 
+    // TODO: clarify if we need user setter in SCAMethod
     public UserEntity getUser() {
         return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
     }
 
     public String getId() {
