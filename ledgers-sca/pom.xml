@@ -19,17 +19,21 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
-    <modules>
-        <module>rest-server</module>
-        <module>service-api</module>
-        <module>service-impl</module>
-    </modules>
-    <packaging>pom</packaging>
-    <artifactId>ledgers-sca</artifactId>
 
+    <packaging>pom</packaging>
+
+    <artifactId>ledgers-sca</artifactId>
+    <name>ledgers-sca</name>
 
     <properties>
         <ruleset.basedir>..</ruleset.basedir>
     </properties>
+
+    <modules>
+        <module>ledgers-sca-rest-server</module>
+        <module>ledgers-sca-service-api</module>
+        <module>ledgers-sca-service-impl</module>
+        <module>ledgers-sca-repository</module>
+    </modules>
 
 </project>

@@ -8,7 +8,8 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ledgers-sca-service-impl</artifactId>
-	
+	<name>ledgers-sca-service-impl</name>
+
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>
@@ -23,17 +24,11 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
 		<!-- spring dependencies -->
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -41,6 +36,12 @@
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-jdk8</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>pro.javatar.commons</groupId>
+			<artifactId>javatar-commons</artifactId>
+			<version>${javatar-commons.version}</version>
 		</dependency>
 
 		<!-- test dependencies -->
@@ -63,7 +64,6 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-sca-app</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-sca-rest-server</exclude>
 									</excludes>
 								</bannedDependencies>

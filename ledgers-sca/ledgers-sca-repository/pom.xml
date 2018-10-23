@@ -7,8 +7,10 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>ledgers-sca-rest-server</artifactId>
-	
+
+	<artifactId>ledgers-sca-repository</artifactId>
+	<name>ledgers-sca-repository</name>
+
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>
@@ -19,7 +21,7 @@
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-sca-service-api</artifactId>
+			<artifactId>ledgers-utils</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
@@ -27,26 +29,7 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<!-- Sprinfox and swagger UI-->
-
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<scope>compile</scope>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -76,7 +59,9 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
+										<exclude>de.adorsys.ledgers:ledgers-sca-service-api</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-sca-service-impl</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-sca-rest-server</exclude>
 									</excludes>
 								</bannedDependencies>
 							</rules>
