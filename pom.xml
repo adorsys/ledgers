@@ -21,7 +21,7 @@
 		<module>utils</module>
 		<module>deposit-account</module>
 		<module>user-management</module>
-		<module>middleware</module>
+		<module>ledgers-middleware</module>
 		<module>sca</module>
 	</modules>
 	<packaging>pom</packaging>
@@ -53,6 +53,8 @@
 	</developers>
 
 	<properties>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
 		<ruleset.basedir>${project.basedir}</ruleset.basedir>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -69,9 +71,11 @@
 		<org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
 		<lombok-plugin.version>1.16.22</lombok-plugin.version>
 		<hamcrest-library.version>1.3</hamcrest-library.version>
-		<javatar-commons.version>0.4</javatar-commons.version>
+		<javatar-commons.version>0.5</javatar-commons.version>
+        <mockito.version>1.10.19</mockito.version>
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+        <slf4j.version>1.7.25</slf4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -106,6 +110,14 @@
 				<artifactId>springfox-swagger-ui</artifactId>
 				<version>${springfox-swagger2.version}</version>
 			</dependency>
+
+            <!-- logging dependencies -->
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
 
 			<!-- other dependencies -->
 
@@ -168,7 +180,14 @@
 
 	<dependencies>
 
-		<!-- other dependencies -->
+        <!-- logging dependencies -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- other dependencies -->
 
 		<dependency>
 			<groupId>org.jetbrains</groupId>
@@ -177,6 +196,7 @@
 		</dependency>
 
 		<!-- test dependencies -->
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -192,6 +212,12 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
 			<scope>test</scope>
 		</dependency>
 

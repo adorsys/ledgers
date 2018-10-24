@@ -1,0 +1,5 @@
+responseStatus: SUCCESS
+messages:
+  - message1
+  - message2
+paymentResult: RCVD
