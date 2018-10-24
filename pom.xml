@@ -17,9 +17,9 @@
 	<artifactId>ledgers</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<modules>
-		<module>postings</module>
+		<module>ledgers-postings</module>
 		<module>ledgers-utils</module>
-		<module>deposit-account</module>
+		<module>ledgers-deposit-account</module>
 		<module>user-management</module>
 		<module>ledgers-middleware</module>
 		<module>sca</module>
@@ -242,7 +242,7 @@
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
 					<excludeRoots>
-						<excludeRoot>../service-impl/target/generated-sources/annotations/</excludeRoot>
+						<excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/</excludeRoot>
 					</excludeRoots>
 				</configuration>
 			</plugin>
