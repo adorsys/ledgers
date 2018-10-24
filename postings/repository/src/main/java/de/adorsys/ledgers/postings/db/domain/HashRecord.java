@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.postings.db.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.adorsys.ledgers.util.hash.HashItem;
 
 import javax.persistence.MappedSuperclass;
@@ -43,11 +44,13 @@ public abstract class HashRecord  implements HashItem<HashRecord> {
 	}
 
     @Override
+    @JsonIgnore
     public String getAlg() {
         return hashAlg;
     }
 
     @Override
+    @JsonIgnore
     public HashRecord getItem() {
         return this;
     }

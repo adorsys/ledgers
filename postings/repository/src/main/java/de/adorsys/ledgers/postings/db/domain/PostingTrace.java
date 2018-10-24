@@ -1,14 +1,11 @@
 package de.adorsys.ledgers.postings.db.domain;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
 import de.adorsys.ledgers.util.hash.HashGenerationException;

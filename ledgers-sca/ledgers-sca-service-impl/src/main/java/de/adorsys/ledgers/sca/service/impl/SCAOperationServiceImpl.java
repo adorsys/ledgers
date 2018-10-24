@@ -95,6 +95,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @Override
+    @SuppressWarnings("PMD.PrematureDeclaration")
     public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException {
 
         Optional<SCAOperationEntity> operation = repository.findById(opId);

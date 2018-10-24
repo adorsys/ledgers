@@ -24,9 +24,6 @@ public class RecordHashHelper {
         }
 
         // Get string value including hash
-//        MessageDigest digest = MessageDigest.getInstance(hashRecord.getHashAlg());
-//        byte[] valueAsBytes = SerializationUtils.writeValueAsBytes(hashRecord);
-//        return Base16.encode(digest.digest(valueAsBytes));
-        return HashGeneratorImpl.hash(hashRecord);
+        return new HashGeneratorImpl().hash(hashRecord);
     }
 }
