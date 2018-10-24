@@ -3,7 +3,7 @@ package de.adorsys.ledgers.um.db.repository;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
-import de.adorsys.ledgers.um.db.domain.SCAMethod;
+import de.adorsys.ledgers.um.db.domain.ScaUserData;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,10 +16,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = UmRepositoryApplication.class)
 @DatabaseSetup("SCAMethodsRepositoryTest-db-entries.xml")
 @DatabaseTearDown(value={"SCAMethodsRepositoryTest-db-entries.xml"}, type= DatabaseOperation.DELETE_ALL)
-public class SCAMethodIT {
+public class ScaUserDataIT {
 
     @Autowired
-    private SCAMethodRepository scaMethodRepository;
+    private ScaUserDataRepository scaUserDataRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -33,20 +33,20 @@ public class SCAMethodIT {
         vladi.setPin("12345");
         userRepository.save(vladi);
 
-        SCAMethod scaEmail = new SCAMethod();
+        ScaUserData scaEmail = new ScaUserData();
         scaEmail.setId("SomeUniqueScaID");
         scaEmail.setMethodType("email");
         scaEmail.setMethodValue("SuperSecureCode");
         scaEmail.setUser(vladi);
 
-        scaMethodRepository.save(scaEmail);
+        scaUserDataRepository.save(scaEmail);
 
-        SCAMethod scaEmailRepeat = new SCAMethod();
+        ScaUserData scaEmailRepeat = new ScaUserData();
         scaEmailRepeat.setId("SomeUniqueScaRepeatID");
         scaEmailRepeat.setMethodType("email");
         scaEmailRepeat.setMethodValue("SuperSecureCode");
         scaEmailRepeat.setUser(vladi);
 
-        scaMethodRepository.save(scaEmailRepeat);
+        scaUserDataRepository.save(scaEmailRepeat);
     }
 }

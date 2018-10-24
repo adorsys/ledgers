@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "sca_methods")
-public class SCAMethod {
+public class ScaUserData {
 
     @Id
     @Column(name = "sca_id")
