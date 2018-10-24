@@ -6,17 +6,20 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 
+/*
+*
+*
+* */
+
 //Todo clearify unique constrains iban & access_type
 @Entity
-@Table(name = "account_accesses", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "iban", name = "iban_unique"),
-        @UniqueConstraint(columnNames = "access_type", name = "access_type_unique")
-})
+@Table(name = "account_accesses")
 public class AccountAccess {
 
     @Id
     @Column(name = "account_access_id")
     private String id;
+
 
     @NotNull
     @Column(nullable = false)
