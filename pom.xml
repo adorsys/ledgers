@@ -18,7 +18,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<modules>
 		<module>postings</module>
-		<module>utils</module>
+		<module>ledgers-utils</module>
 		<module>deposit-account</module>
 		<module>user-management</module>
 		<module>ledgers-middleware</module>
