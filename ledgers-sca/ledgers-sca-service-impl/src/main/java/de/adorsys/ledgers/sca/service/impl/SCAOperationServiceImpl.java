@@ -22,9 +22,9 @@ import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.exception.TanGenerationException;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.sca.service.TanGenerator;
+import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
@@ -41,17 +41,17 @@ import java.util.Optional;
 public class SCAOperationServiceImpl implements SCAOperationService {
     private static final Logger logger = LoggerFactory.getLogger(SCAOperationServiceImpl.class);
     private static final String TAN_VALIDATION_ERROR = "Can't validate client TAN";
-    private static final String TAN_GENERATION_ERROR = "TAN can't be generated";
+    private static final String AUTH_CODE_GENERATION_ERROR = "TAN can't be generated";
 
     private final SCAOperationRepository repository;
 
-    private final TanGenerator tanGenerator;
+    private final AuthCodeGenerator authCodeGenerator;
 
     private HashGenerator hashGenerator;
 
-    public SCAOperationServiceImpl(SCAOperationRepository repository, TanGenerator tanGenerator) {
+    public SCAOperationServiceImpl(SCAOperationRepository repository, AuthCodeGenerator authCodeGenerator) {
         this.repository = repository;
-        this.tanGenerator = tanGenerator;
+        this.authCodeGenerator = authCodeGenerator;
         hashGenerator = new HashGeneratorImpl();
     }
 
@@ -60,9 +60,9 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @Override
-    public String generateAuthCode(String opId, String opData, int validitySeconds) throws TanGenerationException {
+    public String generateAuthCode(String opId, String opData, int validitySeconds) throws AuthCodeGenerationException {
 
-        String tan = tanGenerator.generate();
+        String tan = authCodeGenerator.generate();
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(opData, tan));
 
@@ -71,8 +71,8 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         try {
             scaOperation = buildSCAOperation(opId, validitySeconds, hashItem);
         } catch (HashGenerationException e) {
-            logger.error(TAN_GENERATION_ERROR, e);
-            throw new TanGenerationException(TAN_GENERATION_ERROR, e);
+            logger.error(AUTH_CODE_GENERATION_ERROR, e);
+            throw new AuthCodeGenerationException(AUTH_CODE_GENERATION_ERROR, e);
         }
 
         repository.save(scaOperation);

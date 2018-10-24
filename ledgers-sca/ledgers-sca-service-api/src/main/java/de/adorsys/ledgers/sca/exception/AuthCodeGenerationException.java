@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.service;
+package de.adorsys.ledgers.sca.exception;
 
-public interface TanGenerator {
+public class AuthCodeGenerationException extends Exception {
 
-    String generate();
+    public AuthCodeGenerationException() {}
+
+    public AuthCodeGenerationException(String message) {
+        super(message);
+    }
+
+    public AuthCodeGenerationException(Throwable cause) {
+        super(cause);
+    }
+
+    public AuthCodeGenerationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -5,8 +5,8 @@ import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.exception.TanGenerationException;
-import de.adorsys.ledgers.sca.service.TanGenerator;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.swing.plaf.TreeUI;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ public class SCAOperationServiceImplTest {
     private SCAOperationServiceImpl scaOperationService;
 
     @Mock
-    private TanGenerator tanGenerator;
+    private AuthCodeGenerator authCodeGenerator;
 
     @Mock
     private SCAOperationRepository repository;
@@ -53,12 +52,12 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
-    public void generateAuthCode() throws TanGenerationException, HashGenerationException {
+    public void generateAuthCode() throws AuthCodeGenerationException, HashGenerationException {
 
         String myTan = "myTan";
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
 
-        when(tanGenerator.generate()).thenReturn(myTan);
+        when(authCodeGenerator.generate()).thenReturn(myTan);
         when(hashGenerator.hash(any())).thenReturn("hashed object");
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
@@ -76,14 +75,14 @@ public class SCAOperationServiceImplTest {
         assertThat(entity.getHashAlg(), is(HashGeneratorImpl.DEFAULT_HASH_ALG));
         assertThat(entity.getAuthCodeHash(), is(notNullValue()));
 
-        verify(tanGenerator, times(1)).generate();
+        verify(authCodeGenerator, times(1)).generate();
         verify(hashGenerator, times(1)).hash(any());
         verify(repository, times(1)).save(entity);
     }
-    @Test(expected = TanGenerationException.class)
-    public void generateAuthCodeWithException() throws TanGenerationException, HashGenerationException {
+    @Test(expected = AuthCodeGenerationException.class)
+    public void generateAuthCodeWithException() throws AuthCodeGenerationException, HashGenerationException {
 
-        when(tanGenerator.generate()).thenReturn("tan");
+        when(authCodeGenerator.generate()).thenReturn("tan");
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
         scaOperationService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);

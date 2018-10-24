@@ -7,13 +7,13 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 
-public class TanGeneratorImplTest {
+public class AuthCodeGeneratorImplTest {
 
     private static final int TAN_LENGTH = 6;
 
     @Test
     public void generate() {
-        TanGeneratorImpl generator = new TanGeneratorImpl();
+        AuthCodeGeneratorImpl generator = new AuthCodeGeneratorImpl();
 
         String tan1 = generator.generate();
         assertThat(tan1, is(notNullValue()));

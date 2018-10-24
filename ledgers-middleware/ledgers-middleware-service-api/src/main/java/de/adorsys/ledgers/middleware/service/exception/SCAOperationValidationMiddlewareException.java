@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.service.impl;
+package de.adorsys.ledgers.middleware.service.exception;
 
-import de.adorsys.ledgers.sca.service.TanGenerator;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.stereotype.Service;
+public class SCAOperationValidationMiddlewareException extends Exception {
 
-@Service
-public class TanGeneratorImpl implements TanGenerator {
-    @Override
-    public String generate() {
-        return RandomStringUtils.random(6, true, true);
+    public SCAOperationValidationMiddlewareException() {}
+
+    public SCAOperationValidationMiddlewareException(String message) {
+        super(message);
+    }
+
+    public SCAOperationValidationMiddlewareException(Throwable cause) {
+        super(cause);
+    }
+
+    public SCAOperationValidationMiddlewareException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

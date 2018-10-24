@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.exception;
+package de.adorsys.ledgers.sca.service.impl;
 
-public class TanGenerationException extends Exception {
+import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.stereotype.Service;
 
-    public TanGenerationException() {}
-
-    public TanGenerationException(String message) {
-        super(message);
-    }
-
-    public TanGenerationException(Throwable cause) {
-        super(cause);
-    }
-
-    public TanGenerationException(String message, Throwable cause) {
-        super(message, cause);
+@Service
+public class AuthCodeGeneratorImpl implements AuthCodeGenerator {
+    @Override
+    public String generate() {
+        return RandomStringUtils.random(6, true, true);
     }
 }

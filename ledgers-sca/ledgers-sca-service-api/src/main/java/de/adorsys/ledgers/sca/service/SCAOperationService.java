@@ -2,7 +2,7 @@ package de.adorsys.ledgers.sca.service;
 
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.exception.TanGenerationException;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 
 public interface SCAOperationService {
 
@@ -15,7 +15,7 @@ public interface SCAOperationService {
 	 * @param validitySeconds : documents the validity time of the generated OTP
 	 * @return the generated AuthCode in clear text.
 	 */
-	String generateAuthCode(String opId, String opData, int validitySeconds) throws TanGenerationException;
+	String generateAuthCode(String opId, String opData, int validitySeconds) throws AuthCodeGenerationException;
 
 	/**
 	 * Verify that the auth code, recomputing and verifying the hash of (Auth Code and opData).
