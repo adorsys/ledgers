@@ -243,6 +243,7 @@
 					<printFailingErrors>true</printFailingErrors>
 					<excludeRoots>
 						<excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/</excludeRoot>
+						<excludeRoot>../ledgers-middleware-service-impl/target/generated-sources/annotations/</excludeRoot>
 					</excludeRoots>
 				</configuration>
 			</plugin>

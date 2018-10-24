@@ -17,13 +17,19 @@
 package de.adorsys.ledgers.middleware.service;
 
 
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.converter.AccountConverter;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +41,17 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     private final DepositAccountPaymentService paymentService;
 
+    private final DepositAccountService accountService;
+
     private final PaymentConverter paymentConverter;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, PaymentConverter paymentConverter) {
+    private final AccountConverter accountConverter;
+
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, DepositAccountService depositAccountService, PaymentConverter paymentConverter, AccountConverter accountConverter) {
         this.paymentService = paymentService;
+        this.accountService = depositAccountService;
         this.paymentConverter = paymentConverter;
+        this.accountConverter = accountConverter;
     }
 
     @SuppressWarnings("unchecked")
@@ -51,6 +63,17 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         } catch (PaymentNotFoundException e) {
             logger.error("Payment with id=" + paymentId + " not found", e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
+        try {
+            DepositAccountBO account = accountService.getDepositAccountById(accountId);
+            return accountConverter.toAccountDetailsTO(account, null); //TODO add real balances call and mapping
+        } catch (DepositAccountNotFoundException e) {
+            logger.error("Deposit Account with id=" + accountId + "not found", e);
+            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
 }

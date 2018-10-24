@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.deposit.impl.mappers;
+package de.adorsys.ledgers.deposit.api.service.mappers;
 
 import java.util.Currency;
 
