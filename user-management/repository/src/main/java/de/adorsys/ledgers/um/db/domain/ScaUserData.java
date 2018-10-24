@@ -25,7 +25,6 @@ public class ScaUserData {
 //    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
 
-    // TODO: clarify if we need user setter in SCAMethod
     public UserEntity getUser() {
         return user;
     }

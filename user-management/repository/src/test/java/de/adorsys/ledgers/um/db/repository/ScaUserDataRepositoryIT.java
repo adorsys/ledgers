@@ -7,6 +7,7 @@ import de.adorsys.ledgers.um.db.domain.ScaMethodType;
 import de.adorsys.ledgers.um.db.domain.ScaUserData;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.util.Ids;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = UmRepositoryApplication.class)
 @DatabaseSetup("SCAMethodsRepositoryTest-db-entries.xml")
