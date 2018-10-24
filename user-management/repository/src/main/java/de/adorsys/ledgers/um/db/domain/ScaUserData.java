@@ -15,16 +15,16 @@ public class ScaUserData {
     private String id;
 
     @NotNull
-    @Column(name = "method_type", nullable = false)
-    private String methodType;
+    @Column(nullable = false)
+    private ScaMethodType scaMethod;
 
     @NotNull
-    @Column(name = "method_value", nullable = false)
+    @Column(nullable = false)
     private String methodValue;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserEntity user;
 
     // TODO: clarify if we need user setter in SCAMethod
@@ -44,13 +44,6 @@ public class ScaUserData {
         this.id = id;
     }
 
-    public String getMethodType() {
-        return methodType;
-    }
-
-    public void setMethodType(String methodType) {
-        this.methodType = methodType;
-    }
 
     public String getMethodValue() {
         return methodValue;
@@ -58,5 +51,13 @@ public class ScaUserData {
 
     public void setMethodValue(String methodValue) {
         this.methodValue = methodValue;
+    }
+
+    public ScaMethodType getScaMethod() {
+        return scaMethod;
+    }
+
+    public void setScaMethod(ScaMethodType scaMethod) {
+        this.scaMethod = scaMethod;
     }
 }

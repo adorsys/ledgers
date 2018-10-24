@@ -19,8 +19,8 @@ package de.adorsys.ledgers.um.db.domain;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
-import java.util.Set;
-//import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -45,21 +45,14 @@ public class UserEntity {
     @Column(nullable = false)
     private String pin;
 
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    @JoinTable(name = "user_ledger_account",
-//            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "ledger_account_id", referencedColumnName = "id")
-//    )
-//    private List<LedgerAccount> accounts;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
-    private Set<SCAMethod> scaMethods;
+    private List<ScaUserData> scaMethods = new ArrayList<ScaUserData>();
 
-    public Set<SCAMethod> getScaMethods() {
+    public List<ScaUserData> getScaMethods() {
         return scaMethods;
     }
 
-    public void setScaMethods(Set<SCAMethod> scaMethods) {
+    public void setScaMethods(List<ScaUserData> scaMethods) {
         this.scaMethods = scaMethods;
     }
 
