@@ -27,11 +27,10 @@ public class AccountAccess {
 
     @NotNull
     @Column(nullable = false)
-    private String accessType;
+    @Enumerated(EnumType.STRING)
+    private AccessType accessType= AccessType.OWNER;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name= "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private UserEntity user;
 
     public void setUser(UserEntity user) {
@@ -50,10 +49,6 @@ public class AccountAccess {
         return iban;
     }
 
-    public String getAccessType() {
-        return accessType;
-    }
-
     public void setId(String id) {
         this.id = id;
     }
@@ -62,7 +57,11 @@ public class AccountAccess {
         this.iban = iban;
     }
 
-    public void setAccessType(String accessType) {
+    public AccessType getAccessType() {
+        return accessType;
+    }
+
+    public void setAccessType(AccessType accessType) {
         this.accessType = accessType;
     }
 }
