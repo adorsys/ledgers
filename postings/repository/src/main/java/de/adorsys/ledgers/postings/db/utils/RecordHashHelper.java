@@ -1,13 +1,8 @@
 package de.adorsys.ledgers.postings.db.utils;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import de.adorsys.ledgers.postings.db.domain.HashRecord;
-import de.adorsys.ledgers.util.Base16;
-import de.adorsys.ledgers.util.SerializationUtils;
+import de.adorsys.ledgers.util.hash.HashGenerationException;
+import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 
 public class RecordHashHelper {
 
@@ -15,7 +10,7 @@ public class RecordHashHelper {
     private static final String MISSING_RECORD_ANTECEDANT = "Missing record antecedant hash. Must be set to hash of %s prior saving.";
     private static final String DEFAULT_HASH_ALG = "SHA-256";
 
-    public String computeRecHash(HashRecord hashRecord) throws NoSuchAlgorithmException, JsonProcessingException {
+    public String computeRecHash(HashRecord hashRecord) throws HashGenerationException {
         if (hashRecord.getAntecedentId() != null && hashRecord.getAntecedentHash() == null) {
             throw new IllegalStateException(String.format(MISSING_RECORD_ANTECEDANT, hashRecord.getAntecedentId()));
         }
@@ -29,8 +24,9 @@ public class RecordHashHelper {
         }
 
         // Get string value including hash
-        MessageDigest digest = MessageDigest.getInstance(hashRecord.getHashAlg());
-        byte[] valueAsBytes = SerializationUtils.writeValueAsBytes(hashRecord);
-        return Base16.encode(digest.digest(valueAsBytes));
+//        MessageDigest digest = MessageDigest.getInstance(hashRecord.getHashAlg());
+//        byte[] valueAsBytes = SerializationUtils.writeValueAsBytes(hashRecord);
+//        return Base16.encode(digest.digest(valueAsBytes));
+        return HashGeneratorImpl.hash(hashRecord);
     }
 }

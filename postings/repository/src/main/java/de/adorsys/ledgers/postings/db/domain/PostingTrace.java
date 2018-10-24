@@ -11,6 +11,7 @@ import javax.persistence.PrePersist;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
+import de.adorsys.ledgers.util.hash.HashGenerationException;
 
 /**
  * Posting traces a used to keep references on input posting
@@ -82,7 +83,7 @@ public class PostingTrace extends HashRecord {
         recordTime = LocalDateTime.now();
         try {
             hash = RECORD_HASH_HELPER.computeRecHash(this);
-        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+        } catch (HashGenerationException e) {
             throw new IllegalStateException(e);
         }
     }

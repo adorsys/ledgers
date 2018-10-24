@@ -24,9 +24,6 @@ import java.time.LocalDateTime;
 public class SCAOperationEntity {
 
     @Id
-    @Column(name = "sca_id")
-    private String id;
-
     @Column(name = "op_id", nullable = false)
     private String opId;
 
@@ -49,14 +46,6 @@ public class SCAOperationEntity {
 
     @Column(name = "status_time", nullable = false)
     private LocalDateTime statusTime;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getOpId() {
         return opId;
@@ -117,7 +106,6 @@ public class SCAOperationEntity {
     @Override
     public String toString() {
         return "SCAOperationEntity{" +
-                       "id='" + id + '\'' +
                        ", opId='" + opId + '\'' +
                        ", validitySeconds=" + validitySeconds +
                        ", authCodeHash='" + authCodeHash + '\'' +

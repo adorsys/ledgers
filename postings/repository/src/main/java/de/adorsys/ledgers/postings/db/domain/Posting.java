@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
+import de.adorsys.ledgers.util.hash.HashGenerationException;
 
 /**
  * The word posting is associated with the moment at which the recorded
@@ -174,7 +175,7 @@ public class Posting extends HashRecord {
         recordTime = LocalDateTime.now();
         try {
             hash = RECORD_HASH_HELPER.computeRecHash(this);
-        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+        } catch (HashGenerationException e) {
             throw new IllegalStateException(e);
         }
         return this;

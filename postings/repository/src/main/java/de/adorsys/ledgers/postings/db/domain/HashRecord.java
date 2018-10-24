@@ -16,10 +16,12 @@
 
 package de.adorsys.ledgers.postings.db.domain;
 
+import de.adorsys.ledgers.util.hash.HashItem;
+
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class HashRecord {
+public abstract class HashRecord  implements HashItem<HashRecord> {
 
     /* The antecedent identifier. Use for hash chaining */
     protected String antecedentId;
@@ -40,7 +42,17 @@ public abstract class HashRecord {
 	public HashRecord() {
 	}
 
-	public String getHash() {
+    @Override
+    public String getAlg() {
+        return hashAlg;
+    }
+
+    @Override
+    public HashRecord getItem() {
+        return this;
+    }
+
+    public String getHash() {
 		return hash;
 	}
 
@@ -69,6 +81,4 @@ public abstract class HashRecord {
 		return "HashRecord [antecedentId=" + antecedentId + ", antecedentHash=" + antecedentHash + ", hash=" + hash
 				+ ", hashAlg=" + hashAlg + "]";
 	}
-    
-    
 }

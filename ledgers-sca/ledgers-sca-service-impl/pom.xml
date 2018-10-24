@@ -21,7 +21,13 @@
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-sca-service-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-sca-repository</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- spring dependencies -->
