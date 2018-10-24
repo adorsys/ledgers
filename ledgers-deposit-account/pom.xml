@@ -20,9 +20,9 @@
         <relativePath>..</relativePath>
 	</parent>
 	<modules>
-		<module>service-api</module>
-		<module>service-impl</module>
-		<module>repository</module>
+		<module>ledgers-deposit-account-service-api</module>
+		<module>ledgers-deposit-account-service-impl</module>
+		<module>ledgers-deposit-account-repository</module>
 	</modules>
 	<packaging>pom</packaging>
 	<artifactId>ledgers-deposit-account</artifactId>
