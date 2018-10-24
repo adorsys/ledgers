@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "sca_methods", uniqueConstraints = @UniqueConstraint(name = "method_type_method_value_unique", columnNames={"method_type", "method_value"}))
+@Table(name = "sca_methods")
 public class SCAMethod {
 
     @Id
