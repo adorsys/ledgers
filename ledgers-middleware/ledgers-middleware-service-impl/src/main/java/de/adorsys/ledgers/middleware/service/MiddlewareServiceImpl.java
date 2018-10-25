@@ -47,16 +47,16 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
 
     private final DepositAccountPaymentService paymentService;
+
     private final SCAOperationService scaOperationService;
 
     private final DepositAccountService accountService;
 
     private final PaymentConverter paymentConverter;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, PaymentConverter paymentConverter) {
     private final AccountConverter accountConverter;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, DepositAccountService depositAccountService, PaymentConverter paymentConverter, AccountConverter accountConverter) {
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService depositAccountService, PaymentConverter paymentConverter, AccountConverter accountConverter) {
         this.paymentService = paymentService;
         this.scaOperationService = scaOperationService;
         this.accountService = depositAccountService;
