@@ -33,8 +33,8 @@ public abstract class BaseEntity {
 	private LocalDateTime created;
 
 //	todo: seems this property should be moved from base class
-	@Column(nullable=false)
-	private String user;
+	@Column(name = "user_details",nullable=false)
+	private String userDetails;
 
 	//	todo: seems this property should be moved from base class
 	/*The short description of this entity*/
@@ -48,11 +48,11 @@ public abstract class BaseEntity {
 		super();
 	}
 
-	public BaseEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc) {
+	public BaseEntity(String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
 		super();
 		this.id = id;
 		this.created = created;
-		this.user = user;
+		this.userDetails = userDetails;
 		this.shortDesc = shortDesc;
 		this.longDesc = longDesc;
 	}
@@ -73,12 +73,12 @@ public abstract class BaseEntity {
 		this.created = created;
 	}
 
-	public String getUser() {
-		return user;
+	public String getUserDetails() {
+		return userDetails;
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public void setUserDetails(String userDetails) {
+		this.userDetails = userDetails;
 	}
 
 	public String getShortDesc() {
@@ -99,7 +99,7 @@ public abstract class BaseEntity {
 
 	@Override
 	public String toString() {
-		return "BaseEntity [id=" + id + ", created=" + created + ", user=" + user + ", shortDesc=" + shortDesc
+		return "BaseEntity [id=" + id + ", created=" + created + ", userDetails=" + userDetails + ", shortDesc=" + shortDesc
 				+ ", longDesc=" + longDesc + "]";
 	}
 }

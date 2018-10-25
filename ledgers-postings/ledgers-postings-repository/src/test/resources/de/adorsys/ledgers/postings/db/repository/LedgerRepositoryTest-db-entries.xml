@@ -1,6 +1,6 @@
 <dataset>
     <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
-                      user="Francis"
+                      user_details="Francis"
                       created="2018-08-07 20:58:24.232"
                       name="IFRS"
                       short_desc="Sample chart of account"
@@ -9,7 +9,7 @@
             coa_id="ci8k8PDcTrCsi-F3sT3i-g"
             name="GL"
             created="2018-08-07 20:58:24.232"
-            user="Sample User"
+            user_details="Sample User"
             last_closing="2018-08-07 20:58:24.232"
             
     />
@@ -18,7 +18,7 @@
             coa_id="ci8k8PDcTrCsi-F3sT3i-g"
             name="New general ledger for specific purposes"
             created="2018-08-07 20:58:24.232"
-            user="Sample User"
+            user_details="Sample User"
             last_closing="2018-08-07 20:58:24.232"
     />
 </dataset>

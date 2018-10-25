@@ -30,7 +30,6 @@
     </properties>
 
     <modules>
-        <module>ledgers-sca-rest-server</module>
         <module>ledgers-sca-service-api</module>
         <module>ledgers-sca-service-impl</module>
         <module>ledgers-sca-repository</module>

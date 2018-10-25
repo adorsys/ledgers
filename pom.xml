@@ -17,6 +17,7 @@
 	<artifactId>ledgers</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<modules>
+		<module>ledgers-app</module>
 		<module>ledgers-postings</module>
 		<module>ledgers-utils</module>
 		<module>ledgers-deposit-account</module>
