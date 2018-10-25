@@ -20,19 +20,19 @@ import org.springframework.http.HttpStatus;
 
 public class NotFoundRestException extends RestException {
 
-    public NotFoundRestException() { }
+    public static final String ERROR_CODE = "404_NotFoundRestException";
+
+    private void initialize() {
+        withCode(ERROR_CODE);
+        withStatus(HttpStatus.NOT_FOUND);
+    }
 
     public NotFoundRestException(String message) {
         super(message);
+        initialize();
     }
 
-    @Override
-    public HttpStatus getStatus() {
-        return HttpStatus.NOT_FOUND;
-    }
-
-    @Override
-    public String getCode() {
-        return "404_NotFoundRestException";
+    public NotFoundRestException() {
+        initialize();
     }
 }

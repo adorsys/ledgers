@@ -29,8 +29,15 @@ import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.service.SCAOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,14 +48,17 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     private final DepositAccountPaymentService paymentService;
 
+    private final SCAOperationService scaOperationService;
+
     private final DepositAccountService accountService;
 
     private final PaymentConverter paymentConverter;
 
     private final AccountConverter accountConverter;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, DepositAccountService depositAccountService, PaymentConverter paymentConverter, AccountConverter accountConverter) {
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService depositAccountService, PaymentConverter paymentConverter, AccountConverter accountConverter) {
         this.paymentService = paymentService;
+        this.scaOperationService = scaOperationService;
         this.accountService = depositAccountService;
         this.paymentConverter = paymentConverter;
         this.accountConverter = accountConverter;
@@ -63,6 +73,30 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         } catch (PaymentNotFoundException e) {
             logger.error("Payment with id=" + paymentId + " not found", e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String generateAuthCode(String opId, String opData, int validitySeconds) throws AuthCodeGenerationMiddlewareException {
+        try {
+            return scaOperationService.generateAuthCode(opId, opData, validitySeconds);
+        } catch (AuthCodeGenerationException e) {
+            logger.error(e.getMessage(), e);
+            throw new AuthCodeGenerationMiddlewareException(e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
+    public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException {
+        try {
+            return scaOperationService.validateAuthCode(opId, opData, authCode);
+        } catch (SCAOperationNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationNotFoundMiddlewareException(e);
+        } catch (SCAOperationValidationException e) {
+           logger.error(e.getMessage(),e);
+           throw new SCAOperationValidationMiddlewareException(e);
         }
     }
 

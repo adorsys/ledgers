@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import de.adorsys.ledgers.util.hash.HashGenerationException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -99,7 +100,7 @@ public class PostingRepositoryIT {
 	}
 
 	@Test
-	public void test_posting_hash() throws NoSuchAlgorithmException, JsonProcessingException {
+	public void test_posting_hash() throws JsonProcessingException, HashGenerationException {
 		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
 		Assume.assumeTrue(ledgerOptions.isPresent());
 		String recordUser = "recUser";

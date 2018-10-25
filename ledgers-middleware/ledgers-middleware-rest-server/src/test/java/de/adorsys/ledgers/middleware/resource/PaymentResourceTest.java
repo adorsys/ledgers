@@ -66,7 +66,7 @@ public class PaymentResourceTest {
 
         when(middlewareService.getPaymentStatusById(PAYMENT_ID)).thenReturn(paymentResult);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/" + PAYMENT_ID + "/status"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/{id}/status", PAYMENT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -89,7 +89,7 @@ public class PaymentResourceTest {
         when(middlewareService.getPaymentStatusById(PAYMENT_ID))
                 .thenThrow(new PaymentNotFoundMiddlewareException("Payment with id=" + PAYMENT_ID + " not found"));
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/" + PAYMENT_ID + "/status"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/payments/{id}/status", PAYMENT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
