@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.exception;
+package de.adorsys.ledgers.middleware.domain;
 
-import org.springframework.http.HttpStatus;
+public class AuthCodeTO {
+    private String authCode;
 
-public class NotFoundRestException extends RestException {
-
-    public static final String ERROR_CODE = "404_NotFoundRestException";
-
-    private void initialize() {
-        withCode(ERROR_CODE);
-        withStatus(HttpStatus.NOT_FOUND);
+    public AuthCodeTO() {
     }
 
-    public NotFoundRestException(String message) {
-        super(message);
-        initialize();
+    public AuthCodeTO(String authCode) {
+        this.authCode = authCode;
     }
 
-    public NotFoundRestException() {
-        initialize();
+    public String getAuthCode() {
+        return authCode;
     }
 }

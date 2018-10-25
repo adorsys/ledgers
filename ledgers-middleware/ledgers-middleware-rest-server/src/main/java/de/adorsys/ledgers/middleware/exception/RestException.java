@@ -18,11 +18,18 @@ package de.adorsys.ledgers.middleware.exception;
 
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
+
 public abstract class RestException extends RuntimeException {
 
     protected HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
+    protected String code = "500_InternalServerError";
+
     protected String devMessage;
+
+    protected LocalDateTime dateTime;
+
 
     public RestException() {}
 
@@ -43,6 +50,11 @@ public abstract class RestException extends RuntimeException {
         return this;
     }
 
+    public RestException withCode(String code) {
+        this.code = code;
+        return this;
+    }
+
     public HttpStatus getStatus() {
         return status;
     }
@@ -56,5 +68,11 @@ public abstract class RestException extends RuntimeException {
         return this;
     }
 
-    public abstract String getCode();
+    public String getCode(){
+        return code;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 }

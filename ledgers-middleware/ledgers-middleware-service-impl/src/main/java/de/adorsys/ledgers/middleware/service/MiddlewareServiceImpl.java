@@ -74,6 +74,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
     public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException {
         try {
             return scaOperationService.validateAuthCode(opId, opData, authCode);

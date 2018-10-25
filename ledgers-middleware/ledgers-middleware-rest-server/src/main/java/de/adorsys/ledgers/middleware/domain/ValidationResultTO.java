@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.exception;
+package de.adorsys.ledgers.middleware.domain;
 
-import org.springframework.http.HttpStatus;
+public class ValidationResultTO {
+    private Boolean valid;
 
-public class NotFoundRestException extends RestException {
-
-    public static final String ERROR_CODE = "404_NotFoundRestException";
-
-    private void initialize() {
-        withCode(ERROR_CODE);
-        withStatus(HttpStatus.NOT_FOUND);
+    public ValidationResultTO() {
     }
 
-    public NotFoundRestException(String message) {
-        super(message);
-        initialize();
+    public ValidationResultTO(Boolean valid) {
+        this.valid = valid;
     }
 
-    public NotFoundRestException() {
-        initialize();
+    public Boolean getValid() {
+        return valid;
     }
 }

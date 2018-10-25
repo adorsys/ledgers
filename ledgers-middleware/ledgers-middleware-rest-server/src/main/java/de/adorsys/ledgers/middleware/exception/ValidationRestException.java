@@ -18,21 +18,21 @@ package de.adorsys.ledgers.middleware.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class NotFoundRestException extends RestException {
+public class ValidationRestException extends RestException {
 
-    public static final String ERROR_CODE = "404_NotFoundRestException";
+    public static final String ERROR_CODE = "422_ValidationRestException";
 
-    private void initialize() {
-        withCode(ERROR_CODE);
-        withStatus(HttpStatus.NOT_FOUND);
+    public ValidationRestException() {
+        initialize();
     }
 
-    public NotFoundRestException(String message) {
+    public ValidationRestException(String message) {
         super(message);
         initialize();
     }
 
-    public NotFoundRestException() {
-        initialize();
+    private void initialize() {
+        withStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+        withCode(ERROR_CODE);
     }
 }

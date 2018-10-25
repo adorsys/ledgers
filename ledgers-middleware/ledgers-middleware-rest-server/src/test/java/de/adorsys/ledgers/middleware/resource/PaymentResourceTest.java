@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -70,7 +69,7 @@ public class PaymentResourceTest {
 
         when(middlewareService.getPaymentStatusById(PAYMENT_ID)).thenReturn(paymentResult);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/" + PAYMENT_ID + "/status"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/{id}/status", PAYMENT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -91,9 +90,9 @@ public class PaymentResourceTest {
 
 
         when(middlewareService.getPaymentStatusById(PAYMENT_ID))
-                .thenThrow(new PaymentNotFoundMiddlewareException("Payment with id="+PAYMENT_ID+" not found"));
+                .thenThrow(new PaymentNotFoundMiddlewareException("Payment with id=" + PAYMENT_ID + " not found"));
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/" + PAYMENT_ID + "/status"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/payments/{id}/status", PAYMENT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -107,7 +106,7 @@ public class PaymentResourceTest {
     }
 
     // todo: @spe replace by javatar-commons version 0.6
-    private <T> T strToObj(String source, Class<T> tClass){
+    private <T> T strToObj(String source, Class<T> tClass) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
