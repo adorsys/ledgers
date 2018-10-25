@@ -19,7 +19,7 @@ public class PaymentConverterTest {
     private PaymentConverter mapper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mapper = Mappers.getMapper(PaymentConverter.class);
     }
 
