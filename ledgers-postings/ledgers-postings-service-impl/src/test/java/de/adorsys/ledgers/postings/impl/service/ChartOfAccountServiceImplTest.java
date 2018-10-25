@@ -44,7 +44,7 @@ public class ChartOfAccountServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isNotNull();
         assertThat(result.getCreated()).isNotNull();
-        assertThat(result.getUser()).isEqualTo(USER_NAME);
+        assertThat(result.getUserDetails()).isEqualTo(USER_NAME);
         assertThat(result.getName()).isEqualTo(coa.getName());
         assertThat(result.getShortDesc()).isEqualTo(coa.getShortDesc());
         assertThat(result.getLongDesc()).isEqualTo(coa.getLongDesc());

@@ -31,6 +31,9 @@
 	</properties>
 
 	<dependencies>
+
+        <!-- project dependencies -->
+
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-utils</artifactId>

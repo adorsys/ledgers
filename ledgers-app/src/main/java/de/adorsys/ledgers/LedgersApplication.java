@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.middleware;/*
+/*
  * Copyright 2018-2018 adorsys GmbH & Co KG
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,19 @@ package de.adorsys.ledgers.middleware;/*
  * limitations under the License.
  */
 
+package de.adorsys.ledgers;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
+@EntityScan
+@EnableJpaAuditing
+@EnableJpaRepositories
+@SpringBootApplication(scanBasePackages = "de.adorsys.ledgers")
 public class LedgersApplication {
-
     public static void main(String[] args) {
         new SpringApplicationBuilder(LedgersApplication.class).run(args);
     }

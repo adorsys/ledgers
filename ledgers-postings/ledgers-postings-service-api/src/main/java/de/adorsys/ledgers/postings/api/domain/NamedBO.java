@@ -23,7 +23,7 @@ public abstract class NamedBO{
 	private LocalDateTime created;
 
 //	todo: seems this property should be moved from base class
-	private String user;
+	private String userDetails;
 
 	//	todo: seems this property should be moved from base class
 	/*The short description of this entity*/
@@ -57,12 +57,12 @@ public abstract class NamedBO{
 		this.created = created;
 	}
 
-	public String getUser() {
-		return user;
+	public String getUserDetails() {
+		return userDetails;
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public void setUserDetails(String userDetails) {
+		this.userDetails = userDetails;
 	}
 
 	public String getShortDesc() {

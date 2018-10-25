@@ -1,0 +1,41 @@
+spring:
+  application.name: ledgers
+
+server:
+  # Authorization HTTP header requires to enlarge max header size.
+  max-http-header-size: 65000
+  port: 8088
+
+db:
+  host: localhost
+  user: ledgers
+  password: ledgers
+  database: ledgers
+  port: 5432
+
+---
+spring:
+  profiles: default
+  datasource:
+    url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+    username: ${db.user}
+    password: ${db.password}
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibrenate.globally_quoted_identifiers: true
+      hibernate.jdbc.lob.non_contextual_creation: true
+      hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  jackson.serialization.write_dates_as_timestamps: false
+
+---
+spring:
+  profiles: dev
+
+logging.level.org.postgresql: INFO
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+logging.level.org.springframework: TRACE

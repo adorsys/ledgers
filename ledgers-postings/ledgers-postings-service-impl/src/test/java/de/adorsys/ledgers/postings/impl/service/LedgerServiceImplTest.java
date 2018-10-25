@@ -70,7 +70,7 @@ public class LedgerServiceImplTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getId()).isNotNull();
 		assertThat(result.getCreated()).isNotNull();
-		assertThat(result.getUser()).isEqualTo(USER_NAME);
+		assertThat(result.getUserDetails()).isEqualTo(USER_NAME);
 		assertThat(result.getName()).isEqualTo(LEDGER.getName());
 		assertThat(result.getShortDesc()).isEqualTo(LEDGER.getShortDesc());
 		assertThat(result.getLongDesc()).isEqualTo(LEDGER.getLongDesc());
@@ -89,7 +89,7 @@ public class LedgerServiceImplTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getId()).isNotNull();
 		assertThat(result.getCreated()).isNotNull();
-		assertThat(result.getUser()).isEqualTo(USER_NAME);
+		assertThat(result.getUserDetails()).isEqualTo(USER_NAME);
 		assertThat(result.getName()).isEqualTo(LEDGER_ACCOUNT.getName());
 		assertThat(result.getShortDesc()).isEqualTo(LEDGER_ACCOUNT.getShortDesc());
 		assertThat(result.getLongDesc()).isEqualTo(LEDGER_ACCOUNT.getLongDesc());
