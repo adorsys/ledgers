@@ -75,6 +75,8 @@ public class SCAOperationServiceImpl implements SCAOperationService {
             throw new AuthCodeGenerationException(AUTH_CODE_GENERATION_ERROR, e);
         }
 
+        // todo: send tan to the user functionality will be implemented in #107
+
         repository.save(scaOperation);
 
         return tan;

@@ -16,7 +16,6 @@
 
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.domain.AuthCodeTO;
 import de.adorsys.ledgers.middleware.domain.SCAOperationTO;
 import de.adorsys.ledgers.middleware.domain.ValidationResultTO;
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
@@ -27,6 +26,7 @@ import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddl
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,10 +41,10 @@ public class AuthCodeResource {
     }
 
     @PostMapping(value = "/{opId}/generate")
-    public AuthCodeTO generate(@PathVariable String opId, @RequestBody SCAOperationTO operation) {
+    public ResponseEntity generate(@PathVariable String opId, @RequestBody SCAOperationTO operation) {
         try {
-            String authCode = middlewareService.generateAuthCode(opId, operation.getData(), operation.getValiditySeconds());
-            return new AuthCodeTO(authCode);
+            middlewareService.generateAuthCode(opId, operation.getData(), operation.getValiditySeconds());
+            return ResponseEntity.noContent().build();
         } catch (AuthCodeGenerationMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new ValidationRestException(e.getMessage()).withDevMessage(e.getMessage());

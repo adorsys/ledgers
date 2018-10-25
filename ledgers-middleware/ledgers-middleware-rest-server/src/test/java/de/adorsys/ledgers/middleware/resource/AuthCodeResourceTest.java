@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.domain.AuthCodeTO;
 import de.adorsys.ledgers.middleware.domain.SCAOperationTO;
 import de.adorsys.ledgers.middleware.domain.ValidationResultTO;
 import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
@@ -79,13 +78,8 @@ public class AuthCodeResourceTest {
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(operation)))
                                       .andDo(print())
-                                      .andExpect(status().is(HttpStatus.OK.value()))
-                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andExpect(status().is(HttpStatus.NO_CONTENT.value()))
                                       .andReturn();
-
-        AuthCodeTO authCode = READER.getObjectFromString(mvcResult.getResponse().getContentAsString(), AuthCodeTO.class);
-
-        assertThat(authCode.getAuthCode(), is(TAN_CODE));
 
         verify(middlewareService, times(1)).generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
     }
