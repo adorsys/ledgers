@@ -16,6 +16,8 @@
 
 package de.adorsys.ledgers.um.db.domain;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
@@ -46,14 +48,14 @@ public class UserEntity {
     private String pin;
 
     @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
             mappedBy = "user")
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<ScaUserData> scaMethods = new ArrayList<ScaUserData>();
 
     @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
             mappedBy = "user")
-    private List<AccountAccess> accountAccesses;
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<AccountAccess> accountAccesses = new ArrayList<AccountAccess>();;
 
 
     public String getId() {
