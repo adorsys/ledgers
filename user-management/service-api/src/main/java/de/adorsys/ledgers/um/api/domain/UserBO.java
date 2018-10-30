@@ -16,7 +16,6 @@
 
 package de.adorsys.ledgers.um.api.domain;
 
-import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
