@@ -20,7 +20,7 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
     public ChartOfAccountServiceImpl(ChartOfAccountMapper chartOfAccountMapper) {
         this.chartOfAccountMapper = chartOfAccountMapper;
     }
-
+    
     /**
      * Create a new chart of account.
      * <p>

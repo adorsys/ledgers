@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
@@ -69,7 +70,7 @@ public class PostingServiceImplTest {
     private PostingRepositoryFunctions repoFctn;
 
     @Test
-    public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
+    public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
         when(postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(any())).thenReturn(Optional.of(getPosting()));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         when(principal.getName()).thenReturn(NAME);
@@ -91,7 +92,7 @@ public class PostingServiceImplTest {
     }
 
     @Test
-    public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
 //        when(postingLineRepository.findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(any(), any(), any(), any()))
 //                .thenReturn(getPostingLine());
         when(repoFctn.computeBalance(any(), any())).thenReturn(getPostingLine());

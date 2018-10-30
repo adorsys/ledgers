@@ -20,6 +20,8 @@ import de.adorsys.ledgers.postings.db.domain.Posting;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.db.domain.PostingStatus;
 import de.adorsys.ledgers.postings.db.domain.PostingType;
+import de.adorsys.ledgers.postings.db.exception.BaseLineException;
+import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.postings.impl.utils.DoubleEntryBookKeeping;
@@ -39,7 +41,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     @Override
-	public PostingBO newPosting(PostingBO postingBO) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+	public PostingBO newPosting(PostingBO postingBO) throws LedgerNotFoundException, LedgerAccountNotFoundException, de.adorsys.ledgers.postings.api.exception.BaseLineException {
         Posting posting = postingMapper.toPosting(postingBO);
         return newPostingBOInternal(posting);
     }
@@ -51,7 +53,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
     @Override
 	public PostingBO balanceTx(LedgerAccountBO ledgerAccountBO, LocalDateTime refTime)
-            throws LedgerAccountNotFoundException, LedgerNotFoundException {
+            throws LedgerAccountNotFoundException, LedgerNotFoundException, de.adorsys.ledgers.postings.api.exception.BaseLineException {
     	LedgerAccount ledgerAccount = loadLedgerAccount(ledgerAccountBO);
     	PostingLine computedBalance = repoFctn.computeBalance(ledgerAccount, refTime);
 		Posting posting = new Posting(null, null, null, Ids.id(), 0, refTime, null, null, refTime, PostingType.BAL_STMT, PostingStatus.POSTED, ledgerAccount.getLedger(), refTime, Collections.singletonList(computedBalance));
@@ -77,7 +79,8 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
      * - This approach will simplify computation of balances.
      * 
      */
-    private PostingBO newPostingBOInternal(Posting posting) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
+    private PostingBO newPostingBOInternal(Posting posting) throws LedgerAccountNotFoundException, LedgerNotFoundException, de.adorsys.ledgers.postings.api.exception.BaseLineException {
         // Check ledger not null
     	if(posting.getLedger()==null) { 
     		throw insufficientInfo(posting);
@@ -85,7 +88,13 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         Ledger ledger = loadLedger(posting.getLedger());
 
         // check posting time is not before a closing.
-        repoFctn.validatePostingTime(ledger, posting);
+        try {
+			repoFctn.validatePostingTime(ledger, posting);
+        } catch (PostingRepositoryException e1) {
+        	throw new IllegalArgumentException(e1.getMessage());
+		} catch (BaseLineException e) {
+			throw new de.adorsys.ledgers.postings.api.exception.BaseLineException(e.getMessage());
+		}
 
         // Load original posting. If the sequence number > 0, it means that there is a 
         // predecessor posting available.
@@ -103,15 +112,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
         Posting saved = postingRepository.save(p);
 
-        // Validate existence of accounts and make sure they are all in the same ledger.
-        for (PostingLine line : postingLines) {
-            LedgerAccount ledgerAccount = loadLedgerAccount(line.getAccount());
-            // Check account belongs to ledger.
-            String baseLineId = repoFctn.validatePostingTime(ledger, posting, ledgerAccount).orElse(new PostingLine()).getId();
-
-            PostingLine pl =new PostingLine(null, saved, ledgerAccount, line.getDebitAmount(), line.getCreditAmount(), line.getDetails(), line.getSrcAccount(), baseLineId); 
-            postingLineRepository.save(pl);
-        }
+        validateAccounts(posting, ledger, postingLines, saved);
 
         String postingId = saved.getId();
         saved = postingRepository.findById(postingId)
@@ -122,6 +123,25 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         return postingMapper.toPostingBO(saved);
 
     }
+
+	private void validateAccounts(Posting input, Ledger ledger, List<PostingLine> postingLines, Posting persistent)
+			throws LedgerAccountNotFoundException, LedgerNotFoundException,
+			de.adorsys.ledgers.postings.api.exception.BaseLineException {
+		// Validate existence of accounts and make sure they are all in the same ledger.
+        for (PostingLine line : postingLines) {
+            LedgerAccount ledgerAccount = loadLedgerAccount(line.getAccount());
+            // Check account belongs to ledger.
+            String baseLineId;
+			try {
+				baseLineId = repoFctn.validatePostingTime(ledger, input, ledgerAccount).orElse(new PostingLine()).getId();
+			} catch (BaseLineException e) {
+				throw new de.adorsys.ledgers.postings.api.exception.BaseLineException(e.getMessage());
+			}
+
+            PostingLine pl =new PostingLine(null, persistent, ledgerAccount, line.getDebitAmount(), line.getCreditAmount(), line.getDetails(), line.getSrcAccount(), baseLineId); 
+            postingLineRepository.save(pl);
+        }
+	}
     
     private Optional<Posting> loadPredecessor(Posting current){
     	return current.clonedId()

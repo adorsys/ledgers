@@ -6,6 +6,7 @@ import java.util.List;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
@@ -22,8 +23,9 @@ public interface PostingService {
      * @param posting
      * @return
      * @throws PostingNotFoundException
+     * @throws BaseLineException 
      */
-    PostingBO newPosting(PostingBO posting) throws PostingNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException;
+    PostingBO newPosting(PostingBO posting) throws PostingNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException;
 
     /**
      * Listing all postings associated with this operation id.
@@ -41,8 +43,9 @@ public interface PostingService {
      * @return
      * @throws LedgerAccountNotFoundException
      * @throws LedgerNotFoundException
+     * @throws BaseLineException 
      */
-    PostingBO balanceTx(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException;
+    PostingBO balanceTx(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException;
 
     /**
      * Compute and return the balance of a ledger account whithout storing it.

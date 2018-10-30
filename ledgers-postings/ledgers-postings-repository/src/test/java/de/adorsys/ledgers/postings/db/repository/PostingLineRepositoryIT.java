@@ -34,7 +34,9 @@ import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.domain.Posting;
+import de.adorsys.ledgers.postings.db.exception.BaseLineException;
 import de.adorsys.ledgers.postings.db.exception.DoubleEntryAccountingException;
+import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.util.Ids;
@@ -70,7 +72,7 @@ public class PostingLineRepositoryIT {
     }
 
     @Test
-    public void test_load_posting_ok () throws IOException, DoubleEntryAccountingException {
+    public void test_load_posting_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("sample_posting.yml");
     }
@@ -80,9 +82,11 @@ public class PostingLineRepositoryIT {
      * 
      * @throws IOException
      * @throws DoubleEntryAccountingException 
+     * @throws PostingRepositoryException 
+     * @throws BaseLineException 
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok () throws IOException, DoubleEntryAccountingException {
+    public void use_case_newbank_no_overriden_tx_nok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -97,9 +101,11 @@ public class PostingLineRepositoryIT {
      * 
      * @throws IOException
      * @throws DoubleEntryAccountingException 
+     * @throws PostingRepositoryException 
+     * @throws BaseLineException 
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok () throws IOException, DoubleEntryAccountingException {
+    public void use_case_newbank_no_overriden_tx_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -133,7 +139,7 @@ public class PostingLineRepositoryIT {
 
     
     @Test
-    public void use_case_newbank_overriden_amount_ok () throws IOException, DoubleEntryAccountingException {
+    public void use_case_newbank_overriden_amount_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_overriden_amount.yml");
 
@@ -166,7 +172,7 @@ public class PostingLineRepositoryIT {
     }
 
     @Test
-    public void use_case_newbank_overriden_account_number_ok () throws IOException, DoubleEntryAccountingException {
+    public void use_case_newbank_overriden_account_number_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_overriden_account_number.yml");
 
@@ -261,7 +267,7 @@ public class PostingLineRepositoryIT {
 			return parent;
 		}
     }
-	private void loadPosting(String s) throws JsonParseException, JsonMappingException, IOException, DoubleEntryAccountingException {
+	private void loadPosting(String s) throws JsonParseException, JsonMappingException, IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
     	Ledger ledger = fctn.loadLedger("Zd0ND5YwSzGwIfZilhumPg");//.orElseThrow(() -> new IllegalStateException());
         Assume.assumeNotNull(ledger);
         InputStream inputStream = PostingLineRepositoryIT.class.getResourceAsStream(s);
