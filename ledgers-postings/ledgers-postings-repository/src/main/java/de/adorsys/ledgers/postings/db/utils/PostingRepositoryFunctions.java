@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.postings.db.utils;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import de.adorsys.ledgers.postings.db.domain.Posting;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.db.domain.StmtStatus;
 import de.adorsys.ledgers.postings.db.domain.StmtType;
+import de.adorsys.ledgers.postings.db.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.db.repository.FinancialStmtRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
@@ -37,13 +39,15 @@ public class PostingRepositoryFunctions {
     private PostingLineRepository postingLineRepository;
     @Autowired
     private FinancialStmtRepository financialStmtRepository;
-    
-    public Ledger loadLedger(String id) {
+    @Autowired
+    private Principal principal;
+
+	public Ledger loadLedger(String id) {
     	return ledgerRepository.findById(id).orElseThrow(() -> new IllegalStateException());
     	
     }
 
-    public void validateDoubleEntryAccounting(Posting posting) {
+    public void validateDoubleEntryAccounting(Posting posting) throws DoubleEntryAccountingException {
         List<PostingLine> lines = posting.getLines();
         BigDecimal sumDebit = BigDecimal.ZERO;
         BigDecimal sumCredit = BigDecimal.ZERO;
@@ -53,7 +57,7 @@ public class PostingRepositoryFunctions {
         }
 
         if (!sumDebit.equals(sumCredit)) {
-            throw new IllegalArgumentException(String.format("Debit summs up to %s while credit sums up to %s", sumDebit, sumCredit));
+        	throw new DoubleEntryAccountingException(sumDebit, sumCredit);
         }
     }
     
@@ -145,7 +149,7 @@ public class PostingRepositoryFunctions {
     	return computeBalance(baseLine, postingLines, ledgerAccount);
 	}
     
-    public Posting newPosting(Ledger ledger, Posting posting) {
+    public Posting newPosting(Ledger ledger, Posting posting) throws DoubleEntryAccountingException {
         // check posting time is not before a closing.
         validatePostingTime(ledger, posting);
 
@@ -160,7 +164,7 @@ public class PostingRepositoryFunctions {
         Posting antecedent = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(posting.getLedger()).orElse(new Posting());
 
         List<PostingLine> postingLines = CloneUtils.cloneList(posting.getLines(), PostingLine.class);
-        Posting p = new Posting("francis", antecedent.getId(), antecedent.getHash(), posting.getOprId(), posting.getOprSeqNbr(), 
+        Posting p = new Posting(principal.getName(), antecedent.getId(), antecedent.getHash(), posting.getOprId(), posting.getOprSeqNbr(), 
         		posting.getOprTime(), posting.getOprType(), posting.getOprDetails(), posting.getPstTime(), posting.getPstType(), posting.getPstStatus(), ledger, posting.getValTime(), null);
 
         Posting saved = postingRepository.save(p);
