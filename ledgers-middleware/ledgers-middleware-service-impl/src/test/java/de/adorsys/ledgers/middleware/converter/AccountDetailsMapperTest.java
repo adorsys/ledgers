@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.mapstruct.factory.Mappers;
 import pro.javatar.commons.reader.YamlReader;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Currency;
 
@@ -27,7 +28,7 @@ public class AccountDetailsMapperTest {
     }
 
     @Test
-    public void toAccountDetailsTO() {
+    public void toAccountDetailsTO() throws IOException {
         AccountDetailsTO details = mapper.toAccountDetailsTO(getAccount(DepositAccountBO.class));
 
         assertThat(details.getId()).isEqualTo("id");
@@ -45,11 +46,11 @@ public class AccountDetailsMapperTest {
         assertThat(details.getLinkedAccounts()).isEqualTo("account");
         assertThat(details.getUsageType()).isEqualTo(UsageTypeTO.PRIV);
         assertThat(details.getDetails()).isEqualTo("details");
-        assertThat(details.getBalances()).isEqualTo(null);//TODO fix when balances will be added
+        assertThat(details.getBalances()).isEqualTo(null);//TODO fix when balances will be added     by @dmiex
     }
 
     @Test
-    public void toDepositAccountBO() {
+    public void toDepositAccountBO() throws IOException {
         DepositAccountBO details = mapper.toDepositAccountBO(getAccount(AccountDetailsTO.class));
 
         assertThat(details.getId()).isEqualTo("id");
@@ -69,7 +70,7 @@ public class AccountDetailsMapperTest {
         assertThat(details.getDetails()).isEqualTo("details");
     }
 
-    private static <T> T getAccount(Class<T> aClass) {
-        return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
+    private static <T> T getAccount(Class<T> aClass) throws IOException {
+        return YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "AccountDetails.yml", aClass);
     }
 }

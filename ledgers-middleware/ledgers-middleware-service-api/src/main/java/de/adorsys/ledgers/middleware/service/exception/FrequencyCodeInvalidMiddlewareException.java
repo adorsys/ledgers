@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.api.service;
+package de.adorsys.ledgers.middleware.service.exception;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+public class FrequencyCodeInvalidMiddlewareException extends Exception {
 
-public interface DepositAccountPaymentService {
+    public FrequencyCodeInvalidMiddlewareException() {}
 
-    PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException;
+    public FrequencyCodeInvalidMiddlewareException(String message) {
+        super(message);
+    }
 
-    PaymentBO getPaymentById(PaymentTypeBO paymentType, PaymentProductBO paymentProduct, String paymentId) throws PaymentNotFoundException;
+    public FrequencyCodeInvalidMiddlewareException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

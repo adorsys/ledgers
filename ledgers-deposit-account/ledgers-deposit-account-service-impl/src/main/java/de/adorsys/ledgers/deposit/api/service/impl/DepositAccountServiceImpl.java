@@ -154,7 +154,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
             executeSinglePaymentWithoutSca(singlePaymentBO);
         }
 
-//		PaymentResultBO result = null;// TODO
+//		PaymentResultBO result = null;// TODO by @fpo
         return null;
     }
 
@@ -177,7 +177,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
             throw new PaymentProcessingException(e.getMessage(), e);
         }
 
-//        todo: how we should proceed with batchBookingPreferred = true ?
+//        todo: how we should proceed with batchBookingPreferred = true ?  by @speex
 
         List<PostingLineBO> lines = new ArrayList<>();
 

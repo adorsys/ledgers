@@ -18,10 +18,13 @@ package de.adorsys.ledgers.middleware.resource;
 
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +48,16 @@ public class PaymentResource {
         } catch (PaymentNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{payment-type}/{payment-product}/{paymentId}", produces = {"application/json", "application/xml", "multipart/form-data"})
+    public ResponseEntity<?> getPaymentById(@PathVariable PaymentTypeTO paymentType, @PathVariable PaymentProductTO paymentProduct, @PathVariable String paymentId) {
+        try {
+            return ResponseEntity.ok(middlewareService.getPaymentById(paymentType, paymentProduct, paymentId));
+        } catch (PaymentNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
 }

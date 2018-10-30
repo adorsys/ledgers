@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,8 @@ public class Payment {
     @JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDate requestedExecutionDate;
 
+    private LocalTime requestedExecutionTime;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
 	private PaymentType paymentType;
@@ -78,99 +81,107 @@ public class Payment {
 	@OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
 	private List<PaymentTarget> targets = new ArrayList<>();
 
-	public String getPaymentId() {
-		return paymentId;
-	}
+    public String getPaymentId() {
+        return paymentId;
+    }
 
-	public void setPaymentId(String paymentId) {
-		this.paymentId = paymentId;
-	}
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+    }
 
-	public Boolean getBatchBookingPreferred() {
-		return batchBookingPreferred;
-	}
+    public Boolean getBatchBookingPreferred() {
+        return batchBookingPreferred;
+    }
 
-	public void setBatchBookingPreferred(Boolean batchBookingPreferred) {
-		this.batchBookingPreferred = batchBookingPreferred;
-	}
+    public void setBatchBookingPreferred(Boolean batchBookingPreferred) {
+        this.batchBookingPreferred = batchBookingPreferred;
+    }
 
-	public LocalDate getRequestedExecutionDate() {
-		return requestedExecutionDate;
-	}
+    public LocalDate getRequestedExecutionDate() {
+        return requestedExecutionDate;
+    }
 
-	public void setRequestedExecutionDate(LocalDate requestedExecutionDate) {
-		this.requestedExecutionDate = requestedExecutionDate;
-	}
+    public void setRequestedExecutionDate(LocalDate requestedExecutionDate) {
+        this.requestedExecutionDate = requestedExecutionDate;
+    }
 
-	public PaymentType getPaymentType() {
-		return paymentType;
-	}
+    public LocalTime getRequestedExecutionTime() {
+        return requestedExecutionTime;
+    }
 
-	public void setPaymentType(PaymentType paymentType) {
-		this.paymentType = paymentType;
-	}
+    public void setRequestedExecutionTime(LocalTime requestedExecutionTime) {
+        this.requestedExecutionTime = requestedExecutionTime;
+    }
 
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+    public PaymentType getPaymentType() {
+        return paymentType;
+    }
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
+    }
 
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-	public String getExecutionRule() {
-		return executionRule;
-	}
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-	public void setExecutionRule(String executionRule) {
-		this.executionRule = executionRule;
-	}
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-	public FrequencyCode getFrequency() {
-		return frequency;
-	}
+    public String getExecutionRule() {
+        return executionRule;
+    }
 
-	public void setFrequency(FrequencyCode frequency) {
-		this.frequency = frequency;
-	}
+    public void setExecutionRule(String executionRule) {
+        this.executionRule = executionRule;
+    }
 
-	public int getDayOfExecution() {
-		return dayOfExecution;
-	}
+    public FrequencyCode getFrequency() {
+        return frequency;
+    }
 
-	public void setDayOfExecution(int dayOfExecution) {
-		this.dayOfExecution = dayOfExecution;
-	}
+    public void setFrequency(FrequencyCode frequency) {
+        this.frequency = frequency;
+    }
 
-	public AccountReference getDebtorAccount() {
-		return debtorAccount;
-	}
+    public int getDayOfExecution() {
+        return dayOfExecution;
+    }
 
-	public void setDebtorAccount(AccountReference debtorAccount) {
-		this.debtorAccount = debtorAccount;
-	}
+    public void setDayOfExecution(int dayOfExecution) {
+        this.dayOfExecution = dayOfExecution;
+    }
 
-	public TransactionStatus getTransactionStatus() {
-		return transactionStatus;
-	}
+    public AccountReference getDebtorAccount() {
+        return debtorAccount;
+    }
 
-	public void setTransactionStatus(TransactionStatus transactionStatus) {
-		this.transactionStatus = transactionStatus;
-	}
+    public void setDebtorAccount(AccountReference debtorAccount) {
+        this.debtorAccount = debtorAccount;
+    }
 
-	public List<PaymentTarget> getTargets() {
-		return targets;
-	}
+    public TransactionStatus getTransactionStatus() {
+        return transactionStatus;
+    }
 
-	public void setTargets(List<PaymentTarget> targets) {
-		this.targets = targets;
-	}
+    public void setTransactionStatus(TransactionStatus transactionStatus) {
+        this.transactionStatus = transactionStatus;
+    }
+
+    public List<PaymentTarget> getTargets() {
+        return targets;
+    }
+
+    public void setTargets(List<PaymentTarget> targets) {
+        this.targets = targets;
+    }
 }

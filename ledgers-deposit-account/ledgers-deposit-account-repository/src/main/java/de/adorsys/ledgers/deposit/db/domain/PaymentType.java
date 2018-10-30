@@ -32,7 +32,7 @@ public enum PaymentType {
         this.paymentType = paymentType;
     }
 
-    public String getSpiPaymentType() {
+    public String getPaymentType() {
         return paymentType;
     }
 }

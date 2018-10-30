@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -98,19 +99,16 @@ public class PaymentResourceTest {
         verify(middlewareService, times(1)).getPaymentStatusById(PAYMENT_ID);
     }
 
-    private PaymentResultTO<TransactionStatusTO> readPaymentResult(ResourceReader reader) {
-        return reader.getObjectFromFile("de/adorsys/ledgers/middleware/resource/payment-result.yml", PaymentResultTO.class);
+    private PaymentResultTO<TransactionStatusTO> readPaymentResult(ResourceReader reader) throws IOException {
+        return reader.getObjectFromResource(PaymentResource.class,"payment-result.yml", PaymentResultTO.class);
     }
 
-    // todo: @spe replace by javatar-commons version 0.6
     private <T> T strToObj(String source, Class<T> tClass) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            return objectMapper.readValue(source, tClass);
+            return JsonReader.getInstance().getObjectFromString(source, tClass);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IllegalStateException("Can't build object from the string", e);
         }
-        return null;
     }
 }

@@ -17,7 +17,9 @@
 package de.adorsys.ledgers.middleware.service;
 
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
@@ -34,4 +36,6 @@ public interface MiddlewareService {
     boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException;
 
     AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
+
+    <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
 }

@@ -59,7 +59,7 @@ public class AccountControllerTest {
     @Test
     public void getPaymentStatusById() throws Exception {
         when(middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID)).thenReturn(getDetails());
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + ACCOUNT_ID))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{id}", ACCOUNT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -77,7 +77,7 @@ public class AccountControllerTest {
         when(middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID))
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with id=" + ACCOUNT_ID + " not found"));
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + ACCOUNT_ID))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{id}", ACCOUNT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -87,8 +87,8 @@ public class AccountControllerTest {
     }
 
 
-    private AccountDetailsTO getDetails() {
-        AccountDetailsTO file = YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/resource/AccountDetails.yml", AccountDetailsTO.class);
+    private AccountDetailsTO getDetails() throws IOException {
+        AccountDetailsTO file = YamlReader.getInstance().getObjectFromResource(AccountController.class, "AccountDetails.yml", AccountDetailsTO.class);
         file.setBalances(Collections.emptyList());
         return file;
     }

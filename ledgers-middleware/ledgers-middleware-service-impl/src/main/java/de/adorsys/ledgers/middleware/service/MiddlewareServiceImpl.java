@@ -18,6 +18,7 @@ package de.adorsys.ledgers.middleware.service;
 
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -27,13 +28,11 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountConverter;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MiddlewareServiceImpl implements MiddlewareService {
+public class MiddlewareServiceImpl<T> implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
 
     private final DepositAccountPaymentService paymentService;
@@ -95,8 +94,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
             logger.error(e.getMessage(), e);
             throw new SCAOperationNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
-           logger.error(e.getMessage(),e);
-           throw new SCAOperationValidationMiddlewareException(e);
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationValidationMiddlewareException(e);
         }
     }
 
@@ -104,10 +103,22 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
         try {
             DepositAccountBO account = accountService.getDepositAccountById(accountId);
-            return accountConverter.toAccountDetailsTO(account, null); //TODO add real balances call and mapping
+            return accountConverter.toAccountDetailsTO(account, null); //TODO add real balances call and mapping      by @dmiex
         } catch (DepositAccountNotFoundException e) {
             logger.error("Deposit Account with id=" + accountId + "not found", e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
+    }
+
+    @Override //TODO Consider refactoring to avoid unchecked cast warnings
+    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
+        PaymentBO paymentResult;
+        try {
+            paymentResult = paymentService.getPaymentById(paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct), paymentId);
+        } catch (PaymentNotFoundException e) {
+            logger.error("Payment with id={} not found", paymentId, e);
+            throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
+        }
+        return paymentConverter.toPaymentTO(paymentResult);
     }
 }
