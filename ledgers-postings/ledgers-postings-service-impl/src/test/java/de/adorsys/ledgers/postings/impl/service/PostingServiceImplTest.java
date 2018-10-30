@@ -38,6 +38,7 @@ import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
 import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
+import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,11 +48,12 @@ public class PostingServiceImplTest {
     private static final String NAME = "Mr. Jones";
     private static final String OP_ID = "OP_ID";
 
-    private static final PostingMapper postingMapper = new PostingMapper();
-    private static final LedgerAccountMapper ledgerAccountMapper = new LedgerAccountMapper();
+    private static final PostingMapper POSTING_MAPPER = new PostingMapper();
+    private static final PostingLineMapper POSTING_LINE_MAPPER = new PostingLineMapper();
+    private static final LedgerAccountMapper LEDGER_ACCOUNT_MAPPER = new LedgerAccountMapper();
 
     @InjectMocks
-    private PostingService postingService = new PostingServiceImpl(postingMapper);
+    private PostingService postingService = new PostingServiceImpl(POSTING_MAPPER, POSTING_LINE_MAPPER);
 
     @Mock
     private LedgerRepository ledgerRepository;
@@ -74,7 +76,7 @@ public class PostingServiceImplTest {
         when(postingRepository.save(any())).thenReturn(getPosting());
         when(postingRepository.findById(any())).thenReturn(Optional.of(getPosting()));
         //When
-        PostingBO result = postingService.newPosting(postingMapper.toPostingBO(getPosting()));
+        PostingBO result = postingService.newPosting(POSTING_MAPPER.toPostingBO(getPosting()));
         //Then
         assertThat(result).isNotNull();
     }
@@ -99,7 +101,7 @@ public class PostingServiceImplTest {
         when(postingRepository.save(any())).thenReturn(getPosting());
         when(postingRepository.findById(any())).thenReturn(Optional.of(getPosting()));
         //When
-        PostingBO result = postingService.balanceTx(ledgerAccountMapper.toLedgerAccountBO(getLedgerAccount()), DATE_TIME);
+        PostingBO result = postingService.balanceTx(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(getLedgerAccount()), DATE_TIME);
         //Then
         assertThat(result).isNotNull();
     }

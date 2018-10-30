@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -19,6 +20,7 @@ import de.adorsys.ledgers.postings.db.domain.Posting;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.db.domain.PostingStatus;
 import de.adorsys.ledgers.postings.db.domain.PostingType;
+import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.postings.impl.utils.DoubleEntryBookKeeping;
 import de.adorsys.ledgers.util.CloneUtils;
@@ -29,9 +31,11 @@ import de.adorsys.ledgers.util.Ids;
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
     private final PostingMapper postingMapper;
+    private final PostingLineMapper postingLineMapper;
     
-    public PostingServiceImpl(PostingMapper postingMapper) {
+    public PostingServiceImpl(PostingMapper postingMapper, PostingLineMapper postingLineMapper) {
         this.postingMapper = postingMapper;
+        this.postingLineMapper = postingLineMapper;
     }
 
     @Override
@@ -50,28 +54,20 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
             throws LedgerAccountNotFoundException, LedgerNotFoundException {
     	LedgerAccount ledgerAccount = loadLedgerAccount(ledgerAccountBO);
     	PostingLine computedBalance = repoFctn.computeBalance(ledgerAccount, refTime);
-//        
-//        PostingLine baseLine = postingLineRepository
-//                                       .findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(
-//                                               ledgerAccount, PostingType.LDG_CLSNG, PostingStatus.POSTED, refTime);
-
-        // Look for the youngest posting with the type PostingType.LDG_CLSNG
-//        List<PostingType> txTypes = Arrays.asList(PostingType.BUSI_TX, PostingType.ADJ_TX);
-//        List<BigDecimal> balance = repoFctn.computeBalance(ledgerAccount, txTypes, PostingStatus.POSTED, baseLine.getPstTime(), refTime);
-//
-//		LedgerAccount account = ledgerAccount;
-//		BigDecimal debitAmount = baseLine.getDebitAmount().add(balance.get(0));
-//		BigDecimal creditAmount = baseLine.getCreditAmount().add(balance.get(1));
-//		String details = baseLine.getDetails();
-//		String srcAccount = null;
-//		PostingLine postingLine = new PostingLine(null, null, account, debitAmount, creditAmount, details, srcAccount);
-
 		Posting posting = new Posting(null, null, null, Ids.id(), 0, refTime, null, null, refTime, PostingType.BAL_STMT, PostingStatus.POSTED, ledgerAccount.getLedger(), refTime, Collections.singletonList(computedBalance));
 
         return newPostingBOInternal(posting);
     }
 
-    /*
+    @Override
+	public PostingLineBO computeBalance(LedgerAccountBO ledgerAccountBO, LocalDateTime refTime)
+			throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    	LedgerAccount ledgerAccount = loadLedgerAccount(ledgerAccountBO);
+    	PostingLine computedBalance = repoFctn.computeBalance(ledgerAccount, refTime);
+    	return postingLineMapper.toPostingLineBO(computedBalance);
+	}
+
+	/*
      * Creating a new posting. While creating a new posting, we must watch over following:
      * - If the posting sequence number is higher than zero, it means that this posting is overriding another posting.
      * In this case, we must make sure that all account listed in the original posting are also available in the new posting.
