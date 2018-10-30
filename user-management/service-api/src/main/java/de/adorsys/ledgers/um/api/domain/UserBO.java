@@ -70,4 +70,12 @@ public class UserBO {
     public void setPin(String pin) {
         this.pin = pin;
     }
+
+    public List<AccountAccessBO> getAccountAccesses() {
+        return accountAccesses;
+    }
+
+    public void setAccountAccesses(List<AccountAccessBO> accountAccesses) {
+        this.accountAccesses = accountAccesses;
+    }
 }

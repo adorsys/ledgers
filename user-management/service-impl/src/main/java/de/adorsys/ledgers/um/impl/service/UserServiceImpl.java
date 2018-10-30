@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -81,6 +83,14 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity> userPO = userRepository.findById(id);
         userPO.orElseThrow(() -> new UserNotFoundException("User with id=" + id + " was not found"));
         return userConverter.toUserBO(userPO.get());
+    }
+
+    @Override
+    public List<AccountAccessBO> getAccountAccess(String userId) throws UserNotFoundException {
+        Optional<UserEntity> user = userRepository.findById(userId);
+        user.orElseThrow(() -> new UserNotFoundException("User with id=" + userId + " was not found"));
+        UserBO userBO = userConverter.toUserBO(user.get());
+        return userBO.getAccountAccesses();
     }
 
     @NotNull
