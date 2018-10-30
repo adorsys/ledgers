@@ -29,26 +29,21 @@ public class AccountAccessRepositoryIT {
     @Test
     public void test_create_ok() {
 
-
         AccountAccess accountAccess = new AccountAccess();
         accountAccess.setId(Ids.id());
         accountAccess.setIban("FakeIban");
         accountAccess.setAccessType(AccessType.OWNER);
-
         UserEntity user = new UserEntity();
         user.setId(Ids.id());
         user.setPin("1234");
         user.setLogin("vne");
         user.setEmail("vne@adorsys.de");
-
         accountAccess.setUser(user);
         user.getAccountAccesses().add(accountAccess);
         accountAccess.setUser(user);
         userRepository.save(user);
         AccountAccess result = accountAccessRepository.findById(accountAccess.getId()).orElse(null);
         Assert.notNull(result);
-
-
     }
 
 }

@@ -55,7 +55,7 @@ public class UserEntity {
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "user")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<AccountAccess> accountAccesses = new ArrayList<AccountAccess>();;
+    private List<AccountAccess> accountAccesses = new ArrayList<AccountAccess>();
 
 
     public String getId() {

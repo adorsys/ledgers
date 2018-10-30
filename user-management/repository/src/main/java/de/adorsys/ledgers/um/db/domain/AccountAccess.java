@@ -8,7 +8,7 @@ import javax.persistence.*;
 *
 * */
 
-//Todo clearify unique constrains iban & access_type
+//Todo clarify unique constrains iban & access_type
 @Entity
 @Table(name = "account_accesses")
 public class AccountAccess {
