@@ -16,7 +16,11 @@
 
 package de.adorsys.ledgers.um.api.domain;
 
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserBO {
     private String id;
@@ -29,6 +33,8 @@ public class UserBO {
 
     @NotNull
     private String pin;
+
+    private List<AccountAccessBO> accountAccesses = new ArrayList<>();
 
 //    private List<LedgerAccount> accounts;
 
