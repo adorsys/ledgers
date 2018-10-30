@@ -16,10 +16,10 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
@@ -32,8 +32,11 @@ public class DepositAccountPaymentServiceImpl implements DepositAccountPaymentSe
 
     private final PaymentRepository paymentRepository;
 
-    public DepositAccountPaymentServiceImpl(PaymentRepository paymentRepository) {
+    private final PaymentMapper paymentMapper;
+
+    public DepositAccountPaymentServiceImpl(PaymentRepository paymentRepository, PaymentMapper paymentMapper) {
         this.paymentRepository = paymentRepository;
+        this.paymentMapper = paymentMapper;
     }
 
     @Override
@@ -44,5 +47,27 @@ public class DepositAccountPaymentServiceImpl implements DepositAccountPaymentSe
                                                       .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
         return new PaymentResultBO<>(TransactionStatusBO.valueOf(transactionStatus.name()));
+    }
+
+    @Override
+    public PaymentBO getPaymentById(PaymentTypeBO paymentType, PaymentProductBO paymentProduct, String paymentId) throws PaymentNotFoundException {
+        PaymentBO payment = paymentRepository.findById(paymentId)
+                                    .map(paymentMapper::toPaymentBO)
+                                    .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+
+        return filterPaymentByTypeAndProduct(payment, paymentType, paymentProduct);
+    }
+
+    private PaymentBO filterPaymentByTypeAndProduct(PaymentBO payment, PaymentTypeBO paymentType, PaymentProductBO paymentProduct) throws PaymentNotFoundException {
+        boolean isPresentPayment = PaymentTypeBO.valueOf(payment.getPaymentType().name()) == paymentType;
+        if (payment.getPaymentType() != PaymentTypeBO.BULK) {
+            isPresentPayment = payment.getTargets().stream()
+                                   .map(t -> PaymentProductBO.valueOf(t.getPaymentProduct().name()))
+                                   .allMatch(t -> t == paymentProduct);
+        }
+        if (!isPresentPayment) {
+            throw new PaymentNotFoundException(payment.getPaymentId());
+        }
+        return payment;
     }
 }

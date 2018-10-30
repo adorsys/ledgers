@@ -8,6 +8,7 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountConverter;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.*;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.account.UsageTypeTO;
@@ -27,11 +28,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
-import java.util.Collections;
-import java.util.Currency;
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -45,6 +44,13 @@ public class MiddlewareServiceImplTest {
     private static final String OP_DATA = "opData";
     private static final int VALIDITY_SECONDS = 60;
     private static final String ACCOUNT_ID = "id";
+    private static final String PATH_SINGLE_BO = "de/adorsys/ledgers/middleware/converter/PaymentSingle.yml";
+    private static final String PATH_SINGLE_TO = "de/adorsys/ledgers/middleware/converter/PaymentSingleTO.yml";
+    private static final String PATH_PERIODIC_BO = "de/adorsys/ledgers/middleware/converter/PaymentPeriodic.yml";
+    private static final String PATH_PERIODIC_TO = "de/adorsys/ledgers/middleware/converter/PaymentPeriodicTO.yml";
+    private static final String PATH_BULK_BO = "de/adorsys/ledgers/middleware/converter/PaymentBulk.yml";
+    private static final String PATH_BULK_TO = "de/adorsys/ledgers/middleware/converter/PaymentBulkTO.yml";
+    private static final String WRONG_PAYMENT_ID = "wrong id";
 
     @InjectMocks
     private MiddlewareServiceImpl middlewareService;
@@ -56,8 +62,7 @@ public class MiddlewareServiceImplTest {
     private SCAOperationService operationService;
 
     @Mock
-    private PaymentConverter converter;
-
+    private PaymentConverter paymentConverter;
     @Mock
     private DepositAccountService accountService;
 
@@ -71,14 +76,14 @@ public class MiddlewareServiceImplTest {
         PaymentResultTO<TransactionStatusTO> paymentResultTO = new PaymentResultTO<>(TransactionStatusTO.RJCT);
 
         when(paymentService.getPaymentStatusById(PAYMENT_ID)).thenReturn(paymentResultBO);
-        when(converter.toPaymentResultTO(paymentResultBO)).thenReturn(paymentResultTO);
+        when(paymentConverter.toPaymentResultTO(paymentResultBO)).thenReturn(paymentResultTO);
 
         PaymentResultTO<TransactionStatusTO> paymentResult = middlewareService.getPaymentStatusById(PAYMENT_ID);
 
         assertThat(paymentResult.getPaymentResult().getName(), is(TransactionStatusBO.RJCT.getName()));
 
         verify(paymentService, times(1)).getPaymentStatusById(PAYMENT_ID);
-        verify(converter, times(1)).toPaymentResultTO(paymentResultBO);
+        verify(paymentConverter, times(1)).toPaymentResultTO(paymentResultBO);
     }
 
     @Test(expected = PaymentNotFoundMiddlewareException.class)
@@ -162,7 +167,42 @@ public class MiddlewareServiceImplTest {
         verify(accountService, times(1)).getDepositAccountById(ACCOUNT_ID);
     }
 
+    @Test
+    public void getPaymentById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
+        when(paymentConverter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).thenReturn(PaymentTypeBO.SINGLE);
+        when(paymentConverter.toPaymentProductBO(PaymentProductTO.SEPA)).thenReturn(PaymentProductBO.SEPA);
+        when(paymentService.getPaymentById(PaymentTypeBO.SINGLE, PaymentProductBO.SEPA, PAYMENT_ID)).thenReturn(getPayment(PaymentBO.class, PATH_SINGLE_BO));
+        when(paymentConverter.toPaymentTO(any())).thenReturn(getPayment(SinglePaymentTO.class, PATH_SINGLE_TO));
+        Object result = middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, PAYMENT_ID);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(getPayment(SinglePaymentTO.class, PATH_SINGLE_TO));
+    }
+
+    @Test(expected = PaymentNotFoundMiddlewareException.class)
+    public void getPaymentById_Fail_wrong_id() throws PaymentNotFoundException, PaymentNotFoundMiddlewareException {
+        when(paymentConverter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).thenReturn(PaymentTypeBO.SINGLE);
+        when(paymentConverter.toPaymentProductBO(PaymentProductTO.SEPA)).thenReturn(PaymentProductBO.SEPA);
+        when(paymentService.getPaymentById(PaymentTypeBO.SINGLE, PaymentProductBO.SEPA, WRONG_PAYMENT_ID))
+                .thenThrow(new PaymentNotFoundException(WRONG_PAYMENT_ID));
+        middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, WRONG_PAYMENT_ID);
+    }
+
     private static <T> T getAccount(Class<T> aClass) {
-        return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
+        try {
+            return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
+    }
+
+    private static <T> T getPayment(Class<T> aClass, String path) {
+        try {
+            return YamlReader.getInstance().getObjectFromFile(path, aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
     }
 }

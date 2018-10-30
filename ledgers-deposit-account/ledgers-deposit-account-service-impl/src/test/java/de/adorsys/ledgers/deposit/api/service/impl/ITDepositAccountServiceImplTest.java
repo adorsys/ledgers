@@ -18,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
@@ -47,7 +49,7 @@ public class ITDepositAccountServiceImplTest {
     private DepositAccountMapper depositAccountMapper;
 
     @Test
-    public void test_create_customer_bank_account_ok() throws LedgerAccountNotFoundException, LedgerNotFoundException, PaymentProcessingException {
+    public void test_create_customer_bank_account_ok() throws LedgerAccountNotFoundException, LedgerNotFoundException, PaymentProcessingException, IOException {
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(LEDGER_ACCOUNT);
         when(ledgerService.newLedgerAccount(any())).thenReturn(LEDGER_ACCOUNT);
         when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(DepositAccount.class));
@@ -62,7 +64,7 @@ public class ITDepositAccountServiceImplTest {
         assertThat(createdDepositAccount, is(CoreMatchers.notNullValue()));
     }
 
-    private <T> T getDepositAccount(Class<T> t) {
-        return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/deposit/api/service/impl/ITDepositAccountServiceImplTest.yml", t);
+    private <T> T getDepositAccount(Class<T> t) throws IOException {
+        return YamlReader.getInstance().getObjectFromResource(ITDepositAccountServiceImplTest.class, "ITDepositAccountServiceImplTest.yml", t);
     }
 }

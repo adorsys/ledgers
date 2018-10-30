@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.mapstruct.factory.Mappers;
 import pro.javatar.commons.reader.YamlReader;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Currency;
 
@@ -24,7 +25,7 @@ public class AccountConverterTest {
     public void toAccountDetailsTO() {
         AccountDetailsTO details = accountConverter.toAccountDetailsTO(DEPOSIT_ACCOUNT, Collections.emptyList());
 
-        //assertThat(details).isEqualToComparingFieldByField(ACCOUNT_DETAILS); //TODO Should be uncommented when GetBalances and its Mapping is ready
+        //assertThat(details).isEqualToComparingFieldByField(ACCOUNT_DETAILS); //TODO Should be uncommented when GetBalances and its Mapping is ready     by @dmiex
 
         assertThat(details.getId()).isEqualTo("id");
         assertThat(details.getIban()).isEqualTo("iban");
@@ -41,10 +42,15 @@ public class AccountConverterTest {
         assertThat(details.getLinkedAccounts()).isEqualTo("account");
         assertThat(details.getUsageType()).isEqualTo(UsageTypeTO.PRIV);
         assertThat(details.getDetails()).isEqualTo("details");
-        assertThat(details.getBalances()).isEqualTo(Collections.emptyList());//TODO fix when balances will be added
+        assertThat(details.getBalances()).isEqualTo(Collections.emptyList());//TODO fix when balances will be added     by @dmiex
     }
 
     private static <T> T getAccount(Class<T> aClass) {
-        return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
+        try {
+            return YamlReader.getInstance().getObjectFromResource(AccountConverter.class,"AccountDetails.yml", aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
     }
 }
