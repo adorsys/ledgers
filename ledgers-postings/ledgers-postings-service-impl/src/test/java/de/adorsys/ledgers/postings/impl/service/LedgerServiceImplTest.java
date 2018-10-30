@@ -28,6 +28,7 @@ import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.LedgerMapper;
 import de.adorsys.ledgers.util.Ids;
@@ -39,7 +40,7 @@ public class LedgerServiceImplTest {
 	private static final ChartOfAccount COA = new ChartOfAccount(Ids.id(), DATE_TIME, USER_NAME,
 			"Some short description", "Some long description", "COA");
 	private static final Ledger LEDGER = new Ledger(Ids.id(), DATE_TIME, "User", "Some short description",
-			"Some long description", "Ledger", COA, DATE_TIME);
+			"Some long description", "Ledger", COA);
 	private static final LedgerAccount LEDGER_ACCOUNT = new LedgerAccount(Ids.id(), DATE_TIME, "User",
 			"Some short description", "Some long description", USER_NAME, LEDGER, null, COA, BalanceSide.Cr,
 			AccountCategory.AS);

@@ -1,8 +1,10 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -181,9 +185,43 @@ public class Posting extends HashRecord {
 
     @PrePersist
     public void prePersist() {
-        id = oprId + "_" + oprSeqNbr;
+        id = makeId(oprId, oprSeqNbr);
+    }
+    
+    /**
+     * Return the id of the posting being overriding by this posting.
+     *  
+     * @return
+     */
+    public final Optional<String> clonedId() {
+    	return Optional.ofNullable(oprSeqNbr<=0?null:makeId(oprId, oprSeqNbr-1));
+    }
+    
+    public static String makeId(String oprId, int oprSeqNbr) {
+        return oprId + "_" + oprSeqNbr;
     }
 
+    /**
+     * Union of all lines of this posting and missing lines of the passed posting 
+     * by account number. Lines copied from the in prec posting will be given an
+     * amount of zero for both debit and credit.
+     * 
+     * @param prec
+     * @return
+     */
+    public void union(Posting prec) {
+    	for (PostingLine l : prec.getLines()) {
+			if(hasAccount(l)) {
+				continue;
+			}
+			lines.add(new PostingLine(null, this, l.getAccount(), BigDecimal.ZERO, BigDecimal.ZERO, null, null, l.getBaseLine()));
+    	}
+    }
+    
+    private boolean hasAccount(PostingLine model) {
+    	return lines.stream().filter(l -> StringUtils.equals(l.getAccName(), model.getAccName())).findAny().isPresent();
+    }
+    
 	public String getId() {
 		return id;
 	}

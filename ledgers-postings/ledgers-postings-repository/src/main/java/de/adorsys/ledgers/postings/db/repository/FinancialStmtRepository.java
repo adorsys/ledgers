@@ -4,44 +4,47 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.repository.PagingAndSortingRepository;
+
 import de.adorsys.ledgers.postings.db.domain.FinancialStmt;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.Posting;
+import de.adorsys.ledgers.postings.db.domain.StmtStatus;
+import de.adorsys.ledgers.postings.db.domain.StmtType;
 
-public interface FinancialStmtRepository extends NamedEntityRepository<FinancialStmt> {
+public interface FinancialStmtRepository extends PagingAndSortingRepository<FinancialStmt, String> {
 	
 	/**
 	 * Find the financial statement of the given posting.
 	 * 
-	 * @param pstId
+	 * @param posting
 	 * @return
 	 */
-	Optional<FinancialStmt> findOptionalByPstId(String pstId);
+	Optional<FinancialStmt> findByPosting(Posting posting);
 
 	/**
-	 * Find all financial statements with this name from this ledger.
+	 * Find all financial statements with this stmtId from this ledger, ordered by posting time oldest first.
+	 * 
+	 * e.g. Find all my account statements.
 	 * 
 	 * @param ledger
-	 * @param name
+	 * @param stmtType
+	 * @param stmtTarget
 	 * @return
 	 */
-	List<FinancialStmt> findByLedgerAndNameOrderByPstTimeDescCreatedDesc(Ledger ledger, String name);
+	List<FinancialStmt> findByLedgerAndStmtTypeAndStmtTargetOrderByPstTimeDesc(Ledger ledger, StmtType stmtType, String stmtTarget);
+	
+	Optional<FinancialStmt> findFirstByLedgerAndStmtTypeAndStmtTargetAndStmtStatusOrderByPstTimeDesc(Ledger ledger, StmtType stmtType, String stmtTarget, StmtStatus stmtStatus);
 	
 	/**
-	 * Find all financial statements with this name and posting time from this ledger.
+	 * Find all financial statements with this stmtId and posting time from this ledger.
 	 * 
 	 * @param ledger
-	 * @param name
+	 * @param stmtType
+	 * @param stmtTarget
 	 * @param pstTime
 	 * @return
 	 */
-	List<FinancialStmt> findByLedgerAndNameAndPstTimeOrderByCreatedDesc(Ledger ledger, String name, LocalDateTime pstTime);
+	List<FinancialStmt> findByLedgerAndStmtTypeAndStmtTargetAndPstTimeOrderByStmtSeqNbrDesc(Ledger ledger, StmtType stmtType, String stmtTarget, LocalDateTime pstTime);
 
-	/**
-	 * Find all financial statements with this name and posting time from this ledger.
-	 * 
-	 * @param ledger
-	 * @param pstTime
-	 * @return
-	 */
-	List<FinancialStmt> findByLedgerAndPstTimeAfterOrderByCreatedDesc(Ledger ledger, LocalDateTime pstTime);
 }

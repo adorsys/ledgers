@@ -1,0 +1,161 @@
+# Simple Book keeping system.
+# We use the chart of account from the file: sample_coa_banking.yml
+
+# The name of out business is SimpleBank
+
+# Initial Capital of the Bank. Deposit with the central bank
+- oprId: "deposit_with_central_bank_001"
+  oprDetails: "Initial deposit in the central bank account of SimpleBank"
+  pstTime: 2018-01-01T22:40:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1104
+      shortDesc: "Deposits with CBM - Interest bearing" 
+    debitAmount: 4200000.00
+    creditAmount: 0.00
+  - account:
+      name: 3001
+      shortDesc: "Issued capital – ordinary shares" 
+    debitAmount: 0.00
+    creditAmount: 4200000.00
+# Balances: 1104-D-4200000.00,3001-C-4200000.00 
+
+
+# The bank opens an account with another bank, given a check of the central bank 2 000 000
+- oprId: "deposit_with_hello_bank_001"
+  oprDetails: "Initial deposit in the central bank account of SimpleBank"
+  pstTime: 2018-01-02T15:40:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 11240
+      shortDesc: "hello bank" 
+    debitAmount: 2000000.00
+    creditAmount: 0.00
+  - account:
+      name: 1104
+      shortDesc: "Deposits with CBM - Interest bearing" 
+    debitAmount: 0.00
+    creditAmount: 2000000.00
+# Balances: 11240-D-2000000.00,1104-D-2200000.00 
+    
+# Then the Bank purchases some office furniture with a check of hello bank 14 400 
+- oprId: "purchased_furniture_003"
+  oprDetails: "Purchased Furniture per check"
+  pstTime: 2018-01-03T12:32:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1810
+      shortDesc: "Furniture & fittings" 
+    debitAmount: 14400.00
+    creditAmount: 0.00
+  - account:
+      name: 11240
+      shortDesc: "hello bank" 
+    debitAmount: 0.00
+    creditAmount: 14400.00
+# Balances: 11240-D-1985600.00,1810-D-14400.00 
+    
+
+# Then the Bank withdraw some cahsh from hello bank. 150 000 
+- oprId: "withdrew_cash_hellobank_004"
+  oprDetails: "Withdrew cash from hello bank"
+  pstTime: 2018-01-03T13:30:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1001
+      shortDesc: "Cash in vault" 
+    debitAmount: 150000.00
+    creditAmount: 0.00
+  - account:
+      name: 11240
+      shortDesc: "hello bank" 
+    debitAmount: 0.00
+    creditAmount: 150000.00
+# Balances: 11240-D-1835600.00,1001-D-150000.00 
+
+# The bank pays for service for cleaning and refurbishing rental office: 32 000 check of helo bank
+- oprId: "cleaning_and_refurbishing_service_005"
+  oprDetails: "Cleaning and refurbishing services, check of hello bank"
+  pstTime: 2018-01-08T09:15:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 5057
+      shortDesc: "Cleaning (janitorial services)" 
+    debitAmount: 32000.00
+    creditAmount: 0.00
+  - account:
+      name: 11240
+      shortDesc: "hello bank" 
+    debitAmount: 0.00
+    creditAmount: 32000.00
+# Balances: 11240-D-1803600.00,5057-D-32000.00 
+
+# The bank opens employee accounts. Marion mueller with casch deposit of 1500
+- oprId: "employee_account_marion_muller_006"
+  oprDetails: "Opened employee account for marion mueller."
+  pstTime: 2018-01-12T08:30:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1001
+      shortDesc: "Cash in vault" 
+    debitAmount: 1500.00
+    creditAmount: 0.00
+  - account:
+      name: 2332001
+      shortDesc: "Bank Account Marion Mueller" 
+    debitAmount: 0.00
+    creditAmount: 1500.00
+# Balances: 1001-D-151500.00,2332001-C-1500.00 
+
+# The bank opens employee accounts for anton brueckner with check deposit of 3 500.
+- oprId: "employee_account_anton_brueckner_007"
+  oprDetails: "Opened employee account for anton brueckner."
+  pstTime: 2018-01-12T09:30:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1006
+      shortDesc: "Items for collection:cheques" 
+    debitAmount: 3500.00
+    creditAmount: 0.00
+  - account:
+      name: 2332002
+      shortDesc: "Bank Account Anton Brueckner" 
+    debitAmount: 0.00
+    creditAmount: 3500.00
+# Balances: 1006-D-3500.00,2332002-C-3500.00 
+
+
+# The bank opens employee accounts for max mustermann with cash 5 000.
+- oprId: "employee_account_max_mustermann_008"
+  oprDetails: "Opened employee account for Max Mustermann."
+  pstTime: 2018-01-12T10:30:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1001
+      shortDesc: "Cash in vault" 
+    debitAmount: 5000.00
+    creditAmount: 0.00
+  - account:
+      name: 2332003
+      shortDesc: "Bank Account Msax Mustermann" 
+    debitAmount: 0.00
+    creditAmount: 5000.00
+# Balances: 1001-D-156500.00,2332003-C-5000.00 
+
+    

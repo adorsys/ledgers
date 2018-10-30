@@ -10,8 +10,6 @@
             name="GL"
             created="2018-08-07 20:58:24.232"
             user_details="Sample User"
-            last_closing="2018-08-07 20:58:24.232"
-            
     />
 
     <LEDGER id="Zd0ND5YwSzGwIfZilhumPg1"
@@ -19,6 +17,5 @@
             name="New general ledger for specific purposes"
             created="2018-08-07 20:58:24.232"
             user_details="Sample User"
-            last_closing="2018-08-07 20:58:24.232"
     />
 </dataset>

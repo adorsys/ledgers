@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +36,7 @@ import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
+import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 
@@ -63,6 +63,8 @@ public class PostingServiceImplTest {
     private PostingLineRepository postingLineRepository;
     @Mock
     private LedgerAccountRepository ledgerAccountRepository;
+	@Mock
+    private PostingRepositoryFunctions repoFctn;
 
     @Test
     public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
@@ -88,9 +90,9 @@ public class PostingServiceImplTest {
 
     @Test
     public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        when(postingLineRepository.findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(any(), any(), any(), any()))
-                .thenReturn(getPostingLine());
-        when(postingLineRepository.computeBalance(any(), any(), any(), any(), any())).thenReturn(Arrays.asList(BigDecimal.TEN, BigDecimal.TEN));
+//        when(postingLineRepository.findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(any(), any(), any(), any()))
+//                .thenReturn(getPostingLine());
+        when(repoFctn.computeBalance(any(), any())).thenReturn(getPostingLine());
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         when(postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(any())).thenReturn(Optional.empty());
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(getLedgerAccount()));
@@ -104,7 +106,7 @@ public class PostingServiceImplTest {
 
     private PostingLine getPostingLine() {
         return new PostingLine(OP_ID, getPosting(), getLedgerAccount(), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
-                "Some details", "scrAccount");
+                "Some details", "scrAccount", null);
     }
 
     private LedgerAccount getLedgerAccount() {
@@ -122,7 +124,7 @@ public class PostingServiceImplTest {
 
     private Ledger getLedger() {
         return new Ledger(LEDGER_ID, DATE_TIME, "User", "Some short description",
-                "Some long description", NAME, getChartOfAccount(), DATE_TIME.minusDays(1));
+                "Some long description", NAME, getChartOfAccount());
     }
 
     private ChartOfAccount getChartOfAccount() {
