@@ -22,7 +22,11 @@ public class AccountAccessBO {
         this.user = user;
     }
 
-    public void setUser(UserBO user) {
+    public AccountAccessBO() {
+	}
+
+
+	public void setUser(UserBO user) {
         this.user = user;
     }
 
