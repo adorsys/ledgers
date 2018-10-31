@@ -2,14 +2,13 @@ package de.adorsys.ledgers.postings.db.repository;
 
 import static org.junit.Assert.assertEquals;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import de.adorsys.ledgers.util.hash.HashGenerationException;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +30,11 @@ import de.adorsys.ledgers.postings.db.domain.Posting;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.db.domain.PostingStatus;
 import de.adorsys.ledgers.postings.db.domain.PostingType;
-import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingRepository;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
+import de.adorsys.ledgers.util.hash.HashGenerationException;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,

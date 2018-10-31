@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
@@ -37,7 +37,9 @@ import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
+import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
+import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,11 +49,12 @@ public class PostingServiceImplTest {
     private static final String NAME = "Mr. Jones";
     private static final String OP_ID = "OP_ID";
 
-    private static final PostingMapper postingMapper = new PostingMapper();
-    private static final LedgerAccountMapper ledgerAccountMapper = new LedgerAccountMapper();
+    private static final PostingMapper POSTING_MAPPER = new PostingMapper();
+    private static final PostingLineMapper POSTING_LINE_MAPPER = new PostingLineMapper();
+    private static final LedgerAccountMapper LEDGER_ACCOUNT_MAPPER = new LedgerAccountMapper();
 
     @InjectMocks
-    private PostingService postingService = new PostingServiceImpl(postingMapper);
+    private PostingService postingService = new PostingServiceImpl(POSTING_MAPPER, POSTING_LINE_MAPPER);
 
     @Mock
     private LedgerRepository ledgerRepository;
@@ -63,16 +66,18 @@ public class PostingServiceImplTest {
     private PostingLineRepository postingLineRepository;
     @Mock
     private LedgerAccountRepository ledgerAccountRepository;
+	@Mock
+    private PostingRepositoryFunctions repoFctn;
 
     @Test
-    public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
+    public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
         when(postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(any())).thenReturn(Optional.of(getPosting()));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         when(principal.getName()).thenReturn(NAME);
         when(postingRepository.save(any())).thenReturn(getPosting());
         when(postingRepository.findById(any())).thenReturn(Optional.of(getPosting()));
         //When
-        PostingBO result = postingService.newPosting(postingMapper.toPostingBO(getPosting()));
+        PostingBO result = postingService.newPosting(POSTING_MAPPER.toPostingBO(getPosting()));
         //Then
         assertThat(result).isNotNull();
     }
@@ -87,24 +92,24 @@ public class PostingServiceImplTest {
     }
 
     @Test
-    public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        when(postingLineRepository.findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(any(), any(), any(), any()))
-                .thenReturn(getPostingLine());
-        when(postingLineRepository.computeBalance(any(), any(), any(), any(), any())).thenReturn(Arrays.asList(BigDecimal.TEN, BigDecimal.TEN));
+    public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+//        when(postingLineRepository.findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(any(), any(), any(), any()))
+//                .thenReturn(getPostingLine());
+        when(repoFctn.computeBalance(any(), any())).thenReturn(getPostingLine());
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         when(postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(any())).thenReturn(Optional.empty());
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(getLedgerAccount()));
         when(postingRepository.save(any())).thenReturn(getPosting());
         when(postingRepository.findById(any())).thenReturn(Optional.of(getPosting()));
         //When
-        PostingBO result = postingService.balanceTx(ledgerAccountMapper.toLedgerAccountBO(getLedgerAccount()), DATE_TIME);
+        PostingBO result = postingService.balanceTx(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(getLedgerAccount()), DATE_TIME);
         //Then
         assertThat(result).isNotNull();
     }
 
     private PostingLine getPostingLine() {
         return new PostingLine(OP_ID, getPosting(), getLedgerAccount(), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
-                "Some details", "scrAccount");
+                "Some details", "scrAccount", null);
     }
 
     private LedgerAccount getLedgerAccount() {
@@ -122,7 +127,7 @@ public class PostingServiceImplTest {
 
     private Ledger getLedger() {
         return new Ledger(LEDGER_ID, DATE_TIME, "User", "Some short description",
-                "Some long description", NAME, getChartOfAccount(), DATE_TIME.minusDays(1));
+                "Some long description", NAME, getChartOfAccount());
     }
 
     private ChartOfAccount getChartOfAccount() {

@@ -46,6 +46,11 @@ public class PostingLine {
 	 * 
 	 */
 	private String srcAccount;
+	
+	/*
+	 * The id of the last balanced posting line for this account.
+	 */
+	private String baseLine;
 
 	//================================================================================
 	// Denormalization layer. All following fields:
@@ -136,7 +141,7 @@ public class PostingLine {
 	}
 
 	public PostingLine(String id, Posting posting, LedgerAccount account, BigDecimal debitAmount,
-			BigDecimal creditAmount, String details, String srcAccount) {
+			BigDecimal creditAmount, String details, String srcAccount, String baseLine) {
 		super();
 		this.id = id;
 		this.posting = posting;
@@ -145,6 +150,7 @@ public class PostingLine {
 		this.creditAmount = creditAmount;
 		this.details = details;
 		this.srcAccount = srcAccount;
+		this.baseLine = baseLine;
 	}
 
 	public String getId() {
@@ -239,5 +245,25 @@ public class PostingLine {
 	public void setOprId(String oprId) {
 		this.oprId = oprId;
 	}
+
+	public String getBaseLine() {
+		return baseLine;
+	}
 	
+	/**
+	 * Operations used to track the balance of the account. 
+	 * @return
+	 */
+	public BalanceSide balanceSide() {
+		if(getDebitAmount().subtract(getCreditAmount()).compareTo(BigDecimal.ZERO)>=0) {
+			return BalanceSide.Dr;
+		}
+		return BalanceSide.Cr;
+	}
+	public BigDecimal debitBalance() {
+		return getDebitAmount().subtract(getCreditAmount());
+	}
+	public BigDecimal creditBalance() {
+		return getCreditAmount().subtract(getDebitAmount());
+	}	
 }

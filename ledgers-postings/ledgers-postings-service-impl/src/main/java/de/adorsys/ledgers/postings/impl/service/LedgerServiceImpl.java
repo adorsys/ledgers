@@ -41,8 +41,7 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
                 ledger.getShortDesc(),
                 ledger.getLongDesc(),
                 ledger.getName(),
-                loadCoa(ledger.getCoa()),
-                ledger.getLastClosing());
+                loadCoa(ledger.getCoa()));
         Ledger savedLedger = ledgerRepository.save(newLedger);
 
         return ledgerMapper.toLedgerBO(savedLedger);

@@ -9,11 +9,11 @@ import de.adorsys.ledgers.util.CloneUtils;
 @Component
 public class PostingLineMapper {
 	
-    PostingLineBO toPostingLineBO(PostingLine posting) {
+    public PostingLineBO toPostingLineBO(PostingLine posting) {
     	return CloneUtils.cloneObject(posting, PostingLineBO.class);
     }
 
-    PostingLine toPostingLine(PostingLineBO posting) {
+    public PostingLine toPostingLine(PostingLineBO posting) {
     	return CloneUtils.cloneObject(posting, PostingLine.class);    	
     }
 }

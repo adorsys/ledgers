@@ -5,6 +5,8 @@ import java.util.List;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
@@ -21,8 +23,9 @@ public interface PostingService {
      * @param posting
      * @return
      * @throws PostingNotFoundException
+     * @throws BaseLineException 
      */
-    PostingBO newPosting(PostingBO posting) throws PostingNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException;
+    PostingBO newPosting(PostingBO posting) throws PostingNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException;
 
     /**
      * Listing all postings associated with this operation id.
@@ -33,12 +36,25 @@ public interface PostingService {
     List<PostingBO> findPostingsByOperationId(String oprId);
 
     /**
-     * Compute the balance of a ledger account.
+     * Compute and store the balance of a ledger account.
      *
      * @param ledgerAccount : the ledger account for which the balance shal be computed.
      * @param refTime       the time at which this balance has to be computed.
      * @return
      * @throws LedgerAccountNotFoundException
+     * @throws LedgerNotFoundException
+     * @throws BaseLineException 
      */
-    PostingBO balanceTx(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException;
+    PostingBO balanceTx(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException;
+
+    /**
+     * Compute and return the balance of a ledger account whithout storing it.
+     * 
+     * @param ledgerAccount : the ledger account for which the balance shal be computed.
+     * @param refTime       the time at which this balance has to be computed.
+     * @return
+     * @throws LedgerAccountNotFoundException
+     * @throws LedgerNotFoundException
+     */
+    PostingLineBO computeBalance(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException;
 }

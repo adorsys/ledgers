@@ -1,13 +1,14 @@
 package de.adorsys.ledgers.postings.db.repository;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import de.adorsys.ledgers.postings.db.domain.*;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.db.domain.PostingLine;
+import de.adorsys.ledgers.postings.db.domain.PostingStatus;
+import de.adorsys.ledgers.postings.db.domain.PostingType;
 
 public interface PostingLineRepository extends PagingAndSortingRepository<PostingLine, String> {
 	
@@ -23,11 +24,22 @@ public interface PostingLineRepository extends PagingAndSortingRepository<Postin
 	PostingLine findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(LedgerAccount ledgerAccount,
 			PostingType ldgClsng, PostingStatus pstStatus, LocalDateTime refTime);
 
+	/**
+	 * 
+	 * 
+	 * @param ledgerAccount
+	 * @param txTypes
+	 * @param pstStatus
+	 * @param pstTime
+	 * @param refTime
+	 * @return
+	 */
 	List<PostingLine> findByAccountAndPstTypeInAndPstStatusAndPstTimeGreaterThanAndPstTimeLessThanEqual(
-            LedgerAccount ledgerAccount, List<PostingType> txTypes, PostingStatus pstStatus, LocalDateTime pstTime,
+			LedgerAccount ledgerAccount, List<PostingType> txTypes, PostingStatus pstStatus, LocalDateTime pstTime,
             LocalDateTime refTime);
 
-	@Query("SELECT SUM(l.debitAmount), SUM(l.creditAmount) FROM PostingLine l WHERE l.account= :account AND l.pstType IN :txTypes AND l.pstStatus=:pstStatus AND l.pstTime>:lastClosing AND l.pstTime<=:refTime")
-	List<BigDecimal> computeBalance(LedgerAccount account, List<PostingType> txTypes, PostingStatus pstStatus, LocalDateTime lastClosing,
-                                    LocalDateTime refTime);
+
+	List<PostingLine> findByBaseLineAndPstTimeLessThanEqualOrderByRecordTimeDesc(String baseLine, LocalDateTime refTime);
+
+	List<PostingLine> findByAccountAndPstTimeLessThanEqualOrderByRecordTimeDesc(LedgerAccount account, LocalDateTime refTime);
 }

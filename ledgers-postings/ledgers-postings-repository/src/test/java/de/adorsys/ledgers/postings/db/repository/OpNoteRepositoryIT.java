@@ -3,6 +3,7 @@ package de.adorsys.ledgers.postings.db.repository;
 import java.time.LocalDateTime;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import de.adorsys.ledgers.postings.db.domain.OpNote;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
 
+@Ignore
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 		TransactionalTestExecutionListener.class,
 		DbUnitTestExecutionListener.class})

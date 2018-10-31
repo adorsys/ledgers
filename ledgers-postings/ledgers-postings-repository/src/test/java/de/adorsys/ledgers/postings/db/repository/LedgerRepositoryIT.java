@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,10 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
-import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -53,8 +53,7 @@ public class LedgerRepositoryIT {
 		String shortDesc = null;
 		String longDesc = null;
 		String name = "Sample Ledger-2";
-		LocalDateTime lastClosing = LocalDateTime.now();
-		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa, lastClosing); 
+		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa); 
 		ledgerRepository.save(ledger);
 	}
 	
@@ -67,8 +66,7 @@ public class LedgerRepositoryIT {
 		String shortDesc = null;
 		String longDesc = null;
 		String name = "Sample Ledger-2";
-		LocalDateTime lastClosing = LocalDateTime.now();
-		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa, lastClosing); 
+		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa); 
 		ledgerRepository.save(ledger);
 
 	}
@@ -82,8 +80,7 @@ public class LedgerRepositoryIT {
 		String shortDesc = null;
 		String longDesc = null;
 		String name = null;
-		LocalDateTime lastClosing = LocalDateTime.now();
-		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa, lastClosing); 
+		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa); 
         ledgerRepository.save(ledger);
 	}	
 
@@ -99,25 +96,9 @@ public class LedgerRepositoryIT {
 		String shortDesc = null;
 		String longDesc = null;
 		String name = ledger.getName();
-		LocalDateTime lastClosing = LocalDateTime.now();
-		Ledger ledger2 = new Ledger(id, created, user, shortDesc, longDesc, name, coa, lastClosing); 
+		Ledger ledger2 = new Ledger(id, created, user, shortDesc, longDesc, name, coa); 
 		ledgerRepository.save(ledger2);
 	}
-	@Test(expected=DataIntegrityViolationException.class)
-	public void test_create_ledger_lastClosing_null() {
-		ChartOfAccount coa = chartOfAccountRepository.findById("ci8k8PDcTrCsi-F3sT3i-g").orElse(null);
-		Assume.assumeNotNull(coa);
-		String id = Ids.id();
-		LocalDateTime created = LocalDateTime.now();
-		String user = "Sample User";
-		String shortDesc = null;
-		String longDesc = null;
-		String name = "Sample Ledger-2";
-		LocalDateTime lastClosing = null;
-		Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa, lastClosing); 
-		ledgerRepository.save(ledger);
-	}
-	
 
 	@Test
 	public void test_find_by_coa_returns_n_records(){
