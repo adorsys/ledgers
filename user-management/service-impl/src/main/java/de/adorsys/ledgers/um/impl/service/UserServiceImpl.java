@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
@@ -62,12 +63,23 @@ public class UserServiceImpl implements UserService {
         return MD5Util.verify(pin, user.getPin());
     }
 
+    /**
+     * If the rationale is knowing if the account belongs toi the user.
+     */
     @Override
     public boolean authorize(String login, String pin, String accountId) throws UserNotFoundException {
-        UserEntity user = getUser(login);
-        //        long count = user.getAccounts().stream().filter(a -> a.getId().equals(accountId)).count();
-//        return pinVerified && count > 0;
-        return MD5Util.verify(pin, user.getPin());
+    	return authorize(login, pin);
+//    	if( authorize(login, pin)) {
+    		// verify that the user has this account.
+    		// TODO get Account accesses and check if user is authorized to access this account.
+//    		return true;
+//    	}
+//        UserEntity user = getUser(login);
+//        String hashedPin = MD5Util.encode(user.getPin());
+//        //        long count = user.getAccounts().stream().filter(a -> a.getId().equals(accountId)).count();
+//        //        return pinVerified && count > 0;
+//        return MD5Util.verify(pin, hashedPin);
+//    	return false;
     }
 
 //    @Override
@@ -83,6 +95,14 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity> userPO = userRepository.findById(id);
         userPO.orElseThrow(() -> new UserNotFoundException("User with id=" + id + " was not found"));
         return userConverter.toUserBO(userPO.get());
+    }
+
+    @Override
+    public List<ScaUserDataBO> getUserScaData(String userId) throws UserNotFoundException {
+        Optional<UserEntity> user = userRepository.findById(userId);
+        user.orElseThrow(() -> new UserNotFoundException("User with id=" + userId + " was not found"));
+        UserBO userBO = userConverter.toUserBO(user.get());
+        return userBO.getScaUserData();
     }
 
     @Override

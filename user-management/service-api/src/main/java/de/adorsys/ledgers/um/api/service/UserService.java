@@ -16,11 +16,11 @@
 
 package de.adorsys.ledgers.um.api.service;
 
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-
 import java.util.List;
 
 public interface UserService {
@@ -30,7 +30,7 @@ public interface UserService {
      *
      * @param user User business object
      * @return A persisted user or trows a UserAlreadyExistsException
-     * @throws UserAlreadyExistsException is thrown if user already existss
+     * @throws UserAlreadyExistsException is thrown if user already exists
      */
     UserBO create(UserBO user) throws UserAlreadyExistsException;
 
@@ -72,6 +72,14 @@ public interface UserService {
      * @throws UserNotFoundException is thrown if user can`t be found
      */
     UserBO findById(String id) throws UserNotFoundException;
+
+    /**
+     *
+     * @param userId user ID
+     * @return List<ScaUserDataBO> collection of SCAs for a user
+     * @throws UserNotFoundException is thrown if user can`t be found
+     */
+    List<ScaUserDataBO> getUserScaData(String userId) throws UserNotFoundException;
 
     /**
      *

@@ -18,7 +18,6 @@ package de.adorsys.ledgers.um.db.domain;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -35,28 +34,21 @@ public class UserEntity {
     @Column(name = "user_id")
     private String id;
 
-    @NotNull
     @Column(nullable = false)
     private String login;
 
-    @NotNull
     @Column(nullable = false)
     private String email;
 
-    @NotNull
     @Column(nullable = false)
     private String pin;
 
-    @OneToMany(cascade = CascadeType.ALL,
-            mappedBy = "user")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    private List<ScaUserData> scaMethods = new ArrayList<ScaUserData>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+    private List<ScaUserDataEntity> scaUserData = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL,
-            mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<AccountAccess> accountAccesses = new ArrayList<AccountAccess>();
-
+    private List<AccountAccess> accountAccesses = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -90,12 +82,12 @@ public class UserEntity {
         this.pin = pin;
     }
 
-    public List<ScaUserData> getScaMethods() {
-        return scaMethods;
+    public List<ScaUserDataEntity> getScaUserData() {
+        return scaUserData;
     }
 
-    public void setScaMethods(List<ScaUserData> scaMethods) {
-        this.scaMethods = scaMethods;
+    public void setScaUserData(List<ScaUserDataEntity> scaUserData) {
+        this.scaUserData = scaUserData;
     }
 
     public List<AccountAccess> getAccountAccesses() {
