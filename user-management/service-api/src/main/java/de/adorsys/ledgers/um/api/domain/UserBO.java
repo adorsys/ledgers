@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserBO {
+
     private String id;
 
     @NotNull
@@ -33,10 +34,20 @@ public class UserBO {
     @NotNull
     private String pin;
 
+    private List<ScaUserDataBO> scaUserData = new ArrayList<>();
+
     private List<AccountAccessBO> accountAccesses = new ArrayList<>();
 
-//    private List<LedgerAccount> accounts;
+    public UserBO() {
+    }
 
+    public UserBO(@NotNull String login,
+                  @NotNull String email,
+                  @NotNull String pin) {
+        this.login = login;
+        this.email = email;
+        this.pin = pin;
+    }
 
     public String getId() {
         return id;
@@ -68,6 +79,14 @@ public class UserBO {
 
     public void setPin(String pin) {
         this.pin = pin;
+    }
+
+    public List<ScaUserDataBO> getScaUserData() {
+        return scaUserData;
+    }
+
+    public void setScaUserData(List<ScaUserDataBO> scaUserData) {
+        this.scaUserData = scaUserData;
     }
 
     public List<AccountAccessBO> getAccountAccesses() {

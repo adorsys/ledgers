@@ -1,22 +1,18 @@
 package de.adorsys.ledgers.um.db.domain;
 
-import org.jetbrains.annotations.NotNull;
-
 import javax.persistence.*;
 
 @Entity
-@Table(name = "sca_methods")
-public class ScaUserData {
+@Table(name = "sca_data")
+public class ScaUserDataEntity {
 
     @Id
     @Column(name = "sca_id")
     private String id;
 
-    @NotNull
     @Column(nullable = false)
     private ScaMethodType scaMethod;
 
-    @NotNull
     @Column(nullable = false)
     private String methodValue;
 
@@ -40,7 +36,6 @@ public class ScaUserData {
     public void setId(String id) {
         this.id = id;
     }
-
 
     public String getMethodValue() {
         return methodValue;

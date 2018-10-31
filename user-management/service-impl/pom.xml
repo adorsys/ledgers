@@ -48,6 +48,11 @@
 			<artifactId>mapstruct-jdk8</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>pro.javatar.commons</groupId>
+			<artifactId>javatar-commons</artifactId>
+		</dependency>
+
 		<!-- test dependencies -->
 
 	</dependencies>
