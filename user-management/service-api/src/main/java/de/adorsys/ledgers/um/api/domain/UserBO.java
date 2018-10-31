@@ -18,6 +18,9 @@ package de.adorsys.ledgers.um.api.domain;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserBO {
     private String id;
 
@@ -29,6 +32,8 @@ public class UserBO {
 
     @NotNull
     private String pin;
+
+    private List<AccountAccessBO> accountAccesses = new ArrayList<>();
 
 //    private List<LedgerAccount> accounts;
 
@@ -63,5 +68,13 @@ public class UserBO {
 
     public void setPin(String pin) {
         this.pin = pin;
+    }
+
+    public List<AccountAccessBO> getAccountAccesses() {
+        return accountAccesses;
+    }
+
+    public void setAccountAccesses(List<AccountAccessBO> accountAccesses) {
+        this.accountAccesses = accountAccesses;
     }
 }
