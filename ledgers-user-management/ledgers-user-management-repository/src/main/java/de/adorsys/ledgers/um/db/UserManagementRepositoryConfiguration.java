@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.postings.db;
+package de.adorsys.ledgers.um.db;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
@@ -7,19 +7,12 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import de.adorsys.ledgers.postings.db.domain.BaseEntity;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
 
-/**
- * Configuring what classes to scan while importing this module in 
- * a higer level module.
- * 
- * @author fpo
- *
- */
 @Configuration
-@ComponentScan(basePackageClasses= {PostingsBasePackage.class})
+@ComponentScan(basePackageClasses= {UserManangmentBasePackage.class})
 @EnableJpaAuditing
 @EnableJpaRepositories
-@EntityScan(basePackageClasses= {BaseEntity.class, Jsr310JpaConverters.class})
-public class PostingsRepositoryConfiguration {
+@EntityScan(basePackageClasses= {UserEntity.class, Jsr310JpaConverters.class})
+public class UserManagementRepositoryConfiguration {
 }

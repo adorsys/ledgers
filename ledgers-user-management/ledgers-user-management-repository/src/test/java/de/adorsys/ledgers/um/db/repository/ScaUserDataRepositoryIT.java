@@ -18,6 +18,7 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.um.db.domain.ScaMethodType;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.test.UmRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
 
 @RunWith(SpringRunner.class)
