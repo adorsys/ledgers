@@ -114,6 +114,12 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         }
     }
 
+    @Override
+    public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) {
+        PaymentBO paymentInitiationResult = paymentService.initiatePayment(paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass()));
+        return paymentConverter.toPaymentTO(paymentInitiationResult);
+    }
+
     @Override //TODO Consider refactoring to avoid unchecked cast warnings
     public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
         PaymentBO paymentResult;

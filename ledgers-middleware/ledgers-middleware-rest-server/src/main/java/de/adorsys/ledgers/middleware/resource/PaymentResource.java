@@ -24,11 +24,9 @@ import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/payments")
@@ -51,13 +49,25 @@ public class PaymentResource {
         }
     }
 
-    @GetMapping(value = "/{payment-type}/{payment-product}/{paymentId}", produces = {"application/json", "application/xml", "multipart/form-data"})
-    public ResponseEntity<?> getPaymentById(@PathVariable PaymentTypeTO paymentType, @PathVariable PaymentProductTO paymentProduct, @PathVariable String paymentId) {
+    @GetMapping(value = "/{payment-type}/{payment-product}/{paymentId}"/*, produces = {"application/json", "application/xml", "multipart/form-data"}*/)
+    public ResponseEntity<?> getPaymentById(@PathVariable(name = "payment-type") PaymentTypeTO paymentType,
+                                            @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
+                                            @PathVariable(name = "paymentId") String paymentId) {
         try {
             return ResponseEntity.ok(middlewareService.getPaymentById(paymentType, paymentProduct, paymentId));
         } catch (PaymentNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{paymentType}")
+    public ResponseEntity<?> initiatePayment(@PathVariable PaymentTypeTO paymentType, @RequestBody Object payment) {
+        try {
+            return new ResponseEntity(middlewareService.initiatePayment(payment, paymentType), HttpStatus.CREATED);
+        } catch (Exception e) { //TODO add corresponding exceptions later (initiate payment full procedure with balance checking etc.)
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage());
         }
     }
 }

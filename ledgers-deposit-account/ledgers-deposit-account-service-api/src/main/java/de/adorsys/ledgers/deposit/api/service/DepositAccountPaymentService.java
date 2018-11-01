@@ -24,4 +24,6 @@ public interface DepositAccountPaymentService {
     PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException;
 
     PaymentBO getPaymentById(PaymentTypeBO paymentType, PaymentProductBO paymentProduct, String paymentId) throws PaymentNotFoundException;
+
+    PaymentBO initiatePayment(PaymentBO paymentBO);
 }
