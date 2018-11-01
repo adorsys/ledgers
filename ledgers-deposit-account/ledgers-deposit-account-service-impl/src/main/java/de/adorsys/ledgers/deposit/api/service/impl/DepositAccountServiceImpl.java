@@ -16,6 +16,7 @@ import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
@@ -142,7 +143,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
         try {
             postingService.newPosting(posting);
-        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException e) {
+        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
             throw new PaymentProcessingException(e.getMessage());
         }
         return null;
@@ -189,7 +190,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         PostingBO posting = buildPosting(oprDetails, ledger, lines);
         try {
             postingService.newPosting(posting);
-        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException e) {
+        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
             throw new PaymentProcessingException(e.getMessage(), e);
         }
 
