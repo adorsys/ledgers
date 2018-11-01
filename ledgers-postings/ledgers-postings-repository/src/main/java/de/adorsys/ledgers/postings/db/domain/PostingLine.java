@@ -4,12 +4,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
+
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import de.adorsys.ledgers.util.Ids;
 
@@ -63,6 +66,7 @@ public class PostingLine {
 	
 	/* The time of recording of this posting. */
 	@Column(nullable = false, updatable = false)
+	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime recordTime;
 	
 	/*
@@ -81,6 +85,7 @@ public class PostingLine {
 	 * statement.
 	 */
 	@Column(nullable = false, updatable = false)
+	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime pstTime;
 	
 	/*
@@ -117,6 +122,7 @@ public class PostingLine {
 	 * The Date use to compute interests. This can be different from the posting
 	 * date and can lead to the production of other type of balances.
 	 */
+	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime valTime;
 	
 	private void synchPosting(){

@@ -1,15 +1,31 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateConverter;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalTimeConverter;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 @Entity
 public class Payment {
@@ -32,8 +48,10 @@ public class Payment {
     private Boolean batchBookingPreferred;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate requestedExecutionDate;
+	@Convert(converter=LocalDateConverter.class)
+	private LocalDate requestedExecutionDate;
 
+	@Convert(converter=LocalTimeConverter.class)
     private LocalTime requestedExecutionTime;
 
     @Enumerated(EnumType.STRING)
@@ -41,9 +59,11 @@ public class Payment {
     private PaymentType paymentType;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
+	@Convert(converter=LocalDateConverter.class)
     private LocalDate startDate;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
+	@Convert(converter=LocalDateConverter.class)
     private LocalDate endDate;
 
     private String executionRule;

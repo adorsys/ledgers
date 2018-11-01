@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import de.adorsys.ledgers.postings.db.domain.BaseEntity;
+
 /**
  * Configuring what classes to scan while importing this module in 
  * a higer level module.
@@ -14,10 +16,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  *
  */
 @Configuration
-@ComponentScan(basePackages={"de.adorsys.ledgers.postings.db"})
+@ComponentScan(basePackageClasses= {PostingsBasePackage.class})
 @EnableJpaAuditing
 @EnableJpaRepositories
-@EntityScan(basePackages="de.adorsys.ledgers.postings.db.domain")
+//@EntityScan(basePackageClasses= {BaseEntity.class, Jsr310JpaConverters.class})
+@EntityScan(basePackageClasses= {BaseEntity.class})
 public class PostingsRepositoryConfiguration {
-
 }

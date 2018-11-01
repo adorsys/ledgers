@@ -40,6 +40,47 @@
 		</dependency>
 
 		<!-- test dependencies -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.dbunit</groupId>
+			<artifactId>dbunit</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>junit</artifactId>
+					<groupId>junit</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.springtestdbunit</groupId>
+			<artifactId>spring-test-dbunit</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
