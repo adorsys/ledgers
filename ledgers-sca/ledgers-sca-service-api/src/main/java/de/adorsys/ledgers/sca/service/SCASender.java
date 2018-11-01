@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.db.repository;
+package de.adorsys.ledgers.sca.service;
 
-import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
-import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
-import org.springframework.data.repository.CrudRepository;
+public interface SCASender {
 
-import java.util.List;
-
-public interface SCAOperationRepository extends CrudRepository<SCAOperationEntity, String> {
-
-    List<SCAOperationEntity> findByStatus(AuthCodeStatus status);
+    boolean send(String address, String authCode);
 }

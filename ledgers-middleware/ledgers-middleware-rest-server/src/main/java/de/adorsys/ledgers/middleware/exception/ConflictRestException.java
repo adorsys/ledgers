@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.db.repository;
+package de.adorsys.ledgers.middleware.exception;
 
-import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
-import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.http.HttpStatus;
 
-import java.util.List;
+/**
+ * This is generic exception for cases when BL conflicts with client request
+ */
+public class ConflictRestException extends RestException {
 
-public interface SCAOperationRepository extends CrudRepository<SCAOperationEntity, String> {
+    public static final String ERROR_CODE = "409_ConflictRestException";
 
-    List<SCAOperationEntity> findByStatus(AuthCodeStatus status);
+    public ConflictRestException() {
+        initialize();
+    }
+
+    public ConflictRestException(String message) {
+        super(message);
+        initialize();
+    }
+
+    private void initialize() {
+        withStatus(HttpStatus.CONFLICT);
+        withCode(ERROR_CODE);
+    }
 }

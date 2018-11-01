@@ -1,15 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
-		<artifactId>ledgers-sca</artifactId>
+		<artifactId>ledgers-user-management</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>ledgers-sca-service-impl</artifactId>
-	<name>ledgers-sca-service-impl</name>
 
+    <artifactId>ledgers-user-management-rest-server</artifactId>
+	
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>
@@ -20,26 +21,34 @@
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-sca-service-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-sca-repository</artifactId>
+			<artifactId>ledgers-user-management-service-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
 		<!-- spring dependencies -->
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Sprinfox and swagger UI-->
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -47,12 +56,6 @@
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-jdk8</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>pro.javatar.commons</groupId>
-			<artifactId>javatar-commons</artifactId>
-			<version>${javatar-commons.version}</version>
 		</dependency>
 
 		<!-- test dependencies -->
@@ -75,7 +78,8 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-sca-rest-server</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-user-management-repository</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-user-management-service-impl</exclude>
 									</excludes>
 								</bannedDependencies>
 							</rules>

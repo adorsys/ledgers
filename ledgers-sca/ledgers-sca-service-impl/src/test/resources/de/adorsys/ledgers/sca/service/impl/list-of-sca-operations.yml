@@ -1,0 +1,12 @@
+- opId: opId1
+  status: NEW
+  created: 2018-10-30T16:27:01.951
+  validitySeconds: 180
+  statusTime: 2018-10-30T16:27:01.951
+  authCodeHash: authCodeHash1
+- opId: opId2
+  status: NEW
+  created: 2018-10-30T16:28:01.951
+  validitySeconds: 180
+  statusTime: 2018-10-30T16:28:01.951
+  authCodeHash: authCodeHash2
