@@ -16,14 +16,8 @@ import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingRepository;
-import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 
 public class AbstractServiceImpl {
-
-    @Autowired
-    protected PostingRepository postingRepository;
 
     @Autowired
     protected LedgerAccountRepository ledgerAccountRepository;
@@ -36,13 +30,6 @@ public class AbstractServiceImpl {
 
     @Autowired
     protected LedgerRepository ledgerRepository;
-
-    @Autowired
-    protected PostingLineRepository postingLineRepository;
-    
-    @Autowired
-    protected PostingRepositoryFunctions repoFctn;
-
 
     protected ChartOfAccount loadCoa(ChartOfAccountBO model) throws ChartOfAccountNotFoundException {
         if (model == null) {

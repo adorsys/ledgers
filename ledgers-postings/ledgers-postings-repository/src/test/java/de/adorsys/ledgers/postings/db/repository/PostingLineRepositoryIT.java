@@ -9,7 +9,6 @@ import java.time.Month;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,8 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
+import de.adorsys.ledgers.postings.db.adapter.LedgerRepositoryAdapter;
+import de.adorsys.ledgers.postings.db.adapter.PostingRepositoryAdapter;
 import de.adorsys.ledgers.postings.db.domain.AccountCategory;
 import de.adorsys.ledgers.postings.db.domain.BalanceSide;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
@@ -36,12 +37,11 @@ import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.domain.Posting;
 import de.adorsys.ledgers.postings.db.exception.BaseLineException;
 import de.adorsys.ledgers.postings.db.exception.DoubleEntryAccountingException;
+import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
 import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
-import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.util.Ids;
 
-@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -52,7 +52,10 @@ import de.adorsys.ledgers.util.Ids;
 public class PostingLineRepositoryIT {
 	
 	@Autowired
-	private PostingRepositoryFunctions fctn;
+	private LedgerRepositoryAdapter ledgerRepositoryAdapter;
+	
+	@Autowired
+	private PostingRepositoryAdapter fctn;
 	
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -63,16 +66,16 @@ public class PostingLineRepositoryIT {
     }
     
     @Test
-    public void test_load_coa_ok () throws IOException {
+    public void test_load_coa_ok () throws IOException, LedgerWithIdNotFoundException {
     	loadCoa("sample_coa_banking.yml");
-    	Ledger ledger = fctn.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
+    	Ledger ledger = ledgerRepositoryAdapter.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         Assume.assumeNotNull(ledger);
     	LedgerAccount ledgerAccount = fctn.loadLedgerAccount(ledger, "1128").orElse(null);
     	Assert.assertNotNull(ledgerAccount);
     }
 
     @Test
-    public void test_load_posting_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
+    public void test_load_posting_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException, LedgerWithIdNotFoundException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("sample_posting.yml");
     }
@@ -84,9 +87,10 @@ public class PostingLineRepositoryIT {
      * @throws DoubleEntryAccountingException 
      * @throws PostingRepositoryException 
      * @throws BaseLineException 
+     * @throws LedgerWithIdNotFoundException 
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
+    public void use_case_newbank_no_overriden_tx_nok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException, LedgerWithIdNotFoundException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -103,9 +107,10 @@ public class PostingLineRepositoryIT {
      * @throws DoubleEntryAccountingException 
      * @throws PostingRepositoryException 
      * @throws BaseLineException 
+     * @throws LedgerWithIdNotFoundException 
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
+    public void use_case_newbank_no_overriden_tx_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException, LedgerWithIdNotFoundException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -139,7 +144,7 @@ public class PostingLineRepositoryIT {
 
     
     @Test
-    public void use_case_newbank_overriden_amount_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
+    public void use_case_newbank_overriden_amount_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException, LedgerWithIdNotFoundException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_overriden_amount.yml");
 
@@ -172,7 +177,7 @@ public class PostingLineRepositoryIT {
     }
 
     @Test
-    public void use_case_newbank_overriden_account_number_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
+    public void use_case_newbank_overriden_account_number_ok () throws IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException, LedgerWithIdNotFoundException {
     	loadCoa("sample_coa_banking.yml");
     	loadPosting("use_case_newbank_overriden_account_number.yml");
 
@@ -204,14 +209,14 @@ public class PostingLineRepositoryIT {
     	checkBalance("2332003", dateTime, new BigDecimal(-5000.00));
     }
 
-    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
-    	Ledger ledger = fctn.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
+    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws LedgerWithIdNotFoundException {
+    	Ledger ledger = ledgerRepositoryAdapter.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
     	LedgerAccount account = fctn.loadLedgerAccount(ledger, accountNumber).orElseThrow(() -> new IllegalStateException());
     	BigDecimal balance = fctn.computeBalance(account, date).debitBalance();
     	Assert.assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
-    private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
-    	Ledger ledger = fctn.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
+    private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws LedgerWithIdNotFoundException {
+    	Ledger ledger = ledgerRepositoryAdapter.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
     	LedgerAccount account = fctn.loadLedgerAccount(ledger, accountNumber).orElseThrow(() -> new IllegalStateException());
     	BigDecimal balance = fctn.computeBalance(account, date).debitBalance();
     	Assert.assertNotEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
@@ -219,8 +224,8 @@ public class PostingLineRepositoryIT {
     
 
 
-	private void loadCoa(String s) throws IOException{
-    	Ledger ledger = fctn.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
+	private void loadCoa(String s) throws IOException, LedgerWithIdNotFoundException{
+    	Ledger ledger = ledgerRepositoryAdapter.loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         Assume.assumeNotNull(ledger);
 
         InputStream inputStream = PostingLineRepositoryIT.class.getResourceAsStream(s);
@@ -267,8 +272,8 @@ public class PostingLineRepositoryIT {
 			return parent;
 		}
     }
-	private void loadPosting(String s) throws JsonParseException, JsonMappingException, IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
-    	Ledger ledger = fctn.loadLedger("Zd0ND5YwSzGwIfZilhumPg");//.orElseThrow(() -> new IllegalStateException());
+	private void loadPosting(String s) throws JsonParseException, JsonMappingException, IOException, DoubleEntryAccountingException, BaseLineException, PostingRepositoryException, LedgerWithIdNotFoundException {
+    	Ledger ledger = ledgerRepositoryAdapter.loadLedger("Zd0ND5YwSzGwIfZilhumPg");//.orElseThrow(() -> new IllegalStateException());
         Assume.assumeNotNull(ledger);
         InputStream inputStream = PostingLineRepositoryIT.class.getResourceAsStream(s);
         Posting[] postings = mapper.readValue(inputStream, Posting[].class);
