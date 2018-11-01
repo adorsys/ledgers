@@ -14,7 +14,6 @@ import org.mapstruct.factory.Mappers;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Currency;
 
 import static org.assertj.core.api.Assertions.assertThat;

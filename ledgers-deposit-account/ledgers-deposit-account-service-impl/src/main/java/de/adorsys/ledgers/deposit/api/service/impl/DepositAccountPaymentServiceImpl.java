@@ -58,12 +58,20 @@ public class DepositAccountPaymentServiceImpl implements DepositAccountPaymentSe
         return filterPaymentByTypeAndProduct(payment, paymentType, paymentProduct);
     }
 
+    @Override
+    public PaymentBO initiatePayment(PaymentBO payment) {
+        Payment persistedPayment = paymentMapper.toPayment(payment);
+        persistedPayment.getTargets().forEach(t -> t.setPayment(persistedPayment));
+        Payment save = paymentRepository.save(persistedPayment);
+        return paymentMapper.toPaymentBO(save);
+    }
+
     private PaymentBO filterPaymentByTypeAndProduct(PaymentBO payment, PaymentTypeBO paymentType, PaymentProductBO paymentProduct) throws PaymentNotFoundException {
         boolean isPresentPayment = PaymentTypeBO.valueOf(payment.getPaymentType().name()) == paymentType;
-        if (payment.getPaymentType() != PaymentTypeBO.BULK) {
+        if (isPresentPayment && payment.getPaymentType() != PaymentTypeBO.BULK) {
             isPresentPayment = payment.getTargets().stream()
-                                   .map(t -> PaymentProductBO.valueOf(t.getPaymentProduct().name()))
-                                   .allMatch(t -> t == paymentProduct);
+                                       .map(t -> PaymentProductBO.valueOf(t.getPaymentProduct().name()))
+                                       .allMatch(t -> t == paymentProduct);
         }
         if (!isPresentPayment) {
             throw new PaymentNotFoundException(payment.getPaymentId());

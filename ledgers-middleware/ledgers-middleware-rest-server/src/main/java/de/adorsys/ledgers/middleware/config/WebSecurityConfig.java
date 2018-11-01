@@ -13,27 +13,22 @@ import java.security.Principal;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http
-				.authorizeRequests().antMatchers("/").permitAll()
-				.and()
-				.authorizeRequests().antMatchers("/console/**").permitAll();
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests().antMatchers("/").permitAll()
+                .and()
+                .authorizeRequests().antMatchers("/console/**").permitAll();
 
-		http.csrf().disable();
-		http.headers().frameOptions().disable();
-	}
-	
-	@Bean
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
+    }
+
+    @Bean
     @Primary
     @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-	public Principal principal(){
-		String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-		return new Principal() {
-			@Override
-			public String getName() {
-				return userId;
-			}
-		};
-	}
+    public Principal principal() {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return () -> userId;
+    }
 }
