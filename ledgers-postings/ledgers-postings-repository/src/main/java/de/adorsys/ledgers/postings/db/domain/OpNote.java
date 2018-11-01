@@ -3,11 +3,13 @@ package de.adorsys.ledgers.postings.db.domain;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -31,9 +33,11 @@ public class OpNote {
 	/*Time of recording of this note.*/
 	@Column(nullable=false, updatable=false)
 	@CreatedDate
+	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime recTime;
 	
 	/*Prospective time of execution of this note.*/
+	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime execTime;
 	
 	/*States if execution might occur before execution time.*/

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -50,6 +52,7 @@ public class Posting extends HashRecord {
     private String recordUser;
 
     /* The time of recording of this posting. */
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime recordTime;
 
     /*
@@ -79,6 +82,7 @@ public class Posting extends HashRecord {
     private int oprSeqNbr = 0;
 
     /* The time of occurrence of this operation. Set by the consuming module. */
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime oprTime;
 
     /*
@@ -107,6 +111,7 @@ public class Posting extends HashRecord {
      */
     @Column(nullable = false, updatable = false)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime pstTime;
 
     /*
@@ -140,6 +145,7 @@ public class Posting extends HashRecord {
      * The Date use to compute interests. This can be different from the posting
      * date and can lead to the production of other type of balances.
      */
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime valTime;
 
 //    todo: add description to this field

@@ -3,9 +3,12 @@ package de.adorsys.ledgers.postings.db.domain;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
+
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
@@ -54,6 +57,7 @@ public class PostingTrace extends HashRecord {
     private String tgtPstId;
 
     @Column(nullable = false, updatable = false)
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime recordTime;
 
     public PostingTrace(String id, int pos, String srcPstId, String srcPstHash, String tgtPstId, String antTraceId,

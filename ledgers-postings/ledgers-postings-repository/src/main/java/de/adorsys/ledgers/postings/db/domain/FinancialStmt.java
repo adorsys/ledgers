@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 /**
  * A financial statement will help draw time lines on ledgers and accounts.
@@ -41,6 +44,7 @@ public class FinancialStmt {
 
 	/* Documents the time of the posting. */
 	@Column(nullable = false, updatable = false)
+	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime pstTime;
 
 	/* Documents the posting holding additional information. */
