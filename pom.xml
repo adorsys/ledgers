@@ -72,7 +72,7 @@
 		<org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
 		<lombok-plugin.version>1.16.22</lombok-plugin.version>
 		<hamcrest-library.version>1.3</hamcrest-library.version>
-		<javatar-commons.version>0.6</javatar-commons.version>
+		<javatar-commons.version>LATEST</javatar-commons.version>
         <mockito.version>1.10.19</mockito.version>
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>

@@ -25,9 +25,8 @@ import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.middleware.converter.AccountConverter;
+import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
@@ -36,7 +35,6 @@ import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.postings.api.domain.BalanceBO;
 import de.adorsys.ledgers.postings.api.service.AccountBalancesService;
-import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import org.slf4j.Logger;
@@ -59,17 +57,15 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     private final PaymentConverter paymentConverter;
 
-    private final AccountConverter accountConverter;
+    private final AccountDetailsMapper detailsMapper;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService,
-                                 DepositAccountService accountService, AccountBalancesService accountBalancesService,
-                                 PaymentConverter paymentConverter, AccountConverter accountConverter) {
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService accountService, AccountBalancesService accountBalancesService, PaymentConverter paymentConverter, AccountDetailsMapper detailsMapper) {
         this.paymentService = paymentService;
         this.scaOperationService = scaOperationService;
         this.accountService = accountService;
         this.accountBalancesService = accountBalancesService;
         this.paymentConverter = paymentConverter;
-        this.accountConverter = accountConverter;
+        this.detailsMapper = detailsMapper;
     }
 
     @SuppressWarnings("unchecked")
@@ -119,7 +115,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         try {
             DepositAccountBO account = accountService.getDepositAccountById(accountId);
             List<BalanceBO> balances = accountBalancesService.getBalances(account.getIban());
-            return accountConverter.toAccountDetailsTO(account, balances); //TODO add real balances call and mapping      by @dmiex
+            return detailsMapper.toAccountDetailsTO(account, balances);
         } catch (DepositAccountNotFoundException e) {
             logger.error("Deposit Account with id=" + accountId + "not found", e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);

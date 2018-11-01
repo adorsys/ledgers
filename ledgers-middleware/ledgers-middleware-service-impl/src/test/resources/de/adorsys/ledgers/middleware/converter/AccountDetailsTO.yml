@@ -1,0 +1,36 @@
+id: id
+iban: iban
+bban: bban
+pan: pan
+maskedPan: maskedPan
+msisdn: msisdn
+currency: EUR
+name: name
+product: product
+accountType: CASH
+accountStatus: ENABLED
+bic: bic
+linkedAccounts: account
+usageType: PRIV
+details: details
+balances:
+ - {
+    amount: {
+       currency: EUR,
+       amount: 100
+            },
+  balanceType: CLOSING_BOOKED,
+  lastChangeDateTime: "2018-12-12T00:00:00.000Z",
+  referenceDate: 2018-12-12,
+  lastCommittedTransaction: someAction1
+ }
+ - {
+    amount: {
+        currency: EUR,
+        amount: 200
+             },
+   balanceType: INTERIM_AVAILABLE,
+   lastChangeDateTime: "2018-12-10T00:00:00.000Z",
+   referenceDate: 2018-12-10,
+   lastCommittedTransaction: someAction2
+ }
