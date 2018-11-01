@@ -24,24 +24,24 @@ import java.time.LocalDateTime;
 public class SCAOperationEntity {
 
     @Id
-    @Column(name = "op_id", nullable = false)
+    @Column(name = "op_id", nullable = false, updatable = false)
     private String opId;
 
-    @Column(name = "validity_seconds", nullable = false)
+    @Column(name = "validity_seconds", nullable = false, updatable = false)
     private int validitySeconds;
 
-    /*The hash of auth code and opData*/
-    @Column(name = "auth_code_hash", nullable = false)
+    /* The hash of auth code and opData */
+    @Column(name = "auth_code_hash", nullable = false, updatable = false)
     private String authCodeHash;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthCodeStatus status;
 
-    @Column(name = "hash_alg", nullable = false)
+    @Column(name = "hash_alg", nullable = false, updatable = false)
     private String hashAlg;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime created;
 
     @Column(name = "status_time", nullable = false)

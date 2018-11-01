@@ -2,14 +2,9 @@ package de.adorsys.ledgers.middleware.resource;
 
 import de.adorsys.ledgers.middleware.domain.SCAOperationTO;
 import de.adorsys.ledgers.middleware.domain.ValidationResultTO;
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.exception.RestException;
-import de.adorsys.ledgers.middleware.exception.ValidationRestException;
+import de.adorsys.ledgers.middleware.exception.*;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.util.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -179,6 +174,58 @@ public class AuthCodeResourceTest {
 
         assertThat(exception.getStatus(), is(HttpStatus.UNPROCESSABLE_ENTITY));
         assertThat(exception.getCode(), is(ValidationRestException.ERROR_CODE));
+        assertThat(exception.getDevMessage(), is(message));
+        assertThat(exception.getMessage(), is(message));
+
+        verify(middlewareService, times(1)).validateAuthCode(OP_ID, OP_DATA, TAN_CODE);
+    }
+
+    @Test
+    public void validateStolenException() throws Exception {
+        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+
+        String message = "Operation auth code was stolen";
+        when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenThrow(new SCAOperationUsedOrStolenMiddlewareException(message));
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                                                      .post("/auth-codes/{id}/validate", OP_ID)
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                                                      .content(SerializationUtils.writeValueAsBytes(operation)))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.CONFLICT.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        RestException exception = READER.getObjectFromString(mvcResult.getResponse().getContentAsString(), ConflictRestException.class);
+
+        assertThat(exception.getStatus(), is(HttpStatus.CONFLICT));
+        assertThat(exception.getCode(), is(ConflictRestException.ERROR_CODE));
+        assertThat(exception.getDevMessage(), is(message));
+        assertThat(exception.getMessage(), is(message));
+
+        verify(middlewareService, times(1)).validateAuthCode(OP_ID, OP_DATA, TAN_CODE);
+    }
+
+    @Test
+    public void validateExpiredException() throws Exception {
+        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+
+        String message = "Operation auth code was expired";
+        when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenThrow(new SCAOperationExpiredMiddlewareException(message));
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                                                      .post("/auth-codes/{id}/validate", OP_ID)
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                                                      .content(SerializationUtils.writeValueAsBytes(operation)))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.CONFLICT.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        RestException exception = READER.getObjectFromString(mvcResult.getResponse().getContentAsString(), ConflictRestException.class);
+
+        assertThat(exception.getStatus(), is(HttpStatus.CONFLICT));
+        assertThat(exception.getCode(), is(ConflictRestException.ERROR_CODE));
         assertThat(exception.getDevMessage(), is(message));
         assertThat(exception.getMessage(), is(message));
 

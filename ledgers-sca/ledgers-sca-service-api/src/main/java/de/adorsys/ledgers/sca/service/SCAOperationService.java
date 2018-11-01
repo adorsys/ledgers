@@ -1,8 +1,6 @@
 package de.adorsys.ledgers.sca.service;
 
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.*;
 
 public interface SCAOperationService {
 
@@ -25,5 +23,11 @@ public interface SCAOperationService {
 	 * @param authCode : This auth code was generated at previous step @see #generateAuthCode(String opId, String opData, int validitySeconds)
 	 * @return true if auth code is valid in other cases false will be returned
 	 */
-	boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException;
+	boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException;
+
+
+    /**
+     * All operations that have status NEW will be changed on EXPIRED if date of creation + validitySeconds in the past
+     */
+	void processExpiredOperations();
 }

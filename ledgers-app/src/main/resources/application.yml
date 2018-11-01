@@ -29,14 +29,39 @@ spring:
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
   jackson.serialization.write_dates_as_timestamps: false
+  mail:
+    default-encoding: UTF-8
+    host: smtp.gmail.com
+    port: 587
+    username: #add your email here
+    password: #add your password here
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+sca:
+  authCode:
+    expiration:
+      cron: "*/5 * * * * *" # every 5 seconds
+    email:
+      subject: Your TAN from MockBank
+      from: noreply@adorsys.de
+    phone:
+      subject: Your TAN from MockBank
 
 ---
 spring:
   profiles: h2
+  h2:
+    console:
+      enabled: true
 
 db:
-  url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
-  username: sa
+  url: jdbc:h2:mem:ledgers
+  user: sa
   password: sa
 
 ---
@@ -47,3 +72,6 @@ logging.level.org.postgresql: INFO
 logging.level.org.hibernate.SQL: DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 logging.level.org.springframework: TRACE
+
+management.endpoints.web.exposure.include: "*"
+management.endpoints.web.exposure.exclude: env,beans

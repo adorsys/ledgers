@@ -18,12 +18,11 @@ package de.adorsys.ledgers.middleware.resource;
 
 import de.adorsys.ledgers.middleware.domain.SCAOperationTO;
 import de.adorsys.ledgers.middleware.domain.ValidationResultTO;
+import de.adorsys.ledgers.middleware.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.exception.ValidationRestException;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +62,9 @@ public class AuthCodeResource {
         } catch (SCAOperationNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (SCAOperationUsedOrStolenMiddlewareException | SCAOperationExpiredMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
 }

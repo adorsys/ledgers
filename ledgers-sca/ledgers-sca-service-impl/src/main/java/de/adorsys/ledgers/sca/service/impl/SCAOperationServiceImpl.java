@@ -20,9 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.util.hash.BaseHashItem;
@@ -35,13 +33,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SCAOperationServiceImpl implements SCAOperationService {
     private static final Logger logger = LoggerFactory.getLogger(SCAOperationServiceImpl.class);
     private static final String TAN_VALIDATION_ERROR = "Can't validate client TAN";
     private static final String AUTH_CODE_GENERATION_ERROR = "TAN can't be generated";
+    private static final String STOLEN_ERROR = "Seems auth code was stolen because it already used in the system";
+    private static final String EXPIRATION_ERROR = "Operation is not valid because of expiration";
 
     private final SCAOperationRepository repository;
 
@@ -98,13 +100,27 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
     @Override
     @SuppressWarnings("PMD.PrematureDeclaration")
-    public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException {
+    public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
-        Optional<SCAOperationEntity> operation = repository.findById(opId);
+        Optional<SCAOperationEntity> operationOptional = repository.findById(opId);
 
-        String authCodeHash = operation
+        String authCodeHash = operationOptional
                                       .map(SCAOperationEntity::getAuthCodeHash)
                                       .orElseThrow(SCAOperationNotFoundException::new);
+
+        SCAOperationEntity operation = operationOptional.get();
+
+        if (isOperationAlreadyUsed(operation)) {
+            logger.error(STOLEN_ERROR);
+            throw new SCAOperationUsedOrStolenException(STOLEN_ERROR);
+        }
+
+        if (isOperationAlreadyExpired(operation)) {
+            updateOperationStatus(operation, AuthCodeStatus.EXPIRED);
+            repository.save(operation);
+            logger.error(EXPIRATION_ERROR);
+            throw new SCAOperationExpiredException(EXPIRATION_ERROR);
+        }
 
         String hash;
         try {
@@ -117,16 +133,46 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         boolean valid = hash.equals(authCodeHash);
 
         if (valid) {
-            updateOperationStatus(operation.get(), AuthCodeStatus.USED);
+            updateOperationStatus(operation, AuthCodeStatus.USED);
+            repository.save(operation);
         }
 
         return valid;
     }
 
+    @Override
+    public void processExpiredOperations() {
+        List<SCAOperationEntity> operations = repository.findByStatus(AuthCodeStatus.NEW);
+
+        logger.info("{} operations with status NEW were found", operations.size());
+
+        List<SCAOperationEntity> expiredOperations = operations
+                                                             .stream()
+                                                             .filter(this::isOperationAlreadyExpired)
+                                                             .collect(Collectors.toList());
+
+        expiredOperations.forEach(o -> updateOperationStatus(o, AuthCodeStatus.EXPIRED));
+
+        logger.info("{} operations was detected as EXPIRED", expiredOperations.size());
+
+        repository.saveAll(expiredOperations);
+
+        logger.info("Expired operations were updated");
+    }
+
+    private boolean isOperationAlreadyUsed(SCAOperationEntity operation) {
+        return operation.getStatus() == AuthCodeStatus.USED;
+    }
+
+    private boolean isOperationAlreadyExpired(SCAOperationEntity operation) {
+        boolean hasExpiredStatus = operation.getStatus() == AuthCodeStatus.EXPIRED;
+        int validitySeconds = operation.getValiditySeconds();
+        return hasExpiredStatus || LocalDateTime.now().isAfter(operation.getCreated().plusSeconds(validitySeconds));
+    }
+
     private void updateOperationStatus(SCAOperationEntity operation, AuthCodeStatus status) {
         operation.setStatus(status);
         operation.setStatusTime(LocalDateTime.now());
-        repository.save(operation);
     }
 
     private final static class OperationHashItem {

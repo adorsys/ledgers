@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.db.repository;
+package de.adorsys.ledgers.sca.service.impl.sender;
 
-import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
-import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
-import org.springframework.data.repository.CrudRepository;
+import de.adorsys.ledgers.sca.service.SCASender;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
+@Service
+public class PhoneSCASender implements SCASender {
 
-public interface SCAOperationRepository extends CrudRepository<SCAOperationEntity, String> {
-
-    List<SCAOperationEntity> findByStatus(AuthCodeStatus status);
+    @Override
+    public boolean send(String address, String authCode) {
+        throw new UnsupportedOperationException("Sending SCA via phone not implemented yet");
+    }
 }

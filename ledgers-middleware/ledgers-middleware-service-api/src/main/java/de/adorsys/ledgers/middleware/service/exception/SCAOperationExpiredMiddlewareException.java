@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.db.repository;
+package de.adorsys.ledgers.middleware.service.exception;
 
-import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
-import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
-import org.springframework.data.repository.CrudRepository;
+public class SCAOperationExpiredMiddlewareException extends Exception {
 
-import java.util.List;
+    public SCAOperationExpiredMiddlewareException() {}
 
-public interface SCAOperationRepository extends CrudRepository<SCAOperationEntity, String> {
+    public SCAOperationExpiredMiddlewareException(String message) {
+        super(message);
+    }
 
-    List<SCAOperationEntity> findByStatus(AuthCodeStatus status);
+    public SCAOperationExpiredMiddlewareException(Throwable cause) {
+        super(cause);
+    }
+
+    public SCAOperationExpiredMiddlewareException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -33,16 +33,14 @@ import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.exception.*;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MiddlewareServiceImpl<T> implements MiddlewareService {
+public class MiddlewareServiceImpl implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
 
     private final DepositAccountPaymentService paymentService;
@@ -87,7 +85,7 @@ public class MiddlewareServiceImpl<T> implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException {
+    public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
         try {
             return scaOperationService.validateAuthCode(opId, opData, authCode);
         } catch (SCAOperationNotFoundException e) {
@@ -96,6 +94,12 @@ public class MiddlewareServiceImpl<T> implements MiddlewareService {
         } catch (SCAOperationValidationException e) {
             logger.error(e.getMessage(), e);
             throw new SCAOperationValidationMiddlewareException(e);
+        } catch (SCAOperationExpiredException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationExpiredMiddlewareException(e);
+        } catch (SCAOperationUsedOrStolenException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationUsedOrStolenMiddlewareException(e);
         }
     }
 
