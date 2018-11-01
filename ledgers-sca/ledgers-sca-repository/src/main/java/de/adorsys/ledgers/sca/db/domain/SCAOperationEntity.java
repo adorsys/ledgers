@@ -19,11 +19,14 @@ package de.adorsys.ledgers.sca.db.domain;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 @Entity
 @Table(name = "sca_operation")
@@ -48,11 +51,11 @@ public class SCAOperationEntity {
     private String hashAlg;
 
     @Column(nullable = false, updatable = false)
-//	@Convert(converter=LocalDateTimeConverter.class)
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime created;
 
     @Column(name = "status_time", nullable = false)
-//	@Convert(converter=LocalDateTimeConverter.class)
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime statusTime;
 
     public String getOpId() {
