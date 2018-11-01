@@ -88,6 +88,11 @@ public class PostingLineBO {
 	 */
 	private LocalDateTime valTime;
 
+	/*
+	 * The id of the last balanced posting line for this account.
+	 */
+	private String baseLine;
+	
 	public String getId() {
 		return id;
 	}
@@ -215,4 +220,13 @@ public class PostingLineBO {
 	public void setValTime(LocalDateTime valTime) {
 		this.valTime = valTime;
 	}
+
+	public String getBaseLine() {
+		return baseLine;
+	}
+
+	public void setBaseLine(String baseLine) {
+		this.baseLine = baseLine;
+	}
+	
 }

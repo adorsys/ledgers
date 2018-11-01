@@ -2,6 +2,7 @@ package de.adorsys.ledgers.rest.posting.controller;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
@@ -39,7 +40,7 @@ public class PostingController {
         PostingBO newPosting;
         try {
             newPosting = postingService.newPosting(posting);
-        } catch (LedgerAccountNotFoundException | PostingNotFoundException | LedgerNotFoundException | BaseLineException e) {
+        } catch (LedgerAccountNotFoundException | PostingNotFoundException | LedgerNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
             throw new NotFoundRestException(e.getMessage());
         }
         return ResponseEntity.ok(newPosting);

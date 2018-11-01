@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.postings.db.utils;
+package de.adorsys.ledgers.postings.db.adapter;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -23,16 +23,13 @@ import de.adorsys.ledgers.postings.db.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.db.repository.FinancialStmtRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
-import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
 import de.adorsys.ledgers.util.CloneUtils;
 
 @Service
-public class PostingRepositoryFunctions {
+public class PostingRepositoryAdapter {
 
-	@Autowired
-	private LedgerRepository ledgerRepository;
 	@Autowired
 	private LedgerAccountRepository ledgerAccountRepository;
 	@Autowired
@@ -43,93 +40,7 @@ public class PostingRepositoryFunctions {
 	private FinancialStmtRepository financialStmtRepository;
 	@Autowired
 	private Principal principal;
-
-	public Ledger loadLedger(String id) {
-		return ledgerRepository.findById(id).orElseThrow(() -> new IllegalStateException());
-
-	}
-
-	public void validateDoubleEntryAccounting(Posting posting) throws DoubleEntryAccountingException {
-		List<PostingLine> lines = posting.getLines();
-		BigDecimal sumDebit = BigDecimal.ZERO;
-		BigDecimal sumCredit = BigDecimal.ZERO;
-		for (PostingLine line : lines) {
-			sumDebit = sumDebit.add(line.getDebitAmount());
-			sumCredit = sumCredit.add(line.getCreditAmount());
-		}
-
-		if (!sumDebit.equals(sumCredit)) {
-			throw new DoubleEntryAccountingException(sumDebit, sumCredit);
-		}
-	}
-
-	private PostingLine computeBalance(PostingLine baseLine, List<PostingLine> lines, LedgerAccount account) {
-		BigDecimal sumDebit = baseLine == null ? BigDecimal.ZERO : baseLine.getDebitAmount();
-		BigDecimal sumCredit = baseLine == null ? BigDecimal.ZERO : baseLine.getCreditAmount();
-		Set<String> discardedPostings = filterPostings(lines);
-		for (PostingLine line : lines) {
-			if (discardedPostings.contains(line.getPosting().getId())) {
-				continue;
-			}
-			sumDebit = sumDebit.add(line.getDebitAmount());
-			sumCredit = sumCredit.add(line.getCreditAmount());
-		}
-		return new PostingLine(null, null, account, sumDebit, sumCredit, null, null, null);
-	}
-
-	private Set<String> filterPostings(List<PostingLine> lines) {
-		// building computation set:
-		Set<String> discardedPostings = new HashSet<>();
-		for (PostingLine line : lines) {
-			if (line.getOprSeqNbr() > 0) {
-				for (int i = line.getOprSeqNbr() - 1; i >= 0; i--) {
-					String makeId = Posting.makeId(line.getOprId(), i);
-					discardedPostings.add(makeId);
-				}
-			}
-		}
-		return discardedPostings;
-	}
-
-	public void validatePostingTime(Ledger ledger, Posting posting)
-			throws BaseLineException, PostingRepositoryException {
-		if (posting.getPstTime() == null) {
-			throw new PostingRepositoryException("Missing posting time");
-		}
-		// Look for an account statement closed before that date.
-		Optional<FinancialStmt> stmtOpt = financialStmtRepository
-				.findFirstByLedgerAndStmtTypeAndStmtTargetAndStmtStatusOrderByPstTimeDesc(ledger, StmtType.BS,
-						ledger.getId(), StmtStatus.CLOSED);
-
-		if (stmtOpt.isPresent()) {
-			FinancialStmt accStmt = stmtOpt.get();
-			if (posting.getPstTime().isBefore(accStmt.getPstTime())) {
-				throw new BaseLineException(posting.getPstTime(), accStmt.getPstTime());
-			}
-		}
-	}
-
-	/*
-	 * Checks if this account has been close by the given posting date.
-	 * 
-	 */
-	public Optional<PostingLine> validatePostingTime(Ledger ledger, Posting posting, LedgerAccount ledgerAccount) throws BaseLineException {
-		// Look for an account statement closed before that date.
-		FinancialStmt accStmt = financialStmtRepository
-				.findFirstByLedgerAndStmtTypeAndStmtTargetAndStmtStatusOrderByPstTimeDesc(ledger, StmtType.ACC,
-						ledgerAccount.getId(), StmtStatus.CLOSED)
-				.orElse(null);
-		if (accStmt == null) {
-			return Optional.empty();
-		}
-		if (posting.getPstTime() != null && posting.getPstTime().isAfter(accStmt.getPstTime())) {
-			Posting basePosting = accStmt.getPosting();
-			return basePosting.getLines().stream()
-					.filter(pl -> pl.getAccount().getName().equals(ledgerAccount.getName())).findFirst();
-		}
-		throw new BaseLineException(posting.getPstTime(), accStmt.getPstTime());
-	}
-
+	
 	public PostingLine computeBalance(LedgerAccount ledgerAccount, LocalDateTime refTime) {
 		Ledger ledger = ledgerAccount.getLedger();
 		// Load last closed balance statement for this account.
@@ -156,7 +67,7 @@ public class PostingRepositoryFunctions {
 		return computeBalance(baseLine, postingLines, ledgerAccount);
 	}
 
-	public Posting newPosting(Ledger ledger, Posting posting) throws DoubleEntryAccountingException, BaseLineException, PostingRepositoryException {
+	public Posting newPosting(Ledger ledger, Posting posting) throws DoubleEntryAccountingException, BaseLineException{
 		// check posting time is not before a closing.
 		validatePostingTime(ledger, posting);
 
@@ -196,6 +107,119 @@ public class PostingRepositoryFunctions {
 
 		return saved;
 
+	}
+
+	/**
+	 * Validate Double Entry Accounting. Make sure both total of debit an credit of the 
+	 * given posting lines are equal.
+	 * 
+	 * @param posting
+	 * @throws DoubleEntryAccountingException
+	 */
+	private void validateDoubleEntryAccounting(Posting posting) throws DoubleEntryAccountingException {
+		List<PostingLine> lines = posting.getLines();
+		BigDecimal sumDebit = BigDecimal.ZERO;
+		BigDecimal sumCredit = BigDecimal.ZERO;
+		for (PostingLine line : lines) {
+			sumDebit = sumDebit.add(line.getDebitAmount());
+			sumCredit = sumCredit.add(line.getCreditAmount());
+		}
+
+		if (!sumDebit.equals(sumCredit)) {
+			throw new DoubleEntryAccountingException(sumDebit, sumCredit);
+		}
+	}
+	
+	/**
+	 * Check if there is any closed financial statement after the posting time.
+	 * Throws a baseline exception if this is the case.
+	 * 
+	 * @param ledger
+	 * @param posting
+	 * @throws BaseLineException
+	 * @throws PostingRepositoryException
+	 */
+	private void validatePostingTime(Ledger ledger, Posting posting)
+			throws BaseLineException, PostingRepositoryException {
+		// check posting time not null
+		postingTimeNotNull(posting);
+
+		// Look for an account statement closed before that date.
+		Optional<FinancialStmt> stmtOpt = financialStmtRepository
+				.findFirstByLedgerAndStmtTypeAndStmtTargetAndStmtStatusOrderByPstTimeDesc(
+						ledger, StmtType.BS, ledger.getId(), StmtStatus.CLOSED);
+
+		if (stmtOpt.isPresent()) {
+			FinancialStmt accStmt = stmtOpt.get();
+			if (posting.getPstTime().isBefore(accStmt.getPstTime())) {
+				throw new BaseLineException(posting.getPstTime(), accStmt.getPstTime());
+			}
+		}
+	}
+	
+	/**
+	 * Checks if this account has a released financial statement by the given posting date.
+	 * 
+	 * @param ledger
+	 * @param posting
+	 * @param ledgerAccount
+	 * @return
+	 * @throws BaseLineException
+	 * @throws PostingRepositoryException 
+	 */
+	private Optional<PostingLine> validatePostingTime(Ledger ledger, Posting posting, LedgerAccount ledgerAccount) throws BaseLineException, PostingRepositoryException {
+		// check posting time not null
+		postingTimeNotNull(posting);
+
+		// Look for an account statement closed before that date.
+		Optional<FinancialStmt> stmtOpt = financialStmtRepository
+				.findFirstByLedgerAndStmtTypeAndStmtTargetAndStmtStatusOrderByPstTimeDesc(
+						ledger, StmtType.ACC, ledgerAccount.getId(), StmtStatus.CLOSED);
+		
+		if (!stmtOpt.isPresent()) {
+			return Optional.empty();
+		}
+		
+		FinancialStmt accStmt = stmtOpt.get();
+		if (posting.getPstTime().isAfter(accStmt.getPstTime())) {
+			return accStmt.getPosting().getLines().stream()
+					.filter(pl -> pl.getAccount().getName().equals(ledgerAccount.getName())).findFirst();
+		}
+		throw new BaseLineException(posting.getPstTime(), accStmt.getPstTime());
+	}	
+	
+	private void postingTimeNotNull(Posting posting) throws PostingRepositoryException {
+		if (posting.getPstTime() == null) {
+			throw new PostingRepositoryException("Missing posting time");
+		}
+	}
+
+	private PostingLine computeBalance(PostingLine baseLine, List<PostingLine> lines, LedgerAccount account) {
+		BigDecimal sumDebit = baseLine == null ? BigDecimal.ZERO : baseLine.getDebitAmount();
+		BigDecimal sumCredit = baseLine == null ? BigDecimal.ZERO : baseLine.getCreditAmount();
+		Set<String> discardedPostings = filterPostings(lines);
+		for (PostingLine line : lines) {
+			if (discardedPostings.contains(line.getPosting().getId())) {
+				continue;
+			}
+			sumDebit = sumDebit.add(line.getDebitAmount());
+			sumCredit = sumCredit.add(line.getCreditAmount());
+		}
+		return new PostingLine(null, null, account, sumDebit, sumCredit, null, null, null);
+	}
+
+	private Set<String> filterPostings(List<PostingLine> lines) {
+		// building computation set:
+		Set<String> discardedPostings = new HashSet<>();
+		for (PostingLine line : lines) {
+			if (line.getOprSeqNbr() > 0) {
+				for (int i = line.getOprSeqNbr() - 1; i >= 0; i--) {
+					String makeId = Posting.makeId(line.getOprId(), i);
+					discardedPostings.add(makeId);
+				}
+			}
+		}
+		return discardedPostings;
 	}
 
 	// TODO consider creating of exception builder with all necessary classes
