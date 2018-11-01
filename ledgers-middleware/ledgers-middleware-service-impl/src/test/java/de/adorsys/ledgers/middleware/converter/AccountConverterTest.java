@@ -18,8 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AccountConverterTest {
     private static final AccountDetailsTO ACCOUNT_DETAILS = getAccount(AccountDetailsTO.class);
     private static final DepositAccountBO DEPOSIT_ACCOUNT = getAccount(DepositAccountBO.class);
-    private AccountDetailsMapper mapper = Mappers.getMapper(AccountDetailsMapper.class);
-    private AccountConverter accountConverter = new AccountConverter(mapper);
+    private AccountDetailsMapper detailsMapper = Mappers.getMapper(AccountDetailsMapper.class);
+    private AccountBalancesMapper balancesMapper = Mappers.getMapper(AccountBalancesMapper.class);
+    private AccountConverter accountConverter = new AccountConverter(detailsMapper, balancesMapper);
 
     @Test
     public void toAccountDetailsTO() {
