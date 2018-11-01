@@ -20,10 +20,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.postings.db.adapter.PostingRepositoryAdapter;
 import de.adorsys.ledgers.postings.db.domain.AccountCategory;
 import de.adorsys.ledgers.postings.db.domain.BalanceSide;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
@@ -37,7 +39,6 @@ import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
-import de.adorsys.ledgers.postings.db.utils.PostingRepositoryFunctions;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
@@ -67,15 +68,12 @@ public class PostingServiceImplTest {
     @Mock
     private LedgerAccountRepository ledgerAccountRepository;
 	@Mock
-    private PostingRepositoryFunctions repoFctn;
+    private PostingRepositoryAdapter postingRepositoryAdapter;
 
     @Test
-    public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
-        when(postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(any())).thenReturn(Optional.of(getPosting()));
+    public void newPosting() throws PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException, DoubleEntryAccountingException, de.adorsys.ledgers.postings.db.exception.DoubleEntryAccountingException, de.adorsys.ledgers.postings.db.exception.BaseLineException {
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
-        when(principal.getName()).thenReturn(NAME);
-        when(postingRepository.save(any())).thenReturn(getPosting());
-        when(postingRepository.findById(any())).thenReturn(Optional.of(getPosting()));
+        when(postingRepositoryAdapter.newPosting(any(), any())).thenAnswer(i -> i.getArguments()[1]);
         //When
         PostingBO result = postingService.newPosting(POSTING_MAPPER.toPostingBO(getPosting()));
         //Then
@@ -92,15 +90,10 @@ public class PostingServiceImplTest {
     }
 
     @Test
-    public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
-//        when(postingLineRepository.findFirstByAccountAndPstTypeAndPstStatusAndPstTimeLessThanEqualOrderByPstTimeDesc(any(), any(), any(), any()))
-//                .thenReturn(getPostingLine());
-        when(repoFctn.computeBalance(any(), any())).thenReturn(getPostingLine());
-        when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
-        when(postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(any())).thenReturn(Optional.empty());
+    public void balanceTx() throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException, de.adorsys.ledgers.postings.db.exception.DoubleEntryAccountingException, de.adorsys.ledgers.postings.db.exception.BaseLineException {
+        when(postingRepositoryAdapter.computeBalance(any(), any())).thenReturn(getPostingLine());
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(getLedgerAccount()));
-        when(postingRepository.save(any())).thenReturn(getPosting());
-        when(postingRepository.findById(any())).thenReturn(Optional.of(getPosting()));
+        when(postingRepositoryAdapter.newPosting(any(), any())).thenAnswer(i -> i.getArguments()[1]);
         //When
         PostingBO result = postingService.balanceTx(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(getLedgerAccount()), DATE_TIME);
         //Then

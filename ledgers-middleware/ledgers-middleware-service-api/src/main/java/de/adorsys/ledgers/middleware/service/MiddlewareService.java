@@ -34,4 +34,6 @@ public interface MiddlewareService {
     AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
 
     <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
+
+    <T> Object initiatePayment(T payment, PaymentTypeTO paymentType);
 }

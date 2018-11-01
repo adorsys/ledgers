@@ -61,12 +61,13 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
+
+		<!-- test dependencies -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<scope>test</scope>
 		</dependency>
-
-		<!-- test dependencies -->
 
 		<dependency>
 			<groupId>org.assertj</groupId>

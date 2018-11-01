@@ -1,19 +1,20 @@
 package de.adorsys.ledgers.middleware.converter;
 
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.postings.api.domain.BalanceBO;
-import org.junit.Before;
-import org.junit.Test;
-import org.mapstruct.factory.Mappers;
-import pro.javatar.commons.reader.YamlReader;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Test;
+import org.mapstruct.factory.Mappers;
+
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.postings.api.domain.BalanceBO;
+import pro.javatar.commons.reader.YamlReader;
 
 public class AccountDetailsMapperTest {
     private AccountDetailsMapper mapper;
