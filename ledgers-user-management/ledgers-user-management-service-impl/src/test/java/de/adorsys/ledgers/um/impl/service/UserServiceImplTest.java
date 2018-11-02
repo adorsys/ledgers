@@ -129,6 +129,14 @@ public class UserServiceImplTest {
         userService.getUserScaData(USER_NON_EXISTING_ID);
     }
 
+    @Test(expected = UserNotFoundException.class)
+    public void getAccountAccessWithException() throws UserNotFoundException {
+
+        when(repository.findById(USER_NON_EXISTING_ID)).thenReturn(Optional.empty());
+
+        userService.getAccountAccess(USER_NON_EXISTING_ID);
+    }
+
     private UserBO readUserBO(ResourceReader reader) {
         try {
             return reader.getObjectFromFile("de/adorsys/ledgers/um/impl/service/user-BO.yml", UserBO.class);
