@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.um.impl.service;
 
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -45,6 +46,7 @@ public class UserServiceImplTest {
     private static final String USER_PIN = "12345678";
     private static final String USER_NON_EXISTING_LOGIN = "NonExistingLogin";
     private static final String USER_NON_EXISTING_ID = "NonExistingID";
+    private static final String USER_IBAN = "3737463673647";
 
 
     @Test
@@ -89,6 +91,23 @@ public class UserServiceImplTest {
 
         assertThat(userData.size(), is(2));
         assertThat(userData.get(0).getMethodValue(), is(USER_EMAIL));
+
+        verify(repository, times(1)).findById(USER_ID);
+        verify(converter, times(1)).toUserBO(userEntity);
+    }
+
+    @Test
+    public void getAccountAccess() throws UserNotFoundException {
+        UserEntity userEntity = readUserEntity(reader);
+        UserBO userBO = readUserBO(reader);
+
+        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
+        when(converter.toUserBO(userEntity)).thenReturn(userBO);
+
+        List<AccountAccessBO> accAccess = userService.getAccountAccess(USER_ID);
+
+        assertThat(accAccess.size(), is(2));
+        assertThat(accAccess.get(0).getIban(), is(USER_IBAN));
 
         verify(repository, times(1)).findById(USER_ID);
         verify(converter, times(1)).toUserBO(userEntity);

@@ -10,7 +10,7 @@ public class AccountAccessBO {
     private String iban;
 
     @NotNull
-    private AccessTypeBO accessType= AccessTypeBO.OWNER;
+    private AccessTypeBO accessType; //= AccessTypeBO.OWNER;
 
     @NotNull
     private UserBO user;

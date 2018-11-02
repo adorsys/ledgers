@@ -9,4 +9,11 @@ scaUserData:
   - id: 2
     methodValue: 3737463673647
     scaMethod: MOBILE
+accountAccesses:
+- id: 1
+  iban: 3737463673647
+  accessType: READ
+- id: 2
+  iban: 1485739587263
+  accessType: DISPOSE
 
