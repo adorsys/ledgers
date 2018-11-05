@@ -16,8 +16,10 @@
 
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.domain.SCAOperationTO;
-import de.adorsys.ledgers.middleware.domain.ValidationResultTO;
+import de.adorsys.ledgers.middleware.domain.SCAGenerationRequest;
+import de.adorsys.ledgers.middleware.domain.SCAGenerationResponse;
+import de.adorsys.ledgers.middleware.domain.SCAValidationRequest;
+import de.adorsys.ledgers.middleware.domain.SCAValidationResponse;
 import de.adorsys.ledgers.middleware.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.exception.ValidationRestException;
@@ -25,7 +27,6 @@ import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,23 +40,29 @@ public class AuthCodeResource {
         this.middlewareService = middlewareService;
     }
 
-    @PostMapping(value = "/{opId}/generate")
-    public ResponseEntity generate(@PathVariable String opId, @RequestBody SCAOperationTO operation) {
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
+    @PostMapping(value = "/generate")
+    public SCAGenerationResponse generate(@RequestBody SCAGenerationRequest req) {
         try {
-            middlewareService.generateAuthCode(opId, operation.getData(), operation.getValiditySeconds());
-            return ResponseEntity.noContent().build();
+            String opId = middlewareService.generateAuthCode(req.getUserLogin(), req.getMethod(), req.getOpData(), req.getUserMessage(), req.getValiditySeconds());
+            logger.debug("Operation id={} was generated for user={}", opId, req.getUserLogin());
+            return new SCAGenerationResponse(opId);
         } catch (AuthCodeGenerationMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new ValidationRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (SCAMethodNotSupportedMiddleException e) {
+            logger.error(e.getMessage(), e);
+            throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
 
     @SuppressWarnings("PMD.IdenticalCatchBranches")
     @PostMapping("/{opId}/validate")
-    public ValidationResultTO validate(@PathVariable String opId, @RequestBody SCAOperationTO operation) {
+    public SCAValidationResponse validate(@PathVariable String opId, @RequestBody SCAValidationRequest request) {
         try {
-            boolean valid = middlewareService.validateAuthCode(opId, operation.getData(), operation.getAuthCode());
-            return new ValidationResultTO(valid);
+            boolean valid = middlewareService.validateAuthCode(opId, request.getData(), request.getAuthCode());
+            logger.debug("The validation of operation with id={} was {}", opId, valid ? "successful" : "failed");
+            return new SCAValidationResponse(valid);
         } catch (SCAOperationValidationMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new ValidationRestException(e.getMessage()).withDevMessage(e.getMessage());

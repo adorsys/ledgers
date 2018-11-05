@@ -44,16 +44,13 @@ public class UserResource {
     }
 
     @PostMapping
-    ResponseEntity<Void> createUser(@RequestBody UserTO user) {
-        try {
-            UserBO bo = converter.toUserBO(user);
-            UserBO userBO;
-            userBO = userService.create(bo);
-            URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getId()).build().toUri();
-            return ResponseEntity.created(uri).build();
-        } catch (UserAlreadyExistsException e) {
-            throw new de.adorsys.ledgers.um.rest.exception.UserAlreadyExistsException(e.getMessage());
-        }
+    ResponseEntity<Void> createUser(@RequestBody UserTO user) throws UserAlreadyExistsException {
+        UserBO bo = converter.toUserBO(user);
+        UserBO userBO;
+        userBO = userService.create(bo);
+        URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getId()).build().toUri();
+        return ResponseEntity.created(uri).build();
+//        TODO process with right exceptions
     }
 
     @GetMapping("{id}")

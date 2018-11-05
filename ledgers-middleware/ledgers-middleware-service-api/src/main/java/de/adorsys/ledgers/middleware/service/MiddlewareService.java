@@ -21,13 +21,26 @@ import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
 import de.adorsys.ledgers.middleware.service.exception.*;
+
+import java.util.List;
 
 public interface MiddlewareService {
 
     PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
 
-    String generateAuthCode(String opId, String opData, int validitySeconds) throws AuthCodeGenerationMiddlewareException;
+    /**
+     *
+     * @param userLogin user login
+     * @param scaMethod sca method
+     * @param opData operation data
+     * @param validitySeconds time to live in seconds
+     * @param userMessage what would be show to user
+     * @return opId id of operation created on the request
+     * @throws AuthCodeGenerationMiddlewareException if something happens during auth code generation
+     */
+    String generateAuthCode(String userLogin, SCAMethodTO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException;
 
     boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException;
 
@@ -36,4 +49,6 @@ public interface MiddlewareService {
     <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
 
     <T> Object initiatePayment(T payment, PaymentTypeTO paymentType);
+
+    List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException;
 }

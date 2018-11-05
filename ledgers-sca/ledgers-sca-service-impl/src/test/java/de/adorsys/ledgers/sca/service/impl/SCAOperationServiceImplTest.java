@@ -8,6 +8,9 @@ import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
+import de.adorsys.ledgers.sca.service.SCASender;
+import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
@@ -23,6 +26,7 @@ import pro.javatar.commons.reader.YamlReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +57,8 @@ public class SCAOperationServiceImplTest {
     @Mock
     private HashGenerator hashGenerator;
     private SCAOperationEntity scaOperationEntity;
+    private SCASender emailSender;
+    private SCASender mobileSender;
 
     @Before
     public void setUp() {
@@ -60,6 +66,14 @@ public class SCAOperationServiceImplTest {
         scaOperationEntity = readFromFile("scaOperationEntity.yml", SCAOperationEntity.class);
         scaOperationEntity.setCreated(LocalDateTime.now());
         scaOperationEntity.setStatusTime(LocalDateTime.now());
+
+        HashMap<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
+        emailSender = mock(SCASender.class);
+        mobileSender = mock(SCASender.class);
+        senders.put(ScaMethodTypeBO.EMAIL, emailSender);
+        senders.put(ScaMethodTypeBO.MOBILE, mobileSender);
+
+        scaOperationService.setSenders(senders);
     }
 
 
@@ -73,21 +87,29 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
-    public void generateAuthCode() throws AuthCodeGenerationException, HashGenerationException {
+    public void generateAuthCode() throws AuthCodeGenerationException, HashGenerationException, SCAMethodNotSupportedException {
 
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
 
+        ScaUserDataBO method = mock(ScaUserDataBO.class);
+        String userMessage = "user message";
+        String userLogin = "speex";
+        String email = "spe@adorsys.com.ua";
+
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
+        when(method.getScaMethod()).thenReturn(ScaMethodTypeBO.EMAIL);
+        when(method.getMethodValue()).thenReturn(email);
+        when(emailSender.send(email, TAN)).thenReturn(true);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
 
-        String tan = scaOperationService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
-
-        assertThat(tan, is(TAN));
+        String actualOpId = scaOperationService.generateAuthCode(userLogin, method, OP_DATA, userMessage, VALIDITY_SECONDS);
 
         SCAOperationEntity entity = captor.getValue();
-        assertThat(entity.getOpId(), is(OP_ID));
+
+        assertThat(actualOpId, is(entity.getOpId()));
+
         assertThat(entity.getValiditySeconds(), is(VALIDITY_SECONDS));
         assertThat(entity.getCreated(), is(notNullValue()));
         assertThat(entity.getStatus(), is(AuthCodeStatus.NEW));
@@ -101,12 +123,17 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test(expected = AuthCodeGenerationException.class)
-    public void generateAuthCodeWithException() throws AuthCodeGenerationException, HashGenerationException {
+    public void generateAuthCodeWithException() throws AuthCodeGenerationException, HashGenerationException, SCAMethodNotSupportedException {
 
+        ScaUserDataBO method = mock(ScaUserDataBO.class);
+        String userMessage = "user message";
+        String userLogin = "speex";
+
+        when(method.getScaMethod()).thenReturn(ScaMethodTypeBO.EMAIL);
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
-        scaOperationService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
+        scaOperationService.generateAuthCode(userLogin, method, OP_DATA, userMessage, VALIDITY_SECONDS);
     }
 
     @Test

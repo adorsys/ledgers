@@ -17,13 +17,19 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
 import de.adorsys.ledgers.sca.service.SCASender;
+import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PhoneSCASender implements SCASender {
+public class MobileSCASender implements SCASender {
 
     @Override
-    public boolean send(String address, String authCode) {
+    public boolean send(String value, String authCode) {
         throw new UnsupportedOperationException("Sending SCA via phone not implemented yet");
+    }
+
+    @Override
+    public ScaMethodTypeBO getType() {
+        return ScaMethodTypeBO.MOBILE;
     }
 }

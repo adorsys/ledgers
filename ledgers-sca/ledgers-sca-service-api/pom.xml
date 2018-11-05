@@ -17,6 +17,12 @@
 
 		<!-- project dependencies -->
 
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-user-management-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- spring dependencies -->
 
 		<!-- other dependencies -->
