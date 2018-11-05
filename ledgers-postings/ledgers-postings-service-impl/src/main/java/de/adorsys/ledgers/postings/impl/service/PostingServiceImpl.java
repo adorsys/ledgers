@@ -23,9 +23,7 @@ import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import de.adorsys.ledgers.postings.db.domain.StmtStatus;
 import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.db.repository.AccountStmtRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
-import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
@@ -35,23 +33,15 @@ import de.adorsys.ledgers.util.Ids;
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
     @Autowired
-    private PostingLineRepository postingLineRepository;
-    
-    @Autowired
-    private AccountStmtServiceImpl postingRepositoryAdapter;
-
-    @Autowired
     private PostingRepository postingRepository;
     
     @Autowired
     private AccountStmtRepository accountStmtRepository;
 	
     private final PostingMapper postingMapper;
-    private final PostingLineMapper postingLineMapper;
     
-    public PostingServiceImpl(PostingMapper postingMapper, PostingLineMapper postingLineMapper) {
+    public PostingServiceImpl(PostingMapper postingMapper) {
         this.postingMapper = postingMapper;
-        this.postingLineMapper = postingLineMapper;
     }
 
     @Override
@@ -109,7 +99,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 		
 		// Process posting line without setting posting.
 		for (PostingLine pl : posting.getLines()) {
-			processPostingLine(ledger, p, pl);
+			processPostingLine(p, pl);
 		}
 
 		// compute hash.
@@ -130,12 +120,12 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 	/*
 	 * Process Posting lines withoug sting the posting.
 	 */
-	private void processPostingLine(Ledger ledger, Posting p, PostingLine model) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+	private void processPostingLine(Posting p, PostingLine model) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
 		PostingLine l = new PostingLine();
 		l.setId(Ids.id());
 		LedgerAccount account = loadLedgerAccount(model.getAccount());
 		l.setAccount(account);
-		String baseLine = validatePostingTime(ledger, p, account).orElse(new AccountStmt()).getId();
+		String baseLine = validatePostingTime(p, account).orElse(new AccountStmt()).getId();
 		l.setBaseLine(baseLine);
 		l.setCreditAmount(model.getCreditAmount());
 		l.setDebitAmount(model.getDebitAmount());
@@ -177,7 +167,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 	 * @throws BaseLineException
 	 * @throws PostingRepositoryException 
 	 */
-	private Optional<AccountStmt> validatePostingTime(Ledger ledger, Posting posting, LedgerAccount ledgerAccount) throws BaseLineException, PostingRepositoryException {
+	private Optional<AccountStmt> validatePostingTime(Posting posting, LedgerAccount ledgerAccount) throws BaseLineException, PostingRepositoryException {
 		// check posting time not null
 		postingTimeNotNull(posting);
 

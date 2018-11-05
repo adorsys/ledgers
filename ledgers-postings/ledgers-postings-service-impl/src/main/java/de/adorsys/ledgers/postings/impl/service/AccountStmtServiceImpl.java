@@ -62,7 +62,7 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
 				.orElse(null);
 
 		// Load all posting associated with this base line.
-		List<PostingLine> postingLines = (accStmt == null || accStmt.getPosting() == null)
+		List<PostingLine> postingLines = accStmt == null || accStmt.getPosting() == null
 				? postingLineRepository.findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(account, refTime)
 				: postingLineRepository.findByBaseLineAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(accStmt.getId(), refTime);
 

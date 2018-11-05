@@ -54,7 +54,7 @@ public class PostingServiceImplTest {
     private static final LedgerAccountMapper LEDGER_ACCOUNT_MAPPER = new LedgerAccountMapper();
 
     @InjectMocks
-    private PostingService postingService = new PostingServiceImpl(POSTING_MAPPER, POSTING_LINE_MAPPER);
+    private PostingService postingService = new PostingServiceImpl(POSTING_MAPPER);
 
     @Mock
     private LedgerRepository ledgerRepository;

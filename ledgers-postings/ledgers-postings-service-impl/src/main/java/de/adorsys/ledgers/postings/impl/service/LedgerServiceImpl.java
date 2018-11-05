@@ -17,7 +17,6 @@ import de.adorsys.ledgers.postings.db.domain.BalanceSide;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.LedgerMapper;
 import de.adorsys.ledgers.util.Ids;

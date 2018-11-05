@@ -165,7 +165,9 @@ public class Posting extends HashRecord {
     public Posting hash() {
     	// Skipp computation if a hash exists. Original value 
     	// shall not be overriden.
-    	if(hash!=null) return this;
+    	if(hash!=null) {
+    		return this;
+    	}
     	if(recordTime==null) {
     		recordTime = LocalDateTime.now();
     	}

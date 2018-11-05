@@ -63,13 +63,13 @@ public class AccountStmtBO extends FinancialStmtBO {
 	}
 	
 	public BigDecimal debitBalance() {
-		return BigDecimal.ZERO.add(amt(totalDebit)).subtract(amt(totalCredit));
+		return BigDecimal.ZERO.add(readAmt(totalDebit)).subtract(readAmt(totalCredit));
 	}
 	public BigDecimal creditBalance() {
-		return BigDecimal.ZERO.add(amt(totalCredit)).subtract(amt(totalDebit));
+		return BigDecimal.ZERO.add(readAmt(totalCredit)).subtract(readAmt(totalDebit));
 	}
 	
-	private static BigDecimal amt(BigDecimal amt) {
+	private static BigDecimal readAmt(BigDecimal amt) {
 		return amt==null
 				? BigDecimal.ZERO
 				: amt;
