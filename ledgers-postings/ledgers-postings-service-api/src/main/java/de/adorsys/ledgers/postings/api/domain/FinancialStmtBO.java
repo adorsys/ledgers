@@ -1,16 +1,6 @@
-package de.adorsys.ledgers.postings.db.domain;
+package de.adorsys.ledgers.postings.api.domain;
 
 import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
-
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 /**
  * A financial statement will help draw time lines on ledgers and accounts.
@@ -27,28 +17,20 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
  * @author fpo
  *
  */
-@MappedSuperclass
-public abstract class FinancialStmt {
+public abstract class FinancialStmtBO {
 
-    /* The record id */
-    @Id
     private String id;
 
     /*
      * The corresponding posting.
      * 
      */
-	@OneToOne
-	private Posting posting;
+	private PostingBO posting;
     
 	/* Documents the time of the posting. */
-	@Column(nullable = false, updatable = false)
-	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime pstTime;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, updatable = false)
-	private StmtStatus stmtStatus;
+	private StmtStatusBO stmtStatus;
 
 	/*
 	 * Identifier of the latest processed posting. We use this to 
@@ -56,8 +38,7 @@ public abstract class FinancialStmt {
 	 * held here.
 	 * 
 	 */
-	@OneToOne
-	private PostingTrace latestPst;
+	private PostingTraceBO latestPst;
 	
 	/*
 	 * The sequence number of the operation processed by this posting.
@@ -67,54 +48,53 @@ public abstract class FinancialStmt {
 	 * increasing the sequence number of the former posting.
 	 *
 	 */
-	@Column(nullable = false, updatable = false)
 	private int stmtSeqNbr = 0;
-
-	public LocalDateTime getPstTime() {
-		return pstTime;
-	}
-
-	public int getStmtSeqNbr() {
-		return stmtSeqNbr;
-	}
 
 	public String getId() {
 		return id;
-	}
-
-	public StmtStatus getStmtStatus() {
-		return stmtStatus;
 	}
 
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	public LocalDateTime getPstTime() {
+		return pstTime;
+	}
+
 	public void setPstTime(LocalDateTime pstTime) {
 		this.pstTime = pstTime;
 	}
 
-	public void setStmtStatus(StmtStatus stmtStatus) {
+	public StmtStatusBO getStmtStatus() {
+		return stmtStatus;
+	}
+
+	public void setStmtStatus(StmtStatusBO stmtStatus) {
 		this.stmtStatus = stmtStatus;
+	}
+
+	public PostingTraceBO getLatestPst() {
+		return latestPst;
+	}
+
+	public void setLatestPst(PostingTraceBO latestPst) {
+		this.latestPst = latestPst;
+	}
+
+	public int getStmtSeqNbr() {
+		return stmtSeqNbr;
 	}
 
 	public void setStmtSeqNbr(int stmtSeqNbr) {
 		this.stmtSeqNbr = stmtSeqNbr;
 	}
 
-	public PostingTrace getLatestPst() {
-		return latestPst;
-	}
-
-	public void setLatestPst(PostingTrace latestPst) {
-		this.latestPst = latestPst;
-	}
-
-	public Posting getPosting() {
+	public PostingBO getPosting() {
 		return posting;
 	}
 
-	public void setPosting(Posting posting) {
+	public void setPosting(PostingBO posting) {
 		this.posting = posting;
 	}
 	

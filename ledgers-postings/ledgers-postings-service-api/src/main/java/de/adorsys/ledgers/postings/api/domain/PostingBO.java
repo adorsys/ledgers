@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+
 /**
  * The word posting is associated with the moment at which the recorded
  * operation is effective in the ledger. Therefore, we distinguish between
@@ -35,20 +38,6 @@ public class PostingBO extends HashRecordBO {
      */
     private String oprId;
 
-    /*
-     * The sequence number of the operation processed by this posting.
-     *
-     * A single operation can be overridden many times as long as the enclosing
-     * ledger is not closed. These overriding happens
-     * synchronously. Each single one increasing the sequence number of the
-     * former posting.
-     *
-     * This is, the posting id is always a concatenation between the operation
-     * id and the sequence number.
-     *
-     */
-    private int oprSeqNbr = 0;
-
     /* The time of occurrence of this operation. Set by the consuming module. */
     private LocalDateTime oprTime;
 
@@ -61,6 +50,13 @@ public class PostingBO extends HashRecordBO {
     /* Details associated with this operation. */
     private String oprDetails;
 
+    /*
+     * The source of the operation. For example, payment order may result into many
+     * payments. Each payment will be an operation. The oprSrc field will be used to
+     * document original payment id. 
+     */
+    private String oprSrc;
+    
     /*
      * This is the time from which the posting is effective in the account
      * statement. This also differs from the recording time in that the posting
@@ -76,6 +72,7 @@ public class PostingBO extends HashRecordBO {
      * second of that day. In the case of an adjustment operation, the posting
      * time and the operation time are identical.
      */
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime pstTime;
 
     /*
@@ -106,9 +103,22 @@ public class PostingBO extends HashRecordBO {
      */
     private LocalDateTime valTime;
 
-//    todo: add description to this field
     private List<PostingLineBO> lines = new ArrayList<>();
 
+    /*
+     * The id of the discarded posting. In case this posting discards another posting.
+     */
+    private String discardedId;
+    
+    /*
+     * The record time of the discarding posting 
+     */
+    private LocalDateTime discardedTime;
+    /*
+     * The id of the discaring posting/
+     */
+    private String discardingId;
+    
     public String getId() {
         return id;
     }
@@ -139,14 +149,6 @@ public class PostingBO extends HashRecordBO {
 
     public void setOprId(String oprId) {
         this.oprId = oprId;
-    }
-
-    public int getOprSeqNbr() {
-        return oprSeqNbr;
-    }
-
-    public void setOprSeqNbr(int oprSeqNbr) {
-        this.oprSeqNbr = oprSeqNbr;
     }
 
     public LocalDateTime getOprTime() {
@@ -220,4 +222,37 @@ public class PostingBO extends HashRecordBO {
     public void setLines(List<PostingLineBO> lines) {
         this.lines = lines;
     }
+
+	public String getOprSrc() {
+		return oprSrc;
+	}
+
+	public void setOprSrc(String oprSrc) {
+		this.oprSrc = oprSrc;
+	}
+
+	public String getDiscardedId() {
+		return discardedId;
+	}
+
+	public void setDiscardedId(String discardedId) {
+		this.discardedId = discardedId;
+	}
+
+	public LocalDateTime getDiscardedTime() {
+		return discardedTime;
+	}
+
+	public void setDiscardedTime(LocalDateTime discardedTime) {
+		this.discardedTime = discardedTime;
+	}
+
+	public String getDiscardingId() {
+		return discardingId;
+	}
+
+	public void setDiscardingId(String discardingId) {
+		this.discardingId = discardingId;
+	}
+    
 }

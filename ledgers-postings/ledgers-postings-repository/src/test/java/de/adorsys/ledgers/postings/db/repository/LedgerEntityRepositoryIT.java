@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.postings.db.repository;
+	package de.adorsys.ledgers.postings.db.repository;
 
 import java.time.LocalDateTime;
 

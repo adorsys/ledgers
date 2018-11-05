@@ -25,8 +25,8 @@ import de.adorsys.ledgers.util.Ids;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 		TransactionalTestExecutionListener.class,
 		DbUnitTestExecutionListener.class})
-@DatabaseSetup("OpNoteRepositoryTest-db-entries.xml")
-@DatabaseTearDown(value={"OpNoteRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+@DatabaseSetup("OpNoteRepositoryIT-db-entries.xml")
+@DatabaseTearDown(value={"OpNoteRepositoryIT-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingRepositoryApplication.class)
 public class OpNoteRepositoryIT {

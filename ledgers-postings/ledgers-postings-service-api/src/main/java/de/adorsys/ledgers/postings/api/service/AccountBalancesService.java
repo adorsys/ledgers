@@ -1,9 +1,11 @@
 package de.adorsys.ledgers.postings.api.service;
 
-import de.adorsys.ledgers.postings.api.domain.BalanceBO;
-
 import java.util.List;
 
+import de.adorsys.ledgers.postings.api.domain.BalanceBO;
+
 public interface AccountBalancesService {
-    List<BalanceBO> getBalances(String iban);
+
+	List<BalanceBO> getBalances(String iban);
+
 }

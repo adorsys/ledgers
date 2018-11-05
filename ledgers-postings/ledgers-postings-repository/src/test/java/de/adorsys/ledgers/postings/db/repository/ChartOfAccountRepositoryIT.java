@@ -26,8 +26,8 @@ import de.adorsys.ledgers.util.Ids;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
-@DatabaseSetup("ChartOfAccountRepositoryTest-db-entries.xml")
-@DatabaseTearDown(value={"ChartOfAccountRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+@DatabaseSetup("ChartOfAccountRepositoryIT-db-entries.xml")
+@DatabaseTearDown(value={"ChartOfAccountRepositoryIT-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class ChartOfAccountRepositoryIT {
 	@Autowired
 	private ChartOfAccountRepository chartOfAccountRepository;

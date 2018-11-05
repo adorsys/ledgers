@@ -31,8 +31,8 @@ import de.adorsys.ledgers.util.Ids;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
-@DatabaseSetup("LedgerRepositoryTest-db-entries.xml")
-@DatabaseTearDown(value={"LedgerRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+@DatabaseSetup("LedgerRepositoryIT-db-entries.xml")
+@DatabaseTearDown(value={"LedgerRepositoryIT-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class LedgerRepositoryIT {
 
 	@Autowired

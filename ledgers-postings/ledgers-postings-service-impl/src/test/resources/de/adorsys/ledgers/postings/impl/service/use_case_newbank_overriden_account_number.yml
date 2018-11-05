@@ -44,30 +44,10 @@
     creditAmount: 2000000.00
 # Balances: 11240-D-2000000.00,1104-D-2200000.00 
     
-# Then the Bank purchases some office furniture with a check of hello bank 14 400 
-- oprId: "purchased_furniture_003"
-  oprDetails: "Purchased Furniture per check"
-  pstTime: 2018-01-03T12:32:00.000
-  pstType: BUSI_TX
-  pstStatus: POSTED
-  lines:
-  - account:
-      name: 1810
-      shortDesc: "Furniture & fittings" 
-    debitAmount: 14400.00
-    creditAmount: 0.00
-  - account:
-      name: 11240
-      shortDesc: "hello bank" 
-    debitAmount: 0.00
-    creditAmount: 14400.00
-# Balances: 11240-D-1985600.00,1810-D-14400.00 
-    
-
 # Then the Bank withdraw some cahsh from hello bank. 150 000 
 - oprId: "withdrew_cash_hellobank_004"
   oprDetails: "Withdrew cash from hello bank"
-  pstTime: 2018-01-03T13:30:00.000
+  pstTime: 2018-01-03T06:30:00.000
   pstType: BUSI_TX
   pstStatus: POSTED
   lines:
@@ -81,7 +61,27 @@
       shortDesc: "hello bank" 
     debitAmount: 0.00
     creditAmount: 150000.00
-# Balances: 11240-D-1835600.00,1001-D-150000.00 
+# Balances: 11240-D-1850000.00,1001-D-150000.00 
+    
+# Then the Bank purchases some office furniture with a check of hello bank 14 400 
+- oprId: "purchased_furniture_003"
+  oprDetails: "Purchased Furniture per check"
+  pstTime: 2018-01-03T12:32:00.000
+  pstType: BUSI_TX
+  pstStatus: POSTED
+  lines:
+  - account:
+      name: 1810
+      shortDesc: "Furniture & fittings" 
+    debitAmount: 14400.00
+    creditAmount: 0.00
+  - account:
+      name: 1001
+      shortDesc: "hello bank" 
+    debitAmount: 0.00
+    creditAmount: 14400.00
+# Balances: 11240-D-1850000.00,1810-D-14400.00,1001-D-135600.00
+    
 
 # The bank pays for service for cleaning and refurbishing rental office: 32 000 check of helo bank
 - oprId: "cleaning_and_refurbishing_service_005"
@@ -100,33 +100,28 @@
       shortDesc: "hello bank" 
     debitAmount: 0.00
     creditAmount: 32000.00
-# Balances: 11240-D-1803600.00,5057-D-32000.00 
+# Balances: 11240-D-1818000.00,5057-D-32000.00 
 
-## Changing the transaction amount of a posting. This shall modify all balances going forward for affected accounts.
-# Then the Bank purchases some office furniture with a check of hello bank 14 800 insted of 14 400 
+## Changing the transaction account number of a posting. This shall modify all balances going forward for affected accounts.
+# Then the Bank purchases some office furniture with a check of cash 14 400 instead of  hello bank 14 400 
 - oprId: "purchased_furniture_003"
   oprDetails: "Purchased Furniture per check"
   pstTime: 2018-01-03T12:32:00.000
   pstType: BUSI_TX
   pstStatus: POSTED
-  # Increasing the sequence shows that we are overriding the operation.
-  oprSeqNbr: 1
   lines:
   - account:
       name: 1810
       shortDesc: "Furniture & fittings" 
-    debitAmount: 14800.00
+    debitAmount: 14400.00
     creditAmount: 0.00
   - account:
-      name: 11240
+      name: 1001
       shortDesc: "hello bank" 
     debitAmount: 0.00
-    creditAmount: 14800.00
-## OLD Balances 2018-01-03T23:59:00.000 : 11240-D-1835600.00,1810-D-14400.00 
-## New Balances 2018-01-03T23:59:00.000 : 11240-D-1835200.00,1810-D-14800.00 
-
-## OLD Balances 2018-01-03T23:59:00.000 : 11240-D-1803600.00,5057-D-32000.00 
-## New Balances 2018-01-03T23:59:00.000 : 11240-D-1803200.00,5057-D-32000.00 
+    creditAmount: 14400.00
+# Balances: 11240-D-1850000.00,1810-D-14400.00,1001-D-135600.00
+## Balances corected backward.
 
 # The bank opens employee accounts. Marion mueller with casch deposit of 1500
 - oprId: "employee_account_marion_muller_006"
@@ -145,7 +140,7 @@
       shortDesc: "Bank Account Marion Mueller" 
     debitAmount: 0.00
     creditAmount: 1500.00
-# Balances: 1001-D-151500.00,2332001-C-1500.00 
+# Balances: 1001-D-137100.00,2332001-C-1500.00 
 
 # The bank opens employee accounts for anton brueckner with check deposit of 3 500.
 - oprId: "employee_account_anton_brueckner_007"
@@ -184,6 +179,6 @@
       shortDesc: "Bank Account Msax Mustermann" 
     debitAmount: 0.00
     creditAmount: 5000.00
-# Balances: 1001-D-156500.00,2332003-C-5000.00 
+# Balances: 1001-D-142100.00,2332003-C-5000.00 
 
     

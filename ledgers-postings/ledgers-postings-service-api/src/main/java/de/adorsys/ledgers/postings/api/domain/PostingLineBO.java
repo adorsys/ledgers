@@ -7,8 +7,6 @@ public class PostingLineBO {
 	
 	/* The record id */
 	private String id;
-
-	private PostingBO posting;
 	
 	/*The associated ledger account*/
 	private LedgerAccountBO account;
@@ -31,6 +29,11 @@ public class PostingLineBO {
 	 */
 	private String srcAccount;
 
+	/*
+	 * The id of the last balanced posting line for this account.
+	 */
+	private String baseLine;
+	
 	//================================================================================
 	// Denormalization layer. All following fields:
 	//   - are duplicated from the post
@@ -49,8 +52,6 @@ public class PostingLineBO {
 	 * record time
 	 */
 	private String oprId;
-
-	private int oprSeqNbr = 0;
 	
 	/*
 	 * This is the time from which the posting is effective in this account
@@ -75,24 +76,13 @@ public class PostingLineBO {
 	 */
 	private PostingStatusBO pstStatus = PostingStatusBO.POSTED;
 
-	/*
-	 * The ledger governing this posting.
-	 */
-	private LedgerBO ledger;
-	
-	private String accName;
-	
-	/*
-	 * The Date use to compute interests. This can be different from the posting
-	 * date and can lead to the production of other type of balances.
-	 */
-	private LocalDateTime valTime;
+    private String hash;
+    
+    /*
+     * The record time of the discarding posting 
+     */
+    private LocalDateTime discardedTime;
 
-	/*
-	 * The id of the last balanced posting line for this account.
-	 */
-	private String baseLine;
-	
 	public String getId() {
 		return id;
 	}
@@ -101,13 +91,13 @@ public class PostingLineBO {
 		this.id = id;
 	}
 
-	public PostingBO getPosting() {
-		return posting;
-	}
-
-	public void setPosting(PostingBO posting) {
-		this.posting = posting;
-	}
+//	public PostingBO getPosting() {
+//		return posting;
+//	}
+//
+//	public void setPosting(PostingBO posting) {
+//		this.posting = posting;
+//	}
 
 	public LedgerAccountBO getAccount() {
 		return account;
@@ -165,14 +155,6 @@ public class PostingLineBO {
 		this.oprId = oprId;
 	}
 
-	public int getOprSeqNbr() {
-		return oprSeqNbr;
-	}
-
-	public void setOprSeqNbr(int oprSeqNbr) {
-		this.oprSeqNbr = oprSeqNbr;
-	}
-
 	public LocalDateTime getPstTime() {
 		return pstTime;
 	}
@@ -197,36 +179,28 @@ public class PostingLineBO {
 		this.pstStatus = pstStatus;
 	}
 
-	public LedgerBO getLedger() {
-		return ledger;
-	}
-
-	public void setLedger(LedgerBO ledger) {
-		this.ledger = ledger;
-	}
-
-	public String getAccName() {
-		return accName;
-	}
-
-	public void setAccName(String accName) {
-		this.accName = accName;
-	}
-
-	public LocalDateTime getValTime() {
-		return valTime;
-	}
-
-	public void setValTime(LocalDateTime valTime) {
-		this.valTime = valTime;
-	}
-
 	public String getBaseLine() {
 		return baseLine;
 	}
 
 	public void setBaseLine(String baseLine) {
 		this.baseLine = baseLine;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+
+	public LocalDateTime getDiscardedTime() {
+		return discardedTime;
+	}
+
+	public void setDiscardedTime(LocalDateTime discardedTime) {
+		this.discardedTime = discardedTime;
 	}
 	
 }

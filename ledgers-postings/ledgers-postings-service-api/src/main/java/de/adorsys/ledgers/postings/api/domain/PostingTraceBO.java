@@ -1,90 +1,110 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Posting traces a used to keep references on input posting
- * while making some aggregation of balance calculation.
+ * A posting trace document the inclusion of a posting in the creation of a 
+ * statement.
  * <p>
- * We document statements like balances, balance sheets using posting as well.
- * Since posting never change, any statement produced by this module can be
- * reproduced or checked for integrity.
- * <p>
- * Each trace entry keeps reference of an antecedent posting trace.
- * <p>
- * The hash value of this posting also includes:
- * - The hash value of the input posting
- * - The hash value of the antecedent posting trace.
- * <p>
- * Here we record the posting used and not the operation used.
+ * 
+ * For each stmt posting, an operation can only be involved once.
  *
  * @author fpo
  */
-public class PostingTraceBO extends HashRecordBO {
-
+public class PostingTraceBO {
     private String id;
-
-    /*
-     * The position of the target posting in the list.
-     */
-    private int pos;
-
-    /*The source posting id*/
-    private String srcPstId;
-
-    /*The hash value of the src posting*/
-    private String srcPstHash;
 
     /*The target posting id. Posting receiving.*/
     private String tgtPstId;
+    
+    private LocalDateTime srcPstTime;
+    
+    /*The target posting id. Posting receiving.*/
+    private String srcPstId;
 
-    private LocalDateTime recordTime;
+    /*The source operation id*/
+    private String srcOprId;
 
-    public String getId() {
-        return id;
-    }
+	/*The associated ledger account*/
+	private LedgerAccountBO account;
+	
+	private BigDecimal debitAmount;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	private BigDecimal creditAmount;
+	
+	private String srcPstHash;
 
-    public int getPos() {
-        return pos;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setPos(int pos) {
-        this.pos = pos;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getSrcPstId() {
-        return srcPstId;
-    }
+	public String getTgtPstId() {
+		return tgtPstId;
+	}
 
-    public void setSrcPstId(String srcPstId) {
-        this.srcPstId = srcPstId;
-    }
+	public void setTgtPstId(String tgtPstId) {
+		this.tgtPstId = tgtPstId;
+	}
 
-    public String getSrcPstHash() {
-        return srcPstHash;
-    }
+	public String getSrcOprId() {
+		return srcOprId;
+	}
 
-    public void setSrcPstHash(String srcPstHash) {
-        this.srcPstHash = srcPstHash;
-    }
+	public void setSrcOprId(String srcOprId) {
+		this.srcOprId = srcOprId;
+	}
 
-    public String getTgtPstId() {
-        return tgtPstId;
-    }
+	public LedgerAccountBO getAccount() {
+		return account;
+	}
 
-    public void setTgtPstId(String tgtPstId) {
-        this.tgtPstId = tgtPstId;
-    }
+	public void setAccount(LedgerAccountBO account) {
+		this.account = account;
+	}
 
-    public LocalDateTime getRecordTime() {
-        return recordTime;
-    }
+	public BigDecimal getDebitAmount() {
+		return debitAmount;
+	}
 
-    public void setRecordTime(LocalDateTime recordTime) {
-        this.recordTime = recordTime;
-    }
+	public void setDebitAmount(BigDecimal debitAmount) {
+		this.debitAmount = debitAmount;
+	}
+
+	public BigDecimal getCreditAmount() {
+		return creditAmount;
+	}
+
+	public void setCreditAmount(BigDecimal creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
+	public String getSrcPstHash() {
+		return srcPstHash;
+	}
+
+	public void setSrcPstHash(String srcPstHash) {
+		this.srcPstHash = srcPstHash;
+	}
+
+	public LocalDateTime getSrcPstTime() {
+		return srcPstTime;
+	}
+
+	public void setSrcPstTime(LocalDateTime srcPstTime) {
+		this.srcPstTime = srcPstTime;
+	}
+
+	public String getSrcPstId() {
+		return srcPstId;
+	}
+
+	public void setSrcPstId(String srcPstId) {
+		this.srcPstId = srcPstId;
+	}
+	
 }

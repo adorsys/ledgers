@@ -20,7 +20,6 @@ import de.adorsys.ledgers.postings.api.exception.ChartOfAccountNotFoundException
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.db.adapter.PostingRepositoryAdapter;
 import de.adorsys.ledgers.postings.db.domain.AccountCategory;
 import de.adorsys.ledgers.postings.db.domain.BalanceSide;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;

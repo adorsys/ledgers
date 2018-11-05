@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.postings.db.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
@@ -17,11 +18,9 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
-import de.adorsys.ledgers.postings.db.domain.FinancialStmt;
-import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.postings.db.domain.Posting;
+import de.adorsys.ledgers.postings.db.domain.AccountStmt;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.domain.StmtStatus;
-import de.adorsys.ledgers.postings.db.domain.StmtType;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -29,28 +28,28 @@ import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
-@DatabaseSetup("FinancialStmtRepositoryTest-db-entries.xml")
-@DatabaseTearDown(value={"FinancialStmtRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
-public class FinancialStmtRepositoryIT {
+@DatabaseSetup("AccountStmtRepositoryIT-db-entries.xml")
+@DatabaseTearDown(value={"AccountStmtRepositoryIT-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+public class AccountStmtRepositoryIT {
 
 	@Autowired
-	private LedgerRepository ledgerRepository;
+	private LedgerAccountRepository ledgerAccountRepository;
+	
 	@Autowired
-	private PostingRepository postingRepository;
-	@Autowired
-	private FinancialStmtRepository financialStmtRepository;
+	private AccountStmtRepository financialStmtRepository;
 	
 	@Test
 	public void test_create_financial_statement_ok() {
-		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElseThrow(()-> new IllegalStateException("Missing Ledger with id Zd0ND5YwSzGwIfZilhumPg"));
+		LedgerAccount account = ledgerAccountRepository.findById("xVgaTPMcRty9ik3BTQDh1Q_BS_1_0_0").orElseThrow(()-> new IllegalStateException("Missing LedgerAccount with id xVgaTPMcRty9ik3BTQDh1Q_BS_1_0_0"));
+		AccountStmt f = new AccountStmt();
+		f.setStmtStatus(StmtStatus.SIMULATED);
+		f.setAccount(account);
+		f.setStmtSeqNbr(0);
 		LocalDateTime pstTime = LocalDateTime.of(2017, Month.DECEMBER, 31, 23, 59);
-		Posting posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING").orElseThrow(()-> new IllegalStateException("Missing Posting with id Zd0ND5YwSzGwIfZilhumPg_POSTING"));
-		StmtStatus status = StmtStatus.SIMULATED;
-		StmtType stmtType = StmtType.BS;
-		String stmtTarget = ledger.getId();
-		int stmtSeqNbr = 0;
-		FinancialStmt financialStmt = new FinancialStmt(ledger, pstTime, posting, status, stmtType, stmtTarget, stmtSeqNbr);
-		financialStmtRepository.save(financialStmt);
+		f.setPstTime(pstTime);
+		f.setTotalCredit(BigDecimal.ZERO);
+		f.setTotalDebit(BigDecimal.ZERO);
+		financialStmtRepository.save(f);
 	}
 
 }

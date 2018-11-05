@@ -1,0 +1,48 @@
+<dataset>
+    <CHART_OF_ACCOUNT id="ci8k8PDcTrCsi-F3sT3i-g"
+            user_details="Francis"
+            created="2018-08-07 20:58:24.232"
+            name="IFRS"
+            short_desc="Sample chart of account"
+    />
+    <LEDGER id="Zd0ND5YwSzGwIfZilhumPg"
+            coa_id="ci8k8PDcTrCsi-F3sT3i-g"
+            name="GL"
+            created="2018-08-07 20:58:24.232"
+            user_details="Sample User"
+    />
+
+    <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_BS_1_0_0"
+    		coa_id="ci8k8PDcTrCsi-F3sT3i-g"
+            created="2018-08-07 23:50:41.231"
+            user_details="Sample User"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+            balance_side="Dr"
+            category="AS"
+            name="1.0.0"
+            short_desc="Asset Accounts"
+    />
+
+    <LEDGER_ACCOUNT id="xVgaTPMcRty9ik3BTQDh1Q_BS_2_0_0"
+    		coa_id="ci8k8PDcTrCsi-F3sT3i-g"
+            created="2018-08-07 23:50:41.231"
+            user_details="Sample User"
+            ledger_id="Zd0ND5YwSzGwIfZilhumPg"
+            balance_side="Cr"
+            category="EQ"
+            name="2.0.0"
+            short_desc="Equity Accounts"
+    />
+    
+    <POSTING_TRACE id="Zd0ND5YwSzGwIfZilhumPg_POSTING_TRACE"
+        account_id="xVgaTPMcRty9ik3BTQDh1Q_BS_2_0_0"
+        credit_amount="0.0"
+        debit_amount="0.0"
+        src_opr_id="6b1672f7edf8c371860136271f89b41f22dc122a"
+        src_pst_hash="6b1672f7edf8c371860136271f89b41f22dc12sdf"
+		src_pst_time="2018-11-07 20:58:24.232"
+        src_pst_id="Zd0ND5YwSzGwIfZilhumPg_POSTING12"
+        tgt_pst_id="Zd0ND5YwSzGwIfZilhumPg_POSTING1"
+	/>
+	
+</dataset>
