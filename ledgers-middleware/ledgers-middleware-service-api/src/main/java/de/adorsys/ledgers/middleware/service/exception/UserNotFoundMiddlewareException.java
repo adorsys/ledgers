@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.um.rest.converter;
+package de.adorsys.ledgers.middleware.service.exception;
 
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.rest.domain.UserTO;
+public class UserNotFoundMiddlewareException extends Exception {
 
-import org.mapstruct.Mapper;
+    public UserNotFoundMiddlewareException() {
+    }
 
-@Mapper(componentModel = "spring")
-public interface UserTOConverter {
-
-    UserTO toUserTO(UserBO user);
-
-    UserBO toUserBO(UserTO user);
+    public UserNotFoundMiddlewareException(String message) {
+        super(message);
+    }
 }

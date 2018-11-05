@@ -26,6 +26,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>ledgers-user-management-rest-server</module>
         <module>ledgers-user-management-service-api</module>
         <module>ledgers-user-management-service-impl</module>
         <module>ledgers-user-management-repository</module>

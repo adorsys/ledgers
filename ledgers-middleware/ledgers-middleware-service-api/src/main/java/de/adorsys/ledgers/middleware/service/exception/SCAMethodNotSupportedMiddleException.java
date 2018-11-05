@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.domain;
+package de.adorsys.ledgers.middleware.service.exception;
 
-public class ValidationResultTO {
-    private Boolean valid;
+public class SCAMethodNotSupportedMiddleException extends Exception {
 
-    public ValidationResultTO() {
+    public SCAMethodNotSupportedMiddleException() {}
+
+    public SCAMethodNotSupportedMiddleException(String message) {
+        super(message);
     }
 
-    public ValidationResultTO(Boolean valid) {
-        this.valid = valid;
+    public SCAMethodNotSupportedMiddleException(Throwable cause) {
+        super(cause);
     }
 
-    public Boolean getValid() {
-        return valid;
+    public SCAMethodNotSupportedMiddleException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

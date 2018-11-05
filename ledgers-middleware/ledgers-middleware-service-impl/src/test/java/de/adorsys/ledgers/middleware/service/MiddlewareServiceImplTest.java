@@ -1,38 +1,73 @@
 package de.adorsys.ledgers.middleware.service;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
+import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.*;
-import de.adorsys.ledgers.middleware.service.exception.*;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.postings.api.domain.BalanceBO;
 import de.adorsys.ledgers.postings.api.service.AccountBalancesService;
-import de.adorsys.ledgers.sca.exception.*;
-import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
@@ -43,11 +78,8 @@ public class MiddlewareServiceImplTest {
     private static final String ACCOUNT_ID = "id";
     private static final String PATH_SINGLE_BO = "de/adorsys/ledgers/middleware/converter/PaymentSingle.yml";
     private static final String PATH_SINGLE_TO = "de/adorsys/ledgers/middleware/converter/PaymentSingleTO.yml";
-    private static final String PATH_PERIODIC_BO = "de/adorsys/ledgers/middleware/converter/PaymentPeriodic.yml";
-    private static final String PATH_PERIODIC_TO = "de/adorsys/ledgers/middleware/converter/PaymentPeriodicTO.yml";
-    private static final String PATH_BULK_BO = "de/adorsys/ledgers/middleware/converter/PaymentBulk.yml";
-    private static final String PATH_BULK_TO = "de/adorsys/ledgers/middleware/converter/PaymentBulkTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
+    private static final String USER_MESSAGE = "user message";
 
     @InjectMocks
     private MiddlewareServiceImpl middlewareService;
@@ -64,6 +96,21 @@ public class MiddlewareServiceImplTest {
     private AccountBalancesService accountBalancesService;
     @Mock
     private AccountDetailsMapper detailsMapper;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private SCAMethodTOConverter scaMethodTOConverter;
+
+    private ScaUserDataBO userDataBO;
+    private SCAMethodTO scaMethodTO;
+
+    @Before
+    public void setUp() {
+        userDataBO = new ScaUserDataBO();
+        scaMethodTO = new SCAMethodTO();
+    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -94,24 +141,25 @@ public class MiddlewareServiceImplTest {
 
 
     @Test
-    public void generateAuthCode() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException {
+    public void generateAuthCode() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException {
 
-        String myAuthCode = "my auth code";
-        when(operationService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS)).thenReturn(myAuthCode);
+        when(scaMethodTOConverter.toScaUserDataBO(scaMethodTO)).thenReturn(userDataBO);
+        when(operationService.generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
 
-        String authCode = middlewareService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
+        String actualOpId = middlewareService.generateAuthCode(OP_ID, scaMethodTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
-        assertThat(authCode, is(myAuthCode));
+        assertThat(actualOpId, is(OP_ID));
 
-        verify(operationService, times(1)).generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
+        verify(scaMethodTOConverter, times(1)).toScaUserDataBO(scaMethodTO);
+        verify(operationService, times(1)).generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test(expected = AuthCodeGenerationMiddlewareException.class)
-    public void generateAuthCodeWithException() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException {
+    public void generateAuthCodeWithException() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException {
+        when(scaMethodTOConverter.toScaUserDataBO(scaMethodTO)).thenReturn(userDataBO);
+        when(operationService.generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationException());
 
-        when(operationService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationException());
-
-        middlewareService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
+        middlewareService.generateAuthCode(OP_ID, scaMethodTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test
@@ -185,10 +233,47 @@ public class MiddlewareServiceImplTest {
         middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, WRONG_PAYMENT_ID);
     }
 
-    private static <T> T getAccount(Class<T> aClass) throws IOException {
-        return aClass.equals(AccountDetailsTO.class)
-                       ? YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "AccountDetailsTO.yml", aClass)
-                       : YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "AccountDetails.yml", aClass);
+    @Test
+    public void getSCAMethods() throws UserNotFoundException, UserNotFoundMiddlewareException {
+        String login = "spe@adorsys.com.ua";
+        List<ScaUserDataBO> userData = getDataFromFile("SCAUserDataBO.yml", new TypeReference<List<ScaUserDataBO>>() {
+        });
+        List<SCAMethodTO> scaMethodTOS = getDataFromFile("SCAMethodTO.yml", new TypeReference<List<SCAMethodTO>>() {
+        });
+
+        when(userService.getUserScaData(login)).thenReturn(userData);
+        when(scaMethodTOConverter.toSCAMethodListTO(userData)).thenReturn(scaMethodTOS);
+
+        List<SCAMethodTO> scaMethods = middlewareService.getSCAMethods(login);
+
+        assertThat(scaMethods.size(), is(2));
+
+        assertThat(scaMethods.get(0).getType(), is(SCAMethodTypeTO.EMAIL));
+        assertThat(scaMethods.get(0).getValue(), is("spe@adorsys.com.ua"));
+
+        assertThat(scaMethods.get(1).getType(), is(SCAMethodTypeTO.MOBILE));
+        assertThat(scaMethods.get(1).getValue(), is("+380933686868"));
+
+        verify(userService, times(1)).getUserScaData(login);
+        verify(scaMethodTOConverter, times(1)).toSCAMethodListTO(userData);
+    }
+
+    @Test(expected = UserNotFoundMiddlewareException.class)
+    public void getSCAMethodsUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException {
+        String login = "spe@adorsys.com.ua";
+
+        when(userService.getUserScaData(login)).thenThrow(UserNotFoundException.class);
+
+        middlewareService.getSCAMethods(login);
+    }
+
+    private static <T> T getAccount(Class<T> aClass) {
+        try {
+            return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
     }
 
     private static <T> T getPayment(Class<T> aClass, String path) {
@@ -205,5 +290,17 @@ public class MiddlewareServiceImplTest {
                 YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "Balance1.yml", tClass),
                 YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "Balance2.yml", tClass)
         );
+    }
+
+    //    todo: replace by javatar-commons version 0.7
+    private <T> T getDataFromFile(String fileName, TypeReference<T> typeReference) {
+        ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+        objectMapper.findAndRegisterModules();
+        InputStream inputStream = getClass().getResourceAsStream(fileName);
+        try {
+            return objectMapper.readValue(inputStream, typeReference);
+        } catch (IOException e) {
+            throw new IllegalStateException("File not found");
+        }
     }
 }
