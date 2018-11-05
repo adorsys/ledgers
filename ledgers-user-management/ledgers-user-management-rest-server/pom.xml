@@ -10,7 +10,8 @@
 	</parent>
 
     <artifactId>ledgers-user-management-rest-server</artifactId>
-	
+    <name>ledgers-user-management-rest-server</name>
+
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
 	</properties>

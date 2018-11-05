@@ -1,9 +1,13 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.domain.SCAOperationTO;
-import de.adorsys.ledgers.middleware.domain.ValidationResultTO;
+import de.adorsys.ledgers.middleware.domain.SCAGenerationRequest;
+import de.adorsys.ledgers.middleware.domain.SCAGenerationResponse;
+import de.adorsys.ledgers.middleware.domain.SCAValidationRequest;
+import de.adorsys.ledgers.middleware.domain.SCAValidationResponse;
 import de.adorsys.ledgers.middleware.exception.*;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
 import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.util.SerializationUtils;
 import org.junit.Before;
@@ -23,11 +27,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.ResourceReader;
 
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,6 +45,8 @@ public class AuthCodeResourceTest {
     private static final String TAN_CODE = "my tan code";
     private static final int VALIDITY_SECONDS = 60;
     private static final ResourceReader READER = JsonReader.getInstance();
+    private static final String USER_LOGIN = "userLogin";
+    private static final String USER_MESSAGE = "userMessage";
 
     private MockMvc mockMvc;
 
@@ -49,9 +55,10 @@ public class AuthCodeResourceTest {
 
     @Mock
     private MiddlewareService middlewareService;
+    private SCAMethodTO scaMethod;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mockMvc = MockMvcBuilders
@@ -59,38 +66,49 @@ public class AuthCodeResourceTest {
                           .setControllerAdvice(new ExceptionAdvisor())
                           .setMessageConverters(new MappingJackson2HttpMessageConverter())
                           .build();
+
+        scaMethod = new SCAMethodTO();
+        scaMethod.setType(SCAMethodTypeTO.EMAIL);
+        scaMethod.setValue("spe@adorsys.com.ua");
     }
 
     @Test
     public void generate() throws Exception {
 
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS);
+        SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
-        when(middlewareService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS)).thenReturn(TAN_CODE);
+
+        when(middlewareService.generateAuthCode(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post("/auth-codes/{id}/generate", OP_ID)
+                                                      .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(SerializationUtils.writeValueAsBytes(operation)))
+                                                      .content(SerializationUtils.writeValueAsBytes(request)))
                                       .andDo(print())
-                                      .andExpect(status().is(HttpStatus.NO_CONTENT.value()))
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
 
-        verify(middlewareService, times(1)).generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
+        String content = mvcResult.getResponse().getContentAsString();
+        SCAGenerationResponse actual = strToObj(content, SCAGenerationResponse.class);
+
+        assertThat(actual, is(new SCAGenerationResponse(OP_ID)));
+
+        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test
     public void generateWithValidationError() throws Exception {
 
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS);
+        SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         String message = "Validation error";
-        when(middlewareService.generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationMiddlewareException(message));
+        when(middlewareService.generateAuthCode(USER_LOGIN, scaMethod, OP_DATA,USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationMiddlewareException(message));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post("/auth-codes/{id}/generate", OP_ID)
+                                                      .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(SerializationUtils.writeValueAsBytes(operation)))
+                                                      .content(SerializationUtils.writeValueAsBytes(request)))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -103,12 +121,12 @@ public class AuthCodeResourceTest {
         assertThat(exception.getDevMessage(), is(message));
         assertThat(exception.getMessage(), is(message));
 
-        verify(middlewareService, times(1)).generateAuthCode(OP_ID, OP_DATA, VALIDITY_SECONDS);
+        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test
     public void validate() throws Exception {
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+        SCAValidationRequest operation = new SCAValidationRequest(OP_DATA, TAN_CODE);
 
         when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenReturn(Boolean.FALSE);
 
@@ -121,7 +139,7 @@ public class AuthCodeResourceTest {
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
 
-        ValidationResultTO authCode = READER.getObjectFromString(mvcResult.getResponse().getContentAsString(), ValidationResultTO.class);
+        SCAValidationResponse authCode = READER.getObjectFromString(mvcResult.getResponse().getContentAsString(), SCAValidationResponse.class);
 
         assertThat(authCode.getValid(), is(Boolean.FALSE));
 
@@ -130,7 +148,7 @@ public class AuthCodeResourceTest {
 
     @Test
     public void validateNotFound() throws Exception {
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+        SCAValidationRequest operation = new SCAValidationRequest(OP_DATA, TAN_CODE);
 
         String message = "Operation not found";
         when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenThrow(new SCAOperationNotFoundMiddlewareException(message));
@@ -156,7 +174,7 @@ public class AuthCodeResourceTest {
 
     @Test
     public void validateValidationError() throws Exception {
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+        SCAValidationRequest operation = new SCAValidationRequest(OP_DATA, TAN_CODE);
 
         String message = "Operation is not valid";
         when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenThrow(new SCAOperationValidationMiddlewareException(message));
@@ -182,7 +200,7 @@ public class AuthCodeResourceTest {
 
     @Test
     public void validateStolenException() throws Exception {
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+        SCAValidationRequest operation = new SCAValidationRequest(OP_DATA, TAN_CODE);
 
         String message = "Operation auth code was stolen";
         when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenThrow(new SCAOperationUsedOrStolenMiddlewareException(message));
@@ -208,7 +226,7 @@ public class AuthCodeResourceTest {
 
     @Test
     public void validateExpiredException() throws Exception {
-        SCAOperationTO operation = new SCAOperationTO(OP_DATA, VALIDITY_SECONDS, TAN_CODE);
+        SCAValidationRequest operation = new SCAValidationRequest(OP_DATA, TAN_CODE);
 
         String message = "Operation auth code was expired";
         when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenThrow(new SCAOperationExpiredMiddlewareException(message));
@@ -230,5 +248,14 @@ public class AuthCodeResourceTest {
         assertThat(exception.getMessage(), is(message));
 
         verify(middlewareService, times(1)).validateAuthCode(OP_ID, OP_DATA, TAN_CODE);
+    }
+
+    private <T> T strToObj(String source, Class<T> tClass) {
+        try {
+            return JsonReader.getInstance().getObjectFromString(source, tClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Can't build object from the string", e);
+        }
     }
 }

@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
 import de.adorsys.ledgers.sca.service.SCASender;
+import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,10 +32,10 @@ public class MailSCASender implements SCASender {
 
     private final JavaMailSender sender;
 
-    @Value("${sca.authCode.email.subject")
+    @Value("${sca.authCode.email.subject}")
     private String subject;
 
-    @Value("${sca.authCode.email.from")
+    @Value("${sca.authCode.email.from}")
     private String from;
 
     public MailSCASender(JavaMailSender sender) {
@@ -42,11 +43,11 @@ public class MailSCASender implements SCASender {
     }
 
     @Override
-    public boolean send(String address, String authCode) {
+    public boolean send(String value, String authCode) {
         logger.info("Preparing an email to send auth code");
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(address);
+            message.setTo(value);
             message.setSubject(subject);
             message.setText(authCode);
             message.setFrom(from);
@@ -57,6 +58,11 @@ public class MailSCASender implements SCASender {
         }
         logger.info("Auth code was successfully sent via email");
         return true;
+    }
+
+    @Override
+    public ScaMethodTypeBO getType() {
+        return ScaMethodTypeBO.EMAIL;
     }
 
     void setSubject(String subject) {

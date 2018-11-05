@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.rest.um.converter;
+package de.adorsys.ledgers.sca.exception;
 
-import de.adorsys.ledgers.rest.um.domain.UserTO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import org.mapstruct.Mapper;
+public class SCAMethodNotSupportedException extends Exception {
 
-@Mapper(componentModel = "spring")
-public interface UserTOConverter {
+    public SCAMethodNotSupportedException() {}
 
-    UserTO toUserTO(UserBO user);
+    public SCAMethodNotSupportedException(String message) {
+        super(message);
+    }
 
-    UserBO toUserBO(UserTO user);
+    public SCAMethodNotSupportedException(Throwable cause) {
+        super(cause);
+    }
+
+    public SCAMethodNotSupportedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

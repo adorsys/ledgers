@@ -16,22 +16,19 @@
 
 package de.adorsys.ledgers.middleware.domain;
 
-public class SCAOperationTO {
+public class SCAValidationRequest {
     private String data;
-    private int validitySeconds;
     private String authCode;
 
-    public SCAOperationTO() {
+    public SCAValidationRequest() {
     }
 
-    public SCAOperationTO(String data, int validitySeconds) {
+    public SCAValidationRequest(String data) {
         this.data = data;
-        this.validitySeconds = validitySeconds;
     }
 
-    public SCAOperationTO(String data, int validitySeconds, String authCode) {
+    public SCAValidationRequest(String data, String authCode) {
         this.data = data;
-        this.validitySeconds = validitySeconds;
         this.authCode = authCode;
     }
 
@@ -41,14 +38,6 @@ public class SCAOperationTO {
 
     public void setData(String data) {
         this.data = data;
-    }
-
-    public int getValiditySeconds() {
-        return validitySeconds;
-    }
-
-    public void setValiditySeconds(int validitySeconds) {
-        this.validitySeconds = validitySeconds;
     }
 
     public String getAuthCode() {

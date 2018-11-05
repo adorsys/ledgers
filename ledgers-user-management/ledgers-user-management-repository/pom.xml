@@ -109,7 +109,7 @@
 								<bannedDependencies>
 									<excludes>
 										<exclude>de.adorsys.ledgers:ledgers-user-management-service-impl</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-user-management-api</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-user-management-service-api</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-user-management-rest-server</exclude>
 									</excludes>
 								</bannedDependencies>

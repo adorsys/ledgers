@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.service;
+package de.adorsys.ledgers.um.rest.converter;
 
-import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
 
-public interface SCASender {
+import de.adorsys.ledgers.um.rest.domain.UserTO;
+import org.mapstruct.Mapper;
 
-    boolean send(String value, String authCode);
+@Mapper(componentModel = "spring")
+public interface UserTOConverter {
 
-    ScaMethodTypeBO getType();
+    UserTO toUserTO(UserBO user);
+
+    UserBO toUserBO(UserTO user);
 }

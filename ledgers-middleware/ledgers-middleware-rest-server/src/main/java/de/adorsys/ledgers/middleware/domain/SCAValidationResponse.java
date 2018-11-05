@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.sca.service;
+package de.adorsys.ledgers.middleware.domain;
 
-import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
+public class SCAValidationResponse {
+    private Boolean valid;
 
-public interface SCASender {
+    public SCAValidationResponse() {
+    }
 
-    boolean send(String value, String authCode);
+    public SCAValidationResponse(Boolean valid) {
+        this.valid = valid;
+    }
 
-    ScaMethodTypeBO getType();
+    public Boolean getValid() {
+        return valid;
+    }
 }
