@@ -1,10 +1,8 @@
 package de.adorsys.ledgers.postings.db.domain;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,11 +12,12 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -40,6 +39,8 @@ import de.adorsys.ledgers.util.hash.HashGenerationException;
  */
 @Entity
 @JsonPropertyOrder(alphabetic = true)
+@Table(uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "opr_id", "discarding_id" }, name = "Posting_opr_id_discarding_id_unique") })
 public class Posting extends HashRecord {
     private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
 
@@ -63,23 +64,8 @@ public class Posting extends HashRecord {
      * an operation. Only one of them will be effective in the account statement
      * at any given time.
      */
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name="opr_id")
     private String oprId;
-
-    /*
-     * The sequence number of the operation processed by this posting.
-     *
-     * A single operation can be overridden many times as long as the enclosing
-     * ledger is not closed. These overriding happens
-     * synchronously. Each single one increasing the sequence number of the
-     * former posting.
-     *
-     * This is, the posting id is always a concatenation between the operation
-     * id and the sequence number.
-     *
-     */
-    @Column(nullable = false, updatable = false)
-    private int oprSeqNbr = 0;
 
     /* The time of occurrence of this operation. Set by the consuming module. */
 	@Convert(converter=LocalDateTimeConverter.class)
@@ -93,6 +79,13 @@ public class Posting extends HashRecord {
 
     /* Details associated with this operation. */
     private String oprDetails;
+    
+    /*
+     * The source of the operation. For example, payment order may result into many
+     * payments. Each payment will be an operation. The oprSrc field will be used to
+     * document original payment id. 
+     */
+    private String oprSrc;
 
     /*
      * This is the time from which the posting is effective in the account
@@ -149,38 +142,35 @@ public class Posting extends HashRecord {
     private LocalDateTime valTime;
 
 //    todo: add description to this field
-    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JoinColumn(name = "posting_id")
     private List<PostingLine> lines = new ArrayList<>();
-
-    public Posting() {
-    	super();
-    }
-
-    public Posting(String recordUser, String recordAntecedentId, String recordAntecedentHash, String oprId,
-                   int oprSeqNbr, LocalDateTime oprTime, String oprType, String oprDetails, LocalDateTime pstTime,
-                   PostingType pstType, PostingStatus pstStatus, Ledger ledger, LocalDateTime valTime,
-                   List<PostingLine> lines) {
-        this.recordUser = recordUser;
-        this.antecedentId = recordAntecedentId;
-        this.antecedentHash = recordAntecedentHash;
-        this.oprId = oprId;
-        this.oprSeqNbr = oprSeqNbr;
-        this.oprTime = oprTime;
-        this.oprType = oprType;
-        this.oprDetails = oprDetails;
-        this.pstTime = pstTime;
-        this.pstType = pstType;
-        this.ledger = ledger;
-        this.valTime = valTime;
-        this.lines = lines != null ? lines : new ArrayList<>();
-        this.pstStatus = pstStatus != null ? pstStatus : PostingStatus.POSTED;
-    }
+    
+    /*
+     * The id of the discarded posting. In case this posting discards another posting.
+     */
+    private String discardedId;
+    
+    /*
+     * The record time of the discarding posting 
+     */
+	@Convert(converter=LocalDateTimeConverter.class)
+    private LocalDateTime discardedTime;
+    /*
+     * The id of the discaring posting/
+     */
+    @Column(name="discarding_id")
+    private String discardingId;
 
     public Posting hash() {
-        if (hash != null) {
-            throw new IllegalStateException("Can not update a posting.");
-        }
-        recordTime = LocalDateTime.now();
+    	// Skipp computation if a hash exists. Original value 
+    	// shall not be overriden.
+    	if(hash!=null) {
+    		return this;
+    	}
+    	if(recordTime==null) {
+    		recordTime = LocalDateTime.now();
+    	}
         try {
             hash = RECORD_HASH_HELPER.computeRecHash(this);
         } catch (HashGenerationException e) {
@@ -189,45 +179,10 @@ public class Posting extends HashRecord {
         return this;
     }
 
-    @PrePersist
-    public void prePersist() {
-        id = makeId(oprId, oprSeqNbr);
-    }
-    
-    /**
-     * Return the id of the posting being overriding by this posting.
-     *  
-     * @return
-     */
-    public final Optional<String> clonedId() {
-    	return Optional.ofNullable(oprSeqNbr<=0?null:makeId(oprId, oprSeqNbr-1));
-    }
-    
-    public static String makeId(String oprId, int oprSeqNbr) {
-        return oprId + "_" + oprSeqNbr;
-    }
+	public void synchLines() {
+		lines.stream().forEach(l -> l.synchPosting(this));
+	}
 
-    /**
-     * Union of all lines of this posting and missing lines of the passed posting 
-     * by account number. Lines copied from the in prec posting will be given an
-     * amount of zero for both debit and credit.
-     * 
-     * @param prec
-     * @return
-     */
-    public void union(Posting prec) {
-    	for (PostingLine l : prec.getLines()) {
-			if(hasAccount(l)) {
-				continue;
-			}
-			lines.add(new PostingLine(null, this, l.getAccount(), BigDecimal.ZERO, BigDecimal.ZERO, null, null, l.getBaseLine()));
-    	}
-    }
-    
-    private boolean hasAccount(PostingLine model) {
-    	return lines.stream().filter(l -> StringUtils.equals(l.getAccName(), model.getAccName())).findAny().isPresent();
-    }
-    
 	public String getId() {
 		return id;
 	}
@@ -242,10 +197,6 @@ public class Posting extends HashRecord {
 
 	public String getOprId() {
 		return oprId;
-	}
-
-	public int getOprSeqNbr() {
-		return oprSeqNbr;
 	}
 
 	public LocalDateTime getOprTime() {
@@ -283,4 +234,89 @@ public class Posting extends HashRecord {
 	public List<PostingLine> getLines() {
 		return lines;
 	}
+
+	public String getOprSrc() {
+		return oprSrc;
+	}
+
+	public String getDiscardedId() {
+		return discardedId;
+	}
+
+	public void setDiscardedId(String discardedId) {
+		this.discardedId = discardedId;
+	}
+
+	public LocalDateTime getDiscardedTime() {
+		return discardedTime;
+	}
+
+	public void setDiscardedTime(LocalDateTime discardedTime) {
+		this.discardedTime = discardedTime;
+	}
+
+	public String getDiscardingId() {
+		return discardingId;
+	}
+
+	public void setDiscardingId(String discardingId) {
+		this.discardingId = discardingId;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setRecordUser(String recordUser) {
+		this.recordUser = recordUser;
+	}
+
+	public void setRecordTime(LocalDateTime recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	public void setOprId(String oprId) {
+		this.oprId = oprId;
+	}
+
+	public void setOprTime(LocalDateTime oprTime) {
+		this.oprTime = oprTime;
+	}
+
+	public void setOprType(String oprType) {
+		this.oprType = oprType;
+	}
+
+	public void setOprDetails(String oprDetails) {
+		this.oprDetails = oprDetails;
+	}
+
+	public void setOprSrc(String oprSrc) {
+		this.oprSrc = oprSrc;
+	}
+
+	public void setPstTime(LocalDateTime pstTime) {
+		this.pstTime = pstTime;
+	}
+
+	public void setPstType(PostingType pstType) {
+		this.pstType = pstType;
+	}
+
+	public void setPstStatus(PostingStatus pstStatus) {
+		this.pstStatus = pstStatus;
+	}
+
+	public void setLedger(Ledger ledger) {
+		this.ledger = ledger;
+	}
+
+	public void setValTime(LocalDateTime valTime) {
+		this.valTime = valTime;
+	}
+
+	public void setLines(List<PostingLine> lines) {
+		this.lines = lines;
+	}
+	
 }

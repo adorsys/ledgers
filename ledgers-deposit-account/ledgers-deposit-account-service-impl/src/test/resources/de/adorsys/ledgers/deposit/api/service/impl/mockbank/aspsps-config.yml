@@ -1,0 +1,26 @@
+name: mockbank
+ledger: mockbank
+coaFile: sample_coa_banking.yml
+coaExtensions:
+### Clearing Target 2 - Deposit with Privately owned domestic banks - Non-Interest bearing
+  - shortDesc: Target2-Clearing Account
+    name: 11240
+    parent: 1124
+### Clearing account as subaccount of  Deposits with Centralbank - Non-Interest bearing
+  - shortDesc: SEPA-Clearing Account
+    name: 11031
+    parent: 1103
+### Sample Bank Account Bank account Natural persons (households), residents, Interest bearing
+  - shortDesc: Bank Account Marion Mueller
+    name: DE69760700240340283600
+    parent: 2332
+  - shortDesc: Bank Account Anton Brueckner
+    name: DE80760700240271232400
+    parent: 2332
+  - shortDesc: Bank Account Max Musterman
+    name: DE38760700240320465700
+    parent: 2332
+clearingAccountTarget2: 11031
+clearingAccountSepa: 11031
+depositParentAccount: 2332
+

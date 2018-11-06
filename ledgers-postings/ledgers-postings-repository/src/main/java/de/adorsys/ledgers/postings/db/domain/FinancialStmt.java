@@ -1,18 +1,14 @@
 package de.adorsys.ledgers.postings.db.domain;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
@@ -31,40 +27,38 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
  * @author fpo
  *
  */
-@Entity
-public class FinancialStmt {
+@MappedSuperclass
+public abstract class FinancialStmt {
 
     /* The record id */
     @Id
     private String id;
-	
-	/* Name of the containing ledger */
-	@ManyToOne(optional = false)
-	private Ledger ledger;
 
+    /*
+     * The corresponding posting.
+     * 
+     */
+	@OneToOne
+	private Posting posting;
+    
 	/* Documents the time of the posting. */
 	@Column(nullable = false, updatable = false)
 	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime pstTime;
 
-	/* Documents the posting holding additional information. */
-	@OneToOne(optional=false)
-	private Posting posting;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	private StmtStatus stmtStatus;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, updatable = false)
-	private StmtType stmtType;
-	
 	/*
-	 * Name of the target object. This can be the account or the ledger itself.
+	 * Identifier of the latest processed posting. We use this to 
+	 * perform batch processing. The latest posting process will allways be 
+	 * held here.
 	 * 
 	 */
-	private String stmtTarget;
-
+	@OneToOne
+	private PostingTrace latestPst;
+	
 	/*
 	 * The sequence number of the operation processed by this posting.
 	 *
@@ -75,42 +69,6 @@ public class FinancialStmt {
 	 */
 	@Column(nullable = false, updatable = false)
 	private int stmtSeqNbr = 0;
-
-	public FinancialStmt() {
-	}
-
-    public FinancialStmt(Ledger ledger, LocalDateTime pstTime, Posting posting, StmtStatus stmtStatus, StmtType stmtType,
-			String stmtTarget, int stmtSeqNbr) {
-		this.ledger = ledger;
-		this.pstTime = pstTime;
-		this.posting = posting;
-		this.stmtStatus = stmtStatus;
-		this.stmtType = stmtType;
-		this.stmtTarget = stmtTarget;
-		this.stmtSeqNbr = stmtSeqNbr;
-	}
-
-	@PrePersist
-    public void prePersist() {
-        id = makeId(stmtType, stmtTarget, pstTime, stmtSeqNbr);
-    }
-    
-    /**
-     * Return the id of the posting being overriding by this posting.
-     *  
-     * @return
-     */
-    public final Optional<String> clonedId() {
-    	return Optional.ofNullable(stmtSeqNbr<=0?null:makeId(stmtType, stmtTarget, pstTime, stmtSeqNbr-1));
-    }
-    
-    public static String makeId(StmtType stmtType, String stmtTarget, LocalDateTime pstTime, int stmtSeqNbr) {
-        return stmtType.name() + "_" + stmtTarget + "_" +  pstTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "_" + stmtSeqNbr;
-    }
-	
-	public Ledger getLedger() {
-		return ledger;
-	}
 
 	public LocalDateTime getPstTime() {
 		return pstTime;
@@ -124,20 +82,40 @@ public class FinancialStmt {
 		return id;
 	}
 
+	public StmtStatus getStmtStatus() {
+		return stmtStatus;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setPstTime(LocalDateTime pstTime) {
+		this.pstTime = pstTime;
+	}
+
+	public void setStmtStatus(StmtStatus stmtStatus) {
+		this.stmtStatus = stmtStatus;
+	}
+
+	public void setStmtSeqNbr(int stmtSeqNbr) {
+		this.stmtSeqNbr = stmtSeqNbr;
+	}
+
+	public PostingTrace getLatestPst() {
+		return latestPst;
+	}
+
+	public void setLatestPst(PostingTrace latestPst) {
+		this.latestPst = latestPst;
+	}
+
 	public Posting getPosting() {
 		return posting;
 	}
 
-	public StmtType getStmtType() {
-		return stmtType;
-	}
-
-	public String getStmtTarget() {
-		return stmtTarget;
-	}
-
-	public StmtStatus getStmtStatus() {
-		return stmtStatus;
+	public void setPosting(Posting posting) {
+		this.posting = posting;
 	}
 	
 }

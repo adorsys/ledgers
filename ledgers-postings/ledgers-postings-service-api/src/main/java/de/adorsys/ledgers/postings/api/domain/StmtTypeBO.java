@@ -1,6 +1,6 @@
-package de.adorsys.ledgers.postings.db.domain;
+package de.adorsys.ledgers.postings.api.domain;
 
-public enum StmtType {
+public enum StmtTypeBO {
 	/*
 	 * An account balance statement
 	 */

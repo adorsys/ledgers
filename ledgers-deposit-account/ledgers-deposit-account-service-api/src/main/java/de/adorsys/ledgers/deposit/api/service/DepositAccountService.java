@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface DepositAccountService {
 
-    DepositAccountBO createDepositAccount(DepositAccountBO depositAccount) throws PaymentProcessingException;
+    DepositAccountBO createDepositAccount(DepositAccountBO depositAccount) throws DepositAccountNotFoundException;
 
     DepositAccountBO getDepositAccountById(String accountId) throws DepositAccountNotFoundException;
 

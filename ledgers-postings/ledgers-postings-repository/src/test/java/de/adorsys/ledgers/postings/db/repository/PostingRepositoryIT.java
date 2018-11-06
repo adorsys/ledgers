@@ -26,11 +26,10 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.Posting;
-import de.adorsys.ledgers.postings.db.domain.PostingLine;
-import de.adorsys.ledgers.postings.db.domain.PostingStatus;
 import de.adorsys.ledgers.postings.db.domain.PostingType;
 import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
+import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -38,8 +37,8 @@ import de.adorsys.ledgers.util.hash.HashGenerationException;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
     TransactionalTestExecutionListener.class,
     DbUnitTestExecutionListener.class})
-@DatabaseSetup("PostingRepositoryTest-db-entries.xml")
-@DatabaseTearDown(value={"PostingRepositoryTest-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
+@DatabaseSetup("PostingRepositoryIT-db-entries.xml")
+@DatabaseTearDown(value={"PostingRepositoryIT-db-entries.xml"}, type=DatabaseOperation.DELETE_ALL)
 public class PostingRepositoryIT {
 
 	ObjectMapper om = new ObjectMapper();
@@ -54,22 +53,15 @@ public class PostingRepositoryIT {
 	public void test_create_posting_ok() {
 		Optional<Ledger> ledgerOption = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
 		Assume.assumeTrue(ledgerOption.isPresent());
-		String recordUser = "recUser";
-		String oprId = "oprId";
-		LocalDateTime pstTime = LocalDateTime.now();
-		PostingType pstType = PostingType.BAL_STMT;
-		Ledger ledger = ledgerOption.get();
-		String oprDetails = "oprDetails";
-		String recordAntecedentId = null;
-		String recordAntecedentHash = null;
-		int oprSeqNbr = 0;
-		LocalDateTime oprTime = null;
-		String oprType = null;
-		PostingStatus pstStatus = null;
-		LocalDateTime valTime = null;
-		List<PostingLine> lines = null;
-		Posting posting = new Posting(recordUser, recordAntecedentId, recordAntecedentHash, oprId, oprSeqNbr, oprTime, oprType, oprDetails, pstTime, pstType, pstStatus, ledger, valTime, lines); 
-		postingRepository.save(posting);
+		Posting p = new Posting();
+		p.setRecordUser("recUser");
+		p.setOprId("oprId");
+		p.setPstTime(LocalDateTime.now());
+		p.setPstType(PostingType.BAL_STMT);
+		p.setLedger(ledgerOption.get());
+		p.setOprDetails("oprDetails");
+		p.setId(Ids.id());
+		postingRepository.save(p);
 	}
 
 	@Test
@@ -89,7 +81,7 @@ public class PostingRepositoryIT {
 		Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
 		Assume.assumeNotNull(ledger);
 
-		Posting posting = postingRepository.findFirstOptionalByLedgerOrderByRecordTimeDesc(ledger).orElse(null);
+		Posting posting = postingRepository.findFirstByLedgerOrderByRecordTimeDesc(ledger).orElse(null);
 		Assume.assumeNotNull(posting);
 		assertEquals("Zd0ND5YwSzGwIfZilhumPg_POSTING2", posting.getId());
 		System.out.println(posting.getId());
@@ -100,23 +92,15 @@ public class PostingRepositoryIT {
 	public void test_posting_hash() throws JsonProcessingException, HashGenerationException {
 		Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
 		Assume.assumeTrue(ledgerOptions.isPresent());
-		String recordUser = "recUser";
-		String oprId = "oprId";
-		LocalDateTime pstTime = LocalDateTime.now();
-		PostingType pstType = PostingType.BAL_STMT;
-		String oprDetails = "oprDetails";
-		Ledger ledger = ledgerOptions.get();
-		String recordAntecedentId = null;
-		String recordAntecedentHash = null;
-		int oprSeqNbr = 0;
-		LocalDateTime oprTime = null;
-		String oprType = null;
-		PostingStatus pstStatus = null;
-		LocalDateTime valTime = null;
-		List<PostingLine> lines = null;
-		Posting posting = new Posting(recordUser, recordAntecedentId, recordAntecedentHash, oprId, oprSeqNbr, oprTime, oprType, oprDetails, pstTime, pstType, pstStatus, ledger, valTime, lines); 
-		
-		Posting saved = postingRepository.save(posting);
+		Posting p = new Posting();
+		p.setRecordUser("recUser");
+		p.setOprId("oprId");
+		p.setPstTime(LocalDateTime.now());
+		p.setPstType(PostingType.BAL_STMT);
+		p.setLedger(ledgerOptions.get());
+		p.setOprDetails("oprDetails");
+		p.setId(Ids.id());
+		Posting saved = postingRepository.save(p);
 		saved = postingRepository.save(saved.hash());
 		
 		String writeValueAsString = om.writeValueAsString(saved);

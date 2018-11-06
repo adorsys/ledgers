@@ -77,7 +77,7 @@ public class AbstractServiceImpl {
         if (model.getLedger() != null && model.getName() != null) {
             Ledger loadedLedger = loadLedger(model.getLedger());
             return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, model.getName())
-                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getId()));
+                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getName(), model.getId()));
         }
         throw insufficientInfo(model);
     }

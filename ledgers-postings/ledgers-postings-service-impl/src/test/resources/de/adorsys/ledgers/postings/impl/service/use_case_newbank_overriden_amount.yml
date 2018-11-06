@@ -109,8 +109,6 @@
   pstTime: 2018-01-03T12:32:00.000
   pstType: BUSI_TX
   pstStatus: POSTED
-  # Increasing the sequence shows that we are overriding the operation.
-  oprSeqNbr: 1
   lines:
   - account:
       name: 1810

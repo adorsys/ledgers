@@ -1,123 +1,131 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
-import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
-import de.adorsys.ledgers.util.hash.HashGenerationException;
-
 /**
- * Posting traces a used to keep references on input posting
- * while making some aggregation of balance calculation.
+ * A posting trace document the inclusion of a posting in the creation of a 
+ * statement.
  * <p>
- * We document statements like balances, balance sheets using posting as well.
- * Since posting never change, any statement produced by this module can be
- * reproduced or checked for integrity.
- * <p>
- * Each trace entry keeps reference of an antecedent posting trace.
- * <p>
- * The hash value of this posting also includes:
- * - The hash value of the input posting
- * - The hash value of the antecedent posting trace.
- * <p>
- * Here we record the posting used and not the operation used.
+ * 
+ * For each stmt posting, an operation can only be involved once.
  *
  * @author fpo
  */
 @Entity
-public class PostingTrace extends HashRecord {
-    private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
-
+@Table(uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "tgt_pst_id", "src_opr_id" }, name = "PostingTrace_tgt_pst_id_src_opr_id_unique") })
+public class PostingTrace {
     @Id
     private String id;
 
-    /*
-     * The position of the target posting in the list.
-     */
-    @Column(nullable = false, updatable = false)
-    private int pos;
-
-    /*The source posting id*/
-    @Column(nullable = false, updatable = false)
-    private String srcPstId;
-
-    /*The hash value of the src posting*/
-    @Column(nullable = false, updatable = false)
-    private String srcPstHash;
+    /*The target posting id. Posting receiving.*/
+    @Column(nullable = false, updatable = false, name="tgt_pst_id")
+    private String tgtPstId;
+    
+    @Convert(converter=LocalDateTimeConverter.class)
+    private LocalDateTime srcPstTime;
 
     /*The target posting id. Posting receiving.*/
-    @Column(nullable = false, updatable = false)
-    private String tgtPstId;
+    @Column(nullable = false)
+    private String srcPstId;
 
-    @Column(nullable = false, updatable = false)
-	@Convert(converter=LocalDateTimeConverter.class)
-    private LocalDateTime recordTime;
+    /*The source operation id*/
+    @Column(nullable = false, updatable = false, name="src_opr_id")
+    private String srcOprId;
 
-    public PostingTrace(String id, int pos, String srcPstId, String srcPstHash, String tgtPstId, String antTraceId,
-                        String antTraceHash) {
-        super();
-        this.id = id;
-        this.pos = pos;
-        this.srcPstId = srcPstId;
-        this.srcPstHash = srcPstHash;
-        this.tgtPstId = tgtPstId;
-        this.antecedentId = antTraceId;
-        this.antecedentHash = antTraceHash;
-    }
+	/*The associated ledger account*/
+	@ManyToOne(optional=false)
+	private LedgerAccount account;
+	
+	@Column(nullable=false)
+	private BigDecimal debitAmount;
+
+	@Column(nullable=false)
+	private BigDecimal creditAmount;
+	
+	private String srcPstHash;
     
-    public PostingTrace() {
-    	super();
-    }
-
-    @PrePersist
-    public void hash() {
-        if (hash != null) {
-            throw new IllegalStateException("Can not update a posting trace.");
-        }
-        recordTime = LocalDateTime.now();
-        try {
-            hash = RECORD_HASH_HELPER.computeRecHash(this);
-        } catch (HashGenerationException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
 	public String getId() {
 		return id;
-	}
-
-	public int getPos() {
-		return pos;
-	}
-
-	public String getSrcPstId() {
-		return srcPstId;
-	}
-
-	public String getSrcPstHash() {
-		return srcPstHash;
 	}
 
 	public String getTgtPstId() {
 		return tgtPstId;
 	}
 
-	public LocalDateTime getRecordTime() {
-		return recordTime;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	@Override
-	public String toString() {
-		return "PostingTrace [id=" + id + ", pos=" + pos + ", srcPstId=" + srcPstId + ", srcPstHash=" + srcPstHash
-				+ ", tgtPstId=" + tgtPstId + ", recordTime=" + recordTime + "] [super: " + super.toString() + "]";
+	public void setTgtPstId(String tgtPstId) {
+		this.tgtPstId = tgtPstId;
 	}
 
+	public LedgerAccount getAccount() {
+		return account;
+	}
 
+	public void setAccount(LedgerAccount account) {
+		this.account = account;
+	}
+
+	public BigDecimal getDebitAmount() {
+		return debitAmount;
+	}
+
+	public void setDebitAmount(BigDecimal debitAmount) {
+		this.debitAmount = debitAmount;
+	}
+
+	public BigDecimal getCreditAmount() {
+		return creditAmount;
+	}
+
+	public void setCreditAmount(BigDecimal creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
+	public LocalDateTime getSrcPstTime() {
+		return srcPstTime;
+	}
+
+	public void setSrcPstTime(LocalDateTime srcPstTime) {
+		this.srcPstTime = srcPstTime;
+	}
+
+	public String getSrcOprId() {
+		return srcOprId;
+	}
+
+	public void setSrcOprId(String srcOprId) {
+		this.srcOprId = srcOprId;
+	}
+
+	public String getSrcPstHash() {
+		return srcPstHash;
+	}
+
+	public void setSrcPstHash(String srcPstHash) {
+		this.srcPstHash = srcPstHash;
+	}
+
+	public String getSrcPstId() {
+		return srcPstId;
+	}
+
+	public void setSrcPstId(String srcPstId) {
+		this.srcPstId = srcPstId;
+	}
+	
 }

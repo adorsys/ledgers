@@ -79,6 +79,14 @@ public abstract class HashRecord  implements HashItem<HashRecord> {
 		return antecedentHash;
 	}
 
+	public void setAntecedentId(String antecedentId) {
+		this.antecedentId = antecedentId;
+	}
+
+	public void setAntecedentHash(String antecedentHash) {
+		this.antecedentHash = antecedentHash;
+	}
+
 	@Override
 	public String toString() {
 		return "HashRecord [antecedentId=" + antecedentId + ", antecedentHash=" + antecedentHash + ", hash=" + hash

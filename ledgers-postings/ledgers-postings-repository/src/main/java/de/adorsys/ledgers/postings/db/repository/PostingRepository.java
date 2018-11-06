@@ -9,7 +9,15 @@ import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.Posting;
 
 public interface PostingRepository extends PagingAndSortingRepository<Posting, String> {
+	/**
+	 * Load the non discaded posting.
+	 * 
+	 * @param oprId
+	 * @return
+	 */
+	Optional<Posting> findByOprIdAndDiscardingIdIsNull(String oprId);
+
 	List<Posting> findByOprId(String oprId);
 
-	Optional<Posting> findFirstOptionalByLedgerOrderByRecordTimeDesc(Ledger ledger);
+	Optional<Posting> findFirstByLedgerOrderByRecordTimeDesc(Ledger ledger);
 }

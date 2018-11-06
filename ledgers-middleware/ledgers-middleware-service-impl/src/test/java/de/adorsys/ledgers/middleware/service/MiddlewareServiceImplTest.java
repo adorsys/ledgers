@@ -1,48 +1,74 @@
 package de.adorsys.ledgers.middleware.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.middleware.converter.AccountConverter;
-import de.adorsys.ledgers.middleware.converter.PaymentConverter;
-import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.*;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
-import de.adorsys.ledgers.middleware.service.exception.*;
-import de.adorsys.ledgers.sca.exception.*;
-import de.adorsys.ledgers.middleware.service.exception.*;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.AccountBalancesService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
+import de.adorsys.ledgers.middleware.converter.PaymentConverter;
+import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
@@ -61,17 +87,16 @@ public class MiddlewareServiceImplTest {
 
     @Mock
     private DepositAccountPaymentService paymentService;
-
     @Mock
     private SCAOperationService operationService;
-
     @Mock
     private PaymentConverter paymentConverter;
     @Mock
     private DepositAccountService accountService;
-
     @Mock
-    private AccountConverter accountConverter;
+    private AccountBalancesService accountBalancesService;
+    @Mock
+    private AccountDetailsMapper detailsMapper;
 
     @Mock
     private UserService userService;
@@ -170,9 +195,10 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test
-    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException, LedgerAccountNotFoundException {
         when(accountService.getDepositAccountById(any())).thenReturn(getAccount(DepositAccountBO.class));
-        when(accountConverter.toAccountDetailsTO(any(), anyList())).thenReturn(getAccount(AccountDetailsTO.class));
+        when(accountBalancesService.getBalances(any())).thenReturn(getBalances(BalanceBO.class));
+        when(detailsMapper.toAccountDetailsTO(any(), any())).thenReturn(getAccount(AccountDetailsTO.class));
         AccountDetailsTO details = middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID);
 
         assertThat(details).isNotNull();
@@ -258,6 +284,13 @@ public class MiddlewareServiceImplTest {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
+    }
+
+    private static <T> List<T> getBalances(Class<T> tClass) throws IOException {
+        return Arrays.asList(
+                YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "Balance1.yml", tClass),
+                YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "Balance2.yml", tClass)
+        );
     }
 
     //    todo: replace by javatar-commons version 0.7

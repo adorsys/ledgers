@@ -6,4 +6,7 @@ public class LedgerAccountNotFoundException extends Exception {
     public LedgerAccountNotFoundException(String id) {
         super(String.format("Ledger Account with id %s not found.", id));
     }
+    public LedgerAccountNotFoundException(String name, String id) {
+        super(String.format("Ledger Account with name %s and id %s not found.", name, id));
+    }
 }

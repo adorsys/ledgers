@@ -10,11 +10,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
 
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
-
-import de.adorsys.ledgers.util.Ids;
 
 @Entity
 public class PostingLine {
@@ -22,9 +19,6 @@ public class PostingLine {
 	/* The record id */
 	@Id
 	private String id;
-
-	@ManyToOne(optional=false)
-	private Posting posting;
 	
 	/*The associated ledger account*/
 	@ManyToOne(optional=false)
@@ -76,9 +70,6 @@ public class PostingLine {
 	 */
 	@Column(nullable = false, updatable = false)
 	private String oprId;
-
-	@Column(nullable = false, updatable = false)
-	private int oprSeqNbr = 0;
 	
 	/*
 	 * This is the time from which the posting is effective in this account
@@ -107,84 +98,79 @@ public class PostingLine {
 	 */
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
-	private PostingStatus pstStatus = PostingStatus.POSTED;
+	private PostingStatus pstStatus;
+	@Column(nullable = false)
+    private String hash;
+    
+    /*
+     * The record time of the discarding posting 
+     */
+    private LocalDateTime discardedTime;
 
-	/*
-	 * The ledger governing this posting.
-	 */
-	@ManyToOne(optional=false)
-	private Ledger ledger;
-	
-	@Column(nullable = false, updatable = false)
-	private String accName;
-	
-	/*
-	 * The Date use to compute interests. This can be different from the posting
-	 * date and can lead to the production of other type of balances.
-	 */
-	@Convert(converter=LocalDateTimeConverter.class)
-	private LocalDateTime valTime;
-	
-	private void synchPosting(){
-		this.recordTime = this.posting.getRecordTime();
-		this.oprId = this.posting.getOprId();
-		this.oprSeqNbr = this.posting.getOprSeqNbr();
-		this.pstTime = this.posting.getPstTime();
-		this.pstType = this.posting.getPstType();
-		this.pstStatus = this.posting.getPstStatus();
-		this.ledger = this.posting.getLedger();
-		this.accName = this.account.getName();
-		this.valTime = this.posting.getValTime();
-	}
-
-	@PrePersist
-	public void prePersist(){
-		id = Ids.id();
-		synchPosting();
-	}
-
-	public PostingLine() {
-	}
-
-	public PostingLine(String id, Posting posting, LedgerAccount account, BigDecimal debitAmount,
-			BigDecimal creditAmount, String details, String srcAccount, String baseLine) {
-		super();
-		this.id = id;
-		this.posting = posting;
-		this.account = account;
-		this.debitAmount = debitAmount;
-		this.creditAmount = creditAmount;
-		this.details = details;
-		this.srcAccount = srcAccount;
-		this.baseLine = baseLine;
+	public void synchPosting(Posting posting){
+		this.recordTime = posting.getRecordTime();
+		this.oprId = posting.getOprId();
+		this.pstTime = posting.getPstTime();
+		this.pstType = posting.getPstType();
+		this.pstStatus = posting.getPstStatus();
+		this.hash = posting.getHash();
+		this.discardedTime = posting.getDiscardedTime();
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public Posting getPosting() {
-		return posting;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public LedgerAccount getAccount() {
 		return account;
 	}
 
+	public void setAccount(LedgerAccount account) {
+		this.account = account;
+	}
+
 	public BigDecimal getDebitAmount() {
 		return debitAmount;
+	}
+
+	public void setDebitAmount(BigDecimal debitAmount) {
+		this.debitAmount = debitAmount;
 	}
 
 	public BigDecimal getCreditAmount() {
 		return creditAmount;
 	}
 
+	public void setCreditAmount(BigDecimal creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
 	public String getDetails() {
 		return details;
 	}
 
+	public void setDetails(String details) {
+		this.details = details;
+	}
+
 	public String getSrcAccount() {
 		return srcAccount;
+	}
+
+	public void setSrcAccount(String srcAccount) {
+		this.srcAccount = srcAccount;
+	}
+
+	public String getBaseLine() {
+		return baseLine;
+	}
+
+	public void setBaseLine(String baseLine) {
+		this.baseLine = baseLine;
 	}
 
 	public LocalDateTime getRecordTime() {
@@ -193,10 +179,6 @@ public class PostingLine {
 
 	public String getOprId() {
 		return oprId;
-	}
-
-	public int getOprSeqNbr() {
-		return oprSeqNbr;
 	}
 
 	public LocalDateTime getPstTime() {
@@ -211,65 +193,13 @@ public class PostingLine {
 		return pstStatus;
 	}
 
-	public Ledger getLedger() {
-		return ledger;
+	public String getHash() {
+		return hash;
 	}
 
-	public String getAccName() {
-		return accName;
-	}
-
-	public LocalDateTime getValTime() {
-		return valTime;
-	}
-
-	public void setPstTime(LocalDateTime pstTime) {
-		this.pstTime = pstTime;
-	}
-
-	public void setPstType(PostingType pstType) {
-		this.pstType = pstType;
-	}
-
-	public void setLedger(Ledger ledger) {
-		this.ledger = ledger;
-	}
-
-	@Override
-	public String toString() {
-		return "PostingLine [id=" + id + ", posting=" + posting + ", account=" + account + ", debitAmount="
-				+ debitAmount + ", creditAmount=" + creditAmount + ", details=" + details + ", srcAccount=" + srcAccount
-				+ ", recordTime=" + recordTime + ", oprId=" + oprId + ", oprSeqNbr=" + oprSeqNbr + ", pstTime="
-				+ pstTime + ", pstType=" + pstType + ", pstStatus=" + pstStatus + ", ledger=" + ledger + ", accName="
-				+ accName + ", valTime=" + valTime + "]";
-	}
-
-	public void setRecordTime(LocalDateTime recordTime) {
-		this.recordTime = recordTime;
-	}
-
-	public void setOprId(String oprId) {
-		this.oprId = oprId;
-	}
-
-	public String getBaseLine() {
-		return baseLine;
+	public LocalDateTime getDiscardedTime() {
+		return discardedTime;
 	}
 	
-	/**
-	 * Operations used to track the balance of the account. 
-	 * @return
-	 */
-	public BalanceSide balanceSide() {
-		if(getDebitAmount().subtract(getCreditAmount()).compareTo(BigDecimal.ZERO)>=0) {
-			return BalanceSide.Dr;
-		}
-		return BalanceSide.Cr;
-	}
-	public BigDecimal debitBalance() {
-		return getDebitAmount().subtract(getCreditAmount());
-	}
-	public BigDecimal creditBalance() {
-		return getCreditAmount().subtract(getDebitAmount());
-	}	
+	
 }
