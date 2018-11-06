@@ -16,35 +16,37 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
-
 @Service
 public class DepositAccountConfigServiceImpl implements DepositAccountConfigService {
-	
-	@Autowired
-	private ASPSPConfigData configData;
+    private final ASPSPConfigData configData;
 
-	@Override
-	public String getDepositParentAccount() {
-    	return configData.getDepositParentAccount();
-	}
+    @Autowired
+    public DepositAccountConfigServiceImpl(ASPSPConfigData configData) {
+        this.configData = configData;
+    }
 
-	@Override
-	public String getLedger() {
-    	return configData.getLedger();
-	}
+    @Override
+    public String getDepositParentAccount() {
+        return configData.getDepositParentAccount();
+    }
 
-	@Override
-	public String getClearingAccountTarget2() {
-    	return configData.getClearingAccountTarget2();
-	}
+    @Override
+    public String getLedger() {
+        return configData.getLedger();
+    }
 
-	@Override
-	public String getClearingAccountSepa() {
-    	return configData.getClearingAccountSepa();
-	}
+    @Override
+    public String getClearingAccountTarget2() {
+        return configData.getClearingAccountTarget2();
+    }
+
+    @Override
+    public String getClearingAccountSepa() {
+        return configData.getClearingAccountSepa();
+    }
 }

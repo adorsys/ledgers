@@ -115,7 +115,7 @@ public class PostingBO extends HashRecordBO {
      */
     private LocalDateTime discardedTime;
     /*
-     * The id of the discaring posting/
+     * The id of the discarding posting/
      */
     private String discardingId;
     

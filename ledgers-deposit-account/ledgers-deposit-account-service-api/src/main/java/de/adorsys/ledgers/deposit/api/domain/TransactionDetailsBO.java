@@ -1,28 +1,9 @@
-/*
- * Copyright 2018-2018 adorsys GmbH & Co KG
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package de.adorsys.ledgers.middleware.service.domain.account;
-
-import de.adorsys.ledgers.middleware.service.domain.payment.AmountTO;
+package de.adorsys.ledgers.deposit.api.domain;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class TransactionTO {
-
+public class TransactionDetailsBO {
     private String transactionId;
     private String entryReference;
     private String endToEndId;
@@ -31,21 +12,48 @@ public class TransactionTO {
     private String creditorId;
     private LocalDate bookingDate;
     private LocalDate valueDate;
-    private AmountTO amount;
-    private List<ExchangeRateTO> exchangeRate;
+    private AmountBO transactionAmount;
+    private List<ExchangeRateBO> exchangeRate;
     private String creditorName;
-    private AccountReferenceTO creditorAccount;
+    private AccountReferenceBO creditorAccount;
     private String ultimateCreditor;
     private String debtorName;
-    private AccountReferenceTO debtorAccount;
+    private AccountReferenceBO debtorAccount;
     private String ultimateDebtor;
-    private String remittanceInformationUnstructured;
     private String remittanceInformationStructured;
-    private String purposeCode;
+    private String remittanceInformationUnstructured;
+    private PurposeCodeBO purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;
 
-    //Getters-Setters
+    public TransactionDetailsBO() {
+    }
+
+    public TransactionDetailsBO(String transactionId, String entryReference, String endToEndId, String mandateId, String checkId, String creditorId, LocalDate bookingDate, LocalDate valueDate, AmountBO transactionAmount, List<ExchangeRateBO> exchangeRate, String creditorName, AccountReferenceBO creditorAccount, String ultimateCreditor, String debtorName, AccountReferenceBO debtorAccount, String ultimateDebtor, String remittanceInformationStructured, String remittanceInformationUnstructured, PurposeCodeBO purposeCode, String bankTransactionCode, String proprietaryBankTransactionCode) {
+        this.transactionId = transactionId;
+        this.entryReference = entryReference;
+        this.endToEndId = endToEndId;
+        this.mandateId = mandateId;
+        this.checkId = checkId;
+        this.creditorId = creditorId;
+        this.bookingDate = bookingDate;
+        this.valueDate = valueDate;
+        this.transactionAmount = transactionAmount;
+        this.exchangeRate = exchangeRate;
+        this.creditorName = creditorName;
+        this.creditorAccount = creditorAccount;
+        this.ultimateCreditor = ultimateCreditor;
+        this.debtorName = debtorName;
+        this.debtorAccount = debtorAccount;
+        this.ultimateDebtor = ultimateDebtor;
+        this.remittanceInformationStructured = remittanceInformationStructured;
+        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
+        this.purposeCode = purposeCode;
+        this.bankTransactionCode = bankTransactionCode;
+        this.proprietaryBankTransactionCode = proprietaryBankTransactionCode;
+    }
+
+    //Getters-setters
 
     public String getTransactionId() {
         return transactionId;
@@ -111,19 +119,19 @@ public class TransactionTO {
         this.valueDate = valueDate;
     }
 
-    public AmountTO getAmount() {
-        return amount;
+    public AmountBO getTransactionAmount() {
+        return transactionAmount;
     }
 
-    public void setAmount(AmountTO amount) {
-        this.amount = amount;
+    public void setTransactionAmount(AmountBO transactionAmount) {
+        this.transactionAmount = transactionAmount;
     }
 
-    public List<ExchangeRateTO> getExchangeRate() {
+    public List<ExchangeRateBO> getExchangeRate() {
         return exchangeRate;
     }
 
-    public void setExchangeRate(List<ExchangeRateTO> exchangeRate) {
+    public void setExchangeRate(List<ExchangeRateBO> exchangeRate) {
         this.exchangeRate = exchangeRate;
     }
 
@@ -135,11 +143,11 @@ public class TransactionTO {
         this.creditorName = creditorName;
     }
 
-    public AccountReferenceTO getCreditorAccount() {
+    public AccountReferenceBO getCreditorAccount() {
         return creditorAccount;
     }
 
-    public void setCreditorAccount(AccountReferenceTO creditorAccount) {
+    public void setCreditorAccount(AccountReferenceBO creditorAccount) {
         this.creditorAccount = creditorAccount;
     }
 
@@ -159,11 +167,11 @@ public class TransactionTO {
         this.debtorName = debtorName;
     }
 
-    public AccountReferenceTO getDebtorAccount() {
+    public AccountReferenceBO getDebtorAccount() {
         return debtorAccount;
     }
 
-    public void setDebtorAccount(AccountReferenceTO debtorAccount) {
+    public void setDebtorAccount(AccountReferenceBO debtorAccount) {
         this.debtorAccount = debtorAccount;
     }
 
@@ -175,14 +183,6 @@ public class TransactionTO {
         this.ultimateDebtor = ultimateDebtor;
     }
 
-    public String getRemittanceInformationUnstructured() {
-        return remittanceInformationUnstructured;
-    }
-
-    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
-        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
-    }
-
     public String getRemittanceInformationStructured() {
         return remittanceInformationStructured;
     }
@@ -191,11 +191,19 @@ public class TransactionTO {
         this.remittanceInformationStructured = remittanceInformationStructured;
     }
 
-    public String getPurposeCode() {
+    public String getRemittanceInformationUnstructured() {
+        return remittanceInformationUnstructured;
+    }
+
+    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
+        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
+    }
+
+    public PurposeCodeBO getPurposeCode() {
         return purposeCode;
     }
 
-    public void setPurposeCode(String purposeCode) {
+    public void setPurposeCode(PurposeCodeBO purposeCode) {
         this.purposeCode = purposeCode;
     }
 

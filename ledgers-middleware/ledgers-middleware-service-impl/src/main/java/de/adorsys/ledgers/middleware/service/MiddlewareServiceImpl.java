@@ -17,19 +17,10 @@
 package de.adorsys.ledgers.middleware.service;
 
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.AccountBalancesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
@@ -37,64 +28,52 @@ import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
-
     private final DepositAccountPaymentService paymentService;
-
     private final SCAOperationService scaOperationService;
-
     private final DepositAccountService accountService;
-
     private final AccountBalancesService accountBalancesService;
     private final UserService userService;
-
     private final PaymentConverter paymentConverter;
-
     private final AccountDetailsMapper detailsMapper;
     private final SCAMethodTOConverter scaMethodTOConverter;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService depositAccountService, UserService userService, PaymentConverter paymentConverter, AccountDetailsMapper detailsMapper, SCAMethodTOConverter scaMethodTOConverter, AccountBalancesService accountBalancesService) {
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService accountService, AccountBalancesService accountBalancesService, UserService userService, PaymentConverter paymentConverter, AccountDetailsMapper detailsMapper, SCAMethodTOConverter scaMethodTOConverter) {
         this.paymentService = paymentService;
         this.scaOperationService = scaOperationService;
-        this.accountService = depositAccountService;
+        this.accountService = accountService;
+        this.accountBalancesService = accountBalancesService;
         this.userService = userService;
         this.paymentConverter = paymentConverter;
         this.detailsMapper = detailsMapper;
         this.scaMethodTOConverter = scaMethodTOConverter;
-        this.accountBalancesService = accountBalancesService;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException {
+    public PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws
+            PaymentNotFoundMiddlewareException {
         try {
             PaymentResultBO<TransactionStatusBO> paymentStatus = paymentService.getPaymentStatusById(paymentId);
             return paymentConverter.toPaymentResultTO(paymentStatus);
@@ -106,7 +85,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public String generateAuthCode(String userLogin, SCAMethodTO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException {
+    public String generateAuthCode(String userLogin, SCAMethodTO scaMethod, String opData, String userMessage,
+                                   int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException {
         try {
             ScaUserDataBO scaUserData = scaMethodTOConverter.toScaUserDataBO(scaMethod);
             return scaOperationService.generateAuthCode(userLogin, scaUserData, opData, userMessage, validitySeconds);
@@ -121,7 +101,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
+    public boolean validateAuthCode(String opId, String opData, String authCode) throws
+            SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
         try {
             return scaOperationService.validateAuthCode(opId, opData, authCode);
         } catch (SCAOperationNotFoundException e) {
@@ -140,7 +121,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
-    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
+    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws
+            AccountNotFoundMiddlewareException {
         try {
             DepositAccountBO account = accountService.getDepositAccountById(accountId);
             List<BalanceBO> balances = accountBalancesService.getBalances(account.getIban());
@@ -168,8 +150,22 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         }
     }
 
+    @Override
+    public <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException {
+        List<TransactionDetailsBO> executePayment;
+
+        try {
+            executePayment = paymentService.executePayment(paymentId, paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct));
+        } catch (PaymentNotFoundException | PaymentProcessingException e) {
+            throw new PaymentProcessingMiddlewareException(paymentId, e);
+        }
+
+        return paymentConverter.toTransactionTOList(executePayment);
+    }
+
     @Override //TODO Consider refactoring to avoid unchecked cast warnings
-    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
+    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws
+            PaymentNotFoundMiddlewareException {
         PaymentBO paymentResult;
         try {
             paymentResult = paymentService.getPaymentById(paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct), paymentId);

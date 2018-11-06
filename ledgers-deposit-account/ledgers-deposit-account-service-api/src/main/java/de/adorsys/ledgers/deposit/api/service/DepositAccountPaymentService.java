@@ -18,6 +18,9 @@ package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+
+import java.util.List;
 
 public interface DepositAccountPaymentService {
 
@@ -26,4 +29,6 @@ public interface DepositAccountPaymentService {
     PaymentBO getPaymentById(PaymentTypeBO paymentType, PaymentProductBO paymentProduct, String paymentId) throws PaymentNotFoundException;
 
     PaymentBO initiatePayment(PaymentBO paymentBO);
+
+    List<TransactionDetailsBO> executePayment(String paymentId, PaymentTypeBO paymentType, PaymentProductBO paymentProduct) throws PaymentNotFoundException, PaymentProcessingException;
 }

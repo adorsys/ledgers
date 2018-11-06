@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.middleware.service;
 
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
@@ -31,12 +32,11 @@ public interface MiddlewareService {
     PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
 
     /**
-     *
-     * @param userLogin user login
-     * @param scaMethod sca method
-     * @param opData operation data
+     * @param userLogin       user login
+     * @param scaMethod       sca method
+     * @param opData          operation data
      * @param validitySeconds time to live in seconds
-     * @param userMessage what would be show to user
+     * @param userMessage     what would be show to user
      * @return opId id of operation created on the request
      * @throws AuthCodeGenerationMiddlewareException if something happens during auth code generation
      */
@@ -49,6 +49,8 @@ public interface MiddlewareService {
     <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
 
     <T> Object initiatePayment(T payment, PaymentTypeTO paymentType);
+
+    <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException;
 
     List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException;
 }
