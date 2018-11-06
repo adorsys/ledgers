@@ -62,20 +62,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 		LocalDateTime now = LocalDateTime.now();
 		// check posting time is not before a closing.
 		//		validatePostingTime(posting);
-		Posting p = new Posting();
-//		p.setHash(hash);
-		p.setId(Ids.id());
-		p.setOprDetails(posting.getOprDetails());
-		p.setOprId(posting.getOprId());
-		p.setOprSrc(posting.getOprSrc());
-		p.setOprTime(posting.getOprTime());
-		p.setOprType(posting.getOprType());
-		p.setPstStatus(posting.getPstStatus());
-		p.setPstTime(posting.getPstTime());
-		p.setPstType(posting.getPstType());
-		p.setRecordTime(now);
-		p.setRecordUser(principal.getName());
-		p.setValTime(posting.getValTime());
+		Posting p = createPostingObj(posting, now);
 		
 		Ledger ledger = loadLedger(posting.getLedger());
 		p.setLedger(ledger);
@@ -84,9 +71,6 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
 		// Load original posting. If the sequence number > 0, it means that there is a
 		// predecessor posting available.
-		//		p.setDiscardedId(discardedId);
-		//		p.setDiscardedTime(discardedTime);
-		//		p.setDiscardingId(discardingId);
 		loadPredecessor(p).ifPresent(discarded -> discardPosting(discarded, p));
 
 		// Check double entry accounting
@@ -107,6 +91,24 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 		
 		p.synchLines();
 		return postingRepository.save(p);
+	}
+
+	private Posting createPostingObj(Posting posting, LocalDateTime now) {
+		Posting p = new Posting();
+//		p.setHash(hash);
+		p.setId(Ids.id());
+		p.setOprDetails(posting.getOprDetails());
+		p.setOprId(posting.getOprId());
+		p.setOprSrc(posting.getOprSrc());
+		p.setOprTime(posting.getOprTime());
+		p.setOprType(posting.getOprType());
+		p.setPstStatus(posting.getPstStatus());
+		p.setPstTime(posting.getPstTime());
+		p.setPstType(posting.getPstType());
+		p.setRecordTime(now);
+		p.setRecordUser(principal.getName());
+		p.setValTime(posting.getValTime());
+		return p;
 	}
 	
 	private void discardPosting(final Posting discarded, final Posting discarding) {

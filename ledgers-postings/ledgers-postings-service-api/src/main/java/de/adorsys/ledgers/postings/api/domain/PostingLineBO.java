@@ -91,14 +91,6 @@ public class PostingLineBO {
 		this.id = id;
 	}
 
-//	public PostingBO getPosting() {
-//		return posting;
-//	}
-//
-//	public void setPosting(PostingBO posting) {
-//		this.posting = posting;
-//	}
-
 	public LedgerAccountBO getAccount() {
 		return account;
 	}

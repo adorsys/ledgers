@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,6 +45,7 @@ import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
+    private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
 
     private DepositAccountRepository depositAccountRepository;
     private PostingService postingService;
@@ -76,10 +79,18 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         try {
             ledgerService.newLedgerAccount(ledgerAccount);
         } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
+        	logger.error(e.getMessage(), e);
             throw new DepositAccountNotFoundException(e.getMessage(), e);
         }
 
-        DepositAccount da = new DepositAccount();
+        DepositAccount da = createDepositAccountObj(depositAccount);
+
+        DepositAccount saved = depositAccountRepository.save(da);
+        return depositAccountMapper.toDepositAccountBO(saved);
+    }
+
+	private DepositAccount createDepositAccountObj(DepositAccount depositAccount) {
+		DepositAccount da = new DepositAccount();
         da.setId(Ids.id());
         da.setAccountStatus(depositAccount.getAccountStatus());
         da.setAccountType(depositAccount.getAccountType());
@@ -91,10 +102,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         da.setName(depositAccount.getName());
         da.setProduct(depositAccount.getProduct());
         da.setUsageType(depositAccount.getUsageType());
-
-        DepositAccount saved = depositAccountRepository.save(da);
-        return depositAccountMapper.toDepositAccountBO(saved);
-    }
+		return da;
+	}
 
     @Override
     public DepositAccountBO getDepositAccountById(String accountId) throws DepositAccountNotFoundException {

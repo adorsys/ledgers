@@ -95,33 +95,5 @@ public class AccountStmt extends FinancialStmt {
 
 	public void setTotalCredit(BigDecimal totalCredit) {
 		this.totalCredit = totalCredit;
-	}
-	
-	/**
-	 * Operations used to track the balance of the account. 
-	 * @return
-	public BalanceSide balanceSide() {
-		// Take the balance side of the account if defined.
-		if(account!=null && BalanceSide.DrCr!=account.getBalanceSide()) { return account.getBalanceSide();}
-		
-		if(getDebitAmount().subtract(getCreditAmount()).compareTo(BigDecimal.ZERO)>=0) {
-			return BalanceSide.Dr;
-		}
-		return BalanceSide.Cr;
-	}
-	public BigDecimal debitBalance() {
-		return getDebitAmount().subtract(getCreditAmount());
-	}
-	public BigDecimal creditBalance() {
-		return getCreditAmount().subtract(getDebitAmount());
 	}	
-	public BigDecimal getBalance(BalanceSide balanceSide) {
-		if(balanceSide==BalanceSide.Cr) {
-			return creditBalance();
-		} else {
-			return debitBalance();
-		}
-	}
-	 */
-	
 }

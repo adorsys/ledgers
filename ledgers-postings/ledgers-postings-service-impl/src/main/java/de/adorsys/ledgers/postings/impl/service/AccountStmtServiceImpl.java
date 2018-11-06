@@ -65,15 +65,8 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
 		List<PostingLine> postingLines = accStmt == null || accStmt.getPosting() == null
 				? postingLineRepository.findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(account, refTime)
 				: postingLineRepository.findByBaseLineAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(accStmt.getId(), refTime);
-
-		if (accStmt == null) {
-			accStmt = new AccountStmt();
-			accStmt.setAccount(account);
-			accStmt.setPstTime(refTime);
-			accStmt.setStmtSeqNbr(0);
-			accStmt.setStmtStatus(StmtStatus.SIMULATED);
-			accStmt.setTotalCredit(BigDecimal.ZERO);
-			accStmt.setTotalDebit(BigDecimal.ZERO);
+		if(accStmt==null) {
+			accStmt = newStmtObj(refTime, account);
 		}
 
 		if (!postingLines.isEmpty()) {
@@ -86,28 +79,44 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
 
 		return toBo(accStmt);
 	}
+
+	private AccountStmt newStmtObj(LocalDateTime refTime, LedgerAccount account) {
+		AccountStmt accStmt = new AccountStmt();
+		accStmt.setAccount(account);
+		accStmt.setPstTime(refTime);
+		accStmt.setStmtSeqNbr(0);
+		accStmt.setStmtStatus(StmtStatus.SIMULATED);
+		accStmt.setTotalCredit(BigDecimal.ZERO);
+		accStmt.setTotalDebit(BigDecimal.ZERO);
+		return accStmt;
+	}
+
 	private AccountStmtBO toBo(AccountStmt accStmt) {
 		return accountStmtMapper.toAccountStmtBO(accStmt);
 	}
 
 	private void computeBalance(final AccountStmt stmt, List<PostingLine> lines) {
 		for (PostingLine line : lines) {
-			PostingTrace p = new PostingTrace();
-			p.setAccount(stmt.getAccount());
-			p.setCreditAmount(line.getCreditAmount());
-			p.setDebitAmount(line.getDebitAmount());
-			p.setId(Ids.id());
-			p.setSrcOprId(line.getOprId());
-			p.setSrcPstHash(line.getHash());
-			p.setSrcPstTime(line.getPstTime());
-			p.setTgtPstId(stmt.getId());// Match statement and corresponding posting.
-
-			if (stmt.getYoungestPst() == null || stmt.getYoungestPst().getSrcPstTime().isBefore(p.getSrcPstTime())) {
-				stmt.setYoungestPst(p);
-			}
-			stmt.setLatestPst(p);
-			stmt.setTotalDebit(stmt.getTotalDebit().add(line.getDebitAmount()));
-			stmt.setTotalCredit(stmt.getTotalCredit().add(line.getCreditAmount()));
+			addPostingLine(stmt, line);
 		}
+	}
+
+	private void addPostingLine(final AccountStmt stmt, PostingLine line) {
+		PostingTrace p = new PostingTrace();
+		p.setAccount(stmt.getAccount());
+		p.setCreditAmount(line.getCreditAmount());
+		p.setDebitAmount(line.getDebitAmount());
+		p.setId(Ids.id());
+		p.setSrcOprId(line.getOprId());
+		p.setSrcPstHash(line.getHash());
+		p.setSrcPstTime(line.getPstTime());
+		p.setTgtPstId(stmt.getId());// Match statement and corresponding posting.
+
+		if (stmt.getYoungestPst() == null || stmt.getYoungestPst().getSrcPstTime().isBefore(p.getSrcPstTime())) {
+			stmt.setYoungestPst(p);
+		}
+		stmt.setLatestPst(p);
+		stmt.setTotalDebit(stmt.getTotalDebit().add(line.getDebitAmount()));
+		stmt.setTotalCredit(stmt.getTotalCredit().add(line.getCreditAmount()));
 	}
 }

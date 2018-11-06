@@ -14,11 +14,9 @@ public class Balance {
     private String lastCommittedTransaction;
 	
 	public Balance() {
-		super();
 	}
 	
 	public Balance(BalanceSide balanceSide, Amount amount) {
-		super();
 		this.balanceSide = balanceSide;
 		this.amount = amount;
 	}
