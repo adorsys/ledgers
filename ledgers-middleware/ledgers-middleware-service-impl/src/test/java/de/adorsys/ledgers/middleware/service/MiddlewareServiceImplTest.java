@@ -57,6 +57,7 @@ import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddl
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
 import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
@@ -194,7 +195,7 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test
-    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException {
+    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException, LedgerAccountNotFoundException {
         when(accountService.getDepositAccountById(any())).thenReturn(getAccount(DepositAccountBO.class));
         when(accountBalancesService.getBalances(any())).thenReturn(getBalances(BalanceBO.class));
         when(detailsMapper.toAccountDetailsTO(any(), any())).thenReturn(getAccount(AccountDetailsTO.class));

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -23,6 +24,8 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.service.AccountBalancesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
@@ -62,6 +65,9 @@ public class DepositAccountServiceImplIT {
 	private LedgerService ledgerService;
 	@Autowired
 	private DepositAccountConfigService depositAccountConfigService;
+	
+	@Autowired
+	private AccountBalancesService accountBalancesService;
 	
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     
@@ -129,6 +135,17 @@ public class DepositAccountServiceImplIT {
     	checkBalance("1006", dateTime, new BigDecimal(3500.00));
     	checkBalance("DE80760700240271232400", dateTime, new BigDecimal(-3500.00));
     	checkBalance("DE38760700240320465700", dateTime, new BigDecimal(-5000.00));
+    	
+    }
+    
+    @Test
+    public void use_case_check_account_balance () throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException{
+    	loadPosting("use_case_newbank_no_overriden_tx.yml");
+    	List<BalanceBO> balances = accountBalancesService.getBalances("DE38760700240320465700");
+    	Assert.assertNotNull(balances);
+    	Assert.assertEquals(1, balances.size());
+    	BalanceBO balanceBO = balances.iterator().next();
+    	Assert.assertEquals(balanceBO.getAmount().getAmount().doubleValue(), new BigDecimal(5000.00).doubleValue(), 0d);
     }
 
     private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException{

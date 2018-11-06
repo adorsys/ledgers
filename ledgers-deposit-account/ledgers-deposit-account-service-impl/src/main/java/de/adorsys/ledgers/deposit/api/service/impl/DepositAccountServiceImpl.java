@@ -42,21 +42,17 @@ import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
-public class DepositAccountServiceImpl implements DepositAccountService {
+public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
 
     private DepositAccountRepository depositAccountRepository;
-    private LedgerService ledgerService;
     private PostingService postingService;
-    private DepositAccountConfigService depositAccountConfigService;
     private DepositAccountMapper depositAccountMapper;
 
     public DepositAccountServiceImpl(DepositAccountRepository depositAccountRepository, LedgerService ledgerService,
                                      PostingService postingService, DepositAccountConfigService depositAccountConfigService, DepositAccountMapper depositAccountMapper) {
-        super();
+        super(depositAccountConfigService, ledgerService);
         this.depositAccountRepository = depositAccountRepository;
-        this.ledgerService = ledgerService;
         this.postingService = postingService;
-        this.depositAccountConfigService = depositAccountConfigService;
         this.depositAccountMapper = depositAccountMapper;
     }
 
@@ -264,27 +260,5 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         p.setValTime(now);
         p.setLines(lines);
         return p;
-    }
-    
-    private LedgerBO loadLedger() {
-    	String ledgerName = depositAccountConfigService.getLedger();
-    	return ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
-    }
-    
-    private LedgerAccountBO loadClearingAccountSepa(LedgerBO ledgerBO) {
-    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccountSepa());
-    }
-
-//    private LedgerAccountBO loadClearingAccountTarget2(LedgerBO ledgerBO) {
-//    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccountTarget2());
-//    }
-//
-    private LedgerAccountBO loadClearing(LedgerBO ledgerBO, String accountName) {
-    	try {
-			return ledgerService.findLedgerAccount(ledgerBO, accountName)
-				.orElseThrow(() -> new IllegalStateException(String.format("LedgerAccount with name %s not found from ledger with name %s", accountName, depositAccountConfigService.getLedger())));
-		} catch (LedgerNotFoundException e) {
-			throw new IllegalStateException(e);
-		}
     }
 }
