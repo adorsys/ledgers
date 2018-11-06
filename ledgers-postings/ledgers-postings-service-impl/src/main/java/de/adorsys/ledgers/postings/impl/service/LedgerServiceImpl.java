@@ -1,25 +1,20 @@
 package de.adorsys.ledgers.postings.impl.service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.exception.ChartOfAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.db.domain.AccountCategory;
-import de.adorsys.ledgers.postings.db.domain.BalanceSide;
-import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
-import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.LedgerMapper;
 import de.adorsys.ledgers.util.Ids;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerService {
@@ -68,27 +63,26 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 
         // User
         LedgerAccount parentAccount = getParentAccount(ledgerAccount);
-        Ledger ledger =  parentAccount!=null
-        		? parentAccount.getLedger()
-        				: loadLedger(ledgerAccount.getLedger());
-        		
-        AccountCategory category = ledgerAccount.getCategory()!=null
-        		? AccountCategory.valueOf(ledgerAccount.getCategory().name())
-        				: getAccountCategoryFromParent(parentAccount, ledgerAccount.getShortDesc());
-        
-        BalanceSide balanceSide = ledgerAccount.getBalanceSide()!=null
-        		? BalanceSide.valueOf(ledgerAccount.getBalanceSide().name())
-        				: getBalanceSide(parentAccount, category, ledgerAccount.getShortDesc());
-        		
+        Ledger ledger = parentAccount != null
+                                ? parentAccount.getLedger()
+                                : loadLedger(ledgerAccount.getLedger());
+
+        AccountCategory category = ledgerAccount.getCategory() != null
+                                           ? AccountCategory.valueOf(ledgerAccount.getCategory().name())
+                                           : getAccountCategoryFromParent(parentAccount, ledgerAccount.getShortDesc());
+
+        BalanceSide balanceSide = ledgerAccount.getBalanceSide() != null
+                                          ? BalanceSide.valueOf(ledgerAccount.getBalanceSide().name())
+                                          : getBalanceSide(parentAccount, category, ledgerAccount.getShortDesc());
+
         String id = Ids.id();
-		LocalDateTime created = LocalDateTime.now();
-		String user = principal.getName();
-		String shortDesc = ledgerAccount.getShortDesc();
-		String longDesc = ledgerAccount.getLongDesc();
-		String name = ledgerAccount.getName();
-		LedgerAccount parent = parentAccount;
-		ChartOfAccount coa = ledger.getCoa();
-		LedgerAccount newLedgerAccount = new LedgerAccount(id, created, user, shortDesc, longDesc, name, ledger, parent, coa, balanceSide, category);
+        LocalDateTime created = LocalDateTime.now();
+        String user = principal.getName();
+        String shortDesc = ledgerAccount.getShortDesc();
+        String longDesc = ledgerAccount.getLongDesc();
+        String name = ledgerAccount.getName();
+        ChartOfAccount coa = ledger.getCoa();
+        LedgerAccount newLedgerAccount = new LedgerAccount(id, created, user, shortDesc, longDesc, name, ledger, parentAccount, coa, balanceSide, category);
         return ledgerAccountMapper.toLedgerAccountBO(ledgerAccountRepository.save(newLedgerAccount));
     }
 
@@ -99,11 +93,12 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
     }
 
     @Override
-    public Optional<LedgerAccountBO> findLedgerAccount(LedgerBO ledgerBO, String name) throws LedgerNotFoundException {
+    public LedgerAccountBO findLedgerAccount(LedgerBO ledgerBO, String name) throws LedgerNotFoundException, LedgerAccountNotFoundException {
         Ledger ledger = ledgerMapper.toLedger(ledgerBO);
         return ledgerAccountRepository
                        .findOptionalByLedgerAndName(loadLedger(ledger), name)
-                       .map(ledgerAccountMapper::toLedgerAccountBO);
+                       .map(ledgerAccountMapper::toLedgerAccountBO)
+                       .orElseThrow(() -> new LedgerAccountNotFoundException(name));
     }
 
     private LedgerAccount getParentAccount(LedgerAccountBO ledgerAccount) throws LedgerAccountNotFoundException, LedgerNotFoundException {

@@ -63,6 +63,16 @@ public class PaymentMapperTest {
         assertThat(result).isEqualToComparingFieldByFieldRecursively(getPayment(Payment.class, PAYMENT_TYPE_BULK));
     }
 
+    @Test
+    public void toPosting() {
+        //TODO @fpo Tests
+    }
+
+    @Test
+    public void toTransaction() {
+        //TODO @fpo Tests
+    }
+
     private <T> T getPayment(Class<T> t, PaymentTypeBO paymentType) {
         String path = paymentType == PAYMENT_TYPE_SINGLE
                               ? "PaymentSingle.yml"

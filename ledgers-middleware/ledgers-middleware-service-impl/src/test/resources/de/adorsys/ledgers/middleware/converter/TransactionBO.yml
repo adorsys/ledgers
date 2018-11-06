@@ -1,0 +1,34 @@
+transactionId: posting_ID
+entryReference: some reference
+endToEndId: endToEnd_ID
+mandateId: mandate_ID
+checkId: check_ID
+creditorId: CrushTestDummy
+bookingDate: 2018-01-01
+valueDate: 2018-01-01
+transactionAmount:
+   currency: EUR
+   amount: 100
+
+exchangeRate:
+creditorName: CrushTestDummy
+creditorAccount:
+   iban: IBAN
+   bban: BBAN
+   pan: PAN
+   currency: EUR
+
+ultimateCreditor: CrushTestDummy
+debtorName: Self CrushTestDummy
+debtorAccount:
+     iban: IBAN
+     bban: BBAN
+     pan: PAN
+     currency: EUR
+
+ultimateDebtor: Self CrushTestDummy
+remittanceInformationStructured: z
+remittanceInformationUnstructured: z
+purposeCode: BKDF
+bankTransactionCode: posting_ID
+proprietaryBankTransactionCode: NA

@@ -18,13 +18,14 @@ package de.adorsys.ledgers.middleware.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-
+@SuppressWarnings("PMD")
 @Mapper(componentModel = "spring")
 public abstract class PaymentConverter {
 
@@ -105,4 +106,12 @@ public abstract class PaymentConverter {
     public abstract PaymentTargetBO toPaymentTarget(PeriodicPaymentTO payment);
 
     public abstract List<PaymentTargetBO> toPaymentTarget(List<SinglePaymentTO> payment);
+
+    public abstract List<TransactionTO> toTransactionTOList(List<TransactionDetailsBO> transactions);
+
+    @Mapping(source = "transactionAmount", target = "amount")
+    public abstract TransactionTO toTransactionTO(TransactionDetailsBO transaction);
+
+    @Mapping(target = "transactionAmount", source = "amount")
+    public abstract TransactionDetailsBO toTransactionDetailsBO(TransactionTO transaction);
 }

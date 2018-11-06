@@ -76,7 +76,7 @@ public class LoadCoaBankingIT {
             ledgerService.newLedgerAccount(l);
         }
 
-        LedgerAccountBO la = ledgerService.findLedgerAccount(ledger, "1003").orElse(null);
+        LedgerAccountBO la = ledgerService.findLedgerAccount(ledger, "1003");
         Assume.assumeNotNull(la);
         Assert.assertEquals("Cash in transit", la.getShortDesc());
         Assert.assertEquals(AccountCategoryBO.AS, la.getCategory());

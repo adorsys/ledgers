@@ -40,8 +40,6 @@ public class DepositAccountServiceImplTest {
     @Mock
     private LedgerService ledgerService;
     @Mock
-    private PostingService postingService;
-    @Mock
     private DepositAccountConfigService depositAccountConfigService;
     @Mock
     private DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
@@ -89,21 +87,6 @@ public class DepositAccountServiceImplTest {
         DepositAccountBO account = depositAccountService.getDepositAccountByIBAN("iban");
         //Then
         assertThat(account).isNotNull();
-    }
-
-    @Test
-    public void executeSinglePaymentWithoutSca() {
-        //TODO to be implemented + failure cases
-    }
-
-    @Test
-    public void executeSinglePaymentsWithoutSca() {
-        //TODO to be implemented + failure cases
-    }
-
-    @Test
-    public void executeBulkPaymentWithoutSca() {
-        //TODO to be implemented + failure cases
     }
 
     private DepositAccount getDepositAccount() {

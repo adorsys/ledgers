@@ -95,7 +95,7 @@ public class LedgerController {
     @GetMapping(path = "/accounts", params = {"ledgerName", "accountName"})
     public ResponseEntity<LedgerAccountBO> findLedgerAccountByName(
             @RequestParam(required = true, name = "ledgerName") String ledgerName,
-            @RequestParam(required = true, name = "accountName") String accountName) throws LedgerNotFoundException {
+            @RequestParam(required = true, name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
         LedgerBO ledger = new LedgerBO();
         ledger.setName(ledgerName);
 
@@ -112,15 +112,15 @@ public class LedgerController {
     @GetMapping(path = "/ledgers/{ledgerId}/accounts", params = {"accountName"})
     public ResponseEntity<LedgerAccountBO> findLedgerAccount(
             @PathParam("ledgerId") String ledgerId,
-            @RequestParam(required = true, name = "accountName") String accountName) throws LedgerNotFoundException {
+            @RequestParam(required = true, name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
         LedgerBO ledger = new LedgerBO();
         ledger.setId(ledgerId);
         return ledgerAccount(ledger, accountName);
     }
 
-    private ResponseEntity<LedgerAccountBO> ledgerAccount(LedgerBO ledger, String accountName) throws LedgerNotFoundException {
-        LedgerAccountBO ledgerAccount = ledgerService.findLedgerAccount(ledger, accountName)
-                                                .orElseThrow(() -> new LedgerNotFoundException(ledger.getId()));
+    private ResponseEntity<LedgerAccountBO> ledgerAccount(LedgerBO ledger, String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+        LedgerAccountBO ledgerAccount = ledgerService.findLedgerAccount(ledger, accountName);
+
         return ResponseEntity.ok(ledgerAccount);
     }
 }

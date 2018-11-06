@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -172,6 +173,27 @@ public class PaymentConverterTest {
     private static <T> T getPayment(Class<T> aClass, String path) {
         try {
             return YamlReader.getInstance().getObjectFromFile(path, aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
+    }
+
+    @Test
+    public void toTransactionTO() {
+        TransactionTO result = converter.toTransactionTO(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(TransactionTO.class, "TransactionTO.yml"));
+    }
+
+    @Test
+    public void toTransactionDetailsBO() {
+        TransactionDetailsBO result = converter.toTransactionDetailsBO(readYml(TransactionTO.class, "TransactionTO.yml"));
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
+    }
+
+    private static <T> T readYml(Class<T> aClass, String file) {
+        try {
+            return YamlReader.getInstance().getObjectFromResource(PaymentConverter.class, file, aClass);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);

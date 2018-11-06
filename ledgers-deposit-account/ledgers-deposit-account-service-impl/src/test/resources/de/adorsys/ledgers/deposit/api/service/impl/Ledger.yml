@@ -1,0 +1,13 @@
+name: CrushTestDummy
+id: ledger_ID
+created: 2018-12-12T00:00:00
+userDetails: some details
+shortDesc: shortDescr
+longDesc: long descr
+coa:
+  name: CrushTestDummy
+  id: coa_ID
+  created: 2018-12-12T00:00:00
+  userDetails: some details
+  shortDesc: shortDescr
+  longDesc: long descr
