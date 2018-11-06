@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
@@ -21,12 +22,8 @@ public abstract class AbstractServiceImpl {
     	return ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
     }
     
-    protected LedgerAccountBO loadClearingAccountSepa(LedgerBO ledgerBO) {
-    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccountSepa());
-    }
-
-    protected LedgerAccountBO loadClearingAccountTarget2(LedgerBO ledgerBO) {
-    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccountTarget2());
+    protected LedgerAccountBO loadClearingAccount(LedgerBO ledgerBO, PaymentProductBO paymentProductBO) {
+    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccount(paymentProductBO));
     }
 
     protected LedgerAccountBO loadClearing(LedgerBO ledgerBO, String accountName) {

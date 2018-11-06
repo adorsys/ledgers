@@ -1,12 +1,12 @@
 package de.adorsys.ledgers.deposit.api.service;
 
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+
 public interface DepositAccountConfigService {
 
 	String getDepositParentAccount();
 
 	String getLedger();
 
-	String getClearingAccountTarget2();
-	
-	String getClearingAccountSepa();
+	String getClearingAccount(PaymentProductBO paymentProduct);
 }

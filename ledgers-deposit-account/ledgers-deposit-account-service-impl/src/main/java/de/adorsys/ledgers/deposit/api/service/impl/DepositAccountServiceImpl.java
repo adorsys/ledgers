@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.adorsys.ledgers.deposit.api.domain.BulkPaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
 import de.adorsys.ledgers.deposit.api.domain.SinglePaymentBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -144,7 +145,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         String creditorIban = paymentTarget.getCreditorAccount().getIban();
         LedgerAccountBO creditLedgerAccount;
         try {
-            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> loadClearingAccountSepa(ledger));
+            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> loadClearingAccount(ledger, paymentBO.getPaymentProduct()));
         } catch (LedgerNotFoundException e) {
             throw new PaymentProcessingException(e.getMessage(), e);
         }
@@ -221,7 +222,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
         LedgerAccountBO creditLedgerAccount;
         try {
-            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> loadClearingAccountSepa(ledger));
+            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> loadClearingAccount(ledger, PaymentProductBO.valueOf(singlePayment.getPaymentProduct().name())));
         } catch (LedgerNotFoundException e) {
             throw new PaymentProcessingException(e.getMessage(), e);
         }

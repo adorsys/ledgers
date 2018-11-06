@@ -19,6 +19,7 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 
@@ -39,12 +40,7 @@ public class DepositAccountConfigServiceImpl implements DepositAccountConfigServ
 	}
 
 	@Override
-	public String getClearingAccountTarget2() {
-    	return configData.getClearingAccountTarget2();
-	}
-
-	@Override
-	public String getClearingAccountSepa() {
-    	return configData.getClearingAccountSepa();
+	public String getClearingAccount(PaymentProductBO paymentProduct) {
+		return configData.getClearingAccount(paymentProduct.name());
 	}
 }
