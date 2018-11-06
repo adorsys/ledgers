@@ -1,6 +1,16 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import de.adorsys.ledgers.deposit.api.domain.BulkPaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
@@ -14,7 +24,12 @@ import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.postings.api.domain.*;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.domain.PostingStatusBO;
+import de.adorsys.ledgers.postings.api.domain.PostingTypeBO;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
@@ -25,14 +40,6 @@ import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.SerializationUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 public class DepositAccountServiceImpl implements DepositAccountService {
@@ -54,9 +61,15 @@ public class DepositAccountServiceImpl implements DepositAccountService {
     }
 
     @Override
-    public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO) throws PaymentProcessingException {
+    public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO) throws DepositAccountNotFoundException {
         DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
-        LedgerAccountBO depositParentAccount = depositAccountConfigService.getDepositParentAccount();
+        
+        LedgerBO ledgerBO = loadLedger();
+
+        String depositParentAccountNbr = depositAccountConfigService.getDepositParentAccount();
+        LedgerAccountBO depositParentAccount = new LedgerAccountBO();
+        depositParentAccount.setLedger(ledgerBO);
+        depositParentAccount.setName(depositParentAccountNbr);
 
         // Business logic
         LedgerAccountBO ledgerAccount = new LedgerAccountBO();
@@ -67,7 +80,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         try {
             ledgerService.newLedgerAccount(ledgerAccount);
         } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
-            throw new PaymentProcessingException(e.getMessage(), e); //@fpo Is that for sure? CreateDepositAccount should throw PaymentProcessException?
+            throw new DepositAccountNotFoundException(e.getMessage(), e);
         }
 
         DepositAccount da = new DepositAccount();
@@ -112,7 +125,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         } catch (JsonProcessingException e) {
             throw new PaymentProcessingException("Payment object can't be serialized", e);
         }
-        LedgerBO ledger = depositAccountConfigService.getLedger();
+        LedgerBO ledger = loadLedger();
 
         // Validation debtor account number
         LedgerAccountBO debtorLedgerAccount;
@@ -126,7 +139,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         String creditorIban = paymentTarget.getCreditorAccount().getIban();
         LedgerAccountBO creditLedgerAccount;
         try {
-            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> loadClearingAccountSepa(ledger));
         } catch (LedgerNotFoundException e) {
             throw new PaymentProcessingException(e.getMessage(), e);
         }
@@ -169,7 +182,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         } catch (JsonProcessingException e) {
             throw new PaymentProcessingException("Payment object can't be serialized");
         }
-        LedgerBO ledger = depositAccountConfigService.getLedger();
+        LedgerBO ledger = loadLedger();
 
         // Validation debtor account number
         LedgerAccountBO debtorLedgerAccount;
@@ -203,7 +216,7 @@ public class DepositAccountServiceImpl implements DepositAccountService {
 
         LedgerAccountBO creditLedgerAccount;
         try {
-            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> depositAccountConfigService.getClearingAccount());
+            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, creditorIban).orElseGet(() -> loadClearingAccountSepa(ledger));
         } catch (LedgerNotFoundException e) {
             throw new PaymentProcessingException(e.getMessage(), e);
         }
@@ -252,5 +265,26 @@ public class DepositAccountServiceImpl implements DepositAccountService {
         p.setLines(lines);
         return p;
     }
+    
+    private LedgerBO loadLedger() {
+    	String ledgerName = depositAccountConfigService.getLedger();
+    	return ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
+    }
+    
+    private LedgerAccountBO loadClearingAccountSepa(LedgerBO ledgerBO) {
+    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccountSepa());
+    }
 
+//    private LedgerAccountBO loadClearingAccountTarget2(LedgerBO ledgerBO) {
+//    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccountTarget2());
+//    }
+//
+    private LedgerAccountBO loadClearing(LedgerBO ledgerBO, String accountName) {
+    	try {
+			return ledgerService.findLedgerAccount(ledgerBO, accountName)
+				.orElseThrow(() -> new IllegalStateException(String.format("LedgerAccount with name %s not found from ledger with name %s", accountName, depositAccountConfigService.getLedger())));
+		} catch (LedgerNotFoundException e) {
+			throw new IllegalStateException(e);
+		}
+    }
 }

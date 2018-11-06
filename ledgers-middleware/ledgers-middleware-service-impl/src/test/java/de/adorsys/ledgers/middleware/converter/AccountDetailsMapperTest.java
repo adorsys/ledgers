@@ -10,10 +10,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mapstruct.factory.Mappers;
 
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.postings.api.domain.BalanceBO;
 import pro.javatar.commons.reader.YamlReader;
 
 public class AccountDetailsMapperTest {

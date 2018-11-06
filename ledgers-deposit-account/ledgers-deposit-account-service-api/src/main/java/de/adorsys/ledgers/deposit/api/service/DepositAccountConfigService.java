@@ -1,14 +1,12 @@
 package de.adorsys.ledgers.deposit.api.service;
 
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-
 public interface DepositAccountConfigService {
 
-	LedgerAccountBO getDepositParentAccount();
+	String getDepositParentAccount();
 
-	LedgerBO getLedger();
+	String getLedger();
 
-	LedgerAccountBO getClearingAccount();
-
+	String getClearingAccountTarget2();
+	
+	String getClearingAccountSepa();
 }

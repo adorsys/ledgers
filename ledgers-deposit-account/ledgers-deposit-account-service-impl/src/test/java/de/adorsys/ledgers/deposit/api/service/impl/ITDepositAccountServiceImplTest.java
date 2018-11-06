@@ -1,12 +1,14 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
@@ -19,6 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,13 +30,21 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ITDepositAccountServiceImplTest {
+    private static final String LEDGER_NAME = "ledger";
     private static final String LEDGER_ACCOUNT_ID = "1234567890";
     private static final LedgerAccountBO LEDGER_ACCOUNT = newLedgerAccountBO(LEDGER_ACCOUNT_ID);
+    private static final LedgerBO LEDGER = newLedger(LEDGER_NAME);
 
     private static LedgerAccountBO newLedgerAccountBO(String id) {
         LedgerAccountBO l = new LedgerAccountBO();
         l.setId(id);
         return l;
+    }
+    
+    private static LedgerBO newLedger(String name) {
+    	LedgerBO ledgerBO = new LedgerBO();
+    	ledgerBO.setName(name);
+    	return ledgerBO;
     }
 
     @InjectMocks
@@ -49,13 +60,13 @@ public class ITDepositAccountServiceImplTest {
     private DepositAccountMapper depositAccountMapper;
 
     @Test
-    public void test_create_customer_bank_account_ok() throws LedgerAccountNotFoundException, LedgerNotFoundException, PaymentProcessingException, IOException {
-        when(depositAccountConfigService.getDepositParentAccount()).thenReturn(LEDGER_ACCOUNT);
+    public void test_create_customer_bank_account_ok() throws LedgerAccountNotFoundException, LedgerNotFoundException, IOException, DepositAccountNotFoundException {
+        when(depositAccountConfigService.getDepositParentAccount()).thenReturn(LEDGER_ACCOUNT.getName());
         when(ledgerService.newLedgerAccount(any())).thenReturn(LEDGER_ACCOUNT);
         when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(DepositAccount.class));
         when(depositAccountMapper.toDepositAccount(any())).thenReturn(getDepositAccount(DepositAccount.class));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccount(DepositAccountBO.class));
-
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(LEDGER));
         //Given
         DepositAccountBO da = getDepositAccount(DepositAccountBO.class);
         //When

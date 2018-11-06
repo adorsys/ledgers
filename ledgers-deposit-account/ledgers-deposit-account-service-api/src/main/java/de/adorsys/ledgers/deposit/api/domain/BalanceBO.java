@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.postings.api.domain;
+package de.adorsys.ledgers.deposit.api.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

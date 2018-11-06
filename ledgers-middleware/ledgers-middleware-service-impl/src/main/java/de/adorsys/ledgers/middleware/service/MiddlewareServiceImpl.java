@@ -23,12 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.AccountBalancesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
@@ -49,8 +51,6 @@ import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddl
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.postings.api.domain.BalanceBO;
-import de.adorsys.ledgers.postings.api.service.AccountBalancesService;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
 import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;

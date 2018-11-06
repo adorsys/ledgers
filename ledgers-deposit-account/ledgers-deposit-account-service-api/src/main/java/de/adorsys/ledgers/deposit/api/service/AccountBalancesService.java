@@ -1,8 +1,8 @@
-package de.adorsys.ledgers.postings.api.service;
+package de.adorsys.ledgers.deposit.api.service;
 
 import java.util.List;
 
-import de.adorsys.ledgers.postings.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
 
 public interface AccountBalancesService {
 
