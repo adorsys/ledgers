@@ -1,0 +1,35 @@
+antecedentId: antecendent_ID
+antecedentHash: HASH_HERE
+hash: HASH_HERE
+hashAlg: HASH_ALG
+id: posting_ID
+recordUser: CrushTestDummy
+recordTime: 2018-12-12T00:00:00
+oprId: operation_ID
+oprTime: 2018-12-12T00:00:00
+oprType: money transfer
+oprDetails: some money sent from one user to another
+oprSrc:
+pstTime: 2018-12-12T00:00:00
+pstType: BUSI_TX
+pstStatus: POSTED
+ledger:
+   name: CrushTestDummy
+   id: ledger_ID
+   created: 2018-12-12T00:00:00
+   userDetails: some details
+   shortDesc: shortDescr
+   longDesc: long descr
+   coa:
+     name: CrushTestDummy
+     id: coa_ID
+     created: 2018-12-12T00:00:00
+     userDetails: some details
+     shortDesc: shortDescr
+     longDesc: long descr
+
+valTime: 2018-12-12T00:00:00
+lines:
+discardedId:
+discardedTime:
+discardingId:

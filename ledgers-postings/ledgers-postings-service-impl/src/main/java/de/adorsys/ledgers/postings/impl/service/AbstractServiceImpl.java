@@ -1,9 +1,5 @@
 package de.adorsys.ledgers.postings.impl.service;
 
-import java.security.Principal;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
@@ -16,6 +12,9 @@ import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.security.Principal;
 
 public class AbstractServiceImpl {
 
@@ -66,6 +65,7 @@ public class AbstractServiceImpl {
         }
         throw insufficientInfo(model);
     }
+
     protected LedgerAccount loadLedgerAccount(LedgerAccount model) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         if (model == null) {
             throw nullInfo();
@@ -88,6 +88,7 @@ public class AbstractServiceImpl {
         }
         return loadLedgerByIdOrName(model.getId(), model.getName());
     }
+
     protected Ledger loadLedger(Ledger model) throws LedgerNotFoundException {
         if (model == null) {
             throw nullInfo();
@@ -102,19 +103,19 @@ public class AbstractServiceImpl {
         }
         if (name != null) {
             return ledgerRepository.findOptionalByName(name)
-                           .orElseThrow(() -> new LedgerNotFoundException(name,id));
+                           .orElseThrow(() -> new LedgerNotFoundException(name));
         }
-        throw insufficientInfo(String.format("id %s and name %s", id, name));
+        throw insufficientInfo("Both id and name fields are NULL!");
     }
-    
+
     //TODO consider creating of exception builder with all necessary classes
-    protected IllegalArgumentException insufficientInfo(Object modelObject) {
+    protected IllegalArgumentException insufficientInfo(Object modelObject) { //TODO Unchecked Exception here! Consider swap for Checked Exception!
         return new IllegalArgumentException(
                 String.format("Model Object does not provide sufficient information for loading original instance. %s",
                         modelObject.toString()));
     }
 
     private IllegalArgumentException nullInfo() {
-        return new IllegalArgumentException("Model object can not be null");
+        return new IllegalArgumentException("Model object can not be null"); //TODO Unchecked Exception here! Consider swap for Checked Exception!
     }
 }

@@ -53,5 +53,5 @@ public interface LedgerService {
      * @param name
      * @return
      */
-    Optional<LedgerAccountBO> findLedgerAccount(LedgerBO ledger, String name) throws LedgerNotFoundException;
+    LedgerAccountBO findLedgerAccount(LedgerBO ledger, String name) throws LedgerNotFoundException, LedgerAccountNotFoundException;
 }

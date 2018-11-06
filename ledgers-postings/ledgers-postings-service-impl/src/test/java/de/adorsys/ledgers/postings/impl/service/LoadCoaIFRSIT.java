@@ -74,7 +74,7 @@ public class LoadCoaIFRSIT {
 			ledgerService.newLedgerAccount(ledgerAccount);
 		}
 		
-		LedgerAccountBO la = ledgerService.findLedgerAccount(ledgerBO, "4.2").orElse(null);
+		LedgerAccountBO la = ledgerService.findLedgerAccount(ledgerBO, "4.2");
 		Assume.assumeNotNull(la);
 		Assert.assertEquals("Services",la.getShortDesc());
 		Assert.assertEquals(AccountCategoryBO.RE, la.getCategory());

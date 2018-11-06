@@ -18,15 +18,19 @@ package de.adorsys.ledgers.middleware.resource;
 
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/payments")
@@ -68,6 +72,19 @@ public class PaymentResource {
         } catch (Exception e) { //TODO add corresponding exceptions later (initiate payment full procedure with balance checking etc.)
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
+    public <T> ResponseEntity<List<TransactionTO>> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
+                                                                       @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
+                                                                       @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
+        try {
+            List<TransactionTO> tos = middlewareService.executePayment(paymentId, paymentType, paymentProduct);
+            return ResponseEntity.ok(tos);
+        } catch (PaymentProcessingMiddlewareException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().header("message", e.getMessage()).build(); //TODO Create formal rest error messaging, fix all internal service errors to comply some pattern.
         }
     }
 }

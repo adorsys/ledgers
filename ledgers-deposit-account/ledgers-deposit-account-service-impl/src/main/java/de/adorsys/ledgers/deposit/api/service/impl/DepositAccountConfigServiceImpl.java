@@ -26,9 +26,13 @@ import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 @Service
 public class DepositAccountConfigServiceImpl implements DepositAccountConfigService {
 	
-	@Autowired
-	private ASPSPConfigData configData;
+	private final ASPSPConfigData configData;
 
+    @Autowired
+    public DepositAccountConfigServiceImpl(ASPSPConfigData configData) {
+        this.configData = configData;
+    }
+	
 	@Override
 	public String getDepositParentAccount() {
     	return configData.getDepositParentAccount();

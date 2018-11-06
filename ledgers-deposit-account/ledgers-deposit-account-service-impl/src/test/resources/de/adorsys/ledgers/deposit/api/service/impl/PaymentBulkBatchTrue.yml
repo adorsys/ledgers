@@ -1,0 +1,82 @@
+paymentId: myPaymentId
+batchBookingPreferred: true
+requestedExecutionDate: 2018-12-12
+paymentType: BULK
+startDate:
+endDate:
+executionRule:
+frequency:
+dayOfExecution:
+debtorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+transactionStatus: RCVD
+targets:
+  - {
+      paymentId: myPaymentId1,
+      endToEndIdentification: 123456788,
+      instructedAmount:
+        {
+          currency: EUR,
+          amount: 100
+        },
+      creditorAccount:
+        {
+          iban: DE91100000000123456787,
+          bban: bban,
+          pan: pan,
+          maskedPan: maskedPan,
+          msisdn: msisdn,
+          currency: EUR
+         },
+      creditorAgent: agent,
+      creditorName: Rozetka.ua,
+      creditorAddress:
+      {
+          street: SomeStreet,
+          buildingNumber: 666,
+          city: Kiev,
+          postalCode: 04210,
+          country: Ukraine
+      },
+      remittanceInformationUnstructured: remittance,
+      paymentProduct: SEPA,
+      payment:
+  }
+  - {
+        paymentId: myPaymentId2,
+        endToEndIdentification: 123456789,
+        instructedAmount:
+          {
+            currency: EUR,
+            amount: 100
+          },
+        creditorAccount:
+          {
+            iban: DE91100000000123456788,
+            bban: bban,
+            pan: pan,
+            maskedPan: maskedPan,
+            msisdn: msisdn,
+            currency: EUR
+           },
+        creditorAgent: agent,
+        creditorName: Sokol.ua,
+        creditorAddress:
+        {
+            street: SomeStreet,
+            buildingNumber: 666,
+            city: Kiev,
+            postalCode: 04210,
+            country: Ukraine
+        },
+        remittanceInformationUnstructured: remittance,
+        paymentProduct: CROSS_BORDER,
+        payment:
+    }

@@ -1,0 +1,34 @@
+name: CrushTestDummy
+id: ledger_account_ID
+created: 2018-12-12T00:00:00
+userDetails: some details
+shortDesc: shortDescr
+longDesc: long descr
+
+ledger:
+   name: CrushTestDummy
+   id: ledger_ID
+   created: 2018-12-12T00:00:00
+   userDetails: some details
+   shortDesc: shortDescr
+   longDesc: long descr
+   coa:
+     name: CrushTestDummy
+     id: coa_ID
+     created: 2018-12-12T00:00:00
+     userDetails: some details
+     shortDesc: shortDescr
+     longDesc: long descr
+
+parent:
+
+coa:
+  name: CrushTestDummy
+  id: coa_ID
+  created: 2018-12-12T00:00:00
+  userDetails: some details
+  shortDesc: shortDescr
+  longDesc: long descr
+
+balanceSide: Cr
+category: RE
