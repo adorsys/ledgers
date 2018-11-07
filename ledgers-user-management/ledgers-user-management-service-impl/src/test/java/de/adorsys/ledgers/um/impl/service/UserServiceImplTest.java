@@ -1,8 +1,11 @@
 package de.adorsys.ledgers.um.impl.service;
 
+import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
@@ -45,6 +48,9 @@ public class UserServiceImplTest {
     private static final String USER_PIN = "12345678";
     private static final String USER_NON_EXISTING_LOGIN = "NonExistingLogin";
     private static final String USER_NON_EXISTING_ID = "NonExistingID";
+    private static final String USER_IBAN = "3737463673647";
+    private static final AccessTypeBO USER_ACC_ACCESS_TYPE_1 = AccessTypeBO.READ;
+    private static final AccessTypeBO USER_ACC_ACCESS_TYPE_2 = AccessTypeBO.DISPOSE;
 
 
     @Test
@@ -94,6 +100,26 @@ public class UserServiceImplTest {
         verify(converter, times(1)).toUserBO(userEntity);
     }
 
+    @Test
+    public void getAccountAccess() throws UserNotFoundException {
+        UserEntity userEntity = readUserEntity(reader);
+        UserBO userBO = readUserBO(reader);
+
+        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
+        when(converter.toUserBO(userEntity)).thenReturn(userBO);
+
+        List<AccountAccessBO> accAccess = userService.getAccountAccess(USER_ID);
+
+        assertThat(accAccess.size(), is(2));
+        assertThat(accAccess.get(0).getIban(), is(USER_IBAN));
+        assertThat(accAccess.get(1).getIban(), is(USER_IBAN));
+        assertThat(accAccess.get(0).getAccessType(), is(USER_ACC_ACCESS_TYPE_1));
+        assertThat(accAccess.get(1).getAccessType(), is(USER_ACC_ACCESS_TYPE_2));
+
+        verify(repository, times(1)).findById(USER_ID);
+        verify(converter, times(1)).toUserBO(userEntity);
+    }
+
     @Test(expected = UserNotFoundException.class)
     public void authorizeWithException() throws UserNotFoundException {
 
@@ -108,6 +134,14 @@ public class UserServiceImplTest {
         when(repository.findById(USER_NON_EXISTING_ID)).thenReturn(Optional.empty());
 
         userService.getUserScaData(USER_NON_EXISTING_ID);
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void getAccountAccessWithException() throws UserNotFoundException {
+
+        when(repository.findById(USER_NON_EXISTING_ID)).thenReturn(Optional.empty());
+
+        userService.getAccountAccess(USER_NON_EXISTING_ID);
     }
 
     private UserBO readUserBO(ResourceReader reader) {
