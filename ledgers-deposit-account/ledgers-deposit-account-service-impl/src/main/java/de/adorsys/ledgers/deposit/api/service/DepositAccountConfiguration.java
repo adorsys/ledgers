@@ -60,7 +60,7 @@ public class DepositAccountConfiguration {
         }
     }
 
-    private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws IOException, LedgerNotFoundException, LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
+    private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws LedgerNotFoundException, LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
         ChartOfAccountBO coa = new ChartOfAccountBO();
         coa.setName(ledgerName);
         coa.setShortDesc("COA: " + ledgerName);
