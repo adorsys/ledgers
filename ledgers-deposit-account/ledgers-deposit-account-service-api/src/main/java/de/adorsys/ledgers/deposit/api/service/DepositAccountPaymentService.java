@@ -16,11 +16,16 @@
 
 package de.adorsys.ledgers.deposit.api.service;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import java.util.List;
+
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-
-import java.util.List;
 
 public interface DepositAccountPaymentService {
 

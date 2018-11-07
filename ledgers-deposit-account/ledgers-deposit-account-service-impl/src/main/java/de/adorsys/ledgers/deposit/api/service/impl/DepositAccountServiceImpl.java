@@ -20,7 +20,7 @@ import de.adorsys.ledgers.util.Ids;
 
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
-    private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
 
     private DepositAccountRepository depositAccountRepository;
     private LedgerService ledgerService;
@@ -55,7 +55,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         try {
             ledgerService.newLedgerAccount(ledgerAccount);
         } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             throw new DepositAccountNotFoundException(e.getMessage(), e);
         }
 

@@ -6,10 +6,12 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.CurrencyMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
@@ -44,6 +46,8 @@ public class DepositAccountPaymentServiceImplTest {
     @Mock
     private PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
     @Mock
+    private TransactionDetailsMapper transactionDetailsMapper = Mappers.getMapper(TransactionDetailsMapper.class);
+    @Mock
     private PaymentRepository paymentRepository;
     @Mock
     private CurrencyMapper currencyMapper;
@@ -57,7 +61,7 @@ public class DepositAccountPaymentServiceImplTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void getPaymentStatus() throws PaymentNotFoundException {
-        when(paymentRepository.findById(any())).thenReturn(Optional.of(getSinglePayment(Payment.class)));
+        when(paymentRepository.findById(any())).thenReturn(Optional.of(getSinglePayment()));
 
         PaymentResultBO<TransactionStatusBO> paymentResult = paymentService.getPaymentStatusById(PAYMENT_ID);
 
@@ -77,34 +81,37 @@ public class DepositAccountPaymentServiceImplTest {
 
     @Test
     public void getPaymentById() throws PaymentNotFoundException {
-        testGetPaymentById(PAYMENT_ID, getSinglePayment(Payment.class), getSinglePayment(PaymentBO.class));
-        testGetPaymentById(PAYMENT_ID, getBulkPayment(Payment.class), getBulkPayment(PaymentBO.class));
+        testGetPaymentById(PAYMENT_ID, getSinglePayment(), getSinglePaymentBO());
+        testGetPaymentById(PAYMENT_ID, getBulkPayment(), getBulkPaymentBO());
     }
 
     @Test(expected = PaymentNotFoundException.class)
     public void getPaymentById_not_found() throws PaymentNotFoundException {
-        testGetPaymentById(WRONG_PAYMENT_ID, getSinglePayment(Payment.class), getSinglePayment(PaymentBO.class));
-        testGetPaymentById(WRONG_PAYMENT_ID, getBulkPayment(Payment.class), getBulkPayment(PaymentBO.class));
+        testGetPaymentById(WRONG_PAYMENT_ID, getSinglePayment(), getSinglePaymentBO());
+        testGetPaymentById(WRONG_PAYMENT_ID, getBulkPayment(), getBulkPaymentBO());
     }
 
     @Test
     public void initiatePayment() {
-        when(paymentMapper.toPayment(any())).thenReturn(getSinglePayment(Payment.class));
-        when(paymentRepository.save(any())).thenReturn(getSinglePayment(Payment.class));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePayment(PaymentBO.class));
+        when(paymentMapper.toPayment(any())).thenReturn(getSinglePayment());
+        when(paymentRepository.save(any())).thenReturn(getSinglePayment());
+        when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePaymentBO());
 
-        PaymentBO result = paymentService.initiatePayment(getSinglePayment(PaymentBO.class));
+        PaymentBO result = paymentService.initiatePayment(getSinglePaymentBO());
         assertThat(result).isNotNull();
     }
 
     @Test
     public void executePayment_Single_Success() throws PaymentNotFoundException, PaymentProcessingException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException, DoubleEntryAccountingException, BaseLineException {
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getSinglePayment(Payment.class)));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePayment(PaymentBO.class));
+    	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
+    	LedgerBO ledger = ledgerAccount.getLedger();
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getSinglePayment()));
+        when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePaymentBO());
         //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
-        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(readFile(LedgerAccountBO.class, "LedgerAccount.yml"));
+        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
         when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
-        when(paymentMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
+        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         List<TransactionDetailsBO> result = paymentService.executePayment(PAYMENT_ID, PAYMENT_TYPE_SINGLE, PAYMENT_PRODUCT);
         assertThat(result).isNotEmpty();
@@ -114,26 +121,32 @@ public class DepositAccountPaymentServiceImplTest {
 
     @Test
     public void executePayment_Bulk_Batch_false_Success() throws PaymentNotFoundException, PaymentProcessingException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException, DoubleEntryAccountingException, BaseLineException {
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getBulkPayment(Payment.class)));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulkPayment(PaymentBO.class));
+    	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
+    	LedgerBO ledger = ledgerAccount.getLedger();
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getBulkPayment()));
+        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulkPaymentBO());
         //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
-        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(readFile(LedgerAccountBO.class, "LedgerAccount.yml"));
+        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
         when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
-        when(paymentMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
+        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         List<TransactionDetailsBO> result = paymentService.executePayment(PAYMENT_ID, PAYMENT_TYPE_BULK, PAYMENT_PRODUCT);
         assertThat(result).isNotEmpty();
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.size()).isEqualTo(1);
     }
 
     @Test
     public void executePayment_Bulk_Batch_true_Success() throws PaymentNotFoundException, PaymentProcessingException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException, DoubleEntryAccountingException, BaseLineException {
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(readFile(Payment.class, "PaymentBulkBatchTrue.yml")));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(readFile(PaymentBO.class, "PaymentBulkBatchTrue.yml"));
+    	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
+    	LedgerBO ledger = ledgerAccount.getLedger();
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getBulkBatchPayment()));
+        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulBatchkPaymentBO());
         //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
-        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(readFile(LedgerAccountBO.class, "LedgerAccount.yml"));
+        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
         when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
-        when(paymentMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
+        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         List<TransactionDetailsBO> result = paymentService.executePayment(PAYMENT_ID, PAYMENT_TYPE_BULK, PAYMENT_PRODUCT);
         assertThat(result).isNotEmpty();
@@ -153,14 +166,40 @@ public class DepositAccountPaymentServiceImplTest {
         }
     }
 
-    private <T> T getSinglePayment(Class<T> t) {
-        return readFile(t, "PaymentSingle.yml");
+    private Payment getSinglePayment() {
+        Payment payment = readFile(Payment.class, "PaymentSingle.yml");
+        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        return payment;
+    }
+    private PaymentBO getSinglePaymentBO() {
+        PaymentBO payment = readFile(PaymentBO.class, "PaymentSingle.yml");
+        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        return payment;
     }
 
-    private <T> T getBulkPayment(Class<T> t) {
-        return readFile(t, "PaymentBulk.yml");
+    private Payment getBulkPayment() {
+        Payment payment = readFile(Payment.class, "PaymentBulk.yml");
+        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        return payment;
+    }
+    private PaymentBO getBulkPaymentBO() {
+        PaymentBO payment = readFile(PaymentBO.class, "PaymentBulk.yml");
+        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        return payment;
     }
 
+    
+    private Payment getBulkBatchPayment() {
+        Payment payment = readFile(Payment.class, "PaymentBulkBatchTrue.yml");
+        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        return payment;
+    }
+    private PaymentBO getBulBatchkPaymentBO() {
+        PaymentBO payment = readFile(PaymentBO.class, "PaymentBulkBatchTrue.yml");
+        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        return payment;
+    }
+    
     private <T> T readFile(Class<T> t, String file) {
         try {
             return YamlReader.getInstance().getObjectFromResource(DepositAccountPaymentServiceImpl.class, file, t);

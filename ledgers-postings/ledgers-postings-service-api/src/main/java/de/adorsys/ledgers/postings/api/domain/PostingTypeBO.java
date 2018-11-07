@@ -11,8 +11,7 @@ public enum PostingTypeBO {
 	BAL_STMT,
 	/*Processes a profit and lost statement. Uses posting trace to document associated statement.*/
 	PnL_STMT,
-//	todo: @fpo copy-paste please provide right description
-	/*Processes a profit and lost statement.*/
+	/*Processes a Balance Sheet Statement.*/
 	BS_STMT,
 	/*Document the closing of a ledger.*/
 	LDG_CLSNG;

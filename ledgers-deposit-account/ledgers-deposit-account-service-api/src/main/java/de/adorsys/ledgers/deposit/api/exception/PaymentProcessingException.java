@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.deposit.api.exception;
 
-public class PaymentProcessingException extends Exception {
+public class PaymentProcessingException extends RuntimeException {
     public PaymentProcessingException() {
     }
 
