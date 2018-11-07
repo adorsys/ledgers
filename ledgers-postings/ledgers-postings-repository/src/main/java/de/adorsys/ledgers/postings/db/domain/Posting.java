@@ -1,31 +1,16 @@
 package de.adorsys.ledgers.postings.db.domain;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The word posting is associated with the moment at which the recorded
@@ -40,7 +25,7 @@ import de.adorsys.ledgers.util.hash.HashGenerationException;
 @Entity
 @JsonPropertyOrder(alphabetic = true)
 @Table(uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "opr_id", "discarding_id" }, name = "Posting_opr_id_discarding_id_unique") })
+        @UniqueConstraint(columnNames = {"opr_id", "discarding_id"}, name = "Posting_opr_id_discarding_id_unique")})
 public class Posting extends HashRecord {
     private static final RecordHashHelper RECORD_HASH_HELPER = new RecordHashHelper();
 
@@ -53,7 +38,7 @@ public class Posting extends HashRecord {
     private String recordUser;
 
     /* The time of recording of this posting. */
-	@Convert(converter=LocalDateTimeConverter.class)
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime recordTime;
 
     /*
@@ -64,11 +49,11 @@ public class Posting extends HashRecord {
      * an operation. Only one of them will be effective in the account statement
      * at any given time.
      */
-    @Column(nullable = false, updatable = false, name="opr_id")
+    @Column(nullable = false, updatable = false, name = "opr_id")
     private String oprId;
 
     /* The time of occurrence of this operation. Set by the consuming module. */
-	@Convert(converter=LocalDateTimeConverter.class)
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime oprTime;
 
     /*
@@ -79,11 +64,11 @@ public class Posting extends HashRecord {
 
     /* Details associated with this operation. */
     private String oprDetails;
-    
+
     /*
      * The source of the operation. For example, payment order may result into many
      * payments. Each payment will be an operation. The oprSrc field will be used to
-     * document original payment id. 
+     * document original payment id.
      */
     private String oprSrc;
 
@@ -104,7 +89,7 @@ public class Posting extends HashRecord {
      */
     @Column(nullable = false, updatable = false)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-	@Convert(converter=LocalDateTimeConverter.class)
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime pstTime;
 
     /*
@@ -138,39 +123,39 @@ public class Posting extends HashRecord {
      * The Date use to compute interests. This can be different from the posting
      * date and can lead to the production of other type of balances.
      */
-	@Convert(converter=LocalDateTimeConverter.class)
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime valTime;
 
-//    todo: add description to this field
+    //    todo: add description to this field
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "posting_id")
     private List<PostingLine> lines = new ArrayList<>();
-    
+
     /*
      * The id of the discarded posting. In case this posting discards another posting.
      */
     private String discardedId;
-    
+
     /*
-     * The record time of the discarding posting 
+     * The record time of the discarding posting
      */
-	@Convert(converter=LocalDateTimeConverter.class)
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime discardedTime;
     /*
      * The id of the discaring posting/
      */
-    @Column(name="discarding_id")
+    @Column(name = "discarding_id")
     private String discardingId;
 
     public Posting hash() {
-    	// Skipp computation if a hash exists. Original value 
-    	// shall not be overriden.
-    	if(hash!=null) {
-    		return this;
-    	}
-    	if(recordTime==null) {
-    		recordTime = LocalDateTime.now();
-    	}
+        // Skipp computation if a hash exists. Original value
+        // shall not be overriden.
+        if (hash != null) {
+            return this;
+        }
+        if (recordTime == null) {
+            recordTime = LocalDateTime.now();
+        }
         try {
             hash = RECORD_HASH_HELPER.computeRecHash(this);
         } catch (HashGenerationException e) {
@@ -179,144 +164,144 @@ public class Posting extends HashRecord {
         return this;
     }
 
-	public void synchLines() {
-		lines.stream().forEach(l -> l.synchPosting(this));
-	}
+    public void synchLines() {
+        lines.forEach(l -> l.synchPosting(this));
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getRecordUser() {
-		return recordUser;
-	}
+    public String getRecordUser() {
+        return recordUser;
+    }
 
-	public LocalDateTime getRecordTime() {
-		return recordTime;
-	}
+    public LocalDateTime getRecordTime() {
+        return recordTime;
+    }
 
-	public String getOprId() {
-		return oprId;
-	}
+    public String getOprId() {
+        return oprId;
+    }
 
-	public LocalDateTime getOprTime() {
-		return oprTime;
-	}
+    public LocalDateTime getOprTime() {
+        return oprTime;
+    }
 
-	public String getOprType() {
-		return oprType;
-	}
+    public String getOprType() {
+        return oprType;
+    }
 
-	public String getOprDetails() {
-		return oprDetails;
-	}
+    public String getOprDetails() {
+        return oprDetails;
+    }
 
-	public LocalDateTime getPstTime() {
-		return pstTime;
-	}
+    public LocalDateTime getPstTime() {
+        return pstTime;
+    }
 
-	public PostingType getPstType() {
-		return pstType;
-	}
+    public PostingType getPstType() {
+        return pstType;
+    }
 
-	public PostingStatus getPstStatus() {
-		return pstStatus;
-	}
+    public PostingStatus getPstStatus() {
+        return pstStatus;
+    }
 
-	public Ledger getLedger() {
-		return ledger;
-	}
+    public Ledger getLedger() {
+        return ledger;
+    }
 
-	public LocalDateTime getValTime() {
-		return valTime;
-	}
+    public LocalDateTime getValTime() {
+        return valTime;
+    }
 
-	public List<PostingLine> getLines() {
-		return lines;
-	}
+    public List<PostingLine> getLines() {
+        return lines;
+    }
 
-	public String getOprSrc() {
-		return oprSrc;
-	}
+    public String getOprSrc() {
+        return oprSrc;
+    }
 
-	public String getDiscardedId() {
-		return discardedId;
-	}
+    public String getDiscardedId() {
+        return discardedId;
+    }
 
-	public void setDiscardedId(String discardedId) {
-		this.discardedId = discardedId;
-	}
+    public void setDiscardedId(String discardedId) {
+        this.discardedId = discardedId;
+    }
 
-	public LocalDateTime getDiscardedTime() {
-		return discardedTime;
-	}
+    public LocalDateTime getDiscardedTime() {
+        return discardedTime;
+    }
 
-	public void setDiscardedTime(LocalDateTime discardedTime) {
-		this.discardedTime = discardedTime;
-	}
+    public void setDiscardedTime(LocalDateTime discardedTime) {
+        this.discardedTime = discardedTime;
+    }
 
-	public String getDiscardingId() {
-		return discardingId;
-	}
+    public String getDiscardingId() {
+        return discardingId;
+    }
 
-	public void setDiscardingId(String discardingId) {
-		this.discardingId = discardingId;
-	}
+    public void setDiscardingId(String discardingId) {
+        this.discardingId = discardingId;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setRecordUser(String recordUser) {
-		this.recordUser = recordUser;
-	}
+    public void setRecordUser(String recordUser) {
+        this.recordUser = recordUser;
+    }
 
-	public void setRecordTime(LocalDateTime recordTime) {
-		this.recordTime = recordTime;
-	}
+    public void setRecordTime(LocalDateTime recordTime) {
+        this.recordTime = recordTime;
+    }
 
-	public void setOprId(String oprId) {
-		this.oprId = oprId;
-	}
+    public void setOprId(String oprId) {
+        this.oprId = oprId;
+    }
 
-	public void setOprTime(LocalDateTime oprTime) {
-		this.oprTime = oprTime;
-	}
+    public void setOprTime(LocalDateTime oprTime) {
+        this.oprTime = oprTime;
+    }
 
-	public void setOprType(String oprType) {
-		this.oprType = oprType;
-	}
+    public void setOprType(String oprType) {
+        this.oprType = oprType;
+    }
 
-	public void setOprDetails(String oprDetails) {
-		this.oprDetails = oprDetails;
-	}
+    public void setOprDetails(String oprDetails) {
+        this.oprDetails = oprDetails;
+    }
 
-	public void setOprSrc(String oprSrc) {
-		this.oprSrc = oprSrc;
-	}
+    public void setOprSrc(String oprSrc) {
+        this.oprSrc = oprSrc;
+    }
 
-	public void setPstTime(LocalDateTime pstTime) {
-		this.pstTime = pstTime;
-	}
+    public void setPstTime(LocalDateTime pstTime) {
+        this.pstTime = pstTime;
+    }
 
-	public void setPstType(PostingType pstType) {
-		this.pstType = pstType;
-	}
+    public void setPstType(PostingType pstType) {
+        this.pstType = pstType;
+    }
 
-	public void setPstStatus(PostingStatus pstStatus) {
-		this.pstStatus = pstStatus;
-	}
+    public void setPstStatus(PostingStatus pstStatus) {
+        this.pstStatus = pstStatus;
+    }
 
-	public void setLedger(Ledger ledger) {
-		this.ledger = ledger;
-	}
+    public void setLedger(Ledger ledger) {
+        this.ledger = ledger;
+    }
 
-	public void setValTime(LocalDateTime valTime) {
-		this.valTime = valTime;
-	}
+    public void setValTime(LocalDateTime valTime) {
+        this.valTime = valTime;
+    }
 
-	public void setLines(List<PostingLine> lines) {
-		this.lines = lines;
-	}
-	
+    public void setLines(List<PostingLine> lines) {
+        this.lines = lines;
+    }
+
 }

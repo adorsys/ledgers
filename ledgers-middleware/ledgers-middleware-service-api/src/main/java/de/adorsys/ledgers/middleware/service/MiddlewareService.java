@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.service;
 
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
@@ -53,4 +54,6 @@ public interface MiddlewareService {
     <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException;
 
     List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException;
+
+    List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException;
 }

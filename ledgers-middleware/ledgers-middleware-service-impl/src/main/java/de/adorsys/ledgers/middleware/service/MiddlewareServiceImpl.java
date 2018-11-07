@@ -27,6 +27,7 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
@@ -121,8 +122,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
-    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws
-            AccountNotFoundMiddlewareException {
+    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
         try {
             DepositAccountBO account = accountService.getDepositAccountById(accountId);
             List<BalanceBO> balances = accountBalancesService.getBalances(account.getIban());
@@ -151,28 +151,35 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
-    public <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException {
-        List<TransactionDetailsBO> executePayment;
-
+    public List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException {
         try {
-            executePayment = paymentService.executePayment(paymentId, paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct));
+            DepositAccountBO account = accountService.getDepositAccountById(accountId);
+            List<BalanceBO> balances = accountBalancesService.getBalances(account.getIban());
+            return detailsMapper.toAccountBalancesTO(balances);
+        } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException {
+        try {
+            List<TransactionDetailsBO> executePayment = paymentService.executePayment(paymentId, paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct));
+            return paymentConverter.toTransactionTOList(executePayment);
         } catch (PaymentNotFoundException | PaymentProcessingException e) {
             throw new PaymentProcessingMiddlewareException(paymentId, e);
         }
-
-        return paymentConverter.toTransactionTOList(executePayment);
     }
 
     @Override //TODO Consider refactoring to avoid unchecked cast warnings
-    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws
-            PaymentNotFoundMiddlewareException {
-        PaymentBO paymentResult;
+    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
         try {
-            paymentResult = paymentService.getPaymentById(paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct), paymentId);
+            PaymentBO paymentResult = paymentService.getPaymentById(paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct), paymentId);
+            return paymentConverter.toPaymentTO(paymentResult);
         } catch (PaymentNotFoundException e) {
             logger.error("Payment with id={} not found", paymentId, e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
         }
-        return paymentConverter.toPaymentTO(paymentResult);
     }
 }

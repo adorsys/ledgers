@@ -1,0 +1,9 @@
+amount:
+ {
+   currency: EUR,
+   amount: 200
+ }
+balanceType: INTERIM_AVAILABLE
+lastChangeDateTime: 2018-12-10T00:00:00.000Z
+referenceDate: 2018-12-10
+lastCommittedTransaction: someAction2
