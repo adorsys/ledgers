@@ -113,6 +113,14 @@ public class UserServiceImpl implements UserService {
         return userBO.getAccountAccesses();
     }
 
+    @Override
+    public List<AccountAccessBO> getAccountAccessByUserLogin(String userLogin) throws UserNotFoundException {
+        Optional<UserEntity> user = userRepository.findFirstByLogin(userLogin);
+        user.orElseThrow(() -> new UserNotFoundException("User with login " + userLogin + " not found"));
+        UserBO userBO = userConverter.toUserBO(user.get());
+        return userBO.getAccountAccesses();
+    }
+
     @NotNull
     private UserEntity getUser(String login) throws UserNotFoundException {
         Optional<UserEntity> userOptional = userRepository.findFirstByLogin(login);

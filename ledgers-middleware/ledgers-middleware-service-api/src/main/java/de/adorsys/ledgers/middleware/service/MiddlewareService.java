@@ -47,6 +47,8 @@ public interface MiddlewareService {
 
     AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
 
+    List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException;
+
     <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
 
     <T> Object initiatePayment(T payment, PaymentTypeTO paymentType);

@@ -21,6 +21,7 @@ import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,16 @@ public class AccountController {
         try {
             return ResponseEntity.ok(middlewareService.getBalances(accountId));
         } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
+
+    @GetMapping("/users/{userLogin}")
+    public List<AccountDetailsTO> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
+        try {
+            return middlewareService.getAllAccountDetailsByUserLogin(userLogin);
+        } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }

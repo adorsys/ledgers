@@ -23,6 +23,7 @@ import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -301,6 +302,40 @@ public class MiddlewareServiceImplTest {
         when(paymentService.executePayment(anyString(), any(), any())).thenThrow(new PaymentNotFoundException());
 
         middlewareService.executePayment(PAYMENT_ID, PaymentTypeTO.SINGLE, PaymentProductTO.SEPA);
+    }
+
+    @Test
+    public void getAllAccountDetailsByUserLogin() throws UserNotFoundMiddlewareException, UserNotFoundException {
+
+        String userLogin = "spe";
+
+        AccountDetailsTO account = getAccount(AccountDetailsTO.class);
+        DepositAccountBO accountBO = getAccount(DepositAccountBO.class);
+
+        List<AccountAccessBO> accessBOList = getDataFromFile("account-access-bo-list.yml", new TypeReference<List<AccountAccessBO>>() {});
+        String iban = accessBOList.get(0).getIban();
+
+        when(userService.getAccountAccessByUserLogin(userLogin)).thenReturn(accessBOList);
+        when(accountService.getDepositAccountsByIBAN(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
+        when(detailsMapper.toAccountDetailsListTO(Collections.singletonList(accountBO))).thenReturn(Collections.singletonList(account));
+
+        List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
+
+        assertThat(details.size(), is(1));
+        assertThat(details.get(0), is(account));
+
+        verify(userService, times(1)).getAccountAccessByUserLogin(userLogin);
+        verify(accountService, times(1)).getDepositAccountsByIBAN(Collections.singletonList(iban));
+        verify(detailsMapper, times(1)).toAccountDetailsListTO(Collections.singletonList(accountBO));
+    }
+
+    private static <T> T getAccount(Class<T> aClass) {
+        try {
+            return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
     }
 
     private static <T> List<T> readBalances(Class<T> tClass) throws IOException {

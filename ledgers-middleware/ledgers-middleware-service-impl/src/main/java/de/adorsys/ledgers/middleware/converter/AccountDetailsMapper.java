@@ -14,6 +14,9 @@ public interface AccountDetailsMapper {
 
     AccountDetailsTO toAccountDetailsTO(DepositAccountBO details, List<BalanceBO> balances);
 
+
+    List<AccountDetailsTO> toAccountDetailsListTO(List<DepositAccountBO> details);
+
     DepositAccountBO toDepositAccountBO(AccountDetailsTO details);
 
     List<AccountBalanceTO> toAccountBalancesTO(List<BalanceBO> balances);
