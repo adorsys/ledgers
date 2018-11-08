@@ -18,6 +18,7 @@ package de.adorsys.ledgers.middleware.service;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
@@ -58,6 +60,8 @@ import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -134,8 +138,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
-    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws
-            AccountNotFoundMiddlewareException {
+    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
         try {
             DepositAccountBO account = accountService.getDepositAccountById(accountId);
             List<BalanceBO> balances = accountService.getBalances(account.getIban());
@@ -143,6 +146,29 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
             logger.error("Deposit Account with id=" + accountId + "not found", e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException {
+        logger.info("Retrieving accounts by user login {}", userLogin);
+        try {
+            List<AccountAccessBO> accountAccess = userService.getAccountAccessByUserLogin(userLogin);
+            logger.info("{} accounts were retrieved", accountAccess.size());
+
+            List<String> ibans = accountAccess.stream()
+                                         .filter(a -> a.getAccessType() == AccessTypeBO.OWNER)
+                                         .map(AccountAccessBO::getIban)
+                                         .collect(Collectors.toList());
+            logger.info("{} were accounts were filtered as OWN", ibans.size());
+
+            List<DepositAccountBO> accounts = accountService.getDepositAccountsByIBAN(ibans);
+            logger.info("{} deposit accounts were found", accounts.size());
+
+            return detailsMapper.toAccountDetailsListTO(accounts);
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException(e.getMessage());
         }
     }
 
@@ -164,8 +190,18 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
+    public List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException {
+        try {
+            DepositAccountBO account = accountService.getDepositAccountById(accountId);
+            List<BalanceBO> balances = accountService.getBalances(account.getIban());
+            return detailsMapper.toAccountBalancesTO(balances);
+        } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+    @Override
     public TransactionStatusTO executePayment(String paymentId) throws PaymentProcessingMiddlewareException {
-
         try {
             TransactionStatusBO executePayment = paymentService.executePayment(paymentId);
             return TransactionStatusTO.valueOf(executePayment.name());
@@ -175,15 +211,13 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override //TODO Consider refactoring to avoid unchecked cast warnings
-    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws
-            PaymentNotFoundMiddlewareException {
-        PaymentBO paymentResult;
+    public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
         try {
-            paymentResult = paymentService.getPaymentById(paymentId);
+            PaymentBO paymentResult = paymentService.getPaymentById(paymentId);
+            return paymentConverter.toPaymentTO(paymentResult);
         } catch (PaymentNotFoundException e) {
             logger.error("Payment with id={} not found", paymentId, e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
         }
-        return paymentConverter.toPaymentTO(paymentResult);
     }
 }

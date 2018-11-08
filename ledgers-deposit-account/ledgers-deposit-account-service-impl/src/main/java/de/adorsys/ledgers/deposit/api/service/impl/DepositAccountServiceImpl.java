@@ -90,7 +90,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         da.setName(depositAccount.getName());
         da.setProduct(depositAccount.getProduct());
         da.setUsageType(depositAccount.getUsageType());
-        return da;
+
+        return depositAccountRepository.save(da);
     }
 
     @Override
@@ -106,7 +107,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                        .map(depositAccountMapper::toDepositAccountBO)
                        .orElseThrow(() -> new DepositAccountNotFoundException(iban));
     }
-    
+
 	@Override
 	public List<BalanceBO> getBalances(String iban) throws LedgerAccountNotFoundException {
 		LedgerBO ledger = loadLedger();
@@ -140,4 +141,14 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 		}
 		return result;
 	}    
+
+    @Override
+    public List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans) {
+    	LOGGER.info("Retrieving deposit accounts by list of IBANs");
+
+        List<DepositAccount> accounts = depositAccountRepository.findByIbanIn(ibans);
+        LOGGER.info("{} IBANs were found", accounts.size());
+
+        return depositAccountMapper.toDepositAccountListBO(accounts);
+    }
 }

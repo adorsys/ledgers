@@ -18,6 +18,7 @@ package de.adorsys.ledgers.middleware.service;
 
 import java.util.List;
 
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
@@ -142,5 +143,11 @@ public interface MiddlewareService {
     //============================ Account Details ==============================//
     
     AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
+
+
+	List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException;
+
+
+	List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException;
 
 }

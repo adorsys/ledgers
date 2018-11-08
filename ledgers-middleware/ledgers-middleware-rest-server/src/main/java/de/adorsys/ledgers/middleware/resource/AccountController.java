@@ -18,8 +18,10 @@ package de.adorsys.ledgers.middleware.resource;
 
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
@@ -40,10 +44,30 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}")
-    public ResponseEntity<AccountDetailsTO> getPaymentStatusById(@PathVariable String accountId) {
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(@PathVariable String accountId) {
         try {
             return ResponseEntity.ok(middlewareService.getAccountDetailsByAccountId(accountId));
         } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
+
+    @GetMapping("/balances/{accountId}")
+    public ResponseEntity<List<AccountBalanceTO>> getBalances(@PathVariable String accountId) {
+        try {
+            return ResponseEntity.ok(middlewareService.getBalances(accountId));
+        } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
+
+    @GetMapping("/users/{userLogin}")
+    public List<AccountDetailsTO> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
+        try {
+            return middlewareService.getAllAccountDetailsByUserLogin(userLogin);
+        } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }

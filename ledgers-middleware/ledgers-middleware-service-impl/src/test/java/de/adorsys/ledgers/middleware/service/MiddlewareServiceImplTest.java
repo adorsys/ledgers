@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -29,19 +29,19 @@ import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
@@ -50,6 +50,7 @@ import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
@@ -64,6 +65,7 @@ import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -76,8 +78,13 @@ public class MiddlewareServiceImplTest {
     private static final String OP_DATA = "opData";
     private static final int VALIDITY_SECONDS = 60;
     private static final String ACCOUNT_ID = "id";
+    private static final String ACCOUNT_DETAILS_TO = "AccountDetailsTO.yml";
+    private static final String ACCOUNT_DETAILS_BO = "AccountDetails.yml";
     private static final String PATH_SINGLE_BO = "de/adorsys/ledgers/middleware/converter/PaymentSingle.yml";
     private static final String PATH_SINGLE_TO = "de/adorsys/ledgers/middleware/converter/PaymentSingleTO.yml";
+
+    private static final String SINGLE_BO = "PaymentSingle.yml";
+    private static final String SINGLE_TO = "PaymentSingleTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
     private static final String USER_MESSAGE = "user message";
 
@@ -219,7 +226,7 @@ public class MiddlewareServiceImplTest {
         Object result = middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, PAYMENT_ID);
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getPayment(SinglePaymentTO.class, PATH_SINGLE_TO));
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(SinglePaymentTO.class, SINGLE_TO));
     }
 
     @Test(expected = PaymentNotFoundMiddlewareException.class)
@@ -260,9 +267,89 @@ public class MiddlewareServiceImplTest {
     public void getSCAMethodsUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException {
         String login = "spe@adorsys.com.ua";
 
-        when(userService.getUserScaData(login)).thenThrow(UserNotFoundException.class);
+        when(userService.getUserScaData(login)).thenThrow(new UserNotFoundException());
 
         middlewareService.getSCAMethods(login);
+    }
+
+    @Test
+    public void initiatePayment() {
+        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(paymentService.initiatePayment(any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
+
+        Object result = middlewareService.initiatePayment(readYml(SinglePaymentTO.class, SINGLE_TO), PaymentTypeTO.SINGLE);
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void getBalances_Success() throws AccountNotFoundMiddlewareException, LedgerAccountNotFoundException, IOException, DepositAccountNotFoundException {
+        when(accountService.getDepositAccountById(ACCOUNT_ID)).thenReturn(readYml(DepositAccountBO.class, ACCOUNT_DETAILS_BO));
+        when(accountService.getBalances(any())).thenReturn(readBalances(BalanceBO.class));
+        when(detailsMapper.toAccountBalancesTO(any())).thenReturn(readBalances(AccountBalanceTO.class));
+
+        List<AccountBalanceTO> balances = middlewareService.getBalances(ACCOUNT_ID);
+        assertThat(balances).isNotEmpty();
+        assertThat(balances.size()).isEqualTo(2);
+    }
+
+    @Test(expected = AccountNotFoundMiddlewareException.class)
+    public void getBalances_Failure_depositAccount_Not_Found() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
+        when(accountService.getDepositAccountById(ACCOUNT_ID)).thenThrow(new DepositAccountNotFoundException());
+        middlewareService.getBalances(ACCOUNT_ID);
+    }
+
+    @Test(expected = AccountNotFoundMiddlewareException.class)
+    public void getBalances_Failure_ledgerAccount_Not_Found() throws AccountNotFoundMiddlewareException, LedgerAccountNotFoundException, DepositAccountNotFoundException {
+        when(accountService.getDepositAccountById(ACCOUNT_ID)).thenReturn(readYml(DepositAccountBO.class, ACCOUNT_DETAILS_BO));
+        when(accountService.getBalances(any())).thenThrow(new LedgerAccountNotFoundException("id"));
+
+        middlewareService.getBalances(ACCOUNT_ID);
+    }
+
+    @Test
+    public void executePayment_Success() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
+        when(paymentConverter.toPaymentProductBO(any())).thenReturn(PaymentProductBO.SEPA);
+        when(paymentConverter.toPaymentTypeBO(any())).thenReturn(PaymentTypeBO.SINGLE);
+        when(paymentService.executePayment(any())).thenReturn(TransactionStatusBO.ACSP);
+//        when(paymentConverter.toTransactionTOList(any())).thenReturn(Collections.singletonList(readYml(TransactionTO.class, "TransactionTO.yml")));
+
+        TransactionStatusTO result = middlewareService.executePayment(PAYMENT_ID);
+        assertThat(result).isNotNull();
+    }
+
+    @Test(expected = PaymentProcessingMiddlewareException.class)
+    public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
+        when(paymentConverter.toPaymentProductBO(any())).thenReturn(PaymentProductBO.SEPA);
+//        when(paymentConverter.toPaymentTypeBO(any())).thenReturn(PaymentTypeBO.SINGLE);
+        when(paymentService.executePayment(any())).thenThrow(new PaymentNotFoundException());
+
+        middlewareService.executePayment(PAYMENT_ID);
+    }
+
+    @Test
+    public void getAllAccountDetailsByUserLogin() throws UserNotFoundMiddlewareException, UserNotFoundException {
+
+        String userLogin = "spe";
+
+        AccountDetailsTO account = getAccount(AccountDetailsTO.class);
+        DepositAccountBO accountBO = getAccount(DepositAccountBO.class);
+
+        List<AccountAccessBO> accessBOList = getDataFromFile("account-access-bo-list.yml", new TypeReference<List<AccountAccessBO>>() {});
+        String iban = accessBOList.get(0).getIban();
+
+        when(userService.getAccountAccessByUserLogin(userLogin)).thenReturn(accessBOList);
+        when(accountService.getDepositAccountsByIBAN(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
+        when(detailsMapper.toAccountDetailsListTO(Collections.singletonList(accountBO))).thenReturn(Collections.singletonList(account));
+
+        List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
+
+        assertThat(details.size(), is(1));
+        assertThat(details.get(0), is(account));
+
+        verify(userService, times(1)).getAccountAccessByUserLogin(userLogin);
+        verify(accountService, times(1)).getDepositAccountsByIBAN(Collections.singletonList(iban));
+        verify(detailsMapper, times(1)).toAccountDetailsListTO(Collections.singletonList(accountBO));
     }
 
     private static <T> T getAccount(Class<T> aClass) {
@@ -301,4 +388,21 @@ public class MiddlewareServiceImplTest {
             throw new IllegalStateException("File not found");
         }
     }
+
+    private static <T> T readYml(Class<T> aClass, String fileName) {
+        try {
+            return YamlReader.getInstance().getObjectFromResource(PaymentConverter.class, fileName, aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    private static <T> List<T> readBalances(Class<T> tClass) throws IOException {
+        return Arrays.asList(
+                YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "Balance1.yml", tClass),
+                YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "Balance2.yml", tClass)
+        );
+    }
+
 }

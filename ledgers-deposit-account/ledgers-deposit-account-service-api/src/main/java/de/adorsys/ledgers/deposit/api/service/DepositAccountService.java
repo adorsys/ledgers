@@ -16,4 +16,6 @@ public interface DepositAccountService {
     DepositAccountBO getDepositAccountByIBAN(String iban) throws DepositAccountNotFoundException;
 
 	List<BalanceBO> getBalances(String iban)  throws LedgerAccountNotFoundException ;
+
+    List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans);
 }

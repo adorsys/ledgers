@@ -1,0 +1,9 @@
+amount:
+ {
+   currency: EUR,
+   amount: 100
+ }
+balanceType: CLOSING_BOOKED
+lastChangeDateTime: 2018-12-12T00:00:00.000Z
+referenceDate: 2018-12-12
+lastCommittedTransaction: someAction1
