@@ -16,16 +16,23 @@
 
 package de.adorsys.ledgers.middleware.service;
 
+import java.util.List;
+
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.exception.*;
-
-import java.util.List;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 
 public interface MiddlewareService {
 	

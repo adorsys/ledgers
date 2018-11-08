@@ -21,9 +21,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;

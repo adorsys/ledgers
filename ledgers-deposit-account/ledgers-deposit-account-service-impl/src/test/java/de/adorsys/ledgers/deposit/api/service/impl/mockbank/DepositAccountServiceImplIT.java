@@ -24,8 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.service.AccountBalancesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
@@ -67,7 +67,7 @@ public class DepositAccountServiceImplIT {
     private DepositAccountConfigService depositAccountConfigService;
 
     @Autowired
-    private AccountBalancesService accountBalancesService;
+    private DepositAccountService depositAccountService;
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -141,7 +141,7 @@ public class DepositAccountServiceImplIT {
     @Test
     public void use_case_check_account_balance() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
-        List<BalanceBO> balances = accountBalancesService.getBalances("DE38760700240320465700");
+        List<BalanceBO> balances = depositAccountService.getBalances("DE38760700240320465700");
         Assert.assertNotNull(balances);
         Assert.assertEquals(1, balances.size());
         BalanceBO balanceBO = balances.iterator().next();

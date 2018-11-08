@@ -16,21 +16,24 @@
 
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
 
 @RestController
 @RequestMapping("/payments")
@@ -44,7 +47,7 @@ public class PaymentResource {
     }
 
     @GetMapping("/{id}/status")
-    public PaymentResultTO getPaymentStatusById(@PathVariable String id) {
+    public TransactionStatusTO getPaymentStatusById(@PathVariable String id) {
         try {
             return middlewareService.getPaymentStatusById(id);
         } catch (PaymentNotFoundMiddlewareException e) {
@@ -76,11 +79,11 @@ public class PaymentResource {
     }
 
     @GetMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
-    public <T> ResponseEntity<List<TransactionTO>> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
+    public <T> ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
                                                                        @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
                                                                        @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
         try {
-            List<TransactionTO> tos = middlewareService.executePayment(paymentId, paymentType, paymentProduct);
+            TransactionStatusTO tos = middlewareService.executePayment(paymentId);
             return ResponseEntity.ok(tos);
         } catch (PaymentProcessingMiddlewareException e) {
             logger.error(e.getMessage());

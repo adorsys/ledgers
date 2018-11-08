@@ -34,7 +34,6 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.service.AccountBalancesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
@@ -94,8 +93,6 @@ public class MiddlewareServiceImplTest {
     @Mock
     private DepositAccountService accountService;
     @Mock
-    private AccountBalancesService accountBalancesService;
-    @Mock
     private AccountDetailsMapper detailsMapper;
 
     @Mock
@@ -116,18 +113,18 @@ public class MiddlewareServiceImplTest {
     @SuppressWarnings("unchecked")
     @Test
     public void getPaymentStatusById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
-        PaymentResultBO<TransactionStatusBO> paymentResultBO = mock(PaymentResultBO.class);
-        PaymentResultTO<TransactionStatusTO> paymentResultTO = new PaymentResultTO<>(TransactionStatusTO.RJCT);
+//        PaymentResultBO<TransactionStatusBO> paymentResultBO = mock(PaymentResultBO.class);
+//        PaymentResultTO<TransactionStatusTO> paymentResultTO = new PaymentResultTO<>(TransactionStatusTO.RJCT);
 
-        when(paymentService.getPaymentStatusById(PAYMENT_ID)).thenReturn(paymentResultBO);
-        when(paymentConverter.toPaymentResultTO(paymentResultBO)).thenReturn(paymentResultTO);
+        when(paymentService.getPaymentStatusById(PAYMENT_ID)).thenReturn(TransactionStatusBO.RJCT);
+//        when(paymentConverter.toPaymentResultTO(paymentResultBO)).thenReturn(paymentResultTO);
 
-        PaymentResultTO<TransactionStatusTO> paymentResult = middlewareService.getPaymentStatusById(PAYMENT_ID);
+        TransactionStatusTO paymentResult = middlewareService.getPaymentStatusById(PAYMENT_ID);
 
-        assertThat(paymentResult.getPaymentResult().getName(), is(TransactionStatusBO.RJCT.getName()));
+        assertThat(paymentResult.getName(), is(TransactionStatusBO.RJCT.getName()));
 
         verify(paymentService, times(1)).getPaymentStatusById(PAYMENT_ID);
-        verify(paymentConverter, times(1)).toPaymentResultTO(paymentResultBO);
+//        verify(paymentConverter, times(1)).toPaymentResultTO(paymentResultBO);
     }
 
     @Test(expected = PaymentNotFoundMiddlewareException.class)
@@ -197,7 +194,7 @@ public class MiddlewareServiceImplTest {
     @Test
     public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException, LedgerAccountNotFoundException {
         when(accountService.getDepositAccountById(any())).thenReturn(getAccount(DepositAccountBO.class));
-        when(accountBalancesService.getBalances(any())).thenReturn(getBalances(BalanceBO.class));
+        when(accountService.getBalances(any())).thenReturn(getBalances(BalanceBO.class));
         when(detailsMapper.toAccountDetailsTO(any(), any())).thenReturn(getAccount(AccountDetailsTO.class));
         AccountDetailsTO details = middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID);
 
@@ -217,7 +214,7 @@ public class MiddlewareServiceImplTest {
     public void getPaymentById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
         when(paymentConverter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).thenReturn(PaymentTypeBO.SINGLE);
         when(paymentConverter.toPaymentProductBO(PaymentProductTO.SEPA)).thenReturn(PaymentProductBO.SEPA);
-        when(paymentService.getPaymentById(PaymentTypeBO.SINGLE, PaymentProductBO.SEPA, PAYMENT_ID)).thenReturn(getPayment(PaymentBO.class, PATH_SINGLE_BO));
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(getPayment(PaymentBO.class, PATH_SINGLE_BO));
         when(paymentConverter.toPaymentTO(any())).thenReturn(getPayment(SinglePaymentTO.class, PATH_SINGLE_TO));
         Object result = middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, PAYMENT_ID);
 
@@ -229,7 +226,7 @@ public class MiddlewareServiceImplTest {
     public void getPaymentById_Fail_wrong_id() throws PaymentNotFoundException, PaymentNotFoundMiddlewareException {
         when(paymentConverter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).thenReturn(PaymentTypeBO.SINGLE);
         when(paymentConverter.toPaymentProductBO(PaymentProductTO.SEPA)).thenReturn(PaymentProductBO.SEPA);
-        when(paymentService.getPaymentById(PaymentTypeBO.SINGLE, PaymentProductBO.SEPA, WRONG_PAYMENT_ID))
+        when(paymentService.getPaymentById(WRONG_PAYMENT_ID))
                 .thenThrow(new PaymentNotFoundException(WRONG_PAYMENT_ID));
         middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, WRONG_PAYMENT_ID);
     }

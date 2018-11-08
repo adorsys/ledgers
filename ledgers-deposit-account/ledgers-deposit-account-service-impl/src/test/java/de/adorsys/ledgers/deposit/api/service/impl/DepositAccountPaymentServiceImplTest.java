@@ -1,6 +1,27 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
@@ -13,26 +34,14 @@ import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.*;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountPaymentServiceImplTest {
@@ -66,9 +75,9 @@ public class DepositAccountPaymentServiceImplTest {
     public void getPaymentStatus() throws PaymentNotFoundException {
         when(paymentRepository.findById(any())).thenReturn(Optional.of(getSinglePayment()));
 
-        PaymentResultBO<TransactionStatusBO> paymentResult = paymentService.getPaymentStatusById(PAYMENT_ID);
+        TransactionStatusBO paymentResult = paymentService.getPaymentStatusById(PAYMENT_ID);
 
-        assertThat(paymentResult.getPaymentResult().getName(), is(TransactionStatus.RCVD.getName()));
+        assertThat(paymentResult.getName(), is(TransactionStatus.RCVD.getName()));
         verify(paymentRepository, times(1)).findById(PAYMENT_ID);
     }
 
@@ -77,7 +86,7 @@ public class DepositAccountPaymentServiceImplTest {
 
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.empty());
 
-        PaymentResultBO<TransactionStatusBO> paymentResult = paymentService.getPaymentStatusById(PAYMENT_ID);
+        TransactionStatusBO paymentResult = paymentService.getPaymentStatusById(PAYMENT_ID);
 
         verify(paymentRepository, times(1)).findById(PAYMENT_ID);
     }
@@ -116,7 +125,7 @@ public class DepositAccountPaymentServiceImplTest {
 //        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
 //        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
-        paymentService.executePayment(PAYMENT_ID, PAYMENT_TYPE_SINGLE, PAYMENT_PRODUCT);
+        paymentService.executePayment(PAYMENT_ID);
 //        assertThat(result).isNotEmpty();
 //        assertThat(result.size()).isEqualTo(1);
 //        assertThat(result.get(0)).isNotNull();
@@ -134,7 +143,7 @@ public class DepositAccountPaymentServiceImplTest {
 //        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
 //        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
-        paymentService.executePayment(PAYMENT_ID, PAYMENT_TYPE_BULK, PAYMENT_PRODUCT);
+        paymentService.executePayment(PAYMENT_ID);
 //        assertThat(result).isNotEmpty();
 //        assertThat(result.size()).isEqualTo(1);
     }
@@ -152,7 +161,7 @@ public class DepositAccountPaymentServiceImplTest {
 //        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
         when(paymentSchedulerService.schedulePaymentExecution(any())).thenReturn(TransactionStatusBO.ACSP);
 
-        paymentService.executePayment(PAYMENT_ID, PAYMENT_TYPE_BULK, PAYMENT_PRODUCT);
+        paymentService.executePayment(PAYMENT_ID);
 //        assertThat(result).isNotEmpty();
 //        assertThat(result.size()).isEqualTo(1);
     }
@@ -162,7 +171,7 @@ public class DepositAccountPaymentServiceImplTest {
         when(paymentRepository.findById(WRONG_PAYMENT_ID)).thenReturn(Optional.empty());
         when(paymentMapper.toPaymentBO(persistedPayment)).thenReturn(expectedPayment);
 
-        PaymentBO result = paymentService.getPaymentById(expectedPayment.getPaymentType(), PAYMENT_PRODUCT, paymentId);
+        PaymentBO result = paymentService.getPaymentById(paymentId);
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(expectedPayment);
         if (result.getPaymentType() == PaymentTypeBO.BULK) {
