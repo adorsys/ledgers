@@ -48,6 +48,8 @@ public class PostingLine {
 	 * The id of the last balanced posting line for this account.
 	 */
 	private String baseLine;
+	
+	private String subOprSrcId;
 
 	//================================================================================
 	// Denormalization layer. All following fields:
@@ -70,6 +72,13 @@ public class PostingLine {
 	 */
 	@Column(nullable = false, updatable = false)
 	private String oprId;
+	
+    /*
+     * The source of the operation. For example, payment order may result into many
+     * payments. Each payment will be an operation. The oprSrc field will be used to
+     * document original payment id. 
+     */
+    private String oprSrc;
 	
 	/*
 	 * This is the time from which the posting is effective in this account
@@ -115,6 +124,7 @@ public class PostingLine {
 		this.pstStatus = posting.getPstStatus();
 		this.hash = posting.getHash();
 		this.discardedTime = posting.getDiscardedTime();
+		this.oprSrc = posting.getOprSrc();
 	}
 
 	public String getId() {
@@ -200,6 +210,21 @@ public class PostingLine {
 	public LocalDateTime getDiscardedTime() {
 		return discardedTime;
 	}
-	
+
+	public String getSubOprSrcId() {
+		return subOprSrcId;
+	}
+
+	public void setSubOprSrcId(String subOprSrcId) {
+		this.subOprSrcId = subOprSrcId;
+	}
+
+	public String getOprSrc() {
+		return oprSrc;
+	}
+
+	public void setOprSrc(String oprSrc) {
+		this.oprSrc = oprSrc;
+	}
 	
 }

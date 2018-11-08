@@ -145,7 +145,7 @@ public class DepositAccountServiceImplIT {
         Assert.assertNotNull(balances);
         Assert.assertEquals(1, balances.size());
         BalanceBO balanceBO = balances.iterator().next();
-        Assert.assertEquals(balanceBO.getAmount().getAmount().doubleValue(), new BigDecimal(5000.00).doubleValue(), 0d);
+        Assert.assertEquals(new BigDecimal(5000.00).doubleValue(), balanceBO.getAmount().getAmount().doubleValue(), 0d);
     }
 
     private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException {

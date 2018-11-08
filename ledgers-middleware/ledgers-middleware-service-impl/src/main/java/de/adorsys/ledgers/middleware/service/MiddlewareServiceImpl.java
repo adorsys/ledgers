@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -152,14 +153,14 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     public <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException {
-        List<TransactionDetailsBO> executePayment;
 
         try {
-            executePayment = paymentService.executePayment(paymentId, paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct));
+            paymentService.executePayment(paymentId, paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct));
         } catch (PaymentNotFoundException | PaymentProcessingException e) {
             throw new PaymentProcessingMiddlewareException(paymentId, e);
         }
 
+        List<TransactionDetailsBO> executePayment = Collections.emptyList();
         return paymentConverter.toTransactionTOList(executePayment);
     }
 
