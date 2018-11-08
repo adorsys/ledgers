@@ -45,33 +45,46 @@ public class PaymentSchedulerServiceImpl implements PaymentSchedulerService {
         }
         
 		// Load the payment.
-        Payment storedPayment = paymentRepository.findById(paymentOrderId)
+        Payment pymt = paymentRepository.findById(paymentOrderId)
                 .orElseThrow(() -> new PaymentNotFoundException(paymentOrderId));
         
-        LocalDateTime now = LocalDateTime.now();
         // How do we proceed with periodic Payment
-        if(PaymentType.PERIODIC.equals(storedPayment.getPaymentType())){
-        	// Set startDate to now if none.
-    		LocalDate startDate = storedPayment.getStartDate();
-    		if(startDate==null) {
-    			startDate = now.toLocalDate();
-    		}
-            ScheduledPaymentOrder po = new ScheduledPaymentOrder();
-            po.setPaymentOrderId(paymentOrderId);
-            po.setNextExecTime(now);
-            po.setNextPostingTime(LocalDateTime.of(startDate, LocalTime.MIN));
-            po.setPaymentOrderId(paymentOrderId);
-            po.setExecStatusTime(LocalDateTime.now());
-            scheduledPaymentOrderRepository.save(po);
-            storedPayment.setTransactionStatus(TransactionStatus.ACWP);
-            storedPayment = paymentRepository.save(storedPayment);
-            return TransactionStatusBO.valueOf(storedPayment.getTransactionStatus().name());
+        if(PaymentType.PERIODIC.equals(pymt.getPaymentType())){
+        	return schedulePeriodicPymt(pymt);
         } else {
-            LocalDate requestedExecutionDate = storedPayment.getRequestedExecutionDate()==null?LocalDate.now():storedPayment.getRequestedExecutionDate();
-            LocalTime requestedExecutionTime = storedPayment.getRequestedExecutionTime()==null?LocalTime.now():storedPayment.getRequestedExecutionTime();
-            
-            LocalDateTime postingTime = LocalDateTime.of(requestedExecutionDate, requestedExecutionTime);
-            return txService.bookPayment(paymentOrderId, postingTime);
+            return scheduleOneTimePymt(pymt);
         }
+	}
+
+	private TransactionStatusBO scheduleOneTimePymt(Payment pymt) throws PaymentNotFoundException {
+		LocalDate requestedExecutionDate = pymt.getRequestedExecutionDate()==null?LocalDate.now():pymt.getRequestedExecutionDate();
+		LocalTime requestedExecutionTime = pymt.getRequestedExecutionTime()==null?LocalTime.now():pymt.getRequestedExecutionTime();
+		
+		LocalDateTime postingTime = LocalDateTime.of(requestedExecutionDate, requestedExecutionTime);
+		return txService.bookPayment(pymt.getPaymentId(), postingTime);
+	}
+
+	private TransactionStatusBO schedulePeriodicPymt(Payment pymt) {
+		LocalDateTime now = LocalDateTime.now();
+		// Set startDate to now if none.
+		LocalDate startDate = pymt.getStartDate()==null
+				? now.toLocalDate()
+				: pymt.getStartDate();
+
+		ScheduledPaymentOrder po = newScheduledPaymentOrderObj(pymt, now, startDate);
+		scheduledPaymentOrderRepository.save(po);
+		pymt.setTransactionStatus(TransactionStatus.ACWP);
+		Payment saved = paymentRepository.save(pymt);
+		return TransactionStatusBO.valueOf(saved.getTransactionStatus().name());
+	}
+
+	private ScheduledPaymentOrder newScheduledPaymentOrderObj(Payment pymt, LocalDateTime now,
+			LocalDate startDate) {
+		ScheduledPaymentOrder po = new ScheduledPaymentOrder();
+		po.setPaymentOrderId(pymt.getPaymentId());
+		po.setNextExecTime(now);
+		po.setNextPostingTime(LocalDateTime.of(startDate, LocalTime.MIN));
+		po.setExecStatusTime(now);
+		return po;
 	}
 }

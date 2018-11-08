@@ -71,8 +71,6 @@ public class PaymentResourceTest {
 
     @Test
     public void getPaymentStatusById() throws Exception {
-//        ResourceReader reader = YamlReader.getInstance();
-//        PaymentResultTO<TransactionStatusTO> paymentResult = readPaymentResult(reader);
 
         when(middlewareService.getPaymentStatusById(PAYMENT_ID)).thenReturn(TransactionStatusTO.ACSP);
 
@@ -81,13 +79,6 @@ public class PaymentResourceTest {
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
-
-//        String content = mvcResult.getResponse().getContentAsString();
-//        PaymentResultTO actual = strToObj(content, PaymentResultTO.class);
-
-//        assertThat(actual.getResponseStatus(), is(paymentResult.getResponseStatus()));
-//        assertThat(actual.getPaymentResult(), is(paymentResult.getPaymentResult()));
-//        assertThat(actual.getMessages(), is(nullValue()));
 
         verify(middlewareService, times(1)).getPaymentStatusById(PAYMENT_ID);
     }

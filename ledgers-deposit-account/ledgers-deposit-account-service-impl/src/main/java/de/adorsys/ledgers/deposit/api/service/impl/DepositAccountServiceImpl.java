@@ -32,7 +32,7 @@ import de.adorsys.ledgers.util.Ids;
 
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
 
     private DepositAccountRepository depositAccountRepository;
     private DepositAccountMapper depositAccountMapper;
@@ -67,7 +67,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         try {
             ledgerService.newLedgerAccount(ledgerAccount);
         } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new DepositAccountNotFoundException(e.getMessage(), e);
         }
 
@@ -111,9 +111,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 	@Override
 	public List<BalanceBO> getBalances(String iban) throws LedgerAccountNotFoundException {
 		LedgerBO ledger = loadLedger();
-		LedgerAccountBO ledgerAccountBO = new LedgerAccountBO();
-		ledgerAccountBO.setName(iban);
-		ledgerAccountBO.setLedger(ledger);
+		LedgerAccountBO ledgerAccountBO = newLedgerAccountBOObj(ledger, iban);
 		List<BalanceBO> result = new ArrayList<>();		
 		try {
 			AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccountBO, LocalDateTime.now());
@@ -140,14 +138,21 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 			throw new IllegalStateException(e);
 		}
 		return result;
+	}
+
+	private LedgerAccountBO newLedgerAccountBOObj(LedgerBO ledger, String iban) {
+		LedgerAccountBO ledgerAccountBO = new LedgerAccountBO();
+		ledgerAccountBO.setName(iban);
+		ledgerAccountBO.setLedger(ledger);
+		return ledgerAccountBO;
 	}    
 
     @Override
     public List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans) {
-    	LOGGER.info("Retrieving deposit accounts by list of IBANs");
+    	logger.info("Retrieving deposit accounts by list of IBANs");
 
         List<DepositAccount> accounts = depositAccountRepository.findByIbanIn(ibans);
-        LOGGER.info("{} IBANs were found", accounts.size());
+        logger.info("{} IBANs were found", accounts.size());
 
         return depositAccountMapper.toDepositAccountListBO(accounts);
     }

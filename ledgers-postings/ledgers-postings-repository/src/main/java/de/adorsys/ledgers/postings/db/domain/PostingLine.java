@@ -114,6 +114,7 @@ public class PostingLine {
     /*
      * The record time of the discarding posting 
      */
+	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime discardedTime;
 
 	public void synchPosting(Posting posting){

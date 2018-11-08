@@ -14,7 +14,7 @@ db:
 
 spring:
   application.name: ledgers
-  profiles: default
+#  profiles: default. This will prevent from running the h2 profile.
   datasource:
     url: ${db.url}
     username: ${db.user}

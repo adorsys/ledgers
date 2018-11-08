@@ -1,19 +1,5 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import java.util.Currency;
-import java.util.Optional;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
 import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
@@ -31,7 +17,19 @@ import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.api.service.PostingService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Currency;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountServiceImplTest {
@@ -118,11 +116,11 @@ public class DepositAccountServiceImplTest {
 
         return bo;
     }
-    
+
     private static LedgerBO getLedger() {
-    	LedgerBO ledgerBO = new LedgerBO();
-    	ledgerBO.setName("ledger");
-    	return ledgerBO;
+        LedgerBO ledgerBO = new LedgerBO();
+        ledgerBO.setName("ledger");
+        return ledgerBO;
     }
-    
+
 }

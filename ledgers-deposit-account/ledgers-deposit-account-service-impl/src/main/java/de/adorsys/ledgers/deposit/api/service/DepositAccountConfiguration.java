@@ -98,25 +98,30 @@ public class DepositAccountConfiguration {
                 }
             }
 
-            String shortDesc = model.getShortDesc();
-            String name = model.getName();
-            BalanceSideBO balanceSide = model.getBalanceSide() != null ? model.getBalanceSide() : parent.getBalanceSide();
-            AccountCategoryBO category = model.getCategory() != null ? model.getCategory() : parent.getCategory();
-            String longDesc = null;
-            LocalDateTime created = LocalDateTime.now();
-
-            LedgerAccountBO la = new LedgerAccountBO();
-            la.setId(Ids.id());
-            la.setCreated(created);
-            la.setShortDesc(shortDesc);
-            la.setLongDesc(longDesc);
-            la.setName(name);
-            la.setLedger(ledger);
-            la.setParent(parent);
-            la.setCoa(ledger.getCoa());
-            la.setBalanceSide(balanceSide);
-            la.setCategory(category);
+            LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
             return ledgerService.newLedgerAccount(la);
     	}
     }
+
+	private LedgerAccountBO newLedgerAccountObj(LedgerBO ledger, LedgerAccountModel model, LedgerAccountBO parent) {
+		String shortDesc = model.getShortDesc();
+		String name = model.getName();
+		BalanceSideBO balanceSide = model.getBalanceSide() != null ? model.getBalanceSide() : parent.getBalanceSide();
+		AccountCategoryBO category = model.getCategory() != null ? model.getCategory() : parent.getCategory();
+		String longDesc = null;
+		LocalDateTime created = LocalDateTime.now();
+
+		LedgerAccountBO la = new LedgerAccountBO();
+		la.setId(Ids.id());
+		la.setCreated(created);
+		la.setShortDesc(shortDesc);
+		la.setLongDesc(longDesc);
+		la.setName(name);
+		la.setLedger(ledger);
+		la.setParent(parent);
+		la.setCoa(ledger.getCoa());
+		la.setBalanceSide(balanceSide);
+		la.setCategory(category);
+		return la;
+	}
 }
