@@ -16,4 +16,10 @@ accountAccesses:
   - id: 2
     iban: 3737463673647
     accessType: DISPOSE
+  - id: 3
+    accessType: OWNER
+    iban: 1234567
+  - id: 4
+    accessType: READ
+    iban: 7777777
 

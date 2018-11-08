@@ -81,15 +81,15 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     @Override
     public String generateAuthCode(String userLogin, ScaUserDataBO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationException, SCAMethodNotSupportedException {
 
+        // TODO: check the method supports by user
+
         checkMethodSupported(scaMethod);
 
         String tan = authCodeGenerator.generate();
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(opData, tan));
 
-        SCAOperationEntity scaOperation;
-
-        scaOperation = buildSCAOperation(Ids.id(), validitySeconds, hashItem);
+        SCAOperationEntity scaOperation = buildSCAOperation(Ids.id(), validitySeconds, hashItem);
 
         repository.save(scaOperation);
 

@@ -39,6 +39,8 @@ import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -47,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
@@ -130,6 +133,29 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
             logger.error("Deposit Account with id=" + accountId + "not found", e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException {
+        logger.info("Retrieving accounts by user login {}", userLogin);
+        try {
+            List<AccountAccessBO> accountAccess = userService.getAccountAccessByUserLogin(userLogin);
+            logger.info("{} accounts were retrieved", accountAccess.size());
+
+            List<String> ibans = accountAccess.stream()
+                                         .filter(a -> a.getAccessType() == AccessTypeBO.OWNER)
+                                         .map(AccountAccessBO::getIban)
+                                         .collect(Collectors.toList());
+            logger.info("{} were accounts were filtered as OWN", ibans.size());
+
+            List<DepositAccountBO> accounts = accountService.getDepositAccountsByIBAN(ibans);
+            logger.info("{} deposit accounts were found", accounts.size());
+
+            return detailsMapper.toAccountDetailsListTO(accounts);
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException(e.getMessage());
         }
     }
 

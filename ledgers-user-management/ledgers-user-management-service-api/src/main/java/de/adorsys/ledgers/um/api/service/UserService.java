@@ -88,4 +88,12 @@ public interface UserService {
      * @throws UserNotFoundException is thrown if user can`t be found
      */
     List<AccountAccessBO> getAccountAccess(String userId) throws UserNotFoundException;
+
+    /**
+     *
+     * @param userLogin user login
+     * @return List<AccountAccessBO> collection of AccountAccesses for a user
+     * @throws UserNotFoundException is thrown if user can`t be found
+     */
+    List<AccountAccessBO> getAccountAccessByUserLogin(String userLogin) throws UserNotFoundException;
 }

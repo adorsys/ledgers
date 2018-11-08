@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
@@ -77,7 +79,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         da.setName(depositAccount.getName());
         da.setProduct(depositAccount.getProduct());
         da.setUsageType(depositAccount.getUsageType());
-        return da;
+
+        return depositAccountRepository.save(da);
     }
 
     @Override
@@ -92,5 +95,15 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         return depositAccountRepository.findByIban(iban)
                        .map(depositAccountMapper::toDepositAccountBO)
                        .orElseThrow(() -> new DepositAccountNotFoundException(iban));
+    }
+
+    @Override
+    public List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans) {
+        logger.info("Retrieving deposit accounts by list of IBANs");
+
+        List<DepositAccount> accounts = depositAccountRepository.findByIbanIn(ibans);
+        logger.info("{} IBANs were found", accounts.size());
+
+        return depositAccountMapper.toDepositAccountListBO(accounts);
     }
 }

@@ -18,6 +18,7 @@ package de.adorsys.ledgers.middleware.service.domain.account;
 
 import java.util.Currency;
 import java.util.List;
+import java.util.Objects;
 
 
 public class AccountDetailsTO {
@@ -218,5 +219,55 @@ public class AccountDetailsTO {
 
     public void setBalances(List<AccountBalanceTO> balances) {
         this.balances = balances;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
+        AccountDetailsTO that = (AccountDetailsTO) o;
+        return Objects.equals(id, that.id) &&
+                       Objects.equals(iban, that.iban) &&
+                       Objects.equals(bban, that.bban) &&
+                       Objects.equals(pan, that.pan) &&
+                       Objects.equals(maskedPan, that.maskedPan) &&
+                       Objects.equals(msisdn, that.msisdn) &&
+                       Objects.equals(currency, that.currency) &&
+                       Objects.equals(name, that.name) &&
+                       Objects.equals(product, that.product) &&
+                       accountType == that.accountType &&
+                       accountStatus == that.accountStatus &&
+                       Objects.equals(bic, that.bic) &&
+                       Objects.equals(linkedAccounts, that.linkedAccounts) &&
+                       usageType == that.usageType &&
+                       Objects.equals(details, that.details) &&
+                       Objects.equals(balances, that.balances);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, iban, bban, pan, maskedPan, msisdn, currency, name, product, accountType, accountStatus, bic, linkedAccounts, usageType, details, balances);
+    }
+
+    @Override
+    public String toString() {
+        return "AccountDetailsTO{" +
+                       "id='" + id + '\'' +
+                       ", iban='" + iban + '\'' +
+                       ", bban='" + bban + '\'' +
+                       ", pan='" + pan + '\'' +
+                       ", maskedPan='" + maskedPan + '\'' +
+                       ", msisdn='" + msisdn + '\'' +
+                       ", currency=" + currency +
+                       ", name='" + name + '\'' +
+                       ", product='" + product + '\'' +
+                       ", accountType=" + accountType +
+                       ", accountStatus=" + accountStatus +
+                       ", bic='" + bic + '\'' +
+                       ", linkedAccounts='" + linkedAccounts + '\'' +
+                       ", usageType=" + usageType +
+                       ", details='" + details + '\'' +
+                       ", balances=" + balances +
+                       '}';
     }
 }
