@@ -71,9 +71,7 @@ public class PaymentSchedulerServiceImpl implements PaymentSchedulerService {
             LocalTime requestedExecutionTime = storedPayment.getRequestedExecutionTime()==null?LocalTime.now():storedPayment.getRequestedExecutionTime();
             
             LocalDateTime postingTime = LocalDateTime.of(requestedExecutionDate, requestedExecutionTime);
-            return txService.executePayment(paymentOrderId, postingTime);
+            return txService.bookPayment(paymentOrderId, postingTime);
         }
-        
-		
 	}
 }

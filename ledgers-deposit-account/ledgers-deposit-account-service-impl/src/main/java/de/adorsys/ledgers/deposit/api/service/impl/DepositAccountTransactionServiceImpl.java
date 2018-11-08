@@ -93,7 +93,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
      * and each single payment will be individually sent to this method.
      */
     @Override
-    public TransactionStatusBO executePayment(String paymentId, LocalDateTime pstTime) throws PaymentNotFoundException, PaymentProcessingException {
+    public TransactionStatusBO bookPayment(String paymentId, LocalDateTime pstTime) throws PaymentNotFoundException, PaymentProcessingException {
     	
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException(paymentId));

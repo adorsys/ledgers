@@ -28,10 +28,38 @@ import de.adorsys.ledgers.middleware.service.exception.*;
 import java.util.List;
 
 public interface MiddlewareService {
-
-    PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
-
+	
+	//================= PAYMENT INITIATION ========================//
     /**
+     * PROC:01 Initiates a payment. Called by the channel layer.
+     * 
+     * This call sets the status RCVD
+     * 
+     * @param payment
+     * @param paymentType
+     * @return
+     */
+    <T> Object initiatePayment(T payment, PaymentTypeTO paymentType);
+
+    
+    // ================= SCA =======================================//
+	
+    /**
+     * PROC: 02a
+     * 
+     * Called after the payment initiation to have a list of SCA methods.
+     * 
+     * @param userLogin
+     * @return
+     * @throws UserNotFoundMiddlewareException
+     */
+    List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException;
+    
+    /**
+     * PROC: 02b
+     * 
+     * After the PSU selects the SCA method, this is called to generate and send the auth code.
+     * 
      * @param userLogin       user login
      * @param scaMethod       sca method
      * @param opData          operation data
@@ -42,15 +70,70 @@ public interface MiddlewareService {
      */
     String generateAuthCode(String userLogin, SCAMethodTO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException;
 
+    /**
+     * PROC: 02c
+     * 
+     * This is called when the user enters the received code.
+     * 
+     * @param opId
+     * @param opData
+     * @param authCode
+     * @return
+     * @throws SCAOperationNotFoundMiddlewareException
+     * @throws SCAOperationValidationMiddlewareException
+     * @throws SCAOperationExpiredMiddlewareException
+     * @throws SCAOperationUsedOrStolenMiddlewareException
+     */
     boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException;
 
+    //============================ Payment Execution ==============================//
+    /**
+     * PROC: 03
+     * 
+     * Is called by the channel layer after successfull SCA or no SCA.
+     * 	- When SCA is not needed
+     * 	- After a successfull SCA
+     * payment status will be set to ACSP.
+     * 
+     * @param paymentId
+     * @param paymentType
+     * @param paymentProduct
+     * @return
+     * @throws PaymentProcessingMiddlewareException
+     */
+    TransactionStatusTO executePayment(String paymentId) throws PaymentProcessingMiddlewareException;
+
+    
+    //============================ Payment Status ==============================//
+    
+    /**
+     * PROC: 04
+     * 
+     * Read the status of a payment. Can be called repetitively after initiation of a payment.
+     * 
+     * @param paymentId
+     * @return
+     * @throws PaymentNotFoundMiddlewareException
+     */
+    TransactionStatusTO getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
+    
+    
+    //============================ Payment Status ==============================//
+
+    /**
+     * Reads and return a payment.
+     * 
+     * @param paymentType
+     * @param paymentProduct
+     * @param paymentId
+     * @return
+     * @throws PaymentNotFoundMiddlewareException
+     */
+    <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
+    
+    
+    //============================ Account Details ==============================//
+    
     AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
 
-    <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
-
-    <T> Object initiatePayment(T payment, PaymentTypeTO paymentType);
-
-    <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException;
-
-    List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException;
 }

@@ -56,22 +56,20 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException {
+    public TransactionStatusBO getPaymentStatusById(String paymentId) throws PaymentNotFoundException {
         Optional<Payment> payment = paymentRepository.findById(paymentId);
         TransactionStatus transactionStatus = payment
                                                       .map(Payment::getTransactionStatus)
                                                       .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
-        return new PaymentResultBO<>(TransactionStatusBO.valueOf(transactionStatus.name()));
+        return TransactionStatusBO.valueOf(transactionStatus.name());
     }
 
     @Override
-    public PaymentBO getPaymentById(PaymentTypeBO paymentType, PaymentProductBO paymentProduct, String paymentId) throws PaymentNotFoundException {
-        PaymentBO payment = paymentRepository.findById(paymentId)
+    public PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException {
+        return paymentRepository.findById(paymentId)
                                     .map(paymentMapper::toPaymentBO)
                                     .orElseThrow(() -> new PaymentNotFoundException(paymentId));
-
-        return filterPaymentByTypeAndProduct(payment, paymentType, paymentProduct);
     }
 
     @Override
@@ -93,26 +91,13 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
      * and each single payment will be individually sent to this method.
      */
     @Override
-    public TransactionStatusBO executePayment(String paymentId, PaymentTypeBO paymentType, PaymentProductBO paymentProduct) throws PaymentNotFoundException, PaymentProcessingException {
+    public TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException {
     	
-        PaymentBO storedPayment = getPaymentById(paymentType, paymentProduct, paymentId);
+        PaymentBO storedPayment = getPaymentById(paymentId);
         if (storedPayment.getTransactionStatus() != TransactionStatusBO.RCVD) {
             throw new PaymentProcessingException("Payment execution failed due to: " + storedPayment.getTransactionStatus() + ", payment id: " + paymentId);
         }
         return paymentSchedulerService.schedulePaymentExecution(storedPayment.getPaymentId());
-    }
-
-    private PaymentBO filterPaymentByTypeAndProduct(PaymentBO payment, PaymentTypeBO paymentType, PaymentProductBO paymentProduct) throws PaymentNotFoundException {
-        boolean isPresentPayment = PaymentTypeBO.valueOf(payment.getPaymentType().name()) == paymentType;
-        if (isPresentPayment && payment.getPaymentType() != PaymentTypeBO.BULK) {
-            isPresentPayment = payment.getTargets().stream()
-                                       .map(t -> PaymentProductBO.valueOf(t.getPaymentProduct().name()))
-                                       .allMatch(t -> t == paymentProduct);
-        }
-        if (!isPresentPayment) {
-            throw new PaymentNotFoundException(payment.getPaymentId());
-        }
-        return payment;
     }
 
 }

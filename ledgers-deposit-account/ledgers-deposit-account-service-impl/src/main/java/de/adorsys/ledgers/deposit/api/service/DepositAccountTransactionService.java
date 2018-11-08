@@ -30,5 +30,5 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
  */
 public interface DepositAccountTransactionService {
 
-    TransactionStatusBO executePayment(String paymentId, LocalDateTime postingTime) throws PaymentNotFoundException, PaymentProcessingException;
+    TransactionStatusBO bookPayment(String paymentId, LocalDateTime postingTime) throws PaymentNotFoundException, PaymentProcessingException;
 }

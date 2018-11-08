@@ -17,20 +17,17 @@
 package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 
 public interface DepositAccountPaymentService {
 
-    PaymentResultBO<TransactionStatusBO> getPaymentStatusById(String paymentId) throws PaymentNotFoundException;
+    TransactionStatusBO getPaymentStatusById(String paymentId) throws PaymentNotFoundException;
 
-    PaymentBO getPaymentById(PaymentTypeBO paymentType, PaymentProductBO paymentProduct, String paymentId) throws PaymentNotFoundException;
+    PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException;
 
     PaymentBO initiatePayment(PaymentBO paymentBO);
 
-    TransactionStatusBO executePayment(String paymentId, PaymentTypeBO paymentType, PaymentProductBO paymentProduct) throws PaymentNotFoundException, PaymentProcessingException;
+    TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException;
 }

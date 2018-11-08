@@ -73,11 +73,11 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public PaymentResultTO<TransactionStatusTO> getPaymentStatusById(String paymentId) throws
+    public TransactionStatusTO getPaymentStatusById(String paymentId) throws
             PaymentNotFoundMiddlewareException {
         try {
-            PaymentResultBO<TransactionStatusBO> paymentStatus = paymentService.getPaymentStatusById(paymentId);
-            return paymentConverter.toPaymentResultTO(paymentStatus);
+            TransactionStatusBO paymentStatus = paymentService.getPaymentStatusById(paymentId);
+            return TransactionStatusTO.valueOf(paymentStatus.name());
         } catch (PaymentNotFoundException e) {
             logger.error("Payment with id=" + paymentId + " not found", e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
@@ -152,16 +152,14 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
-    public <T> List<TransactionTO> executePayment(String paymentId, PaymentTypeTO paymentType, PaymentProductTO paymentProduct) throws PaymentProcessingMiddlewareException {
+    public TransactionStatusTO executePayment(String paymentId) throws PaymentProcessingMiddlewareException {
 
         try {
-            paymentService.executePayment(paymentId, paymentConverter.toPaymentTypeBO(paymentType), paymentConverter.toPaymentProductBO(paymentProduct));
+            TransactionStatusBO executePayment = paymentService.executePayment(paymentId);
+            return TransactionStatusTO.valueOf(executePayment.name());
         } catch (PaymentNotFoundException | PaymentProcessingException e) {
             throw new PaymentProcessingMiddlewareException(paymentId, e);
         }
-
-        List<TransactionDetailsBO> executePayment = Collections.emptyList();
-        return paymentConverter.toTransactionTOList(executePayment);
     }
 
     @Override //TODO Consider refactoring to avoid unchecked cast warnings
