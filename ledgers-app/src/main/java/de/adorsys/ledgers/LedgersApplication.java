@@ -23,11 +23,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import de.adorsys.ledgers.deposit.api.service.EnableDepositAccount;
+import de.adorsys.ledgers.middleware.EnableLedgersMiddleware;
+import de.adorsys.ledgers.postings.impl.EnablePostingService;
+
 @EntityScan
 @EnableScheduling
 @EnableJpaAuditing
 @EnableJpaRepositories
-@SpringBootApplication(scanBasePackages = "de.adorsys.ledgers")
+@SpringBootApplication(scanBasePackages = {"de.adorsys.ledgers.sca","de.adorsys.ledgers.um","de.adorsys.ledgers.app"})
+@EnableLedgersMiddleware
+@EnableDepositAccount
+@EnablePostingService
 public class LedgersApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(LedgersApplication.class).run(args);
