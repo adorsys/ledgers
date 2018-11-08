@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.deposit.api.exception;
+package de.adorsys.ledgers.deposit.api.service;
 
-public class PaymentProcessingException extends RuntimeException {
-    public PaymentProcessingException() {
-    }
+import java.time.LocalDateTime;
 
-    public PaymentProcessingException(String message) {
-        super(message);
-    }
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 
-    public PaymentProcessingException(String message, Throwable cause) {
-        super(message, cause);
-    }
+/**
+ * Proceed with booking of payments orders.
+ * 
+ * @author fpo
+ *
+ */
+public interface DepositAccountTransactionService {
+
+    TransactionStatusBO bookPayment(String paymentId, LocalDateTime postingTime) throws PaymentNotFoundException, PaymentProcessingException;
 }

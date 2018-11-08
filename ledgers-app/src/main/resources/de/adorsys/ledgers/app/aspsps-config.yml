@@ -2,10 +2,6 @@ name: mockbank
 ledger: mockbank
 coaFile: sample_coa_banking.yml
 coaExtensions:
-### Hello Bank
-  - shortDesc: Hello Bank
-    name: 11240
-    parent: 1124
 ### Clearing account as subaccount of  Deposits with Centralbank - Non-Interest bearing
   - shortDesc: SEPA-Clearing Account (sepa-credit-transfers)
     name: 11031

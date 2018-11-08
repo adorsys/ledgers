@@ -34,6 +34,8 @@ public class PostingLineBO {
 	 */
 	private String baseLine;
 	
+	private String subOprSrcId;
+
 	//================================================================================
 	// Denormalization layer. All following fields:
 	//   - are duplicated from the post
@@ -53,7 +55,14 @@ public class PostingLineBO {
 	 */
 	private String oprId;
 	
-	/*
+    /*
+     * The source of the operation. For example, payment order may result into many
+     * payments. Each payment will be an operation. The oprSrc field will be used to
+     * document original payment id. 
+     */
+    private String oprSrc;
+
+    /*
 	 * This is the time from which the posting is effective in this account
 	 * statement.
 	 */
@@ -194,5 +203,22 @@ public class PostingLineBO {
 	public void setDiscardedTime(LocalDateTime discardedTime) {
 		this.discardedTime = discardedTime;
 	}
+
+	public String getSubOprSrcId() {
+		return subOprSrcId;
+	}
+
+	public void setSubOprSrcId(String subOprSrcId) {
+		this.subOprSrcId = subOprSrcId;
+	}
+
+	public String getOprSrc() {
+		return oprSrc;
+	}
+
+	public void setOprSrc(String oprSrc) {
+		this.oprSrc = oprSrc;
+	}
+	
 	
 }

@@ -5,14 +5,14 @@ import java.util.List;
 
 public class ASPSPConfigData {
 
+	private static final ClearingAccount NO_ACCOUNT = new ClearingAccount();
 	private String name;
 	private String ledger;
 	private String coaFile;
+	private String depositParentAccount;
 	private List<LedgerAccountModel> coaExtensions = new ArrayList<>();
 
-	private String clearingAccountTarget2;
-	private String clearingAccountSepa;
-	private String depositParentAccount;
+	private List<ClearingAccount> clearingAccounts = new ArrayList<>();
 	
 	public String getName() {
 		return name;
@@ -38,22 +38,19 @@ public class ASPSPConfigData {
 	public void setCoaExtensions(List<LedgerAccountModel> coaExtensions) {
 		this.coaExtensions = coaExtensions;
 	}
-	public String getClearingAccountTarget2() {
-		return clearingAccountTarget2;
-	}
-	public void setClearingAccountTarget2(String clearingAccountTarget2) {
-		this.clearingAccountTarget2 = clearingAccountTarget2;
-	}
-	public String getClearingAccountSepa() {
-		return clearingAccountSepa;
-	}
-	public void setClearingAccountSepa(String clearingAccountSepa) {
-		this.clearingAccountSepa = clearingAccountSepa;
-	}
 	public String getDepositParentAccount() {
 		return depositParentAccount;
 	}
 	public void setDepositParentAccount(String depositParentAccount) {
 		this.depositParentAccount = depositParentAccount;
+	}
+	public List<ClearingAccount> getClearingAccounts() {
+		return clearingAccounts;
+	}
+	public void setClearingAccounts(List<ClearingAccount> clearingAccounts) {
+		this.clearingAccounts = clearingAccounts;
+	}
+	public String getClearingAccount(String paymentProduct) {
+		return clearingAccounts.stream().filter(c -> c.getPaymentProduct().equals(paymentProduct)).findFirst().orElse(NO_ACCOUNT).getAccountNbr();
 	}
 }

@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.util;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,5 +15,13 @@ public class SerializationUtils {
 	public static String writeValueAsString(Object value)
 	        throws JsonProcessingException{
 		return OBJECT_MAPPER.writeValueAsString(value);
+	}
+	
+	public static <T> T readValueFromString(String src, Class<T> klass)  {
+		try {
+			return OBJECT_MAPPER.readValue(src, klass);
+		} catch (IOException e) {
+			throw new IllegalStateException(e); 
+		}
 	}
 }

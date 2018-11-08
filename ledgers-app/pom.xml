@@ -9,188 +9,199 @@
 	governing permissions and ~ limitations under the License. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.adorsys.ledgers</groupId>
-        <artifactId>ledgers</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
-    </parent>
+	<parent>
+		<groupId>de.adorsys.ledgers</groupId>
+		<artifactId>ledgers</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
 
-    <artifactId>ledgers-app</artifactId>
-    <name>ledgers-app</name>
+	<artifactId>ledgers-app</artifactId>
+	<name>ledgers-app</name>
 
-    <properties>
-        <ruleset.basedir>..</ruleset.basedir>
-    </properties>
+	<properties>
+		<ruleset.basedir>..</ruleset.basedir>
+	</properties>
 
-    <dependencies>
+	<dependencies>
 
-        <!--project dependency-->
+		<!--project dependency -->
 
-        <!-- middleware -->
+		<!-- middleware -->
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-middleware-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-middleware-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-middleware-service-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-middleware-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-middleware-rest-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-middleware-rest-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <!-- posting -->
+		<!-- posting -->
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-postings-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-postings-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-postings-service-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-postings-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-postings-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-postings-repository</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <!-- deposit account -->
+		<!-- deposit account -->
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-deposit-account-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-deposit-account-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-deposit-account-service-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-deposit-account-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-deposit-account-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-deposit-account-repository</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <!-- sca -->
+		<!-- sca -->
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-sca-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-sca-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-sca-service-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-sca-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-sca-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-sca-repository</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <!-- user management -->
+		<!-- user management -->
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-user-management-rest-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-user-management-rest-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-user-management-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-user-management-service-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-user-management-service-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-user-management-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-user-management-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-user-management-repository</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <!-- spring dependency -->
+		<!-- spring dependency -->
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 
-        <!-- db dependencies -->
+		<!-- db dependencies -->
 
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-        <!-- other dependencies -->
+		<!-- other dependencies -->
 
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>de.adorsys.ledgers.LedgersApplication</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>de.adorsys.ledgers.LedgersApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<delimiters>
+						<delimiter>@</delimiter>
+					</delimiters>
+					<useDefaultDelimiters>false</useDefaultDelimiters>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

@@ -30,6 +30,7 @@ ledger:
 
 valTime: 2018-12-12T00:00:00
 lines:
+  - id: ledger_ID
 discardedId:
 discardedTime:
 discardingId:
