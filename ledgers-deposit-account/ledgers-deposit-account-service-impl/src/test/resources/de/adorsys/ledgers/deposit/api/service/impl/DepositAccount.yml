@@ -1,0 +1,12 @@
+id: ACCOUNT_ID
+iban: CrushTestDummy
+msisdn: MSISDN
+currency: EUR
+name: NAME
+product: PRODUCT
+accountType: CASH
+accountStatus: ENABLED
+bic: BIC
+linkedAccounts: LINKED_ACCOUNT
+usageType: PRIV
+details: some details

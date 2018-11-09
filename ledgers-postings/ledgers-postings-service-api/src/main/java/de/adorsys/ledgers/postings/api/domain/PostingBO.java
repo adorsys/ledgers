@@ -19,16 +19,22 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
  */
 public class PostingBO extends HashRecordBO {
 
-    /* The record id */
+    /**
+     * The record id
+     * */
     private String id;
 
-    /* The user (technically) recording this posting. */
+    /**
+     * The user (technically) recording this posting.
+     * */
     private String recordUser;
 
-    /* The time of recording of this posting. */
+    /**
+     * The time of recording of this posting.
+     * */
     private LocalDateTime recordTime;
 
-    /*
+    /**
      * The unique identifier of this business operation. The operation
      * identifier differs from the posting identifier in that it is not unique.
      * The same operation, can be repetitively posted if some conditions change.
@@ -38,26 +44,30 @@ public class PostingBO extends HashRecordBO {
      */
     private String oprId;
 
-    /* The time of occurrence of this operation. Set by the consuming module. */
+    /**
+     * The time of occurrence of this operation. Set by the consuming module.
+     * */
     private LocalDateTime oprTime;
 
-    /*
+    /**
      * The type of operation recorded here. The semantic of this information is
      * determined by the consuming module.
      */
     private String oprType;
 
-    /* Details associated with this operation. */
+    /**
+     * Details associated with this operation.
+     * */
     private String oprDetails;
 
-    /*
+    /**
      * The source of the operation. For example, payment order may result into many
      * payments. Each payment will be an operation. The oprSrc field will be used to
      * document original payment id. 
      */
     private String oprSrc;
     
-    /*
+    /**
      * This is the time from which the posting is effective in the account
      * statement. This also differs from the recording time in that the posting
      * time can be before or after the recording time.
@@ -75,7 +85,7 @@ public class PostingBO extends HashRecordBO {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime pstTime;
 
-    /*
+    /**
      * Some posting are mechanical and do not have an influence on the balance
      * of an account. Depending on the business logic of the product module,
      * different types of posting might be defined so that the journal can be
@@ -87,17 +97,17 @@ public class PostingBO extends HashRecordBO {
      */
     private PostingTypeBO pstType;
 
-    /*
+    /**
      * This is the status of the posting. Can be used to book
      */
     private PostingStatusBO pstStatus = PostingStatusBO.POSTED;
 
-    /*
+    /**
      * The ledger governing this posting.
      */
     private LedgerBO ledger;
 
-    /*
+    /**
      * The Date use to compute interests. This can be different from the posting
      * date and can lead to the production of other type of balances.
      */
@@ -105,16 +115,17 @@ public class PostingBO extends HashRecordBO {
 
     private List<PostingLineBO> lines = new ArrayList<>();
 
-    /*
+    /**
      * The id of the discarded posting. In case this posting discards another posting.
      */
     private String discardedId;
     
-    /*
+    /**
      * The record time of the discarding posting 
      */
     private LocalDateTime discardedTime;
-    /*
+
+    /**
      * The id of the discarding posting/
      */
     private String discardingId;

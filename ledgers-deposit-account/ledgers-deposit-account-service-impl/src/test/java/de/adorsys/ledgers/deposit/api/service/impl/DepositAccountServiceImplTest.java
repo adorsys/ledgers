@@ -1,12 +1,11 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
-import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
@@ -14,25 +13,33 @@ import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import de.adorsys.ledgers.postings.api.service.PostingService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import pro.javatar.commons.reader.YamlReader;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountServiceImplTest {
+    private final static String ACCOUNT_ID = "ACCOUNT_ID";
+    private final static String POSTING_ID = "posting_ID";
     @Mock
     private DepositAccountRepository depositAccountRepository;
     @Mock
@@ -41,6 +48,10 @@ public class DepositAccountServiceImplTest {
     private DepositAccountConfigService depositAccountConfigService;
     @Mock
     private DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
+    @Mock
+    private PostingService postingService;
+    @Mock
+    private PaymentMapper paymentMapper;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -87,6 +98,28 @@ public class DepositAccountServiceImplTest {
         assertThat(account).isNotNull();
     }
 
+    @Test
+    public void getTransactionById() throws DepositAccountNotFoundException, TransactionNotFoundException {
+        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
+        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
+        when(postingService.findPostingsByOperationId(anyString())).thenReturn(Collections.singletonList(readFile(PostingBO.class, "Posting.yml")));
+        //when(paymentMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+
+        TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
+        assertThat(result).isNotNull();
+        //assertThat(result).isEqualToComparingFieldByFieldRecursively(readFile(TransactionDetailsBO.class, "Transaction.yml")); //TODO uncomment after implementation of transactionMapper
+
+    }
+
+    @Test(expected = TransactionNotFoundException.class)
+    public void getTransactionById_Failure() throws DepositAccountNotFoundException, TransactionNotFoundException {
+        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
+        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
+        when(postingService.findPostingsByOperationId(anyString())).thenReturn(Collections.emptyList());
+
+        depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
+    }
+
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", Currency.getInstance("EUR"),
                 "name", "product", AccountType.CASH, AccountStatus.ENABLED, "bic", null,
@@ -123,4 +156,13 @@ public class DepositAccountServiceImplTest {
         return ledgerBO;
     }
 
+
+    private <T> T readFile(Class<T> t, String file) {
+        try {
+            return YamlReader.getInstance().getObjectFromResource(DepositAccountPaymentServiceImpl.class, file, t);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Resource file not found", e);
+        }
+    }
 }

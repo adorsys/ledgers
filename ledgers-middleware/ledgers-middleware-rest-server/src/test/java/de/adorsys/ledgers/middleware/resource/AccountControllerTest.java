@@ -8,7 +8,9 @@ import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class AccountControllerTest {
     private static final String ACCOUNT_ID = "XXXYYYZZZ";
+    private static final String TRANSACTION_ID = "TRANSACTION_ID";
 
     private MockMvc mockMvc;
 
@@ -140,7 +143,7 @@ public class AccountControllerTest {
     @Test
     public void getBalances_Success() throws Exception {
         when(middlewareService.getBalances(ACCOUNT_ID)).thenReturn(readBalances(AccountBalanceTO.class));
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts//balances/{accountId}", ACCOUNT_ID))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -162,7 +165,7 @@ public class AccountControllerTest {
         when(middlewareService.getBalances(ACCOUNT_ID))
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with id=" + ACCOUNT_ID + " not found"));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/accounts//balances/{accountId}", ACCOUNT_ID))
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
                 .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -171,17 +174,55 @@ public class AccountControllerTest {
         verify(middlewareService, times(1)).getBalances(ACCOUNT_ID);
     }
 
+    @Test
+    public void getTransactionById() throws Exception {
+        when(middlewareService.getTransactionById(ACCOUNT_ID, TRANSACTION_ID))
+                .thenReturn(readYml(TransactionTO.class, "Transaction.yml"));
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions/{transactionId}", ACCOUNT_ID, TRANSACTION_ID))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        TransactionTO actual = JsonReader.getInstance().getObjectFromString(content, TransactionTO.class);
+        assertThat(mvcResult.getResponse().getStatus(), is(200));
+
+        assertThat(actual).isNotNull();
+        assertThat(actual).isEqualToComparingFieldByFieldRecursively(readYml(TransactionTO.class, "Transaction.yml"));
+        verify(middlewareService, times(1)).getTransactionById(ACCOUNT_ID, TRANSACTION_ID);
+    }
+
+    @Test
+    public void getTransactionById_Failure_NotFound() throws Exception {
+        when(middlewareService.getTransactionById(ACCOUNT_ID, TRANSACTION_ID))
+                .thenThrow(new TransactionNotFoundMiddlewareException("Transaction with id=" + TRANSACTION_ID + "account " + ACCOUNT_ID + " not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions/{transactionId}", ACCOUNT_ID, TRANSACTION_ID))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        verify(middlewareService, times(1)).getTransactionById(ACCOUNT_ID, TRANSACTION_ID);
+    }
+
     private AccountDetailsTO getDetails() throws IOException {
         AccountDetailsTO file = YamlReader.getInstance().getObjectFromResource(AccountController.class, "AccountDetails.yml", AccountDetailsTO.class);
         file.setBalances(Collections.emptyList());
         return file;
     }
 
-    private static <T> List<T> readBalances(Class<T> tClass) throws IOException {
-        return Arrays.asList(
-                YamlReader.getInstance().getObjectFromResource(AccountController.class, "Balance1.yml", tClass),
-                YamlReader.getInstance().getObjectFromResource(AccountController.class, "Balance2.yml", tClass)
-        );
+    private static <T> List<T> readBalances(Class<T> tClass) {
+        try {
+            return Arrays.asList(
+                    YamlReader.getInstance().getObjectFromResource(AccountController.class, "Balance1.yml", tClass),
+                    YamlReader.getInstance().getObjectFromResource(AccountController.class, "Balance2.yml", tClass)
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private <T> T strToObj(String source, TypeReference<T> ref) {
@@ -205,5 +246,14 @@ public class AccountControllerTest {
         } catch (IOException e) {
             throw new IllegalStateException("File not found",e);
         }
+    }
+
+    private static <T> T readYml(Class<T> aClass, String fileName) {
+        try {
+            return YamlReader.getInstance().getObjectFromResource(AccountController.class, fileName, aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
