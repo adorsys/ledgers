@@ -1,17 +1,22 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -26,34 +31,33 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.YamlReader;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AccountControllerTest {
+public class AccountResourceTest {
     private static final String ACCOUNT_ID = "XXXYYYZZZ";
     private static final String TRANSACTION_ID = "TRANSACTION_ID";
 
     private MockMvc mockMvc;
 
     @InjectMocks
-    private AccountController controller;
+    private AccountResource controller;
 
     @Mock
     private MiddlewareService middlewareService;
@@ -208,22 +212,31 @@ public class AccountControllerTest {
     }
 
     private AccountDetailsTO getDetails() throws IOException {
-        AccountDetailsTO file = YamlReader.getInstance().getObjectFromResource(AccountController.class, "AccountDetails.yml", AccountDetailsTO.class);
+        AccountDetailsTO file = YamlReader.getInstance().getObjectFromResource(AccountResource.class, "AccountDetails.yml", AccountDetailsTO.class);
         file.setBalances(Collections.emptyList());
         return file;
     }
 
-    private static <T> List<T> readBalances(Class<T> tClass) {
-        try {
-            return Arrays.asList(
-                    YamlReader.getInstance().getObjectFromResource(AccountController.class, "Balance1.yml", tClass),
-                    YamlReader.getInstance().getObjectFromResource(AccountController.class, "Balance2.yml", tClass)
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+//<<<<<<< HEAD:ledgers-middleware/ledgers-middleware-rest-server/src/test/java/de/adorsys/ledgers/middleware/resource/AccountResourceTest.java
+    private static <T> List<T> readBalances(Class<T> tClass) throws IOException {
+        return Arrays.asList(
+                YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance1.yml", tClass),
+                YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance2.yml", tClass)
+        );
     }
+//=======
+//>>>>>>> develop:ledgers-middleware/ledgers-middleware-rest-server/src/test/java/de/adorsys/ledgers/middleware/resource/AccountControllerTest.java
+//    private static <T> List<T> readBalances(Class<T> tClass) {
+//        try {
+//            return Arrays.asList(
+//                    YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance1.yml", tClass),
+//                    YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance2.yml", tClass)
+//            );
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     private <T> T strToObj(String source, TypeReference<T> ref) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -250,7 +263,7 @@ public class AccountControllerTest {
 
     private static <T> T readYml(Class<T> aClass, String fileName) {
         try {
-            return YamlReader.getInstance().getObjectFromResource(AccountController.class, fileName, aClass);
+            return YamlReader.getInstance().getObjectFromResource(AccountResource.class, fileName, aClass);
         } catch (IOException e) {
             e.printStackTrace();
         }

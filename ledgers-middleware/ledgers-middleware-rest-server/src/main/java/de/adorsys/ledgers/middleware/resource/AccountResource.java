@@ -36,12 +36,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
-public class AccountController {
-    private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
+public class AccountResource {
+    private static final Logger logger = LoggerFactory.getLogger(AccountResource.class);
 
     private final MiddlewareService middlewareService;
 
-    public AccountController(MiddlewareService middlewareService) {
+    public AccountResource(MiddlewareService middlewareService) {
         this.middlewareService = middlewareService;
     }
 

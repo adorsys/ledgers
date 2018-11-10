@@ -16,10 +16,14 @@
 
 package de.adorsys.ledgers.um.impl.converter;
 
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 
 import org.mapstruct.Mapper;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserConverter {
@@ -27,4 +31,12 @@ public interface UserConverter {
     UserBO toUserBO(UserEntity user);
 
     UserEntity toUserPO(UserBO user);
+
+    ScaUserDataBO toScaUserDataBO(ScaUserDataEntity entity);
+
+    ScaUserDataEntity toScaUserDataEntity(ScaUserDataBO bo);
+
+    List<ScaUserDataBO> toScaUserDataListBO(List<ScaUserDataEntity> list);
+
+    List<ScaUserDataEntity> toScaUserDataListEntity(List<ScaUserDataBO> bos);
 }

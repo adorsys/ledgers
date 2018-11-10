@@ -55,6 +55,14 @@ public class SCAMethodTO {
     public int hashCode() {
         return Objects.hash(type, value);
     }
+
+    @Override
+    public String toString() {
+        return "SCAMethodTO{" +
+                       "type=" + type +
+                       ", value='" + value + '\'' +
+                       '}';
+    }
 }
 
 
