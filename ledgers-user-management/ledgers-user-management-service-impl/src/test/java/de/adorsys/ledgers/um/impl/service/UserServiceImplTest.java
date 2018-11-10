@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.um.impl.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
@@ -7,6 +8,7 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.AccessType;
+import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
@@ -14,11 +16,14 @@ import de.adorsys.ledgers.util.MD5Util;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import pro.javatar.commons.reader.ResourceReader;
@@ -59,15 +64,43 @@ public class UserServiceImplTest {
 
     @Before
     public void setUp() {
-        userEntity = readUserEntity(reader);
-        userBO = readUserBO(reader);
+        userEntity = readUserEntity();
+        userBO = readUserBO();
+    }
+
+    @Test
+    public void updateScaData() throws UserNotFoundException, IOException {
+        List<ScaUserDataBO> scaUserDataBOS = getScaUserData(ScaUserDataBO.class);
+        List<ScaUserDataEntity> scaUserDataEntities = getScaUserData(ScaUserDataEntity.class);
+
+        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
+        when(converter.toScaUserDataListEntity(scaUserDataBOS)).thenReturn(scaUserDataEntities);
+        when(repository.save(userEntity)).thenReturn(userEntity);
+
+        userService.updateScaData(scaUserDataBOS, USER_LOGIN);
+
+        verify(repository, times(1)).findFirstByLogin(USER_LOGIN);
+        verify(converter, times(1)).toScaUserDataListEntity(scaUserDataBOS);
+        verify(repository, times(1)).save(userEntity);
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void updateScaDataUserNotFound() throws UserNotFoundException, IOException {
+        List<ScaUserDataBO> scaUserDataBOS = getScaUserData(ScaUserDataBO.class);
+
+        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
+
+        userService.updateScaData(scaUserDataBOS, USER_LOGIN);
+    }
+
+    private <T> List<T> getScaUserData(Class<T> clazz) throws IOException {
+        return reader.getListFromInputStream(getClass().getResourceAsStream("sca-user-methods.yml"), clazz);
     }
 
     @Test
     public void authorizeWithLoginAndPin() throws UserNotFoundException {
-        UserEntity userEntity = readUserEntity(reader);
 
-        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.of(userEntity));
+        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
 
         boolean auth = userService.authorize(USER_LOGIN, USER_PIN);
 
@@ -93,10 +126,8 @@ public class UserServiceImplTest {
 
     @Test
     public void getUserScaData() throws UserNotFoundException {
-        UserEntity userEntity = readUserEntity(reader);
-        UserBO userBO = readUserBO(reader);
 
-        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
+        when(repository.findById(USER_ID)).thenReturn(Optional.ofNullable(userEntity));
         when(converter.toUserBO(userEntity)).thenReturn(userBO);
 
         List<ScaUserDataBO> userData = userService.getUserScaData(USER_ID);
@@ -110,10 +141,8 @@ public class UserServiceImplTest {
 
     @Test
     public void getAccountAccess() throws UserNotFoundException {
-        UserEntity userEntity = readUserEntity(reader);
-        UserBO userBO = readUserBO(reader);
 
-        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
+        when(repository.findById(USER_ID)).thenReturn(Optional.ofNullable(userEntity));
         when(converter.toUserBO(userEntity)).thenReturn(userBO);
 
         List<AccountAccessBO> accAccess = userService.getAccountAccess(USER_ID);
@@ -190,18 +219,18 @@ public class UserServiceImplTest {
     }
 
 
-        private UserBO readUserBO(ResourceReader reader) {
+        private UserBO readUserBO() {
         try {
-            return reader.getObjectFromFile("de/adorsys/ledgers/um/impl/service/user-BO.yml", UserBO.class);
+            return reader.getObjectFromResource(getClass(),"user-BO.yml", UserBO.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private UserEntity readUserEntity(ResourceReader reader) {
+    private UserEntity readUserEntity() {
         try {
-            return reader.getObjectFromFile("de/adorsys/ledgers/um/impl/service/user-entity.yml", UserEntity.class);
+            return reader.getObjectFromResource(getClass(),"user-entity.yml", UserEntity.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,7 +17,18 @@
 package de.adorsys.ledgers.middleware.service;
 
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
@@ -34,21 +45,30 @@ import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.exception.*;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
@@ -150,6 +170,20 @@ public class MiddlewareServiceImpl implements MiddlewareService {
             logger.info("{} deposit accounts were found", accounts.size());
 
             return detailsMapper.toAccountDetailsListTO(accounts);
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateScaMethods(List<SCAMethodTO> scaMethods, String userLogin) throws UserNotFoundMiddlewareException {
+
+        logger.info("Updating sca methods by user login {}", userLogin);
+        List<ScaUserDataBO> scaUserDataBOS = scaMethodTOConverter.toSCAMethodListBO(scaMethods);
+
+        try {
+            userService.updateScaData(scaUserDataBOS, userLogin);
         } catch (UserNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new UserNotFoundMiddlewareException(e.getMessage());

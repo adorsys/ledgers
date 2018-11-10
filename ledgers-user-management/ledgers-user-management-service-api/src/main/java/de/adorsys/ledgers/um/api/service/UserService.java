@@ -96,4 +96,12 @@ public interface UserService {
      * @throws UserNotFoundException is thrown if user can`t be found
      */
     List<AccountAccessBO> getAccountAccessByUserLogin(String userLogin) throws UserNotFoundException;
+
+    /**
+     * Update SCA methods by user login
+     *
+     * @param scaDataList user methods
+     * @param userLogin user login
+     */
+    void updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException;
 }

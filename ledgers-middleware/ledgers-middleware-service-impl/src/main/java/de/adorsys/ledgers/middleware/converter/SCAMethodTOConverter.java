@@ -38,4 +38,6 @@ public interface SCAMethodTOConverter {
     ScaUserDataBO toScaUserDataBO(SCAMethodTO to);
 
     List<SCAMethodTO> toSCAMethodListTO(List<ScaUserDataBO> list);
+
+    List<ScaUserDataBO> toSCAMethodListBO(List<SCAMethodTO> list);
 }
