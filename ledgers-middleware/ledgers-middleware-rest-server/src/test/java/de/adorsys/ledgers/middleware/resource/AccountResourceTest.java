@@ -1,22 +1,17 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -31,28 +26,32 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AccountResourceTest {
     private static final String ACCOUNT_ID = "XXXYYYZZZ";
     private static final String TRANSACTION_ID = "TRANSACTION_ID";
+    private static final LocalDate DATE_FROM = LocalDate.of(2018, 12, 12);
+    private static final LocalDate DATE_TO = LocalDate.of(2018, 12, 18);
 
     private MockMvc mockMvc;
 
@@ -136,10 +135,10 @@ public class AccountResourceTest {
         when(middlewareService.getAllAccountDetailsByUserLogin(userLogin)).thenThrow(new UserNotFoundMiddlewareException());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/users/{login}", userLogin))
-                                      .andDo(print())
-                                      .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                                      .andReturn();
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
 
         verify(middlewareService, times(1)).getAllAccountDetailsByUserLogin(userLogin);
     }
@@ -211,32 +210,55 @@ public class AccountResourceTest {
         verify(middlewareService, times(1)).getTransactionById(ACCOUNT_ID, TRANSACTION_ID);
     }
 
-    private AccountDetailsTO getDetails() throws IOException {
-        AccountDetailsTO file = YamlReader.getInstance().getObjectFromResource(AccountResource.class, "AccountDetails.yml", AccountDetailsTO.class);
-        file.setBalances(Collections.emptyList());
+    @Test
+    public void getTransactionByDates() throws Exception {
+        when(middlewareService.getTransactionsByDates(any(), any(), any()))
+                .thenReturn(Collections.singletonList(readYml(TransactionTO.class, "Transaction.yml")));
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions", ACCOUNT_ID)
+                                                      .param("dateFrom", DATE_FROM.toString())
+                                                      .param("dateTo", DATE_TO.toString()))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        List<TransactionTO> actual = JsonReader.getInstance().getListFromString(content, TransactionTO.class);
+        assertThat(mvcResult.getResponse().getStatus(), is(200));
+
+        assertThat(actual.isEmpty()).isFalse();
+        assertThat(actual.get(0)).isEqualToComparingFieldByFieldRecursively(readYml(TransactionTO.class, "Transaction.yml"));
+        verify(middlewareService, times(1)).getTransactionsByDates(ACCOUNT_ID, DATE_FROM, DATE_TO);
+    }
+
+    @Test
+    public void getTransactionByDates_Failure_WrongDateInput() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions", ACCOUNT_ID)
+                                .param("dateFrom", DATE_TO.toString())
+                                .param("dateTo", DATE_FROM.toString()))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.CONFLICT.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        verify(middlewareService, times(0)).getTransactionsByDates(ACCOUNT_ID, DATE_FROM, DATE_TO);
+    }
+
+    private AccountDetailsTO getDetails() {
+        AccountDetailsTO file = readYml(AccountDetailsTO.class, "AccountDetails.yml");
+        Optional.ofNullable(file)
+                .ifPresent(d -> d.setBalances(Collections.emptyList()));
         return file;
     }
 
-//<<<<<<< HEAD:ledgers-middleware/ledgers-middleware-rest-server/src/test/java/de/adorsys/ledgers/middleware/resource/AccountResourceTest.java
-    private static <T> List<T> readBalances(Class<T> tClass) throws IOException {
+
+    private static <T> List<T> readBalances(Class<T> tClass) {
         return Arrays.asList(
-                YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance1.yml", tClass),
-                YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance2.yml", tClass)
+                readYml(tClass, "Balance1.yml"),
+                readYml(tClass, "Balance2.yml")
         );
     }
-//=======
-//>>>>>>> develop:ledgers-middleware/ledgers-middleware-rest-server/src/test/java/de/adorsys/ledgers/middleware/resource/AccountControllerTest.java
-//    private static <T> List<T> readBalances(Class<T> tClass) {
-//        try {
-//            return Arrays.asList(
-//                    YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance1.yml", tClass),
-//                    YamlReader.getInstance().getObjectFromResource(AccountResource.class, "Balance2.yml", tClass)
-//            );
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
     private <T> T strToObj(String source, TypeReference<T> ref) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -248,8 +270,8 @@ public class AccountResourceTest {
         }
         return null;
     }
-
     //    todo: replace by javatar-commons version 0.7
+
     private <T> T fileToObj(String source, TypeReference<T> ref) {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         objectMapper.findAndRegisterModules();
@@ -257,7 +279,7 @@ public class AccountResourceTest {
         try {
             return objectMapper.readValue(inputStream, ref);
         } catch (IOException e) {
-            throw new IllegalStateException("File not found",e);
+            throw new IllegalStateException("File not found", e);
         }
     }
 

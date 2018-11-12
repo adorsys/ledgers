@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.um.db.domain;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import javax.persistence.*;
 
@@ -15,6 +16,8 @@ public class AccountAccess {
 
     @Id
     @Column(name = "account_access_id")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
 
@@ -27,27 +30,12 @@ public class AccountAccess {
     @Enumerated(EnumType.STRING)
     private AccessType accessType= AccessType.OWNER;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private UserEntity user;
-
-    public void setUser(UserEntity user) {
-        this.user = user;
-    }
-
-    public UserEntity getUser() {
-        return user;
-    }
-
     public String getId() {
         return id;
     }
 
     public String getIban() {
         return iban;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public void setIban(String iban) {

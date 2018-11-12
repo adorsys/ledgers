@@ -8,9 +8,7 @@ import de.adorsys.ledgers.um.db.EnableUserManagmentRepository;
 @SpringBootApplication
 @EnableUserManagmentRepository
 public class UmRepositoryApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(UmRepositoryApplication.class, args);
     }
-
 }

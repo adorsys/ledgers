@@ -5,16 +5,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
+import de.adorsys.ledgers.deposit.db.EnableDepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.AccountCategoryBO;
 import de.adorsys.ledgers.postings.api.domain.BalanceSideBO;
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
@@ -28,18 +26,16 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
 
 @Configuration
-@ComponentScan(basePackages = {"de.adorsys.ledgers.deposit"})
-@EnableJpaAuditing
-@EnableJpaRepositories
-@EntityScan(basePackages = "de.adorsys.ledgers.deposit.domain")
-public class DepositAccountConfiguration {
+@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class)
+@EnableDepositAccountRepository
+public class DepositAccountServiceConfiguration {
 
     private final ChartOfAccountService coaService;
     private final LedgerService ledgerService;
     private final ASPSPConfigSource configSource;
 
     @Autowired
-    public DepositAccountConfiguration(ChartOfAccountService coaService, LedgerService ledgerService, ASPSPConfigSource configSource) {
+    public DepositAccountServiceConfiguration(ChartOfAccountService coaService, LedgerService ledgerService, ASPSPConfigSource configSource) {
         this.coaService = coaService;
         this.ledgerService = ledgerService;
         this.configSource = configSource;

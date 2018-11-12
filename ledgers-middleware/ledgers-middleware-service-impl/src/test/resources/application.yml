@@ -1,0 +1,77 @@
+server:
+  # Authorization HTTP header requires to enlarge max header size.
+  max-http-header-size: 65000
+  port: 8088
+
+db:
+  host: localhost
+  user: ledgers
+  password: ledgers
+  database: ledgers
+  port: 5432
+  url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+
+
+spring:
+  application.name: ledgers
+#  profiles: default. This will prevent from running the h2 profile.
+  datasource:
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibrenate.globally_quoted_identifiers: true
+      hibernate.jdbc.lob.non_contextual_creation: true
+      hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  jackson.serialization.write_dates_as_timestamps: false
+  mail:
+    default-encoding: UTF-8
+    host: smtp.gmail.com
+    port: 587
+    username: #add your email here
+    password: #add your password here
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+sca:
+  authCode:
+    expiration:
+      cron: "*/5 * * * * *" # every 5 seconds
+    email:
+      subject: Your TAN from MockBank
+      from: noreply@adorsys.de
+    phone:
+      subject: Your TAN from MockBank
+
+---
+spring:
+  profiles: h2
+  h2:
+    console:
+      enabled: true
+
+db:
+  url: jdbc:h2:mem:ledgers
+  user: sa
+  password: sa
+
+---
+spring:
+  profiles: dev
+
+logging.level.org.postgresql: INFO
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+logging.level.org.springframework: TRACE
+
+management.endpoints.web.exposure.include: "*"
+management.endpoints.web.exposure.exclude: env,beans

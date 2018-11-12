@@ -1,26 +1,30 @@
 package de.adorsys.ledgers.postings.impl.service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
 import de.adorsys.ledgers.postings.api.service.ChartOfAccountService;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
+import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
+import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.impl.converter.ChartOfAccountMapper;
 import de.adorsys.ledgers.util.Ids;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements ChartOfAccountService {
     private final ChartOfAccountMapper chartOfAccountMapper;
 
-    public ChartOfAccountServiceImpl(ChartOfAccountMapper chartOfAccountMapper) {
+    public ChartOfAccountServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository, ChartOfAccountMapper chartOfAccountMapper) {
+        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
         this.chartOfAccountMapper = chartOfAccountMapper;
     }
-    
+
     /**
      * Create a new chart of account.
      * <p>

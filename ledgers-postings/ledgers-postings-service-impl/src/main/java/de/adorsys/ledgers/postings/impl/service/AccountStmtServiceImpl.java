@@ -1,122 +1,115 @@
 package de.adorsys.ledgers.postings.impl.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
-import de.adorsys.ledgers.postings.db.domain.AccountStmt;
-import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
-import de.adorsys.ledgers.postings.db.domain.PostingLine;
-import de.adorsys.ledgers.postings.db.domain.PostingTrace;
-import de.adorsys.ledgers.postings.db.domain.StmtStatus;
-import de.adorsys.ledgers.postings.db.repository.AccountStmtRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
+import de.adorsys.ledgers.postings.db.domain.*;
+import de.adorsys.ledgers.postings.db.repository.*;
 import de.adorsys.ledgers.postings.impl.converter.AccountStmtMapper;
 import de.adorsys.ledgers.util.Ids;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AccountStmtServiceImpl extends AbstractServiceImpl implements AccountStmtService {
 
-	@Autowired
-	private AccountStmtRepository accountStmtRepository;
+    private AccountStmtRepository accountStmtRepository;
 
-	@Autowired
-	private PostingLineRepository postingLineRepository;
+    private PostingLineRepository postingLineRepository;
 
-	@Autowired
-	private AccountStmtMapper accountStmtMapper;
+    private AccountStmtMapper accountStmtMapper;
 
-	@Override
-	public AccountStmtBO readStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime)
-			throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
-		return stmt(ledgerAccount, refTime, false);
-	}
+    public AccountStmtServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository, AccountStmtRepository accountStmtRepository, PostingLineRepository postingLineRepository, AccountStmtMapper accountStmtMapper) {
+        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
+        this.accountStmtRepository = accountStmtRepository;
+        this.postingLineRepository = postingLineRepository;
+        this.accountStmtMapper = accountStmtMapper;
+    }
 
-	@Override
-	public AccountStmtBO createStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime)
-			throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
-		return stmt(ledgerAccount, refTime, true);
-	}
+    @Override
+    public AccountStmtBO readStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+        AccountStmt stmt = stmt(ledgerAccount, refTime);
+        return accountStmtMapper.toAccountStmtBO(stmt);
+    }
 
-	@Override
-	public AccountStmtBO closeStmt(AccountStmtBO stmt) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public AccountStmtBO createStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+        AccountStmt stmt = stmt(ledgerAccount, refTime);
+        stmt = accountStmtRepository.save(stmt);
+        return accountStmtMapper.toAccountStmtBO(stmt);
+    }
 
-	public AccountStmtBO stmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime, boolean store)
-			throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
-		LedgerAccount account = loadLedgerAccount(ledgerAccount);
-		AccountStmt accStmt = accountStmtRepository
-				.findFirstByAccountAndStmtStatusAndPstTimeLessThanOrderByPstTimeDescStmtSeqNbrDesc(account,
-						StmtStatus.CLOSED, refTime)
-				.orElse(null);
+    @Override
+    public AccountStmtBO closeStmt(AccountStmtBO stmt) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-		// Load all posting associated with this base line.
-		List<PostingLine> postingLines = accStmt == null || accStmt.getPosting() == null
-				? postingLineRepository.findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(account, refTime)
-				: postingLineRepository.findByBaseLineAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(accStmt.getId(), refTime);
-		if(accStmt==null) {
-			accStmt = newStmtObj(refTime, account);
-		}
+    private AccountStmt stmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+        LedgerAccount account = loadLedgerAccount(ledgerAccount);
+        AccountStmt accStmt = accountStmtRepository
+                                      .findFirstByAccountAndStmtStatusAndPstTimeLessThanOrderByPstTimeDescStmtSeqNbrDesc(account, StmtStatus.CLOSED, refTime)
+                                      .orElseGet(() -> newStmtObj(refTime, account));
 
-		if (!postingLines.isEmpty()) {
-			computeBalance(accStmt, postingLines);
-			if(store) {
-				// Create posting
-				accountStmtRepository.save(accStmt);
-			}
-		}
 
-		return toBo(accStmt);
-	}
+        // Load all posting associated with this base line.
+        List<PostingLine> postingLines = accStmt.getPosting() == null
+                                                 ? postingLineRepository.findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(account, refTime)
+                                                 : postingLineRepository.findByBaseLineAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(accStmt.getId(), refTime);
 
-	private AccountStmt newStmtObj(LocalDateTime refTime, LedgerAccount account) {
-		AccountStmt accStmt = new AccountStmt();
-		accStmt.setAccount(account);
-		accStmt.setPstTime(refTime);
-		accStmt.setStmtSeqNbr(0);
-		accStmt.setStmtStatus(StmtStatus.SIMULATED);
-		accStmt.setTotalCredit(BigDecimal.ZERO);
-		accStmt.setTotalDebit(BigDecimal.ZERO);
-		return accStmt;
-	}
+        return computeBalance(accStmt, postingLines);
+    }
 
-	private AccountStmtBO toBo(AccountStmt accStmt) {
-		return accountStmtMapper.toAccountStmtBO(accStmt);
-	}
+    private AccountStmt newStmtObj(LocalDateTime refTime, LedgerAccount account) {
+        AccountStmt accStmt = new AccountStmt();
+        accStmt.setId(Ids.id());
+        accStmt.setAccount(account);
+        accStmt.setPstTime(refTime);
+        accStmt.setStmtSeqNbr(0);
+        accStmt.setStmtStatus(StmtStatus.SIMULATED);
+        accStmt.setTotalCredit(BigDecimal.ZERO);
+        accStmt.setTotalDebit(BigDecimal.ZERO);
+        return accStmt;
+    }
+@SuppressWarnings("PMD.AvoidReassigningParameters")
+    private AccountStmt computeBalance(AccountStmt stmt, List<PostingLine> lines) {
+        if (!lines.isEmpty()) {
+            for (PostingLine line : lines) {
+                stmt = refreshStatement(stmt, line);
+            }
+        }
+        return stmt;
+    }
 
-	private void computeBalance(final AccountStmt stmt, List<PostingLine> lines) {
-		for (PostingLine line : lines) {
-			addPostingLine(stmt, line);
-		}
-	}
+    private AccountStmt refreshStatement(AccountStmt stmt, PostingLine line) {
+        PostingTrace p = createPostingTrace(stmt, line);// Match statement and corresponding posting.
 
-	private void addPostingLine(final AccountStmt stmt, PostingLine line) {
-		PostingTrace p = new PostingTrace();
-		p.setAccount(stmt.getAccount());
-		p.setCreditAmount(line.getCreditAmount());
-		p.setDebitAmount(line.getDebitAmount());
-		p.setId(Ids.id());
-		p.setSrcOprId(line.getOprId());
-		p.setSrcPstHash(line.getHash());
-		p.setSrcPstTime(line.getPstTime());
-		p.setTgtPstId(stmt.getId());// Match statement and corresponding posting.
+        if (stmt.getYoungestPst() == null
+                    || stmt.getYoungestPst().getSrcPstTime().isBefore(p.getSrcPstTime())) {
+            stmt.setYoungestPst(p);
+        }
+        stmt.setLatestPst(p);
+        stmt.setTotalDebit(stmt.getTotalDebit().add(line.getDebitAmount()));
+        stmt.setTotalCredit(stmt.getTotalCredit().add(line.getCreditAmount()));
+        return stmt;
+    }
 
-		if (stmt.getYoungestPst() == null || stmt.getYoungestPst().getSrcPstTime().isBefore(p.getSrcPstTime())) {
-			stmt.setYoungestPst(p);
-		}
-		stmt.setLatestPst(p);
-		stmt.setTotalDebit(stmt.getTotalDebit().add(line.getDebitAmount()));
-		stmt.setTotalCredit(stmt.getTotalCredit().add(line.getCreditAmount()));
-	}
+    private PostingTrace createPostingTrace(AccountStmt stmt, PostingLine line) {
+        PostingTrace p = new PostingTrace();
+        p.setAccount(stmt.getAccount());
+        p.setCreditAmount(line.getCreditAmount());
+        p.setDebitAmount(line.getDebitAmount());
+        p.setId(Ids.id());
+        p.setSrcOprId(line.getOprId());
+        p.setSrcPstHash(line.getHash());
+        p.setSrcPstTime(line.getPstTime());
+        p.setTgtPstId(stmt.getId());
+        return p;
+    }
 }

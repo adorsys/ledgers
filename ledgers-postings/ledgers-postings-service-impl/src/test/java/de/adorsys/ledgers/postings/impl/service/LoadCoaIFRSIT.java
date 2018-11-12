@@ -6,7 +6,6 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
 
-@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -74,11 +72,11 @@ public class LoadCoaIFRSIT {
 			ledgerService.newLedgerAccount(ledgerAccount);
 		}
 		
-		LedgerAccountBO la = ledgerService.findLedgerAccount(ledgerBO, "4.2");
+		LedgerAccountBO la = ledgerService.findLedgerAccount(ledgerBO, "2.3");
 		Assume.assumeNotNull(la);
-		Assert.assertEquals("Services",la.getShortDesc());
-		Assert.assertEquals(AccountCategoryBO.RE, la.getCategory());
-		Assert.assertEquals(BalanceSideBO.Cr, la.getBalanceSide());
+		Assert.assertEquals("Other Reserves (Accumulated Other Comprehensive Income)",la.getShortDesc());
+		Assert.assertEquals(AccountCategoryBO.EQ, la.getCategory());
+		Assert.assertEquals(BalanceSideBO.DrCr, la.getBalanceSide());
 	}
 
 }

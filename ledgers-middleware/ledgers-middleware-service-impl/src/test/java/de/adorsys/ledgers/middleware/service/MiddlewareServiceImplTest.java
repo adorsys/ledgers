@@ -1,40 +1,9 @@
 package de.adorsys.ledgers.middleware.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
@@ -53,30 +22,35 @@ import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
-import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.*;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
@@ -257,8 +231,6 @@ public class MiddlewareServiceImplTest {
 
     @Test
     public void getPaymentById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
-        when(paymentConverter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).thenReturn(PaymentTypeBO.SINGLE);
-        when(paymentConverter.toPaymentProductBO(PaymentProductTO.SEPA)).thenReturn(PaymentProductBO.SEPA);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
         when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
         Object result = middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, PAYMENT_ID);
@@ -269,8 +241,6 @@ public class MiddlewareServiceImplTest {
 
     @Test(expected = PaymentNotFoundMiddlewareException.class)
     public void getPaymentById_Fail_wrong_id() throws PaymentNotFoundException, PaymentNotFoundMiddlewareException {
-        when(paymentConverter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).thenReturn(PaymentTypeBO.SINGLE);
-        when(paymentConverter.toPaymentProductBO(PaymentProductTO.SEPA)).thenReturn(PaymentProductBO.SEPA);
         when(paymentService.getPaymentById(WRONG_PAYMENT_ID))
                 .thenThrow(new PaymentNotFoundException(WRONG_PAYMENT_ID));
         middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, WRONG_PAYMENT_ID);
@@ -347,8 +317,8 @@ public class MiddlewareServiceImplTest {
 
     @Test
     public void executePayment_Success() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
-        when(paymentConverter.toPaymentProductBO(any())).thenReturn(PaymentProductBO.SEPA);
-        when(paymentConverter.toPaymentTypeBO(any())).thenReturn(PaymentTypeBO.SINGLE);
+//        when(paymentConverter.toPaymentProductBO(any())).thenReturn(PaymentProductBO.SEPA);
+//        when(paymentConverter.toPaymentTypeBO(any())).thenReturn(PaymentTypeBO.SINGLE);
         when(paymentService.executePayment(any())).thenReturn(TransactionStatusBO.ACSP);
 //        when(paymentConverter.toTransactionTOList(any())).thenReturn(Collections.singletonList(readYml(TransactionTO.class, "TransactionTO.yml")));
 
@@ -358,7 +328,7 @@ public class MiddlewareServiceImplTest {
 
     @Test(expected = PaymentProcessingMiddlewareException.class)
     public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
-        when(paymentConverter.toPaymentProductBO(any())).thenReturn(PaymentProductBO.SEPA);
+//        when(paymentConverter.toPaymentProductBO(any())).thenReturn(PaymentProductBO.SEPA);
 //        when(paymentConverter.toPaymentTypeBO(any())).thenReturn(PaymentTypeBO.SINGLE);
         when(paymentService.executePayment(any())).thenThrow(new PaymentNotFoundException());
 
@@ -444,4 +414,19 @@ public class MiddlewareServiceImplTest {
         }
         return null;
     }
+
+    @Test
+    public void getTransactionsByDates() throws TransactionNotFoundMiddlewareException, AccountNotFoundMiddlewareException, DepositAccountNotFoundException, TransactionNotFoundException {
+        when(accountService.getTransactionsByDates(any(), any(), any())).thenReturn(Collections.singletonList(new TransactionDetailsBO()));
+        when(paymentConverter.toTransactionTOList(any())).thenReturn(Collections.singletonList(new TransactionTO()));
+        List<TransactionTO> result = middlewareService.getTransactionsByDates(ACCOUNT_ID, LocalDate.of(2018, 12, 12), LocalDate.of(2018, 12, 18));
+        assertThat(result.isEmpty()).isFalse();
+    }
+
+    @Test(expected = AccountNotFoundMiddlewareException.class)
+    public void getTransactionsByDates_Failure() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
+        when(accountService.getTransactionsByDates(any(), any(), any())).thenThrow(new DepositAccountNotFoundException());
+        middlewareService.getTransactionsByDates(ACCOUNT_ID, LocalDate.of(2018, 12, 12), LocalDate.of(2018, 12, 18));
+    }
+
 }

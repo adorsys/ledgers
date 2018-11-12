@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
@@ -34,6 +35,7 @@ public class PostingLine {
 	 * This is the json representation of the transaction as posted for the
 	 * product module.
 	 */
+    @Lob
 	private String details;
 
 	/*

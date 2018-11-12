@@ -40,7 +40,6 @@ public class AccountAccessRepositoryIT {
     public void test_create_ok() {
 
         AccountAccess accountAccess = new AccountAccess();
-        accountAccess.setId(Ids.id());
         accountAccess.setIban("FakeIban");
         accountAccess.setAccessType(AccessType.OWNER);
         UserEntity user = new UserEntity();
@@ -48,10 +47,9 @@ public class AccountAccessRepositoryIT {
         user.setPin("1234");
         user.setLogin("vne");
         user.setEmail("vne@adorsys.de");
-        accountAccess.setUser(user);
         user.getAccountAccesses().add(accountAccess);
-        accountAccess.setUser(user);
-        userRepository.save(user);
+        user = userRepository.save(user);
+        accountAccess = user.getAccountAccesses().iterator().next();
         AccountAccess result = accountAccessRepository.findById(accountAccess.getId()).orElse(null);
         Assert.notNull(result);
     }

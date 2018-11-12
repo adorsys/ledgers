@@ -1,6 +1,8 @@
 package de.adorsys.ledgers.postings.impl.service;
 
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
@@ -8,38 +10,45 @@ import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
-import de.adorsys.ledgers.postings.db.repository.AccountStmtRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingRepository;
+import de.adorsys.ledgers.postings.db.repository.*;
+import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
-    @Autowired
-    private PostingRepository postingRepository;
-
-    @Autowired
-    private AccountStmtRepository accountStmtRepository;
-
+    private final PostingRepository postingRepository;
+    private final AccountStmtRepository accountStmtRepository;
     private final PostingMapper postingMapper;
+    private final PostingLineRepository postingLineRepository;
+    private final PostingLineMapper postingLineMapper;
 
-    public PostingServiceImpl(PostingMapper postingMapper) {
+    public PostingServiceImpl(LedgerAccountRepository ledgerAccountRepository,
+                              ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository,
+                              PostingRepository postingRepository, AccountStmtRepository accountStmtRepository,
+                              PostingMapper postingMapper, PostingLineRepository postingLineRepository,
+                              PostingLineMapper postingLineMapper) {
+        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
+        this.postingRepository = postingRepository;
+        this.accountStmtRepository = accountStmtRepository;
         this.postingMapper = postingMapper;
+        this.postingLineRepository = postingLineRepository;
+        this.postingLineMapper = postingLineMapper;
     }
 
     @Override
-    @SuppressWarnings("PMD.IdenticalCatchBranches")
     public PostingBO newPosting(PostingBO postingBO) throws LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException, DoubleEntryAccountingException {
         Posting posting = postingMapper.toPosting(postingBO);
         posting = newPosting(posting);
@@ -49,6 +58,15 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     @Override
     public List<PostingBO> findPostingsByOperationId(String oprId) {
         return CloneUtils.cloneList(postingRepository.findByOprId(oprId), PostingBO.class);
+    }
+
+    @Override
+    public List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+        LedgerAccount account = loadLedgerAccount(ledgerAccount);
+        return postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(account, timeFrom, timeTo)
+                       .stream()
+                       .map(postingLineMapper::toPostingLineBO)
+                       .collect(Collectors.toList());
     }
 
 
@@ -113,7 +131,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     /*
-     * Process Posting lines withoug sting the posting.
+     * Process Posting lines without sting the posting.
      */
     private void processPostingLine(Posting p, PostingLine model) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
         PostingLine l = new PostingLine();

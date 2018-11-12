@@ -32,7 +32,6 @@ import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
 
-@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,

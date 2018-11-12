@@ -1,0 +1,189 @@
+accounts: 
+  - iban: DE69760700240340283600
+    currency: EUR
+    name: Marion Mueller
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE80760700240271232400
+    currency: EUR
+    name: Anton Brueckner
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE38760700240320465700
+    currency: EUR
+    name: Max Musterman
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+users:
+  - login: marion.mueller
+    email: marion.mueller@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: marion.mueller@mail.de
+    accountAccesses:
+      - iban: DE69760700240340283600
+        accessType: OWNER
+  - login: anton.brueckner
+    email: anton.brueckner@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: anton.brueckner@mail.de
+    accountAccesses:
+      - iban: DE80760700240271232400
+        accessType: OWNER
+  - login: max.musterman
+    email: max.musterman@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: max.musterman@mail.de
+    accountAccesses:
+      - iban: DE38760700240320465700
+        accessType: OWNER
+singlePaymentTests:
+# Payment from Marion Mueller to Max Musterman on 2018-06-01 at 12:25:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-01
+      requestedExecutionTime: 12:25:00
+      debtorAccount:
+        iban: DE69760700240340283600
+        currency: EUR
+      instructedAmount:
+        amount: 3000
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: 0.00
+    balanceCreditAccountBefore: 0.00
+    balanceDebitAccountAfter: -3000.00
+    balanceCreditAccountAfter: 3000.00
+    
+# Payment from Anton Brueckner to Max Musterman on 2018-06-01 at 13:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-01
+      requestedExecutionTime: 13:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 700
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: 0.00
+    balanceCreditAccountBefore: 3000.00
+    balanceDebitAccountAfter: -700.00
+    balanceCreditAccountAfter: 3700.00
+
+# Payment from Anton Brueckner to Bank external Rainer Maier on 2018-06-02 at 10:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-02
+      requestedExecutionTime: 10:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 900
+      creditorAccount:
+        iban: DE84100100100568753108
+        currency: EUR
+      creditorName: Rainer Maier
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: -700.00
+# balanceCreditAccountBefore: 0.00
+    balanceDebitAccountAfter: -1600.00
+# balanceCreditAccountAfter: SEPA:900.00
+
+# Payment from Marion Mueller to Miriam Krause on 2018-06-02 at 18:23:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-02
+      requestedExecutionTime: 18:23:00
+      debtorAccount:
+        iban: DE69760700240340283600
+        currency: EUR
+      instructedAmount:
+        amount: 1400
+      creditorAccount:
+        iban: DE64370400440136510500
+        currency: EUR
+      creditorName: Miriam Krause
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: -3000.00
+#    balanceCreditAccountBefore: 0.00
+    balanceDebitAccountAfter: -4400.00
+#    balanceCreditAccountAfter: SEPA:3000.00
+
+# Payment from Max Musterman to Anton Brueckner on 2018-06-14 at 11:00:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-14
+      requestedExecutionTime: 11:00:00
+      debtorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      instructedAmount:
+        amount: 2300
+      creditorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      creditorName: Anton Brueckner
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: 3700.00
+    balanceCreditAccountBefore: -1600.00
+    balanceDebitAccountAfter: 1400.00
+    balanceCreditAccountAfter: 700.00
+
+# Payment from Max Musterman to Marion Mueller on 2018-06-17 at 18:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-17
+      requestedExecutionTime: 18:10:00
+      debtorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      instructedAmount:
+        amount: 1280
+      creditorAccount:
+        iban: DE69760700240340283600
+        currency: EUR
+      creditorName: Marion Mueller
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: 1400.00
+    balanceCreditAccountBefore: -4400.00
+    balanceDebitAccountAfter: 120.00
+    balanceCreditAccountAfter: -3120.00
+
+transactions: 
+  - iban: DE69760700240340283600
+    dateFrom: 2018-05-30
+    dateTo: 2018-06-30
+    transactions: 
+      - bookingDate: 2018-06-17
+        amount:
+          amount: 1280.00
+        creditorName: Marion Mueller
+      - bookingDate: 2018-06-02
+        amount:
+          amount: 1400.00
+        creditorName: Miriam Krause
+      - bookingDate: 2018-06-01
+        amount:
+          amount: 3000.00
+        creditorName: Max Musterman
+    

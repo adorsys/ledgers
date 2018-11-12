@@ -2,11 +2,12 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
-import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.*;
@@ -24,25 +25,28 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
 
-    private DepositAccountRepository depositAccountRepository;
-    private DepositAccountMapper depositAccountMapper;
-    private AccountStmtService accountStmtService; //NOPMD
-    private PostingService postingService;
-    private PaymentMapper paymentMapper; //NOPMD
+    private final DepositAccountRepository depositAccountRepository;
+    private final DepositAccountMapper depositAccountMapper;
+    private final AccountStmtService accountStmtService; //NOPMD
+    private final PostingService postingService;
+    private final TransactionDetailsMapper transactionDetailsMapper;
 
-    public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, DepositAccountRepository depositAccountRepository, LedgerService ledgerService1, DepositAccountConfigService depositAccountConfigService1, DepositAccountMapper depositAccountMapper, PostingService postingService, PaymentMapper paymentMapper) {
+    public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
+                                     LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
+                                     DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService,
+                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper) {
         super(depositAccountConfigService, ledgerService);
         this.depositAccountRepository = depositAccountRepository;
-        this.ledgerService = ledgerService1;
-        this.depositAccountConfigService = depositAccountConfigService1;
         this.depositAccountMapper = depositAccountMapper;
+        this.accountStmtService = accountStmtService;
         this.postingService = postingService;
-        this.paymentMapper = paymentMapper;
+        this.transactionDetailsMapper = transactionDetailsMapper;
     }
 
     @Override
@@ -146,6 +150,22 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         logger.info("{} IBANs were found", accounts.size());
 
         return depositAccountMapper.toDepositAccountListBO(accounts);
+    }
+
+    @Override
+    public List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException {
+        DepositAccountBO account = getDepositAccountById(accountId);
+        LedgerBO ledgerBO = loadLedger();
+        LedgerAccountBO ledgerAccountBO;
+        try {
+            ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
+            return postingService.findPostingsByDates(ledgerAccountBO, dateFrom, dateTo)
+                           .stream()
+                           .map(transactionDetailsMapper::toTransaction)
+                           .collect(Collectors.toList());
+        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
+            throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
     }
 
     @Override

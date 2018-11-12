@@ -17,6 +17,9 @@
 package de.adorsys.ledgers.middleware.service;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -231,6 +234,23 @@ public class MiddlewareServiceImpl implements MiddlewareService {
             throw new TransactionNotFoundMiddlewareException(e.getMessage(), e);
         }
 
+    }
+
+    @Override
+    public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws AccountNotFoundMiddlewareException {
+    	LocalDate today = LocalDate.now();
+    	LocalDateTime dateTimeFrom = dateFrom==null
+    			?today.atStartOfDay()
+    			:dateFrom.atStartOfDay();
+    	LocalDateTime dateTimeTo = dateTo==null
+    			?today.atTime(LocalTime.MAX)
+    			:dateTo.atTime(LocalTime.MAX);
+        try {
+            List<TransactionDetailsBO> transactions = accountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
+            return paymentConverter.toTransactionTOList(transactions);
+        } catch (DepositAccountNotFoundException e) {
+            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
     }
 
     @Override

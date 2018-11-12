@@ -16,22 +16,36 @@
 
 package de.adorsys.ledgers.um.db.domain;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.GenericGenerator;
+
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "login", name = "user_login_unique"),
-        @UniqueConstraint(columnNames = "email", name = "user_email_unique")
+        @UniqueConstraint(columnNames = "login", name = UserEntity.USER_LOGIN_UNIQUE),
+        @UniqueConstraint(columnNames = "email", name = UserEntity.USER_EMAIL_UNIQUE)
 })
 public class UserEntity {
+	
+	public static final String USER_LOGIN_UNIQUE = "user_login_unique";
+	public static final String USER_EMAIL_UNIQUE = "user_email_unique";
 
     @Id
     @Column(name = "user_id")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
     @Column(nullable = false)
@@ -43,13 +57,14 @@ public class UserEntity {
     @Column(nullable = false)
     private String pin;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
     private List<ScaUserDataEntity> scaUserData = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
     private List<AccountAccess> accountAccesses = new ArrayList<>();
-
+    
     public String getId() {
         return id;
     }

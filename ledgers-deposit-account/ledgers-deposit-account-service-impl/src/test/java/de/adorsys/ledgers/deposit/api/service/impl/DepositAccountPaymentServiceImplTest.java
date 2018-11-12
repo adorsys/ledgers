@@ -56,7 +56,7 @@ public class DepositAccountPaymentServiceImplTest {
     @Mock
     private PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
     @Mock
-    private TransactionDetailsMapper transactionDetailsMapper = Mappers.getMapper(TransactionDetailsMapper.class);
+    private TransactionDetailsMapper transactionDetailsMapper;// = Mappers.getMapper(TransactionDetailsMapper.class);
     @Mock
     private PaymentRepository paymentRepository;
     @Mock
@@ -153,7 +153,7 @@ public class DepositAccountPaymentServiceImplTest {
     	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
     	LedgerBO ledger = ledgerAccount.getLedger();
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getBulkBatchPayment()));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulBatchkPaymentBO());
+        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulBatchPaymentBO());
         //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
 //        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
 //        when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
@@ -181,35 +181,35 @@ public class DepositAccountPaymentServiceImplTest {
 
     private Payment getSinglePayment() {
         Payment payment = readFile(Payment.class, "PaymentSingle.yml");
-        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
     private PaymentBO getSinglePaymentBO() {
         PaymentBO payment = readFile(PaymentBO.class, "PaymentSingle.yml");
-        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
 
     private Payment getBulkPayment() {
         Payment payment = readFile(Payment.class, "PaymentBulk.yml");
-        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
     private PaymentBO getBulkPaymentBO() {
         PaymentBO payment = readFile(PaymentBO.class, "PaymentBulk.yml");
-        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
 
     
     private Payment getBulkBatchPayment() {
         Payment payment = readFile(Payment.class, "PaymentBulkBatchTrue.yml");
-        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
-    private PaymentBO getBulBatchkPaymentBO() {
+    private PaymentBO getBulBatchPaymentBO() {
         PaymentBO payment = readFile(PaymentBO.class, "PaymentBulkBatchTrue.yml");
-        payment.getTargets().stream().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
     

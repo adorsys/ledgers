@@ -73,6 +73,7 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     public PaymentBO initiatePayment(PaymentBO payment) {
         Payment persistedPayment = paymentMapper.toPayment(payment);
         persistedPayment.getTargets().forEach(t -> t.setPayment(persistedPayment));
+        persistedPayment.setTransactionStatus(TransactionStatus.RCVD);
         Payment save = paymentRepository.save(persistedPayment);
         return paymentMapper.toPaymentBO(save);
     }

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 @Target(value = {java.lang.annotation.ElementType.TYPE})
 @Documented
 @Import({
-	DepositAccountConfiguration.class
+	DepositAccountServiceConfiguration.class
 })
-public @interface EnableDepositAccount {
+public @interface EnableDepositAccountService {
 }

@@ -23,11 +23,15 @@ public class TransactionNotFoundException extends Exception {
     public TransactionNotFoundException() {
     }
 
-    public TransactionNotFoundException(String accountId, String transactionId) {
-        super(String.format(MESSAGE, transactionId, accountId));
+    public TransactionNotFoundException(String message) {
+        super(message);
     }
 
     public TransactionNotFoundException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public TransactionNotFoundException(String accountId, String transactionId) {
+        super(String.format(MESSAGE, transactionId, accountId));
     }
 }

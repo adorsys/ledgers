@@ -1,7 +1,0 @@
-<dataset>
-    <DEPOSIT_ACCOUNT id="ci8k8PDcTrCsiF3sT3ig"
-            iban="1234567890"
-            currency="EUR"
-            account_status="ENABLED"
-    />
-</dataset>

@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
@@ -152,5 +153,7 @@ public interface MiddlewareService {
 
 	void updateScaMethods(List<SCAMethodTO> scaMethods, String userLogin) throws UserNotFoundMiddlewareException;
 
-	TransactionTO getTransactionById(String accountId, String transactionId) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException;
+    TransactionTO getTransactionById(String accountId, String transactionId) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException;
+
+    List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws AccountNotFoundMiddlewareException;
 }

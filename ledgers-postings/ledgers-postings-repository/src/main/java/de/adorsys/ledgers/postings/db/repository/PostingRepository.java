@@ -1,11 +1,12 @@
 package de.adorsys.ledgers.postings.db.repository;
 
-import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.postings.db.domain.Posting;
-import org.springframework.data.repository.PagingAndSortingRepository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.Posting;
 
 public interface PostingRepository extends PagingAndSortingRepository<Posting, String> {
     /**
@@ -19,4 +20,6 @@ public interface PostingRepository extends PagingAndSortingRepository<Posting, S
     List<Posting> findByOprId(String oprId);
 
     Optional<Posting> findFirstByLedgerOrderByRecordTimeDesc(Ledger ledger);
+
+//    List<Posting> findAllByLedger_NameAndOprTimeAfterAndOprTimeBefore(String iban, LocalDateTime from, LocalDateTime to); //TODO check for compliance and test the filtering
 }

@@ -7,6 +7,6 @@ package de.adorsys.ledgers.postings.db;
  * @author fpo
  *
  */
-public class PostingsBasePackage {
+public class PostingsDBBasePackage {
 
 }
