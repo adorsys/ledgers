@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import de.adorsys.ledgers.postings.db.EnablePostingsReporitory;
 
 @Configuration
-@ComponentScan(basePackages={"de.adorsys.ledgers.postings.impl"})
+@ComponentScan(basePackageClasses=PostingServiceBasePackage.class)
 @EnablePostingsReporitory
-public class PostingServiceConfiguration {
-
-}
+public class PostingServiceConfiguration {}

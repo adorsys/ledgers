@@ -7,6 +7,6 @@ package de.adorsys.ledgers.deposit.db;
  * @author fpo
  *
  */
-public class DepositAccountBasePackage {
+public class DepositAccountDBBasePackage {
 
 }

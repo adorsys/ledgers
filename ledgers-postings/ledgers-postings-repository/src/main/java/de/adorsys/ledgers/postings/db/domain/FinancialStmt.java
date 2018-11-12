@@ -30,18 +30,18 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
 @MappedSuperclass
 public abstract class FinancialStmt {
 
-    /* The record id */
+    /** The record id */
     @Id
     private String id;
 
-    /*
+    /**
      * The corresponding posting.
      * 
      */
 	@OneToOne
 	private Posting posting;
     
-	/* Documents the time of the posting. */
+	/** Documents the time of the posting. */
 	@Column(nullable = false, updatable = false)
 	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime pstTime;
@@ -50,7 +50,7 @@ public abstract class FinancialStmt {
 	@Column(nullable = false, updatable = false)
 	private StmtStatus stmtStatus;
 
-	/*
+	/**
 	 * Identifier of the latest processed posting. We use this to 
 	 * perform batch processing. The latest posting process will allways be 
 	 * held here.
@@ -59,7 +59,7 @@ public abstract class FinancialStmt {
 	@OneToOne
 	private PostingTrace latestPst;
 	
-	/*
+	/**
 	 * The sequence number of the operation processed by this posting.
 	 *
 	 * A single statement can be overridden many times as long as the enclosing

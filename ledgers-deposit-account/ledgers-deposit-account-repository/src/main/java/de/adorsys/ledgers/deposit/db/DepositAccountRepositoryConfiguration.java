@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 
 @Configuration
-@ComponentScan(basePackageClasses= {DepositAccountBasePackage.class})
+@ComponentScan(basePackageClasses= {DepositAccountDBBasePackage.class})
 @EnableJpaAuditing
 @EnableJpaRepositories
 @EntityScan(basePackageClasses= {DepositAccount.class, Jsr310JpaConverters.class})

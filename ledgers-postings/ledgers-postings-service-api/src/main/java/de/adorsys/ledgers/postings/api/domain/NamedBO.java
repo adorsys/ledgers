@@ -5,80 +5,91 @@ import java.time.LocalDateTime;
 /**
  * The existence or value of a ledger entity is always considered relative to
  * the posting date.
- * 
+ * <p>
  * When a book is closed, modification on ledger entities must lead to the
  * creation of new entities.
- * 
- * @author fpo
  *
+ * @author fpo
  */
-public abstract class NamedBO{
-	
-	/*Business identifier.  Always unique in a certain scope. Generally in the scope of it's container.*/
-	private String name;
+public abstract class NamedBO {
 
-	/* Identifier */
-	private String id;
+    /*Business identifier.  Always unique in a certain scope. Generally in the scope of it's container.*/
+    private String name;
 
-	private LocalDateTime created;
+    /* Identifier */
+    private String id;
 
-//	todo: seems this property should be moved from base class
-	private String userDetails;
+    private LocalDateTime created;
 
-	//	todo: seems this property should be moved from base class
-	/*The short description of this entity*/
-	private String shortDesc;
+    //	todo: seems this property should be moved from base class
+    private String userDetails;
 
-	//	todo: seems this property should be moved from base class
-	/*The long description of this entity*/
-	private String longDesc;
+    //	todo: seems this property should be moved from base class
+    /*The short description of this entity*/
+    private String shortDesc;
 
-	public String getName() {
-		return name;
-	}
+    //	todo: seems this property should be moved from base class
+    /*The long description of this entity*/
+    private String longDesc;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public NamedBO() {
+    }
 
-	public String getId() {
-		return id;
-	}
+    public NamedBO(String name, String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
+        this.name = name;
+        this.id = id;
+        this.created = created;
+        this.userDetails = userDetails;
+        this.shortDesc = shortDesc;
+        this.longDesc = longDesc;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public LocalDateTime getCreated() {
-		return created;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setCreated(LocalDateTime created) {
-		this.created = created;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getUserDetails() {
-		return userDetails;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setUserDetails(String userDetails) {
-		this.userDetails = userDetails;
-	}
+    public LocalDateTime getCreated() {
+        return created;
+    }
 
-	public String getShortDesc() {
-		return shortDesc;
-	}
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
 
-	public void setShortDesc(String shortDesc) {
-		this.shortDesc = shortDesc;
-	}
+    public String getUserDetails() {
+        return userDetails;
+    }
 
-	public String getLongDesc() {
-		return longDesc;
-	}
+    public void setUserDetails(String userDetails) {
+        this.userDetails = userDetails;
+    }
 
-	public void setLongDesc(String longDesc) {
-		this.longDesc = longDesc;
-	}
+    public String getShortDesc() {
+        return shortDesc;
+    }
+
+    public void setShortDesc(String shortDesc) {
+        this.shortDesc = shortDesc;
+    }
+
+    public String getLongDesc() {
+        return longDesc;
+    }
+
+    public void setLongDesc(String longDesc) {
+        this.longDesc = longDesc;
+    }
 
 }

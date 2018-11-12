@@ -7,6 +7,4 @@ package de.adorsys.ledgers.um.db;
  * @author fpo
  *
  */
-public class UserManangmentBasePackage {
-
-}
+public class UserManangmentBasePackage {}

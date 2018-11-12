@@ -12,23 +12,25 @@ import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.Principal;
 
 public class AbstractServiceImpl {
 
-    @Autowired
-    protected LedgerAccountRepository ledgerAccountRepository;
+    protected final LedgerAccountRepository ledgerAccountRepository;
 
-    @Autowired
-    protected ChartOfAccountRepository chartOfAccountRepo;
+    protected final ChartOfAccountRepository chartOfAccountRepo;
 
-    @Autowired
-    protected Principal principal;
+    protected final Principal principal;
 
-    @Autowired
-    protected LedgerRepository ledgerRepository;
+    protected final LedgerRepository ledgerRepository;
+
+    public AbstractServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository) {
+        this.ledgerAccountRepository = ledgerAccountRepository;
+        this.chartOfAccountRepo = chartOfAccountRepo;
+        this.principal = principal;
+        this.ledgerRepository = ledgerRepository;
+    }
 
     protected ChartOfAccount loadCoa(ChartOfAccountBO model) throws ChartOfAccountNotFoundException {
         if (model == null) {

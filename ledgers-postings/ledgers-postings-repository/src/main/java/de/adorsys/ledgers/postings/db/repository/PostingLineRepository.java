@@ -13,4 +13,7 @@ public interface PostingLineRepository extends PagingAndSortingRepository<Postin
 	List<PostingLine> findByBaseLineAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(String baseLine, LocalDateTime refTime);
 
 	List<PostingLine> findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(LedgerAccount account, LocalDateTime refTime);
+
+	List<PostingLine> findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(
+			LedgerAccount ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo);
 }

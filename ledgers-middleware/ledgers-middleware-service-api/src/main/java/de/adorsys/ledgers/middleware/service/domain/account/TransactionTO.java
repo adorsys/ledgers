@@ -16,10 +16,15 @@
 
 package de.adorsys.ledgers.middleware.service.domain.account;
 
-import de.adorsys.ledgers.middleware.service.domain.payment.AmountTO;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
+import de.adorsys.ledgers.middleware.service.domain.payment.AmountTO;
 
 public class TransactionTO {
 
@@ -29,7 +34,11 @@ public class TransactionTO {
     private String mandateId;
     private String checkId;
     private String creditorId;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate bookingDate;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate valueDate;
     private AmountTO amount;
     private List<ExchangeRateTO> exchangeRate;

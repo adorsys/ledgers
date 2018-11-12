@@ -15,6 +15,7 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.ScaMethodType;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
@@ -40,7 +41,6 @@ public class ScaUserDataRepositoryIT {
     public void test_create_ok() {
 
         ScaUserDataEntity data = new ScaUserDataEntity();
-        data.setId(Ids.id());
         data.setScaMethod(ScaMethodType.EMAIL);
         data.setMethodValue("vne@adorsys.de");
 
@@ -50,10 +50,9 @@ public class ScaUserDataRepositoryIT {
         user.setLogin("vne");
         user.setEmail("vne@adorsys.de");
 
-        data.setUser(user);
         user.getScaUserData().add(data);
-        data.setUser(user);
-        userRepository.save(user);
+        user = userRepository.save(user);
+        data = user.getScaUserData().iterator().next();
         ScaUserDataEntity result = scaUserDataRepository.findById(data.getId()).orElse(null);
         Assert.notNull(result);
     }

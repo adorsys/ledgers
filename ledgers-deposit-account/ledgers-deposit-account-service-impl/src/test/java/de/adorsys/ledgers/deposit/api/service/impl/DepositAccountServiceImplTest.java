@@ -1,11 +1,13 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
@@ -14,10 +16,12 @@ import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.util.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
@@ -27,8 +31,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +58,8 @@ public class DepositAccountServiceImplTest {
     private PostingService postingService;
     @Mock
     private PaymentMapper paymentMapper;
+    @Mock
+    private TransactionDetailsMapper transactionDetailsMapper;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -118,6 +126,24 @@ public class DepositAccountServiceImplTest {
         when(postingService.findPostingsByOperationId(anyString())).thenReturn(Collections.emptyList());
 
         depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
+    }
+
+    @Test
+    public void getTransactionsByDates() throws DepositAccountNotFoundException, TransactionNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, JsonProcessingException {
+        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(new DepositAccount()));
+        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(new DepositAccountBO());
+        when(postingService.findPostingsByDates(any(), any(), any())).thenReturn(Collections.singletonList(newPostingLineBO()));
+        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+        List<TransactionDetailsBO> result = depositAccountService.getTransactionsByDates(ACCOUNT_ID, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 18, 0, 0));
+        assertThat(result.isEmpty()).isFalse();
+    }
+
+    private PostingLineBO newPostingLineBO() throws JsonProcessingException {
+        PostingLineBO pl = new PostingLineBO();
+        pl.setAccount(new LedgerAccountBO());
+        pl.setDetails(SerializationUtils.writeValueAsString(new TransactionDetailsBO()));
+        return pl;
     }
 
     private DepositAccount getDepositAccount() {

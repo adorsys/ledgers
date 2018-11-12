@@ -63,6 +63,7 @@ public class Posting extends HashRecord {
     private String oprType;
 
     /* Details associated with this operation. */
+    @Lob
     private String oprDetails;
 
     /*

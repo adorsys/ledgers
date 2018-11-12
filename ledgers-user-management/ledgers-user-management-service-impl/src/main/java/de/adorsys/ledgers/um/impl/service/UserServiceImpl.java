@@ -16,8 +16,18 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import java.util.List;
+import java.util.Optional;
+
+import org.hibernate.exception.ConstraintViolationException;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -27,14 +37,6 @@ import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.MD5Util;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -54,13 +56,18 @@ public class UserServiceImpl implements UserService {
     public UserBO create(UserBO user) throws UserAlreadyExistsException {
         UserEntity userPO = userConverter.toUserPO(user);
 
-        if (userRepository.existsById(userPO.getId())) {
-            throw new UserAlreadyExistsException(user);
-        }
-
         userPO.setPin(MD5Util.encode(user.getPin()));
-
-        return userConverter.toUserBO(userRepository.save(userPO));
+        
+        try {
+        	return userConverter.toUserBO(userRepository.save(userPO));
+        } catch(ConstraintViolationException c) {
+        	if(UserEntity.USER_EMAIL_UNIQUE.equals(c.getConstraintName()) ||   //TODO by @speex Let's UserAlreadyExistsException will decide what to do, just pass user and exception args to it
+        			UserEntity.USER_LOGIN_UNIQUE.equals(c.getConstraintName())){
+        		throw new UserAlreadyExistsException(user, c);
+        	} else {
+        		throw new UserAlreadyExistsException(c.getMessage(), c);
+        	}
+        }
     }
 
     @Override

@@ -3,6 +3,11 @@ package de.adorsys.ledgers.deposit.api.domain;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
 public class TransactionDetailsBO {
     private String transactionId;
     private String entryReference;
@@ -10,7 +15,11 @@ public class TransactionDetailsBO {
     private String mandateId;
     private String checkId;
     private String creditorId;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate bookingDate;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate valueDate;
     private AmountBO transactionAmount;
     private List<ExchangeRateBO> exchangeRate;

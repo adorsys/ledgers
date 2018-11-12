@@ -32,4 +32,12 @@ public class UserAlreadyExistsException extends Exception {
     public UserAlreadyExistsException(String message) {
         super(message);
     }
+
+	public UserAlreadyExistsException(UserBO user, Throwable cause) {
+		super(String.format(ERROR_MESSAGE, user.getLogin(), user.getEmail()), cause);
+	}
+
+	public UserAlreadyExistsException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

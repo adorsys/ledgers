@@ -16,10 +16,9 @@ import de.adorsys.ledgers.postings.db.domain.BaseEntity;
  *
  */
 @Configuration
-@ComponentScan(basePackageClasses= {PostingsBasePackage.class})
+@ComponentScan(basePackageClasses= {PostingsDBBasePackage.class})
 @EnableJpaAuditing
 @EnableJpaRepositories
-//@EntityScan(basePackageClasses= {BaseEntity.class, Jsr310JpaConverters.class})
 @EntityScan(basePackageClasses= {BaseEntity.class})
 public class PostingsRepositoryConfiguration {
 }

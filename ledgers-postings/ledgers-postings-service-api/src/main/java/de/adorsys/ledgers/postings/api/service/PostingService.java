@@ -1,8 +1,11 @@
 package de.adorsys.ledgers.postings.api.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
@@ -21,8 +24,8 @@ public interface PostingService {
      * @param posting
      * @return
      * @throws PostingNotFoundException
-     * @throws BaseLineException 
-     * @throws DoubleEntryAccountingException 
+     * @throws BaseLineException
+     * @throws DoubleEntryAccountingException
      */
     PostingBO newPosting(PostingBO posting) throws PostingNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException, DoubleEntryAccountingException;
 
@@ -33,4 +36,6 @@ public interface PostingService {
      * @return
      */
     List<PostingBO> findPostingsByOperationId(String oprId);
+
+    List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime dateFrom, LocalDateTime dateTo) throws LedgerAccountNotFoundException, LedgerNotFoundException;
 }

@@ -1,0 +1,69 @@
+accounts: 
+  - iban: DE69760700240340283600
+    currency: EUR
+    name: Marion Mueller
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE80760700240271232400
+    currency: EUR
+    name: Anton Brueckner
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE38760700240320465700
+    currency: EUR
+    name: Max Musterman
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+users:
+  - login: marion.mueller
+    email: marion.mueller@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: marion.mueller@mail.de
+    accountAccesses:
+      - iban: DE69760700240340283600
+        accessType: OWNER
+  - login: anton.brueckner
+    email: anton.brueckner@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: anton.brueckner@mail.de
+    accountAccesses:
+      - iban: DE80760700240271232400
+        accessType: OWNER
+  - login: max.musterman
+    email: max.musterman@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: max.musterman@mail.de
+    accountAccesses:
+      - iban: DE38760700240320465700
+        accessType: OWNER
+singlePaymentTests:
+  - singlePayment:
+      debtorAccount:
+        iban: DE69760700240340283600
+        currency: EUR
+      instructedAmount:
+        amount: 3000
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balanceDebitAccountBefore: 0.00
+    balanceCreditAccountBefore: 0.00
+    balanceDebitAccountAfter: -3000.00
+    balanceCreditAccountAfter: 3000.00
+    
+    

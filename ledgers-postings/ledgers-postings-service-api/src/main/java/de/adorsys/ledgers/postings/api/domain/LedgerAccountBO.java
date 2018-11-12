@@ -11,7 +11,7 @@ public class LedgerAccountBO extends NamedBO {
 	/* Name of the containing ledger */
 	private LedgerBO ledger;
 
-	/*
+	/**
 	 * Identifier of the parent of this account in the containing chart of
 	 * account.
 	 * 
@@ -20,7 +20,7 @@ public class LedgerAccountBO extends NamedBO {
 	 */
 	private LedgerAccountBO parent;
 
-	/*
+	/**
 	 * The Chart of account defining this ledger account.
 	 * 
 	 * This can be inherited from the parent account. Must always
@@ -28,7 +28,7 @@ public class LedgerAccountBO extends NamedBO {
 	 */
 	private ChartOfAccountBO coa;
 	
-	/* 
+	/**
 	 * Indicator on what BS side increases the balance of this account.
 	 * 
 	 *  Helps decides where to display the position in a balance sheet.
@@ -36,7 +36,7 @@ public class LedgerAccountBO extends NamedBO {
 	 */
 	private BalanceSideBO balanceSide;
 	
-	/*
+	/**
 	 * Each account belongs to an account category
 	 */
 	private AccountCategoryBO category;

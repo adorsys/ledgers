@@ -7,10 +7,14 @@ import java.util.Currency;
 @Component
 public class CurrencyMapper {
     public Currency toCurrency(String currency) {
-        return Currency.getInstance(currency);
+        return currency == null
+                       ? null
+                       : Currency.getInstance(currency);
     }
 
     public String currencyToString(Currency currency) {
-        return currency.getCurrencyCode();
+        return currency == null
+                       ? null
+                       : currency.getCurrencyCode();
     }
 }

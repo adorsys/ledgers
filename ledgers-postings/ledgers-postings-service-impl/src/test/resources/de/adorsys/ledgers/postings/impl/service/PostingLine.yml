@@ -1,0 +1,13 @@
+id: id
+account:
+debitAmount: 100
+creditAmount: 0
+details: details
+srcAccount: sourceAccId
+baseLine: baseline
+subOprSrcId: someId
+recordTime: 2018-12-12T00:00:00
+oprId: oprId
+oprSrc: paymentId
+pstTime: 2018-12-12T00:00:00
+pstType: ADJ_TX

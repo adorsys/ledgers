@@ -3,10 +3,12 @@ package de.adorsys.ledgers.util;
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SerializationUtils {
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	public static byte[] writeValueAsBytes(Object value)
 	        throws JsonProcessingException{

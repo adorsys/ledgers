@@ -1,0 +1,8 @@
+name: name
+id: id
+created: 2018-12-12T00:00:00
+userDetails: userDetails
+shortDesc: shortDescr
+ledger:
+balanceSide:
+category: RE

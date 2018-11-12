@@ -1,0 +1,596 @@
+- shortDesc: "Assets"
+  name: 1
+  category: AS
+  balanceSide: Dr
+- shortDesc: "Property, Plant And Equipment"
+  name: 1.1
+- shortDesc: "Land And Buildings"
+  name: 1.1.1
+- shortDesc: "Machinery And Equipment"
+  name: 1.1.2
+- shortDesc: "Vehicles"
+  name: 1.1.3
+- shortDesc: "Fixtures And Fittings"
+  name: 1.1.4
+- shortDesc: "Exploration And Evaluation Assets"
+  name: 1.1.5
+- shortDesc: "Additional Property, Plant And Equipment"
+  name: 1.1.6
+- shortDesc: "Construction In Progress"
+  name: 1.1.7
+- shortDesc: "Investment Property"
+  name: 1.2
+- shortDesc: "Investment Property Under Construction Or Development"
+  name: 1.2.1
+- shortDesc: "Investment Property Completed"
+  name: 1.2.2
+- shortDesc: "Intangible Assets"
+  name: 1.3
+- shortDesc: "Intangible Assets Other Than Goodwill"
+  name: 1.3.1
+- shortDesc: "Goodwill"
+  name: 1.3.2
+- shortDesc: "Financial Assets"
+  name: 1.4
+- shortDesc: "Group Companies (Intercompany Investments)"
+  name: 1.4.1
+- shortDesc: "Investments And Financial Instruments"
+  name: 1.4.2
+- shortDesc: "Derivative Financial Assets"
+  name: 1.4.3
+- shortDesc: "Other Financial Assets"
+  name: 1.4.4
+- shortDesc: "Allowance For Credit Losses (Aggregate)"
+  name: 1.4.5
+  balanceSide: Cr
+- shortDesc: "Financial Assets Classified By Designation"
+  name: 1.4.6
+- shortDesc: "Biological Assets"
+  name: 1.5
+- shortDesc: "Biological Assets At Cost"
+  name: 1.5.1
+- shortDesc: "Biological Assets At Fair Value"
+  name: 1.5.2
+- shortDesc: "Accrued And Other Assets"
+  name: 1.6
+- shortDesc: "Prepayments And Other Current Assets"
+  name: 1.6.1
+- shortDesc: "Tax Related Receivables"
+  name: 1.6.2
+- shortDesc: "Service Providers"
+  name: 1.6.3
+- shortDesc: "Construction Contract Asset"
+  name: 1.6.4
+- shortDesc: "Set Up Costs"
+  name: 1.6.5
+- shortDesc: "Restricted Assets"
+  name: 1.6.6
+- shortDesc: "Current Investments Not Classified As Cash Equivalents"
+  name: 1.6.7
+- shortDesc: "Additional, Other And Miscellaneous Assets"
+  name: 1.6.8
+- shortDesc: "Inventories"
+  name: 1.7
+- shortDesc: "Raw Materials and Production Supplies"
+  name: 1.7.1
+- shortDesc: "Merchandise"
+  name: 1.7.2
+- shortDesc: "Food and Beverage"
+  name: 1.7.3
+- shortDesc: "Agricultural Produce"
+  name: 1.7.4
+- shortDesc: "Work In Progress"
+  name: 1.7.5
+- shortDesc: "Materials and Supplies To Be Consumed In Production Process Or Rendering Services"
+  name: 1.7.6
+- shortDesc: "Finished Goods"
+  name: 1.7.7
+- shortDesc: "Packaging And Storage Materials"
+  name: 1.7.8
+- shortDesc: "Spare Parts"
+  name: 1.7.9
+- shortDesc: "Fuel"
+  name: 1.7.10
+- shortDesc: "Property Intended For Sale In Ordinary Course Of Business"
+  name: 1.7.11
+- shortDesc: "Inventories In Transit"
+  name: 1.7.12
+- shortDesc: "Other Inventories"
+  name: 1.7.13
+- shortDesc: "Inventories Pledged As Security For Liabilities"
+  name: 1.7.14
+- shortDesc: "Inventories At Fair Value Less Costs To Sell"
+  name: 1.7.15
+- shortDesc: "Acquisition In Progress"
+  name: 1.7.16
+- shortDesc: "Additional Inventory Items"
+  name: 1.7.17
+- shortDesc: "Receivables"
+  name: 1.8
+- shortDesc: "Trade Receivables"
+  name: 1.8.1
+- shortDesc: "Contract Assets"
+  name: 1.8.2
+- shortDesc: "Other Receivables"
+  name: 1.8.3
+- shortDesc: "Adjustments"
+  name: 1.8.4
+  balanceSide: Cr
+- shortDesc: "Cash And Cash Equivalents"
+  name: 1.9
+- shortDesc: "Cash"
+  name: 1.9.1
+- shortDesc: "Cash Equivalents"
+  name: 1.9.2
+- shortDesc: "Short-Term Investments"
+  name: 1.9.3
+- shortDesc: "Other Cash And Cash Equivalents"
+  name: 1.9.4
+- shortDesc: "Equity"
+  name: 2
+  category: EQ
+  balanceSide: Cr
+- shortDesc: "Issued Capital"
+  name: 2.1
+- shortDesc: "Ordinary Shares"
+  name: 2.1.1
+- shortDesc: "Preferred Shares"
+  name: 2.1.2
+- shortDesc: "Par Value Per Share"
+  name: 2.1.3
+- shortDesc: "Share Premium"
+  name: 2.1.4
+- shortDesc: "Additional Paid In Capital"
+  name: 2.1.5
+- shortDesc: "Retained Earnings"
+  name: 2.2
+  balanceSide: DrCr
+- shortDesc: "Current Year's Retained Profit (Loss)"
+  name: 2.2.1
+  balanceSide: DrCr
+- shortDesc: "Prior Years' Retained Profit (Loss)"
+  name: 2.2.2
+  balanceSide: DrCr
+- shortDesc: "Other Reserves (Accumulated Other Comprehensive Income)"
+  name: 2.3
+  balanceSide: DrCr
+- shortDesc: "Revaluation Surplus"
+  name: 2.3.1
+  balanceSide: Cr
+- shortDesc: "Reserve Of Exchange Differences On Translation"
+  name: 2.3.2
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Cash Flow Hedges"
+  name: 2.3.3
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Gains And Losses On Hedging Instruments That Hedge Investments In Equity Instruments"
+  name: 2.3.4
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Change In Value Of Time Value Of Options"
+  name: 2.3.5
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Change In Value Of Forward Elements Of Forward Contracts"
+  name: 2.3.6
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Change In Value Of Foreign Currency Basis Spreads"
+  name: 2.3.7
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Gains And Losses On Financial Assets Measured At Fair Value Through Other Comprehensive Income"
+  name: 2.3.8
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Gains And Losses On Remeasuring Available-For-Sale Financial Assets"
+  name: 2.3.9
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Share-Based Payments"
+  name: 2.3.10
+  balanceSide: DrCr
+- shortDesc: "Reserve Of Remeasurements Of Defined Benefit Plans"
+  name: 2.3.11
+  balanceSide: DrCr
+- shortDesc: "Amount Recognised In Other Comprehensive Income And Accumulated In Equity Relating To Non-Current Assets Or Disposal Groups Held For Sale"
+  name: 2.3.12
+  balanceSide: Cr
+- shortDesc: "Reserve Of Gains And Losses From Investments In Equity Instruments"
+  name: 2.3.13
+  balanceSide: Cr
+- shortDesc: "Reserve Of Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability"
+  name: 2.3.14
+  balanceSide: Cr
+- shortDesc: "Reserve For Catastrophe"
+  name: 2.3.15
+  balanceSide: Cr
+- shortDesc: "Reserve For Equalisation"
+  name: 2.3.16
+  balanceSide: Cr
+- shortDesc: "Reserve Of Discretionary Participation Features"
+  name: 2.3.17
+  balanceSide: Cr
+- shortDesc: "Reserve Of Equity Component Of Convertible Instruments"
+  name: 2.3.18
+  balanceSide: Cr
+- shortDesc: "Capital Redemption Reserve"
+  name: 2.3.19
+  balanceSide: Cr
+- shortDesc: "Merger Reserve"
+  name: 2.3.20
+  balanceSide: Cr
+- shortDesc: "Statutory Reserve"
+  name: 2.3.21
+  balanceSide: Cr
+- shortDesc: "Other Equity"
+  name: 2.4
+  balanceSide: DrCr
+- shortDesc: "Other Equity Interest"
+  name: 2.4.1
+  balanceSide: Cr
+- shortDesc: "Capital Reserve"
+  name: 2.4.2
+  balanceSide: Cr
+- shortDesc: "Receivable For Shares (Share Subscribed But Unissued)"
+  name: 2.4.3
+  balanceSide: Dr
+- shortDesc: "Treasury Shares"
+  name: 2.4.4
+  balanceSide: Dr
+- shortDesc: "Controlling Interest"
+  name: 2.4.5
+  balanceSide: Cr
+- shortDesc: "Non-Controlling Interest"
+  name: 2.4.6
+  balanceSide: Cr
+- shortDesc: "Liabilities"
+  name: 3
+  category: LI
+  balanceSide: Cr
+- shortDesc: "Borrowings"
+  name: 3.1
+- shortDesc: "Borrowings (By Type)"
+  name: 3.1.1
+- shortDesc: "Financial Liabilities (By Designation)"
+  name: 3.1.2
+- shortDesc: "Provisions"
+  name: 3.2
+- shortDesc: "Employee Benefits"
+  name: 3.2.1
+- shortDesc: "Warranties"
+  name: 3.2.2
+- shortDesc: "Refunds"
+  name: 3.2.3
+- shortDesc: "Decommissioning, Restoration And Rehabilitation"
+  name: 3.2.4
+- shortDesc: "Restructuring"
+  name: 3.2.5
+- shortDesc: "Onerous Contracts"
+  name: 3.2.6
+- shortDesc: "Legal Proceedings"
+  name: 3.2.7
+- shortDesc: "Business Combinations"
+  name: 3.2.8
+- shortDesc: "Liabilities Included In Disposal Groups"
+  name: 3.2.9
+- shortDesc: "Other Provisions"
+  name: 3.2.10
+- shortDesc: "Miscellaneous Other Provisions"
+  name: 3.2.11
+- shortDesc: "Trade And Other Payables"
+  name: 3.3
+- shortDesc: "Trade Payables"
+  name: 3.3.1
+- shortDesc: "Contract Liabilities"
+  name: 3.3.2
+- shortDesc: "Related Party Payables"
+  name: 3.3.3
+- shortDesc: "Retention Payables"
+  name: 3.3.4
+- shortDesc: "Adjustments"
+  name: 3.3.5
+- shortDesc: "Accrued, Deferred And Other Liabilities"
+  name: 3.4
+- shortDesc: "Accrued Liabilities"
+  name: 3.4.1
+- shortDesc: "Accrued Expenses And Other Liabilities"
+  name: 3.4.2
+- shortDesc: "Dividend Payables"
+  name: 3.4.3
+- shortDesc: "Interest Payable"
+  name: 3.4.4
+- shortDesc: "Deferred Income, Unearned Revenue"
+  name: 3.4.5
+- shortDesc: "Advances"
+  name: 3.4.6
+- shortDesc: "Construction Contract Liability"
+  name: 3.4.7
+- shortDesc: "Other Payables"
+  name: 3.4.8
+- shortDesc: "Tax Liabilities"
+  name: 3.5
+- shortDesc: "Current Tax Liabilities"
+  name: 3.5.1
+- shortDesc: "Deferred Tax Liabilities"
+  name: 3.5.2
+- shortDesc: "Other And Miscellaneous Liabilities"
+  name: 3.6
+- shortDesc: "Finance Leases"
+  name: 3.6.1
+- shortDesc: "Deposits"
+  name: 3.6.2
+- shortDesc: "Derivative Financial Liabilities"
+  name: 3.6.3
+- shortDesc: "Government Grant Obligations"
+  name: 3.6.4
+- shortDesc: "Liabilities Due To Central Banks"
+  name: 3.6.5
+- shortDesc: "Subordinated Liabilities"
+  name: 3.6.6
+- shortDesc: "Other Liabilities"
+  name: 3.6.7
+- shortDesc: "Revenue"
+  name: 4
+  category: RE
+  balanceSide: Cr
+- shortDesc: "Goods"
+  name: 4.1
+- shortDesc: "Products"
+  name: 4.1.1
+- shortDesc: "Merchandise"
+  name: 4.1.2
+- shortDesc: "Adjustments"
+  name: 4.1.3
+  balanceSide: Dr
+- shortDesc: "Specifically Itemized Goods Revenues"
+  name: 4.1.4
+- shortDesc: "Services"
+  name: 4.2
+- shortDesc: "Specifically Itemized Service Revenues"
+  name: 4.2.1
+- shortDesc: "Revenue From Contracts With Customers"
+  name: 4.3
+- shortDesc: "Revenue From Construction Contracts"
+  name: 4.4
+- shortDesc: "Franchise Fee Income"
+  name: 4.5
+- shortDesc: "Barter Sales"
+  name: 4.6
+- shortDesc: "Goods"
+  name: 4.6.1
+- shortDesc: "Services"
+  name: 4.6.2
+- shortDesc: "Construction Contracts"
+  name: 4.6.3
+- shortDesc: "Royalties"
+  name: 4.6.4
+- shortDesc: "Interest"
+  name: 4.6.5
+- shortDesc: "Dividends"
+  name: 4.6.6
+- shortDesc: "Other Exchange Revenue"
+  name: 4.6.7
+- shortDesc: "Dividends Classified As Operating Expense"
+  name: 4.7
+  balanceSide: Dr
+- shortDesc: "By Nature Non-Revenue Income"
+  name: 4.8
+  balanceSide: DrCr
+- shortDesc: "Changes In Inventories"
+  name: 4.8.1
+  balanceSide: DrCr
+- shortDesc: "Work Performed By Entity And Capitalised"
+  name: 4.8.2
+  balanceSide: Cr
+- shortDesc: "Operating Expenses"
+  name: 5
+  category: EX
+  balanceSide: Dr
+- shortDesc: "Expenses Classified By Nature"
+  name: 5.1
+- shortDesc: "Raw Materials And Consumables"
+  name: 5.1.1
+- shortDesc: "Merchandise"
+  name: 5.1.2
+- shortDesc: "Employee Benefits"
+  name: 5.1.3
+- shortDesc: "Services"
+  name: 5.1.4
+- shortDesc: "Transportation Expense"
+  name: 5.1.5
+- shortDesc: "Depreciation And Amortisation"
+  name: 5.1.6
+- shortDesc: "Rental Expense"
+  name: 5.1.7
+- shortDesc: "Tax Other Than Income"
+  name: 5.1.8
+- shortDesc: "Expenses Classified By Function"
+  name: 5.2
+- shortDesc: "Cost Of Sales"
+  name: 5.2.1
+- shortDesc: "Selling, General And Administrative"
+  name: 5.2.2
+- shortDesc: "Non-Operating Income And Expense (Peripheral Activities)"
+  name: 6
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Other Income"
+  name: 6.1
+  category: NORE
+  balanceSide: Cr
+- shortDesc: "Finance Income"
+  name: 6.1.1
+- shortDesc: "Interest Income"
+  name: 6.1.2
+- shortDesc: "Dividends"
+  name: 6.1.3
+- shortDesc: "Royalties"
+  name: 6.1.4
+- shortDesc: "Licensees"
+  name: 6.1.5
+- shortDesc: "Rental Income"
+  name: 6.1.6
+- shortDesc: "Contractual Fines And Penalties"
+  name: 6.1.7
+- shortDesc: "Income From Government Grants"
+  name: 6.1.8
+- shortDesc: "Property Service Charge Income"
+  name: 6.1.9
+- shortDesc: "Income From Reimbursements Under Insurance Policies"
+  name: 6.1.10
+- shortDesc: "Other Revenue"
+  name: 6.1.11
+- shortDesc: "Other Expenses"
+  name: 6.2
+  category: NOEX
+  balanceSide: Dr
+- shortDesc: "Finance Costs"
+  name: 6.2.1
+- shortDesc: "Interest Expense"
+  name: 6.2.2
+- shortDesc: "Property Service Charges"
+  name: 6.2.3
+- shortDesc: "Unwinding Discounts On Provisions"
+  name: 6.2.4
+- shortDesc: "Donations And Subsidies"
+  name: 6.2.5
+- shortDesc: "Dividends Classified As Expense"
+  name: 6.2.6
+- shortDesc: "Other Expense By Nature"
+  name: 6.2.7
+- shortDesc: "Other Operating Expenses By Function"
+  name: 6.2.8
+- shortDesc: "Gains And Losses"
+  name: 6.3
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Foreign Exchange Gain (Loss)"
+  name: 6.3.1
+  balanceSide: DrCr
+- shortDesc: "Impairment"
+  name: 6.3.2
+  category: NOEX
+  balanceSide: Dr
+- shortDesc: "Restructuring Activities"
+  name: 6.3.3
+  category: NOEX
+  balanceSide: Dr
+- shortDesc: "Disposals Of Non-Current Assets"
+  name: 6.3.4
+  category: NOEX
+  balanceSide: Cr
+- shortDesc: "Disposals Of Property, Plant And Equipment"
+  name: 6.3.5
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Disposals Of Investment Properties"
+  name: 6.3.6
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Disposals Of Investments"
+  name: 6.3.7
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Gains And Losses On Derivatives"
+  name: 6.3.8
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Disposals Of Other Non-Current Assets"
+  name: 6.3.9
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Changes In Contingent Consideration"
+  name: 6.3.10
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Changes In Investment Property"
+  name: 6.3.11
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Gain (Loss) On Liability Extinguishment"
+  name: 6.3.12
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Expense (Income) On Discontinued Operations"
+  name: 6.3.13
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Litigation Settlements"
+  name: 6.3.14
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Other Reversals Of Provisions"
+  name: 6.3.15
+  category: NORE
+  balanceSide: Cr
+- shortDesc: "Gain (Loss) On Financial Assets Reclassified To Fair Value"
+  name: 6.3.16
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Cumulative Gain (Loss) From Reclassification To OCI"
+  name: 6.3.17
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Gain (Loss) On Derecognition Of Amortised Cost Assets"
+  name: 6.3.18
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Gain (Loss) On Non-Cash Dividends"
+  name: 6.3.19
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Other Comprehensive Income Reclassification Adjustments"
+  name: 6.4
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Exchange Differences On Translation"
+  name: 6.4.1
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Available-For-Sale Financial Assets"
+  name: 6.4.2
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Cash Flow Hedges"
+  name: 6.4.3
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Hedges Of Net Investment In Foreign Operations"
+  name: 6.4.4
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Change In Value Of Time Value Of Options"
+  name: 6.4.5
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Change In Value Of Forward Elements Of Forward Contracts"
+  name: 6.4.6
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Change In Value Of Foreign Currency Basis Spreads"
+  name: 6.4.7
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Financial Assets Measured At Fair Value Through Other Comprehensive Income"
+  name: 6.4.8
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Group Companies"
+  name: 6.5
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Equity Method Investments"
+  name: 6.5.1
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Subsidiaries, Jointly Controlled Entities And Associates"
+  name: 6.5.2
+  category: NOOP
+  balanceSide: DrCr
+- shortDesc: "Income Tax"
+  name: 7
+  category: NOEX
+  balanceSide: Dr
+- shortDesc: "Expense"
+  name: 7.1
+  category: NOEX
+  balanceSide: Dr
+- shortDesc: "Benefit"
+  name: 7.2
+  category: NORE
+  balanceSide: Cr
