@@ -111,7 +111,7 @@ public class DepositAccountServiceImplTest {
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(new LedgerBO()));
         when(paymentTargetRepository.findById(any())).thenReturn(Optional.of(getTarget()));
-        when(postingService.findPostingById(any(), any())).thenReturn(new PostingLineBO());
+        when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
         when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
