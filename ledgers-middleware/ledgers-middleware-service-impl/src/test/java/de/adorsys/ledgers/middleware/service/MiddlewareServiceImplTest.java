@@ -281,7 +281,7 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test
-    public void initiatePayment() {
+    public void initiatePayment() throws AccountNotFoundMiddlewareException {
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
         when(paymentService.initiatePayment(any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
         when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
