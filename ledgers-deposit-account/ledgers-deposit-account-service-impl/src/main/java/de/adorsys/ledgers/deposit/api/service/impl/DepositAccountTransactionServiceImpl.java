@@ -168,7 +168,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
     private List<TransactionDetailsBO> executeTransactions(PostingBO posting) throws PaymentProcessingException {
         try {
-            PostingBO p = postingService.newPosting(posting);
+            PostingBO p = postingService.newPosting(posting); //TODO Here in BulkPayment with batchPref: false we get only one Postingline and our balance is getting spoiled
             return p.getLines().stream()
                            .map(transactionDetailsMapper::toTransaction)
                            .collect(Collectors.toList());
