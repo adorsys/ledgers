@@ -121,7 +121,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         fixDebitLine(storedPayment, posting, debitLine);
 
-        postings.forEach(p -> executeTransactions(p));
+        postings.forEach(this::executeTransactions);
         payment.setTransactionStatus(TransactionStatus.ACSP);
         payment = paymentRepository.save(payment);
         return TransactionStatusBO.valueOf(payment.getTransactionStatus().name());
@@ -233,7 +233,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     private PostingLineBO buildPostingLine(final PostingBO posting, String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
         PostingLineBO p = new PostingLineBO();
         p.setDetails(lineDetails);
-        p.setAccount(ledgerAccount);
+        p.setAccount(ledgerAccount); //TODO Refactor whole shit
         p.setDebitAmount(debitAmount);
         p.setCreditAmount(creditAmount);
         posting.getLines().add(p);

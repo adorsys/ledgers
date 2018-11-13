@@ -20,6 +20,4 @@ public interface PostingRepository extends PagingAndSortingRepository<Posting, S
     List<Posting> findByOprId(String oprId);
 
     Optional<Posting> findFirstByLedgerOrderByRecordTimeDesc(Ledger ledger);
-
-//    List<Posting> findAllByLedger_NameAndOprTimeAfterAndOprTimeBefore(String iban, LocalDateTime from, LocalDateTime to); //TODO check for compliance and test the filtering
 }
