@@ -58,7 +58,7 @@ public class DepositAccountServiceImplTest {
     @Mock
     private TransactionDetailsMapper transactionDetailsMapper;
     @Mock
-    PaymentTargetRepository paymentTargetRepository;
+    private PaymentTargetRepository paymentTargetRepository;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -116,7 +116,7 @@ public class DepositAccountServiceImplTest {
 
         TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
         assertThat(result).isNotNull();
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readFile(TransactionDetailsBO.class, "Transaction.yml")); //TODO uncomment after implementation of transactionMapper
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
     }
 
