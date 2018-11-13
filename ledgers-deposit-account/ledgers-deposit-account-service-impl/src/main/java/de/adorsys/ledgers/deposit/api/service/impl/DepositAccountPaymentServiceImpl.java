@@ -22,7 +22,6 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.PaymentSchedulerService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
@@ -35,7 +34,6 @@ import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
-//    private static final Logger LOGGER = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
 
     private final PaymentRepository paymentRepository;
 
@@ -43,14 +41,11 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
 
     private final PaymentSchedulerService paymentSchedulerService;
 
-    private final DepositAccountService depositAccountService;
-
-    public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, PaymentRepository paymentRepository, PaymentMapper paymentMapper, PaymentSchedulerService paymentSchedulerService, DepositAccountService depositAccountService) {
+    public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, PaymentRepository paymentRepository, PaymentMapper paymentMapper, PaymentSchedulerService paymentSchedulerService) {
         super(depositAccountConfigService, ledgerService);
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.paymentSchedulerService = paymentSchedulerService;
-        this.depositAccountService = depositAccountService;
     }
 
     @Override
