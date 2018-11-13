@@ -13,4 +13,10 @@ public class PostingNotFoundException extends Exception {
 		this(String.format("Entity of type %s and id %s not found.", model.getClass().getName(), model.getId()));
 	}
 
+	public PostingNotFoundException(String accountId, String oprSrcId) {
+		this(String.format("Posting with account id %s  and oprSrcId %s could not be found", accountId, oprSrcId));
+	}
+	
+	
+
 }

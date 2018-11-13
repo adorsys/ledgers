@@ -71,7 +71,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         LedgerAccount account = loadLedgerAccount(ledgerAccount);
         return postingLineRepository.findFirstByAccountAndOprSrc(account, sourceId)
                        .map(postingLineMapper::toPostingLineBO)
-                       .orElseThrow(() -> new PostingNotFoundException(String.format("Posting with %s could not be found", sourceId)));
+                       .orElseThrow(() -> new PostingNotFoundException(account.getId(), sourceId));
     }
 
     private Posting newPosting(Posting posting) throws DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
