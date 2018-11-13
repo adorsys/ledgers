@@ -105,7 +105,8 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         // Initialize the debit line with zero.
         PostingLineBO debitLine = buildDebitLine(posting, oprDetails, debtorLedgerAccount, BigDecimal.ZERO);
 
-        Set<PostingBO> postings = storedPayment.getTargets().stream().map(target -> {
+        Set<PostingBO> postings = storedPayment.getTargets().stream()
+                                          .map(target -> {
             target.setPayment(storedPayment);
             PostingBO postingBO = posting;
             PostingLineBO debitLineBO = debitLine;
@@ -227,7 +228,9 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     }
 
     private PostingLineBO buildDebitLine(final PostingBO posting, String oprDetails, LedgerAccountBO debtorLedgerAccount, BigDecimal amount) {
-        return buildPostingLine(posting, oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
+        PostingLineBO line = buildPostingLine(posting, oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
+        line.setSubOprSrcId(posting.getOprId());
+        return line;
     }
 
     private PostingLineBO buildPostingLine(final PostingBO posting, String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
