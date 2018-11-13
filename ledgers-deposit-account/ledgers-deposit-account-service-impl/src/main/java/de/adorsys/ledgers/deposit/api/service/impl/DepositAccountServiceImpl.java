@@ -178,7 +178,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             String sourceId = paymentTargetRepository.findById(transactionId)
                                       .map(t -> t.getPayment().getPaymentId())
                                       .orElseThrow(() -> new TransactionNotFoundException(accountId, transactionId));
-            PostingLineBO posting = postingService.findPostingById(ledgerAccountBO, sourceId);
+            PostingLineBO posting = postingService.findPostingLineById(ledgerAccountBO, sourceId);
             TransactionDetailsBO transaction = transactionDetailsMapper.toTransaction(posting);
             if (!transaction.getTransactionId().equals(transactionId)) {
                 throw new TransactionNotFoundException(accountId, transactionId);

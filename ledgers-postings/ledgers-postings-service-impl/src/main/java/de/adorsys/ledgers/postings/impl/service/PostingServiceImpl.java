@@ -67,7 +67,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     @Override
-    public PostingLineBO findPostingById(LedgerAccountBO ledgerAccount, String sourceId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException {
+    public PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String sourceId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException {
         LedgerAccount account = loadLedgerAccount(ledgerAccount);
         return postingLineRepository.findFirstByAccountAndOprSrc(account, sourceId)
                        .map(postingLineMapper::toPostingLineBO)
