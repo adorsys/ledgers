@@ -8,17 +8,15 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
-import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
-import de.adorsys.ledgers.deposit.db.domain.AccountType;
-import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
-import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
+import de.adorsys.ledgers.deposit.db.domain.*;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
+import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.SerializationUtils;
@@ -39,7 +37,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,6 +57,8 @@ public class DepositAccountServiceImplTest {
     private PaymentMapper paymentMapper;
     @Mock
     private TransactionDetailsMapper transactionDetailsMapper;
+    @Mock
+    private PaymentTargetRepository paymentTargetRepository;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -93,7 +92,7 @@ public class DepositAccountServiceImplTest {
     public void getDepositAccountById_wrong_id() throws DepositAccountNotFoundException {
         when(depositAccountRepository.findById("wrong_id")).thenReturn(Optional.empty());
         //When
-        DepositAccountBO account = depositAccountService.getDepositAccountById("wrong_id");
+        depositAccountService.getDepositAccountById("wrong_id");
     }
 
     @Test
@@ -107,29 +106,41 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getTransactionById() throws DepositAccountNotFoundException, TransactionNotFoundException {
+    public void getTransactionById() throws TransactionNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
-        when(postingService.findPostingsByOperationId(anyString())).thenReturn(Collections.singletonList(readFile(PostingBO.class, "Posting.yml")));
-        //when(paymentMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(new LedgerBO()));
+        when(paymentTargetRepository.findById(any())).thenReturn(Optional.of(getTarget()));
+        when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
+        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
         assertThat(result).isNotNull();
-        //assertThat(result).isEqualToComparingFieldByFieldRecursively(readFile(TransactionDetailsBO.class, "Transaction.yml")); //TODO uncomment after implementation of transactionMapper
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
     }
 
+    private PaymentTarget getTarget() {
+        PaymentTarget target = new PaymentTarget();
+        Payment payment = new Payment();
+        payment.setPaymentId("payment_id");
+        target.setPayment(payment);
+        return target;
+    }
+
     @Test(expected = TransactionNotFoundException.class)
-    public void getTransactionById_Failure() throws DepositAccountNotFoundException, TransactionNotFoundException {
+    public void getTransactionById_Failure() throws TransactionNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
+        when(depositAccountConfigService.getLedger()).thenReturn("name");
+        when(ledgerService.findLedgerByName("name")).thenReturn(Optional.of(new LedgerBO()));
+        when(ledgerService.findLedgerAccount(any(), any())).thenReturn(new LedgerAccountBO());
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
-        when(postingService.findPostingsByOperationId(anyString())).thenReturn(Collections.emptyList());
 
         depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
     }
 
     @Test
-    public void getTransactionsByDates() throws DepositAccountNotFoundException, TransactionNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, JsonProcessingException {
+    public void getTransactionsByDates() throws DepositAccountNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, JsonProcessingException {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(new DepositAccount()));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(new DepositAccountBO());
         when(postingService.findPostingsByDates(any(), any(), any())).thenReturn(Collections.singletonList(newPostingLineBO()));

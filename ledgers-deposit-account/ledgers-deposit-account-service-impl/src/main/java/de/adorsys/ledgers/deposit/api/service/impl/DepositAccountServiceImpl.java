@@ -10,10 +10,12 @@ import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
+import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
 import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -33,20 +35,19 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     private final DepositAccountRepository depositAccountRepository;
     private final DepositAccountMapper depositAccountMapper;
-    private final AccountStmtService accountStmtService; //NOPMD
+    private final AccountStmtService accountStmtService;
     private final PostingService postingService;
     private final TransactionDetailsMapper transactionDetailsMapper;
+    private final PaymentTargetRepository paymentTargetRepository;
 
-    public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
-                                     LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
-                                     DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService,
-                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper) {
+    public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, DepositAccountRepository depositAccountRepository, DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService, PostingService postingService, TransactionDetailsMapper transactionDetailsMapper, PaymentTargetRepository paymentTargetRepository) {
         super(depositAccountConfigService, ledgerService);
         this.depositAccountRepository = depositAccountRepository;
         this.depositAccountMapper = depositAccountMapper;
         this.accountStmtService = accountStmtService;
         this.postingService = postingService;
         this.transactionDetailsMapper = transactionDetailsMapper;
+        this.paymentTargetRepository = paymentTargetRepository;
     }
 
     @Override
@@ -169,15 +170,23 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws DepositAccountNotFoundException, TransactionNotFoundException {
-        DepositAccountBO account = getDepositAccountById(accountId);
-        List<PostingBO> postings = postingService.findPostingsByOperationId(transactionId); //TODO @fpo Are we sure that there can be more than one posting per id?
-
-        if (!postings.isEmpty()
-                    && postings.get(0).getLedger().getName().equals(account.getIban())) { //TODO refactor according to @fpo IBAN in posting is somewhere else
-            return new TransactionDetailsBO();//paymentMapper.toTransaction(postings.get(0)); //TODO Uncomment after @fpo implemented the mapper
+    public TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundException {
+        try {
+            DepositAccountBO account = getDepositAccountById(accountId);
+            LedgerBO ledgerBO = loadLedger();
+            LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
+            String sourceId = paymentTargetRepository.findById(transactionId)
+                                      .map(t -> t.getPayment().getPaymentId())
+                                      .orElseThrow(() -> new TransactionNotFoundException(accountId, transactionId));
+            PostingLineBO posting = postingService.findPostingLineById(ledgerAccountBO, sourceId);
+            TransactionDetailsBO transaction = transactionDetailsMapper.toTransaction(posting);
+            if (!transaction.getTransactionId().equals(transactionId)) {
+                throw new TransactionNotFoundException(accountId, transactionId);
+            }
+            return transaction;
+        } catch (DepositAccountNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | PostingNotFoundException e) {
+            throw new TransactionNotFoundException(e.getMessage());
         }
-        throw new TransactionNotFoundException(accountId, transactionId);
     }
 
     private LedgerAccountBO newLedgerAccountBOObj(LedgerBO ledger, String iban) {

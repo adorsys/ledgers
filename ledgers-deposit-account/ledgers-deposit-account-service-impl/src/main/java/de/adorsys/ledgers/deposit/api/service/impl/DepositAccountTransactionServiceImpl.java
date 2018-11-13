@@ -105,7 +105,8 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         // Initialize the debit line with zero.
         PostingLineBO debitLine = buildDebitLine(posting, oprDetails, debtorLedgerAccount, BigDecimal.ZERO);
 
-        Set<PostingBO> postings = storedPayment.getTargets().stream().map(target -> {
+        Set<PostingBO> postings = storedPayment.getTargets().stream()
+                                          .map(target -> {
             target.setPayment(storedPayment);
             PostingBO postingBO = posting;
             PostingLineBO debitLineBO = debitLine;
@@ -121,7 +122,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         fixDebitLine(storedPayment, posting, debitLine);
 
-        postings.forEach(p -> executeTransactions(p));
+        postings.forEach(this::executeTransactions);
         payment.setTransactionStatus(TransactionStatus.ACSP);
         payment = paymentRepository.save(payment);
         return TransactionStatusBO.valueOf(payment.getTransactionStatus().name());
@@ -168,7 +169,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
     private List<TransactionDetailsBO> executeTransactions(PostingBO posting) throws PaymentProcessingException {
         try {
-            PostingBO p = postingService.newPosting(posting);
+            PostingBO p = postingService.newPosting(posting); //TODO Here in BulkPayment with batchPref: false we get only one Postingline and our balance is getting spoiled
             return p.getLines().stream()
                            .map(transactionDetailsMapper::toTransaction)
                            .collect(Collectors.toList());
@@ -227,13 +228,15 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     }
 
     private PostingLineBO buildDebitLine(final PostingBO posting, String oprDetails, LedgerAccountBO debtorLedgerAccount, BigDecimal amount) {
-        return buildPostingLine(posting, oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
+        PostingLineBO line = buildPostingLine(posting, oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
+        line.setSubOprSrcId(posting.getOprId());
+        return line;
     }
 
     private PostingLineBO buildPostingLine(final PostingBO posting, String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
         PostingLineBO p = new PostingLineBO();
         p.setDetails(lineDetails);
-        p.setAccount(ledgerAccount);
+        p.setAccount(ledgerAccount); //TODO Refactor whole shit
         p.setDebitAmount(debitAmount);
         p.setCreditAmount(creditAmount);
         posting.getLines().add(p);

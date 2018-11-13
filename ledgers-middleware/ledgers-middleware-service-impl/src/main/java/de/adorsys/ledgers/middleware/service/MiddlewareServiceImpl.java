@@ -211,12 +211,10 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public TransactionTO getTransactionById(String accountId, String transactionId) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException {
+    public TransactionTO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundMiddlewareException {
         try {
             TransactionDetailsBO transaction = accountService.getTransactionById(accountId, transactionId);
             return paymentConverter.toTransactionTO(transaction);
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         } catch (TransactionNotFoundException e) {
             throw new TransactionNotFoundMiddlewareException(e.getMessage(), e);
         }

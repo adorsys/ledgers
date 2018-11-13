@@ -3,10 +3,7 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
@@ -69,6 +66,13 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
                        .collect(Collectors.toList());
     }
 
+    @Override
+    public PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String sourceId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException {
+        LedgerAccount account = loadLedgerAccount(ledgerAccount);
+        return postingLineRepository.findFirstByAccountAndOprSrc(account, sourceId)
+                       .map(postingLineMapper::toPostingLineBO)
+                       .orElseThrow(() -> new PostingNotFoundException(account.getId(), sourceId));
+    }
 
     private Posting newPosting(Posting posting) throws DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
         LocalDateTime now = LocalDateTime.now();
