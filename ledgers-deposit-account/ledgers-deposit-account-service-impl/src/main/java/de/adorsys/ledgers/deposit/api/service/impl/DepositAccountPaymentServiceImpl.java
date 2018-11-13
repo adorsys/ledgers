@@ -16,10 +16,6 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
@@ -32,21 +28,21 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
-//    private static final Logger LOGGER = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
 
     private final PaymentRepository paymentRepository;
 
     private final PaymentMapper paymentMapper;
-    
+
     private final PaymentSchedulerService paymentSchedulerService;
-    
-    public DepositAccountPaymentServiceImpl(PaymentRepository paymentRepository, PaymentMapper paymentMapper, 
-    		LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService,
-    		PaymentSchedulerService paymentSchedulerService) {
-    	super(depositAccountConfigService, ledgerService);
+
+    public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, PaymentRepository paymentRepository, PaymentMapper paymentMapper, PaymentSchedulerService paymentSchedulerService) {
+        super(depositAccountConfigService, ledgerService);
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.paymentSchedulerService = paymentSchedulerService;
@@ -65,8 +61,8 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     @Override
     public PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException {
         return paymentRepository.findById(paymentId)
-                                    .map(paymentMapper::toPaymentBO)
-                                    .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+                       .map(paymentMapper::toPaymentBO)
+                       .orElseThrow(() -> new PaymentNotFoundException(paymentId));
     }
 
     @Override
@@ -84,13 +80,13 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
      * - Future date payment
      * - Periodic Payment
      * - Bulk Payment with batch execution
-     * 
+     * <p>
      * + Bulk payment without batch execution will be splited into single payments
      * and each single payment will be individually sent to this method.
      */
     @Override
     public TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException {
-    	
+
         PaymentBO storedPayment = getPaymentById(paymentId);
         if (storedPayment.getTransactionStatus() != TransactionStatusBO.RCVD) {
             throw new PaymentProcessingException("Payment execution failed due to: " + storedPayment.getTransactionStatus() + ", payment id: " + paymentId);
