@@ -1,10 +1,6 @@
 package de.adorsys.ledgers.um.db.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -19,7 +15,8 @@ public class ScaUserDataEntity {
     private String id;
 
     @Column(nullable = false)
-    private ScaMethodType scaMethod;
+    @Enumerated(EnumType.STRING)
+    private ScaMethodTypeEntity scaMethod;
 
     @Column(nullable = false)
     private String methodValue;
@@ -36,11 +33,11 @@ public class ScaUserDataEntity {
         this.methodValue = methodValue;
     }
 
-    public ScaMethodType getScaMethod() {
+    public ScaMethodTypeEntity getScaMethod() {
         return scaMethod;
     }
 
-    public void setScaMethod(ScaMethodType scaMethod) {
+    public void setScaMethod(ScaMethodTypeEntity scaMethod) {
         this.scaMethod = scaMethod;
     }
 }

@@ -17,21 +17,18 @@
 package de.adorsys.ledgers.um.api.domain;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UserBO {
 
     private String id;
 
-    @NotNull
     private String login;
 
-    @NotNull
     private String email;
 
-    @NotNull
     private String pin;
 
     private List<ScaUserDataBO> scaUserData = new ArrayList<>();
@@ -95,5 +92,41 @@ public class UserBO {
 
     public void setAccountAccesses(List<AccountAccessBO> accountAccesses) {
         this.accountAccesses = accountAccesses;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        UserBO userBO = (UserBO) o;
+        return Objects.equals(id, userBO.id) &&
+                Objects.equals(login, userBO.login) &&
+                Objects.equals(email, userBO.email) &&
+                Objects.equals(pin, userBO.pin) &&
+                Objects.equals(scaUserData, userBO.scaUserData) &&
+                Objects.equals(accountAccesses, userBO.accountAccesses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, email, pin, scaUserData, accountAccesses);
+    }
+
+    @Override
+    public String toString() {
+        return "UserBO{" +
+                "id='" + id + '\'' +
+                ", login='" + login + '\'' +
+                ", email='" + email + '\'' +
+                ", pin='" + pin + '\'' +
+                ", scaUserData=" + scaUserData +
+                ", accountAccesses=" + accountAccesses +
+                '}';
     }
 }

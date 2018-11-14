@@ -1,24 +1,39 @@
 package de.adorsys.ledgers.middleware.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.*;
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.ResultStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.BulkPaymentTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PeriodicPaymentTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.ResultStatusTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentConverterTest {

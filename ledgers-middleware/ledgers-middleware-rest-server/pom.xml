@@ -66,11 +66,6 @@
 			<artifactId>mapstruct-jdk8</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>pro.javatar.commons</groupId>
-            <artifactId>javatar-commons</artifactId>
-        </dependency>
-
 		<!-- test dependencies -->
 
         <dependency>
@@ -84,6 +79,12 @@
             <artifactId>spring-webmvc</artifactId>
             <scope>test</scope>
         </dependency>
+
+		<dependency>
+			<groupId>pro.javatar.commons</groupId>
+			<artifactId>javatar-commons</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>

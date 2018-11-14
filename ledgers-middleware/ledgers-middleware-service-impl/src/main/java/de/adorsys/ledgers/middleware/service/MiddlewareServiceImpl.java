@@ -41,6 +41,7 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.slf4j.Logger;
@@ -140,7 +141,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException {
         logger.info("Retrieving accounts by user login {}", userLogin);
         try {
-            List<AccountAccessBO> accountAccess = userService.getAccountAccessByUserLogin(userLogin);
+        	UserBO userBO = userService.findByLogin(userLogin);
+            List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
             logger.info("{} accounts were retrieved", accountAccess.size());
 
             List<String> ibans = accountAccess.stream()
@@ -189,7 +191,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     @Override
     public List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException {
         try {
-            List<ScaUserDataBO> userScaData = userService.getUserScaData(userLogin);
+        	UserBO userBO = userService.findByLogin(userLogin);
+            List<ScaUserDataBO> userScaData = userBO.getScaUserData();
             return scaMethodTOConverter.toSCAMethodListTO(userScaData);
         } catch (UserNotFoundException e) {
             logger.error(e.getMessage(), e);

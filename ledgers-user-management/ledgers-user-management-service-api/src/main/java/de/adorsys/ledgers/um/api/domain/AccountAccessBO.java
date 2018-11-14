@@ -12,26 +12,13 @@ public class AccountAccessBO {
     @NotNull
     private AccessTypeBO accessType;
 
-    @NotNull
-    private UserBO user;
-
-    public AccountAccessBO(@NotNull String iban, AccessTypeBO accessType, @NotNull UserBO user) {
+    public AccountAccessBO(@NotNull String iban, AccessTypeBO accessType) {
         this.iban = iban;
         this.accessType = accessType;
-        this.user = user;
     }
 
     public AccountAccessBO() {
 	}
-
-
-	public void setUser(UserBO user) {
-        this.user = user;
-    }
-
-    public UserBO getUser() {
-        return user;
-    }
 
     public String getId() {
         return id;

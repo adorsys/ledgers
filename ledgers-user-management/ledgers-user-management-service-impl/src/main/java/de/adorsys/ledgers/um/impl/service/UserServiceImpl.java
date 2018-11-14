@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -32,6 +33,7 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
@@ -47,7 +49,8 @@ public class UserServiceImpl implements UserService {
     private final UserConverter userConverter;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserConverter userConverter) {
+    public UserServiceImpl(UserRepository userRepository,
+                           UserConverter userConverter) {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
     }
@@ -57,7 +60,6 @@ public class UserServiceImpl implements UserService {
         UserEntity userPO = userConverter.toUserPO(user);
 
         userPO.setPin(MD5Util.encode(user.getPin()));
-        
         try {
         	return userConverter.toUserBO(userRepository.save(userPO));
         } catch(ConstraintViolationException c) {
@@ -82,26 +84,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean authorize(String login, String pin, String accountId) throws UserNotFoundException {
         return authorize(login, pin);
-//    	if( authorize(login, pin)) {
-        // verify that the user has this account.
-        // TODO get Account accesses and check if user is authorized to access this account.
-//    		return true;
-//    	}
-//        UserEntity user = getUser(login);
-//        String hashedPin = MD5Util.encode(user.getPin());
-//        //        long count = user.getAccounts().stream().filter(a -> a.getId().equals(accountId)).count();
-//        //        return pinVerified && count > 0;
-//        return MD5Util.verify(pin, hashedPin);
-//    	return false;
     }
 
-//    @Override
-//    public void addAccount(String login, LedgerAccount account) throws UserNotFoundException {
-//        UserPO user = getUser(login);
-//        List<LedgerAccount> accounts = user.getAccounts();
-//        accounts.add(account);
-//        userRepository.save(user);
-//    }
+    @Override
+    public List<UserBO> listUsers(int page, int size) {
+        List<UserEntity> content = userRepository.findAll(PageRequest.of(page, size)).getContent();
+        return userConverter.toUserBOList(content);
+    }
 
     @Override
     public UserBO findById(String id) throws UserNotFoundException {
@@ -111,32 +100,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<ScaUserDataBO> getUserScaData(String userId) throws UserNotFoundException {
-        Optional<UserEntity> user = userRepository.findById(userId);
-        user.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, userId)));
-        UserBO userBO = userConverter.toUserBO(user.get());
-        return userBO.getScaUserData();
-    }
+	public UserBO findByLogin(String login) throws UserNotFoundException {
+    	return userConverter.toUserBO(getUser(login));
+	}
 
     @Override
-    public List<AccountAccessBO> getAccountAccess(String userId) throws UserNotFoundException {
-        Optional<UserEntity> user = userRepository.findById(userId);
-        user.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, userId)));
-        UserBO userBO = userConverter.toUserBO(user.get());
-        return userBO.getAccountAccesses();
-    }
-
-    @Override
-    public List<AccountAccessBO> getAccountAccessByUserLogin(String userLogin) throws UserNotFoundException {
-        Optional<UserEntity> user = userRepository.findFirstByLogin(userLogin);
-        user.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
-        UserBO userBO = userConverter.toUserBO(user.get());
-        return userBO.getAccountAccesses();
-    }
-
-    @Override
-    public void updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException {
-
+    public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException {
         logger.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
                                   .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
@@ -145,7 +114,23 @@ public class UserServiceImpl implements UserService {
         user.setScaUserData(scaMethods);
 
         logger.info("{} sca methods would be updated", scaMethods.size());
-        userRepository.save(user);
+        UserEntity save = userRepository.save(user);
+        return userConverter.toUserBO(save);
+    }
+
+    @Override
+    public UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO)
+            throws UserNotFoundException {
+        logger.info("Retrieving user by login={}", userLogin);
+        UserEntity user = userRepository.findFirstByLogin(userLogin)
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
+
+        List<AccountAccess> accountAccesses = userConverter.toAccountAccessListEntity(accountAccessListBO);
+        user.setAccountAccesses(accountAccesses);
+
+        logger.info("{} account accesses would be updated", accountAccesses.size());
+        UserEntity save = userRepository.save(user);
+        return userConverter.toUserBO(save);
     }
 
     @NotNull

@@ -1,14 +1,14 @@
 package de.adorsys.ledgers.um.converter;
 
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
-import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.mapstruct.factory.Mappers;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.impl.converter.UserConverter;
 
 public class UserConverterTest {
     public static final String USER_ID = "someID";

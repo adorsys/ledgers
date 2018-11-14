@@ -16,12 +16,13 @@
 
 package de.adorsys.ledgers.um.api.service;
 
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import java.util.List;
+
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import java.util.List;
 
 public interface UserService {
 
@@ -56,15 +57,6 @@ public interface UserService {
     boolean authorize(String id, String pin, String accountId) throws UserNotFoundException;
 
     /**
-     * Adds new account for a specific User
-     *
-     * @param login   User login
-     * @param account Account to added for the user or throws UserNotFoundException
-     * @throws UserNotFoundException is thrown if user can`t be found
-     */
-//    void addAccount(String login, LedgerAccount account) throws UserNotFoundException;
-
-    /**
      * Finds a User by its identifier
      *
      * @param id User identifier
@@ -74,34 +66,24 @@ public interface UserService {
     UserBO findById(String id) throws UserNotFoundException;
 
     /**
+     * Finds a User by its login
      *
-     * @param userId user ID
-     * @return List<ScaUserDataBO> collection of SCAs for a user
+     * @param login User identifier
+     * @return a User or throws a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      */
-    List<ScaUserDataBO> getUserScaData(String userId) throws UserNotFoundException;
-
-    /**
-     *
-     * @param userId user ID
-     * @return List<AccountAccessBO> collection of AccountAccesses for a user
-     * @throws UserNotFoundException is thrown if user can`t be found
-     */
-    List<AccountAccessBO> getAccountAccess(String userId) throws UserNotFoundException;
-
-    /**
-     *
-     * @param userLogin user login
-     * @return List<AccountAccessBO> collection of AccountAccesses for a user
-     * @throws UserNotFoundException is thrown if user can`t be found
-     */
-    List<AccountAccessBO> getAccountAccessByUserLogin(String userLogin) throws UserNotFoundException;
+    UserBO findByLogin(String login) throws UserNotFoundException;
 
     /**
      * Update SCA methods by user login
      *
      * @param scaDataList user methods
      * @param userLogin user login
+     * @return 
      */
-    void updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException;
+    UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException;
+
+	UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO)  throws UserNotFoundException;
+
+	List<UserBO> listUsers(int page, int size);
 }
