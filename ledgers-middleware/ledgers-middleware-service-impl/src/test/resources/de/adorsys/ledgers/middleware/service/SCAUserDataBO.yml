@@ -1,14 +1,6 @@
 - id: 1
   scaMethod: EMAIL
   methodValue: spe@adorsys.com.ua
-  user:
-    id: 1
-    login: speex
-    email: spe@adorsys.com.ua
 - id: 2
   scaMethod: MOBILE
   methodValue: +380933686868
-  user:
-    id: 1
-    login: speex
-    email: spe@adorsys.com.ua

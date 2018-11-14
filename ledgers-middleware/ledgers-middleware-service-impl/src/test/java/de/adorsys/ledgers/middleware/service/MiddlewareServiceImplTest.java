@@ -1,9 +1,38 @@
 package de.adorsys.ledgers.middleware.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.deposit.api.domain.*;
+
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
@@ -22,35 +51,31 @@ import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
-import de.adorsys.ledgers.middleware.service.exception.*;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
@@ -105,7 +130,7 @@ public class MiddlewareServiceImplTest {
         });
 
         when(scaMethodTOConverter.toSCAMethodListBO(scaMethodTOS)).thenReturn(userData);
-        doNothing().when(userService).updateScaData(userData, userLogin);
+        when(userService.updateScaData(userData, userLogin)).thenReturn(new UserBO());
 
         middlewareService.updateScaMethods(scaMethodTOS, userLogin);
 
@@ -254,7 +279,9 @@ public class MiddlewareServiceImplTest {
         List<SCAMethodTO> scaMethodTOS = getDataFromFile("SCAMethodTO.yml", new TypeReference<List<SCAMethodTO>>() {
         });
 
-        when(userService.getUserScaData(login)).thenReturn(userData);
+        UserBO userBO = new UserBO();
+        userBO.getScaUserData().addAll(userData);
+        when(userService.findByLogin(login)).thenReturn(userBO);
         when(scaMethodTOConverter.toSCAMethodListTO(userData)).thenReturn(scaMethodTOS);
 
         List<SCAMethodTO> scaMethods = middlewareService.getSCAMethods(login);
@@ -267,7 +294,7 @@ public class MiddlewareServiceImplTest {
         assertThat(scaMethods.get(1).getType(), is(SCAMethodTypeTO.MOBILE));
         assertThat(scaMethods.get(1).getValue(), is("+380933686868"));
 
-        verify(userService, times(1)).getUserScaData(login);
+        verify(userService, times(1)).findByLogin(login);
         verify(scaMethodTOConverter, times(1)).toSCAMethodListTO(userData);
     }
 
@@ -275,7 +302,7 @@ public class MiddlewareServiceImplTest {
     public void getSCAMethodsUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException {
         String login = "spe@adorsys.com.ua";
 
-        when(userService.getUserScaData(login)).thenThrow(new UserNotFoundException());
+        when(userService.findByLogin(login)).thenThrow(new UserNotFoundException());
 
         middlewareService.getSCAMethods(login);
     }
@@ -347,7 +374,10 @@ public class MiddlewareServiceImplTest {
         });
         String iban = accessBOList.get(0).getIban();
 
-        when(userService.getAccountAccessByUserLogin(userLogin)).thenReturn(accessBOList);
+        UserBO userBO = new UserBO();
+        userBO.getAccountAccesses().addAll(accessBOList);
+        when(userService.findByLogin(userLogin)).thenReturn(userBO);
+        
         when(accountService.getDepositAccountsByIBAN(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
         when(detailsMapper.toAccountDetailsListTO(Collections.singletonList(accountBO))).thenReturn(Collections.singletonList(account));
 
@@ -356,7 +386,7 @@ public class MiddlewareServiceImplTest {
         assertThat(details.size(), is(1));
         assertThat(details.get(0), is(account));
 
-        verify(userService, times(1)).getAccountAccessByUserLogin(userLogin);
+        verify(userService, times(1)).findByLogin(userLogin);
         verify(accountService, times(1)).getDepositAccountsByIBAN(Collections.singletonList(iban));
         verify(detailsMapper, times(1)).toAccountDetailsListTO(Collections.singletonList(accountBO));
     }

@@ -1,39 +1,34 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.db.domain.AccountAccess;
-import de.adorsys.ledgers.um.db.domain.AccessType;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.MD5Util;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
@@ -111,7 +106,7 @@ public class UserServiceImplTest {
     public void findById() throws UserNotFoundException {
 
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
-        when(converter.toUserBO(userEntity)).thenReturn(userBO);
+        when(converter.toUserBO(any())).thenReturn(userBO);
 
         UserBO user = userService.findById(USER_ID);
 
@@ -119,39 +114,6 @@ public class UserServiceImplTest {
         assertThat(user.getEmail(), is(USER_EMAIL));
         assertThat(user.getLogin(), is(USER_LOGIN));
         assertThat(MD5Util.encode(user.getPin()), is(MD5Util.encode(USER_PIN)));
-
-        verify(repository, times(1)).findById(USER_ID);
-        verify(converter, times(1)).toUserBO(userEntity);
-    }
-
-    @Test
-    public void getUserScaData() throws UserNotFoundException {
-
-        when(repository.findById(USER_ID)).thenReturn(Optional.ofNullable(userEntity));
-        when(converter.toUserBO(userEntity)).thenReturn(userBO);
-
-        List<ScaUserDataBO> userData = userService.getUserScaData(USER_ID);
-
-        assertThat(userData.size(), is(2));
-        assertThat(userData.get(0).getMethodValue(), is(USER_EMAIL));
-
-        verify(repository, times(1)).findById(USER_ID);
-        verify(converter, times(1)).toUserBO(userEntity);
-    }
-
-    @Test
-    public void getAccountAccess() throws UserNotFoundException {
-
-        when(repository.findById(USER_ID)).thenReturn(Optional.ofNullable(userEntity));
-        when(converter.toUserBO(userEntity)).thenReturn(userBO);
-
-        List<AccountAccessBO> accAccess = userService.getAccountAccess(USER_ID);
-
-        assertThat(accAccess.size(), is(4));
-        assertThat(accAccess.get(0).getIban(), is(USER_IBAN));
-        assertThat(accAccess.get(1).getIban(), is(USER_IBAN));
-        assertThat(accAccess.get(0).getAccessType(), is(USER_ACC_ACCESS_TYPE_1));
-        assertThat(accAccess.get(1).getAccessType(), is(USER_ACC_ACCESS_TYPE_2));
 
         verify(repository, times(1)).findById(USER_ID);
         verify(converter, times(1)).toUserBO(userEntity);
@@ -165,61 +127,7 @@ public class UserServiceImplTest {
         userService.authorize(USER_NON_EXISTING_LOGIN, "SomePin");
     }
 
-    @Test(expected = UserNotFoundException.class)
-    public void getUserScaDataWithException() throws UserNotFoundException {
-
-        when(repository.findById(USER_NON_EXISTING_ID)).thenReturn(Optional.empty());
-
-        userService.getUserScaData(USER_NON_EXISTING_ID);
-    }
-
-    @Test(expected = UserNotFoundException.class)
-    public void getAccountAccessWithException() throws UserNotFoundException {
-
-        when(repository.findById(USER_NON_EXISTING_ID)).thenReturn(Optional.empty());
-
-        userService.getAccountAccess(USER_NON_EXISTING_ID);
-    }
-
-    @Test
-    public void getAccountAccessByUserLogin() throws UserNotFoundException {
-        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.of(userEntity));
-        when(converter.toUserBO(userEntity)).thenReturn(userBO);
-
-        List<AccountAccessBO> access = userService.getAccountAccessByUserLogin(USER_LOGIN);
-
-        assertThat(access.size(), is(4));
-
-        assertThat(access.get(0).getId(), is("1"));
-        assertThat(access.get(1).getId(), is("2"));
-
-        assertThat(access.get(0).getIban(), is(USER_IBAN));
-        assertThat(access.get(1).getIban(), is(USER_IBAN));
-
-        assertThat(access.get(0).getAccessType(), is(USER_ACC_ACCESS_TYPE_1));
-        assertThat(access.get(1).getAccessType(), is(USER_ACC_ACCESS_TYPE_2));
-
-
-        assertThat(access.get(2).getId(), is("3"));
-        assertThat(access.get(2).getAccessType(), is(AccessTypeBO.OWNER));
-        assertThat(access.get(2).getIban(), is("1234567"));
-
-        assertThat(access.get(3).getId(), is("4"));
-        assertThat(access.get(3).getAccessType(), is(AccessTypeBO.READ));
-        assertThat(access.get(3).getIban(), is("7777777"));
-
-        verify(repository, times(1)).findFirstByLogin(USER_LOGIN);
-        verify(converter, times(1)).toUserBO(userEntity);
-    }
-
-    @Test(expected = UserNotFoundException.class)
-    public void getAccountAccessByUserLoginUserNotFound() throws UserNotFoundException {
-        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
-        userService.getAccountAccessByUserLogin(USER_LOGIN);
-    }
-
-
-        private UserBO readUserBO() {
+    private UserBO readUserBO() {
         try {
             return reader.getObjectFromResource(getClass(),"user-BO.yml", UserBO.class);
         } catch (IOException e) {

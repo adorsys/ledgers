@@ -1,0 +1,18 @@
+{
+  "id": "NewUniqueID",
+  "email": "vne@adorsys.com.ua",
+  "pin": 12345678,
+  "login": "vne_ua",
+  "scaUserData": [
+    {
+      "id": 1,
+      "methodValue": "vne@adorsys.com.ua",
+      "scaMethod": "EMAIL"
+    },
+    {
+      "id": 2,
+      "methodValue": 3737463673647,
+      "scaMethod": "MOBILE"
+    }
+  ]
+}

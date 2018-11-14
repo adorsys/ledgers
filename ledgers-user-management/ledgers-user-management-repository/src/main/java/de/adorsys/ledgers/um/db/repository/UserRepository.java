@@ -16,13 +16,13 @@
 
 package de.adorsys.ledgers.um.db.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
+
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 
-import java.util.Optional;
-
-public interface UserRepository extends CrudRepository<UserEntity, String> {
+public interface UserRepository extends PagingAndSortingRepository<UserEntity, String> {
 
     Optional<UserEntity> findFirstByLogin(String login);
 }

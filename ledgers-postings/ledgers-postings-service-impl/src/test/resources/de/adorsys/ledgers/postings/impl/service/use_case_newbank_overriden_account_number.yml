@@ -83,7 +83,7 @@
 # Balances: 11240-D-1850000.00,1810-D-14400.00,1001-D-135600.00
     
 
-# The bank pays for service for cleaning and refurbishing rental office: 32 000 check of helo bank
+# The bank pays for de.adorsys.ledgers.um.rest.controller for cleaning and refurbishing rental office: 32 000 check of helo bank
 - oprId: "cleaning_and_refurbishing_service_005"
   oprDetails: "Cleaning and refurbishing services, check of hello bank"
   pstTime: 2018-01-08T09:15:00.000

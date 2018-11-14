@@ -24,4 +24,11 @@ public class UserNotFoundMiddlewareException extends Exception {
     public UserNotFoundMiddlewareException(String message) {
         super(message);
     }
+
+	public UserNotFoundMiddlewareException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
+    
+    
 }

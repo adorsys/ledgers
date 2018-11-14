@@ -16,49 +16,69 @@
 
 package de.adorsys.ledgers.um.rest.controller;
 
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.rest.converter.UserTOConverter;
-import de.adorsys.ledgers.um.rest.domain.UserTO;
-import de.adorsys.ledgers.um.rest.exception.NotFoundRestException;
+
+import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.um.rest.exception.NotFoundRestException;
 
 @RestController
 @RequestMapping(UserResource.USERS)
 public class UserResource {
 
-    public static final String USERS = "/users/";
+    static final String USERS = "/users/";
+    private static final String SCA_DATA = "sca-data";
     private final UserService userService;
-    private final UserTOConverter converter;
 
-    public UserResource(UserService userService, UserTOConverter converter) {
+    public UserResource(UserService userService) {
         this.userService = userService;
-        this.converter = converter;
     }
 
-    @PostMapping
-    ResponseEntity<Void> createUser(@RequestBody UserTO user) throws UserAlreadyExistsException {
-        UserBO bo = converter.toUserBO(user);
+    @PostMapping()
+    ResponseEntity<Void> createUser(@RequestBody UserBO user) throws UserAlreadyExistsException {
         UserBO userBO;
-        userBO = userService.create(bo);
-        URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getId()).build().toUri();
+        userBO = userService.create(user);
+        URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getLogin()).build().toUri();
         return ResponseEntity.created(uri).build();
-//        TODO process with right exceptions
     }
 
     @GetMapping("{id}")
-    ResponseEntity<UserTO> getUser(@PathVariable String id) {
+    ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
         try {
-            UserBO userBO;
-            userBO = userService.findById(id);
-            return ResponseEntity.ok(converter.toUserTO(userBO));
+        	return ResponseEntity.ok(userService.findById(id));
+        } catch (UserNotFoundException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
+        try {
+        	return ResponseEntity.ok(userService.findByLogin(login));
+        } catch (UserNotFoundException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @PutMapping("{id}/" + SCA_DATA)
+    ResponseEntity<Void> createUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
+        try {
+            UserBO userBO = userService.findById(id);
+            UserBO user = userService.updateScaData(data, userBO.getLogin());
+
+            URI uri = UriComponentsBuilder.fromUriString(USERS + user.getId())
+                    .build().toUri();
+
+            return ResponseEntity.created(uri).build();
         } catch (UserNotFoundException e) {
             throw new NotFoundRestException(e.getMessage());
         }

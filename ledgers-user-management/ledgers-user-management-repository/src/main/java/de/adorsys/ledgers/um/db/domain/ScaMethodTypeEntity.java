@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.um.db.domain;
 
-public enum  ScaMethodType {
+public enum ScaMethodTypeEntity {
     EMAIL,
-    MOBILE;
+    MOBILE
 }
