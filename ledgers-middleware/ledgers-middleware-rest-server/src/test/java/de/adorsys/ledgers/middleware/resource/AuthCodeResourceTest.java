@@ -3,7 +3,6 @@ package de.adorsys.ledgers.middleware.resource;
 import de.adorsys.ledgers.middleware.domain.SCAGenerationRequest;
 import de.adorsys.ledgers.middleware.domain.SCAGenerationResponse;
 import de.adorsys.ledgers.middleware.domain.SCAValidationRequest;
-import de.adorsys.ledgers.middleware.domain.SCAValidationResponse;
 import de.adorsys.ledgers.middleware.exception.*;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
@@ -128,7 +127,7 @@ public class AuthCodeResourceTest {
     public void validate() throws Exception {
         SCAValidationRequest operation = new SCAValidationRequest(OP_DATA, TAN_CODE);
 
-        when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenReturn(Boolean.FALSE);
+        when(middlewareService.validateAuthCode(OP_ID, OP_DATA, TAN_CODE)).thenReturn(Boolean.TRUE);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/{id}/validate", OP_ID)
@@ -139,9 +138,9 @@ public class AuthCodeResourceTest {
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
 
-        SCAValidationResponse authCode = READER.getObjectFromString(mvcResult.getResponse().getContentAsString(), SCAValidationResponse.class);
+        String content = mvcResult.getResponse().getContentAsString();
 
-        assertThat(authCode.getValid(), is(Boolean.FALSE));
+        assertThat(content, is(Boolean.TRUE.toString()));
 
         verify(middlewareService, times(1)).validateAuthCode(OP_ID, OP_DATA, TAN_CODE);
     }

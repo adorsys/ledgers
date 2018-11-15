@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.domain;
+package de.adorsys.ledgers.middleware.service;
 
-public class SCAValidationResponse {
-    private Boolean valid;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 
-    public SCAValidationResponse() {
-    }
+public interface MiddlewareUserService {
+    /**
+     * Performs user authorisation
+     *
+     * @param login  User login
+     * @param pin User PIN
+     * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
+     * @throws UserNotFoundMiddlewareException is thrown if user can`t be found
+     */
+    boolean authorise(String login, String pin) throws UserNotFoundMiddlewareException;
 
-    public SCAValidationResponse(Boolean valid) {
-        this.valid = valid;
-    }
-
-    public Boolean getValid() {
-        return valid;
-    }
 }

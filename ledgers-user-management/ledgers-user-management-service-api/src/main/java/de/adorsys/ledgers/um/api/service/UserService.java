@@ -38,12 +38,12 @@ public interface UserService {
     /**
      * Performs user authorisation
      *
-     * @param id  User identifier
+     * @param login  User login
      * @param pin User PIN
      * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      */
-    boolean authorize(String id, String pin) throws UserNotFoundException;
+    boolean authorise(String login, String pin) throws UserNotFoundException;
 
     /**
      * Performs user authorisation
@@ -54,7 +54,7 @@ public interface UserService {
      * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      */
-    boolean authorize(String id, String pin, String accountId) throws UserNotFoundException;
+    boolean authorise(String id, String pin, String accountId) throws UserNotFoundException;
 
     /**
      * Finds a User by its identifier

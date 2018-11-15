@@ -97,7 +97,7 @@ public class UserServiceImplTest {
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
 
-        boolean auth = userService.authorize(USER_LOGIN, USER_PIN);
+        boolean auth = userService.authorise(USER_LOGIN, USER_PIN);
 
         assertThat(auth, is(true));
     }
@@ -124,7 +124,7 @@ public class UserServiceImplTest {
 
         when(repository.findFirstByLogin(USER_NON_EXISTING_LOGIN)).thenReturn(Optional.empty());
 
-        userService.authorize(USER_NON_EXISTING_LOGIN, "SomePin");
+        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin");
     }
 
     private UserBO readUserBO() {
