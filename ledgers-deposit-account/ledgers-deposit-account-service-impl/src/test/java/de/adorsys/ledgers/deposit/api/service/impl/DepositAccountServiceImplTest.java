@@ -8,7 +8,10 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
-import de.adorsys.ledgers.deposit.db.domain.*;
+import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
+import de.adorsys.ledgers.deposit.db.domain.AccountType;
+import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
+import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
@@ -110,7 +113,6 @@ public class DepositAccountServiceImplTest {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(new LedgerBO()));
-        when(paymentTargetRepository.findById(any())).thenReturn(Optional.of(getTarget()));
         when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
         when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
@@ -120,21 +122,14 @@ public class DepositAccountServiceImplTest {
 
     }
 
-    private PaymentTarget getTarget() {
-        PaymentTarget target = new PaymentTarget();
-        Payment payment = new Payment();
-        payment.setPaymentId("payment_id");
-        target.setPayment(payment);
-        return target;
-    }
-
     @Test(expected = TransactionNotFoundException.class)
-    public void getTransactionById_Failure() throws TransactionNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException {
+    public void getTransactionById_Failure() throws TransactionNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountConfigService.getLedger()).thenReturn("name");
         when(ledgerService.findLedgerByName("name")).thenReturn(Optional.of(new LedgerBO()));
         when(ledgerService.findLedgerAccount(any(), any())).thenReturn(new LedgerAccountBO());
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
+        when(postingService.findPostingLineById(any(), any())).thenThrow(new PostingNotFoundException(ACCOUNT_ID, POSTING_ID));
 
         depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
     }
@@ -192,7 +187,6 @@ public class DepositAccountServiceImplTest {
         ledgerBO.setName("ledger");
         return ledgerBO;
     }
-
 
     private <T> T readFile(Class<T> t, String file) {
         try {

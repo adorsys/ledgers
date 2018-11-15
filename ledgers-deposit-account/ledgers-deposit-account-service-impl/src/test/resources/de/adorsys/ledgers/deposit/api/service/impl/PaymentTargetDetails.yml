@@ -1,0 +1,41 @@
+transactionId: subId1
+endToEndId: 123456789
+bookingDate: 2018-12-12
+valueDate: 2018-12-12
+debtorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+paymentOrderId: orderId
+paymentType: SINGLE
+transactionAmount:
+  {
+   currency: EUR,
+   amount: 100
+  }
+creditorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+creditorAgent: agent
+creditorName: Rozetka.ua
+creditorAddress:
+  {
+    street: SomeStreet,
+    buildingNumber: 666,
+    city: Kiev,
+    postalCode: 04210,
+    country: Ukraine
+  }
+remittanceInformationUnstructured: remittance
+paymentProduct: SEPA

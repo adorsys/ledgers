@@ -1,0 +1,31 @@
+transactionId: orderId
+endToEndId:
+bookingDate: 2018-12-12
+valueDate: 2018-12-12
+debtorName:
+debtorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+ultimateDebtor:
+paymentOrderId: orderId
+paymentType: BULK
+transactionAmount:
+  {
+   currency: EUR,
+   amount: 200
+  }
+creditorAccount:
+creditorAgent: multiple
+creditorName: multiple
+creditorAddress:
+ultimateCreditor:
+remittanceInformationUnstructured:
+paymentProduct:
+transactionStatus: RCVD
+exchangeRate:

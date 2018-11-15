@@ -35,5 +35,5 @@ public interface PostingService {
 
     List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime dateFrom, LocalDateTime dateTo) throws LedgerAccountNotFoundException, LedgerNotFoundException;
 
-    PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String sourceId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException;
+    PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String subOprSrcId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException;
 }

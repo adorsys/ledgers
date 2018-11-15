@@ -11,53 +11,54 @@ public class PaymentTargetDetailsBO extends TransactionDetailsBO {
     private PaymentProductBO paymentProduct;
     private String creditorAgent;
 
-	public AddressBO getCreditorAddress() {
-		return creditorAddress;
-	}
+    //Getters - Setters
+    public AddressBO getCreditorAddress() {
+        return creditorAddress;
+    }
 
-	public void setCreditorAddress(AddressBO creditorAddress) {
-		this.creditorAddress = creditorAddress;
-	}
+    public void setCreditorAddress(AddressBO creditorAddress) {
+        this.creditorAddress = creditorAddress;
+    }
 
-	public String getPaymentOrderId() {
-		return paymentOrderId;
-	}
+    public String getPaymentOrderId() {
+        return paymentOrderId;
+    }
 
-	public void setPaymentOrderId(String paymentOrderId) {
-		this.paymentOrderId = paymentOrderId;
-	}
+    public void setPaymentOrderId(String paymentOrderId) {
+        this.paymentOrderId = paymentOrderId;
+    }
 
-	public PaymentTypeBO getPaymentType() {
-		return paymentType;
-	}
+    public PaymentTypeBO getPaymentType() {
+        return paymentType;
+    }
 
-	public void setPaymentType(PaymentTypeBO paymentType) {
-		this.paymentType = paymentType;
-	}
+    public void setPaymentType(PaymentTypeBO paymentType) {
+        this.paymentType = paymentType;
+    }
 
-	public TransactionStatusBO getTransactionStatus() {
-		return transactionStatus;
-	}
+    public TransactionStatusBO getTransactionStatus() {
+        return transactionStatus;
+    }
 
-	public void setTransactionStatus(TransactionStatusBO transactionStatus) {
-		this.transactionStatus = transactionStatus;
-	}
+    public void setTransactionStatus(TransactionStatusBO transactionStatus) {
+        this.transactionStatus = transactionStatus;
+    }
 
-	public PaymentProductBO getPaymentProduct() {
-		return paymentProduct;
-	}
+    public PaymentProductBO getPaymentProduct() {
+        return paymentProduct;
+    }
 
-	public void setPaymentProduct(PaymentProductBO paymentProduct) {
-		this.paymentProduct = paymentProduct;
-	}
+    public void setPaymentProduct(PaymentProductBO paymentProduct) {
+        this.paymentProduct = paymentProduct;
+    }
 
-	public String getCreditorAgent() {
-		return creditorAgent;
-	}
+    public String getCreditorAgent() {
+        return creditorAgent;
+    }
 
-	public void setCreditorAgent(String creditorAgent) {
-		this.creditorAgent = creditorAgent;
-	}
-	
+    public void setCreditorAgent(String creditorAgent) {
+        this.creditorAgent = creditorAgent;
+    }
+
 
 }

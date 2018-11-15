@@ -1,22 +1,13 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.IOException;
-import java.util.List;
-
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,21 +21,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import pro.javatar.commons.reader.JsonReader;
-import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
-@Ignore
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PaymentResourceTest {
@@ -159,7 +151,7 @@ public class PaymentResourceTest {
     public void executePaymentNoSca() throws Exception {
         when(middlewareService.executePayment(any())).thenReturn(TransactionStatusTO.ACSP);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
                 "/payments/execute-no-sca/{payment-id}/{payment-product}/{payment-type}", PAYMENT_ID, PaymentProductTO.SEPA, PaymentTypeTO.SINGLE))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
@@ -167,17 +159,9 @@ public class PaymentResourceTest {
                                       .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
-        List<TransactionTO> actual = JsonReader.getInstance().getListFromString(content,TransactionTO.class);
-
-        assertThat(actual.size(), is(1));
-        assertThat(actual.get(0).getTransactionId(), is("posting_ID"));
-        assertThat(mvcResult.getResponse().getStatus(), is(200));
-
+        TransactionStatusTO actual = JsonReader.getInstance().getObjectFromString(content, TransactionStatusTO.class);
+        assertThat(actual).isEqualTo(TransactionStatusTO.ACSP);
         verify(middlewareService, times(1)).executePayment(any());
-    }
-
-    private PaymentResultTO<TransactionStatusTO> readPaymentResult(ResourceReader reader) throws IOException {
-        return reader.getObjectFromResource(PaymentResource.class, "payment-result.yml", PaymentResultTO.class);
     }
 
     private <T> T strToObj(String source, Class<T> tClass) {

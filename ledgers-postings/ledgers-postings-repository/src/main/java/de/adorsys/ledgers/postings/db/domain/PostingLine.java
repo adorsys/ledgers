@@ -1,18 +1,10 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 @Entity
 public class PostingLine {
@@ -186,40 +178,28 @@ public class PostingLine {
 		this.baseLine = baseLine;
 	}
 
-	public LocalDateTime getRecordTime() {
-		return recordTime;
-	}
-
-	public String getOprId() {
-		return oprId;
-	}
-
-	public LocalDateTime getPstTime() {
-		return pstTime;
-	}
-
-	public PostingType getPstType() {
-		return pstType;
-	}
-
-	public PostingStatus getPstStatus() {
-		return pstStatus;
-	}
-
-	public String getHash() {
-		return hash;
-	}
-
-	public LocalDateTime getDiscardedTime() {
-		return discardedTime;
-	}
-
 	public String getSubOprSrcId() {
 		return subOprSrcId;
 	}
 
 	public void setSubOprSrcId(String subOprSrcId) {
 		this.subOprSrcId = subOprSrcId;
+	}
+
+	public LocalDateTime getRecordTime() {
+		return recordTime;
+	}
+
+	public void setRecordTime(LocalDateTime recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	public String getOprId() {
+		return oprId;
+	}
+
+	public void setOprId(String oprId) {
+		this.oprId = oprId;
 	}
 
 	public String getOprSrc() {
@@ -229,5 +209,44 @@ public class PostingLine {
 	public void setOprSrc(String oprSrc) {
 		this.oprSrc = oprSrc;
 	}
-	
+
+	public LocalDateTime getPstTime() {
+		return pstTime;
+	}
+
+	public void setPstTime(LocalDateTime pstTime) {
+		this.pstTime = pstTime;
+	}
+
+	public PostingType getPstType() {
+		return pstType;
+	}
+
+	public void setPstType(PostingType pstType) {
+		this.pstType = pstType;
+	}
+
+	public PostingStatus getPstStatus() {
+		return pstStatus;
+	}
+
+	public void setPstStatus(PostingStatus pstStatus) {
+		this.pstStatus = pstStatus;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+
+	public LocalDateTime getDiscardedTime() {
+		return discardedTime;
+	}
+
+	public void setDiscardedTime(LocalDateTime discardedTime) {
+		this.discardedTime = discardedTime;
+	}
 }

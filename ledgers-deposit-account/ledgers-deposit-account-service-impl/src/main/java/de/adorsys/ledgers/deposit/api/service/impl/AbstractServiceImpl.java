@@ -20,11 +20,12 @@ public abstract class AbstractServiceImpl {
 
     protected LedgerBO loadLedger() {
         String ledgerName = depositAccountConfigService.getLedger();
-        return ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
+        return ledgerService.findLedgerByName(ledgerName)
+                       .orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
     }
-    
+
     protected LedgerAccountBO loadClearingAccount(LedgerBO ledgerBO, PaymentProductBO paymentProductBO) {
-    	return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccount(paymentProductBO));
+        return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccount(paymentProductBO));
     }
 
     protected LedgerAccountBO loadClearing(LedgerBO ledgerBO, String accountName) {
