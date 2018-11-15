@@ -18,6 +18,7 @@ public class MiddlewareTestCaseData2 {
 	private List<DepositAccountTO> accounts = new ArrayList<>();
 	private List<UserTO> users = new ArrayList<>();
 	private List<SinglePaymentTestData> singlePaymentTests = new ArrayList<>(); 
+	private List<BulkPaymentTestData> bulkPaymentTests = new ArrayList<>();
 	private List<TransactionTestData> transactions = new ArrayList<>();
 
 	public List<DepositAccountTO> getAccounts() {
@@ -44,4 +45,11 @@ public class MiddlewareTestCaseData2 {
 	public void setTransactions(List<TransactionTestData> transactions) {
 		this.transactions = transactions;
 	}
+	public List<BulkPaymentTestData> getBulkPaymentTests() {
+		return bulkPaymentTests;
+	}
+	public void setBulkPaymentTests(List<BulkPaymentTestData> bulkPaymentTests) {
+		this.bulkPaymentTests = bulkPaymentTests;
+	}
+	
 }

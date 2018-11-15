@@ -31,6 +31,7 @@ import de.adorsys.ledgers.middleware.service.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.DepositAccountTO;
 import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.service.domain.payment.BulkPaymentTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
@@ -63,16 +64,19 @@ public class MiddlewareServiceImpl2IT {
 	public void execute_payment_read_tx_ok() throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException, DepositAccountNotFoundException, PaymentProcessingMiddlewareException, PaymentNotFoundMiddlewareException, UserAlreadyExistsMIddlewareException {
 		MiddlewareTestCaseData2 testData = loadTestData("MiddlewareServiceImplIT-read_tx_ok.yml");
 		
+		// Create accounts
 		List<DepositAccountTO> accounts = testData.getAccounts();
 		for (DepositAccountTO depositAccount : accounts) {
 			accountService.createDepositAccount(depositAccount);
 		}
 		
+		// Create users
 		List<UserTO> users = testData.getUsers();
 		for (UserTO userTO : users) {
 			userService.create(userTO);
 		}
 		
+		// Execute single payments
 		List<SinglePaymentTestData> singlePaymentTests = testData.getSinglePaymentTests();
 		for (SinglePaymentTestData singlePaymentTest : singlePaymentTests) {
 			
@@ -113,6 +117,25 @@ public class MiddlewareServiceImpl2IT {
 			}
 		}
 		
+		// Execute bulk payments
+		List<BulkPaymentTestData> bulkPaymentTests = testData.getBulkPaymentTests();
+		for (BulkPaymentTestData bulkPaymentTest : bulkPaymentTests) {
+			
+			BulkPaymentTO bulkPayment = bulkPaymentTest.getBulkPayment();
+			
+			// Initiate
+			BulkPaymentTO pymt = (BulkPaymentTO) middlewareService.initiatePayment(bulkPayment, PaymentTypeTO.BULK);
+			TransactionStatusTO initiatedPaymentStatus = middlewareService.getPaymentStatusById(pymt.getPaymentId());
+			Assert.assertEquals(TransactionStatusTO.RCVD, initiatedPaymentStatus);
+
+			// Execute
+			TransactionStatusTO executedPaymentStatus = middlewareService.executePayment(pymt.getPaymentId());
+			Assert.assertEquals(TransactionStatusTO.ACSP, executedPaymentStatus);
+			
+		}
+
+		
+		// read trransaction
 		List<TransactionTestData> transactions = testData.getTransactions();
 		for (TransactionTestData txTest : transactions) {
 			checkTransactions(txTest);

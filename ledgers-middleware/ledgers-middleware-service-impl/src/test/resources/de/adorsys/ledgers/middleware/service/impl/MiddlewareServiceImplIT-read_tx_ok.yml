@@ -169,6 +169,33 @@ singlePaymentTests:
     balanceDebitAccountAfter: 120.00
     balanceCreditAccountAfter: -3120.00
 
+bulkPaymentTests:
+# Payment from Anton Brueckner to to 3 children with external bank account on 2018-06-01 at 12:25:00
+  - bulkPayment:
+      batchBookingPreferred: true
+      requestedExecutionDate: 2018-06-23
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      paymentProduct: SEPA
+      payments:
+        - creditorAccount:
+            iban: DE67760700240243265400
+            currency: EUR
+          creditorName: Maria Brueckner
+          remittanceInformationUnstructured: Payment
+          paymentProduct: SEPA
+          instructedAmount:
+            amount: 150
+        - creditorAccount:
+            iban: DE23760700240234367800
+            currency: EUR
+          creditorName: Patrick Brueckner
+          remittanceInformationUnstructured: Payment
+          paymentProduct: SEPA
+          instructedAmount:
+            amount: 100
+
 transactions: 
   - iban: DE69760700240340283600
     dateFrom: 2018-05-30

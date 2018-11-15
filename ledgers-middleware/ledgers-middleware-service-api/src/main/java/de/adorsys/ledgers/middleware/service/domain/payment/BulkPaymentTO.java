@@ -5,10 +5,17 @@ import de.adorsys.ledgers.middleware.service.domain.account.AccountReferenceTO;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
 public class BulkPaymentTO {
     private String paymentId;
     private Boolean batchBookingPreferred;
     private AccountReferenceTO debtorAccount;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate requestedExecutionDate;
     private TransactionStatusTO paymentStatus;
     private List<SinglePaymentTO> payments;
