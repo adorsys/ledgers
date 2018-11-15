@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean authorize(String login, String pin) throws UserNotFoundException {
+    public boolean authorise(String login, String pin) throws UserNotFoundException {
         UserEntity user = getUser(login);
         return MD5Util.verify(pin, user.getPin());
     }
@@ -82,8 +82,9 @@ public class UserServiceImpl implements UserService {
      * If the rationale is knowing if the account belongs toi the user.
      */
     @Override
-    public boolean authorize(String login, String pin, String accountId) throws UserNotFoundException {
-        return authorize(login, pin);
+    public boolean authorise(String login, String pin, String accountId) throws UserNotFoundException {
+//        todo: do something with accountid
+        return authorise(login, pin);
     }
 
     @Override

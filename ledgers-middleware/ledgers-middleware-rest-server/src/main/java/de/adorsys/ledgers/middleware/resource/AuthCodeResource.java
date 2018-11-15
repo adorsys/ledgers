@@ -19,7 +19,6 @@ package de.adorsys.ledgers.middleware.resource;
 import de.adorsys.ledgers.middleware.domain.SCAGenerationRequest;
 import de.adorsys.ledgers.middleware.domain.SCAGenerationResponse;
 import de.adorsys.ledgers.middleware.domain.SCAValidationRequest;
-import de.adorsys.ledgers.middleware.domain.SCAValidationResponse;
 import de.adorsys.ledgers.middleware.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.exception.ValidationRestException;
@@ -30,9 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth-codes")
+@RequestMapping(AuthCodeResource.AUTH_CODES)
 public class AuthCodeResource {
     private final static Logger logger = LoggerFactory.getLogger(AuthCodeResource.class);
+    static final String AUTH_CODES = "/auth-codes";
 
     private final MiddlewareService middlewareService;
 
@@ -58,11 +58,11 @@ public class AuthCodeResource {
 
     @SuppressWarnings("PMD.IdenticalCatchBranches")
     @PostMapping("/{opId}/validate")
-    public SCAValidationResponse validate(@PathVariable String opId, @RequestBody SCAValidationRequest request) {
+    public boolean validate(@PathVariable String opId, @RequestBody SCAValidationRequest request) {
         try {
             boolean valid = middlewareService.validateAuthCode(opId, request.getData(), request.getAuthCode());
             logger.debug("The validation of operation with id={} was {}", opId, valid ? "successful" : "failed");
-            return new SCAValidationResponse(valid);
+            return valid;
         } catch (SCAOperationValidationMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new ValidationRestException(e.getMessage()).withDevMessage(e.getMessage());
