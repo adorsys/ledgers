@@ -108,7 +108,7 @@ public class UserResourceTest {
     @Test
     public void getUserById() throws Exception {
         UserBO userBO = getUserBO();
-        when(userService.findByLogin(USER_ID)).thenReturn(userBO);
+        when(userService.findById(USER_ID)).thenReturn(userBO);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .get("/users/" + USER_ID))
@@ -117,7 +117,15 @@ public class UserResourceTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
 
+        assertThat(mvcResult.getResponse().getStatus(), is(200));
 
+        String userString = mvcResult.getResponse().getContentAsString();
+        UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
+
+        assertNotNull(user);
+        assertEquals(user, userBO);
+
+        verify(userService, times(1)).findById(USER_ID);
     }
 
     private UserBO getUserBO() {
