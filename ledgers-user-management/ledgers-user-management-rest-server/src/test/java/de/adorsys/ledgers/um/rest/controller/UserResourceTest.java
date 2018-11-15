@@ -39,6 +39,7 @@ import pro.javatar.commons.reader.YamlReader;
 public class UserResourceTest {
 
     private static final String USER_LOGIN = "vne";
+    private static final String USER_ID = "SomeUniqueID";
 
     @InjectMocks
     private UserResource userResource; // user controller
@@ -102,6 +103,21 @@ public class UserResourceTest {
         assertEquals(user, userBO);
 
         verify(userService, times(1)).findByLogin(USER_LOGIN);
+    }
+
+    @Test
+    public void getUserById() throws Exception {
+        UserBO userBO = getUserBO();
+        when(userService.findByLogin(USER_ID)).thenReturn(userBO);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                .get("/users/" + USER_ID))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+
     }
 
     private UserBO getUserBO() {
