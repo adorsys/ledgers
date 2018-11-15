@@ -57,8 +57,7 @@ public class UserEntity {
     @Column(nullable = false)
     private String pin;
 
-//    TODO: is orphanRemoval annotation necessary? It breaks the method
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<ScaUserDataEntity> scaUserData = new ArrayList<>();
 

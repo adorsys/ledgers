@@ -111,7 +111,8 @@ public class UserServiceImpl implements UserService {
                                   .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
 
         List<ScaUserDataEntity> scaMethods = userConverter.toScaUserDataListEntity(scaDataList);
-        user.setScaUserData(scaMethods);
+        user.getScaUserData().clear();
+        user.getScaUserData().addAll(scaMethods);
 
         logger.info("{} sca methods would be updated", scaMethods.size());
         UserEntity save = userRepository.save(user);
@@ -126,7 +127,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
 
         List<AccountAccess> accountAccesses = userConverter.toAccountAccessListEntity(accountAccessListBO);
-        user.setAccountAccesses(accountAccesses);
+        user.getAccountAccesses().clear();
+        user.getAccountAccesses().addAll(accountAccesses);
 
         logger.info("{} account accesses would be updated", accountAccesses.size());
         UserEntity save = userRepository.save(user);
