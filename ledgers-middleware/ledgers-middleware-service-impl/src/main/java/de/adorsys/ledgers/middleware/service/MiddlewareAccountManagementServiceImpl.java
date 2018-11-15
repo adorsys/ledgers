@@ -1,81 +1,38 @@
 package de.adorsys.ledgers.middleware.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import de.adorsys.ledgers.middleware.converter.UserTOMapper;
-import de.adorsys.ledgers.middleware.service.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMIddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.converter.DepositAccountMiddlewareMapper;
+import de.adorsys.ledgers.middleware.service.domain.account.DepositAccountTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
 
 @Service
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
-
-	@Autowired
-	private UserService userService;
 	
 	@Autowired
-	private UserTOMapper userTOMapper;
+	private DepositAccountService depositAccountService;
 	
+	@Autowired
+	private DepositAccountMiddlewareMapper depositAccountMapper;
+
 	@Override
-	public UserTO create(UserTO user) throws UserAlreadyExistsMIddlewareException {
-		UserBO userBO = userTOMapper.toUserBO(user);
+	public void createDepositAccount(DepositAccountTO depositAccount) throws AccountNotFoundMiddlewareException {
 		try {
-			return userTOMapper.toUserTO(userService.create(userBO));
-		} catch (UserAlreadyExistsException e) {
-			throw new UserAlreadyExistsMIddlewareException(user,e);
+			depositAccountService.createDepositAccount(depositAccountMapper.toDepositAccountBO(depositAccount));
+		} catch (DepositAccountNotFoundException e) {
+			throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+		}		
+	}
+
+	@Override
+	public DepositAccountTO getDepositAccountByIBAN(String iban) throws AccountNotFoundMiddlewareException {
+		try {
+			return depositAccountMapper.toDepositAccountTO(depositAccountService.getDepositAccountByIBAN(iban));
+		} catch (DepositAccountNotFoundException e) {
+			throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}
-
-	@Override
-	public UserTO findById(String id) throws UserNotFoundMiddlewareException {
-		try {
-			return userTOMapper.toUserTO(userService.findById(id));
-		} catch (UserNotFoundException e) {
-			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public UserTO findByUserLogin(String userLogin) throws UserNotFoundMiddlewareException {
-		try {
-			return userTOMapper.toUserTO(userService.findByLogin(userLogin));
-		} catch (UserNotFoundException e) {
-			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public UserTO updateScaData(String userLogin, List<ScaUserDataTO> scaDataList)
-			throws UserNotFoundMiddlewareException {
-		try {
-			return userTOMapper.toUserTO(userService.updateScaData(userTOMapper.toScaUserDataListBO(scaDataList), userLogin));
-		} catch (UserNotFoundException e) {
-			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public UserTO updateAccountAccess(String userLogin, List<AccountAccessTO> accounts)
-			throws UserNotFoundMiddlewareException {
-		try {
-			return userTOMapper.toUserTO(userService.updateAccountAccess(userLogin, userTOMapper.toAccountAccessListBO(accounts)));
-		} catch (UserNotFoundException e) {
-			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public List<UserTO> listUsers(int page, int size) {
-		return userTOMapper.toUserTOList(userService.listUsers(page, size));
-	}
-
 }

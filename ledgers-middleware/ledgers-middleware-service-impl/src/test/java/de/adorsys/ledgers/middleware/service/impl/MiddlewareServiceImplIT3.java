@@ -49,7 +49,7 @@ import de.adorsys.ledgers.um.api.service.UserService;
     DbUnitTestExecutionListener.class})
 @ActiveProfiles("h2")
 @DatabaseTearDown(value={"MiddlewareServiceImplIT-db-delete.xml"}, type=DatabaseOperation.DELETE_ALL)
-public class MiddlewareServiceImplIT {
+public class MiddlewareServiceImplIT3 {
 
 	private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 	@Autowired
@@ -149,7 +149,7 @@ public class MiddlewareServiceImplIT {
 	}
 
 	private MiddlewareTestCaseData loadTestData(String file) {
-		InputStream inputStream = MiddlewareServiceImplIT.class.getResourceAsStream(file);
+		InputStream inputStream = MiddlewareServiceImplIT3.class.getResourceAsStream(file);
 		try {
 			return mapper.readValue(inputStream, MiddlewareTestCaseData.class);
 		} catch (IOException e) {
