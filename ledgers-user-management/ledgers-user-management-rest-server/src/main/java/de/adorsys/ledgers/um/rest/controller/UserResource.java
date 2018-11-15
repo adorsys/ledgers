@@ -70,7 +70,7 @@ public class UserResource {
     }
 
     @PutMapping("{id}/" + SCA_DATA)
-    ResponseEntity<Void> createUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
+    ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
         try {
             UserBO userBO = userService.findById(id);
             UserBO user = userService.updateScaData(data, userBO.getLogin());
