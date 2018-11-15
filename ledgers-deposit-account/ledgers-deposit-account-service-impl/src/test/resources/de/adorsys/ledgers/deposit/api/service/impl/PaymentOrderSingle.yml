@@ -1,0 +1,20 @@
+paymentId: myPaymentId
+batchBookingPreferred:
+requestedExecutionDate: 2018-12-12
+requestedExecutionTime: 12:00:00
+paymentType: SINGLE
+startDate:
+endDate:
+executionRule:
+frequency:
+dayOfExecution:
+debtorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+transactionStatus: RCVD

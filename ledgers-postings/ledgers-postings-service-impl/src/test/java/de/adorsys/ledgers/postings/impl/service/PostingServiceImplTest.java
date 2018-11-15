@@ -1,39 +1,32 @@
 package de.adorsys.ledgers.postings.impl.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.db.domain.*;
+import de.adorsys.ledgers.postings.db.repository.*;
 import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
+import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.db.repository.AccountStmtRepository;
-import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
-import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
-import de.adorsys.ledgers.postings.db.repository.PostingRepository;
-import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostingServiceImplTest {
@@ -87,7 +80,7 @@ public class PostingServiceImplTest {
         assertThat(CollectionUtils.isNotEmpty(result)).isTrue();
     }
 
-    @Test //TODO @fpo please refactor or completely remove
+    @Test
     public void findPostingsByDates() throws LedgerAccountNotFoundException, LedgerNotFoundException {
         when(postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(any(), any(), any()))
                 .thenReturn(Collections.singletonList(readYml(PostingLine.class,"PostingLine.yml")));

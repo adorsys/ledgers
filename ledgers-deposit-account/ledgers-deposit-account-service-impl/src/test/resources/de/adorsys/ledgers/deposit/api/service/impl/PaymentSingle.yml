@@ -20,7 +20,7 @@ debtorAccount:
 transactionStatus: RCVD
 targets:
   - {
-      paymentId: myPaymentId,
+      paymentId: subId1,
       endToEndIdentification: 123456789,
       instructedAmount:
         {

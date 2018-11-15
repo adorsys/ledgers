@@ -81,17 +81,15 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
      * - Periodic Payment
      * - Bulk Payment with batch execution
      * <p>
-     * + Bulk payment without batch execution will be splited into single payments
+     * + Bulk payment without batch execution will be split into single payments
      * and each single payment will be individually sent to this method.
      */
     @Override
-    public TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException {
-
-        PaymentBO storedPayment = getPaymentById(paymentId);
-        if (storedPayment.getTransactionStatus() != TransactionStatusBO.RCVD) {
-            throw new PaymentProcessingException("Payment execution failed due to: " + storedPayment.getTransactionStatus() + ", payment id: " + paymentId);
+    public TransactionStatusBO executePayment(String paymentId) throws PaymentProcessingException {
+        try {
+            return paymentSchedulerService.schedulePaymentExecution(paymentId);
+        } catch (PaymentNotFoundException e) {
+            throw new PaymentProcessingException("Payment execution failed due to: " + e.getMessage() + ", payment id: " + paymentId);
         }
-        return paymentSchedulerService.schedulePaymentExecution(storedPayment.getPaymentId());
     }
-
 }

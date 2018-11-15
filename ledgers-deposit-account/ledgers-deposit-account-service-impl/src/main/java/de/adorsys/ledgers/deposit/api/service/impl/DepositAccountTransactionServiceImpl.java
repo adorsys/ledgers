@@ -39,8 +39,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,55 +71,25 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
      * - Periodic Payment
      * - Bulk Payment with batch execution
      * <p>
-     * + Bulk payment without batch execution will be splited into single payments
+     * + Bulk payment without batch execution will be split into single payments
      * and each single payment will be individually sent to this method.
      */
     @Override
-    public TransactionStatusBO bookPayment(String paymentId, LocalDateTime pstTime) throws PaymentNotFoundException, PaymentProcessingException {
-
+    public TransactionStatusBO bookPayment(String paymentId, LocalDateTime pstTime) throws PaymentNotFoundException {
         Payment payment = paymentRepository.findById(paymentId)
                                   .orElseThrow(() -> new PaymentNotFoundException(paymentId));
         PaymentBO storedPayment = paymentMapper.toPaymentBO(payment);
 
         // We do not need to store the whole payment in the details. We will keep a Map<String, String> here for simplicity.
-        PaymentOrderDetailsBO po = new PaymentOrderDetailsBO(storedPayment);
-        String oprDetails;
-        try {
-            oprDetails = SerializationUtils.writeValueAsString(po);
-        } catch (JsonProcessingException e) {
-            throw new PaymentProcessingException("Payment object can't be serialized", e);
-        }
-
+        String oprDetails = serializeOprDetails(paymentMapper.toPaymentOrder(storedPayment));
         LedgerBO ledger = loadLedger();
 
         // Validation debtor account number
-        LedgerAccountBO debtorLedgerAccount;
-        try {
-            debtorLedgerAccount = ledgerService.findLedgerAccount(ledger, storedPayment.getDebtorAccount().getIban());
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new PaymentProcessingException(e.getMessage(), e);
-        }
+        LedgerAccountBO debtorLedgerAccount = getDebtorAccount(ledger, storedPayment.getDebtorAccount().getIban());
 
-        PostingBO posting = buildPosting(pstTime, po, oprDetails, ledger);
-        // Initialize the debit line with zero.
-        PostingLineBO debitLine = buildDebitLine(posting, oprDetails, debtorLedgerAccount, BigDecimal.ZERO);
-
-        Set<PostingBO> postings = storedPayment.getTargets().stream()
-                                          .map(target -> {
-            target.setPayment(storedPayment);
-            PostingBO postingBO = posting;
-            PostingLineBO debitLineBO = debitLine;
-            // No Batch booking. Then each target shall finish in a proper booking.
-            if (storedPayment.getPaymentType() == PaymentTypeBO.BULK && !storedPayment.getBatchBookingPreferred()) {
-                postingBO = buildPosting(pstTime, po, oprDetails, ledger);
-                // Initialize the debit line with zero.
-                debitLineBO = buildDebitLine(posting, oprDetails, debtorLedgerAccount, BigDecimal.ZERO);
-            }
-            preparePostingLines(postingBO, ledger, debitLineBO, target);
-            return postingBO;
-        }).collect(Collectors.toSet());
-
-        fixDebitLine(storedPayment, posting, debitLine);
+        Set<PostingBO> postings = storedPayment.getPaymentType() == PaymentTypeBO.BULK && storedPayment.getBatchBookingPreferred()
+                                          ? createBatchPostings(pstTime, oprDetails, ledger, debtorLedgerAccount, storedPayment)
+                                          : createRegularPostings(pstTime, oprDetails, ledger, debtorLedgerAccount, storedPayment);
 
         postings.forEach(this::executeTransactions);
         payment.setTransactionStatus(TransactionStatus.ACSP);
@@ -128,48 +97,78 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         return TransactionStatusBO.valueOf(payment.getTransactionStatus().name());
     }
 
-    private void fixDebitLine(PaymentBO storedPayment, PostingBO posting, PostingLineBO debitLine) {
-        // For bulk payment with batch booking, we need another debit line.
-        if (storedPayment.getPaymentType() == PaymentTypeBO.BULK && storedPayment.getBatchBookingPreferred()) {
-            PaymentTargetBO paymentTarget = storedPayment.getTargets().iterator().next();
-            // Isolate payment
-            PaymentTargetDetailsBO tx = mapPaymentTargetDetailsBO(storedPayment, posting, debitLine, paymentTarget);
+    private Set<PostingBO> createRegularPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount, PaymentBO storedPayment) {
+        return storedPayment.getTargets().stream()
+                       .map(t -> {
+                           t.setPayment(storedPayment);
+                           return buildDCPosting(pstTime, oprDetails, ledger, debtorLedgerAccount, t);
+                       })
+                       .collect(Collectors.toSet());
+    }
 
-            String pmtDetails;
-            try {
-                pmtDetails = SerializationUtils.writeValueAsString(tx);
-            } catch (JsonProcessingException e) {
-                throw new PaymentProcessingException("Payment object can't be serialized", e);
-            }
-            debitLine.setDetails(pmtDetails);
+    private Set<PostingBO> createBatchPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount, PaymentBO storedPayment) {
+        PostingBO posting = buildPosting(pstTime, storedPayment.getPaymentId(), oprDetails, ledger);
+        List<PostingLineBO> creditLines = storedPayment.getTargets().stream()
+                                                  .map(t -> {
+                                                      t.setPayment(storedPayment);
+                                                      String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(t, pstTime.toLocalDate()));
+                                                      return buildCreditLine(t, ledger, targetDetails);
+                                                  })
+                                                  .collect(Collectors.toList());
+
+        AmountBO amount = calculateDebitAmountBatch(storedPayment, creditLines);
+        String debitLineDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(storedPayment, amount, pstTime.toLocalDate()));
+        PostingLineBO debitLine = buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, storedPayment.getPaymentId());
+        posting.getLines().add(debitLine);
+        posting.getLines().addAll(creditLines);
+
+        return new HashSet<>(Collections.singletonList(posting));
+    }
+
+    private PostingBO buildDCPosting(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount, PaymentTargetBO target) {
+        PostingBO posting = buildPosting(pstTime, target.getPayment().getPaymentId(), oprDetails, ledger);
+        String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(target, pstTime.toLocalDate()));
+        PostingLineBO debitLine = buildPostingLine(targetDetails, debtorLedgerAccount, target.getInstructedAmount().getAmount(), BigDecimal.ZERO, posting.getOprId());
+        PostingLineBO creditLine = buildCreditLine(target, ledger, targetDetails);
+        posting.getLines().addAll(Arrays.asList(debitLine, creditLine));
+        return posting;
+    }
+
+    private AmountBO calculateDebitAmountBatch(PaymentBO storedPayment, List<PostingLineBO> creditLines) {
+        Currency currency = storedPayment.getTargets().iterator().next().getInstructedAmount().getCurrency();
+        BigDecimal debitAmount = creditLines.stream()
+                                         .map(PostingLineBO::getCreditAmount)
+                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new AmountBO(currency, debitAmount);
+    }
+
+    private PostingLineBO buildCreditLine(PaymentTargetBO target, LedgerBO ledger, String targetDetails) {
+        LedgerAccountBO creditorAccount = getCreditorAccount(ledger, target.getCreditorAccount().getIban(), target.getPaymentProduct());
+        return buildPostingLine(targetDetails, creditorAccount, BigDecimal.ZERO, target.getInstructedAmount().getAmount(), target.getPaymentId());
+    }
+
+    private LedgerAccountBO getDebtorAccount(LedgerBO ledger, String iban) {
+        try {
+            return ledgerService.findLedgerAccount(ledger, iban);
+        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
+            throw new PaymentProcessingException(e.getMessage(), e);
         }
     }
 
-    private PaymentTargetDetailsBO mapPaymentTargetDetailsBO(PaymentBO storedPayment, PostingBO posting, PostingLineBO debitLine, PaymentTargetBO paymentTarget) {
-        PaymentTargetDetailsBO tx = new PaymentTargetDetailsBO();
-        tx.setTransactionId(storedPayment.getPaymentId());
-        tx.setEndToEndId(paymentTarget.getEndToEndIdentification());
-        tx.setBookingDate(posting.getPstTime().toLocalDate());
-        tx.setValueDate(posting.getPstTime().toLocalDate());
-        AmountBO txAmount = new AmountBO();
-        txAmount.setAmount(debitLine.getDebitAmount());
-        txAmount.setCurrency(paymentTarget.getInstructedAmount().getCurrency());
-        tx.setTransactionAmount(txAmount);
-        tx.setDebtorAccount(storedPayment.getDebtorAccount());
-        tx.setRemittanceInformationUnstructured(paymentTarget.getRemittanceInformationUnstructured());
-        tx.setPaymentOrderId(storedPayment.getPaymentId());
-        tx.setPaymentType(storedPayment.getPaymentType());
-        tx.setPaymentProduct(paymentTarget.getPaymentProduct());
-      /*tx.setCreditorName(); //TODO @fpo why it is commented? Should it be uncommented after or simply removed?
-        tx.setCreditorAccount();
-        tx.setCreditorAddress();
-        tx.setCreditorAgent();*/
-        return tx;
+    private LedgerAccountBO getCreditorAccount(LedgerBO ledger, String iban, PaymentProductBO paymentProduct) {
+        try {
+            return ledgerService.findLedgerAccount(ledger, iban);
+        } catch (LedgerNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new PaymentProcessingException(e.getMessage(), e);
+        } catch (LedgerAccountNotFoundException ex) {
+            return loadClearingAccount(ledger, paymentProduct);
+        }
     }
 
     private List<TransactionDetailsBO> executeTransactions(PostingBO posting) throws PaymentProcessingException {
         try {
-            PostingBO p = postingService.newPosting(posting); //TODO Here in BulkPayment with batchPref: false we get only one Postingline and our balance is getting spoiled
+            PostingBO p = postingService.newPosting(posting);
             return p.getLines().stream()
                            .map(transactionDetailsMapper::toTransaction)
                            .collect(Collectors.toList());
@@ -178,76 +177,21 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         }
     }
 
-    private void preparePostingLines(PostingBO posting, LedgerBO ledger, final PostingLineBO debitLine, PaymentTargetBO paymentTarget) {
-        LedgerAccountBO creditLedgerAccount;
-
-        try {
-            creditLedgerAccount = ledgerService.findLedgerAccount(ledger, paymentTarget.getCreditorAccount().getIban());
-        } catch (LedgerNotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new PaymentProcessingException(e.getMessage(), e);
-        } catch (LedgerAccountNotFoundException e1) {
-            creditLedgerAccount = loadClearingAccount(ledger, paymentTarget.getPaymentProduct());
-        }
-
-        // Isolate payment
-        PaymentTargetDetailsBO tx = new PaymentTargetDetailsBO();
-        tx.setTransactionId(paymentTarget.getPaymentId());
-        tx.setEndToEndId(paymentTarget.getEndToEndIdentification());
-        tx.setBookingDate(posting.getPstTime().toLocalDate());
-        tx.setValueDate(posting.getPstTime().toLocalDate());
-        tx.setTransactionAmount(paymentTarget.getInstructedAmount());
-        tx.setCreditorName(paymentTarget.getCreditorName());
-        tx.setCreditorAccount(paymentTarget.getCreditorAccount());
-        tx.setDebtorAccount(paymentTarget.getPayment().getDebtorAccount());
-        tx.setRemittanceInformationUnstructured(paymentTarget.getRemittanceInformationUnstructured());
-        tx.setCreditorAddress(paymentTarget.getCreditorAddress());
-        tx.setPaymentOrderId(paymentTarget.getPayment().getPaymentId());
-        tx.setPaymentType(paymentTarget.getPayment().getPaymentType());
-        tx.setPaymentProduct(paymentTarget.getPaymentProduct());
-        tx.setCreditorAgent(paymentTarget.getCreditorAgent());
-
-        String pymtDetails;
-        try {
-            pymtDetails = SerializationUtils.writeValueAsString(tx);
-        } catch (JsonProcessingException e) {
-            throw new PaymentProcessingException("Payment object can't be serialized", e);
-        }
-
-        BigDecimal amount = paymentTarget.getInstructedAmount().getAmount();
-        debitLine.setDebitAmount(debitLine.getDebitAmount().add(amount));
-        // Set payment details on the debit line
-        debitLine.setDetails(pymtDetails);
-        buildCreditLine(posting, pymtDetails, creditLedgerAccount, amount, paymentTarget);
-    }
-
-    private PostingLineBO buildCreditLine(final PostingBO posting, String oprDetails, LedgerAccountBO creditLedgerAccount, BigDecimal amount, PaymentTargetBO paymentTarget) {
-        PostingLineBO line = buildPostingLine(posting, oprDetails, creditLedgerAccount, BigDecimal.ZERO, amount);
-        line.setSubOprSrcId(paymentTarget.getPaymentId());
+    private PostingLineBO buildPostingLine(String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount, String subOprSrcId) {
+        PostingLineBO line = new PostingLineBO();
+        line.setDetails(lineDetails);
+        line.setAccount(ledgerAccount);
+        line.setDebitAmount(debitAmount);
+        line.setCreditAmount(creditAmount);
+        line.setSubOprSrcId(subOprSrcId);
         return line;
     }
 
-    private PostingLineBO buildDebitLine(final PostingBO posting, String oprDetails, LedgerAccountBO debtorLedgerAccount, BigDecimal amount) {
-        PostingLineBO line = buildPostingLine(posting, oprDetails, debtorLedgerAccount, amount, BigDecimal.ZERO);
-        line.setSubOprSrcId(posting.getOprId());
-        return line;
-    }
-
-    private PostingLineBO buildPostingLine(final PostingBO posting, String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount) {
-        PostingLineBO p = new PostingLineBO();
-        p.setDetails(lineDetails);
-        p.setAccount(ledgerAccount); //TODO Refactor whole shit
-        p.setDebitAmount(debitAmount);
-        p.setCreditAmount(creditAmount);
-        posting.getLines().add(p);
-        return p;
-    }
-
-    private PostingBO buildPosting(LocalDateTime pstTime, PaymentOrderDetailsBO po, String oprDetails, LedgerBO ledger) {
+    private PostingBO buildPosting(LocalDateTime pstTime, String paymentId, String oprDetails, LedgerBO ledger) {
         PostingBO p = new PostingBO();
         p.setOprId(Ids.id());
         p.setOprTime(pstTime);
-        p.setOprSrc(po.getPaymentId());
+        p.setOprSrc(paymentId);
         p.setOprDetails(oprDetails);
         p.setPstTime(pstTime);
         p.setPstType(PostingTypeBO.BUSI_TX);
@@ -255,5 +199,13 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         p.setLedger(ledger);
         p.setValTime(pstTime);
         return p;
+    }
+
+    private <T> String serializeOprDetails(T orderDetails) throws PaymentProcessingException {
+        try {
+            return SerializationUtils.writeValueAsString(orderDetails);
+        } catch (JsonProcessingException e) {
+            throw new PaymentProcessingException("Payment object can't be serialized", e);
+        }
     }
 }

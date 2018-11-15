@@ -1,12 +1,12 @@
 package de.adorsys.ledgers.deposit.api.service.mappers;
 
+import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.db.domain.Payment;
+import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTargetBO;
-import de.adorsys.ledgers.deposit.db.domain.Payment;
-import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
+import java.time.LocalDate;
 
 @Mapper(componentModel = "spring", uses = CurrencyMapper.class)
 public interface PaymentMapper {
@@ -17,8 +17,24 @@ public interface PaymentMapper {
     @Mapping(ignore = true, target = "payment")
     PaymentTargetBO toPaymentTargetBO(PaymentTarget target);
 
-    //TODO @fpo implement and test
-//    PostingBO toPosting(PaymentBO payment);
+    PaymentOrderDetailsBO toPaymentOrder(PaymentBO payment);
 
-//    TransactionDetailsBO toTransaction(PostingBO posting);
+    @Mapping(source = "paymentTarget.paymentId", target = "transactionId")
+    @Mapping(source = "paymentTarget.endToEndIdentification", target = "endToEndId")
+    @Mapping(source = "postingTime", target = "bookingDate")
+    @Mapping(source = "postingTime", target = "valueDate")
+    @Mapping(source = "paymentTarget.instructedAmount", target = "transactionAmount")
+    @Mapping(source = "paymentTarget.payment.debtorAccount", target = "debtorAccount")
+    @Mapping(source = "paymentTarget.payment.paymentId", target = "paymentOrderId")
+    @Mapping(source = "paymentTarget.payment.paymentType", target = "paymentType")
+    PaymentTargetDetailsBO toPaymentTargetDetails(PaymentTargetBO paymentTarget, LocalDate postingTime);
+
+    @Mapping(source = "amount", target = "transactionAmount")
+    @Mapping(source = "postingTime", target = "valueDate")
+    @Mapping(source = "postingTime", target = "bookingDate")
+    @Mapping(source = "payment.paymentId", target = "transactionId")
+    @Mapping(source = "payment.paymentId", target = "paymentOrderId")
+    @Mapping(constant = "multiple", target = "creditorAgent")
+    @Mapping(constant = "multiple", target = "creditorName")
+    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(PaymentBO payment, AmountBO amount, LocalDate postingTime);
 }

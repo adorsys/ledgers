@@ -10,7 +10,9 @@ import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApp
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.*;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -37,7 +39,6 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 
-//@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = DepositAccountServiceApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -70,16 +71,14 @@ public class DepositAccountServiceImplIT {
      * Testing the test. Negative case, if comparison with wrong balance works.
      *
      * @throws IOException
-     * @throws DoubleEntryAccountingException
      * @throws PostingRepositoryException
      * @throws BaseLineException
      * @throws LedgerAccountNotFoundException
-     * @throws PostingNotFoundException
      * @throws LedgerNotFoundException
      * @throws LedgerWithIdNotFoundException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_newbank_no_overriden_tx_nok() throws IOException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
         LocalDateTime dateTime = LocalDateTime.of(2018, Month.JANUARY, 01, 23, 59);
@@ -92,16 +91,14 @@ public class DepositAccountServiceImplIT {
      * Classical case, no overriden transaction. Test balance computation.
      *
      * @throws IOException
-     * @throws DoubleEntryAccountingException
      * @throws PostingRepositoryException
      * @throws BaseLineException
      * @throws LedgerAccountNotFoundException
-     * @throws PostingNotFoundException
      * @throws LedgerNotFoundException
      * @throws LedgerWithIdNotFoundException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_newbank_no_overriden_tx_ok() throws IOException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
         LocalDateTime dateTime = LocalDateTime.of(2018, Month.JANUARY, 01, 8, 30);
@@ -135,7 +132,7 @@ public class DepositAccountServiceImplIT {
 
     @Ignore //TODO @fpo fix
     @Test
-    public void use_case_check_account_balance() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_check_account_balance() throws IOException, LedgerAccountNotFoundException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
         List<BalanceBO> balances = depositAccountService.getBalances("DE38760700240320465700");
         Assert.assertNotNull(balances);
@@ -158,7 +155,7 @@ public class DepositAccountServiceImplIT {
         Assert.assertNotEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
-    private void loadPosting(String s) throws LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, BaseLineException, DoubleEntryAccountingException, IOException {
+    private void loadPosting(String s) throws IOException {
         LedgerBO ledger = loadLedger();
         Assume.assumeNotNull(ledger);
         InputStream inputStream = DepositAccountServiceImplIT.class.getResourceAsStream(s);

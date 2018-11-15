@@ -1,47 +1,32 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Optional;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.PaymentSchedulerService;
-import de.adorsys.ledgers.deposit.api.service.mappers.CurrencyMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
-import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
-import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.api.service.PostingService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountPaymentServiceImplTest {
@@ -55,18 +40,9 @@ public class DepositAccountPaymentServiceImplTest {
     private DepositAccountPaymentServiceImpl paymentService;
     @Mock
     private PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
-    @Mock
-    private TransactionDetailsMapper transactionDetailsMapper;// = Mappers.getMapper(TransactionDetailsMapper.class);
+
     @Mock
     private PaymentRepository paymentRepository;
-    @Mock
-    private CurrencyMapper currencyMapper;
-    @Mock
-    private DepositAccountConfigService depositAccountConfigService;
-    @Mock
-    private LedgerService ledgerService;
-    @Mock
-    private PostingService postingService;
     @Mock
     private PaymentSchedulerService paymentSchedulerService;
 
@@ -114,56 +90,17 @@ public class DepositAccountPaymentServiceImplTest {
     }
 
     @Test
-    public void executePayment_Single_Success() throws PaymentNotFoundException, PaymentProcessingException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException, DoubleEntryAccountingException, BaseLineException {
-    	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
-    	LedgerBO ledger = ledgerAccount.getLedger();
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getSinglePayment()));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePaymentBO());
-        //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
-//        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
-//        when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
-//        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
-//        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+    public void executePayment_Single_Success() throws PaymentNotFoundException, PaymentProcessingException {
+        when(paymentSchedulerService.schedulePaymentExecution(PAYMENT_ID)).thenReturn(TransactionStatusBO.ACSP);
 
-        paymentService.executePayment(PAYMENT_ID);
-//        assertThat(result).isNotEmpty();
-//        assertThat(result.size()).isEqualTo(1);
-//        assertThat(result.get(0)).isNotNull();
+        TransactionStatusBO result = paymentService.executePayment(PAYMENT_ID);
+        assertThat(result).isEqualTo(TransactionStatusBO.ACSP);
     }
 
-    @Test
-    public void executePayment_Bulk_Batch_false_Success() throws PaymentNotFoundException, PaymentProcessingException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException, DoubleEntryAccountingException, BaseLineException {
-    	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
-    	LedgerBO ledger = ledgerAccount.getLedger();
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getBulkPayment()));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulkPaymentBO());
-        //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
-//        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
-//        when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
-//        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
-//        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
-
+    @Test(expected = PaymentProcessingException.class)
+    public void executePayment_Single_Failure() throws PaymentNotFoundException {
+        when(paymentSchedulerService.schedulePaymentExecution(PAYMENT_ID)).thenThrow(new PaymentNotFoundException());
         paymentService.executePayment(PAYMENT_ID);
-//        assertThat(result).isNotEmpty();
-//        assertThat(result.size()).isEqualTo(1);
-    }
-
-    @Test
-    public void executePayment_Bulk_Batch_true_Success() throws LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException, BaseLineException, DoubleEntryAccountingException, PaymentNotFoundException  {
-    	LedgerAccountBO ledgerAccount = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
-    	LedgerBO ledger = ledgerAccount.getLedger();
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(getBulkBatchPayment()));
-        when(paymentMapper.toPaymentBO(any())).thenReturn(getBulBatchPaymentBO());
-        //TODO uncomment when method is refactored //when(depositAccountConfigService.getLedger()).thenReturn(readFile(LedgerBO.class, "Ledger.yml"));
-//        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(ledgerAccount);
-//        when(postingService.newPosting(any())).thenReturn(readFile(PostingBO.class, "Posting.yml"));
-//        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(ledger));
-//        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
-        when(paymentSchedulerService.schedulePaymentExecution(any())).thenReturn(TransactionStatusBO.ACSP);
-
-        paymentService.executePayment(PAYMENT_ID);
-//        assertThat(result).isNotEmpty();
-//        assertThat(result.size()).isEqualTo(1);
     }
 
     private <T> void testGetPaymentById(String paymentId, Payment persistedPayment, PaymentBO expectedPayment) throws PaymentNotFoundException {
@@ -184,6 +121,7 @@ public class DepositAccountPaymentServiceImplTest {
         payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
+
     private PaymentBO getSinglePaymentBO() {
         PaymentBO payment = readFile(PaymentBO.class, "PaymentSingle.yml");
         payment.getTargets().forEach(t -> t.setPayment(payment));
@@ -195,24 +133,13 @@ public class DepositAccountPaymentServiceImplTest {
         payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
+
     private PaymentBO getBulkPaymentBO() {
         PaymentBO payment = readFile(PaymentBO.class, "PaymentBulk.yml");
         payment.getTargets().forEach(t -> t.setPayment(payment));
         return payment;
     }
 
-    
-    private Payment getBulkBatchPayment() {
-        Payment payment = readFile(Payment.class, "PaymentBulkBatchTrue.yml");
-        payment.getTargets().forEach(t -> t.setPayment(payment));
-        return payment;
-    }
-    private PaymentBO getBulBatchPaymentBO() {
-        PaymentBO payment = readFile(PaymentBO.class, "PaymentBulkBatchTrue.yml");
-        payment.getTargets().forEach(t -> t.setPayment(payment));
-        return payment;
-    }
-    
     private <T> T readFile(Class<T> t, String file) {
         try {
             return YamlReader.getInstance().getObjectFromResource(DepositAccountPaymentServiceImpl.class, file, t);
