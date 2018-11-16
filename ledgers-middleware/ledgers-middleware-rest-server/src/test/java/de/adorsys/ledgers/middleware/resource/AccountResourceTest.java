@@ -50,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AccountResourceTest {
     private static final String ACCOUNT_ID = "XXXYYYZZZ";
     private static final String TRANSACTION_ID = "TRANSACTION_ID";
+    private static final String IBAN = "DE91100000000123456789";
     private static final LocalDate DATE_FROM = LocalDate.of(2018, 12, 12);
     private static final LocalDate DATE_TO = LocalDate.of(2018, 12, 18);
 
@@ -244,6 +245,39 @@ public class AccountResourceTest {
 
         verify(middlewareService, times(0)).getTransactionsByDates(ACCOUNT_ID, DATE_FROM, DATE_TO);
     }
+
+    @Test
+    public void getAccountDetailsByIban() throws Exception {
+        AccountDetailsTO details = getDetails();
+        when(middlewareService.getAccountDetailsByIban(IBAN)).thenReturn(details);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/ibans/{iban}", IBAN))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        AccountDetailsTO actual = JsonReader.getInstance().getObjectFromString(content, AccountDetailsTO.class);
+
+        assertThat(actual).isEqualToComparingFieldByFieldRecursively(details);
+        verify(middlewareService, times(1)).getAccountDetailsByIban(IBAN);
+
+    }
+
+    @Test
+    public void getAccountDetailsByIbanAccountNotFoundMiddlewareException() throws Exception {
+        when(middlewareService.getAccountDetailsByIban(IBAN))
+                .thenThrow(new AccountNotFoundMiddlewareException("Account with iban=" + IBAN + " not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/ibans/{iban}", IBAN))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        verify(middlewareService, times(1)).getAccountDetailsByIban(IBAN);
+    }
+
 
     private AccountDetailsTO getDetails() {
         AccountDetailsTO file = readYml(AccountDetailsTO.class, "AccountDetails.yml");

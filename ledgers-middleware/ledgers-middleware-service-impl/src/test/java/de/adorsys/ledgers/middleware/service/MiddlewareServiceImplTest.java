@@ -5,10 +5,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,6 +88,7 @@ public class MiddlewareServiceImplTest {
     private static final String SINGLE_TO = "PaymentSingleTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
     private static final String USER_MESSAGE = "user message";
+    private static final String IBAN = "DE91100000000123456789";
 
     @InjectMocks
     private MiddlewareServiceImpl middlewareService;
@@ -237,13 +235,18 @@ public class MiddlewareServiceImplTest {
 
     @Test
     public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException, LedgerAccountNotFoundException {
-        when(accountService.getDepositAccountById(any())).thenReturn(getAccount(DepositAccountBO.class));
-        when(accountService.getBalances(any())).thenReturn(readBalances(BalanceBO.class));
+        DepositAccountBO account = getAccount(DepositAccountBO.class);
+        List<BalanceBO> balances = readBalances(BalanceBO.class);
+
+        when(accountService.getDepositAccountById(any())).thenReturn(account);
+        when(accountService.getBalances(any())).thenReturn(balances);
         when(detailsMapper.toAccountDetailsTO(any(), any())).thenReturn(getAccount(AccountDetailsTO.class));
         AccountDetailsTO details = middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID);
 
         assertThat(details).isNotNull();
         verify(accountService, times(1)).getDepositAccountById(ACCOUNT_ID);
+        verify(accountService, times(1)).getBalances(account.getIban());
+        verify(detailsMapper, times(1)).toAccountDetailsTO(account, balances);
     }
 
     @Test(expected = AccountNotFoundMiddlewareException.class)
@@ -378,7 +381,7 @@ public class MiddlewareServiceImplTest {
         userBO.getAccountAccesses().addAll(accessBOList);
         when(userService.findByLogin(userLogin)).thenReturn(userBO);
         
-        when(accountService.getDepositAccountsByIBAN(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
+        when(accountService.getDepositAccountsByIban(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
         when(detailsMapper.toAccountDetailsListTO(Collections.singletonList(accountBO))).thenReturn(Collections.singletonList(account));
 
         List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
@@ -387,7 +390,7 @@ public class MiddlewareServiceImplTest {
         assertThat(details.get(0), is(account));
 
         verify(userService, times(1)).findByLogin(userLogin);
-        verify(accountService, times(1)).getDepositAccountsByIBAN(Collections.singletonList(iban));
+        verify(accountService, times(1)).getDepositAccountsByIban(Collections.singletonList(iban));
         verify(detailsMapper, times(1)).toAccountDetailsListTO(Collections.singletonList(accountBO));
     }
 
@@ -415,6 +418,43 @@ public class MiddlewareServiceImplTest {
         when(accountService.getTransactionById(anyString(), anyString())).thenThrow(new TransactionNotFoundException("ACCOUNT_ID", "POSTING_ID"));
 
         middlewareService.getTransactionById("ACCOUNT_ID", "POSTING_ID");
+    }
+
+    @Test
+    public void getAccountDetailsByIban() throws LedgerAccountNotFoundException, DepositAccountNotFoundException, IOException, AccountNotFoundMiddlewareException {
+        DepositAccountBO account = getAccount(DepositAccountBO.class);
+        List<BalanceBO> balances = readBalances(BalanceBO.class);
+        AccountDetailsTO accountDetailsTO = getAccount(AccountDetailsTO.class);
+
+        when(accountService.getDepositAccountByIban(IBAN)).thenReturn(account);
+        when(accountService.getBalances(IBAN)).thenReturn(balances);
+        when(detailsMapper.toAccountDetailsTO(account, balances)).thenReturn(accountDetailsTO);
+
+        AccountDetailsTO details = middlewareService.getAccountDetailsByIban(IBAN);
+
+        assertThat(details).isNotNull();
+        assertThat(details, is(accountDetailsTO));
+
+        verify(accountService, times(1)).getDepositAccountByIban(IBAN);
+        verify(accountService, times(1)).getBalances(IBAN);
+        verify(detailsMapper, times(1)).toAccountDetailsTO(account, balances);
+    }
+
+    @Test(expected = AccountNotFoundMiddlewareException.class)
+    public void getAccountDetailsByIbanDepositAccountNotFoundException() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+
+        when(accountService.getDepositAccountByIban(IBAN)).thenThrow(DepositAccountNotFoundException.class);
+
+        middlewareService.getAccountDetailsByIban(IBAN);
+    }
+
+    @Test(expected = AccountNotFoundMiddlewareException.class)
+    public void getAccountDetailsByIbanLedgerAccountNotFoundException() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, LedgerAccountNotFoundException {
+
+        when(accountService.getDepositAccountByIban(IBAN)).thenReturn(mock(DepositAccountBO.class));
+        when(accountService.getBalances(IBAN)).thenThrow(LedgerAccountNotFoundException.class);
+
+        middlewareService.getAccountDetailsByIban(IBAN);
     }
 
     private static <T> List<T> readBalances(Class<T> tClass) throws IOException {

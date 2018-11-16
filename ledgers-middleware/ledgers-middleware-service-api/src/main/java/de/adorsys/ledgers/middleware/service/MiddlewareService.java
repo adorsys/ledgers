@@ -137,6 +137,8 @@ public interface MiddlewareService {
 
     AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
 
+    AccountDetailsTO getAccountDetailsByIban(String iban) throws AccountNotFoundMiddlewareException;
+
     List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException;
 
     List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException;

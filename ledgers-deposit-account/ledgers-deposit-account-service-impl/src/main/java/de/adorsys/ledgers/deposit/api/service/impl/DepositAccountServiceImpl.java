@@ -102,7 +102,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public DepositAccountBO getDepositAccountByIBAN(String iban) throws DepositAccountNotFoundException {
+    public DepositAccountBO getDepositAccountByIban(String iban) throws DepositAccountNotFoundException {
         return depositAccountRepository.findByIban(iban)
                        .map(depositAccountMapper::toDepositAccountBO)
                        .orElseThrow(() -> new DepositAccountNotFoundException(iban));
@@ -141,7 +141,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans) {
+    public List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans) {
         logger.info("Retrieving deposit accounts by list of IBANs");
 
         List<DepositAccount> accounts = depositAccountRepository.findByIbanIn(ibans);

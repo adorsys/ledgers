@@ -102,6 +102,16 @@ public class AccountResource {
         }
     }
 
+    @GetMapping("/ibans/{iban}")
+    public AccountDetailsTO getAccountDetailsByIban(@PathVariable String iban) {
+        try {
+            return middlewareService.getAccountDetailsByIban(iban);
+        } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
+
     private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
         if (!validDate(dateFrom).isEqual(validDate(dateTo))
                     && validDate(dateFrom).isAfter(validDate(dateTo))) {

@@ -16,13 +16,13 @@ public interface DepositAccountService {
 
     DepositAccountBO getDepositAccountById(String accountId) throws DepositAccountNotFoundException;
 
-    DepositAccountBO getDepositAccountByIBAN(String iban) throws DepositAccountNotFoundException;
+    DepositAccountBO getDepositAccountByIban(String iban) throws DepositAccountNotFoundException;
 
     TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundException;
 
     List<BalanceBO> getBalances(String iban) throws LedgerAccountNotFoundException;
 
-    List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans);
+    List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans);
 
     List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException;
 }
