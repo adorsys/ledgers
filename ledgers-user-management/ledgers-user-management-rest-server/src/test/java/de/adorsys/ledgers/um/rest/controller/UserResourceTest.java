@@ -80,7 +80,6 @@ public class UserResourceTest {
             .andExpect(status().is(HttpStatus.CREATED.value()))
             .andReturn();
 
-        assertThat(mvcResult.getResponse().getStatus(), is(201));
         assertThat(mvcResult.getResponse().getHeader("Location"), is("/users/vne_ua"));
 
         verify(userService, times(1)).create(any());
@@ -97,8 +96,6 @@ public class UserResourceTest {
             .andExpect(status().is(HttpStatus.OK.value()))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn();
-
-        assertThat(mvcResult.getResponse().getStatus(), is(200));
 
         String userString = mvcResult.getResponse().getContentAsString();
         UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
@@ -121,8 +118,6 @@ public class UserResourceTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
 
-        assertThat(mvcResult.getResponse().getStatus(), is(200));
-
         String userString = mvcResult.getResponse().getContentAsString();
         UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
 
@@ -139,7 +134,6 @@ public class UserResourceTest {
         when(userService.updateScaData(any(), anyString())).thenReturn(userBO);
 
         String jsonScaUserData = JsonReader.getInstance().getStringFromFile("de/adorsys/ledgers/um/rest/controller/scaUserData.json");
-        List<ScaUserDataBO> scaUserData = JsonReader.getInstance().getListFromString(jsonScaUserData, ScaUserDataBO.class);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                     .put("/users/" + USER_ID + "/sca-data")
@@ -149,7 +143,6 @@ public class UserResourceTest {
                 .andExpect(status().is(HttpStatus.CREATED.value()))
                 .andReturn();
 
-        assertThat(mvcResult.getResponse().getStatus(), is(201));
         assertThat(mvcResult.getResponse().getHeader("Location"), is("/users/" + USER_ID));
 
         verify(userService, times(1)).findById(USER_ID);
