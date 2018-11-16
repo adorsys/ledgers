@@ -17,7 +17,22 @@
 package de.adorsys.ledgers.middleware.service;
 
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
@@ -34,9 +49,23 @@ import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.exception.*;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -44,15 +73,6 @@ import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
@@ -128,10 +148,10 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     @Override
     public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
         try {
-            DepositAccountBO account = accountService.getDepositAccountById(accountId);
-            List<BalanceBO> balances = accountService.getBalances(account.getIban());
-            return detailsMapper.toAccountDetailsTO(account, balances);
-        } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
+            DepositAccountDetailsBO accountDetailsBO = accountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
+            List<BalanceBO> balances = accountDetailsBO.getBalances();
+            return detailsMapper.toAccountDetailsTO(accountDetailsBO.getAccount(), balances);
+        } catch (DepositAccountNotFoundException e) {
             logger.error("Deposit Account with id=" + accountId + "not found", e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
@@ -179,7 +199,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException {
         PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
         try {
-            accountService.getDepositAccountByIBAN(paymentBO.getDebtorAccount().getIban());
+            accountService.getDepositAccountByIBAN(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new AccountNotFoundMiddlewareException(e.getMessage());
@@ -203,10 +223,10 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     @Override
     public List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException {
         try {
-            DepositAccountBO account = accountService.getDepositAccountById(accountId);
-            List<BalanceBO> balances = accountService.getBalances(account.getIban());
+            DepositAccountDetailsBO accountDetailsBO = accountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
+            List<BalanceBO> balances = accountDetailsBO.getBalances();
             return detailsMapper.toAccountBalancesTO(balances);
-        } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
+        } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }

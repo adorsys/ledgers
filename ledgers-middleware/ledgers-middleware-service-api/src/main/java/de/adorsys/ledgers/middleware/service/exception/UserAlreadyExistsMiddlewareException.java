@@ -18,26 +18,26 @@ package de.adorsys.ledgers.middleware.service.exception;
 
 import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
 
-public class UserAlreadyExistsMIddlewareException extends Exception {
+public class UserAlreadyExistsMiddlewareException extends Exception {
 
     public static final String ERROR_MESSAGE = "User with such login=%s or email=%s already exists";
 
-    public UserAlreadyExistsMIddlewareException() {
+    public UserAlreadyExistsMiddlewareException() {
     }
 
-    public UserAlreadyExistsMIddlewareException(UserTO user) {
+    public UserAlreadyExistsMiddlewareException(UserTO user) {
         this(String.format(ERROR_MESSAGE, user.getLogin(), user.getEmail()));
     }
 
-    public UserAlreadyExistsMIddlewareException(String message) {
+    public UserAlreadyExistsMiddlewareException(String message) {
         super(message);
     }
 
-	public UserAlreadyExistsMIddlewareException(UserTO user, Throwable cause) {
+	public UserAlreadyExistsMiddlewareException(UserTO user, Throwable cause) {
 		super(String.format(ERROR_MESSAGE, user.getLogin(), user.getEmail()), cause);
 	}
 
-	public UserAlreadyExistsMIddlewareException(String message, Throwable cause) {
+	public UserAlreadyExistsMiddlewareException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

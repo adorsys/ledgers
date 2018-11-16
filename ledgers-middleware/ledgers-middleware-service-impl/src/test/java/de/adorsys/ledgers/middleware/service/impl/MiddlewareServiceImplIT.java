@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.Assert;
@@ -23,12 +24,13 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.middleware.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountReferenceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.DepositAccountTO;
 import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.BulkPaymentTO;
@@ -40,8 +42,19 @@ import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddleware
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMIddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.test.MiddlewareServiceApplication;
+import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerStmtBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.service.AccountStmtService;
+import de.adorsys.ledgers.postings.api.service.LedgerService;
+import de.adorsys.ledgers.postings.api.service.LedgerStmtService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = MiddlewareServiceApplication.class)
@@ -50,7 +63,7 @@ import de.adorsys.ledgers.middleware.test.MiddlewareServiceApplication;
     DbUnitTestExecutionListener.class})
 @ActiveProfiles("h2")
 @DatabaseTearDown(value={"MiddlewareServiceImplIT-db-delete.xml"}, type=DatabaseOperation.DELETE_ALL)
-public class MiddlewareServiceImpl2IT {
+public class MiddlewareServiceImplIT {
 
 	private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 	@Autowired
@@ -59,14 +72,20 @@ public class MiddlewareServiceImpl2IT {
 	private MiddlewareAccountManagementService accountService;
 	@Autowired
 	private MiddlewareUserManagementService userService;
+	@Autowired
+	private AccountStmtService accountStmtService;
+	@Autowired
+	private LedgerService ledgerService;
+	@Autowired
+	private DepositAccountConfigService depositAccountConfigService;
 	
 	@Test
-	public void execute_payment_read_tx_ok() throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException, DepositAccountNotFoundException, PaymentProcessingMiddlewareException, PaymentNotFoundMiddlewareException, UserAlreadyExistsMIddlewareException {
-		MiddlewareTestCaseData2 testData = loadTestData("MiddlewareServiceImplIT-read_tx_ok.yml");
+	public void execute_payment_read_tx_ok() throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException, DepositAccountNotFoundException, PaymentProcessingMiddlewareException, PaymentNotFoundMiddlewareException, UserAlreadyExistsMiddlewareException, LedgerNotFoundException, BaseLineException, LedgerAccountNotFoundException {
+		MiddlewareTestCaseData testData = loadTestData("MiddlewareServiceImplIT-read_tx_ok.yml");
 		
 		// Create accounts
-		List<DepositAccountTO> accounts = testData.getAccounts();
-		for (DepositAccountTO depositAccount : accounts) {
+		List<AccountDetailsTO> accounts = testData.getAccounts();
+		for (AccountDetailsTO depositAccount : accounts) {
 			accountService.createDepositAccount(depositAccount);
 		}
 		
@@ -123,6 +142,11 @@ public class MiddlewareServiceImpl2IT {
 			
 			BulkPaymentTO bulkPayment = bulkPaymentTest.getBulkPayment();
 			
+			List<AccountBalance> before = bulkPaymentTest.getBefore();
+			for (AccountBalance bal : before) {
+				checkBalance(bal, LocalDateTime.now());
+			}
+			
 			// Initiate
 			BulkPaymentTO pymt = (BulkPaymentTO) middlewareService.initiatePayment(bulkPayment, PaymentTypeTO.BULK);
 			TransactionStatusTO initiatedPaymentStatus = middlewareService.getPaymentStatusById(pymt.getPaymentId());
@@ -131,7 +155,11 @@ public class MiddlewareServiceImpl2IT {
 			// Execute
 			TransactionStatusTO executedPaymentStatus = middlewareService.executePayment(pymt.getPaymentId());
 			Assert.assertEquals(TransactionStatusTO.ACSP, executedPaymentStatus);
-			
+						
+			List<AccountBalance> after = bulkPaymentTest.getAfter();
+			for (AccountBalance bal : after) {
+				checkBalance(bal, LocalDateTime.now());
+			}
 		}
 
 		
@@ -142,9 +170,18 @@ public class MiddlewareServiceImpl2IT {
 		}
 	}	
 
+	private void checkBalance(AccountBalance bal, LocalDateTime refTime) throws LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException {
+		String ledger = depositAccountConfigService.getLedger();
+		LedgerBO ledgerBO = new LedgerBO();
+		ledgerBO.setName(ledger);
+		LedgerAccountBO ledgerAccount = ledgerService.findLedgerAccount(ledgerBO, bal.getAccNbr());
+		AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccount, refTime);
+		Assert.assertEquals(bal.getBalance().doubleValue(), stmt.creditBalance().doubleValue(), 0d);
+	}
+
 	private void checkTransactions(TransactionTestData txTest) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException, DepositAccountNotFoundException {
 		String iban = txTest.getIban();
-		DepositAccountTO depositAccount = accountService.getDepositAccountByIBAN(iban);
+		AccountDetailsTO depositAccount = accountService.getDepositAccountByIBAN(iban, LocalDateTime.now(), true);
 		List<TransactionTO> loadedTransactions = middlewareService.getTransactionsByDates(depositAccount.getId(), txTest.getDateFrom(), txTest.getDateTo());
 		// Now compare the transactions
 		List<TransactionTO> expectedTransactions = txTest.getTransactions();
@@ -159,7 +196,7 @@ public class MiddlewareServiceImpl2IT {
 	}
 
 	private void checkBalance(AccountReferenceTO account, BigDecimal creditAmount) throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-		DepositAccountTO depositAccount = accountService.getDepositAccountByIBAN(account.getIban());
+		AccountDetailsTO depositAccount = accountService.getDepositAccountByIBAN(account.getIban(), LocalDateTime.now(), true);
 		List<AccountBalanceTO> balances = middlewareService.getBalances(depositAccount.getId());
 		Assert.assertNotNull(balances);
 		Assert.assertEquals(1, balances.size());
@@ -169,10 +206,10 @@ public class MiddlewareServiceImpl2IT {
 		Assert.assertEquals(creditAmount.doubleValue(), amount.getAmount().doubleValue(), 0d);
 	}
 
-	private MiddlewareTestCaseData2 loadTestData(String file) {
-		InputStream inputStream = MiddlewareServiceImpl2IT.class.getResourceAsStream(file);
+	private MiddlewareTestCaseData loadTestData(String file) {
+		InputStream inputStream = MiddlewareServiceImplIT.class.getResourceAsStream(file);
 		try {
-			return mapper.readValue(inputStream, MiddlewareTestCaseData2.class);
+			return mapper.readValue(inputStream, MiddlewareTestCaseData.class);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}

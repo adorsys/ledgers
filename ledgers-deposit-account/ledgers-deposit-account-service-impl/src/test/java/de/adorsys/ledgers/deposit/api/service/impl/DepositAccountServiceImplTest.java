@@ -1,32 +1,8 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
-import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
-import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
-import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
-import de.adorsys.ledgers.deposit.db.domain.*;
-import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
-import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.util.SerializationUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import pro.javatar.commons.reader.YamlReader;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -35,9 +11,48 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
+import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
+import de.adorsys.ledgers.deposit.db.domain.AccountType;
+import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
+import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
+import de.adorsys.ledgers.deposit.db.domain.Payment;
+import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
+import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
+import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
+import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.service.AccountStmtService;
+import de.adorsys.ledgers.postings.api.service.LedgerService;
+import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.util.SerializationUtils;
+import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountServiceImplTest {
@@ -59,6 +74,8 @@ public class DepositAccountServiceImplTest {
     private TransactionDetailsMapper transactionDetailsMapper;
     @Mock
     private PaymentTargetRepository paymentTargetRepository;
+    @Mock
+    private AccountStmtService accountStmtService;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -79,33 +96,47 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getDepositAccountById() throws DepositAccountNotFoundException {
+    public void getDepositAccountById() throws DepositAccountNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount()));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
+//        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+//        when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO());
         //When
-        DepositAccountBO account = depositAccountService.getDepositAccountById("id");
+        DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getDepositAccountById("id", LocalDateTime.now(), false);
         //Then
-        assertThat(account).isNotNull();
+        assertThat(depositAccountDetailsBO).isNotNull();
+        assertThat(depositAccountDetailsBO.getAccount()).isNotNull();
     }
 
     @Test(expected = DepositAccountNotFoundException.class)
     public void getDepositAccountById_wrong_id() throws DepositAccountNotFoundException {
         when(depositAccountRepository.findById("wrong_id")).thenReturn(Optional.empty());
         //When
-        depositAccountService.getDepositAccountById("wrong_id");
+        depositAccountService.getDepositAccountById("wrong_id", LocalDateTime.now(), false);
     }
 
     @Test
-    public void getDepositAccountByIBAN() throws DepositAccountNotFoundException {
-        when(depositAccountRepository.findByIban(any())).thenReturn(Optional.of(getDepositAccount()));
+    public void getDepositAccountByIBAN() throws DepositAccountNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
+//        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+//        when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO());
         //When
-        DepositAccountBO account = depositAccountService.getDepositAccountByIBAN("iban");
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIBAN("iban", LocalDateTime.now(), false);
         //Then
-        assertThat(account).isNotNull();
+        assertThat(accountDetailsBO).isNotNull();
+        assertThat(accountDetailsBO.getAccount()).isNotNull();
     }
 
-    @Test
+    private AccountStmtBO newAccountStmtBO() {
+		AccountStmtBO result = new AccountStmtBO();
+		LedgerAccountBO ledgerAccountBO2 = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
+		result.setAccount(ledgerAccountBO2);
+		result.setPstTime(LocalDateTime.now());
+		return result;
+	}
+
+	@Test
     public void getTransactionById() throws TransactionNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));

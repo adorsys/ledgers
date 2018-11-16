@@ -5,7 +5,7 @@ import java.util.List;
 import de.adorsys.ledgers.middleware.service.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMIddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 
 public interface MiddlewareUserManagementService {
@@ -14,9 +14,9 @@ public interface MiddlewareUserManagementService {
      *
      * @param user User transfer object
      * @return A persisted user or trows a UserAlreadyExistsException
-     * @throws UserAlreadyExistsMIddlewareException is thrown if user already exists
+     * @throws UserAlreadyExistsMiddlewareException is thrown if user already exists
      */
-    UserTO create(UserTO user) throws UserAlreadyExistsMIddlewareException;
+    UserTO create(UserTO user) throws UserAlreadyExistsMiddlewareException;
 
     /**
      * Finds a User by its identifier

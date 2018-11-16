@@ -3,7 +3,7 @@ package de.adorsys.ledgers.middleware.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.adorsys.ledgers.middleware.service.domain.account.DepositAccountTO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
 
 /**
@@ -13,18 +13,18 @@ import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
  *
  *
  */
-public class MiddlewareTestCaseData2 {
+public class MiddlewareTestCaseData {
 	
-	private List<DepositAccountTO> accounts = new ArrayList<>();
+	private List<AccountDetailsTO> accounts = new ArrayList<>();
 	private List<UserTO> users = new ArrayList<>();
 	private List<SinglePaymentTestData> singlePaymentTests = new ArrayList<>(); 
 	private List<BulkPaymentTestData> bulkPaymentTests = new ArrayList<>();
 	private List<TransactionTestData> transactions = new ArrayList<>();
 
-	public List<DepositAccountTO> getAccounts() {
+	public List<AccountDetailsTO> getAccounts() {
 		return accounts;
 	}
-	public void setAccounts(List<DepositAccountTO> accounts) {
+	public void setAccounts(List<AccountDetailsTO> accounts) {
 		this.accounts = accounts;
 	}
 	public List<UserTO> getUsers() {

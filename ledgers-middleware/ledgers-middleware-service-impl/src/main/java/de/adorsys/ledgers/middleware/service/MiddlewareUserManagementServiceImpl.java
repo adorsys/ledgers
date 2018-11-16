@@ -2,14 +2,16 @@ package de.adorsys.ledgers.middleware.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import de.adorsys.ledgers.middleware.converter.UserTOMapper;
+import de.adorsys.ledgers.middleware.converter.UserMapper;
 import de.adorsys.ledgers.middleware.service.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMIddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
@@ -18,20 +20,22 @@ import de.adorsys.ledgers.um.api.service.UserService;
 
 @Service
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
+    private static final Logger logger = LoggerFactory.getLogger(MiddlewareUserManagementServiceImpl.class);
 
 	@Autowired
 	private UserService userService;
 	
 	@Autowired
-	private UserTOMapper userTOMapper;
+	private UserMapper userTOMapper;
 	
 	@Override
-	public UserTO create(UserTO user) throws UserAlreadyExistsMIddlewareException {
+	public UserTO create(UserTO user) throws UserAlreadyExistsMiddlewareException {
 		UserBO userBO = userTOMapper.toUserBO(user);
 		try {
 			return userTOMapper.toUserTO(userService.create(userBO));
 		} catch (UserAlreadyExistsException e) {
-			throw new UserAlreadyExistsMIddlewareException(user,e);
+			logger.error(e.getMessage(), e);
+			throw new UserAlreadyExistsMiddlewareException(user,e);
 		}
 	}
 
@@ -40,6 +44,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 		try {
 			return userTOMapper.toUserTO(userService.findById(id));
 		} catch (UserNotFoundException e) {
+			logger.error(e.getMessage(), e);
 			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}
@@ -49,6 +54,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 		try {
 			return userTOMapper.toUserTO(userService.findByLogin(userLogin));
 		} catch (UserNotFoundException e) {
+			logger.error(e.getMessage(), e);
 			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}
@@ -57,8 +63,10 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	public UserTO updateScaData(String userLogin, List<ScaUserDataTO> scaDataList)
 			throws UserNotFoundMiddlewareException {
 		try {
-			return userTOMapper.toUserTO(userService.updateScaData(userTOMapper.toScaUserDataListBO(scaDataList), userLogin));
+			UserBO userBO = userService.updateScaData(userTOMapper.toScaUserDataListBO(scaDataList), userLogin);
+			return userTOMapper.toUserTO(userBO);
 		} catch (UserNotFoundException e) {
+			logger.error(e.getMessage(), e);
 			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}
@@ -67,8 +75,10 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	public UserTO updateAccountAccess(String userLogin, List<AccountAccessTO> accounts)
 			throws UserNotFoundMiddlewareException {
 		try {
-			return userTOMapper.toUserTO(userService.updateAccountAccess(userLogin, userTOMapper.toAccountAccessListBO(accounts)));
+			UserBO userBO = userService.updateAccountAccess(userLogin, userTOMapper.toAccountAccessListBO(accounts));
+			return userTOMapper.toUserTO(userBO);
 		} catch (UserNotFoundException e) {
+			logger.error(e.getMessage(), e);
 			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}

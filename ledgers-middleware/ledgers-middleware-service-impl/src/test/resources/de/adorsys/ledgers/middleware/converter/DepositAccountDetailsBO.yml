@@ -1,0 +1,18 @@
+account:
+  id: id
+  iban: iban
+  bban: bban
+  pan: pan
+  maskedPan: maskedPan
+  msisdn: msisdn
+  currency: EUR
+  name: name
+  product: product
+  accountType: CASH
+  accountStatus: ENABLED
+  bic: bic
+  linkedAccounts: account
+  usageType: PRIV
+  details: details
+  
+balances:

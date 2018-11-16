@@ -170,7 +170,7 @@ singlePaymentTests:
     balanceCreditAccountAfter: -3120.00
 
 bulkPaymentTests:
-# Payment from Anton Brueckner to to 3 children with external bank account on 2018-06-01 at 12:25:00
+# Payment from Anton Brueckner to to 2 children with external bank account on 2018-06-01 at 12:25:00
   - bulkPayment:
       batchBookingPreferred: true
       requestedExecutionDate: 2018-06-23
@@ -195,6 +195,17 @@ bulkPaymentTests:
           paymentProduct: SEPA
           instructedAmount:
             amount: 100
+    before:
+     - accNbr: DE80760700240271232400
+       balance: 700.00
+     - accNbr: 11031
+       balance: 2300.00
+    after:
+     - accNbr: DE80760700240271232400
+       balance: 450.00
+     - accNbr: 11031
+       balance: 2550.00
+
 
 transactions: 
   - iban: DE69760700240340283600

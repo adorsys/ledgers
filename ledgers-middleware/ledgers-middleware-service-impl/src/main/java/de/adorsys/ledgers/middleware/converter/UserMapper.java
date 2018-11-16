@@ -28,7 +28,7 @@ import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 
 @Mapper(componentModel = "spring")
-public interface UserTOMapper {
+public interface UserMapper {
 
     UserTO toUserTO(UserBO user);
 
