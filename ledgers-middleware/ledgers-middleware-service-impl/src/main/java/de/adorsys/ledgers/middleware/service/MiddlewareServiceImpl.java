@@ -138,10 +138,22 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
+    public AccountDetailsTO getAccountDetailsByIban(String iban) throws AccountNotFoundMiddlewareException {
+        try {
+            DepositAccountBO account = accountService.getDepositAccountByIBAN(iban);
+            List<BalanceBO> balances = accountService.getBalances(iban);
+            return detailsMapper.toAccountDetailsTO(account, balances);
+        } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
+            logger.error("Deposit Account with iban={} not found", iban, e);
+            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException {
         logger.info("Retrieving accounts by user login {}", userLogin);
         try {
-        	UserBO userBO = userService.findByLogin(userLogin);
+            UserBO userBO = userService.findByLogin(userLogin);
             List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
             logger.info("{} accounts were retrieved", accountAccess.size());
 
@@ -191,7 +203,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     @Override
     public List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException {
         try {
-        	UserBO userBO = userService.findByLogin(userLogin);
+            UserBO userBO = userService.findByLogin(userLogin);
             List<ScaUserDataBO> userScaData = userBO.getScaUserData();
             return scaMethodTOConverter.toSCAMethodListTO(userScaData);
         } catch (UserNotFoundException e) {
