@@ -123,7 +123,7 @@ public class MiddlewareServiceImplIT {
 
 	private void checkTransactions(TransactionTestData txTest) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException, DepositAccountNotFoundException {
 		String iban = txTest.getIban();
-		DepositAccountBO depositAccount = depositAccountService.getDepositAccountByIBAN(iban);
+		DepositAccountBO depositAccount = depositAccountService.getDepositAccountByIban(iban);
 		List<TransactionTO> loadedTransactions = middlewareService.getTransactionsByDates(depositAccount.getId(), txTest.getDateFrom(), txTest.getDateTo());
 		// Now compare the transactions
 		List<TransactionTO> expectedTransactions = txTest.getTransactions();
@@ -138,7 +138,7 @@ public class MiddlewareServiceImplIT {
 	}
 
 	private void checkBalance(AccountReferenceTO account, BigDecimal creditAmount) throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-		DepositAccountBO depositAccount = depositAccountService.getDepositAccountByIBAN(account.getIban());
+		DepositAccountBO depositAccount = depositAccountService.getDepositAccountByIban(account.getIban());
 		List<AccountBalanceTO> balances = middlewareService.getBalances(depositAccount.getId());
 		Assert.assertNotNull(balances);
 		Assert.assertEquals(1, balances.size());

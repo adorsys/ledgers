@@ -103,7 +103,7 @@ public class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIban(any())).thenReturn(Optional.of(getDepositAccount()));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
         //When
-        DepositAccountBO account = depositAccountService.getDepositAccountByIBAN("iban");
+        DepositAccountBO account = depositAccountService.getDepositAccountByIban("iban");
         //Then
         assertThat(account).isNotNull();
     }

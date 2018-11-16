@@ -381,7 +381,7 @@ public class MiddlewareServiceImplTest {
         userBO.getAccountAccesses().addAll(accessBOList);
         when(userService.findByLogin(userLogin)).thenReturn(userBO);
         
-        when(accountService.getDepositAccountsByIBAN(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
+        when(accountService.getDepositAccountsByIban(Collections.singletonList(iban))).thenReturn(Collections.singletonList(accountBO));
         when(detailsMapper.toAccountDetailsListTO(Collections.singletonList(accountBO))).thenReturn(Collections.singletonList(account));
 
         List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
@@ -390,7 +390,7 @@ public class MiddlewareServiceImplTest {
         assertThat(details.get(0), is(account));
 
         verify(userService, times(1)).findByLogin(userLogin);
-        verify(accountService, times(1)).getDepositAccountsByIBAN(Collections.singletonList(iban));
+        verify(accountService, times(1)).getDepositAccountsByIban(Collections.singletonList(iban));
         verify(detailsMapper, times(1)).toAccountDetailsListTO(Collections.singletonList(accountBO));
     }
 
@@ -426,7 +426,7 @@ public class MiddlewareServiceImplTest {
         List<BalanceBO> balances = readBalances(BalanceBO.class);
         AccountDetailsTO accountDetailsTO = getAccount(AccountDetailsTO.class);
 
-        when(accountService.getDepositAccountByIBAN(IBAN)).thenReturn(account);
+        when(accountService.getDepositAccountByIban(IBAN)).thenReturn(account);
         when(accountService.getBalances(IBAN)).thenReturn(balances);
         when(detailsMapper.toAccountDetailsTO(account, balances)).thenReturn(accountDetailsTO);
 
@@ -435,7 +435,7 @@ public class MiddlewareServiceImplTest {
         assertThat(details).isNotNull();
         assertThat(details, is(accountDetailsTO));
 
-        verify(accountService, times(1)).getDepositAccountByIBAN(IBAN);
+        verify(accountService, times(1)).getDepositAccountByIban(IBAN);
         verify(accountService, times(1)).getBalances(IBAN);
         verify(detailsMapper, times(1)).toAccountDetailsTO(account, balances);
     }
@@ -443,7 +443,7 @@ public class MiddlewareServiceImplTest {
     @Test(expected = AccountNotFoundMiddlewareException.class)
     public void getAccountDetailsByIbanDepositAccountNotFoundException() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
 
-        when(accountService.getDepositAccountByIBAN(IBAN)).thenThrow(DepositAccountNotFoundException.class);
+        when(accountService.getDepositAccountByIban(IBAN)).thenThrow(DepositAccountNotFoundException.class);
 
         middlewareService.getAccountDetailsByIban(IBAN);
     }
@@ -451,7 +451,7 @@ public class MiddlewareServiceImplTest {
     @Test(expected = AccountNotFoundMiddlewareException.class)
     public void getAccountDetailsByIbanLedgerAccountNotFoundException() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, LedgerAccountNotFoundException {
 
-        when(accountService.getDepositAccountByIBAN(IBAN)).thenReturn(mock(DepositAccountBO.class));
+        when(accountService.getDepositAccountByIban(IBAN)).thenReturn(mock(DepositAccountBO.class));
         when(accountService.getBalances(IBAN)).thenThrow(LedgerAccountNotFoundException.class);
 
         middlewareService.getAccountDetailsByIban(IBAN);

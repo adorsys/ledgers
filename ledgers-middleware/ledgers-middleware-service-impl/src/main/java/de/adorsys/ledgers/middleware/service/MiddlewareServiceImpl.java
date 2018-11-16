@@ -140,7 +140,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     @Override
     public AccountDetailsTO getAccountDetailsByIban(String iban) throws AccountNotFoundMiddlewareException {
         try {
-            DepositAccountBO account = accountService.getDepositAccountByIBAN(iban);
+            DepositAccountBO account = accountService.getDepositAccountByIban(iban);
             List<BalanceBO> balances = accountService.getBalances(iban);
             return detailsMapper.toAccountDetailsTO(account, balances);
         } catch (DepositAccountNotFoundException | LedgerAccountNotFoundException e) {
@@ -163,7 +163,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
                                          .collect(Collectors.toList());
             logger.info("{} were accounts were filtered as OWN", ibans.size());
 
-            List<DepositAccountBO> accounts = accountService.getDepositAccountsByIBAN(ibans);
+            List<DepositAccountBO> accounts = accountService.getDepositAccountsByIban(ibans);
             logger.info("{} deposit accounts were found", accounts.size());
 
             return detailsMapper.toAccountDetailsListTO(accounts);
@@ -191,7 +191,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException {
         PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
         try {
-            accountService.getDepositAccountByIBAN(paymentBO.getDebtorAccount().getIban());
+            accountService.getDepositAccountByIban(paymentBO.getDebtorAccount().getIban());
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new AccountNotFoundMiddlewareException(e.getMessage());
