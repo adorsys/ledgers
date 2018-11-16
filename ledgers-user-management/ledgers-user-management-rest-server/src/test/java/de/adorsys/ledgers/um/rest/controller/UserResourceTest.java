@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.IOException;
+import java.util.List;
+
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -39,6 +43,7 @@ import pro.javatar.commons.reader.YamlReader;
 public class UserResourceTest {
 
     private static final String USER_LOGIN = "vne";
+    private static final String USER_ID = "SomeUniqueID";
 
     @InjectMocks
     private UserResource userResource; // user controller
@@ -75,7 +80,6 @@ public class UserResourceTest {
             .andExpect(status().is(HttpStatus.CREATED.value()))
             .andReturn();
 
-        assertThat(mvcResult.getResponse().getStatus(), is(201));
         assertThat(mvcResult.getResponse().getHeader("Location"), is("/users/vne_ua"));
 
         verify(userService, times(1)).create(any());
@@ -93,8 +97,6 @@ public class UserResourceTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn();
 
-        assertThat(mvcResult.getResponse().getStatus(), is(200));
-
         String userString = mvcResult.getResponse().getContentAsString();
         UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
 
@@ -102,6 +104,49 @@ public class UserResourceTest {
         assertEquals(user, userBO);
 
         verify(userService, times(1)).findByLogin(USER_LOGIN);
+    }
+
+    @Test
+    public void getUserById() throws Exception {
+        UserBO userBO = getUserBO();
+        when(userService.findById(USER_ID)).thenReturn(userBO);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                .get("/users/" + USER_ID))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        String userString = mvcResult.getResponse().getContentAsString();
+        UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
+
+        assertNotNull(user);
+        assertEquals(user, userBO);
+
+        verify(userService, times(1)).findById(USER_ID);
+    }
+
+    @Test
+    public void updateUserScaData() throws Exception {
+        UserBO userBO = getUserBO();
+        when(userService.findById(anyString())).thenReturn(userBO);
+        when(userService.updateScaData(any(), anyString())).thenReturn(userBO);
+
+        String jsonScaUserData = JsonReader.getInstance().getStringFromFile("de/adorsys/ledgers/um/rest/controller/scaUserData.json");
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                    .put("/users/" + USER_ID + "/sca-data")
+                    .contentType(APPLICATION_JSON_UTF8_VALUE)
+                    .content(jsonScaUserData))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.CREATED.value()))
+                .andReturn();
+
+        assertThat(mvcResult.getResponse().getHeader("Location"), is("/users/" + USER_ID));
+
+        verify(userService, times(1)).findById(USER_ID);
+        verify(userService, times(1)).updateScaData(any(), anyString());
     }
 
     private UserBO getUserBO() {
