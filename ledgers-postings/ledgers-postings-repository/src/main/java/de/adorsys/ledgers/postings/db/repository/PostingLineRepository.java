@@ -17,5 +17,5 @@ public interface PostingLineRepository extends PagingAndSortingRepository<Postin
     List<PostingLine> findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(
             LedgerAccount ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo);
 
-    Optional<PostingLine> findFirstByAccountAndOprSrc(LedgerAccount ledgerAccount, String operationSourceId);
+    Optional<PostingLine> findFirstByAccountAndSubOprSrcId(LedgerAccount ledgerAccount, String subOprSrcId);
 }

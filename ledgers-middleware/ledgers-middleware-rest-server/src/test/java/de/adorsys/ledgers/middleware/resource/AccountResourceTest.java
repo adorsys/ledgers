@@ -1,17 +1,25 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -26,32 +34,32 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AccountResourceTest {
     private static final String ACCOUNT_ID = "XXXYYYZZZ";
     private static final String TRANSACTION_ID = "TRANSACTION_ID";
+    private static final String IBAN = "DE91100000000123456789";
     private static final LocalDate DATE_FROM = LocalDate.of(2018, 12, 12);
     private static final LocalDate DATE_TO = LocalDate.of(2018, 12, 18);
+    private static final LocalDateTime DATE_TIME = LocalDateTime.of(2018, 12, 18, 0,0,0);
 
     private MockMvc mockMvc;
 
@@ -244,6 +252,39 @@ public class AccountResourceTest {
 
         verify(middlewareService, times(0)).getTransactionsByDates(ACCOUNT_ID, DATE_FROM, DATE_TO);
     }
+
+    @Test
+    public void getAccountDetailsByIban() throws Exception {
+        AccountDetailsTO details = getDetails();
+        when(middlewareService.getAccountDetailsByIban(IBAN)).thenReturn(details);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/ibans/{iban}", IBAN))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        AccountDetailsTO actual = JsonReader.getInstance().getObjectFromString(content, AccountDetailsTO.class);
+
+        assertThat(actual).isEqualToComparingFieldByFieldRecursively(details);
+        verify(middlewareService, times(1)).getAccountDetailsByIban(IBAN);
+
+    }
+
+    @Test
+    public void getAccountDetailsByIbanAccountNotFoundMiddlewareException() throws Exception {
+        when(middlewareService.getAccountDetailsByIban(IBAN))
+                .thenThrow(new AccountNotFoundMiddlewareException("Account with iban=" + IBAN + " not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/ibans/{iban}", IBAN))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        verify(middlewareService, times(1)).getAccountDetailsByIban(IBAN);
+    }
+
 
     private AccountDetailsTO getDetails() {
         AccountDetailsTO file = readYml(AccountDetailsTO.class, "AccountDetails.yml");

@@ -31,7 +31,7 @@ public class NotFoundRestException extends RestException {
         super(message);
         initialize();
     }
-
+    
     public NotFoundRestException() {
         initialize();
     }

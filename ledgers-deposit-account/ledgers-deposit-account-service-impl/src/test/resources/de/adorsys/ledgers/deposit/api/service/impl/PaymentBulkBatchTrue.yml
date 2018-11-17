@@ -1,6 +1,7 @@
-paymentId: myPaymentId
+paymentId: orderId
 batchBookingPreferred: true
 requestedExecutionDate: 2018-12-12
+requestedExecutionTime:
 paymentType: BULK
 startDate:
 endDate:
@@ -19,7 +20,7 @@ debtorAccount:
 transactionStatus: RCVD
 targets:
   - {
-      paymentId: myPaymentId1,
+      paymentId: subId1,
       endToEndIdentification: 123456788,
       instructedAmount:
         {
@@ -50,7 +51,7 @@ targets:
       payment:
   }
   - {
-        paymentId: myPaymentId2,
+        paymentId: subId2,
         endToEndIdentification: 123456789,
         instructedAmount:
           {

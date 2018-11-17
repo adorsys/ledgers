@@ -19,7 +19,7 @@ public interface DepositAccountService {
 
     TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundException;
 
-    List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans);
+    List<DepositAccountDetailsBO> getDepositAccountsByIBAN(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;;
 
     List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException;
 

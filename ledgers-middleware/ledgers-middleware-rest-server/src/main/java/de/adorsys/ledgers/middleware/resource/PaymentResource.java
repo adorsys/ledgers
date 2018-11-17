@@ -16,17 +16,6 @@
 
 package de.adorsys.ledgers.middleware.resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
@@ -34,6 +23,11 @@ import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentProcessingMiddlewareException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/payments")
@@ -78,13 +72,13 @@ public class PaymentResource {
         }
     }
 
-    @GetMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
-    public <T> ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
+    @PostMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
+    public ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
                                                                        @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
                                                                        @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
         try {
-            TransactionStatusTO tos = middlewareService.executePayment(paymentId);
-            return ResponseEntity.ok(tos);
+            TransactionStatusTO status = middlewareService.executePayment(paymentId);
+            return ResponseEntity.ok(status);
         } catch (PaymentProcessingMiddlewareException e) {
             logger.error(e.getMessage());
             return ResponseEntity.badRequest().header("message", e.getMessage()).build(); //TODO Create formal rest error messaging, fix all internal service errors to comply some pattern.

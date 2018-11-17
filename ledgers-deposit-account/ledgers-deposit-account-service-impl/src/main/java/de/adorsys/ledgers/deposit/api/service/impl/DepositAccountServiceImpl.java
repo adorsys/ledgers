@@ -25,7 +25,6 @@ import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
 import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
 import de.adorsys.ledgers.postings.api.domain.BalanceSideBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
@@ -50,16 +49,14 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private final AccountStmtService accountStmtService;
     private final PostingService postingService;
     private final TransactionDetailsMapper transactionDetailsMapper;
-    private final PaymentTargetRepository paymentTargetRepository;
 
-    public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, DepositAccountRepository depositAccountRepository, DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService, PostingService postingService, TransactionDetailsMapper transactionDetailsMapper, PaymentTargetRepository paymentTargetRepository) {
+    public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService, DepositAccountRepository depositAccountRepository, DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService, PostingService postingService, TransactionDetailsMapper transactionDetailsMapper) {
         super(depositAccountConfigService, ledgerService);
         this.depositAccountRepository = depositAccountRepository;
         this.depositAccountMapper = depositAccountMapper;
         this.accountStmtService = accountStmtService;
         this.postingService = postingService;
         this.transactionDetailsMapper = transactionDetailsMapper;
-        this.paymentTargetRepository = paymentTargetRepository;
     }
 
     @Override
@@ -112,7 +109,11 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 	@Override
 	public DepositAccountDetailsBO getDepositAccountByIBAN(String iban, LocalDateTime refTime, boolean withBalances)
 			throws DepositAccountNotFoundException {
-    	DepositAccountBO depositAccountBO = getDepositAccountByIBAN(iban);
+		List<DepositAccountBO> accounts = getDepositAccountsByIban(Collections.singletonList(iban));
+		if(accounts.isEmpty()) {
+			throw new DepositAccountNotFoundException(String.format("Accounts with iban %s not found", iban));
+		}
+    	DepositAccountBO depositAccountBO = accounts.iterator().next();
     	List<BalanceBO> balances = withBalances
 					? getBalances(iban, refTime)
 							: Collections.emptyList();
@@ -129,20 +130,21 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 							: Collections.emptyList();
         return new DepositAccountDetailsBO(depositAccountBO, balances);
 	}
-    
+
+	@Override
+    public List<DepositAccountDetailsBO> getDepositAccountsByIBAN(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException {
+		
+    	List<DepositAccountDetailsBO> result = new ArrayList<>();
+    	for (String iban : ibans) {
+    		result.add(getDepositAccountByIBAN(iban, refTime, withBalances));
+		}
+		return result;
+    }
+	
     private DepositAccountBO getDepositAccountById(String accountId) throws DepositAccountNotFoundException {
         return depositAccountRepository.findById(accountId)
                        .map(depositAccountMapper::toDepositAccountBO)
                        .orElseThrow(() -> new DepositAccountNotFoundException(accountId));
-    }
-
-    private DepositAccountBO getDepositAccountByIBAN(String iban) throws DepositAccountNotFoundException {
-    	List<DepositAccount> found = depositAccountRepository.findByIbanIn(Collections.singletonList(iban));
-    	if(found.isEmpty()) {
-    		throw new DepositAccountNotFoundException(iban);
-    	}
-        
-    	return depositAccountMapper.toDepositAccountBO(found.iterator().next());
     }
 
     private List<BalanceBO> getBalances(String iban, LocalDateTime refTime) {
@@ -177,8 +179,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         return result;
     }
     
-    @Override
-    public List<DepositAccountBO> getDepositAccountsByIBAN(List<String> ibans) {
+    private List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans) {
         logger.info("Retrieving deposit accounts by list of IBANs");
 
         List<DepositAccount> accounts = depositAccountRepository.findByIbanIn(ibans);
@@ -209,15 +210,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             DepositAccountBO account = getDepositAccountById(accountId);
             LedgerBO ledgerBO = loadLedger();
             LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
-            String sourceId = paymentTargetRepository.findById(transactionId)
-                                      .map(t -> t.getPayment().getPaymentId())
-                                      .orElseThrow(() -> new TransactionNotFoundException(accountId, transactionId));
-            PostingLineBO posting = postingService.findPostingLineById(ledgerAccountBO, sourceId);
-            TransactionDetailsBO transaction = transactionDetailsMapper.toTransaction(posting);
-            if (!transaction.getTransactionId().equals(transactionId)) {
-                throw new TransactionNotFoundException(accountId, transactionId);
-            }
-            return transaction;
+            PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
+            return transactionDetailsMapper.toTransaction(line);
         } catch (DepositAccountNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | PostingNotFoundException e) {
             throw new TransactionNotFoundException(e.getMessage());
         }
