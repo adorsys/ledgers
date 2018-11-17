@@ -17,5 +17,4 @@ public class AccountBalance {
 	public void setAccNbr(String accNbr) {
 		this.accNbr = accNbr;
 	}
-
 }

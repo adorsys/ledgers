@@ -13,13 +13,14 @@ import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
  *
  *
  */
-public class MiddlewareTestCaseData {
+public class MiddlewareTestCaseData extends BalancesData {
 	
 	private List<AccountDetailsTO> accounts = new ArrayList<>();
 	private List<UserTO> users = new ArrayList<>();
-	private List<SinglePaymentTestData> singlePaymentTests = new ArrayList<>(); 
-	private List<BulkPaymentTestData> bulkPaymentTests = new ArrayList<>();
+	private List<SinglePaymentsData> singlePayments = new ArrayList<>(); 
+	private List<BulkPaymentsData> bulkPayments = new ArrayList<>();
 	private List<TransactionTestData> transactions = new ArrayList<>();
+
 
 	public List<AccountDetailsTO> getAccounts() {
 		return accounts;
@@ -33,23 +34,22 @@ public class MiddlewareTestCaseData {
 	public void setUsers(List<UserTO> users) {
 		this.users = users;
 	}
-	public List<SinglePaymentTestData> getSinglePaymentTests() {
-		return singlePaymentTests;
-	}
-	public void setSinglePaymentTests(List<SinglePaymentTestData> singlePaymentTests) {
-		this.singlePaymentTests = singlePaymentTests;
-	}
 	public List<TransactionTestData> getTransactions() {
 		return transactions;
 	}
 	public void setTransactions(List<TransactionTestData> transactions) {
 		this.transactions = transactions;
 	}
-	public List<BulkPaymentTestData> getBulkPaymentTests() {
-		return bulkPaymentTests;
+	public List<SinglePaymentsData> getSinglePayments() {
+		return singlePayments;
 	}
-	public void setBulkPaymentTests(List<BulkPaymentTestData> bulkPaymentTests) {
-		this.bulkPaymentTests = bulkPaymentTests;
+	public void setSinglePayments(List<SinglePaymentsData> singlePayments) {
+		this.singlePayments = singlePayments;
 	}
-	
+	public List<BulkPaymentsData> getBulkPayments() {
+		return bulkPayments;
+	}
+	public void setBulkPayments(List<BulkPaymentsData> bulkPayments) {
+		this.bulkPayments = bulkPayments;
+	}
 }
