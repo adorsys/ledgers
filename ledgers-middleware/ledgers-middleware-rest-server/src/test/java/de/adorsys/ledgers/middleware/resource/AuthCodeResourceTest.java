@@ -1,15 +1,18 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.domain.SCAGenerationRequest;
-import de.adorsys.ledgers.middleware.domain.SCAGenerationResponse;
-import de.adorsys.ledgers.middleware.domain.SCAValidationRequest;
-import de.adorsys.ledgers.middleware.exception.*;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
-import de.adorsys.ledgers.middleware.service.exception.*;
-import de.adorsys.ledgers.util.SerializationUtils;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,17 +26,29 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
+import de.adorsys.ledgers.middleware.domain.SCAGenerationRequest;
+import de.adorsys.ledgers.middleware.domain.SCAGenerationResponse;
+import de.adorsys.ledgers.middleware.domain.SCAValidationRequest;
+import de.adorsys.ledgers.middleware.exception.ConflictRestException;
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.exception.RestException;
+import de.adorsys.ledgers.middleware.exception.ValidationRestException;
+import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.um.ScaMethodTypeTO;
+import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.util.SerializationUtils;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.ResourceReader;
-
-import java.io.IOException;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,7 +69,22 @@ public class AuthCodeResourceTest {
 
     @Mock
     private MiddlewareService middlewareService;
-    private SCAMethodTO scaMethod;
+    @Mock
+    private SCAMethodTOConverter scaMethodTOConverter;
+    
+    private static SCAMethodTO scaMethod;
+    private static ScaUserDataTO scaUserDataTO;
+    
+    @BeforeClass
+    public static void beforeClass() {
+        scaMethod = new SCAMethodTO();
+        scaMethod.setType(SCAMethodTypeTO.EMAIL);
+        scaMethod.setValue("spe@adorsys.com.ua");
+        
+        scaUserDataTO = new ScaUserDataTO();
+		scaUserDataTO.setScaMethod(ScaMethodTypeTO.EMAIL);
+        scaUserDataTO.setMethodValue("spe@adorsys.com.ua");
+    }
 
     @Before
     public void setUp() {
@@ -65,10 +95,6 @@ public class AuthCodeResourceTest {
                           .setControllerAdvice(new ExceptionAdvisor())
                           .setMessageConverters(new MappingJackson2HttpMessageConverter())
                           .build();
-
-        scaMethod = new SCAMethodTO();
-        scaMethod.setType(SCAMethodTypeTO.EMAIL);
-        scaMethod.setValue("spe@adorsys.com.ua");
     }
 
     @Test
@@ -77,7 +103,8 @@ public class AuthCodeResourceTest {
         SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
 
-        when(middlewareService.generateAuthCode(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
+        when(scaMethodTOConverter.toScaUserDataTO(scaMethod)).thenReturn(scaUserDataTO);
+		when(middlewareService.generateAuthCode(USER_LOGIN, scaUserDataTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/generate")
@@ -93,7 +120,8 @@ public class AuthCodeResourceTest {
 
         assertThat(actual, is(new SCAGenerationResponse(OP_ID)));
 
-        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(scaMethodTOConverter, times(1)).toScaUserDataTO(scaMethod);
+        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, scaUserDataTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test
@@ -102,7 +130,8 @@ public class AuthCodeResourceTest {
         SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         String message = "Validation error";
-        when(middlewareService.generateAuthCode(USER_LOGIN, scaMethod, OP_DATA,USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationMiddlewareException(message));
+        when(scaMethodTOConverter.toScaUserDataTO(scaMethod)).thenReturn(scaUserDataTO);
+        when(middlewareService.generateAuthCode(USER_LOGIN, scaUserDataTO, OP_DATA,USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationMiddlewareException(message));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/generate")
@@ -120,7 +149,8 @@ public class AuthCodeResourceTest {
         assertThat(exception.getDevMessage(), is(message));
         assertThat(exception.getMessage(), is(message));
 
-        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, scaMethod, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(scaMethodTOConverter, times(1)).toScaUserDataTO(scaMethod);
+        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, scaUserDataTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test

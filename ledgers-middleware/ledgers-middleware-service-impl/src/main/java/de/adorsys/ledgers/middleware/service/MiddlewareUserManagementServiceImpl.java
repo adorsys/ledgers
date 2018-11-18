@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.middleware.converter.UserMapper;
@@ -22,12 +21,16 @@ import de.adorsys.ledgers.um.api.service.UserService;
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareUserManagementServiceImpl.class);
 
-	@Autowired
-	private UserService userService;
+	private final UserService userService;
 	
-	@Autowired
-	private UserMapper userTOMapper;
+	private final UserMapper userTOMapper;
 	
+	public MiddlewareUserManagementServiceImpl(UserService userService, UserMapper userTOMapper) {
+		super();
+		this.userService = userService;
+		this.userTOMapper = userTOMapper;
+	}
+
 	@Override
 	public UserTO create(UserTO user) throws UserAlreadyExistsMiddlewareException {
 		UserBO userBO = userTOMapper.toUserBO(user);
@@ -87,5 +90,14 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	public List<UserTO> listUsers(int page, int size) {
 		return userTOMapper.toUserTOList(userService.listUsers(page, size));
 	}
-
+	
+    @Override
+    public boolean authorise(String login, String pin) throws UserNotFoundMiddlewareException {
+        try {
+            return userService.authorise(login, pin);
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
 }

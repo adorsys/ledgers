@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
@@ -67,7 +67,7 @@ public class AccountResourceTest {
     private AccountResource controller;
 
     @Mock
-    private MiddlewareService middlewareService;
+    private MiddlewareAccountManagementService middlewareService;
 
     @Before
     public void setUp() {

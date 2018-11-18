@@ -1,10 +1,14 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareUserService;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -18,17 +22,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 
 public class UserManagementResourceTest {
     private static final String LOGIN = "login";
@@ -40,7 +36,7 @@ public class UserManagementResourceTest {
     private UserManagementResource resource;
 
     @Mock
-    private MiddlewareUserService userService;
+    private MiddlewareUserManagementService userService;
 
     @Before
     public void setUp() throws Exception {

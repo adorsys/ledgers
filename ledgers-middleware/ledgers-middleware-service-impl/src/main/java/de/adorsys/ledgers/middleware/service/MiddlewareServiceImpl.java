@@ -17,37 +17,25 @@
 package de.adorsys.ledgers.middleware.service;
 
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.middleware.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.converter.PaymentConverter;
-import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.converter.UserMapper;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
@@ -57,8 +45,6 @@ import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddle
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
 import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
@@ -66,37 +52,29 @@ import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
     
-    private static final LocalDateTime BASE_TIME = LocalDateTime.MIN;
     private final DepositAccountPaymentService paymentService;
     private final SCAOperationService scaOperationService;
     private final DepositAccountService accountService;
-    private final UserService userService;
     private final PaymentConverter paymentConverter;
-    private final AccountDetailsMapper detailsMapper;
-    private final SCAMethodTOConverter scaMethodTOConverter;
+    private final UserMapper userMapper;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService accountService, UserService userService, PaymentConverter paymentConverter, AccountDetailsMapper detailsMapper, SCAMethodTOConverter scaMethodTOConverter) {
-        this.paymentService = paymentService;
-        this.scaOperationService = scaOperationService;
-        this.accountService = accountService;
-        this.userService = userService;
-        this.paymentConverter = paymentConverter;
-        this.detailsMapper = detailsMapper;
-        this.scaMethodTOConverter = scaMethodTOConverter;
-    }
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService,
+			DepositAccountService accountService, PaymentConverter paymentConverter, UserMapper userMapper) {
+		super();
+		this.paymentService = paymentService;
+		this.scaOperationService = scaOperationService;
+		this.accountService = accountService;
+		this.paymentConverter = paymentConverter;
+		this.userMapper = userMapper;
+	}
 
-    @Override
+	@Override
     public TransactionStatusTO getPaymentStatusById(String paymentId) throws
             PaymentNotFoundMiddlewareException {
         try {
@@ -110,10 +88,10 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public String generateAuthCode(String userLogin, SCAMethodTO scaMethod, String opData, String userMessage,
+    public String generateAuthCode(String userLogin, ScaUserDataTO scaMethod, String opData, String userMessage,
                                    int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException {
         try {
-            ScaUserDataBO scaUserData = scaMethodTOConverter.toScaUserDataBO(scaMethod);
+        	ScaUserDataBO scaUserData = userMapper.toScaUserDataBO(scaMethod);
             return scaOperationService.generateAuthCode(userLogin, scaUserData, opData, userMessage, validitySeconds);
         } catch (AuthCodeGenerationException e) {
             logger.error(e.getMessage(), e);
@@ -146,81 +124,6 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @Override
-    public AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException {
-        try {
-            DepositAccountDetailsBO accountDetailsBO = accountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
-            List<BalanceBO> balances = accountDetailsBO.getBalances();
-            return detailsMapper.toAccountDetailsTO(accountDetailsBO.getAccount(), balances);
-        } catch (DepositAccountNotFoundException e) {
-            logger.error("Deposit Account with id=" + accountId + "not found", e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public AccountDetailsTO getAccountDetailsByIban(String iban) throws AccountNotFoundMiddlewareException {
-		try {
-			DepositAccountDetailsBO depositAccountBO = accountService.getDepositAccountByIBAN(iban, BASE_TIME, false);
-			return detailsMapper.toAccountDetailsTO(depositAccountBO);
-		} catch (DepositAccountNotFoundException e) {
-            logger.error("Deposit Account with iban={} not found", iban, e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-		}
-    }
-
-    @Override
-    public AccountDetailsTO getAccountDetailsWithBalancesByIban(String iban, LocalDateTime refTime) throws AccountNotFoundMiddlewareException {
-		try {
-			DepositAccountDetailsBO depositAccountBO = accountService.getDepositAccountByIBAN(iban, refTime, true);
-			return detailsMapper.toAccountDetailsTO(depositAccountBO);
-		} catch (DepositAccountNotFoundException e) {
-            logger.error("Deposit Account with iban={} not found", iban, e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-		}
-    }
-    
-    @Override
-    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
-        logger.info("Retrieving accounts by user login {}", userLogin);
-        try {
-            UserBO userBO = userService.findByLogin(userLogin);
-            List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
-            logger.info("{} accounts were retrieved", accountAccess.size());
-
-            List<String> ibans = accountAccess.stream()
-                                         .filter(a -> a.getAccessType() == AccessTypeBO.OWNER)
-                                         .map(AccountAccessBO::getIban)
-                                         .collect(Collectors.toList());
-            logger.info("{} were accounts were filtered as OWN", ibans.size());
-
-            List<DepositAccountDetailsBO> depositAccounts = accountService.getDepositAccountsByIBAN(ibans, BASE_TIME, false);
-            logger.info("{} deposit accounts were found", depositAccounts.size());
-            
-            return depositAccounts.stream().map(detailsMapper::toAccountDetailsTO).collect(Collectors.toList());
-        } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new UserNotFoundMiddlewareException(e.getMessage());
-        } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
-			throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-		}
-    }
-    
-    @Override
-    public void updateScaMethods(List<SCAMethodTO> scaMethods, String userLogin) throws UserNotFoundMiddlewareException {
-
-        logger.info("Updating sca methods by user login {}", userLogin);
-        List<ScaUserDataBO> scaUserDataBOS = scaMethodTOConverter.toSCAMethodListBO(scaMethods);
-
-        try {
-            userService.updateScaData(scaUserDataBOS, userLogin);
-        } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new UserNotFoundMiddlewareException(e.getMessage());
-        }
-    }
-
-    @Override
     public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException {
         @SuppressWarnings("unchecked")
 		PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
@@ -233,58 +136,6 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         }
         PaymentBO paymentInitiationResult = paymentService.initiatePayment(paymentBO);
         return paymentConverter.toPaymentTO(paymentInitiationResult);
-    }
-
-    @Override
-    public List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException {
-        try {
-            UserBO userBO = userService.findByLogin(userLogin);
-            List<ScaUserDataBO> userScaData = userBO.getScaUserData();
-            return scaMethodTOConverter.toSCAMethodListTO(userScaData);
-        } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new UserNotFoundMiddlewareException(e.getMessage());
-        }
-    }
-
-    @Override
-    public List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException {
-        try {
-            DepositAccountDetailsBO accountDetailsBO = accountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
-            List<BalanceBO> balances = accountDetailsBO.getBalances();
-            return detailsMapper.toAccountBalancesTO(balances);
-        } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public TransactionTO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundMiddlewareException {
-        try {
-            TransactionDetailsBO transaction = accountService.getTransactionById(accountId, transactionId);
-            return paymentConverter.toTransactionTO(transaction);
-        } catch (TransactionNotFoundException e) {
-            throw new TransactionNotFoundMiddlewareException(e.getMessage(), e);
-        }
-
-    }
-
-    @Override
-    public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws AccountNotFoundMiddlewareException {
-        LocalDate today = LocalDate.now();
-        LocalDateTime dateTimeFrom = dateFrom == null
-                                             ? today.atStartOfDay()
-                                             : dateFrom.atStartOfDay();
-        LocalDateTime dateTimeTo = dateTo == null
-                                           ? today.atTime(LocalTime.MAX)
-                                           : dateTo.atTime(LocalTime.MAX);
-        try {
-            List<TransactionDetailsBO> transactions = accountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
-            return paymentConverter.toTransactionTOList(transactions);
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override

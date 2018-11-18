@@ -1,15 +1,20 @@
 package de.adorsys.ledgers.middleware.resource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,142 +27,121 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import de.adorsys.ledgers.middleware.converter.SCAMethodTOConverter;
+import de.adorsys.ledgers.middleware.exception.ExceptionAdvisor;
+import de.adorsys.ledgers.middleware.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.service.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 
 public class ScaMethodResourceTest {
-    private static final String USER_LOGIN = "userLogin";
+	private static final String USER_LOGIN = "userLogin";
 
-    private MockMvc mockMvc;
+	private MockMvc mockMvc;
 
-    @InjectMocks
-    private ScaMethodResource resource;
+	@InjectMocks
+	private ScaMethodResource resource;
 
+	@Mock
+	private MiddlewareUserManagementService middlewareUserService;
     @Mock
-    private MiddlewareService middlewareService;
+    private SCAMethodTOConverter scaMethodTOConverter;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+	private static ObjectMapper ymlMapper;
+	private static ObjectMapper jsonMapper;
 
-        mockMvc = MockMvcBuilders
-                          .standaloneSetup(resource)
-                          .setControllerAdvice(new ExceptionAdvisor())
-                          .setMessageConverters(new MappingJackson2HttpMessageConverter())
-                          .build();
-    }
+	private static UserTO userTO;
+    private static List<SCAMethodTO> scaMethodTOS;
 
-    @Test
-    public void getUserScaMethods() throws Exception {
+	@BeforeClass
+	public static void beforClass() {
+		ymlMapper = initMapper(new ObjectMapper(new YAMLFactory()));
+		jsonMapper = initMapper(new ObjectMapper());
+		try {
+			userTO = ymlMapper.readValue(ScaMethodResourceTest.class.getResourceAsStream("user.yml"), UserTO.class);
+	        scaMethodTOS = ymlMapper.readValue(ScaMethodResourceTest.class.getResourceAsStream("SCAMethodTO.yml"), new TypeReference<List<SCAMethodTO>>() {});
+		} catch (IOException e) {
+			throw new IllegalStateException("File not found", e);
+		}
+	}
+	
+	private static ObjectMapper initMapper(ObjectMapper mapper) {
+		mapper.findAndRegisterModules();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		return mapper;
+	}
 
-        List<SCAMethodTO> methods = fileToObj("sca-methods.yml", new TypeReference<List<SCAMethodTO>>() {
-        });
+	@Before
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
 
-        when(middlewareService.getSCAMethods(USER_LOGIN)).thenReturn(methods);
+		mockMvc = MockMvcBuilders.standaloneSetup(resource).setControllerAdvice(new ExceptionAdvisor())
+				.setMessageConverters(new MappingJackson2HttpMessageConverter()).build();
+	}
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ScaMethodResource.SCA_METHODS+"/{login}", USER_LOGIN))
-                .andDo(print())
-                .andExpect(status().is(HttpStatus.OK.value()))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andReturn();
+	@Test
+	public void getUserScaMethods() throws Exception {
 
-        String content = mvcResult.getResponse().getContentAsString();
-        List<SCAMethodTO> actual = strToObj(content, new TypeReference<List<SCAMethodTO>>() {
-        });
-        assertThat(mvcResult.getResponse().getStatus(), is(200));
-        assertThat(actual, is(methods));
+        when(scaMethodTOConverter.toSCAMethodListTO(userTO.getScaUserData())).thenReturn(scaMethodTOS);
+		when(middlewareUserService.findByUserLogin(USER_LOGIN)).thenReturn(userTO);
 
-        verify(middlewareService, times(1)).getSCAMethods(USER_LOGIN);
-    }
+		MvcResult mvcResult = mockMvc
+				.perform(MockMvcRequestBuilders.get(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN))
+				.andDo(print()).andExpect(status().is(HttpStatus.OK.value()))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andReturn();
 
-    @Test
-    public void getUserScaMethodsUserNotFound() throws Exception {
+		String content = mvcResult.getResponse().getContentAsString();
+		List<SCAMethodTO> methods = jsonMapper.readValue(content, new TypeReference<List<SCAMethodTO>>() {});
 
-        when(middlewareService.getSCAMethods(USER_LOGIN)).thenThrow(UserNotFoundMiddlewareException.class);
+		assertThat(mvcResult.getResponse().getStatus(), is(200));
+		assertThat(scaMethodTOS, is(methods));
 
-        mockMvc.perform(MockMvcRequestBuilders.get(ScaMethodResource.SCA_METHODS+"/{login}", USER_LOGIN))
-                .andDo(print())
-                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andReturn();
+		verify(middlewareUserService, times(1)).findByUserLogin(USER_LOGIN);
+	}
 
-        verify(middlewareService, times(1)).getSCAMethods(USER_LOGIN);
-    }
+	@Test
+	public void getUserScaMethodsUserNotFound() throws Exception {
 
-    @Test
-    public void updateUserScaMethods() throws Exception {
-        List<SCAMethodTO> methods = fileToObj("sca-methods.yml", new TypeReference<List<SCAMethodTO>>() {
-        });
+		when(middlewareUserService.findByUserLogin(USER_LOGIN)).thenThrow(UserNotFoundMiddlewareException.class);
 
-        doNothing().when(middlewareService).updateScaMethods(methods, USER_LOGIN);
+		mockMvc.perform(MockMvcRequestBuilders.get(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN))
+				.andDo(print()).andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andReturn();
 
-        mockMvc.perform(MockMvcRequestBuilders.put(ScaMethodResource.SCA_METHODS+"/{login}", USER_LOGIN)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(objToStr(methods)))
-                                      .andDo(print())
-                                      .andExpect(status().is(HttpStatus.ACCEPTED.value()))
-                                      .andReturn();
+		verify(middlewareUserService, times(1)).findByUserLogin(USER_LOGIN);
+	}
 
-        verify(middlewareService, times(1)).updateScaMethods(methods, USER_LOGIN);
-    }
+	@Test
+	public void updateUserScaMethods() throws Exception {
+		when(scaMethodTOConverter.toSCAMethodListBO(scaMethodTOS)).thenReturn(userTO.getScaUserData());
+		when(middlewareUserService.updateScaData(USER_LOGIN, userTO.getScaUserData())).thenReturn(userTO);
 
-    @Test
-    public void updateUserScaMethodsUserNotFound() throws Exception {
-        List<SCAMethodTO> methods = fileToObj("sca-methods.yml", new TypeReference<List<SCAMethodTO>>() {
-        });
+		String stringContent = jsonMapper.writeValueAsString(scaMethodTOS);
+		mockMvc.perform(MockMvcRequestBuilders.put(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN)
+				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent)).andDo(print())
+				.andExpect(status().is(HttpStatus.ACCEPTED.value())).andReturn();
 
-        doThrow(UserNotFoundMiddlewareException.class).when(middlewareService).updateScaMethods(methods, USER_LOGIN);
+		verify(scaMethodTOConverter, times(1)).toSCAMethodListBO(scaMethodTOS);
+		verify(middlewareUserService, times(1)).updateScaData(USER_LOGIN, userTO.getScaUserData());
+	}
 
-        mockMvc.perform(MockMvcRequestBuilders.put(ScaMethodResource.SCA_METHODS+"/{login}", USER_LOGIN)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(objToStr(methods)))
-                                      .andDo(print())
-                                      .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-                                      .andReturn();
+	@Test
+	public void updateUserScaMethodsUserNotFound() throws Exception {
+		when(scaMethodTOConverter.toSCAMethodListBO(scaMethodTOS)).thenReturn(userTO.getScaUserData());
+		when(middlewareUserService.updateScaData(USER_LOGIN, userTO.getScaUserData())).thenThrow(UserNotFoundMiddlewareException.class);
 
-        verify(middlewareService, times(1)).updateScaMethods(methods, USER_LOGIN);
-    }
+		String stringContent = jsonMapper.writeValueAsString(scaMethodTOS);
+		mockMvc.perform(MockMvcRequestBuilders.put(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN)
+				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent)).andDo(print())
+				.andExpect(status().is(HttpStatus.NOT_FOUND.value())).andReturn();
 
-    //    todo: replace by javatar-commons version 0.7
-    private <T> T fileToObj(String source, TypeReference<T> ref) {
-        ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-        objectMapper.findAndRegisterModules();
-        InputStream inputStream = getClass().getResourceAsStream(source);
-        try {
-            return objectMapper.readValue(inputStream, ref);
-        } catch (IOException e) {
-            throw new IllegalStateException("File not found",e);
-        }
-    }
-
-
-    private <T> T strToObj(String source, TypeReference<T> ref) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        try {
-            return objectMapper.readValue(source, ref);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    private String objToStr(Object source) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        try {
-            return objectMapper.writeValueAsString(source);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+		verify(scaMethodTOConverter, times(1)).toSCAMethodListBO(scaMethodTOS);
+		verify(middlewareUserService, times(1)).updateScaData(USER_LOGIN, userTO.getScaUserData());
+	}
 }

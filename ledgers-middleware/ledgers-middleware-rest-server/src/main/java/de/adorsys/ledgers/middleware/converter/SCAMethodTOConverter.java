@@ -16,14 +16,15 @@
 
 package de.adorsys.ledgers.middleware.converter;
 
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import java.util.List;
+
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
-import java.util.List;
+import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
 
 @Mapper(componentModel = "spring")
 public interface SCAMethodTOConverter {
@@ -32,12 +33,12 @@ public interface SCAMethodTOConverter {
             @Mapping(source = "scaMethod", target = "type"),
             @Mapping(source = "methodValue", target = "value")
     })
-    SCAMethodTO toSCAMethodTO(ScaUserDataBO bo);
+    SCAMethodTO toSCAMethodTO(ScaUserDataTO bo);
 
     @InheritInverseConfiguration
-    ScaUserDataBO toScaUserDataBO(SCAMethodTO to);
+    ScaUserDataTO toScaUserDataTO(SCAMethodTO to);
 
-    List<SCAMethodTO> toSCAMethodListTO(List<ScaUserDataBO> list);
+    List<SCAMethodTO> toSCAMethodListTO(List<ScaUserDataTO> list);
 
-    List<ScaUserDataBO> toSCAMethodListBO(List<SCAMethodTO> list);
+    List<ScaUserDataTO> toSCAMethodListBO(List<SCAMethodTO> list);
 }

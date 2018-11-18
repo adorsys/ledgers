@@ -16,17 +16,10 @@
 
 package de.adorsys.ledgers.middleware.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import de.adorsys.ledgers.middleware.service.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.service.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.service.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.service.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.service.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.service.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.service.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.AuthCodeGenerationMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.PaymentNotFoundMiddlewareException;
@@ -36,8 +29,6 @@ import de.adorsys.ledgers.middleware.service.exception.SCAOperationExpiredMiddle
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationUsedOrStolenMiddlewareException;
 import de.adorsys.ledgers.middleware.service.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 
 public interface MiddlewareService {
 
@@ -58,17 +49,6 @@ public interface MiddlewareService {
     // ================= SCA =======================================//
 
     /**
-     * PROC: 02a
-     * <p>
-     * Called after the payment initiation to have a list of SCA methods.
-     *
-     * @param userLogin
-     * @return
-     * @throws UserNotFoundMiddlewareException
-     */
-    List<SCAMethodTO> getSCAMethods(String userLogin) throws UserNotFoundMiddlewareException;
-
-    /**
      * PROC: 02b
      * <p>
      * After the PSU selects the SCA method, this is called to generate and send the auth code.
@@ -81,7 +61,7 @@ public interface MiddlewareService {
      * @return opId id of operation created on the request
      * @throws AuthCodeGenerationMiddlewareException if something happens during auth code generation
      */
-    String generateAuthCode(String userLogin, SCAMethodTO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException;
+    String generateAuthCode(String userLogin, ScaUserDataTO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException;
 
     /**
      * PROC: 02c
@@ -143,22 +123,4 @@ public interface MiddlewareService {
      */
     <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
 
-
-    //============================ Account Details ==============================//
-
-    AccountDetailsTO getAccountDetailsByAccountId(String accountId) throws AccountNotFoundMiddlewareException;
-
-    AccountDetailsTO getAccountDetailsByIban(String iban) throws AccountNotFoundMiddlewareException;
-
-    AccountDetailsTO getAccountDetailsWithBalancesByIban(String iban, LocalDateTime refTime) throws AccountNotFoundMiddlewareException;
-
-    List<AccountBalanceTO> getBalances(String accountId) throws AccountNotFoundMiddlewareException;
-
-    List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException;
-
-    void updateScaMethods(List<SCAMethodTO> scaMethods, String userLogin) throws UserNotFoundMiddlewareException;
-
-    TransactionTO getTransactionById(String accountId, String transactionId) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException;
-
-    List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws AccountNotFoundMiddlewareException;
 }

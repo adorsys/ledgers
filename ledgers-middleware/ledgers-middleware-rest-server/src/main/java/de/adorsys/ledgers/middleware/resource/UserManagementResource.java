@@ -16,9 +16,6 @@
 
 package de.adorsys.ledgers.middleware.resource;
 
-import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.service.MiddlewareUserService;
-import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,25 +23,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.adorsys.ledgers.middleware.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.service.exception.UserNotFoundMiddlewareException;
+
 @RestController
 @RequestMapping(UserManagementResource.USERS)
 public class UserManagementResource {
     private static final Logger logger = LoggerFactory.getLogger(UserManagementResource.class);
     static final String USERS = "/users";
-    private final MiddlewareUserService userService;
+    private final MiddlewareUserManagementService middlewareUserService;
 
-    public UserManagementResource(MiddlewareUserService userService) {
-        this.userService = userService;
+    public UserManagementResource(MiddlewareUserManagementService middlewareUserService) {
+        this.middlewareUserService = middlewareUserService;
     }
 
     @PostMapping("/authorise")
     public boolean authorise(@RequestParam("login")String login, @RequestParam("pin") String pin){
         try {
-            return userService.authorise(login, pin);
+            return middlewareUserService.authorise(login, pin);
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
-
 }

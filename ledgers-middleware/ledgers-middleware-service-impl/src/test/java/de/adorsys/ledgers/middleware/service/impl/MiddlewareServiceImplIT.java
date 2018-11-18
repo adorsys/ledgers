@@ -197,13 +197,9 @@ public class MiddlewareServiceImplIT {
 			TransactionNotFoundMiddlewareException, DepositAccountNotFoundException {
 		String iban = txTest.getIban();
 		AccountDetailsTO depositAccount = accountService.getDepositAccountByIBAN(iban, LocalDateTime.now(), true);
-		List<TransactionTO> loadedTransactions = middlewareService.getTransactionsByDates(depositAccount.getId(),
+		List<TransactionTO> loadedTransactions = accountService.getTransactionsByDates(depositAccount.getId(),
 				txTest.getDateFrom(), txTest.getDateTo());
-//		<<<<<<< HEAD
-//=======
-//		DepositAccountBO depositAccount = depositAccountService.getDepositAccountByIban(iban);
-//		List<TransactionTO> loadedTransactions = middlewareService.getTransactionsByDates(depositAccount.getId(), txTest.getDateFrom(), txTest.getDateTo());
-//>>>>>>> develop
+
 		// Now compare the transactions
 		List<TransactionTO> expectedTransactions = txTest.getTransactions();
 		Assert.assertEquals(expectedTransactions.size(), loadedTransactions.size());
@@ -217,20 +213,6 @@ public class MiddlewareServiceImplIT {
 		}
 	}
 
-//<<<<<<< HEAD
-//=======
-//	private void checkBalance(AccountReferenceTO account, BigDecimal creditAmount) throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-//		DepositAccountBO depositAccount = depositAccountService.getDepositAccountByIban(account.getIban());
-//		List<AccountBalanceTO> balances = middlewareService.getBalances(depositAccount.getId());
-//		Assert.assertNotNull(balances);
-//		Assert.assertEquals(1, balances.size());
-//		AccountBalanceTO accountBalanceTO = balances.get(0);
-//		AmountTO amount = accountBalanceTO.getAmount();
-//		Assert.assertNotNull(amount.getAmount());
-//		Assert.assertEquals(creditAmount.doubleValue(), amount.getAmount().doubleValue(), 0d);
-//	}
-//
-//>>>>>>> develop
 	private MiddlewareTestCaseData loadTestData(String file) {
 		InputStream inputStream = MiddlewareServiceImplIT.class.getResourceAsStream(file);
 		try {
