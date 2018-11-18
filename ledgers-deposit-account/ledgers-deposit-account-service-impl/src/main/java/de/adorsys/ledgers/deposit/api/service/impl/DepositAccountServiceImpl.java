@@ -197,7 +197,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
             return postingService.findPostingsByDates(ledgerAccountBO, dateFrom, dateTo)
                            .stream()
-                           .map(transactionDetailsMapper::toTransaction)
+                           .map(transactionDetailsMapper::toTransactionSigned)
                            .collect(Collectors.toList());
         } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
             throw new DepositAccountUncheckedException(e.getMessage(), e);
@@ -211,7 +211,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             LedgerBO ledgerBO = loadLedger();
             LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
             PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
-            return transactionDetailsMapper.toTransaction(line);
+            return transactionDetailsMapper.toTransactionSigned(line);
         } catch (DepositAccountNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | PostingNotFoundException e) {
             throw new TransactionNotFoundException(e.getMessage());
         }

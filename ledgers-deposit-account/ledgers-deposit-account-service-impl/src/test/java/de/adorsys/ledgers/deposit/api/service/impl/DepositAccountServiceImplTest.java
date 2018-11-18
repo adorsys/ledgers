@@ -136,7 +136,7 @@ public class DepositAccountServiceImplTest {
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(new LedgerBO()));
         when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
-        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
         assertThat(result).isNotNull();
@@ -161,7 +161,7 @@ public class DepositAccountServiceImplTest {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(new DepositAccount()));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(new DepositAccountBO());
         when(postingService.findPostingsByDates(any(), any(), any())).thenReturn(Collections.singletonList(newPostingLineBO()));
-        when(transactionDetailsMapper.toTransaction(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+        when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         List<TransactionDetailsBO> result = depositAccountService.getTransactionsByDates(ACCOUNT_ID, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 18, 0, 0));
         assertThat(result.isEmpty()).isFalse();

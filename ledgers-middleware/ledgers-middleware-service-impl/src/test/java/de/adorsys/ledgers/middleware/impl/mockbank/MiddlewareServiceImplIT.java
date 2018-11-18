@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -205,12 +206,36 @@ public class MiddlewareServiceImplIT {
 		Assert.assertEquals(expectedTransactions.size(), loadedTransactions.size());
 		for (int i = 0; i < expectedTransactions.size(); i++) {
 			TransactionTO expectedTransaction = expectedTransactions.get(i);
-			TransactionTO loadedTransaction = loadedTransactions.get(i);
-			Assert.assertEquals(expectedTransaction.getBookingDate(), loadedTransaction.getBookingDate());
-			Assert.assertEquals(expectedTransaction.getAmount().getAmount().doubleValue(),
-					loadedTransaction.getAmount().getAmount().doubleValue(), 0d);
-			Assert.assertEquals(expectedTransaction.getCreditorName(), loadedTransaction.getCreditorName());
+			TransactionTO transactionTO = hasLoadedTRansaction(expectedTransaction, loadedTransactions);
+			if(transactionTO!=null) {
+				loadedTransactions.remove(transactionTO);
+			} else {
+				Assert.fail(String.format("Missing transaction with: date %s and amount %s and creditor %s", expectedTransaction.getBookingDate(), expectedTransaction.getAmount().getAmount(), expectedTransaction.getCreditorName()));
+			}
+
 		}
+		if(!loadedTransactions.isEmpty()) {
+			for (TransactionTO t : loadedTransactions) {
+				System.out.println(String.format("Loaded transaction not specified: date %s and amount %s and creditor %s", t.getBookingDate(), t.getAmount().getAmount(), t.getCreditorName()));
+				Assert.fail("See logs");
+			}
+		}
+	}
+	
+	private TransactionTO hasLoadedTRansaction(TransactionTO expectedTransaction, List<TransactionTO> loadedTransactions) {
+		for (TransactionTO loadedTransaction : loadedTransactions) {
+			if(!expectedTransaction.getBookingDate().equals(loadedTransaction.getBookingDate())) {
+				continue;
+			}
+			if(expectedTransaction.getAmount().getAmount().compareTo(loadedTransaction.getAmount().getAmount())!=0){
+				continue;
+			}
+			if(!StringUtils.equals(expectedTransaction.getCreditorName(), loadedTransaction.getCreditorName())) {
+				continue;
+			}
+			return loadedTransaction;
+		}
+		return null;
 	}
 
 	private MiddlewareTestCaseData loadTestData(String file) {

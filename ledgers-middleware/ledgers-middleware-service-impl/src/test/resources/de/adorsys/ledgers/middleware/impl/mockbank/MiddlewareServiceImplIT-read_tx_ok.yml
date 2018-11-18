@@ -327,7 +327,7 @@ bulkPayments:
 
 # Bulk Payment no batch from Anton Brueckner to to 2 children with external bank account on 2018-06-25 at 12:25:00
   - bulkPayment:
-      batchBookingPreferred: true
+      batchBookingPreferred: false
       requestedExecutionDate: 2018-06-25
       debtorAccount:
         iban: DE80760700240271232400
@@ -391,9 +391,44 @@ transactions:
         creditorName: Marion Mueller
       - bookingDate: 2018-06-02
         amount:
-          amount: 1400.00
+          amount: -1400.00
         creditorName: Miriam Krause
       - bookingDate: 2018-06-01
         amount:
-          amount: 3000.00
+          amount: -3000.00
         creditorName: Max Musterman
+# Anton Brueckner's account suitable for testing no batch payment.
+# Supposed to have 7 Payments instead of 6.
+  - iban: DE80760700240271232400
+    dateFrom: 2018-05-30
+    dateTo: 2018-06-30
+    transactions: 
+      - bookingDate: 2018-06-25
+        amount:
+          amount: -100.00
+        creditorName: Patrick Brueckner
+      - bookingDate: 2018-06-25
+        amount:
+          amount: -150.00
+        creditorName: Maria Brueckner
+      - bookingDate: 2018-06-24
+        amount:
+          amount: -2300.00
+        creditorName: multiple
+      - bookingDate: 2018-06-23
+        amount:
+          amount: -250.00
+        creditorName: multiple
+      - bookingDate: 2018-06-14
+        amount:
+          amount: 2300.00
+        creditorName: Anton Brueckner
+      - bookingDate: 2018-06-02
+        amount:
+          amount: -900.00
+        creditorName: Rainer Maier
+      - bookingDate: 2018-06-01
+        amount:
+          amount: -700.00
+        creditorName: Max Musterman
+        
