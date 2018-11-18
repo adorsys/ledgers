@@ -105,7 +105,7 @@
 			<artifactId>spring-test-dbunit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+		<!-- Need these service because we are activating the module from their implementation packages. -->
         <dependency>
             <groupId>de.adorsys.ledgers</groupId>
             <artifactId>ledgers-sca-service-impl</artifactId>

@@ -153,7 +153,7 @@
     creditAmount: 0.00
   - account:
       name: DE38760700240320465700
-      shortDesc: "Bank Account Msax Mustermann" 
+      shortDesc: "Bank Account Max Mustermann" 
     debitAmount: 0.00
     creditAmount: 5000.00
 # Balances: 1001-D-156500.00,2332003-C-5000.00 

@@ -1,28 +1,26 @@
 package de.adorsys.ledgers.deposit.api.service;
 
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 public interface DepositAccountService {
 
     DepositAccountBO createDepositAccount(DepositAccountBO depositAccount) throws DepositAccountNotFoundException;
 
-    DepositAccountBO getDepositAccountById(String accountId) throws DepositAccountNotFoundException;
+	DepositAccountDetailsBO getDepositAccountByIBAN(String iban, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;
 
-    DepositAccountBO getDepositAccountByIban(String iban) throws DepositAccountNotFoundException;
+	DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;
 
     TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundException;
 
-    List<BalanceBO> getBalances(String iban) throws LedgerAccountNotFoundException;
-
-    List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans);
+    List<DepositAccountDetailsBO> getDepositAccountsByIBAN(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;;
 
     List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException;
+
 }

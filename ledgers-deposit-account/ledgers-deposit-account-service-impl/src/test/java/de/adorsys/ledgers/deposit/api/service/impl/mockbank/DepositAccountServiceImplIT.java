@@ -1,26 +1,13 @@
 package de.adorsys.ledgers.deposit.api.service.impl.mockbank;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
-import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.service.AccountStmtService;
-import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
-import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.Month;
+
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +19,26 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
+import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.service.AccountStmtService;
+import de.adorsys.ledgers.postings.api.service.LedgerService;
+import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
+import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = DepositAccountServiceApplication.class)
@@ -61,9 +62,6 @@ public class DepositAccountServiceImplIT {
     private LedgerService ledgerService;
     @Autowired
     private DepositAccountConfigService depositAccountConfigService;
-
-    @Autowired
-    private DepositAccountService depositAccountService;
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -129,16 +127,11 @@ public class DepositAccountServiceImplIT {
         checkBalance("DE38760700240320465700", dateTime, new BigDecimal(-5000.00));
 
     }
-
-    @Ignore //TODO @fpo fix
+    
     @Test
-    public void use_case_check_account_balance() throws IOException, LedgerAccountNotFoundException {
+    public void use_case_check_account_balance() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, DepositAccountNotFoundException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
-        List<BalanceBO> balances = depositAccountService.getBalances("DE38760700240320465700");
-        Assert.assertNotNull(balances);
-        Assert.assertEquals(1, balances.size());
-        BalanceBO balanceBO = balances.iterator().next();
-        Assert.assertEquals(new BigDecimal(5000.00).doubleValue(), balanceBO.getAmount().getAmount().doubleValue(), 0d);
+        checkBalance("DE38760700240320465700", LocalDateTime.now(), new BigDecimal(-5000.00));
     }
 
     private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException {
