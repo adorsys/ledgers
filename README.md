@@ -15,7 +15,7 @@ See below for a short technical introduction of the module. More to find in [The
 
 ### Dependencies
 
-Ledgers is heavily dependent on spring for now.
+Ledgers is heavily dependents on spring for now. We are still working on a more inclusive dependency management.
 
 ### Building and Running
 
@@ -31,12 +31,12 @@ This will start the ledgers app with the embedded h2 database.
 
 ### Visiting the API
 
-http://localhost:8088/swagger-ui.html#/
+[http://localhost:8088/swagger-ui.html](http://localhost:8088/swagger-ui.html#/)
 
 
 ### Visiting the Database
 
-when started with the h2 profile, you can use the web browser to visit database tables on the url http://localhost:8088/h2-console/ . make sure you use the following connection properties:
+when started with the h2 profile, you can use the web browser to visit database tables on the url [http://localhost:8088/h2-console/](http://localhost:8088/h2-console/) . make sure you use the following connection properties:
 
 Driver Class : org.h2.Driver
 JDBC URL: jdbc:h2:mem:ledgers
@@ -56,9 +56,9 @@ The ledgers application is built to be fully extensible and embeddable into othe
 
 | Artifact | Description |
 |------------|-------------|
-| `@Enable<ModuleName>` | Annotation used to select an implementation module among alternatives. This will generally be dropped on a Spring Application class. |
-| `@<ModuleName>Configuration` | Main spring configuration class for the module. Might include other modules, scan entities, initialize resources. |
-| `@<ModuleName>BasePackage` | Marker class used to document package scanning for a module. We will generally me stuff like: `@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class)`. The package of this call must allow for scanning of all spring components in the module. |
+| `@EnableModuleName` | Annotation used to select an implementation module among alternatives. This will generally be dropped on a Spring Application class. |
+| `@ModuleNameConfiguration` | Main spring configuration class for the module. Might include other modules, scan entities, initialize resources. |
+| `@ModuleNameBasePackage` | Marker class used to document package scanning for a module. We will generally me stuff like: `@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class)`. The package of this call must allow for scanning of all spring components in the module. |
 
 You can easily use features by adding following annotations to your spring `@Configuration` class:
 

@@ -15,7 +15,7 @@ This will start the ledgers app with the embedded h2 database.
 
 ### Visiting the API
 
-http://localhost:8088/swagger-ui.html#/
+[http://localhost:8088/swagger-ui.html](http://localhost:8088/swagger-ui.html#/)
 
 ### Testing API with Postman json collections
  

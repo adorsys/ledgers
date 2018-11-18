@@ -2,9 +2,8 @@
 
 ## Posting and Double Entry Accounting Basic
 
-see: [Posting and Double Entry Accounting Basic](postings.md)
+For a datamodel see: [Posting and Double Entry Accounting Basic](postings.md)
 
-## Data Model
 
 # Microservices and Transactional Boundaries
 
@@ -46,6 +45,40 @@ This page will be used to analyze how to run the accounting module embedded insi
   	
 3- It might be meaningful to distinguish between export interfaces, and journal entry end point:
   - In a clean design, the journal entry end point will have to be fully protected by the embedding product module to prevent the proliferation of unqualified postings.   
+
+## Example
+
+We user Spring dependencies to assemble module. Each module contains following dependency management artefact.
+
+The ledgers application is built to be fully extensible and embeddable into other JPA applixations.
+
+
+| Artifact | Description |
+|------------|-------------|
+| `@EnableModuleName` | Annotation used to select an implementation module among alternatives. This will generally be dropped on a Spring Application class. |
+| `@ModuleNameConfiguration` | Main spring configuration class for the module. Might include other modules, scan entities, initialize resources. |
+| `@ModuleNameBasePackage` | Marker class used to document package scanning for a module. We will generally me stuff like: `@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class)`. The package of this call must allow for scanning of all spring components in the module. |
+
+You can easily use features by adding following annotations to your spring `@Configuration` class:
+
+| Annotation | Description |
+|------------|-------------|
+| `@EnableDepositAccountService` | Enables the deposit account service module.|
+| `@EnableLedgersMiddlewareRest` | Enables the the Ledger middleware rest application. |
+| `@EnableLedgersMiddlewareService` | Enables the Ledger middleware service. |
+| `@EnablePostingService` | Enables the postings service module.   |
+| `@EnableSCAService` | Enables The SCA service module  |
+| `@EnableUserManagementService` | Enables the a user management service  |
+
+Following JPA module are automatically included in the corresponding service modules so they generally do not need to be considered while assembling modules. 
+ 
+| Annotation | Description |
+|------------|-------------|
+| `@EnableDepositAccountRepository`| Enables the deposit account JPA module. |
+| `@EnablePostingsReporitory`  | Enables the ledgers posting repository module.                 |
+| `@EnableSCARepository` | Enables the sca repository module |
+| `@EnableUserManagmentRepository`   | Enables a user management module. |
+
 
 # Robustness
 
