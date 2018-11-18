@@ -5,5 +5,5 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackageClasses= {LedgersMiddlewareRestBasePackage.class})
-public class LedgersMiddlewareConfiguration {
+public class LedgersMiddlewareRestConfiguration {
 }

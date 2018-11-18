@@ -20,13 +20,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
-import de.adorsys.ledgers.middleware.impl.EnableMiddlewareService;
+import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
 import de.adorsys.ledgers.um.impl.EnableUserManagementService;
 
 @SpringBootApplication
-@EnableMiddlewareService
+@EnableLedgersMiddlewareService
 @EnableDepositAccountService
 @EnableUserManagementService
 @EnableSCAService

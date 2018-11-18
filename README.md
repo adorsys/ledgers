@@ -1,6 +1,90 @@
-# Spring based implementation of a ledger
+# Ledgers
 
-## Providing following features
+This is a standalone deployment of the ledgers deposit account application. This module is not meant to be productively used. It can be deployed to explore the functionality of the ledgers module on a swagger rest interface. 
+
+## Who we are
+[adorsys](https://adorsys.de/en/index.html) is a company who works ever since the very beginning of PSD2 with its requirements and implicit tasks.
+We help banks to be PSD2 complaint (technical and legal terms). To speed up the process we provide this open source XS2A interface, specified by Berlin Group,
+that can be connected to your middleware system.
+You can check your readiness for PSD2 Compliance and other information via [our Web-site](https://adorsys.de/en/psd2.html).
+
+
+## Getting Started
+
+See below for a short technical introduction of the module. More to find in [These instructions](doc/GETTING_STARTED.md). The instruction below will surely get you a copy of the project up and running on your local machine for development and testing purposes. 
+
+### Dependencies
+
+Ledgers is heavily dependent on spring for now.
+
+### Building and Running
+
+```
+	> git clone https://github.com/adorsys/ledgers.git
+	> cd ledgers
+	> mvn clean install
+	> cd ledgers-app
+	> mvn spring-boot:run -Dspring.profiles.active=h2
+```
+
+This will start the ledgers app with the embedded h2 database.
+
+### Visiting the API
+
+http://localhost:8088/swagger-ui.html#/
+
+
+### Visiting the Database
+
+when started with the h2 profile, you can use the web browser to visit database tables on the url http://localhost:8088/h2-console/ . make sure you use the following connection properties:
+
+Driver Class : org.h2.Driver
+JDBC URL: jdbc:h2:mem:ledgers
+User Name: sa
+Password: sa
+
+Press Connect button and you can explore the data model.
+
+More on this to come...
+
+## Module structure
+
+We user Spring dependencies to assemble module. Each module contains following dependency management artefact.
+
+The ledgers application is built to be fully extensible and embeddable into other JPA applixations.
+
+
+| Artifact | Description |
+|------------|-------------|
+| `@Enable<ModuleName>` | Annotation used to select an implementation module among alternatives. This will generally be dropped on a Spring Application class. |
+| `@<ModuleName>Configuration` | Main spring configuration class for the module. Might include other modules, scan entities, initialize resources. |
+| `@<ModuleName>BasePackage` | Marker class used to document package scanning for a module. We will generally me stuff like: `@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class)`. The package of this call must allow for scanning of all spring components in the module. |
+
+You can easily use features by adding following annotations to your spring `@Configuration` class:
+
+| Annotation | Description |
+|------------|-------------|
+| `@EnableDepositAccountService` | Enables the deposit account service module.|
+| `@EnableLedgersMiddlewareRest` | Enables the the Ledger middleware rest application. |
+| `@EnableLedgersMiddlewareService` | Enables the Ledger middleware service. |
+| `@EnablePostingService` | Enables the postings service module.   |
+| `@EnableSCAService` | Enables The SCA service module  |
+| `@EnableUserManagementService` | Enables the a user management service  |
+
+Following JPA module are automatically included in the corresponding service modules so they generally do not need to be considered while assembling modules. 
+ 
+| Annotation | Description |
+|------------|-------------|
+| `@EnableDepositAccountRepository`| Enables the deposit account JPA module. |
+| `@EnablePostingsReporitory`  | Enables the ledgers posting repository module.                 |
+| `@EnableSCARepository` | Enables the sca repository module |
+| `@EnableUserManagmentRepository`   | Enables a user management module. |
+
+## Features
+
+### Double Entry Accounting : Ledgers Posting
+
+This is simple implementation of the double entry accounting with some additional features like:
 
 * Classical functionality of an accounting module
     * Journaling of Transactions
@@ -17,24 +101,54 @@
     * Allowing the horizontal partitioning of the module using eventual consistency techniques
     * Allowing the vertical partitioning (time based) of entries to increase the throughput of parallel write operations
 
-## Who we are
-[adorsys](https://adorsys.de/en/index.html) is a company who works ever since the very beginning of PSD2 with its requirements and implicit tasks.
-We help banks to be PSD2 complaint (technical and legal terms). To speed up the process we provide this open source XS2A interface, specified by Berlin Group,
-that can be connected to your middleware system.
-You can check your readiness for PSD2 Compliance and other information via [our Web-site](https://adorsys.de/en/psd2.html).
+### Deposit Account Implementation
 
+Simple implementation of a deposit account that support:
 
-## Getting Started
+* Account management
+    * Creating a banking deposit account
+    * List transactions
+* Initiating and executing payments 
+    * Single payment
+    * Future dated payments
+    * Periodic payments (scheduller pending)
+    * Bulk payments (batch and non batch)
+* Cash deposit (Still pending)
+* Statement and Balances
+    * Account Statement
+    * Trial Balances
+* String Customer Authentication
+    * Authorizing payment initiation
+    * Authorizing transactions listings
+    * Support for multiple SCA Methods
+        * 1:n E-Mails
+        * 1:n mobile phones  
+    
+#### Configuration
 
-[These instructions](doc/GETTING_STARTED.md) will get you a copy of the project up and running on your local machine for development and testing purposes. 
+The deposit account module needs a chart of account. You can find a sample chart of account at: [a link](ledgers-deposit-account/ledgers-deposit-account-service-impl/src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/mockbank/sample_coa_banking.yml)
 
-### Brief architecture documentation
+### Dumy SCA and User Management
+
+We provide a sample SCA and user management application no to be used in a productive environment.
+
+### Middleware Module
+
+This is a sort of online banking application exposes the deposit account functionality to an online environment enabling the following workflow:
+* Create deposit accounts
+* Create banking users
+* Initiate Payments
+* Check balances
+* Read payment transactions 
+
+This is a sample test data file for the deposit account [link](/ledgers-deposit-account-service-impl/src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/mockbank/use_case_newbank_no_overriden_tx.yml)
+
+## Brief architecture documentation
 Available in [the documentation](doc/architecture/README.md)
 
 ## Deployment
 
-Dockerfiles provided in the project allow to put the build artifacts into a docker images. Those images are to be
-configured through your environment (documentation follows) to interact properly.
+Dockerfiles will be provided to allow to put the build artifacts into a docker images. Not available for now.
 
 More details see in [instruction](doc/deployment.md)
 
@@ -51,18 +165,6 @@ Please read [CONTRIBUTING](doc/CONTRIBUTING.md) for details on our code of condu
 ## Release notes
   
   * [Release notes](doc/releasenotes.md) 
- 
-### Testing API with Postman json collections
- 
- For testing API of xs2a it is used Postman https://www.getpostman.com/
- Environment jsons with global parameter’s sets and Collections of jsons for imitation of processes flows are stored in /scripts/tests/postman folder.
- To import Postman collections and environments follow next steps:
- 1.     Download Postman jsons with collections and environments to your local machine.
- 2.     Open Postman, press button “Import”.
- 3.     Choose “Import file” to import one json or “Import folder” to import all jsons within the folder, then press button “Choose Files” or “Choose Folders” and open necessary files/folders.
- 4.     To change settings of environments - go to “Manage Environments”, press the environment name and change variables.
- 
- To start testing with Postman collections it is necessary to have all services running.
  
 ## Roadmap
  

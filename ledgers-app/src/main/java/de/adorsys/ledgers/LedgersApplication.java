@@ -24,7 +24,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
-import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddleware;
+import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
+import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 
 @EntityScan
@@ -32,7 +33,8 @@ import de.adorsys.ledgers.postings.impl.EnablePostingService;
 @EnableJpaAuditing
 @EnableJpaRepositories
 @SpringBootApplication(scanBasePackages = {"de.adorsys.ledgers.sca","de.adorsys.ledgers.um","de.adorsys.ledgers.app"})
-@EnableLedgersMiddleware
+@EnableLedgersMiddlewareRest
+@EnableLedgersMiddlewareService
 @EnableDepositAccountService
 @EnablePostingService
 public class LedgersApplication {

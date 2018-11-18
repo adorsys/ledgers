@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 @Target(value = {java.lang.annotation.ElementType.TYPE})
 @Documented
 @Import({
-	LedgersMiddlewareConfiguration.class
+	LedgersMiddlewareRestConfiguration.class
 })
-public @interface EnableLedgersMiddleware {
+public @interface EnableLedgersMiddlewareRest {
 }

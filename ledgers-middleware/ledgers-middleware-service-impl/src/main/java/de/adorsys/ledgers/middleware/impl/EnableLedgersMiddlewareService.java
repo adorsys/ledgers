@@ -12,5 +12,5 @@ import org.springframework.context.annotation.Import;
 @Import({
 	MiddlewareServiceConfiguration.class
 })
-public @interface EnableMiddlewareService {
+public @interface EnableLedgersMiddlewareService {
 }
