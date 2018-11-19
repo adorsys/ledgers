@@ -1,6 +1,70 @@
 # Ledgers
 
-This is a standalone deployment of the ledgers deposit account application. This module is not meant to be productively used. It can be deployed to explore the functionality of the ledgers module on a swagger rest interface. 
+Banking Booking System kept simple!
+
+## Features
+
+### Deposit Account Implementation
+
+Simple implementation of a deposit account that supports:
+
+* Account management
+    * Creating a banking deposit account
+    * List transactions
+* Initiating and executing payments 
+    * Single payment
+    * Future dated payments
+    * Periodic payments (scheduller pending)
+    * Bulk payments (batch and non batch)
+* Cash deposit (Still pending)
+* Statement and Balances
+    * Account Statement
+    * Trial Balances
+* String Customer Authentication
+    * Authorizing payment initiation
+    * Authorizing transactions listings
+    * Support for multiple SCA Methods
+        * 1:n E-Mails
+        * 1:n mobile phones  
+    
+
+### Double Entry Accounting : Ledgers Posting
+
+This is simple implementation of the double entry accounting with some additional features like:
+
+* Classical functionality of an accounting module
+    * Journaling of Transactions
+    * Account Balance Inquiry
+    * Account Statement Reporting
+* Some innovative accounting functionalities
+    * Read only journal entries
+    * No down time for time based closing operations (day, month, year)
+    * Asynchronous balance computation for parallel processing of journal entries
+    * Detaching processing time and entry effective time, allowing the storage of future and/or passt transactions
+* Some technical innovations
+    * Securing integrity of entries using hash chains
+    * Spring based JPA module embedding for transactional integrity
+    * Allowing the horizontal partitioning of the module using eventual consistency techniques
+    * Allowing the vertical partitioning (time based) of entries to increase the throughput of parallel write operations
+
+### Configuration
+
+The deposit account module needs a chart of account. You can find a sample chart of account at: [Sample Chart Of Accounts](ledgers-deposit-account/ledgers-deposit-account-service-impl/src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/mockbank/sample_coa_banking.yml)
+
+### Dumy SCA and User Management
+
+We provide a sample SCA and user management application no to be used in a productive environment.
+
+### Middleware Module
+
+This is a sort of online banking application exposes the deposit account functionality to an online environment enabling the following workflow:
+* Create deposit accounts
+* Create banking users
+* Initiate Payments
+* Check balances
+* Read payment transactions 
+
+This is a sample test data file for the deposit account [Sample Test Data](ledgers-deposit-account/ledgers-deposit-account-service-impl/src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/mockbank/use_case_newbank_no_overriden_tx.yml)
 
 ## Who we are
 [adorsys](https://adorsys.de/en/index.html) is a company who works ever since the very beginning of PSD2 with its requirements and implicit tasks.
@@ -79,69 +143,6 @@ Following JPA module are automatically included in the corresponding service mod
 | `@EnablePostingsReporitory`  | Enables the ledgers posting repository module.                 |
 | `@EnableSCARepository` | Enables the sca repository module |
 | `@EnableUserManagmentRepository`   | Enables a user management module. |
-
-## Features
-
-### Double Entry Accounting : Ledgers Posting
-
-This is simple implementation of the double entry accounting with some additional features like:
-
-* Classical functionality of an accounting module
-    * Journaling of Transactions
-    * Account Balance Inquiry
-    * Account Statement Reporting
-* Some innovative accounting functionalities
-    * Read only journal entries
-    * No down time for time based closing operations (day, month, year)
-    * Asynchronous balance computation for parallel processing of journal entries
-    * Detaching processing time and entry effective time, allowing the storage of future and/or passt transactions
-* Some technical innovations
-    * Securing integrity of entries using hash chains
-    * Spring based JPA module embedding for transactional integrity
-    * Allowing the horizontal partitioning of the module using eventual consistency techniques
-    * Allowing the vertical partitioning (time based) of entries to increase the throughput of parallel write operations
-
-### Deposit Account Implementation
-
-Simple implementation of a deposit account that support:
-
-* Account management
-    * Creating a banking deposit account
-    * List transactions
-* Initiating and executing payments 
-    * Single payment
-    * Future dated payments
-    * Periodic payments (scheduller pending)
-    * Bulk payments (batch and non batch)
-* Cash deposit (Still pending)
-* Statement and Balances
-    * Account Statement
-    * Trial Balances
-* String Customer Authentication
-    * Authorizing payment initiation
-    * Authorizing transactions listings
-    * Support for multiple SCA Methods
-        * 1:n E-Mails
-        * 1:n mobile phones  
-    
-#### Configuration
-
-The deposit account module needs a chart of account. You can find a sample chart of account at: [a link](ledgers-deposit-account/ledgers-deposit-account-service-impl/src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/mockbank/sample_coa_banking.yml)
-
-### Dumy SCA and User Management
-
-We provide a sample SCA and user management application no to be used in a productive environment.
-
-### Middleware Module
-
-This is a sort of online banking application exposes the deposit account functionality to an online environment enabling the following workflow:
-* Create deposit accounts
-* Create banking users
-* Initiate Payments
-* Check balances
-* Read payment transactions 
-
-This is a sample test data file for the deposit account [link](/ledgers-deposit-account-service-impl/src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/mockbank/use_case_newbank_no_overriden_tx.yml)
 
 ## Brief architecture documentation
 Available in [the documentation](doc/architecture/README.md)
