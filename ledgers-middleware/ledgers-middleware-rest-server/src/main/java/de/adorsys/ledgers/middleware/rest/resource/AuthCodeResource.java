@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,15 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.rest.converter.SCAMethodTOConverter;
 import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationRequest;
 import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationResponse;
 import de.adorsys.ledgers.middleware.rest.domain.SCAValidationRequest;
@@ -47,20 +40,16 @@ public class AuthCodeResource {
     static final String AUTH_CODES = "/auth-codes";
 
     private final MiddlewareService middlewareService;
-    private final SCAMethodTOConverter scaMethodTOConverter;
 
-    public AuthCodeResource(MiddlewareService middlewareService, SCAMethodTOConverter scaMethodTOConverter) {
-		super();
+    public AuthCodeResource(MiddlewareService middlewareService) {
 		this.middlewareService = middlewareService;
-		this.scaMethodTOConverter = scaMethodTOConverter;
 	}
 
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
     @PostMapping(value = "/generate")
     public SCAGenerationResponse generate(@RequestBody SCAGenerationRequest req) {
         try {
-        	ScaUserDataTO scaUserDataTO = scaMethodTOConverter.toScaUserDataTO(req.getMethod());
-            String opId = middlewareService.generateAuthCode(req.getUserLogin(), scaUserDataTO, req.getOpData(), req.getUserMessage(), req.getValiditySeconds());
+            String opId = middlewareService.generateAuthCode(req.getUserLogin(), req.getScaUserDataId(), req.getPaymentId(), req.getOpData(), req.getUserMessage(), req.getValiditySeconds());
             logger.debug("Operation id={} was generated for user={}", opId, req.getUserLogin());
             return new SCAGenerationResponse(opId);
         } catch (AuthCodeGenerationMiddlewareException e) {
@@ -69,6 +58,9 @@ public class AuthCodeResource {
         } catch (SCAMethodNotSupportedMiddleException e) {
             logger.error(e.getMessage(), e);
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (UserNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {
+            logger.error(e.getMessage());
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
 

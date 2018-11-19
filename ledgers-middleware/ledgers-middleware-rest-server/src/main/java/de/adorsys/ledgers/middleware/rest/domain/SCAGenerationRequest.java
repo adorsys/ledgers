@@ -16,11 +16,10 @@
 
 package de.adorsys.ledgers.middleware.rest.domain;
 
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAMethodTO;
-
 public class SCAGenerationRequest {
     private String userLogin;
-    private SCAMethodTO method;
+    private String scaUserDataId;
+    private String paymentId;
     private String opData;
     private String userMessage;
     private int validitySeconds;
@@ -28,20 +27,25 @@ public class SCAGenerationRequest {
     public SCAGenerationRequest() {
     }
 
-    public SCAGenerationRequest(String userLogin, SCAMethodTO method, String opData, String userMessage, int validitySeconds) {
+    public SCAGenerationRequest(String userLogin, String scaUserDataId, String paymentId, String opData, String userMessage, int validitySeconds) {
         this.userLogin = userLogin;
-        this.method = method;
+        this.scaUserDataId = scaUserDataId;
+        this.paymentId = paymentId;
         this.opData = opData;
         this.userMessage = userMessage;
         this.validitySeconds = validitySeconds;
     }
 
-    public String getUserLogin() {
-        return userLogin;
+    public String getScaUserDataId() {
+        return scaUserDataId;
     }
 
-    public SCAMethodTO getMethod() {
-        return method;
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public String getUserLogin() {
+        return userLogin;
     }
 
     public String getOpData() {

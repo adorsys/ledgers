@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 
+import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,15 +40,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
@@ -63,6 +57,7 @@ import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
+    private static final String SCA_USER_DATA_ID = "myPaymentId";
     private static final String PAYMENT_ID = "myPaymentId";
     private static final String OP_ID = "opId";
     private static final String OP_DATA = "opData";
@@ -129,25 +124,22 @@ public class MiddlewareServiceImplTest {
 
 
     @Test
-    public void generateAuthCode() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException {
+    public void generateAuthCode() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, UserNotFoundException, UserScaDataNotFoundException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
 
-        when(userMapper.toScaUserDataBO(scaMethodTO)).thenReturn(userDataBO);
-        when(operationService.generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
+        when(operationService.generateAuthCode(OP_ID, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
 
-        String actualOpId = middlewareService.generateAuthCode(OP_ID, scaMethodTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        String actualOpId = middlewareService.generateAuthCode(OP_ID, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         assertThat(actualOpId, is(OP_ID));
 
-        verify(userMapper, times(1)).toScaUserDataBO(scaMethodTO);
-        verify(operationService, times(1)).generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(operationService, times(1)).generateAuthCode(OP_ID, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test(expected = AuthCodeGenerationMiddlewareException.class)
-    public void generateAuthCodeWithException() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException {
-        when(userMapper.toScaUserDataBO(scaMethodTO)).thenReturn(userDataBO);
-        when(operationService.generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationException());
+    public void generateAuthCodeWithException() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, UserNotFoundException, UserScaDataNotFoundException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
+        when(operationService.generateAuthCode(OP_ID, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationException());
 
-        middlewareService.generateAuthCode(OP_ID, scaMethodTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        middlewareService.generateAuthCode(OP_ID, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
     }
 
     @Test

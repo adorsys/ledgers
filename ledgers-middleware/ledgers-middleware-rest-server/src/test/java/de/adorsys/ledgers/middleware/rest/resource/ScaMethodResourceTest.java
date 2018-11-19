@@ -51,8 +51,6 @@ public class ScaMethodResourceTest {
 
 	@Mock
 	private MiddlewareUserManagementService middlewareUserService;
-    @Mock
-    private SCAMethodTOConverter scaMethodTOConverter;
 
 	private static ObjectMapper ymlMapper;
 	private static ObjectMapper jsonMapper;
@@ -66,7 +64,7 @@ public class ScaMethodResourceTest {
 		jsonMapper = initMapper(new ObjectMapper());
 		try {
 			userTO = ymlMapper.readValue(ScaMethodResourceTest.class.getResourceAsStream("user.yml"), UserTO.class);
-	        scaMethodTOS = ymlMapper.readValue(ScaMethodResourceTest.class.getResourceAsStream("SCAMethodTO.yml"), new TypeReference<List<SCAMethodTO>>() {});
+	        scaMethodTOS = ymlMapper.readValue(ScaMethodResourceTest.class.getResourceAsStream("ScaUserDataTO.yml"), new TypeReference<List<ScaUserDataTO>>() {});
 		} catch (IOException e) {
 			throw new IllegalStateException("File not found", e);
 		}
@@ -89,7 +87,6 @@ public class ScaMethodResourceTest {
 	@Test
 	public void getUserScaMethods() throws Exception {
 
-        when(scaMethodTOConverter.toSCAMethodListTO(userTO.getScaUserData())).thenReturn(scaMethodTOS);
 		when(middlewareUserService.findByUserLogin(USER_LOGIN)).thenReturn(userTO);
 
 		MvcResult mvcResult = mockMvc
@@ -98,7 +95,7 @@ public class ScaMethodResourceTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andReturn();
 
 		String content = mvcResult.getResponse().getContentAsString();
-		List<SCAMethodTO> methods = jsonMapper.readValue(content, new TypeReference<List<SCAMethodTO>>() {});
+		List<SCAMethodTO> methods = jsonMapper.readValue(content, new TypeReference<List<ScaUserDataTO>>() {});
 
 		assertThat(mvcResult.getResponse().getStatus(), is(200));
 		assertThat(scaMethodTOS, is(methods));
@@ -120,7 +117,6 @@ public class ScaMethodResourceTest {
 
 	@Test
 	public void updateUserScaMethods() throws Exception {
-		when(scaMethodTOConverter.toSCAMethodListBO(scaMethodTOS)).thenReturn(userTO.getScaUserData());
 		when(middlewareUserService.updateScaData(USER_LOGIN, userTO.getScaUserData())).thenReturn(userTO);
 
 		String stringContent = jsonMapper.writeValueAsString(scaMethodTOS);
@@ -128,13 +124,11 @@ public class ScaMethodResourceTest {
 				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent)).andDo(print())
 				.andExpect(status().is(HttpStatus.ACCEPTED.value())).andReturn();
 
-		verify(scaMethodTOConverter, times(1)).toSCAMethodListBO(scaMethodTOS);
 		verify(middlewareUserService, times(1)).updateScaData(USER_LOGIN, userTO.getScaUserData());
 	}
 
 	@Test
 	public void updateUserScaMethodsUserNotFound() throws Exception {
-		when(scaMethodTOConverter.toSCAMethodListBO(scaMethodTOS)).thenReturn(userTO.getScaUserData());
 		when(middlewareUserService.updateScaData(USER_LOGIN, userTO.getScaUserData())).thenThrow(UserNotFoundMiddlewareException.class);
 
 		String stringContent = jsonMapper.writeValueAsString(scaMethodTOS);
@@ -142,7 +136,6 @@ public class ScaMethodResourceTest {
 				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent)).andDo(print())
 				.andExpect(status().is(HttpStatus.NOT_FOUND.value())).andReturn();
 
-		verify(scaMethodTOConverter, times(1)).toSCAMethodListBO(scaMethodTOS);
 		verify(middlewareUserService, times(1)).updateScaData(USER_LOGIN, userTO.getScaUserData());
 	}
 }

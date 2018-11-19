@@ -19,8 +19,17 @@ package de.adorsys.ledgers.middleware.api.domain.sca;
 import java.util.Objects;
 
 public class SCAMethodTO {
+    private String id;
     private SCAMethodTypeTO type;
     private String value;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public SCAMethodTypeTO getType() {
         return type;
@@ -47,19 +56,21 @@ public class SCAMethodTO {
             return false;
         }
         SCAMethodTO that = (SCAMethodTO) o;
-        return type == that.type &&
+        return Objects.equals(id, that.id) &&
+                       type == that.type &&
                        Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, value);
+        return Objects.hash(id, type, value);
     }
 
     @Override
     public String toString() {
         return "SCAMethodTO{" +
-                       "type=" + type +
+                       "id='" + id + '\'' +
+                       ", type=" + type +
                        ", value='" + value + '\'' +
                        '}';
     }
