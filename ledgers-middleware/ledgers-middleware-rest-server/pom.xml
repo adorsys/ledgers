@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-middleware-service-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- spring dependencies -->
@@ -111,7 +111,6 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-middleware-app</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-middleware-service-impl</exclude>
 									</excludes>
 								</bannedDependencies>

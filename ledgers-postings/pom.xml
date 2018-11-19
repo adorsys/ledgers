@@ -19,14 +19,15 @@
 		<version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
 	</parent>
+
 	<modules>
 		<module>ledgers-postings-rest-server</module>
 		<module>ledgers-postings-service-api</module>
 		<module>ledgers-postings-service-impl</module>
 		<module>ledgers-postings-repository</module>
 	</modules>
+
 	<packaging>pom</packaging>
 	<artifactId>ledgers-postings</artifactId>
-
 
 </project>

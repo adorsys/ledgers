@@ -57,7 +57,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <!-- other dependencies -->
 
         <dependency>
@@ -98,4 +97,5 @@
         </dependency>
 		
     </dependencies>
+
 </project>

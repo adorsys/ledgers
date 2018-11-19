@@ -9,31 +9,62 @@
 	governing permissions and ~ limitations under the License. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>ledgers-deposit-account-service-api</artifactId>
+    <artifactId>ledgers-deposit-account-service-api</artifactId>
 
-	<description>Deposit Account Service API</description>
+    <description>Deposit Account Service API</description>
 
-	<parent>
-		<groupId>de.adorsys.ledgers</groupId>
-		<artifactId>ledgers-deposit-account</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>..</relativePath>
-	</parent>
+    <parent>
+        <groupId>de.adorsys.ledgers</groupId>
+        <artifactId>ledgers-deposit-account</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
 
-	<properties>
-		<ruleset.basedir>../..</ruleset.basedir>
-	</properties>
+    <properties>
+        <ruleset.basedir>../..</ruleset.basedir>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-postings-service-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-postings-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>de.adorsys.ledgers:ledgers-deposit-account-service-impl</exclude>
+                                        <exclude>de.adorsys.ledgers:ledgers-deposit-account-repository</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
