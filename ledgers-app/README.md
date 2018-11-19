@@ -1,0 +1,2 @@
+# Ledgers Sample App
+This is a standalone deployment of the ledgers deposit account application. This module is not meant to be productively used. It can be deployed to explore the functionality of the ledgers module on a swagger rest interface. 
