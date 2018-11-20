@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,13 +29,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAMethodTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.rest.converter.SCAMethodTOConverter;
-import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationRequest;
 import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationResponse;
 import de.adorsys.ledgers.middleware.rest.domain.SCAValidationRequest;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
@@ -82,15 +77,15 @@ public class AuthCodeResourceTest {
     @Test
     public void generate() throws Exception {
 
-        SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        AuthCodeDataTO data = new AuthCodeDataTO(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
 
-		when(middlewareService.generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
+		when(middlewareService.generateAuthCode(data)).thenReturn(OP_ID);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(SerializationUtils.writeValueAsBytes(request)))
+                                                      .content(SerializationUtils.writeValueAsBytes(data)))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -101,21 +96,21 @@ public class AuthCodeResourceTest {
 
         assertThat(actual, is(new SCAGenerationResponse(OP_ID)));
 
-        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(middlewareService, times(1)).generateAuthCode(data);
     }
 
     @Test
     public void generateWithValidationError() throws Exception {
 
-        SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        AuthCodeDataTO data = new AuthCodeDataTO(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         String message = "Validation error";
-        when(middlewareService.generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA,USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationMiddlewareException(message));
+        when(middlewareService.generateAuthCode(data)).thenThrow(new AuthCodeGenerationMiddlewareException(message));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(SerializationUtils.writeValueAsBytes(request)))
+                                                      .content(SerializationUtils.writeValueAsBytes(data)))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -128,21 +123,21 @@ public class AuthCodeResourceTest {
         assertThat(exception.getDevMessage(), is(message));
         assertThat(exception.getMessage(), is(message));
 
-        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(middlewareService, times(1)).generateAuthCode(data);
     }
 
     @Test
     public void generateWithUserNotFound() throws Exception {
 
-        SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        AuthCodeDataTO data = new AuthCodeDataTO(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         String message = "User with such login is not found";
-        when(middlewareService.generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA,USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new UserNotFoundMiddlewareException(message));
+        when(middlewareService.generateAuthCode(data)).thenThrow(new UserNotFoundMiddlewareException(message));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(SerializationUtils.writeValueAsBytes(request)))
+                                                      .content(SerializationUtils.writeValueAsBytes(data)))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -155,21 +150,21 @@ public class AuthCodeResourceTest {
         assertThat(exception.getDevMessage(), is(message));
         assertThat(exception.getMessage(), is(message));
 
-        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(middlewareService, times(1)).generateAuthCode(data);
     }
 
     @Test
     public void generateWithScaUserDataNotFound() throws Exception {
 
-        SCAGenerationRequest request = new SCAGenerationRequest(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        AuthCodeDataTO data = new AuthCodeDataTO(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         String message = "Sca User Data with such id is not found";
-        when(middlewareService.generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA,USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new UserScaDataNotFoundMiddlewareException(message));
+        when(middlewareService.generateAuthCode(data)).thenThrow(new UserScaDataNotFoundMiddlewareException(message));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(SerializationUtils.writeValueAsBytes(request)))
+                                                      .content(SerializationUtils.writeValueAsBytes(data)))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -182,7 +177,7 @@ public class AuthCodeResourceTest {
         assertThat(exception.getDevMessage(), is(message));
         assertThat(exception.getMessage(), is(message));
 
-        verify(middlewareService, times(1)).generateAuthCode(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(middlewareService, times(1)).generateAuthCode(data);
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCASender;
@@ -51,6 +52,8 @@ public class SCAOperationServiceImplTest {
     private static final int VALIDITY_SECONDS = 3 * 60;
     private static final String TAN = "my tan";
     private static final String AUTH_CODE_HASH = "authCodeHash";
+    private static final String USER_LOGIN = "user_login";
+    private static final String USER_MESSAGE = "user message";
 
     @InjectMocks
     private SCAOperationServiceImpl scaOperationService;
@@ -70,6 +73,7 @@ public class SCAOperationServiceImplTest {
     private SCAOperationEntity scaOperationEntity;
     private SCASender emailSender;
     private SCASender mobileSender;
+    private AuthCodeDataBO codeDataBO;
 
     @Before
     public void setUp() {
@@ -77,6 +81,14 @@ public class SCAOperationServiceImplTest {
         scaOperationEntity = readFromFile("scaOperationEntity.yml", SCAOperationEntity.class);
         scaOperationEntity.setCreated(LocalDateTime.now());
         scaOperationEntity.setStatusTime(LocalDateTime.now());
+
+        codeDataBO = new AuthCodeDataBO();
+        codeDataBO.setOpData(OP_DATA);
+        codeDataBO.setPaymentId(PAYMENT_ID);
+        codeDataBO.setScaUserDataId(SCA_USER_DATA_ID);
+        codeDataBO.setUserLogin(USER_LOGIN);
+        codeDataBO.setUserMessage(USER_MESSAGE);
+        codeDataBO.setValiditySeconds(VALIDITY_SECONDS);
 
         HashMap<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
         emailSender = mock(SCASender.class);
@@ -99,8 +111,6 @@ public class SCAOperationServiceImplTest {
 
     @Test
     public void generateAuthCode() throws AuthCodeGenerationException, HashGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
-        String userMessage = "user message";
-        String userLogin = "speex";
         String email = "spe@adorsys.com.ua";
 
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
@@ -109,7 +119,7 @@ public class SCAOperationServiceImplTest {
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
         method.setId(SCA_USER_DATA_ID);
 
-        when(userService.findByLogin(userLogin)).thenReturn(userBO);
+        when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
@@ -117,7 +127,7 @@ public class SCAOperationServiceImplTest {
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
 
-        String actualOpId = scaOperationService.generateAuthCode(userLogin, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, userMessage, VALIDITY_SECONDS);
+        String actualOpId = scaOperationService.generateAuthCode(codeDataBO);
 
         SCAOperationEntity entity = captor.getValue();
 
@@ -130,7 +140,7 @@ public class SCAOperationServiceImplTest {
         assertThat(entity.getHashAlg(), is(HashGeneratorImpl.DEFAULT_HASH_ALG));
         assertThat(entity.getAuthCodeHash(), is(notNullValue()));
 
-        verify(userService, times(1)).findByLogin(userLogin);
+        verify(userService, times(1)).findByLogin(USER_LOGIN);
         verify(userBO, times(1)).getScaUserData();
         verify(authCodeGenerator, times(1)).generate();
         verify(hashGenerator, times(1)).hash(any());
@@ -139,50 +149,44 @@ public class SCAOperationServiceImplTest {
 
     @Test(expected = AuthCodeGenerationException.class)
     public void generateAuthCodeWithException() throws AuthCodeGenerationException, HashGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
-        String userMessage = "user message";
-        String userLogin = "speex";
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
         method.setId(SCA_USER_DATA_ID);
         UserBO userBO = mock(UserBO.class);
 
-        when(userService.findByLogin(userLogin)).thenReturn(userBO);
+        when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
-        scaOperationService.generateAuthCode(userLogin, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, userMessage, VALIDITY_SECONDS);
+        scaOperationService.generateAuthCode(codeDataBO);
     }
 
     @Test(expected = UserNotFoundException.class)
     public void generateUserNotFoundException() throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
-        String userMessage = "user message";
-        String userLogin = "speex";
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
         method.setId(SCA_USER_DATA_ID);
 
-        when(userService.findByLogin(userLogin)).thenThrow(new UserNotFoundException(userLogin));
+        when(userService.findByLogin(USER_LOGIN)).thenThrow(new UserNotFoundException(USER_LOGIN));
 
-        scaOperationService.generateAuthCode(userLogin, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, userMessage, VALIDITY_SECONDS);
+        scaOperationService.generateAuthCode(codeDataBO);
     }
 
     @Test(expected = UserScaDataNotFoundException.class)
     public void generateUserScaDataNotFoundException() throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
-        String userMessage = "user message";
-        String userLogin = "speex";
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
         method.setId("not existing id");
         UserBO userBO = mock(UserBO.class);
 
-        when(userService.findByLogin(userLogin)).thenReturn(userBO);
+        when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
 
-        scaOperationService.generateAuthCode(userLogin, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, userMessage, VALIDITY_SECONDS);
+        scaOperationService.generateAuthCode(codeDataBO);
     }
 
 

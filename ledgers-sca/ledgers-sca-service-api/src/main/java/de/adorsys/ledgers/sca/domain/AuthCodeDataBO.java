@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.rest.domain;
+package de.adorsys.ledgers.sca.domain;
 
-public class SCAGenerationRequest {
+public class AuthCodeDataBO {
     private String userLogin;
     private String scaUserDataId;
     private String paymentId;
@@ -24,39 +24,63 @@ public class SCAGenerationRequest {
     private String userMessage;
     private int validitySeconds;
 
-    public SCAGenerationRequest() {
+    public String getUserLogin() {
+        return userLogin;
     }
 
-    public SCAGenerationRequest(String userLogin, String scaUserDataId, String paymentId, String opData, String userMessage, int validitySeconds) {
+    public void setUserLogin(String userLogin) {
         this.userLogin = userLogin;
-        this.scaUserDataId = scaUserDataId;
-        this.paymentId = paymentId;
-        this.opData = opData;
-        this.userMessage = userMessage;
-        this.validitySeconds = validitySeconds;
     }
 
     public String getScaUserDataId() {
         return scaUserDataId;
     }
 
+    public void setScaUserDataId(String scaUserDataId) {
+        this.scaUserDataId = scaUserDataId;
+    }
+
     public String getPaymentId() {
         return paymentId;
     }
 
-    public String getUserLogin() {
-        return userLogin;
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 
     public String getOpData() {
         return opData;
     }
 
+    public void setOpData(String opData) {
+        this.opData = opData;
+    }
+
     public String getUserMessage() {
         return userMessage;
     }
 
+    public void setUserMessage(String userMessage) {
+        this.userMessage = userMessage;
+    }
+
     public int getValiditySeconds() {
         return validitySeconds;
+    }
+
+    public void setValiditySeconds(int validitySeconds) {
+        this.validitySeconds = validitySeconds;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthCodeDataBO{" +
+                       "userLogin='" + userLogin + '\'' +
+                       ", scaUserDataId='" + scaUserDataId + '\'' +
+                       ", paymentId='" + paymentId + '\'' +
+                       ", opData='" + opData + '\'' +
+                       ", userMessage='" + userMessage + '\'' +
+                       ", validitySeconds=" + validitySeconds +
+                       '}';
     }
 }

@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
-import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationRequest;
 import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationResponse;
 import de.adorsys.ledgers.middleware.rest.domain.SCAValidationRequest;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
@@ -47,10 +47,10 @@ public class AuthCodeResource {
 
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
     @PostMapping(value = "/generate")
-    public SCAGenerationResponse generate(@RequestBody SCAGenerationRequest req) {
+    public SCAGenerationResponse generate(@RequestBody AuthCodeDataTO data) {
         try {
-            String opId = middlewareService.generateAuthCode(req.getUserLogin(), req.getScaUserDataId(), req.getPaymentId(), req.getOpData(), req.getUserMessage(), req.getValiditySeconds());
-            logger.debug("Operation id={} was generated for user={}", opId, req.getUserLogin());
+            String opId = middlewareService.generateAuthCode(data);
+            logger.debug("Operation id={} was generated for user={}", opId, data.getUserLogin());
             return new SCAGenerationResponse(opId);
         } catch (AuthCodeGenerationMiddlewareException e) {
             logger.error(e.getMessage(), e);

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
@@ -85,23 +86,21 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @Override
-    public String generateAuthCode(String userLogin, String scaUserDataId, String paymentId, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
+    public String generateAuthCode(AuthCodeDataBO data) throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
 
-        // TODO: check the method supports by user
-
-        ScaUserDataBO scaUserData = getScaUserData(userLogin, scaUserDataId);
+        ScaUserDataBO scaUserData = getScaUserData(data.getUserLogin(), data.getScaUserDataId());
 
         checkMethodSupported(scaUserData);
 
         String tan = authCodeGenerator.generate();
 
-        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(opData, tan));
+        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(data.getOpData(), tan));
 
-        SCAOperationEntity scaOperation = buildSCAOperation(paymentId, validitySeconds, hashItem);
+        SCAOperationEntity scaOperation = buildSCAOperation(data.getPaymentId(), data.getValiditySeconds(), hashItem);
 
         repository.save(scaOperation);
 
-        String message = userMessage + " " + tan;
+        String message = data.getUserMessage() + " " + tan;
 
         senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
 

@@ -19,7 +19,10 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import java.time.LocalDateTime;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import org.slf4j.Logger;
@@ -54,14 +57,16 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     private final SCAOperationService scaOperationService;
     private final DepositAccountService accountService;
     private final PaymentConverter paymentConverter;
+    private final AuthCodeDataConverter authCodeDataConverter;
 
     public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService,
-                                 DepositAccountService accountService, PaymentConverter paymentConverter) {
+                                 DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter) {
 		super();
 		this.paymentService = paymentService;
 		this.scaOperationService = scaOperationService;
 		this.accountService = accountService;
 		this.paymentConverter = paymentConverter;
+        this.authCodeDataConverter = authCodeDataConverter;
     }
 
 	@Override
@@ -78,10 +83,10 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public String generateAuthCode(String userLogin, String scaUserDataId, String paymentId, String opData, String userMessage,
-                                   int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
+    public String generateAuthCode(AuthCodeDataTO authCodeData) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
         try {
-            return scaOperationService.generateAuthCode(userLogin, scaUserDataId, paymentId, opData, userMessage, validitySeconds);
+            AuthCodeDataBO authCodeDataBO = authCodeDataConverter.toAuthCodeDataBO(authCodeData);
+            return scaOperationService.generateAuthCode(authCodeDataBO);
         } catch (AuthCodeGenerationException e) {
             logger.error(e.getMessage(), e);
             throw new AuthCodeGenerationMiddlewareException(e);
