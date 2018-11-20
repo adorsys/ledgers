@@ -82,10 +82,8 @@
 							<rules>
 								<bannedDependencies>
 									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-app</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-service-impl</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-db-api</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-db-impl</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-postings-service-impl</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-postings-repository</exclude>
 									</excludes>
 								</bannedDependencies>
 							</rules>

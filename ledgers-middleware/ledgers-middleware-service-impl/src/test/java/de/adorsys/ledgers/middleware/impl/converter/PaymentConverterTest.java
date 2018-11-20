@@ -191,15 +191,6 @@ public class PaymentConverterTest {
                 .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_BULK_BO));
     }
 
-//    private static <T> T readYml(Class<T> aClass, String path) {
-//        try {
-//        	return mapper.readValue(PaymentConverterTest.class.getResourceAsStream(path), aClass);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            throw new IllegalStateException("Resource file not found", e);
-//        }
-//    }
-//
     @Test
     public void toTransactionTO() {
         TransactionTO result = converter.toTransactionTO(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));

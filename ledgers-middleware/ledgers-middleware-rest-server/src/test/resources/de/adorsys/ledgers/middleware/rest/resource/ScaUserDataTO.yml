@@ -1,0 +1,6 @@
+- id: 1
+  scaMethod: EMAIL
+  methodValue: spe@adorsys.com.ua
+- id: 2
+  scaMethod: MOBILE
+  methodValue: +380933686868

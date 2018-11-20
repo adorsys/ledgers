@@ -20,13 +20,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
@@ -53,14 +57,17 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
     private final SCAOperationRepository repository;
 
+    private final UserService userService;
+
     private final AuthCodeGenerator authCodeGenerator;
 
     private HashGenerator hashGenerator;
 
     private Map<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
 
-    public SCAOperationServiceImpl(List<SCASender> senders, SCAOperationRepository repository, AuthCodeGenerator authCodeGenerator) {
+    public SCAOperationServiceImpl(List<SCASender> senders, SCAOperationRepository repository, UserService userService, AuthCodeGenerator authCodeGenerator) {
         this.repository = repository;
+        this.userService = userService;
         this.authCodeGenerator = authCodeGenerator;
         hashGenerator = new HashGeneratorImpl();
         if (senders != null) {
@@ -79,23 +86,23 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @Override
-    public String generateAuthCode(String userLogin, ScaUserDataBO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationException, SCAMethodNotSupportedException {
+    public String generateAuthCode(AuthCodeDataBO data) throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
 
-        // TODO: check the method supports by user
+        ScaUserDataBO scaUserData = getScaUserData(data.getUserLogin(), data.getScaUserDataId());
 
-        checkMethodSupported(scaMethod);
+        checkMethodSupported(scaUserData);
 
         String tan = authCodeGenerator.generate();
 
-        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(opData, tan));
+        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(data.getOpData(), tan));
 
-        SCAOperationEntity scaOperation = buildSCAOperation(Ids.id(), validitySeconds, hashItem);
+        SCAOperationEntity scaOperation = buildSCAOperation(data.getPaymentId(), data.getValiditySeconds(), hashItem);
 
         repository.save(scaOperation);
 
-        String message = userMessage + " " + tan;
+        String message = data.getUserMessage() + " " + tan;
 
-        senders.get(scaMethod.getScaMethod()).send(scaMethod.getMethodValue(), message);
+        senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
 
         return scaOperation.getOpId();
     }
@@ -104,6 +111,18 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         if (!senders.containsKey(scaMethod.getScaMethod())) {
             throw new SCAMethodNotSupportedException();
         }
+    }
+
+    @NotNull
+    private ScaUserDataBO getScaUserData(String userLogin, String scaUserDataId) throws UserNotFoundException, UserScaDataNotFoundException {
+        UserBO userServiceByLogin = userService.findByLogin(userLogin);
+        Optional<ScaUserDataBO> scaUserData = userServiceByLogin.getScaUserData()
+                                                      .stream()
+                                                      .filter(s -> s.getId().equals(scaUserDataId))
+                                                      .findFirst();
+
+        scaUserData.orElseThrow(() -> new UserScaDataNotFoundException(scaUserDataId));
+        return scaUserData.get();
     }
 
     @NotNull

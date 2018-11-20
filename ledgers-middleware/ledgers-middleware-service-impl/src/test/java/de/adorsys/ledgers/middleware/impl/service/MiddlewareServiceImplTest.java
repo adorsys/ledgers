@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,19 +43,9 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.middleware.impl.service.MiddlewareServiceImpl;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
 import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
@@ -63,6 +59,7 @@ import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
+    private static final String SCA_USER_DATA_ID = "myPaymentId";
     private static final String PAYMENT_ID = "myPaymentId";
     private static final String OP_ID = "opId";
     private static final String OP_DATA = "opData";
@@ -89,6 +86,8 @@ public class MiddlewareServiceImplTest {
     private DepositAccountService accountService;
     @Mock
     private AccountDetailsMapper detailsMapper;
+    @Mock
+    private AuthCodeDataConverter codeDataConverter;
 
     @Mock
     private UserService userService;
@@ -129,25 +128,31 @@ public class MiddlewareServiceImplTest {
 
 
     @Test
-    public void generateAuthCode() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException {
+    public void generateAuthCode() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, UserNotFoundException, UserScaDataNotFoundException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
 
-        when(userMapper.toScaUserDataBO(scaMethodTO)).thenReturn(userDataBO);
-        when(operationService.generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenReturn(OP_ID);
+        AuthCodeDataTO codeDataTO = readYml(AuthCodeDataTO.class, "auth-code-data.yml");
+        AuthCodeDataBO codeDataBO = readYml(AuthCodeDataBO.class, "auth-code-data.yml");
 
-        String actualOpId = middlewareService.generateAuthCode(OP_ID, scaMethodTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        when(codeDataConverter.toAuthCodeDataBO(codeDataTO)).thenReturn(codeDataBO);
+        when(operationService.generateAuthCode(codeDataBO)).thenReturn(OP_ID);
+
+        String actualOpId = middlewareService.generateAuthCode(codeDataTO);
 
         assertThat(actualOpId, is(OP_ID));
 
-        verify(userMapper, times(1)).toScaUserDataBO(scaMethodTO);
-        verify(operationService, times(1)).generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        verify(codeDataConverter, times(1)).toAuthCodeDataBO(codeDataTO);
+        verify(operationService, times(1)).generateAuthCode(codeDataBO);
     }
 
     @Test(expected = AuthCodeGenerationMiddlewareException.class)
-    public void generateAuthCodeWithException() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException {
-        when(userMapper.toScaUserDataBO(scaMethodTO)).thenReturn(userDataBO);
-        when(operationService.generateAuthCode(OP_ID, userDataBO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS)).thenThrow(new AuthCodeGenerationException());
+    public void generateAuthCodeWithException() throws AuthCodeGenerationMiddlewareException, AuthCodeGenerationException, SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, UserNotFoundException, UserScaDataNotFoundException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
+        AuthCodeDataTO codeDataTO = readYml(AuthCodeDataTO.class, "auth-code-data.yml");
+        AuthCodeDataBO codeDataBO = readYml(AuthCodeDataBO.class, "auth-code-data.yml");
 
-        middlewareService.generateAuthCode(OP_ID, scaMethodTO, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+        when(codeDataConverter.toAuthCodeDataBO(codeDataTO)).thenReturn(codeDataBO);
+        when(operationService.generateAuthCode(codeDataBO)).thenThrow(new AuthCodeGenerationException());
+
+        middlewareService.generateAuthCode(codeDataTO);
     }
 
     @Test

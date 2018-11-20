@@ -19,12 +19,15 @@
 		<version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
 	</parent>
+
 	<modules>
 		<module>ledgers-deposit-account-service-api</module>
 		<module>ledgers-deposit-account-service-impl</module>
 		<module>ledgers-deposit-account-repository</module>
 	</modules>
+
 	<packaging>pom</packaging>
+
 	<artifactId>ledgers-deposit-account</artifactId>
 
 </project>

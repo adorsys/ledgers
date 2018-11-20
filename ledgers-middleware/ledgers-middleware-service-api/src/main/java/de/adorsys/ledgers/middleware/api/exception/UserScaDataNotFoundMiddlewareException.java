@@ -16,20 +16,20 @@
 
 package de.adorsys.ledgers.middleware.api.exception;
 
-public class UserNotFoundMiddlewareException extends Exception {
+public class UserScaDataNotFoundMiddlewareException extends Exception {
 
-    public UserNotFoundMiddlewareException() {
+    public UserScaDataNotFoundMiddlewareException() {
     }
 
-    public UserNotFoundMiddlewareException(Throwable cause) {
+    public UserScaDataNotFoundMiddlewareException(Throwable cause) {
         super(cause);
     }
 
-    public UserNotFoundMiddlewareException(String message) {
+    public UserScaDataNotFoundMiddlewareException(String message) {
         super(message);
     }
 
-	public UserNotFoundMiddlewareException(String message, Throwable cause) {
+	public UserScaDataNotFoundMiddlewareException(String message, Throwable cause) {
 		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}

@@ -1,4 +1,6 @@
-- type: EMAIL
+- id: 1
+  type: EMAIL
   value: spe@adorsys.com.ua
-- type: MOBILE
+- id: 2
+  type: MOBILE
   value: +380933686868

@@ -18,6 +18,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import java.util.List;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +29,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAMethodTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
-import de.adorsys.ledgers.middleware.rest.converter.SCAMethodTOConverter;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 
 @RestController
@@ -42,19 +41,17 @@ public class ScaMethodResource {
     private static final Logger logger = LoggerFactory.getLogger(ScaMethodResource.class);
 
     private final MiddlewareUserManagementService middlewareUserService;
-    private final SCAMethodTOConverter scaMethodTOConverter;
 
-	public ScaMethodResource(MiddlewareUserManagementService middlewareAccountService,
-			SCAMethodTOConverter scaMethodTOConverter) {
-		super();
+    public ScaMethodResource(MiddlewareUserManagementService middlewareAccountService) {
 		this.middlewareUserService = middlewareAccountService;
-		this.scaMethodTOConverter = scaMethodTOConverter;
-	}
+    }
 
 	@GetMapping("/{userLogin}")
-    public List<SCAMethodTO> getUserScaMethods(@PathVariable String userLogin) {
+
+    public List<ScaUserDataTO> getUserScaMethods(@PathVariable String userLogin) {
         try {
-            return scaMethodTOConverter.toSCAMethodListTO(middlewareUserService.findByUserLogin(userLogin).getScaUserData());
+            UserTO user = middlewareUserService.findByUserLogin(userLogin);
+            return user.getScaUserData();
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -62,10 +59,9 @@ public class ScaMethodResource {
     }
 
     @PutMapping("{userLogin}")
-    public ResponseEntity updateUserScaMethods(@PathVariable String userLogin, @RequestBody List<SCAMethodTO> methods) {
+    public ResponseEntity updateUserScaMethods(@PathVariable String userLogin, @RequestBody List<ScaUserDataTO> methods) {
         try {
-        	List<ScaUserDataTO> scaMethodListBO = scaMethodTOConverter.toSCAMethodListBO(methods);
-        	middlewareUserService.updateScaData(userLogin, scaMethodListBO);
+        	middlewareUserService.updateScaData(userLogin, methods);
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());

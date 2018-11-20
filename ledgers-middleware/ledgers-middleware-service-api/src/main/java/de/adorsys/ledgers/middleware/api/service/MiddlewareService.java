@@ -19,16 +19,8 @@ package de.adorsys.ledgers.middleware.api.service;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.exception.*;
 
 public interface MiddlewareService {
 
@@ -53,15 +45,14 @@ public interface MiddlewareService {
      * <p>
      * After the PSU selects the SCA method, this is called to generate and send the auth code.
      *
-     * @param userLogin       user login
-     * @param scaMethod       sca method
-     * @param opData          operation data
-     * @param validitySeconds time to live in seconds
-     * @param userMessage     what would be show to user
+     * @param authCodeData  Data that needed for auth code generation
      * @return opId id of operation created on the request
      * @throws AuthCodeGenerationMiddlewareException if something happens during auth code generation
+     * @throws SCAMethodNotSupportedMiddleException if user sca method doesn't support by ledgers
+     * @throws UserNotFoundMiddlewareException if user not found by id
+     * @throws UserScaDataNotFoundMiddlewareException if sca user data not found by id
      */
-    String generateAuthCode(String userLogin, ScaUserDataTO scaMethod, String opData, String userMessage, int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException;
+    String generateAuthCode(AuthCodeDataTO authCodeData) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException;
 
     /**
      * PROC: 02c

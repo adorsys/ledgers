@@ -19,6 +19,12 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import java.time.LocalDateTime;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,19 +39,8 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
-import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
 import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
 import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
@@ -53,7 +48,6 @@ import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
@@ -63,17 +57,17 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     private final SCAOperationService scaOperationService;
     private final DepositAccountService accountService;
     private final PaymentConverter paymentConverter;
-    private final UserMapper userMapper;
+    private final AuthCodeDataConverter authCodeDataConverter;
 
     public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService,
-			DepositAccountService accountService, PaymentConverter paymentConverter, UserMapper userMapper) {
+                                 DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter) {
 		super();
 		this.paymentService = paymentService;
 		this.scaOperationService = scaOperationService;
 		this.accountService = accountService;
 		this.paymentConverter = paymentConverter;
-		this.userMapper = userMapper;
-	}
+        this.authCodeDataConverter = authCodeDataConverter;
+    }
 
 	@Override
     public TransactionStatusTO getPaymentStatusById(String paymentId) throws
@@ -89,17 +83,22 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public String generateAuthCode(String userLogin, ScaUserDataTO scaMethod, String opData, String userMessage,
-                                   int validitySeconds) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException {
+    public String generateAuthCode(AuthCodeDataTO authCodeData) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException {
         try {
-        	ScaUserDataBO scaUserData = userMapper.toScaUserDataBO(scaMethod);
-            return scaOperationService.generateAuthCode(userLogin, scaUserData, opData, userMessage, validitySeconds);
+            AuthCodeDataBO authCodeDataBO = authCodeDataConverter.toAuthCodeDataBO(authCodeData);
+            return scaOperationService.generateAuthCode(authCodeDataBO);
         } catch (AuthCodeGenerationException e) {
             logger.error(e.getMessage(), e);
             throw new AuthCodeGenerationMiddlewareException(e);
         } catch (SCAMethodNotSupportedException e) {
             logger.error(e.getMessage(), e);
             throw new SCAMethodNotSupportedMiddleException(e);
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException(e);
+        } catch (UserScaDataNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserScaDataNotFoundMiddlewareException(e);
         }
     }
 

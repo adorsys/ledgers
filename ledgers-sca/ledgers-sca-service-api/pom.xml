@@ -48,7 +48,6 @@
 								<bannedDependencies>
 									<excludes>
 										<exclude>de.adorsys.ledgers:ledgers-sca-service-impl</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-sca-rest-server</exclude>
 									</excludes>
 								</bannedDependencies>
 							</rules>

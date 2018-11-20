@@ -29,6 +29,7 @@
     </properties>
     
     <dependencies>
+
 		<!-- other dependencies -->
 
 		<dependency>
@@ -40,6 +41,37 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>de.adorsys.ledgers:ledgers-postings-service-impl</exclude>
+                                        <exclude>de.adorsys.ledgers:ledgers-postings-repository</exclude>
+                                        <exclude>de.adorsys.ledgers:ledgers-postings-rest-service</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

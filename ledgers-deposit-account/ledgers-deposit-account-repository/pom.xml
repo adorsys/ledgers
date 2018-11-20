@@ -27,10 +27,10 @@
 
 	<properties>
 		<ruleset.basedir>../..</ruleset.basedir>
-
 	</properties>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-utils</artifactId>
@@ -42,11 +42,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -61,12 +56,12 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
 
-		<!-- test dependencies -->
+        <!-- test dependencies -->
 
 		<dependency>
 			<groupId>org.assertj</groupId>
@@ -105,4 +100,34 @@
 		</dependency>
 
 	</dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>de.adorsys.ledgers:ledgers-deposit-account-service-impl</exclude>
+                                        <exclude>de.adorsys.ledgers:ledgers-deposit-account-service-api</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.middleware.api.exception;
+package de.adorsys.ledgers.middleware.impl.converter;
 
-public class UserNotFoundMiddlewareException extends Exception {
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import org.mapstruct.Mapper;
 
-    public UserNotFoundMiddlewareException() {
-    }
+@Mapper(componentModel = "spring")
+public interface AuthCodeDataConverter {
 
-    public UserNotFoundMiddlewareException(Throwable cause) {
-        super(cause);
-    }
-
-    public UserNotFoundMiddlewareException(String message) {
-        super(message);
-    }
-
-	public UserNotFoundMiddlewareException(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
-    
-    
+    AuthCodeDataBO toAuthCodeDataBO(AuthCodeDataTO to);
 }
