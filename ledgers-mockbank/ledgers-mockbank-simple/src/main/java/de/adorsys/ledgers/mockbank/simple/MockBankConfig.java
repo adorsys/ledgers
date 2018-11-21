@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.app;
+package de.adorsys.ledgers.mockbank.simple;
 
 import org.springframework.context.annotation.Bean;
 

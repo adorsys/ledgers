@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
+//@Component
 public class MockBankConfigSource implements ASPSPConfigSource {
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 

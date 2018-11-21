@@ -1,16 +1,14 @@
-package de.adorsys.ledgers.app;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
-import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
-import org.springframework.stereotype.Component;
+package de.adorsys.ledgers.mockbank.simple;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 @Component
 public class MockBankConfigSource implements ASPSPConfigSource {
