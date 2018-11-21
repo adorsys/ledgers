@@ -17,18 +17,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 
-import java.time.LocalDateTime;
-
-import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
-import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -39,20 +27,26 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
-    
+
     private final DepositAccountPaymentService paymentService;
     private final SCAOperationService scaOperationService;
     private final DepositAccountService accountService;
@@ -61,15 +55,15 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService,
                                  DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter) {
-		super();
-		this.paymentService = paymentService;
-		this.scaOperationService = scaOperationService;
-		this.accountService = accountService;
-		this.paymentConverter = paymentConverter;
+        super();
+        this.paymentService = paymentService;
+        this.scaOperationService = scaOperationService;
+        this.accountService = accountService;
+        this.paymentConverter = paymentConverter;
         this.authCodeDataConverter = authCodeDataConverter;
     }
 
-	@Override
+    @Override
     public TransactionStatusTO getPaymentStatusById(String paymentId) throws
             PaymentNotFoundMiddlewareException {
         try {
@@ -126,9 +120,9 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     @Override
     public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException {
         @SuppressWarnings("unchecked")
-		PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
+        PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
         try {
-            accountService.getDepositAccountByIBAN(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
+            accountService.getDepositAccountByIban(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
 
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -149,7 +143,7 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @SuppressWarnings("unchecked")
-	@Override //TODO Consider refactoring to avoid unchecked cast warnings
+    @Override //TODO Consider refactoring to avoid unchecked cast warnings
     public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
         try {
             PaymentBO paymentResult = paymentService.getPaymentById(paymentId);

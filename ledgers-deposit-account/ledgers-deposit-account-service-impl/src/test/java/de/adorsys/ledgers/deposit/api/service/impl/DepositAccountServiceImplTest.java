@@ -1,31 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
-import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
@@ -50,7 +26,25 @@ import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.SerializationUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountServiceImplTest {
@@ -94,7 +88,7 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getDepositAccountById() throws DepositAccountNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+    public void getDepositAccountById() throws DepositAccountNotFoundException {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount()));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
         //When
@@ -112,25 +106,17 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getDepositAccountByIBAN() throws DepositAccountNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+    public void getDepositAccountByIBAN() throws DepositAccountNotFoundException {
         when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
         when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
         //When
-        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIBAN("iban", LocalDateTime.now(), false);
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIban("iban", LocalDateTime.now(), false);
         //Then
         assertThat(accountDetailsBO).isNotNull();
         assertThat(accountDetailsBO.getAccount()).isNotNull();
     }
 
-    private AccountStmtBO newAccountStmtBO() {
-		AccountStmtBO result = new AccountStmtBO();
-		LedgerAccountBO ledgerAccountBO2 = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
-		result.setAccount(ledgerAccountBO2);
-		result.setPstTime(LocalDateTime.now());
-		return result;
-	}
-
-	@Test
+    @Test
     public void getTransactionById() throws TransactionNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
@@ -165,6 +151,27 @@ public class DepositAccountServiceImplTest {
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         List<TransactionDetailsBO> result = depositAccountService.getTransactionsByDates(ACCOUNT_ID, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 18, 0, 0));
         assertThat(result.isEmpty()).isFalse();
+    }
+
+    @Test
+    public void confirmationOfFunds_more_than_necessary_available() throws BaseLineException, LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
+        confirmationOfFunds_more_than_necessary_available(100);
+        confirmationOfFunds_more_than_necessary_available(101);
+    }
+
+    private void confirmationOfFunds_more_than_necessary_available(long amount) throws BaseLineException, LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
+        when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
+        when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+        boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class,"FundsConfirmationRequest.yml"));
+        assertThat(response).isTrue();
+    }
+
+    @Test(expected = DepositAccountNotFoundException.class)
+    public void confirmationOfFunds_Failure() throws DepositAccountNotFoundException {
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.emptyList());
+        depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class,"FundsConfirmationRequest.yml"));
     }
 
     private PostingLineBO newPostingLineBO() throws JsonProcessingException {
@@ -208,6 +215,15 @@ public class DepositAccountServiceImplTest {
         LedgerBO ledgerBO = new LedgerBO();
         ledgerBO.setName("ledger");
         return ledgerBO;
+    }
+
+    private AccountStmtBO newAccountStmtBO(long amount) {
+        AccountStmtBO result = new AccountStmtBO();
+        LedgerAccountBO ledgerAccountBO2 = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
+        result.setAccount(ledgerAccountBO2);
+        result.setPstTime(LocalDateTime.now());
+        result.setTotalCredit(BigDecimal.valueOf(amount));
+        return result;
     }
 
     private <T> T readFile(Class<T> t, String file) {
