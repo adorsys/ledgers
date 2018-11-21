@@ -1,0 +1,38 @@
+version: '3'
+
+networks:
+  ledgers-net:
+
+volumes:
+  ledgers-data:
+
+services:
+
+  ledgers:
+    image: adorsys/ledgers
+    container_name: ledgers
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - ledgers-net
+    ports:
+      - "8088:8088"
+    depends_on:
+    - ledgers-db
+
+  ledgers-db:
+    image: centos/postgresql-95-centos7
+    container_name: ledgers_db
+    restart: on-failure
+    volumes:
+      - ledgers-data:/var/lib/pgsql/data
+    expose:
+      - 5432
+    networks:
+      - ledgers-net
+    environment:
+      - POSTGRESQL_ADMIN_PASSWORD=postgres
+      - POSTGRESQL_DATABASE=ledgers
+      - POSTGRESQL_USER=ledgers
+      - POSTGRESQL_PASSWORD=ledgers
