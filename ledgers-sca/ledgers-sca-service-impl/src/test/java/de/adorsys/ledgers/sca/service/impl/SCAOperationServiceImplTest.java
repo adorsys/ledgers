@@ -87,8 +87,6 @@ public class SCAOperationServiceImplTest {
         codeDataBO.setPaymentId(PAYMENT_ID);
         codeDataBO.setScaUserDataId(SCA_USER_DATA_ID);
         codeDataBO.setUserLogin(USER_LOGIN);
-        codeDataBO.setUserMessage(USER_MESSAGE);
-        codeDataBO.setValiditySeconds(VALIDITY_SECONDS);
 
         HashMap<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
         emailSender = mock(SCASender.class);
@@ -97,6 +95,8 @@ public class SCAOperationServiceImplTest {
         senders.put(ScaMethodTypeBO.MOBILE, mobileSender);
 
         scaOperationService.setSenders(senders);
+        scaOperationService.setAuthCodeValiditySeconds(VALIDITY_SECONDS);
+        scaOperationService.setAuthCodeEmailBody("TAN: %s");
     }
 
 

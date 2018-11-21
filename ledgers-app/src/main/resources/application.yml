@@ -49,7 +49,7 @@ sca:
       cron: "*/5 0 0 * * *" # every 5 seconds
     email:
       subject: "Your TAN from MockBank"
-      body: "TAN: {}"
+      body: "TAN: %s"
       from: noreply@adorsys.de
     phone:
       subject: "Your TAN from MockBank"
