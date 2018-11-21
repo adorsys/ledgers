@@ -26,7 +26,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
-import de.adorsys.ledgers.mockbank.simple.EnableMockbankSimple;
+import de.adorsys.ledgers.mockbank.simple.EnableMockBankSimple;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 
 @EntityScan
@@ -38,7 +38,7 @@ import de.adorsys.ledgers.postings.impl.EnablePostingService;
 @EnableLedgersMiddlewareService
 @EnableDepositAccountService
 @EnablePostingService
-@EnableMockbankSimple
+@EnableMockBankSimple
 public class LedgersApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(LedgersApplication.class).run(args);

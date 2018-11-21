@@ -1,8 +1,0 @@
-iban: DE80760700240271232400
-currency: EUR
-name: mockbank
-product: some product
-accountType: CASH
-accountStatus: ENABLED
-usageType: PRIV
-details: details

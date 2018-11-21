@@ -37,7 +37,7 @@ import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 
 @Configuration
 @ComponentScan(basePackageClasses=MockbankSimpleBasePackage.class)
-public class MockbankSimpleConfiguration {
+public class MockBankSimpleConfiguration {
 	
 
 	private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -56,9 +56,9 @@ public class MockbankSimpleConfiguration {
 			DepositAccountNotFoundException, PaymentProcessingMiddlewareException, PaymentNotFoundMiddlewareException,
 			UserAlreadyExistsMiddlewareException, LedgerNotFoundException, BaseLineException,
 			LedgerAccountNotFoundException {
-		
+
 		LedgerBO ledgerBO = loadLedger();
-		
+
 		MockbankInitData testData = loadTestData("mockbank-simple-init-data.yml");
 
 		// Create accounts
@@ -78,7 +78,7 @@ public class MockbankSimpleConfiguration {
 
 		// Execute bulk payments
 		processBulkPayments(testData.getBulkPayments(), ledgerBO);
-		
+
 		return testData;
 	}
 

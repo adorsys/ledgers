@@ -11,7 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 
-public class TransactionTestData {
+public class TransactionData {
 	private String iban;
     
 	@JsonDeserialize(using = LocalDateDeserializer.class)
