@@ -44,13 +44,15 @@ spring:
 
 sca:
   authCode:
+    validity.seconds: 180
     expiration:
       cron: "*/5 * * * * *" # every 5 seconds
     email:
-      subject: Your TAN from MockBank
+      subject: "Your TAN from MockBank"
+      body: "TAN: %s"
       from: noreply@adorsys.de
     phone:
-      subject: Your TAN from MockBank
+      subject: "Your TAN from MockBank"
 
 ---
 spring:
