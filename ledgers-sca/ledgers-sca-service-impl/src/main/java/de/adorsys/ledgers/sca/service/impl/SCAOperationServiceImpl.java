@@ -38,6 +38,7 @@ import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -65,6 +66,12 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
     private Map<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
 
+    @Value("${sca.authCode.validity.seconds:180}")
+    private int authCodeValiditySeconds;
+
+    @Value("${sca.authCode.email.body}")
+    private String authCodeEmailBody;
+
     public SCAOperationServiceImpl(List<SCASender> senders, SCAOperationRepository repository, UserService userService, AuthCodeGenerator authCodeGenerator) {
         this.repository = repository;
         this.userService = userService;
@@ -85,6 +92,14 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         this.senders = senders;
     }
 
+    void setAuthCodeValiditySeconds(int authCodeValiditySeconds) {
+        this.authCodeValiditySeconds = authCodeValiditySeconds;
+    }
+
+    void setAuthCodeEmailBody(String authCodeEmailBody) {
+        this.authCodeEmailBody = authCodeEmailBody;
+    }
+
     @Override
     public String generateAuthCode(AuthCodeDataBO data) throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException {
 
@@ -96,11 +111,11 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(data.getOpData(), tan));
 
-        SCAOperationEntity scaOperation = buildSCAOperation(data.getPaymentId(), data.getValiditySeconds(), hashItem);
+        SCAOperationEntity scaOperation = buildSCAOperation(data.getPaymentId(), hashItem);
 
         repository.save(scaOperation);
 
-        String message = data.getUserMessage() + " " + tan;
+        String message = String.format(authCodeEmailBody,tan);
 
         senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
 
@@ -126,14 +141,14 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @NotNull
-    private SCAOperationEntity buildSCAOperation(String opId, int validitySeconds, BaseHashItem<OperationHashItem> hashItem) throws AuthCodeGenerationException {
+    private SCAOperationEntity buildSCAOperation(String opId, BaseHashItem<OperationHashItem> hashItem) throws AuthCodeGenerationException {
 
         String authCodeHash = generateHashByOpData(hashItem);
 
         SCAOperationEntity scaOperation = new SCAOperationEntity();
         scaOperation.setOpId(opId);
         scaOperation.setCreated(LocalDateTime.now());
-        scaOperation.setValiditySeconds(validitySeconds);
+        scaOperation.setValiditySeconds(authCodeValiditySeconds);
         scaOperation.setStatus(AuthCodeStatus.NEW);
         scaOperation.setStatusTime(LocalDateTime.now());
         scaOperation.setHashAlg(hashItem.getAlg());

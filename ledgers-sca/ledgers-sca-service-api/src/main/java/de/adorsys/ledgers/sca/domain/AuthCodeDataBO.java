@@ -21,8 +21,6 @@ public class AuthCodeDataBO {
     private String scaUserDataId;
     private String paymentId;
     private String opData;
-    private String userMessage;
-    private int validitySeconds;
 
     public String getUserLogin() {
         return userLogin;
@@ -56,22 +54,6 @@ public class AuthCodeDataBO {
         this.opData = opData;
     }
 
-    public String getUserMessage() {
-        return userMessage;
-    }
-
-    public void setUserMessage(String userMessage) {
-        this.userMessage = userMessage;
-    }
-
-    public int getValiditySeconds() {
-        return validitySeconds;
-    }
-
-    public void setValiditySeconds(int validitySeconds) {
-        this.validitySeconds = validitySeconds;
-    }
-
     @Override
     public String toString() {
         return "AuthCodeDataBO{" +
@@ -79,8 +61,6 @@ public class AuthCodeDataBO {
                        ", scaUserDataId='" + scaUserDataId + '\'' +
                        ", paymentId='" + paymentId + '\'' +
                        ", opData='" + opData + '\'' +
-                       ", userMessage='" + userMessage + '\'' +
-                       ", validitySeconds=" + validitySeconds +
                        '}';
     }
 }
