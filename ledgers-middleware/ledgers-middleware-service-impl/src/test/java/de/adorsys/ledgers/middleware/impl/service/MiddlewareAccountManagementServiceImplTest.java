@@ -1,32 +1,9 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -47,6 +24,25 @@ import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareAccountManagementServiceImplTest {
@@ -131,7 +127,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         userBO.getAccountAccesses().addAll(accessBOList);
         when(userService.findByLogin(userLogin)).thenReturn(userBO);
         
-        when(accountService.getDepositAccountsByIBAN(Collections.singletonList(iban), LocalDateTime.MIN, false)).thenReturn(Collections.singletonList(accountBO));
+        when(accountService.getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false)).thenReturn(Collections.singletonList(accountBO));
         when(detailsMapper.toAccountDetailsTO(accountBO)).thenReturn(account);
 
         List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
@@ -140,7 +136,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(details.get(0), is(account));
 
         verify(userService, times(1)).findByLogin(userLogin);
-        verify(accountService, times(1)).getDepositAccountsByIBAN(Collections.singletonList(iban), LocalDateTime.MIN, false);
+        verify(accountService, times(1)).getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false);
         verify(detailsMapper, times(1)).toAccountDetailsTO(accountBO);
     }
 
@@ -183,24 +179,24 @@ public class MiddlewareAccountManagementServiceImplTest {
         DepositAccountDetailsBO accountBO = getDepositAccountDetailsBO();
         AccountDetailsTO accountDetailsTO = getAccount(AccountDetailsTO.class);
 
-        when(accountService.getDepositAccountByIBAN(IBAN, TIME, true)).thenReturn(accountBO);
+        when(accountService.getDepositAccountByIban(IBAN, TIME, true)).thenReturn(accountBO);
         when(detailsMapper.toAccountDetailsTO(accountBO)).thenReturn(accountDetailsTO);
         AccountDetailsTO details = middlewareService.getAccountDetailsWithBalancesByIban(IBAN, TIME);
 
         assertThat(details).isNotNull();
         assertThat(details, is(accountDetailsTO));
 
-        verify(accountService, times(1)).getDepositAccountByIBAN(IBAN, TIME, true);
+        verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, true);
         verify(detailsMapper, times(1)).toAccountDetailsTO(accountBO);
     }
 
     @Test(expected = AccountNotFoundMiddlewareException.class)
     public void getAccountDetailsByIbanDepositAccountNotFoundException() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
 
-        when(accountService.getDepositAccountByIBAN(IBAN, TIME, true)).thenThrow(new DepositAccountNotFoundException());
+        when(accountService.getDepositAccountByIban(IBAN, TIME, true)).thenThrow(new DepositAccountNotFoundException());
 
         middlewareService.getAccountDetailsWithBalancesByIban(IBAN, TIME);
-        verify(accountService, times(1)).getDepositAccountByIBAN(IBAN, TIME, true);
+        verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, true);
     }
     
     @Test

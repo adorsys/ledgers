@@ -1,21 +1,6 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import de.adorsys.ledgers.deposit.api.domain.AmountBO;
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.domain.BalanceTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
@@ -25,12 +10,7 @@ import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
-import de.adorsys.ledgers.postings.api.domain.BalanceSideBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.domain.PostingTraceBO;
+import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
@@ -39,6 +19,16 @@ import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
@@ -106,41 +96,39 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         return depositAccountRepository.save(da);
     }
 
-	@Override
-	public DepositAccountDetailsBO getDepositAccountByIBAN(String iban, LocalDateTime refTime, boolean withBalances)
-			throws DepositAccountNotFoundException {
-		List<DepositAccountBO> accounts = getDepositAccountsByIban(Collections.singletonList(iban));
-		if(accounts.isEmpty()) {
-			throw new DepositAccountNotFoundException(String.format("Accounts with iban %s not found", iban));
-		}
-    	DepositAccountBO depositAccountBO = accounts.iterator().next();
-    	List<BalanceBO> balances = withBalances
-					? getBalances(iban, refTime)
-							: Collections.emptyList();
+    @Override
+    public DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException {
+        List<DepositAccountBO> accounts = getDepositAccountsByIban(Collections.singletonList(iban));
+        if (accounts.isEmpty()) {
+            throw new DepositAccountNotFoundException(String.format("Accounts with iban %s not found", iban));
+        }
+        DepositAccountBO depositAccountBO = accounts.iterator().next();
+        List<BalanceBO> balances = withBalances
+                                           ? getBalances(iban, refTime)
+                                           : Collections.emptyList();
 
         return new DepositAccountDetailsBO(depositAccountBO, balances);
-	}
-
-	@Override
-	public DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances)
-			throws DepositAccountNotFoundException {
-    	DepositAccountBO depositAccountBO = getDepositAccountById(accountId);
-    	List<BalanceBO> balances = withBalances
-					? getBalances(depositAccountBO.getIban(), refTime)
-							: Collections.emptyList();
-        return new DepositAccountDetailsBO(depositAccountBO, balances);
-	}
-
-	@Override
-    public List<DepositAccountDetailsBO> getDepositAccountsByIBAN(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException {
-		
-    	List<DepositAccountDetailsBO> result = new ArrayList<>();
-    	for (String iban : ibans) {
-    		result.add(getDepositAccountByIBAN(iban, refTime, withBalances));
-		}
-		return result;
     }
-	
+
+    @Override
+    public DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException {
+        DepositAccountBO depositAccountBO = getDepositAccountById(accountId);
+        List<BalanceBO> balances = withBalances
+                                           ? getBalances(depositAccountBO.getIban(), refTime)
+                                           : Collections.emptyList();
+        return new DepositAccountDetailsBO(depositAccountBO, balances);
+    }
+
+    @Override
+    public List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException {
+
+        List<DepositAccountDetailsBO> result = new ArrayList<>();
+        for (String iban : ibans) {
+            result.add(getDepositAccountByIban(iban, refTime, withBalances));
+        }
+        return result;
+    }
+
     private DepositAccountBO getDepositAccountById(String accountId) throws DepositAccountNotFoundException {
         return depositAccountRepository.findById(accountId)
                        .map(depositAccountMapper::toDepositAccountBO)
@@ -172,13 +160,13 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                 balanceBO.setLastChangeDateTime(stmt.getPstTime());
             }
             result.add(balanceBO);
-        } catch (LedgerNotFoundException | BaseLineException | LedgerAccountNotFoundException e ) {
-        	logger.error(e.getMessage(), e);
+        } catch (LedgerNotFoundException | BaseLineException | LedgerAccountNotFoundException e) {
+            logger.error(e.getMessage(), e);
             throw new DepositAccountUncheckedException(e.getMessage(), e);
         }
         return result;
     }
-    
+
     private List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans) {
         logger.info("Retrieving deposit accounts by list of IBANs");
 
@@ -202,6 +190,28 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
             throw new DepositAccountUncheckedException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) throws DepositAccountNotFoundException {
+        try {
+            DepositAccountDetailsBO account = getDepositAccountByIban(requestBO.getPsuAccount().getIban(), LocalDateTime.now(), true);
+            return account.getBalances().stream()
+                           .filter(b -> b.getBalanceType() == BalanceTypeBO.AVAILABLE)
+                           .findFirst()
+                           .map(b -> isSufficientAmountAvailable(requestBO, b))
+                           .orElse(Boolean.FALSE);
+        } catch (DepositAccountNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new DepositAccountNotFoundException(e.getMessage(), e);
+        }
+    }
+
+    private boolean isSufficientAmountAvailable(FundsConfirmationRequestBO request, BalanceBO balance) {
+        AmountBO balanceAmount = balance.getAmount();
+        return Optional.ofNullable(request.getInstructedAmount())
+                       .map(r -> balanceAmount.getAmount().compareTo(r.getAmount()) >= 0)
+                       .orElse(false);
     }
 
     @Override

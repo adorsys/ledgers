@@ -1,78 +1,56 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
+import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
-import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
-import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.service.UserService;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
-    private static final String SCA_USER_DATA_ID = "myPaymentId";
     private static final String PAYMENT_ID = "myPaymentId";
     private static final String OP_ID = "opId";
     private static final String OP_DATA = "opData";
-    private static final int VALIDITY_SECONDS = 60;
-    private static final String ACCOUNT_ID = "id";
 
     private static final String SINGLE_BO = "PaymentSingle.yml";
     private static final String SINGLE_TO = "PaymentSingleTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
-    private static final String USER_MESSAGE = "user message";
 
     private static final LocalDateTime TIME = LocalDateTime.now();
-    
+
     @InjectMocks
     private MiddlewareServiceImpl middlewareService;
 
@@ -85,24 +63,7 @@ public class MiddlewareServiceImplTest {
     @Mock
     private DepositAccountService accountService;
     @Mock
-    private AccountDetailsMapper detailsMapper;
-    @Mock
     private AuthCodeDataConverter codeDataConverter;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private UserMapper userMapper;
-
-    private ScaUserDataBO userDataBO;
-    private ScaUserDataTO scaMethodTO;
-
-    @Before
-    public void setUp() {
-        userDataBO = new ScaUserDataBO();
-        scaMethodTO = new ScaUserDataTO();
-    }
 
     @Test
     public void getPaymentStatusById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
@@ -186,15 +147,6 @@ public class MiddlewareServiceImplTest {
         middlewareService.validateAuthCode(OP_ID, OP_DATA, myAuthCode);
     }
 
-    @Ignore // TODO dima fix
-	@Test(expected = AccountNotFoundMiddlewareException.class)
-    public void getAccountDetailsByAccountId_wrong_id() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-    	when(accountService.getDepositAccountById("wrong id", any(), false)).thenThrow(new DepositAccountNotFoundException());
-        when(detailsMapper.toAccountDetailsTO(any(), any())).thenReturn(getAccount(AccountDetailsTO.class));
-
-        verify(accountService, times(1)).getDepositAccountById(ACCOUNT_ID, TIME, false);
-    }
-
     @Test
     public void getPaymentById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
@@ -235,15 +187,6 @@ public class MiddlewareServiceImplTest {
         when(paymentService.executePayment(any())).thenThrow(new PaymentNotFoundException());
 
         middlewareService.executePayment(PAYMENT_ID);
-    }
-
-    private static <T> T getAccount(Class<T> aClass) {
-        try {
-            return YamlReader.getInstance().getObjectFromFile("de/adorsys/ledgers/middleware/converter/AccountDetails.yml", aClass);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Resource file not found", e);
-        }
     }
 
     //    todo: replace by javatar-commons version 0.7
