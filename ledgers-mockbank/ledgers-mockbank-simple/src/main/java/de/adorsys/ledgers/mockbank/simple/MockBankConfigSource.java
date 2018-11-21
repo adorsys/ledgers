@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
+import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
