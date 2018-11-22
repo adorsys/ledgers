@@ -24,6 +24,7 @@
 		<module>ledgers-user-management</module>
 		<module>ledgers-middleware</module>
 		<module>ledgers-sca</module>
+		<module>ledgers-mockbank</module>
 	</modules>
 	<packaging>pom</packaging>
 
