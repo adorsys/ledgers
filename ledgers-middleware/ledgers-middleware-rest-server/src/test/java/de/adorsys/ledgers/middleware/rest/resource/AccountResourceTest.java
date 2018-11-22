@@ -1,25 +1,18 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.rest.exception.ExceptionAdvisor;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -34,23 +27,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.rest.exception.ExceptionAdvisor;
-import de.adorsys.ledgers.middleware.rest.resource.AccountResource;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -84,6 +80,7 @@ public class AccountResourceTest {
     @Test
     public void getAccountDetailsByAccountId() throws Exception {
         when(middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID, DATE_TIME)).thenReturn(getDetails());
+
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}", ACCOUNT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
@@ -154,8 +151,10 @@ public class AccountResourceTest {
 
     @Test
     public void getBalances_Success() throws Exception {
-    	AccountDetailsTO accountDetails = readBalances();
+        AccountDetailsTO accountDetails = readBalances();
+
         when(middlewareService.getAccountDetailsByAccountId(ACCOUNT_ID, DATE_TIME)).thenReturn(accountDetails);
+
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
@@ -191,6 +190,7 @@ public class AccountResourceTest {
     public void getTransactionById() throws Exception {
         when(middlewareService.getTransactionById(ACCOUNT_ID, TRANSACTION_ID))
                 .thenReturn(readYml(TransactionTO.class, "Transaction.yml"));
+
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions/{transactionId}", ACCOUNT_ID, TRANSACTION_ID))
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
@@ -224,6 +224,7 @@ public class AccountResourceTest {
     public void getTransactionByDates() throws Exception {
         when(middlewareService.getTransactionsByDates(any(), any(), any()))
                 .thenReturn(Collections.singletonList(readYml(TransactionTO.class, "Transaction.yml")));
+
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions", ACCOUNT_ID)
                                                       .param("dateFrom", DATE_FROM.toString())
                                                       .param("dateTo", DATE_TO.toString()))
@@ -243,7 +244,6 @@ public class AccountResourceTest {
 
     @Test
     public void getTransactionByDates_Failure_WrongDateInput() throws Exception {
-
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions", ACCOUNT_ID)
                                 .param("dateFrom", DATE_TO.toString())
                                 .param("dateTo", DATE_FROM.toString()))
@@ -270,7 +270,6 @@ public class AccountResourceTest {
 
         assertThat(actual).isEqualToComparingFieldByFieldRecursively(details);
         verify(middlewareService, times(1)).getAccountDetailsByIban(IBAN);
-
     }
 
     @Test
@@ -288,6 +287,64 @@ public class AccountResourceTest {
     }
 
 
+    @Test
+    public void fundsConfirmation() throws Exception {
+        String requestJson = fileToString("FundsConfirmation.json");
+
+        when(middlewareService.confirmFundsAvailability(any())).thenReturn(true);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/accounts/funds-confirmation")
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                      .content(requestJson))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        Boolean actual = JsonReader.getInstance().getObjectFromString(content, Boolean.class);
+
+        assertThat(actual).isTrue();
+        verify(middlewareService, times(1)).confirmFundsAvailability(any());
+    }
+
+    @Test
+    public void fundsConfirmation_fail() throws Exception {
+        String requestJson = fileToString("FundsConfirmation.json");
+
+        when(middlewareService.confirmFundsAvailability(any())).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/accounts/funds-confirmation")
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                      .content(requestJson))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        Boolean actual = JsonReader.getInstance().getObjectFromString(content, Boolean.class);
+
+        assertThat(actual).isFalse();
+        verify(middlewareService, times(1)).confirmFundsAvailability(any());
+    }
+
+    @Test
+    public void fundsConfirmation_fail_account_not_found() throws Exception {
+        String requestJson = fileToString("FundsConfirmation.json");
+
+        when(middlewareService.confirmFundsAvailability(any())).thenThrow(AccountNotFoundMiddlewareException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/funds-confirmation")
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(requestJson))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+        verify(middlewareService, times(1)).confirmFundsAvailability(any());
+    }
+
     private AccountDetailsTO getDetails() {
         AccountDetailsTO file = readYml(AccountDetailsTO.class, "AccountDetails.yml");
         Optional.ofNullable(file)
@@ -297,10 +354,10 @@ public class AccountResourceTest {
 
 
     private static AccountDetailsTO readBalances() {
-        List<AccountBalanceTO> balances = Arrays.asList(readYml(AccountBalanceTO.class, "Balance1.yml"),readYml(AccountBalanceTO.class, "Balance2.yml"));
+        List<AccountBalanceTO> balances = Arrays.asList(readYml(AccountBalanceTO.class, "Balance1.yml"), readYml(AccountBalanceTO.class, "Balance2.yml"));
         AccountDetailsTO result = new AccountDetailsTO();
         result.setBalances(balances);
-		return result;
+        return result;
     }
 
     private <T> T strToObj(String source, TypeReference<T> ref) {
@@ -313,6 +370,7 @@ public class AccountResourceTest {
         }
         return null;
     }
+
     //    todo: replace by javatar-commons version 0.7
 
     private <T> T fileToObj(String source, TypeReference<T> ref) {
@@ -333,5 +391,14 @@ public class AccountResourceTest {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String fileToString(String source) {
+        try {
+            return IOUtils.toString(PaymentResourceTest.class.getResourceAsStream(source), "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Can't build object from the string", e);
+        }
     }
 }

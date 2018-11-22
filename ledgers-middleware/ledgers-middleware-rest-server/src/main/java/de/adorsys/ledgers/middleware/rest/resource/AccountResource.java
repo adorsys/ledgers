@@ -16,24 +16,9 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
@@ -41,6 +26,17 @@ import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareExcepti
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/accounts")
@@ -100,9 +96,9 @@ public class AccountResource {
     }
 
     @GetMapping("/users/{userLogin}")
-    public List<AccountDetailsTO> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
+    public ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
         try {
-            return middlewareAccountService.getAllAccountDetailsByUserLogin(userLogin);
+            return ResponseEntity.ok(middlewareAccountService.getAllAccountDetailsByUserLogin(userLogin));
         } catch (UserNotFoundMiddlewareException | AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -110,10 +106,21 @@ public class AccountResource {
     }
 
     @GetMapping("/ibans/{iban}")
-    public AccountDetailsTO getAccountDetailsByIban(@PathVariable String iban) {
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(@PathVariable String iban) {
         try {
-            return middlewareAccountService.getAccountDetailsByIban(iban);
+            return ResponseEntity.ok(middlewareAccountService.getAccountDetailsByIban(iban));
         } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/funds-confirmation")
+    public ResponseEntity<Boolean> fundsConfirmation(@RequestBody FundsConfirmationRequestTO request){
+	    try {
+	        boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
+	        return ResponseEntity.ok(fundsAvailable);
+        } catch (AccountNotFoundMiddlewareException e){
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }

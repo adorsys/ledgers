@@ -1,0 +1,17 @@
+{
+  "psuId": "PSU_ID",
+  "psuAccount": {
+    "iban": "DE91100000000123456789",
+    "bban": "bban",
+    "pan": "pan",
+    "maskedPan": "maskedPan",
+    "msisdn": "msisdn",
+    "currency": "EUR"
+  },
+  "instructedAmount": {
+    "currency": "EUR",
+    "amount": 100
+  },
+  "cardNumber": "cardNr",
+  "payee": "John Smith"
+}

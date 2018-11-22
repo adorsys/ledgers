@@ -25,8 +25,6 @@ public class AuthCodeDataConverterTest {
         assertThat(bo.getUserLogin(), is(to.getUserLogin()));
         assertThat(bo.getPaymentId(), is(to.getPaymentId()));
         assertThat(bo.getScaUserDataId(), is(to.getScaUserDataId()));
-        assertThat(bo.getUserMessage(), is(to.getUserMessage()));
-        assertThat(bo.getValiditySeconds(), is(to.getValiditySeconds()));
     }
 
     private <T> T readYml(Class<T> aClass, String file) {
