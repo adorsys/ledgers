@@ -15,16 +15,6 @@ coaExtensions:
   - shortDesc: CROSS_BORDER-Clearing Account (cross-border-credit-transfers)
     name: 11034
     parent: 1103
-### Sample Bank Account Bank account Natural persons (households), residents, Interest bearing
-  - shortDesc: Bank Account Marion Mueller
-    name: DE69760700240340283600
-    parent: 2332
-  - shortDesc: Bank Account Anton Brueckner
-    name: DE80760700240271232400
-    parent: 2332
-  - shortDesc: Bank Account Max Musterman
-    name: DE38760700240320465700
-    parent: 2332
 ### Payment products supported.
 clearingAccounts:
   - paymentProduct: SEPA

@@ -75,6 +75,29 @@
             <version>${javatar-commons.version}</version>
         </dependency>
 
+		<!-- Need these service because we are activating the module from their implementation packages. -->
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-sca-service-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-user-management-service-impl</artifactId>
+			<version>${project.version}</version>
+            <scope>test</scope>
+		</dependency>
+
+		<dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-postings-service-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <!-- test dependencies -->
 
 		<dependency>
@@ -112,70 +135,20 @@
 			<artifactId>spring-test-dbunit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- Need these service because we are activating the module from their implementation packages. -->
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-sca-service-impl</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-		<dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-deposit-account-service-impl</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-user-management-service-impl</artifactId>
+			<artifactId>ledgers-middleware-service-impl</artifactId>
 			<version>${project.version}</version>
-            <scope>test</scope>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-middleware-rest-server</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-postings-service-impl</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-deposit-account-service-impl</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>${maven-enforcer-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>enforce-banned-dependencies</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<bannedDependencies>
-									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-middleware-rest-server</exclude>
-									</excludes>
-								</bannedDependencies>
-							</rules>
-							<fail>true</fail>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
 

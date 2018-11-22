@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
@@ -30,7 +29,6 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService
 import de.adorsys.ledgers.mockbank.simple.data.BulkPaymentsData;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.SinglePaymentsData;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
@@ -47,8 +45,6 @@ public class MockBankSimpleConfiguration {
 	private MiddlewareAccountManagementService accountService;
 	@Autowired
 	private MiddlewareUserManagementService userService;
-	@Autowired
-	private DepositAccountConfigService depositAccountConfigService;
 
 	@Bean
 	public MockbankInitData init()
@@ -56,8 +52,6 @@ public class MockBankSimpleConfiguration {
 			DepositAccountNotFoundException, PaymentProcessingMiddlewareException, PaymentNotFoundMiddlewareException,
 			UserAlreadyExistsMiddlewareException, LedgerNotFoundException, BaseLineException,
 			LedgerAccountNotFoundException {
-
-		LedgerBO ledgerBO = loadLedger();
 
 		MockbankInitData testData = loadTestData("mockbank-simple-init-data.yml");
 
@@ -74,22 +68,15 @@ public class MockBankSimpleConfiguration {
 		}
 
 		// Execute single payments
-		processSinglePayments(testData.getSinglePayments(), ledgerBO);
+		processSinglePayments(testData.getSinglePayments());
 
 		// Execute bulk payments
-		processBulkPayments(testData.getBulkPayments(), ledgerBO);
+		processBulkPayments(testData.getBulkPayments());
 
 		return testData;
 	}
 
-	private LedgerBO loadLedger() {
-		String ledger = depositAccountConfigService.getLedger();
-		LedgerBO ledgerBO = new LedgerBO();
-		ledgerBO.setName(ledger);
-		return ledgerBO;
-	}
-
-	private void processSinglePayments(List<SinglePaymentsData> singlePaymentTests, LedgerBO ledgerBO)
+	private void processSinglePayments(List<SinglePaymentsData> singlePaymentTests)
 			throws AccountNotFoundMiddlewareException, PaymentNotFoundMiddlewareException,
 			PaymentProcessingMiddlewareException, LedgerNotFoundException, LedgerAccountNotFoundException,
 			BaseLineException {
@@ -104,7 +91,7 @@ public class MockBankSimpleConfiguration {
 		}
 	}
 
-	private void processBulkPayments(List<BulkPaymentsData> bulkPaymentTests, LedgerBO ledgerBO) throws AccountNotFoundMiddlewareException,
+	private void processBulkPayments(List<BulkPaymentsData> bulkPaymentTests) throws AccountNotFoundMiddlewareException,
 			PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, LedgerNotFoundException,
 			LedgerAccountNotFoundException, BaseLineException {
 		if(bulkPaymentTests==null) {
