@@ -14,6 +14,9 @@ public class ASPSPConfigData {
 
 	private List<ClearingAccount> clearingAccounts = new ArrayList<>();
 	
+	/*Account number present means config is up to date*/
+	private String updateMarkerAccountNbr;
+	
 	public String getName() {
 		return name;
 	}
@@ -52,5 +55,11 @@ public class ASPSPConfigData {
 	}
 	public String getClearingAccount(String paymentProduct) {
 		return clearingAccounts.stream().filter(c -> c.getPaymentProduct().equals(paymentProduct)).findFirst().orElse(NO_ACCOUNT).getAccountNbr();
+	}
+	public String getUpdateMarkerAccountNbr() {
+		return updateMarkerAccountNbr;
+	}
+	public void setUpdateMarkerAccountNbr(String updateMarkerAccountNbr) {
+		this.updateMarkerAccountNbr = updateMarkerAccountNbr;
 	}
 }

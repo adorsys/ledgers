@@ -41,3 +41,6 @@ clearingAccounts:
     accountNbr: 11034
 depositParentAccount: 2332
 
+
+### Marker used to prevent repeated processing of this config file.
+updateMarkerAccountNbr: 2320

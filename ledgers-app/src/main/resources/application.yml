@@ -68,6 +68,18 @@ db:
 
 ---
 spring:
+  profiles: h2-fs
+  h2:
+    console:
+      enabled: true
+
+db:
+  url: jdbc:h2:./target/ledgers-db
+  user: sa
+  password: sa
+
+---
+spring:
   profiles: dev
 
 logging.level.org.postgresql: INFO

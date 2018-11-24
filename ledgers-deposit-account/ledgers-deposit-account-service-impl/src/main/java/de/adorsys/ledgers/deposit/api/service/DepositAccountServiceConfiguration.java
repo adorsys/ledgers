@@ -3,12 +3,14 @@ package de.adorsys.ledgers.deposit.api.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
@@ -44,12 +46,17 @@ public class DepositAccountServiceConfiguration {
     @Bean
     public ASPSPConfigData initConfigData() throws IOException {
         ASPSPConfigData aspspConfigData = configSource.aspspConfigData();
-        try {
-            processASPSPConfigData(aspspConfigData);
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException | ChartOfAccountNotFoundException e) {
-            throw new IllegalStateException(e);
+
+        // Only process if update is required.
+        if(!updateRequired(aspspConfigData)) {
+        	return aspspConfigData;
         }
-        return aspspConfigData;
+        try {
+        	processASPSPConfigData(aspspConfigData);
+        	return aspspConfigData;
+        } catch (LedgerNotFoundException | LedgerAccountNotFoundException | ChartOfAccountNotFoundException e) {
+        	throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
     }
 
     private void processASPSPConfigData(ASPSPConfigData aspspConfigData) throws IOException, LedgerNotFoundException, LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
@@ -62,15 +69,10 @@ public class DepositAccountServiceConfiguration {
     }
 
     private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws IOException, LedgerNotFoundException, LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
-        ChartOfAccountBO coa = new ChartOfAccountBO();
-        coa.setName(ledgerName);
-        coa.setShortDesc("COA: " + ledgerName);
+        ChartOfAccountBO coa = readCoa(ledgerName);
         coa = coaService.findChartOfAccountsByName(ledgerName).orElse(coaService.newChartOfAccount(coa));
 
-        LedgerBO ledger = new LedgerBO();
-        ledger.setName(ledgerName);
-        ledger.setShortDesc(ledgerName);
-        ledger.setCoa(coa);
+        LedgerBO ledger = readLedger(ledgerName, coa);
         ledger = ledgerService.findLedgerByName(ledgerName).orElse(ledgerService.newLedger(ledger));
 
         List<LedgerAccountModel> ledgerAccounts = configSource.chartOfAccount(coaFile);
@@ -120,4 +122,47 @@ public class DepositAccountServiceConfiguration {
 		la.setCategory(category);
 		return la;
 	}
+	
+	/*
+	 * Check if update required. If then process the config file.
+	 */
+	private boolean updateRequired(ASPSPConfigData aspspConfigData) {
+		// Check ledger present
+		Optional<LedgerBO> ledgerOption = ledgerService.findLedgerByName(aspspConfigData.getLedger());
+		if(!ledgerOption.isPresent()) {
+			return true;
+		}
+		
+		String updateMarkerAccountNbr = aspspConfigData.getUpdateMarkerAccountNbr();
+		if(updateMarkerAccountNbr==null) {
+			return true;
+		}
+
+		try {
+			ledgerService.findLedgerAccount(ledgerOption.get(), updateMarkerAccountNbr);
+			// Ledger account present.
+			return false;
+		} catch (LedgerNotFoundException e) {
+			throw new DepositAccountUncheckedException(e.getMessage(), e);
+		} catch (LedgerAccountNotFoundException e) {
+			// ledger account non existent.
+			return true;
+		}
+	}
+	
+	private LedgerBO readLedger(String ledgerName, ChartOfAccountBO coa) {
+		LedgerBO ledger = new LedgerBO();
+        ledger.setName(ledgerName);
+        ledger.setShortDesc(ledgerName);
+        ledger.setCoa(coa);
+		return ledger;
+	}
+
+	private ChartOfAccountBO readCoa(String ledgerName) {
+		ChartOfAccountBO coa = new ChartOfAccountBO();
+        coa.setName(ledgerName);
+        coa.setShortDesc("COA: " + ledgerName);
+		return coa;
+	}
+
 }
