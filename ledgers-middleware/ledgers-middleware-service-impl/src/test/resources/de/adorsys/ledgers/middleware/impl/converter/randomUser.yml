@@ -1,0 +1,18 @@
+login: PSU_ID
+email: email
+pin: pin
+scaUserData:
+  - id: 1
+    scaMethod: EMAIL
+    methodValue: spe@adorsys.com.ua
+  - id: 2
+    scaMethod: MOBILE
+    methodValue: +380933686868
+accountAccesses:
+  - id: 1
+    accessType: OWNER
+    iban: 1234567
+  - id: 2
+    accessType: READ
+    iban: 7777777
+    

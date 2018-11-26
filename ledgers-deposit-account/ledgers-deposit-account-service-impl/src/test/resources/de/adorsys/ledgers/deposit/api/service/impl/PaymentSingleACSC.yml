@@ -1,0 +1,52 @@
+paymentId: myPaymentId
+batchBookingPreferred:
+requestedExecutionDate: 2018-12-12
+requestedExecutionTime: 12:00:00
+paymentType: SINGLE
+startDate:
+endDate:
+executionRule:
+frequency:
+dayOfExecution:
+debtorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+transactionStatus: ACSC
+targets:
+  - {
+      paymentId: subId1,
+      endToEndIdentification: 123456789,
+      instructedAmount:
+        {
+          currency: EUR,
+          amount: 100
+        },
+      creditorAccount:
+        {
+          iban: DE91100000000123456789,
+          bban: bban,
+          pan: pan,
+          maskedPan: maskedPan,
+          msisdn: msisdn,
+          currency: EUR
+         },
+      creditorAgent: agent,
+      creditorName: Rozetka.ua,
+      creditorAddress:
+      {
+          street: SomeStreet,
+          buildingNumber: 666,
+          city: Kiev,
+          postalCode: 04210,
+          country: Ukraine
+      },
+      remittanceInformationUnstructured: remittance,
+      paymentProduct: SEPA,
+      payment:
+  }

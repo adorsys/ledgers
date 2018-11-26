@@ -30,4 +30,6 @@ public interface DepositAccountPaymentService {
     PaymentBO initiatePayment(PaymentBO paymentBO);
 
     TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException;
+
+    void cancelPayment(String paymentId) throws PaymentNotFoundException;
 }

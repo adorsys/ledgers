@@ -14,6 +14,7 @@ import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -147,5 +148,42 @@ public class DepositAccountPaymentServiceImplTest {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
+    }
+
+    @Test
+    public void cancelPayment() throws PaymentNotFoundException {
+        //Given
+        ArgumentCaptor<Payment> captor = ArgumentCaptor.forClass(Payment.class);
+
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(readFile(Payment.class, "PaymentSingle.yml")));
+        when(paymentRepository.save(captor.capture())).thenReturn(mock(Payment.class));
+
+        //When
+        paymentService.cancelPayment(PAYMENT_ID);
+        //Than
+        assertThat(captor.getValue().getTransactionStatus()).isEqualTo(TransactionStatus.CANC);
+
+        verify(paymentRepository, times(1)).findById(PAYMENT_ID);
+        verify(paymentRepository, times(1)).save(any());
+    }
+
+    @Test(expected = PaymentNotFoundException.class)
+    public void cancelPayment_Failure_pmt_nf() throws PaymentNotFoundException {
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.empty());
+
+        //When
+        paymentService.cancelPayment(PAYMENT_ID);
+
+        verify(paymentRepository, times(1)).findById(PAYMENT_ID);
+    }
+
+    @Test(expected = PaymentProcessingException.class)
+    public void cancelPayment_Failure_pmt_executed() throws PaymentNotFoundException {
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(readFile(Payment.class, "PaymentSingleACSC.yml")));
+
+        //When
+        paymentService.cancelPayment(PAYMENT_ID);
+
+        verify(paymentRepository, times(1)).findById(PAYMENT_ID);
     }
 }

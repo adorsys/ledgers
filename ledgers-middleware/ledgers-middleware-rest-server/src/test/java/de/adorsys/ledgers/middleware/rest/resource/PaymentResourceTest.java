@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.rest.exception.ExceptionAdvisor;
@@ -163,6 +160,36 @@ public class PaymentResourceTest {
         TransactionStatusTO actual = JsonReader.getInstance().getObjectFromString(content, TransactionStatusTO.class);
         assertThat(actual).isEqualTo(TransactionStatusTO.ACSP);
         verify(middlewareService, times(1)).executePayment(any());
+    }
+
+    @Test
+    public void initiatePmtCancellation() throws Exception {
+        PaymentCancellationResponseTO expected = readYml(PaymentCancellationResponseTO.class, "CancellationResponse.yml");
+
+        when(middlewareService.initiatePaymentCancellation(any(),any())).thenReturn(expected);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+                "/payments/cancel-initiation/{psuId}/{paymentId}","PSU_ID", PAYMENT_ID))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.OK.value()))
+                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                      .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        PaymentCancellationResponseTO actual = JsonReader.getInstance().getObjectFromString(content, PaymentCancellationResponseTO.class);
+        assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+        verify(middlewareService, times(1)).initiatePaymentCancellation(any(),any());
+    }
+
+    @Test
+    public void cancelPaymentNoSca() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete(
+                "/payments/cancel/{paymentId}",PAYMENT_ID))
+                                      .andDo(print())
+                                      .andExpect(status().is(HttpStatus.NO_CONTENT.value()))
+                                      .andReturn();
+
+        verify(middlewareService, times(1)).cancelPayment(any());
     }
 
     private <T> T strToObj(String source, Class<T> tClass) {

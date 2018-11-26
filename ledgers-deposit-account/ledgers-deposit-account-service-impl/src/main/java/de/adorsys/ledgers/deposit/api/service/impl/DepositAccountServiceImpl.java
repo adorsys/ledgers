@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
+    private static final String msgIbanNF = "Accounts with iban %s not found";
 
     private final DepositAccountRepository depositAccountRepository;
     private final DepositAccountMapper depositAccountMapper;
@@ -100,7 +101,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     public DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException {
         List<DepositAccountBO> accounts = getDepositAccountsByIban(Collections.singletonList(iban));
         if (accounts.isEmpty()) {
-            throw new DepositAccountNotFoundException(String.format("Accounts with iban %s not found", iban));
+            throw new DepositAccountNotFoundException(String.format(msgIbanNF, iban));
         }
         DepositAccountBO depositAccountBO = accounts.iterator().next();
         List<BalanceBO> balances = withBalances
