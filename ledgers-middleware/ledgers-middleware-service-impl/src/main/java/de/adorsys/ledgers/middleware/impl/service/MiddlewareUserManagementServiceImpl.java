@@ -1,9 +1,13 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
@@ -23,6 +27,9 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareUserManagementServiceImpl.class);
 
 	private final UserService userService;
+
+	@Autowired
+	private DepositAccountService depositAccountService;
 	
 	private final UserMapper userTOMapper;
 	
@@ -79,9 +86,14 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	public UserTO updateAccountAccess(String userLogin, List<AccountAccessTO> accounts)
 			throws UserNotFoundMiddlewareException {
 		try {
+			// check if accounts exist in ledgers deposit account
+			for (AccountAccessTO account : accounts) {
+				depositAccountService.getDepositAccountByIban(account.getIban(), LocalDateTime.now(), false);
+			}
+
 			UserBO userBO = userService.updateAccountAccess(userLogin, userTOMapper.toAccountAccessListBO(accounts));
 			return userTOMapper.toUserTO(userBO);
-		} catch (UserNotFoundException e) {
+		} catch (UserNotFoundException | DepositAccountNotFoundException e) {
 			logger.error(e.getMessage(), e);
 			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
 		}
