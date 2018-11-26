@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.api.service;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
@@ -45,11 +46,11 @@ public interface MiddlewareService {
      * <p>
      * After the PSU selects the SCA method, this is called to generate and send the auth code.
      *
-     * @param authCodeData  Data that needed for auth code generation
+     * @param authCodeData Data that needed for auth code generation
      * @return opId id of operation created on the request
-     * @throws AuthCodeGenerationMiddlewareException if something happens during auth code generation
-     * @throws SCAMethodNotSupportedMiddleException if user sca method doesn't support by ledgers
-     * @throws UserNotFoundMiddlewareException if user not found by id
+     * @throws AuthCodeGenerationMiddlewareException  if something happens during auth code generation
+     * @throws SCAMethodNotSupportedMiddleException   if user sca method doesn't support by ledgers
+     * @throws UserNotFoundMiddlewareException        if user not found by id
      * @throws UserScaDataNotFoundMiddlewareException if sca user data not found by id
      */
     String generateAuthCode(AuthCodeDataTO authCodeData) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException;
@@ -114,4 +115,22 @@ public interface MiddlewareService {
      */
     <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
 
+    /**
+     * Checks the possibility of payment cancellation
+     *
+     * @param psuId
+     * @param paymentId
+     * @return PaymentCancellationResponseTO
+     */
+    PaymentCancellationResponseTO initiatePaymentCancellation(String psuId, String paymentId) throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
+
+    /**
+     * Cancels payment if possible
+     *
+     * @param paymentId payment identifier
+     * @throws UserNotFoundMiddlewareException
+     * @throws PaymentNotFoundMiddlewareException
+     * @throws PaymentProcessingMiddlewareException
+     */
+    void cancelPayment(String paymentId) throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
 }

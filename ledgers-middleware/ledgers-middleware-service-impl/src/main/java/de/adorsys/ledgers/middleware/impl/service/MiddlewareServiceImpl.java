@@ -24,10 +24,13 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
@@ -42,6 +45,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO.ACSC;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
@@ -52,15 +58,15 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     private final DepositAccountService accountService;
     private final PaymentConverter paymentConverter;
     private final AuthCodeDataConverter authCodeDataConverter;
+    private final MiddlewareUserManagementServiceImpl userManagementService;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService,
-                                 DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter) {
-        super();
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter, MiddlewareUserManagementServiceImpl userManagementService) {
         this.paymentService = paymentService;
         this.scaOperationService = scaOperationService;
         this.accountService = accountService;
         this.paymentConverter = paymentConverter;
         this.authCodeDataConverter = authCodeDataConverter;
+        this.userManagementService = userManagementService;
     }
 
     @Override
@@ -72,6 +78,41 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         } catch (PaymentNotFoundException e) {
             logger.error("Payment with id=" + paymentId + " not found", e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public PaymentCancellationResponseTO initiatePaymentCancellation(String psuId, String paymentId) throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException {
+        UserTO user = userManagementService.findById(psuId);
+        try {
+            PaymentBO payment = paymentService.getPaymentById(paymentId);
+            Optional<AccountAccessTO> userAccountRelatedToPayment = user.getAccountAccesses().stream()
+                                                                            .filter(a -> a.getIban().equals(payment.getDebtorAccount().getIban()))
+                                                                            .findFirst();
+            userAccountRelatedToPayment.orElseThrow(() -> new PaymentNotFoundException(paymentId));
+
+            TransactionStatusTO status = TransactionStatusTO.valueOf(payment.getTransactionStatus().name());
+            if (status == ACSC) {
+                throw new PaymentProcessingMiddlewareException(String.format("Request for payment cancellation is forbidden as the payment with id:%s has status:%s", paymentId, status));
+            }
+            boolean scaRequired = !user.getScaUserData().isEmpty();
+            return new PaymentCancellationResponseTO(scaRequired, status);
+        } catch (PaymentNotFoundException e) {
+            logger.error(String.format("Payment with id= %s, not found", paymentId), e);
+            throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void cancelPayment(String paymentId) throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException {
+        try {
+            paymentService.cancelPayment(paymentId);
+        } catch (PaymentNotFoundException e) {
+            logger.error(String.format("Payment with id= %s, not found", paymentId), e);
+            throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
+        } catch (PaymentProcessingException e) {
+            logger.error(e.getMessage(), e);
+            throw new PaymentProcessingMiddlewareException(e.getMessage());
         }
     }
 
@@ -143,13 +184,13 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     }
 
     @SuppressWarnings("unchecked")
-    @Override //TODO Consider refactoring to avoid unchecked cast warnings
+    @Override
     public Object getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException {
         try {
             PaymentBO paymentResult = paymentService.getPaymentById(paymentId);
             return paymentConverter.toPaymentTO(paymentResult);
         } catch (PaymentNotFoundException e) {
-            logger.error("Payment with id={} not found", paymentId, e);
+            logger.error(String.format("Payment with id= %s, not found", paymentId), e);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
         }
     }

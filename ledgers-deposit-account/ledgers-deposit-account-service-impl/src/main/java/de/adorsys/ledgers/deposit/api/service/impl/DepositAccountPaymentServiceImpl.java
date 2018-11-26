@@ -34,6 +34,8 @@ import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
+    private static final String PAYMENT_EXECUTION_FAILED = "Payment execution failed due to: %s, payment id: %s";
+    private static final String PAYMENT_CANCELLATION_FAILED = "Can`t cancel payment id:%s, as it is already executed";
 
     private final PaymentRepository paymentRepository;
 
@@ -89,7 +91,20 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         try {
             return paymentSchedulerService.schedulePaymentExecution(paymentId);
         } catch (PaymentNotFoundException e) {
-            throw new PaymentProcessingException("Payment execution failed due to: " + e.getMessage() + ", payment id: " + paymentId);
+            throw new PaymentProcessingException(String.format(PAYMENT_EXECUTION_FAILED, e.getMessage(), paymentId));
+        }
+    }
+
+    @Override
+    public void cancelPayment(String paymentId) throws PaymentNotFoundException {
+        Payment storedPayment = paymentRepository.findById(paymentId)
+                                        .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+
+        if (storedPayment.getTransactionStatus() == TransactionStatus.ACSC) {
+            throw new PaymentProcessingException(String.format(PAYMENT_CANCELLATION_FAILED, paymentId));
+        } else {
+            storedPayment.setTransactionStatus(TransactionStatus.CANC);
+            paymentRepository.save(storedPayment);
         }
     }
 }

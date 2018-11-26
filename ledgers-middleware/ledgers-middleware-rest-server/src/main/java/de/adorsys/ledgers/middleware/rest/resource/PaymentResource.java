@@ -16,14 +16,15 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -75,8 +76,8 @@ public class PaymentResource {
 
     @PostMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
     public ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
-                                                                       @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
-                                                                       @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
+                                                                   @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
+                                                                   @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
         try {
             TransactionStatusTO status = middlewareService.executePayment(paymentId);
             return ResponseEntity.ok(status);
@@ -84,5 +85,29 @@ public class PaymentResource {
             logger.error(e.getMessage());
             return ResponseEntity.badRequest().header("message", e.getMessage()).build(); //TODO Create formal rest error messaging, fix all internal service errors to comply some pattern.
         }
+    }
+
+    @PostMapping(value = "/cancel-initiation/{psuId}/{paymentId}")
+    public ResponseEntity<PaymentCancellationResponseTO> initiatePmtCancellation(@PathVariable String psuId, @PathVariable String paymentId) {
+        try {
+            PaymentCancellationResponseTO response = middlewareService.initiatePaymentCancellation(psuId, paymentId);
+            return ResponseEntity.ok(response);
+        } catch (UserNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
+        } catch (PaymentProcessingMiddlewareException e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+        }
+    }
+
+    @DeleteMapping("/cancel/{paymentId}")
+    public ResponseEntity cancelPaymentNoSca(@PathVariable String paymentId) {
+        try {
+            middlewareService.cancelPayment(paymentId);
+        } catch (UserNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
+        } catch (PaymentProcessingMiddlewareException e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+        }
+        return ResponseEntity.noContent().build();
     }
 }
