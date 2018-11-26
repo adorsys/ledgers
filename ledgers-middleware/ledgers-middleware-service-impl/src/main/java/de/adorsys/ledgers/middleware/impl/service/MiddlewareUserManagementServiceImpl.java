@@ -28,15 +28,16 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
 	private final UserService userService;
 
-	@Autowired
-	private DepositAccountService depositAccountService;
+	private final DepositAccountService depositAccountService;
 	
 	private final UserMapper userTOMapper;
 	
-	public MiddlewareUserManagementServiceImpl(UserService userService, UserMapper userTOMapper) {
+	@Autowired
+	public MiddlewareUserManagementServiceImpl(UserService userService, UserMapper userTOMapper, DepositAccountService depositAccountService) {
 		super();
 		this.userService = userService;
 		this.userTOMapper = userTOMapper;
+		this.depositAccountService = depositAccountService;
 	}
 
 	@Override
