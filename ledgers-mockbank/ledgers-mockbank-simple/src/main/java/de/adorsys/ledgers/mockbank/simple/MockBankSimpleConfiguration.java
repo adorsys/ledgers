@@ -2,6 +2,7 @@ package de.adorsys.ledgers.mockbank.simple;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,11 @@ public class MockBankSimpleConfiguration {
 
 		MockbankInitData testData = loadTestData("mockbank-simple-init-data.yml");
 
+		// CHeck if update is required.
+		if(!updateRequired(testData)) {
+			return testData;
+		}
+		
 		// Create accounts
 		List<AccountDetailsTO> accounts = testData.getAccounts();
 		for (AccountDetailsTO depositAccount : accounts) {
@@ -117,4 +123,17 @@ public class MockBankSimpleConfiguration {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	/*
+	 * Check if update required. If then process the config file.
+	 */
+	private boolean updateRequired(MockbankInitData testData) {
+		try {
+			accountService.getDepositAccountByIBAN(testData.getUpdateMarkerAccountNbr(), LocalDateTime.now(), false);
+			return false;
+		} catch (AccountNotFoundMiddlewareException e) {
+			return true;
+		}
+	}
+	
 }

@@ -432,3 +432,7 @@ transactions:
           amount: -700.00
         creditorName: Max Musterman
         
+        
+### Marker used to prevent repeated processing of this config file.
+### If deposit account with this number is present, config will not be read.
+updateMarkerAccountNbr: DE38760700240320465700

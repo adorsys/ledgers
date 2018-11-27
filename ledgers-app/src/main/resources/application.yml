@@ -4,7 +4,7 @@ server:
   port: 8088
 
 db:
-  host: ledgers_db
+  host: localhost
   user: ledgers
   password: ledgers
   database: ledgers
@@ -63,6 +63,18 @@ spring:
 
 db:
   url: jdbc:h2:mem:ledgers
+  user: sa
+  password: sa
+
+---
+spring:
+  profiles: h2-fs
+  h2:
+    console:
+      enabled: true
+
+db:
+  url: jdbc:h2:./target/ledgers-db
   user: sa
   password: sa
 
