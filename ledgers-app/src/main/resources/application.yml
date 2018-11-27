@@ -4,7 +4,7 @@ server:
   port: 8088
 
 db:
-  host: ledgers_db
+  host: localhost
   user: ledgers
   password: ledgers
   database: ledgers

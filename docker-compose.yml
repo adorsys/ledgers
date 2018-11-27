@@ -11,6 +11,7 @@ services:
   ledgers:
     image: adorsys/ledgers
     container_name: ledgers
+    restart: on-failure
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,7 +20,9 @@ services:
     ports:
       - "8088:8088"
     depends_on:
-    - ledgers-db
+      - ledgers-db
+    environment:
+      - DB_HOST=ledgers_db
 
   ledgers-db:
     image: centos/postgresql-95-centos7

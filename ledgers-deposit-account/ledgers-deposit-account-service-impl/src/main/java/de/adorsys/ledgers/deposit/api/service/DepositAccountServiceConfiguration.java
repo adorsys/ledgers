@@ -69,10 +69,10 @@ public class DepositAccountServiceConfiguration {
     }
 
     private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws IOException, LedgerNotFoundException, LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
-        ChartOfAccountBO coa = readCoa(ledgerName);
+        ChartOfAccountBO coa = createCoa(ledgerName);
         coa = coaService.findChartOfAccountsByName(ledgerName).orElse(coaService.newChartOfAccount(coa));
 
-        LedgerBO ledger = readLedger(ledgerName, coa);
+        LedgerBO ledger = createLedger(ledgerName, coa);
         ledger = ledgerService.findLedgerByName(ledgerName).orElse(ledgerService.newLedger(ledger));
 
         List<LedgerAccountModel> ledgerAccounts = configSource.chartOfAccount(coaFile);
@@ -82,6 +82,7 @@ public class DepositAccountServiceConfiguration {
         return ledger;
     }
 
+    // todo: @fpo do we really need to return results by this method? because it never used
     private LedgerAccountBO newLedgerAccount(LedgerBO ledger, LedgerAccountModel model) throws LedgerNotFoundException, LedgerAccountNotFoundException {
     	try {
 	        return ledgerService.findLedgerAccount(ledger, model.getName());
@@ -138,8 +139,12 @@ public class DepositAccountServiceConfiguration {
 			return true;
 		}
 
+		return checkLedgerAccountPresent(updateMarkerAccountNbr, ledgerOption.get());
+	}
+
+	private boolean checkLedgerAccountPresent(String updateMarkerAccountNbr, LedgerBO ledger) {
 		try {
-			ledgerService.findLedgerAccount(ledgerOption.get(), updateMarkerAccountNbr);
+			ledgerService.findLedgerAccount(ledger, updateMarkerAccountNbr);
 			// Ledger account present.
 			return false;
 		} catch (LedgerNotFoundException e) {
@@ -149,8 +154,8 @@ public class DepositAccountServiceConfiguration {
 			return true;
 		}
 	}
-	
-	private LedgerBO readLedger(String ledgerName, ChartOfAccountBO coa) {
+
+	private LedgerBO createLedger(String ledgerName, ChartOfAccountBO coa) {
 		LedgerBO ledger = new LedgerBO();
         ledger.setName(ledgerName);
         ledger.setShortDesc(ledgerName);
@@ -158,7 +163,7 @@ public class DepositAccountServiceConfiguration {
 		return ledger;
 	}
 
-	private ChartOfAccountBO readCoa(String ledgerName) {
+	private ChartOfAccountBO createCoa(String ledgerName) {
 		ChartOfAccountBO coa = new ChartOfAccountBO();
         coa.setName(ledgerName);
         coa.setShortDesc("COA: " + ledgerName);
