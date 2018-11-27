@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  userManagementEndPoint: 'http:localhost:8088'
 };
