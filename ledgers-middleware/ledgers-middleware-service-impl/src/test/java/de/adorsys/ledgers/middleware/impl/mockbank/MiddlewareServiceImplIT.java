@@ -1,28 +1,10 @@
 package de.adorsys.ledgers.middleware.impl.mockbank;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
-
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
@@ -32,11 +14,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
@@ -49,6 +27,22 @@ import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = MiddlewareServiceApplication.class)
@@ -197,7 +191,7 @@ public class MiddlewareServiceImplIT {
 	private void checkTransactions(TransactionTestData txTest) throws AccountNotFoundMiddlewareException,
 			TransactionNotFoundMiddlewareException, DepositAccountNotFoundException {
 		String iban = txTest.getIban();
-		AccountDetailsTO depositAccount = accountService.getDepositAccountByIBAN(iban, LocalDateTime.now(), true);
+		AccountDetailsTO depositAccount = accountService.getDepositAccountByIban(iban, LocalDateTime.now(), true);
 		List<TransactionTO> loadedTransactions = accountService.getTransactionsByDates(depositAccount.getId(),
 				txTest.getDateFrom(), txTest.getDateTo());
 
