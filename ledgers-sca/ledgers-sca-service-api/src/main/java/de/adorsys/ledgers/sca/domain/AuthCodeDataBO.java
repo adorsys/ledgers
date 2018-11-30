@@ -19,7 +19,7 @@ package de.adorsys.ledgers.sca.domain;
 public class AuthCodeDataBO {
     private String userLogin;
     private String scaUserDataId;
-    private String paymentId;
+    private String opId;
     private String opData;
 
     public String getUserLogin() {
@@ -38,12 +38,12 @@ public class AuthCodeDataBO {
         this.scaUserDataId = scaUserDataId;
     }
 
-    public String getPaymentId() {
-        return paymentId;
+    public String getOpId() {
+        return opId;
     }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
+    public void setOpId(String opId) {
+        this.opId = opId;
     }
 
     public String getOpData() {
@@ -59,7 +59,7 @@ public class AuthCodeDataBO {
         return "AuthCodeDataBO{" +
                        "userLogin='" + userLogin + '\'' +
                        ", scaUserDataId='" + scaUserDataId + '\'' +
-                       ", paymentId='" + paymentId + '\'' +
+                       ", opId='" + opId + '\'' +
                        ", opData='" + opData + '\'' +
                        '}';
     }

@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.api.domain.um;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jetbrains.annotations.NotNull;
 
 public class ScaUserDataTO {
@@ -14,6 +15,7 @@ public class ScaUserDataTO {
     private String methodValue;
 
     @NotNull
+    @JsonIgnore
     private UserTO user;
 
     public ScaUserDataTO() {

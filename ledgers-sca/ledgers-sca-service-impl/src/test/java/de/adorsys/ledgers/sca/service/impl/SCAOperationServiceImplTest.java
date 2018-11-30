@@ -84,7 +84,7 @@ public class SCAOperationServiceImplTest {
 
         codeDataBO = new AuthCodeDataBO();
         codeDataBO.setOpData(OP_DATA);
-        codeDataBO.setPaymentId(PAYMENT_ID);
+        codeDataBO.setOpId(PAYMENT_ID);
         codeDataBO.setScaUserDataId(SCA_USER_DATA_ID);
         codeDataBO.setUserLogin(USER_LOGIN);
 
@@ -131,7 +131,7 @@ public class SCAOperationServiceImplTest {
 
         SCAOperationEntity entity = captor.getValue();
 
-        assertThat(actualOpId, is(entity.getOpId()));
+        assertThat(actualOpId, is(entity.getId()));
 
         assertThat(entity.getValiditySeconds(), is(VALIDITY_SECONDS));
         assertThat(entity.getCreated(), is(notNullValue()));
@@ -195,7 +195,7 @@ public class SCAOperationServiceImplTest {
 
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
 
-        when(repository.findById(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(repository.findOneByOpIdOrderByCreatedDesc(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
@@ -207,7 +207,7 @@ public class SCAOperationServiceImplTest {
         assertThat(savedEntity.getStatus(), is(AuthCodeStatus.USED));
         assertThat(savedEntity.getStatusTime().isAfter(LocalDateTime.now().minusSeconds(5)), is(Boolean.TRUE));
 
-        verify(repository, times(1)).findById(OP_ID);
+        verify(repository, times(1)).findOneByOpIdOrderByCreatedDesc(OP_ID);
         verify(hashGenerator, times(1)).hash(any());
         verify(repository, times(1)).save(savedEntity);
     }
@@ -215,7 +215,7 @@ public class SCAOperationServiceImplTest {
     @Test
     public void validateAuthCodeNotValid() throws SCAOperationNotFoundException, SCAOperationValidationException, HashGenerationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
-        when(repository.findById(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(repository.findOneByOpIdOrderByCreatedDesc(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
 
         boolean valid = scaOperationService.validateAuthCode(OP_ID, OP_DATA, TAN);
@@ -224,7 +224,7 @@ public class SCAOperationServiceImplTest {
 
         assertThat(scaOperationEntity.getStatus(), is(AuthCodeStatus.NEW));
 
-        verify(repository, times(1)).findById(OP_ID);
+        verify(repository, times(1)).findOneByOpIdOrderByCreatedDesc(OP_ID);
         verify(hashGenerator, times(1)).hash(any());
         verify(repository, times(0)).save(scaOperationEntity);
     }
@@ -232,7 +232,7 @@ public class SCAOperationServiceImplTest {
     @Test(expected = SCAOperationNotFoundException.class)
     public void validateAuthCodeOperationNotFound() throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
-        when(repository.findById(OP_ID)).thenReturn(Optional.empty());
+        when(repository.findOneByOpIdOrderByCreatedDesc(OP_ID)).thenReturn(Optional.empty());
 
         scaOperationService.validateAuthCode(OP_ID, OP_DATA, TAN);
     }
@@ -240,7 +240,7 @@ public class SCAOperationServiceImplTest {
     @Test(expected = SCAOperationValidationException.class)
     public void validateAuthCodeOperationHashException() throws SCAOperationNotFoundException, SCAOperationValidationException, HashGenerationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
-        when(repository.findById(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(repository.findOneByOpIdOrderByCreatedDesc(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
         scaOperationService.validateAuthCode(OP_ID, OP_DATA, TAN);
@@ -252,7 +252,7 @@ public class SCAOperationServiceImplTest {
         // operation was used
         scaOperationEntity.setStatus(AuthCodeStatus.USED);
 
-        when(repository.findById(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(repository.findOneByOpIdOrderByCreatedDesc(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
 
         scaOperationService.validateAuthCode(OP_ID, OP_DATA, TAN);
     }
@@ -263,7 +263,7 @@ public class SCAOperationServiceImplTest {
         // operation was created 5 minutes ago
         scaOperationEntity.setCreated(LocalDateTime.now().minusMinutes(5));
 
-        when(repository.findById(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(repository.findOneByOpIdOrderByCreatedDesc(OP_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(repository.save(any())).thenReturn(scaOperationEntity);
 
         scaOperationService.validateAuthCode(OP_ID, OP_DATA, TAN);

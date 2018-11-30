@@ -21,8 +21,11 @@ import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SCAOperationRepository extends CrudRepository<SCAOperationEntity, String> {
 
     List<SCAOperationEntity> findByStatus(AuthCodeStatus status);
+
+    Optional<SCAOperationEntity> findOneByOpIdOrderByCreatedDesc(String opId);
 }
