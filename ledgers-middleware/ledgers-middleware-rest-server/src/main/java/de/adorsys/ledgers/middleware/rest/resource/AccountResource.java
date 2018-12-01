@@ -16,6 +16,24 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
@@ -26,22 +44,18 @@ import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareExcepti
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @RequestMapping("/accounts")
+@Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 public class AccountResource {
-    private static final Logger logger = LoggerFactory.getLogger(AccountResource.class);
+    private static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
+    private static final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
+
+	private static final Logger logger = LoggerFactory.getLogger(AccountResource.class);
 
     private final MiddlewareAccountManagementService middlewareAccountService;
 
@@ -50,7 +64,10 @@ public class AccountResource {
     }
 
     @GetMapping("/{accountId}")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(@PathVariable String accountId) {
+    @ApiOperation("Returns account details information")
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(
+    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
+    		@PathVariable String accountId) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true));
         } catch (AccountNotFoundMiddlewareException e) {
@@ -60,7 +77,10 @@ public class AccountResource {
     }
 
     @GetMapping("/balances/{accountId}")
-    public ResponseEntity<List<AccountBalanceTO>> getBalances(@PathVariable String accountId) {
+    @ApiOperation("Returns balances of the deposit account")
+    public ResponseEntity<List<AccountBalanceTO>> getBalances(
+    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
+    		@PathVariable String accountId) {
         try {
             AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true);
             return ResponseEntity.ok(accountDetails.getBalances());
@@ -71,7 +91,12 @@ public class AccountResource {
     }
 
     @GetMapping("{accountId}/transactions/{transactionId}")
-    public ResponseEntity<TransactionTO> getTransactionById(@PathVariable String accountId, @PathVariable String transactionId) {
+    @ApiOperation("Returns the transaction with the given account id and transaction id.")
+    public ResponseEntity<TransactionTO> getTransactionById(
+    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
+    		@PathVariable String accountId, 
+    		@ApiParam(THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY)
+    		@PathVariable String transactionId) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getTransactionById(accountId, transactionId));
         } catch (AccountNotFoundMiddlewareException | TransactionNotFoundMiddlewareException e) {
@@ -80,10 +105,13 @@ public class AccountResource {
         }
     }
 
-    @GetMapping("{accountId}/transactions")
-    public ResponseEntity<List<TransactionTO>> getTransactionByDates(@PathVariable String accountId,
-                                                                     @RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
-                                                                     @RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo) {
+    @GetMapping("/{accountId}/transactions")
+    @ApiOperation("Returns all transactions for the given account id")
+    public ResponseEntity<List<TransactionTO>> getTransactionByDates(
+    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
+    		@PathVariable String accountId,
+    		@RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
+    		@RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo) {
         dateChecker(dateFrom, dateTo);
         try {
             List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
@@ -105,7 +133,10 @@ public class AccountResource {
     }
 
     @GetMapping("/ibans/{iban}")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(@PathVariable String iban) {
+    @ApiOperation("Returns account details information given the account IBAN")
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
+    		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
+    		@PathVariable String iban) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
         } catch (AccountNotFoundMiddlewareException e) {

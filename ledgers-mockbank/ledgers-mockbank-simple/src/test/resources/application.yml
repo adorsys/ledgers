@@ -30,10 +30,12 @@ spring:
 
 sca:
   authCode:
+    validity.seconds: 180
     expiration:
       cron: "*/5 0 0 * * *" # every 5 seconds
     email:
       subject: Your TAN from MockBank
+      body: "TAN: %s"
       from: noreply@adorsys.de
     phone:
       subject: Your TAN from MockBank
@@ -46,7 +48,7 @@ spring:
       enabled: true
 
 db:
-  url: jdbc:h2:mem:ledgers
+  url: jdbc:h2:~/ledgers/mockbank-simple
   user: sa
   password: sa
 
