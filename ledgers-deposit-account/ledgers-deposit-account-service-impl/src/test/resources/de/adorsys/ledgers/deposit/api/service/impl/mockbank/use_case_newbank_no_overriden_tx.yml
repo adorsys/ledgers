@@ -15,11 +15,13 @@
       shortDesc: "Deposits with CBM - Interest bearing" 
     debitAmount: 4200000.00
     creditAmount: 0.00
+    id: 1
   - account:
       name: 3001
       shortDesc: "Issued capital – ordinary shares" 
     debitAmount: 0.00
     creditAmount: 4200000.00
+    id: 2
 # Balances: 1104-D-4200000.00,3001-C-4200000.00 
 
 
@@ -35,12 +37,14 @@
       shortDesc: "hello bank" 
     debitAmount: 2000000.00
     creditAmount: 0.00
+    id: 3
   - account:
       name: 1104
       shortDesc: "Deposits with CBM - Interest bearing" 
     debitAmount: 0.00
     creditAmount: 2000000.00
-# Balances: 11240-D-2000000.00,1104-D-2200000.00 
+    id: 4
+    # Balances: 11240-D-2000000.00,1104-D-2200000.00
     
 # Then the Bank purchases some office furniture with a check of hello bank 14 400 
 - oprId: "purchased_furniture_003"
@@ -54,12 +58,14 @@
       shortDesc: "Furniture & fittings" 
     debitAmount: 14400.00
     creditAmount: 0.00
+    id: 5
   - account:
       name: 11240
       shortDesc: "hello bank" 
     debitAmount: 0.00
     creditAmount: 14400.00
-# Balances: 11240-D-1985600.00,1810-D-14400.00 
+    id: 6
+    # Balances: 11240-D-1985600.00,1810-D-14400.00
     
 
 # Then the Bank withdraw some cahsh from hello bank. 150 000 
@@ -74,11 +80,13 @@
       shortDesc: "Cash in vault" 
     debitAmount: 150000.00
     creditAmount: 0.00
+    id: 7
   - account:
       name: 11240
       shortDesc: "hello bank" 
     debitAmount: 0.00
     creditAmount: 150000.00
+    id: 8
 # Balances: 11240-D-1835600.00,1001-D-150000.00 
 
 # The bank pays for service for cleaning and refurbishing rental office: 32 000 check of helo bank
@@ -93,11 +101,13 @@
       shortDesc: "Cleaning (janitorial services)" 
     debitAmount: 32000.00
     creditAmount: 0.00
+    id: 9
   - account:
       name: 11240
       shortDesc: "hello bank" 
     debitAmount: 0.00
     creditAmount: 32000.00
+    id: 10
 # Balances: 11240-D-1803600.00,5057-D-32000.00 
 
 # The bank opens employee accounts. Marion mueller with casch deposit of 1500
@@ -112,11 +122,13 @@
       shortDesc: "Cash in vault" 
     debitAmount: 1500.00
     creditAmount: 0.00
+    id: 11
   - account:
       name: DE69760700240340283600
       shortDesc: "Bank Account Marion Mueller" 
     debitAmount: 0.00
     creditAmount: 1500.00
+    id: 12
 # Balances: 1001-D-151500.00,2332001-C-1500.00 
 
 # The bank opens employee accounts for anton brueckner with check deposit of 3 500.
@@ -131,11 +143,13 @@
       shortDesc: "Items for collection:cheques" 
     debitAmount: 3500.00
     creditAmount: 0.00
+    id: 13
   - account:
       name: DE80760700240271232400
       shortDesc: "Bank Account Anton Brueckner" 
     debitAmount: 0.00
     creditAmount: 3500.00
+    id: 14
 # Balances: 1006-D-3500.00,2332002-C-3500.00 
 
 
@@ -151,11 +165,13 @@
       shortDesc: "Cash in vault" 
     debitAmount: 5000.00
     creditAmount: 0.00
+    id: 15
   - account:
       name: DE38760700240320465700
       shortDesc: "Bank Account Max Mustermann" 
     debitAmount: 0.00
     creditAmount: 5000.00
-# Balances: 1001-D-156500.00,2332003-C-5000.00 
+    id: 16
+    # Balances: 1001-D-156500.00,2332003-C-5000.00
 
     

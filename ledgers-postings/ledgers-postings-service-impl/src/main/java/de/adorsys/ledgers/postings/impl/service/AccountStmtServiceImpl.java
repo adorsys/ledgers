@@ -10,6 +10,7 @@ import de.adorsys.ledgers.postings.db.repository.*;
 import de.adorsys.ledgers.postings.impl.converter.AccountStmtMapper;
 import de.adorsys.ledgers.util.Ids;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -33,6 +34,7 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AccountStmtBO readStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         AccountStmt stmt = stmt(ledgerAccount, refTime);
         return accountStmtMapper.toAccountStmtBO(stmt);

@@ -62,7 +62,7 @@ public class AccountResource {
     @GetMapping("/balances/{accountId}")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(@PathVariable String accountId) {
         try {
-            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true);
+            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
             return ResponseEntity.ok(accountDetails.getBalances());
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);

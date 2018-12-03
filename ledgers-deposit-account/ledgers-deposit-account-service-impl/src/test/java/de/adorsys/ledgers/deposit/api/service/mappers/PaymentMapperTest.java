@@ -25,6 +25,7 @@ public class PaymentMapperTest {
     private static final String SINGLE_PATH = "PaymentSingle.yml";
     private static final String BULK_PATH = "PaymentBulk.yml";
     private static final Currency CURRENCY = Currency.getInstance("EUR");
+    private static final String TRANSACTION_ID = "TR_1";
     private final Payment SINGLE_PMT = readYml(Payment.class, SINGLE_PATH);
     private final PaymentBO SINGLE_PMT_BO = readYml(PaymentBO.class, SINGLE_PATH);
     private final Payment BULK_PMT = readYml(Payment.class, BULK_PATH);
@@ -75,7 +76,7 @@ public class PaymentMapperTest {
 
     @Test
     public void toPaymentTargetDetails() {
-        PaymentTargetDetailsBO result = mapper.toPaymentTargetDetails(readYml(PaymentTargetBO.class, "PaymentTarget.yml"), LocalDate.of(2018, 12, 12));
+        PaymentTargetDetailsBO result = mapper.toPaymentTargetDetails(TRANSACTION_ID, readYml(PaymentTargetBO.class, "PaymentTarget.yml"), LocalDate.of(2018, 12, 12));
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(PaymentTargetDetailsBO.class, "PaymentTargetDetails.yml"));
     }
@@ -85,7 +86,7 @@ public class PaymentMapperTest {
         PaymentBO payment = readYml(PaymentBO.class, "PaymentBulkBatchTrue.yml");
         AmountBO amount = new AmountBO(Currency.getInstance("EUR"), BigDecimal.valueOf(200));
         LocalDate date = LocalDate.of(2018, 12, 12);
-        PaymentTargetDetailsBO result = mapper.toPaymentTargetDetailsBatch(payment, amount, date);
+        PaymentTargetDetailsBO result = mapper.toPaymentTargetDetailsBatch(TRANSACTION_ID, payment, amount, date);
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(PaymentTargetDetailsBO.class, "PaymentTargetDetailsBatch.yml"));
     }
