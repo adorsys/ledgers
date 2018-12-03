@@ -14,6 +14,7 @@ spring:
       hibrenate.globally_quoted_identifiers: true
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      hibernate.ddl.auto: update
   jackson.serialization.write_dates_as_timestamps: false
   mail:
     default-encoding: UTF-8
@@ -40,17 +41,19 @@ sca:
     phone:
       subject: Your TAN from MockBank
 
+user-service:
+  jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4      
+
 ---
 spring:
   profiles: h2
   h2:
     console:
       enabled: true
-
-db:
-  url: jdbc:h2:~/ledgers/mockbank-simple
-  user: sa
-  password: sa
+  datasource:
+    url: jdbc:h2:./target/ledgersdbs/ledgers-mockbank-simple
+    username: sa
+    password: sa
 
 ---
 spring:

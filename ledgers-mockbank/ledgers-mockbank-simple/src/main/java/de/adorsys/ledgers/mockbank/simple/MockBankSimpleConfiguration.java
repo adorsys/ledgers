@@ -1,30 +1,36 @@
 package de.adorsys.ledgers.mockbank.simple;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.mockbank.simple.data.BulkPaymentsData;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.SinglePaymentsData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Configuration
 @ComponentScan(basePackageClasses = MockbankSimpleBasePackage.class)
@@ -43,7 +49,7 @@ public class MockBankSimpleConfiguration {
 
     @Bean
     public MockbankInitData init()
-            throws AccountNotFoundMiddlewareException, PaymentProcessingMiddlewareException, UserAlreadyExistsMiddlewareException {
+            throws AccountNotFoundMiddlewareException, PaymentProcessingMiddlewareException, UserAlreadyExistsMiddlewareException, AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
 
         MockbankInitData testData = loadTestData("mockbank-simple-init-data.yml");
 
@@ -74,7 +80,7 @@ public class MockBankSimpleConfiguration {
         }
     }
 
-    private void createAccounts(MockbankInitData testData) throws AccountNotFoundMiddlewareException {
+    private void createAccounts(MockbankInitData testData) throws AccountNotFoundMiddlewareException, AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException {
         List<AccountDetailsTO> accounts = testData.getAccounts();
         for (AccountDetailsTO depositAccount : accounts) {
             accountService.createDepositAccount(depositAccount);
@@ -122,7 +128,7 @@ public class MockBankSimpleConfiguration {
     /*
      * Check if update required. If then process the config file.
      */
-    private boolean updateRequired(MockbankInitData testData) {
+    private boolean updateRequired(MockbankInitData testData) throws InsufficientPermissionMiddlewareException {
         try {
             accountService.getDepositAccountByIban(testData.getUpdateMarkerAccountNbr(), LocalDateTime.now(), false);
             return false;

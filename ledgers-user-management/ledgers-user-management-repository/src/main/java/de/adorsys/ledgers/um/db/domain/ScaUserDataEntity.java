@@ -40,4 +40,9 @@ public class ScaUserDataEntity {
     public void setScaMethod(ScaMethodTypeEntity scaMethod) {
         this.scaMethod = scaMethod;
     }
+
+	public void setId(String id) {
+		this.id = id;
+	}
+    
 }

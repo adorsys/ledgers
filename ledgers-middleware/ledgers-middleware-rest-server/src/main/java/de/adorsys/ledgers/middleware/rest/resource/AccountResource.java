@@ -39,10 +39,12 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,12 +75,29 @@ public class AccountResource {
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
 
+    /**
+     * @deprecated : wrong REST principles applied here
+     * 
+     * @param accountId
+     * @return
+     */
     @GetMapping("/balances/{accountId}")
     @ApiOperation("Returns balances of the deposit account")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(
+    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
+    		@PathVariable String accountId) {
+    	return getBalances2(accountId);
+    }
+
+    @GetMapping("/{accountId}/balances")
+    @ApiOperation("Returns balances of the deposit account with the given id")
+    public ResponseEntity<List<AccountBalanceTO>> getBalances2(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId) {
         try {
@@ -87,9 +106,12 @@ public class AccountResource {
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
-
+    
     @GetMapping("{accountId}/transactions/{transactionId}")
     @ApiOperation("Returns the transaction with the given account id and transaction id.")
     public ResponseEntity<TransactionTO> getTransactionById(
@@ -102,7 +124,10 @@ public class AccountResource {
         } catch (AccountNotFoundMiddlewareException | TransactionNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
 
     @GetMapping("/{accountId}/transactions")
@@ -119,30 +144,63 @@ public class AccountResource {
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
 
+    /**
+     * TODO: Bad REST design. Use query parameter instead.
+     * 
+     * @deprecated: Access list of accounts thru the user resource and use the iban to read account details.
+     * @param userLogin
+     * @return
+     */
     @GetMapping("/users/{userLogin}")
+    @ApiOperation("Returns the list of all accounts linked to the given user.")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
+    	return getListOfAccountDetailsByUserLogin(userLogin);
+    }
+
+    private ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserLogin(String userLogin) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getAllAccountDetailsByUserLogin(userLogin));
         } catch (UserNotFoundMiddlewareException | AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
-
+    
+    /**
+     * @deprecated: user request param instead
+     * @param iban
+     * @return
+     */
     @GetMapping("/ibans/{iban}")
     @ApiOperation("Returns account details information given the account IBAN")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
     		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
     		@PathVariable String iban) {
+    	return getAccountDetailsByIban2(iban);
+    }
+    @GetMapping(params="iban")
+    @ApiOperation("Returns account details information given the account IBAN")
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(
+    		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
+    		@RequestParam(required = true, name = "iban") String iban) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
 
     @PostMapping(value = "/funds-confirmation")

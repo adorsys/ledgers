@@ -78,6 +78,7 @@
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
         <slf4j.version>1.7.25</slf4j.version>
+        <nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
 	</properties>
 
 	<dependencyManagement>

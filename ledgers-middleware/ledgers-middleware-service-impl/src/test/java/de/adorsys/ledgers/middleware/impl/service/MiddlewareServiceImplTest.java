@@ -1,37 +1,58 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.middleware.api.domain.payment.*;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
@@ -42,8 +63,6 @@ public class MiddlewareServiceImplTest {
     private static final String SINGLE_BO = "PaymentSingle.yml";
     private static final String SINGLE_TO = "PaymentSingleTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
-
-    private static final LocalDateTime TIME = LocalDateTime.now();
 
     @InjectMocks
     private MiddlewareServiceImpl middlewareService;

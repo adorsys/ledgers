@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.um.api.service;
 
+import java.util.Date;
 import java.util.List;
 
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -43,7 +44,7 @@ public interface UserService {
      * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      */
-    boolean authorise(String login, String pin) throws UserNotFoundException;
+    String authorise(String login, String pin) throws UserNotFoundException;
 
     /**
      * Performs user authorisation
@@ -51,10 +52,10 @@ public interface UserService {
      * @param id        User identifier
      * @param pin       User PIN
      * @param accountId Account identifier
-     * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
+     * @return String representation of authorisation token for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      */
-    boolean authorise(String id, String pin, String accountId) throws UserNotFoundException;
+    String authorise(String id, String pin, String accountId) throws UserNotFoundException;
 
     /**
      * Finds a User by its identifier
@@ -86,4 +87,15 @@ public interface UserService {
 	UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO)  throws UserNotFoundException;
 
 	List<UserBO> listUsers(int page, int size);
+
+	/**
+	 * Check if the provided token is valid at the given reference time and return the corresponding user.
+	 * 
+	 * 
+	 * @param accessToken
+	 * @param refTime
+	 * @return
+	 * @throws UserNotFoundException 
+	 */
+	UserBO validate(String accessToken, Date refTime) throws UserNotFoundException;
 }
