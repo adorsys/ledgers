@@ -3,3 +3,7 @@
   height: 16px;
   vertical-align: text-bottom;
 }
+
+thead {
+  background-color: #054f72;
+}
