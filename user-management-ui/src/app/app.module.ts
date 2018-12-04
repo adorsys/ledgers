@@ -6,7 +6,9 @@ import { AppComponent } from './app.component';
 import { NavbarComponent } from './commons/navbar/navbar.component';
 import { FooterComponent } from './commons/footer/footer.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { SidebarComponent } from './components/dashboard/sidebar/sidebar.component';
+import { SidebarComponent } from './commons/sidebar/sidebar.component';
+import { UsersComponent } from './components/users/users.component';
+import { AccountsComponent } from './components/accounts/accounts.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +16,9 @@ import { SidebarComponent } from './components/dashboard/sidebar/sidebar.compone
     NavbarComponent,
     FooterComponent,
     DashboardComponent,
-    SidebarComponent
+    SidebarComponent,
+    UsersComponent,
+    AccountsComponent
   ],
   imports: [
     BrowserModule,
