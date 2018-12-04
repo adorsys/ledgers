@@ -48,10 +48,7 @@ public class UserManagementResource {
     @PostMapping("/authorise")
     public boolean authorise(@RequestParam("login")String login, @RequestParam("pin") String pin){
         try {
-            if(middlewareUserService.authorise(login, pin)!=null) {
-            	return true;
-            }
-            return false;
+        	return middlewareUserService.authorise(login, pin)!=null;
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());

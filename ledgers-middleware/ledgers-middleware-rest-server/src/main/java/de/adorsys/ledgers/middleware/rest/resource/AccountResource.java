@@ -46,6 +46,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementServ
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.rest.exception.RestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -53,6 +54,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping("/accounts")
 @Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
+@SuppressWarnings("PMD.IdenticalCatchBranches")
 public class AccountResource {
     private static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
     private static final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
@@ -73,13 +75,21 @@ public class AccountResource {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true));
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw forbiddenRestException(e);
 		}
     }
+
+	private RestException forbiddenRestException(InsufficientPermissionMiddlewareException e) {
+		logger.error(e.getMessage(), e);
+		return new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+	}
+
+	private RestException notFoundRestException(AccountNotFoundMiddlewareException e) {
+		logger.error(e.getMessage(), e);
+		return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+	}
 
     /**
      * @deprecated : wrong REST principles applied here
@@ -104,11 +114,9 @@ public class AccountResource {
             AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true);
             return ResponseEntity.ok(accountDetails.getBalances());
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw forbiddenRestException(e);
 		}
     }
     
@@ -125,8 +133,7 @@ public class AccountResource {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw forbiddenRestException(e);
 		}
     }
 
@@ -142,11 +149,9 @@ public class AccountResource {
             List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
             return ResponseEntity.ok(transactions);
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw forbiddenRestException(e);
 		}
     }
 
@@ -195,11 +200,9 @@ public class AccountResource {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw forbiddenRestException(e);
 		}
     }
 
@@ -209,8 +212,7 @@ public class AccountResource {
             boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
             return ResponseEntity.ok(fundsAvailable);
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw notFoundRestException(e);
         }
     }
 

@@ -1,17 +1,6 @@
 package de.adorsys.ledgers.middleware.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 

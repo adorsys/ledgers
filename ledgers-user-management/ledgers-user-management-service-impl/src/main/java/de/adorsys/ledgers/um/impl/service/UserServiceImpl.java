@@ -135,11 +135,11 @@ public class UserServiceImpl implements UserService {
 			
 			List<AccountAccess> accountAccesses = userEntity.getAccountAccesses();
 			List<AccountAccess> accountAccessesFromToken = userFromToken.getAccountAccesses();
-			for (AccountAccess accountAccessFT : accountAccessesFromToken) {
+			accountAccessesFromToken.forEach(accountAccessFT -> {
 				confirmAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
-			}
+			});
 
-			userEntity.setAccountAccesses(accountAccessesFromToken);;
+			userEntity.setAccountAccesses(accountAccessesFromToken);
 			return userConverter.toUserBO(userEntity);
 			
 		} catch (ParseException e) {
@@ -167,15 +167,15 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 		// Make sure old access still valid
-		if(requested.getAccessType().compareTo(existent.getAccessType())>0) {
-			return false;
-		}
-		return false;
+		return requested.getAccessType().compareTo(existent.getAccessType())<=0;
+
 	}
 
 	private String authorizeInternal(String pin, UserEntity user) {
 		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
-        if(!success) return null;
+        if(!success) {
+        	return null;
+        }
         Date iat = new Date();
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
         	.subject(user.getId())
