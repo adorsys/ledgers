@@ -17,7 +17,11 @@ export class UserService {
     return this.http.post(this.url, JSON.stringify(user));
   }
 
-  getUserById() {
+  getUserById(id: string) {
+    return this.http.get(this.url + '/' + id);
+  }
+
+  getUserByLogin() {
 
   }
 }

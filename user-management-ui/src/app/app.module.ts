@@ -9,6 +9,8 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { SidebarComponent } from './commons/sidebar/sidebar.component';
 import { UsersComponent } from './components/users/users.component';
 import { AccountsComponent } from './components/accounts/accounts.component';
+import { UserNewComponent } from './components/users/user-new/user-new.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -18,11 +20,13 @@ import { AccountsComponent } from './components/accounts/accounts.component';
     DashboardComponent,
     SidebarComponent,
     UsersComponent,
-    AccountsComponent
+    AccountsComponent,
+    UserNewComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
