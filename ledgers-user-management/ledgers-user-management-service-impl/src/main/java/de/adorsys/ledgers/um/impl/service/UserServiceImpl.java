@@ -16,17 +16,6 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.hibernate.exception.ConstraintViolationException;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -39,6 +28,16 @@ import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.MD5Util;
+import org.hibernate.exception.ConstraintViolationException;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -61,14 +60,14 @@ public class UserServiceImpl implements UserService {
 
         userPO.setPin(MD5Util.encode(user.getPin()));
         try {
-        	return userConverter.toUserBO(userRepository.save(userPO));
-        } catch(ConstraintViolationException c) {
-        	if(UserEntity.USER_EMAIL_UNIQUE.equals(c.getConstraintName()) ||   //TODO by @speex Let's UserAlreadyExistsException will decide what to do, just pass user and exception args to it
-        			UserEntity.USER_LOGIN_UNIQUE.equals(c.getConstraintName())){
-        		throw new UserAlreadyExistsException(user, c);
-        	} else {
-        		throw new UserAlreadyExistsException(c.getMessage(), c);
-        	}
+            return userConverter.toUserBO(userRepository.save(userPO));
+        } catch (ConstraintViolationException c) {
+            if (UserEntity.USER_EMAIL_UNIQUE.equals(c.getConstraintName()) ||   //TODO by @speex Let's UserAlreadyExistsException will decide what to do, just pass user and exception args to it
+                        UserEntity.USER_LOGIN_UNIQUE.equals(c.getConstraintName())) {
+                throw new UserAlreadyExistsException(user, c);
+            } else {
+                throw new UserAlreadyExistsException(c.getMessage(), c);
+            }
         }
     }
 
@@ -94,6 +93,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserBO> getAll() {
+        return userConverter.toUserBOList(userRepository.findAll());
+    }
+
+    @Override
     public UserBO findById(String id) throws UserNotFoundException {
         Optional<UserEntity> userPO = userRepository.findById(id);
         userPO.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, id)));
@@ -101,9 +105,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-	public UserBO findByLogin(String login) throws UserNotFoundException {
-    	return userConverter.toUserBO(getUser(login));
-	}
+    public UserBO findByLogin(String login) throws UserNotFoundException {
+        return userConverter.toUserBO(getUser(login));
+    }
 
     @Override
     public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException {
@@ -125,7 +129,7 @@ public class UserServiceImpl implements UserService {
             throws UserNotFoundException {
         logger.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
-                .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
+                                  .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
 
         List<AccountAccess> accountAccesses = userConverter.toAccountAccessListEntity(accountAccessListBO);
         user.getAccountAccesses().clear();

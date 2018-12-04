@@ -16,13 +16,13 @@
 
 package de.adorsys.ledgers.um.api.service;
 
-import java.util.List;
-
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -38,8 +38,8 @@ public interface UserService {
     /**
      * Performs user authorisation
      *
-     * @param login  User login
-     * @param pin User PIN
+     * @param login User login
+     * @param pin   User PIN
      * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      */
@@ -78,12 +78,14 @@ public interface UserService {
      * Update SCA methods by user login
      *
      * @param scaDataList user methods
-     * @param userLogin user login
-     * @return 
+     * @param userLogin   user login
+     * @return
      */
     UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException;
 
-	UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO)  throws UserNotFoundException;
+    UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO) throws UserNotFoundException;
 
-	List<UserBO> listUsers(int page, int size);
+    List<UserBO> listUsers(int page, int size);
+
+    List<UserBO> getAll();
 }
