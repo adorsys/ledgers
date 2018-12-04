@@ -16,13 +16,18 @@
 
 package de.adorsys.ledgers.um.db.repository;
 
-import java.util.Optional;
-
+import de.adorsys.ledgers.um.db.domain.UserEntity;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import de.adorsys.ledgers.um.db.domain.UserEntity;
+import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends PagingAndSortingRepository<UserEntity, String> {
 
     Optional<UserEntity> findFirstByLogin(String login);
+
+    @NotNull
+    @Override
+    List<UserEntity> findAll();
 }

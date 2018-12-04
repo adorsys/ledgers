@@ -1,23 +1,5 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -27,8 +9,24 @@ import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.MD5Util;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
@@ -127,9 +125,26 @@ public class UserServiceImplTest {
         userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin");
     }
 
+    @Test
+    public void getAll() {
+        when(repository.findAll()).thenReturn(Collections.singletonList(readUserEntity()));
+        when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(readUserBO()));
+        List<UserBO> response = userService.getAll();
+
+        assertThat(response.size(), is(1));
+    }
+
+    @Test
+    public void getAll_empty() {
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+        List<UserBO> response = userService.getAll();
+
+        assertThat(response.size(), is(0));
+    }
+
     private UserBO readUserBO() {
         try {
-            return reader.getObjectFromResource(getClass(),"user-BO.yml", UserBO.class);
+            return reader.getObjectFromResource(getClass(), "user-BO.yml", UserBO.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,7 +153,7 @@ public class UserServiceImplTest {
 
     private UserEntity readUserEntity() {
         try {
-            return reader.getObjectFromResource(getClass(),"user-entity.yml", UserEntity.class);
+            return reader.getObjectFromResource(getClass(), "user-entity.yml", UserEntity.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
