@@ -67,11 +67,11 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     @Override
-    public PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String subOprSrcId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException {
+    public PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String transactionId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException {
         LedgerAccount account = loadLedgerAccount(ledgerAccount);
-        return postingLineRepository.findFirstByAccountAndSubOprSrcId(account, subOprSrcId)
+        return postingLineRepository.findFirstByIdAndAccount(transactionId, account)
                        .map(postingLineMapper::toPostingLineBO)
-                       .orElseThrow(() -> new PostingNotFoundException(account.getId(), subOprSrcId));
+                       .orElseThrow(() -> new PostingNotFoundException(account.getId(), transactionId));
     }
 
     private Posting newPosting(Posting posting) throws DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
@@ -139,7 +139,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
      */
     private void processPostingLine(Posting p, PostingLine model) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
         PostingLine l = new PostingLine();
-        l.setId(Ids.id());
+        l.setId(model.getId()/*Ids.id()*/);
         LedgerAccount account = loadLedgerAccount(model.getAccount());
         l.setAccount(account);
         String baseLine = validatePostingTime(p, account).orElse(new AccountStmt()).getId();

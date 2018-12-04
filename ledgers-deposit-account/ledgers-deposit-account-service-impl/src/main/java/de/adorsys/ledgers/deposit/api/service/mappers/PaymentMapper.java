@@ -19,7 +19,7 @@ public interface PaymentMapper {
 
     PaymentOrderDetailsBO toPaymentOrder(PaymentBO payment);
 
-    @Mapping(source = "paymentTarget.paymentId", target = "transactionId")
+    @Mapping(source = "id", target = "transactionId")
     @Mapping(source = "paymentTarget.endToEndIdentification", target = "endToEndId")
     @Mapping(source = "postingTime", target = "bookingDate")
     @Mapping(source = "postingTime", target = "valueDate")
@@ -27,14 +27,14 @@ public interface PaymentMapper {
     @Mapping(source = "paymentTarget.payment.debtorAccount", target = "debtorAccount")
     @Mapping(source = "paymentTarget.payment.paymentId", target = "paymentOrderId")
     @Mapping(source = "paymentTarget.payment.paymentType", target = "paymentType")
-    PaymentTargetDetailsBO toPaymentTargetDetails(PaymentTargetBO paymentTarget, LocalDate postingTime);
+    PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime);
 
     @Mapping(source = "amount", target = "transactionAmount")
     @Mapping(source = "postingTime", target = "valueDate")
     @Mapping(source = "postingTime", target = "bookingDate")
-    @Mapping(source = "payment.paymentId", target = "transactionId")
+    @Mapping(source = "id", target = "transactionId")
     @Mapping(source = "payment.paymentId", target = "paymentOrderId")
     @Mapping(constant = "multiple", target = "creditorAgent")
     @Mapping(constant = "multiple", target = "creditorName")
-    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(PaymentBO payment, AmountBO amount, LocalDate postingTime);
+    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime);
 }

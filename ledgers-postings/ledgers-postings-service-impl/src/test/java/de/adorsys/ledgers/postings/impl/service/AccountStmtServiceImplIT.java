@@ -256,7 +256,7 @@ public class AccountStmtServiceImplIT {
         PostingBO[] postings = mapper.readValue(inputStream, PostingBO[].class);
         for (PostingBO p : postings) {
             p.setLedger(ledger);
-            p.getLines().stream().forEach(pl -> {
+            p.getLines().forEach(pl -> {
                 pl.getAccount().setLedger(ledger);
             });
             postingService.newPosting(p);
