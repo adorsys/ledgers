@@ -4,6 +4,7 @@ import {DashboardComponent} from "./components/dashboard/dashboard.component";
 import {UsersComponent} from "./components/users/users.component";
 import {UserNewComponent} from "./components/users/user-new/user-new.component";
 import {AccountsComponent} from "./components/accounts/accounts.component";
+import {UserEditComponent} from "./components/users/user-edit/user-edit.component";
 
 const routes: Routes = [
   {
@@ -20,7 +21,7 @@ const routes: Routes = [
   },
   {
     path: 'users/:id',
-    component: UserNewComponent
+    component: UserEditComponent
   },
 ];
 

@@ -11,6 +11,7 @@ import { UsersComponent } from './components/users/users.component';
 import { AccountsComponent } from './components/accounts/accounts.component';
 import { UserNewComponent } from './components/users/user-new/user-new.component';
 import { HttpClientModule } from '@angular/common/http';
+import { UserEditComponent } from './components/users/user-edit/user-edit.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { HttpClientModule } from '@angular/common/http';
     SidebarComponent,
     UsersComponent,
     AccountsComponent,
-    UserNewComponent
+    UserNewComponent,
+    UserEditComponent
   ],
   imports: [
     BrowserModule,
