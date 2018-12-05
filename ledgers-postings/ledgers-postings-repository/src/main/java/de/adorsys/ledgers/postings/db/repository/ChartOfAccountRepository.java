@@ -8,8 +8,8 @@ public interface ChartOfAccountRepository extends NamedEntityRepository<ChartOfA
 	/**
 	 * Find a chart of account with this name.
 	 * 
-	 * @param name
-	 * @return
+	 * @param name of chart of account
+	 * @return chart of account wrapped with Optional
 	 */
 	Optional<ChartOfAccount> findOptionalByName(String name);
 }

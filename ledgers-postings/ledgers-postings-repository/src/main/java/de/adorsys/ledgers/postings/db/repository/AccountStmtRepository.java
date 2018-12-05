@@ -14,10 +14,10 @@ public interface AccountStmtRepository extends PagingAndSortingRepository<Accoun
 	/**
 	 * Select the latest statement for the given reference time.
 	 * 
-	 * @param account
-	 * @param stmtStatus
-	 * @param refTime
-	 * @return
+	 * @param account ledger account
+	 * @param stmtStatus statement status
+	 * @param refTime reference time
+	 * @return account statement wrapped with Optional
 	 */
 	Optional<AccountStmt> findFirstByAccountAndStmtStatusAndPstTimeLessThanOrderByPstTimeDescStmtSeqNbrDesc(
 			LedgerAccount account, StmtStatus stmtStatus, LocalDateTime refTime);

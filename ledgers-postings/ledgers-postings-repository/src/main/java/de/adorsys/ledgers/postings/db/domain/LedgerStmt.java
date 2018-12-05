@@ -29,7 +29,7 @@ public class LedgerStmt extends FinancialStmt {
     /**
      * Return the id of the posting being overriding by this posting.
      *  
-     * @return
+     * @return the id of the posting being overriding by this posting.
      */
     public final Optional<String> clonedId() {
     	return Optional.ofNullable(getStmtSeqNbr()<=0?null:makeId(ledger, getPstTime(), getStmtSeqNbr()-1));
