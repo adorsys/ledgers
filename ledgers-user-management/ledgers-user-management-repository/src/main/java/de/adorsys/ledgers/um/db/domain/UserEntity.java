@@ -59,7 +59,7 @@ public class UserEntity {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="users_roles", joinColumns = @JoinColumn(name="user_id"))
-    @Column(name="roles")
+    @Column(name="role")
     @Enumerated(EnumType.STRING)
     private Collection<UserRole> userRoles =  new ArrayList<>();
 
