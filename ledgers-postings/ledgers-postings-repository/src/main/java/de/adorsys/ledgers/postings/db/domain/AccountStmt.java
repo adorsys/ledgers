@@ -44,7 +44,7 @@ public class AccountStmt extends FinancialStmt {
     /**
      * Return the id of the posting being overriding by this posting.
      *
-     * @return
+     * @return the id of the posting being overriding by this posting.
      */
     public final Optional<String> clonedId() {
         return Optional.ofNullable(getStmtSeqNbr() <= 0 ? null : makeId(account, getPstTime(), getStmtSeqNbr() - 1));

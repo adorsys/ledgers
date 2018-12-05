@@ -3,8 +3,10 @@
 # ------------------------------------------------------------------
 
 stages:
-- "build"    # build jar and provide as artifact
-#- "build:image"  # dockerize jar and push to gitlab registry
+- "build:src"    # build jar and provide as artifact
+- "build:qa"     # run tests and code quality checks
+- "build:image"  # dockerize jar and push to docker registry
+- "deploy"       # push to openshift registry (snapshot deployment) or release registry
 
 # ------------------------------------------------------------------
 # variables
@@ -15,38 +17,123 @@ variables: &variables
   ###########################
   # Docker images variables #
   ###########################
-
   GITLAB_REGISTRY: "gitlab-registry.adorsys.de"
   GITLAB_NAMESPACE: "adorsys/xs2a/ledgers"
 
-  # XS2A Service
-  GITLAB_IMAGE_NAME_XS2A: "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}/ledgers"
+  DOCKER_NAMESPACE: "adorsys"
+
+  #  OPENSHIFT_REGISTRY: "openshift-registry.adorsys.de:443"
+  #  OPENSHIFT_NAMESPACE: "multibanking-xs2a"
+
+  # Ledgers Service
+#  GITLAB_IMAGE_NAME_LEDGERS: "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}"
+  DOCKER_IMAGE_NAME_LEDGERS: "${DOCKER_NAMESPACE}/ledgers"
+  #  OPENSHIFT_IMAGE_NAME_LEDGERS: "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/aspsp-xs2a"
+
+
 
   ###########################
   # Build variables         #
   ###########################
 
-  JAVA_TOOL_OPTIONS: "-Xmx850M"
+  JAVA_TOOL_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAM=3G -XX:MaxRAMFraction=3"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 
+  ###########################
+  # Deployment variables    #
+  ###########################
+
+#  DEV_NAMESPACE: adorsys-psd2-develop
+#  INTEG_NAMESPACE: adorsys-psd2-integ
+#  DEMO_NAMESPACE: adorsys-psd2-demo
+#  TILLER_NAMESPACE: adorsys-psd2-tiller
+#  ANSIBLE_VAULT_PASSWORD_FILE: /tmp/vault_pass
 # ------------------------------------------------------------------
 # reusable yaml anchors
 # ------------------------------------------------------------------
 
+.java_artifacts: &java_artifacts
+  paths:
+  - "ledgers-app/target/ledgers-app*jar"
+  - "ledgers-deposit-account/ledgers-deposit-account-repository/target/ledgers-deposit-account-repository*jar"
+  - "ledgers-deposit-account/ledgers-deposit-account-service-api/target/ledgers-deposit-account-service-api*jar"
+  - "ledgers-deposit-account/ledgers-deposit-account-service-impl/target/ledgers-deposit-account-service-impl*jar"
+  - "ledgers-middleware/ledgers-middleware-rest-server/target/ledgers-middleware-rest-server*jar"
+  - "ledgers-middleware/ledgers-middleware-service-api/target/ledgers-middleware-service-api*jar"
+  - "ledgers-middleware/ledgers-middleware-service-impl/target/ledgers-middleware-service-impl*jar"
+  - "ledgers-mockbank/ledgers-mockbank-simple/target/ledgers-mockbank-simple*jar"
+  - "ledgers-postings/ledgers-postings-repository/target/ledgers-postings-repository*jar"
+  - "ledgers-postings/ledgers-postings-rest-server/target/ledgers-postings-rest-server*jar"
+  - "ledgers-postings/ledgers-postings-service-api/target/ledgers-postings-service-api*jar"
+  - "ledgers-postings/ledgers-postings-service-impl/target/ledgers-postings-service-impl*jar"
+  - "ledgers-sca/ledgers-sca-repository/target/ledgers-sca-repository*jar"
+  - "ledgers-sca/ledgers-sca-service-api/target/ledgers-sca-service-api*jar"
+  - "ledgers-sca/ledgers-sca-service-impl/target/ledgers-sca-service-impl*jar"
+  - "ledgers-user-management/ledgers-user-management-repository/target/ledgers-user-management-repository*jar"
+  - "ledgers-user-management/ledgers-user-management-rest-server/target/ledgers-user-management-rest-server*jar"
+  - "ledgers-user-management/ledgers-user-management-service-api/target/ledgers-user-management-service-api*jar"
+  - "ledgers-user-management/ledgers-user-management-service-impl/target/ledgers-user-management-service-impl*jar"
+  - "ledgers-utils/target/ledgers-utils*jar"
+  name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
+
+
 .build_java: &build_java
+  stage: "build:src"
   image: "adorsys/openjdk-build-base:8"
   script:
-    - mvn clean install pmd:pmd pmd:check
+  - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+  - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+  - mvn -DskipTests clean install
 
-#    - mvn clean install pmd:pmd pmd:check javadoc:javadoc
 # Build docker images and put them to GITLAB repo
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
 #.build_docker_image: &build_docker_image
 #  script:
-#    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $GITLAB_REGISTRY
+#  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $GITLAB_REGISTRY
 #
-#    - docker build -t "$GITLAB_IMAGE_NAME_XS2A:$DOCKER_TAG" spi-mock
-#    - docker push "$GITLAB_IMAGE_NAME_XS2A:$DOCKER_TAG"
+#  - docker build -t "GITLAB_IMAGE_NAME_LEDGERS:$DOCKER_TAG" .
+#  - docker push "GITLAB_IMAGE_NAME_LEDGERS:$DOCKER_TAG"
+
+
+# Build docker images and put them to DOCKER HUB repo
+.build_dockerhub_image: &build_dockerhub_image
+  script:
+  - docker build -t "DOCKER_IMAGE_NAME_LEDGERS:$DOCKER_TAG" .
+
+  - docker login -u $DOCKER_HUB_LOGIN -p $DOCKER_HUB_PASS
+
+  - docker push "DOCKER_IMAGE_NAME_LEDGERS:$DOCKER_TAG"
+
+  - docker logout
+
+# Pull docker images and put them to OPENSHIFT repo
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
+#.push_docker_openshift: &push_docker_openshift
+#  script:
+#  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $GITLAB_REGISTRY
+#  - docker login -u openshift -p $OPENSHIFT_TOKEN $OPENSHIFT_REGISTRY
+#
+#  - docker pull GITLAB_IMAGE_NAME_LEDGERS:$DOCKER_TAG
+#  - docker tag GITLAB_IMAGE_NAME_LEDGERS:$DOCKER_TAG OPENSHIFT_IMAGE_NAME_LEDGERS:$DOCKER_TAG
+#  - docker push OPENSHIFT_IMAGE_NAME_LEDGERS:$DOCKER_TAG
+
+#.helm_env_deploy: &helm_env_deploy
+#  image: adorsys/ci-helm:2.10
+#  script:
+#  - cd devops/charts/xs2a
+#  - helm init --client-only
+#  - oc login openshift.adorsys.de --token=${HELM_TOKEN}
+#  - echo "${VAULT_PWD}" > $ANSIBLE_VAULT_PASSWORD_FILE
+#  - ansible-vault view env/${HELM_VALUE}.enc > env/${HELM_VALUE}
+#  - >-
+#    helm diff upgrade ${HELM_RELEASE} .
+#    --allow-unreleased -q
+#    -f env/${HELM_VALUE}
+#  - >-
+#    helm upgrade -i ${HELM_RELEASE} .
+#    --namespace=${OPENSHIFT_NAMESPACE} --wait --timeout=600
+#    -f env/${HELM_VALUE}
 
 
 # ------------------------------------------------------------------
@@ -54,57 +141,199 @@ variables: &variables
 # ------------------------------------------------------------------
 
 build_package:
-  stage: "build"
+  <<: *build_java
+  artifacts:
+    <<: *java_artifacts
+    expire_in: "1 day"
+
+pmd_report:
+  stage: "build:src"
+  image: "adorsys/openjdk-build-base:8"
+  script:
+  - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+  - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+  - mvn -Dmaven.test.skip=true package pmd:pmd
   artifacts:
     paths:
-    - "spi-mock/target/spi-mock*jar"
     - "qa/pmd/pmd-ruleset.xml"
     - "**/**/*/pmd.html"
     - "**/*/pmd.xml"
-    - "**/target/site/*"
-    - "**/target/surefire-reports/*"
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-pmd"
     expire_in: "10 day"
-  <<: *build_java
+
+check_pmd:
+  stage: "build:qa"
+  image: "adorsys/openjdk-build-base:8"
+  script:
+  - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+  - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+  - mvn -Dmaven.test.skip=true package pmd:check
+
+check_javadoc:
+  stage: "build:qa"
+  image: "adorsys/openjdk-build-base:8"
+  script:
+  - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+  - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+  - mvn -Dmaven.test.skip=true package javadoc:javadoc
+  artifacts:
+    paths:
+    - "**/target/site/*"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
+    expire_in: "10 day"
+
+unit_tests:
+  stage: "build:qa"
+  image: "adorsys/openjdk-build-base:8"
+  script:
+  - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+  - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+  - mvn --fail-at-end clean install
+  artifacts:
+    paths:
+    - "**/target/surefire-reports/*"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
+    expire_in: "10 day"
 
 
 # Develop
 
+deploy_dockerhub_stage:
+  stage: "build:image"
+  only:
+  - develop
+  variables:
+    DOCKER_TAG: develop
+  <<: *build_dockerhub_image
+
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
 #build_image_integ:
 #  stage: "build:image"
 #  only:
-#    - develop
+#  - develop
 #  variables:
-#    DOCKER_TAG: develop
+#    DOCKER_TAG: integ
+#  environment:
+#    name: integ
+#    url: https://xs2a.integ.cloud.adorsys.de
 #  <<: *build_docker_image
+
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
+#deploy_image_integ:
+#  stage: deploy
+#  only:
+#  - develop
+#  environment:
+#    name: integ
+#    url: https://xs2a.integ.cloud.adorsys.de
+#  variables:
+#    DOCKER_TAG: integ
+#  <<: *push_docker_openshift
+
+#deploy_develop_stage:
+#  stage: "deploy:static"
+#  <<: *helm_env_deploy
+#  only:
+#  - develop
+#  variables:
+#    <<: *variables
+#    OPENSHIFT_NAMESPACE: "${DEV_NAMESPACE}"
+#    DOCKER_TAG: "${CI_COMMIT_REF_SLUG}"
+#    HELM_RELEASE: "${CI_ENVIRONMENT_SLUG}-psd2"
+#    HELM_VALUE: develop.yaml
+#  environment:
+#    name: dev
+#    url: ~
+#
 
 # Master
 
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
 #build_image_master:
 #  stage: "build:image"
 #  only:
-#    - master
+#  - master
 #  variables:
 #    DOCKER_TAG: latest
+#  environment:
+#    name: demo
 #  <<: *build_docker_image
+
+build_dockerhub_image_master:
+  stage: "build:image"
+  only:
+  - master
+  variables:
+    DOCKER_TAG: latest
+  environment:
+    name: demo
+  <<: *build_dockerhub_image
+
+## TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
+#deploy_image_master:
+#  stage: deploy
+#  only:
+#  - master
+#  variables:
+#    DOCKER_TAG: latest
+#  environment:
+#    name: demo
+#  <<: *push_docker_openshift
+
 
 # Release
 
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
 #build_image_release:
 #  stage: "build:image"
 #  only:
-#    - tags
+#  - tags
 #  variables:
 #    DOCKER_TAG: $CI_COMMIT_TAG
 #  <<: *build_docker_image
 
+build_dockerhub_image_release:
+  stage: "build:image"
+  only:
+  - tags
+  variables:
+    DOCKER_TAG: $CI_COMMIT_TAG
+  <<: *build_dockerhub_image
+
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
+#deploy_image_release:
+#  stage: deploy
+#  only:
+#  - tags
+#  when: manual
+#  variables:
+#    DOCKER_TAG: $CI_COMMIT_TAG
+#  <<: *push_docker_openshift
+
 # Integ tests
-#
+
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
 #build_image_integtest:
 #  stage: "build:image"
 #  only:
-#    - schedules
+#  - schedules
 #  variables:
 #    DOCKER_TAG: nightly
 #  <<: *build_docker_image
 
+push_dockerhub_image_nightly:
+  stage: "build:image"
+  only:
+  - schedules
+  variables:
+    DOCKER_TAG: nightly
+  <<: *build_dockerhub_image
+
+# TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
+#deploy_image_integtest:
+#  stage: deploy
+#  only:
+#  - schedules
+#  variables:
+#    DOCKER_TAG: nightly
+#  <<: *push_docker_openshift

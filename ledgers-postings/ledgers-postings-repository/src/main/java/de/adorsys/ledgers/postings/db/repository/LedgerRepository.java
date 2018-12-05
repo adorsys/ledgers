@@ -10,16 +10,16 @@ public interface LedgerRepository extends NamedEntityRepository<Ledger> {
 	/**
 	 * Find a ledger with this name.
 	 * 
-	 * @param name
-	 * @return
+	 * @param name of ledger
+	 * @return ledger wrapped with Optional
 	 */
 	Optional<Ledger> findOptionalByName(String name);
 
 	/**
 	 * Resolve all ledgers using this coa.
 	 * 
-	 * @param coa
-	 * @return
+	 * @param coa: chart of account
+	 * @return list of ledgers
 	 */
 	List<Ledger> findByCoa(ChartOfAccount coa);
 }
