@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,14 +112,14 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         List<PostingLineBO> creditLines = storedPayment.getTargets().stream()
                                                   .map(t -> {
                                                       t.setPayment(storedPayment);
-                                                      String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(t, pstTime.toLocalDate()));
-                                                      return buildCreditLine(t, ledger, targetDetails);
+                                                      return buildCreditLine(t, ledger, pstTime.toLocalDate());
                                                   })
                                                   .collect(Collectors.toList());
 
         AmountBO amount = calculateDebitAmountBatch(storedPayment, creditLines);
-        String debitLineDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(storedPayment, amount, pstTime.toLocalDate()));
-        PostingLineBO debitLine = buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, storedPayment.getPaymentId());
+        String id = UUID.randomUUID().toString();
+        String debitLineDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, storedPayment, amount, pstTime.toLocalDate()));
+        PostingLineBO debitLine = buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, storedPayment.getPaymentId(), id);
         posting.getLines().add(debitLine);
         posting.getLines().addAll(creditLines);
 
@@ -127,9 +128,10 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
     private PostingBO buildDCPosting(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount, PaymentTargetBO target) {
         PostingBO posting = buildPosting(pstTime, target.getPayment().getPaymentId(), oprDetails, ledger);
-        String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(target, pstTime.toLocalDate()));
-        PostingLineBO debitLine = buildPostingLine(targetDetails, debtorLedgerAccount, target.getInstructedAmount().getAmount(), BigDecimal.ZERO, posting.getOprId());
-        PostingLineBO creditLine = buildCreditLine(target, ledger, targetDetails);
+        String id = UUID.randomUUID().toString();
+        String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime.toLocalDate()));
+        PostingLineBO debitLine = buildPostingLine(targetDetails, debtorLedgerAccount, target.getInstructedAmount().getAmount(), BigDecimal.ZERO, posting.getOprId(), id);
+        PostingLineBO creditLine = buildCreditLine(target, ledger, pstTime.toLocalDate());
         posting.getLines().addAll(Arrays.asList(debitLine, creditLine));
         return posting;
     }
@@ -142,9 +144,11 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         return new AmountBO(currency, debitAmount);
     }
 
-    private PostingLineBO buildCreditLine(PaymentTargetBO target, LedgerBO ledger, String targetDetails) {
+    private PostingLineBO buildCreditLine(PaymentTargetBO target, LedgerBO ledger, LocalDate pstTime) {
         LedgerAccountBO creditorAccount = getCreditorAccount(ledger, target.getCreditorAccount().getIban(), target.getPaymentProduct());
-        return buildPostingLine(targetDetails, creditorAccount, BigDecimal.ZERO, target.getInstructedAmount().getAmount(), target.getPaymentId());
+        String id = UUID.randomUUID().toString();
+        String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime));
+        return buildPostingLine(targetDetails, creditorAccount, BigDecimal.ZERO, target.getInstructedAmount().getAmount(), target.getPaymentId(), id);
     }
 
     private LedgerAccountBO getDebtorAccount(LedgerBO ledger, String iban) {
@@ -177,8 +181,9 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         }
     }
 
-    private PostingLineBO buildPostingLine(String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount, String subOprSrcId) {
+    private PostingLineBO buildPostingLine(String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount, String subOprSrcId, String lineId) {
         PostingLineBO line = new PostingLineBO();
+        line.setId(lineId);
         line.setDetails(lineDetails);
         line.setAccount(ledgerAccount);
         line.setDebitAmount(debitAmount);

@@ -45,14 +45,14 @@ public class AccountResource {
 
     private final MiddlewareAccountManagementService middlewareAccountService;
 
-	public AccountResource(MiddlewareAccountManagementService middlewareAccountService) {
-		this.middlewareAccountService = middlewareAccountService;
-	}
+    public AccountResource(MiddlewareAccountManagementService middlewareAccountService) {
+        this.middlewareAccountService = middlewareAccountService;
+    }
 
-	@GetMapping("/{accountId}")
+    @GetMapping("/{accountId}")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(@PathVariable String accountId) {
         try {
-            return ResponseEntity.ok(middlewareAccountService.getAccountDetailsByAccountId(accountId, LocalDateTime.MAX));
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true));
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -62,7 +62,7 @@ public class AccountResource {
     @GetMapping("/balances/{accountId}")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(@PathVariable String accountId) {
         try {
-        	AccountDetailsTO accountDetails = middlewareAccountService.getAccountDetailsByAccountId(accountId, LocalDateTime.MAX);
+            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
             return ResponseEntity.ok(accountDetails.getBalances());
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
@@ -84,7 +84,6 @@ public class AccountResource {
     public ResponseEntity<List<TransactionTO>> getTransactionByDates(@PathVariable String accountId,
                                                                      @RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
                                                                      @RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo) {
-
         dateChecker(dateFrom, dateTo);
         try {
             List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
@@ -108,7 +107,7 @@ public class AccountResource {
     @GetMapping("/ibans/{iban}")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(@PathVariable String iban) {
         try {
-            return ResponseEntity.ok(middlewareAccountService.getAccountDetailsByIban(iban));
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -116,11 +115,11 @@ public class AccountResource {
     }
 
     @PostMapping(value = "/funds-confirmation")
-    public ResponseEntity<Boolean> fundsConfirmation(@RequestBody FundsConfirmationRequestTO request){
-	    try {
-	        boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
-	        return ResponseEntity.ok(fundsAvailable);
-        } catch (AccountNotFoundMiddlewareException e){
+    public ResponseEntity<Boolean> fundsConfirmation(@RequestBody FundsConfirmationRequestTO request) {
+        try {
+            boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
+            return ResponseEntity.ok(fundsAvailable);
+        } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }

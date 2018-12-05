@@ -4,7 +4,7 @@ server:
   port: 8088
 
 db:
-  host: ledgers_db
+  host: localhost
   user: ledgers
   password: ledgers
   database: ledgers
@@ -31,16 +31,12 @@ spring:
   jackson.serialization.write_dates_as_timestamps: false
   mail:
     default-encoding: UTF-8
-    host: smtp.gmail.com
-    port: 587
-    username: #add your email here
-    password: #add your password here
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+    host: localhost
+    port: 2500
+#    properties:
+#      mail:
+#        smtp:
+#          auth: false
 
 sca:
   authCode:
@@ -63,6 +59,18 @@ spring:
 
 db:
   url: jdbc:h2:mem:ledgers
+  user: sa
+  password: sa
+
+---
+spring:
+  profiles: h2-fs
+  h2:
+    console:
+      enabled: true
+
+db:
+  url: jdbc:h2:./target/ledgers-db
   user: sa
   password: sa
 

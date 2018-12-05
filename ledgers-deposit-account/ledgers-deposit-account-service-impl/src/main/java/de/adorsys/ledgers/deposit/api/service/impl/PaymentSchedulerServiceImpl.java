@@ -6,7 +6,6 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.deposit.api.service.PaymentSchedulerService;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
-import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.ScheduledPaymentOrder;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
@@ -49,11 +48,11 @@ public class PaymentSchedulerServiceImpl implements PaymentSchedulerService {
                                   .orElseThrow(() -> new PaymentNotFoundException(paymentOrderId));
 
         // How do we proceed with periodic Payment
-        if (PaymentType.PERIODIC.equals(payment.getPaymentType())) {
+      /*  if (PaymentType.PERIODIC.equals(payment.getPaymentType())) { //TODO Should be reviewed after 19 dec payment execution scheduler should be implemented
             return schedulePeriodicPmt(payment);
-        } else {
-            return scheduleOneTimePmt(payment);
-        }
+        } else {*/
+        return scheduleOneTimePmt(payment);
+        //}
     }
 
     private TransactionStatusBO scheduleOneTimePmt(Payment payment) throws PaymentNotFoundException {
@@ -68,7 +67,7 @@ public class PaymentSchedulerServiceImpl implements PaymentSchedulerService {
         return txService.bookPayment(payment.getPaymentId(), postingTime);
     }
 
-    private TransactionStatusBO schedulePeriodicPmt(Payment payment) {
+    private TransactionStatusBO schedulePeriodicPmt(Payment payment) { //TODO //NOPMD
         LocalDateTime now = LocalDateTime.now();
         // Set startDate to now if none.
         LocalDate startDate = payment.getStartDate() == null

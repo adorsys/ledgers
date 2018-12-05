@@ -21,6 +21,7 @@ public class MockbankInitData extends BalancesData {
 	private List<BulkPaymentsData> bulkPayments = new ArrayList<>();
 	private List<TransactionData> transactions = new ArrayList<>();
 
+	private String updateMarkerAccountNbr;
 
 	public List<AccountDetailsTO> getAccounts() {
 		return accounts;
@@ -51,5 +52,11 @@ public class MockbankInitData extends BalancesData {
 	}
 	public void setBulkPayments(List<BulkPaymentsData> bulkPayments) {
 		this.bulkPayments = bulkPayments;
+	}
+	public String getUpdateMarkerAccountNbr() {
+		return updateMarkerAccountNbr;
+	}
+	public void setUpdateMarkerAccountNbr(String updateMarkerAccountNbr) {
+		this.updateMarkerAccountNbr = updateMarkerAccountNbr;
 	}
 }

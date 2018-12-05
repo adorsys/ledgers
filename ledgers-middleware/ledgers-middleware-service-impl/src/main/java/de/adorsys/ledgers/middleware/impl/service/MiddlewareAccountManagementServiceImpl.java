@@ -34,20 +34,20 @@ import java.util.stream.Collectors;
 @Service
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareAccountManagementServiceImpl.class);
+    private static final LocalDateTime BASE_TIME = LocalDateTime.MIN; //TODO @fpo why we use minimal possible time value?
 
-    private static final LocalDateTime BASE_TIME = LocalDateTime.MIN;
-
-    @Autowired
-    private DepositAccountService depositAccountService;
-
-    @Autowired
-    private AccountDetailsMapper accountDetailsMapper;
+    private final DepositAccountService depositAccountService;
+    private final AccountDetailsMapper accountDetailsMapper;
+    private final PaymentConverter paymentConverter;
+    private final UserService userService;
 
     @Autowired
-    private PaymentConverter paymentConverter;
-
-    @Autowired
-    private UserService userService;
+    public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService, AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService) {
+        this.depositAccountService = depositAccountService;
+        this.accountDetailsMapper = accountDetailsMapper;
+        this.paymentConverter = paymentConverter;
+        this.userService = userService;
+    }
 
     @Override
     public void createDepositAccount(AccountDetailsTO depositAccount) throws AccountNotFoundMiddlewareException {
@@ -61,57 +61,22 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
-        DepositAccountDetailsBO accountDetailsBO;
         try {
-            accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, withBalance);
-        } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
-        return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO.getAccount(), accountDetailsBO.getBalances());
-    }
-
-    @Override
-    public AccountDetailsTO getDepositAccountByIBAN(String iban, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
-        DepositAccountDetailsBO accountDetailsBO;
-        try {
-            accountDetailsBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
-        } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
-        return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO.getAccount(), accountDetailsBO.getBalances());
-    }
-
-    @Override
-    public AccountDetailsTO getAccountDetailsByAccountId(String accountId, LocalDateTime refTime) throws AccountNotFoundMiddlewareException {
-        try {
-            DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, refTime, true);
+            DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
             return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
         } catch (DepositAccountNotFoundException e) {
-            logger.error("Deposit Account with id=" + accountId + "not found", e);
+            logger.error(e.getMessage(), e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
 
     @Override
-    public AccountDetailsTO getAccountDetailsByIban(String iban) throws AccountNotFoundMiddlewareException {
+    public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
         try {
-            DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, BASE_TIME, false);
+            DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, false);
             return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
         } catch (DepositAccountNotFoundException e) {
-            logger.error("Deposit Account with iban={} not found", iban, e);
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public AccountDetailsTO getAccountDetailsWithBalancesByIban(String iban, LocalDateTime refTime) throws AccountNotFoundMiddlewareException {
-        try {
-            DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, refTime, true);
-            return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
-        } catch (DepositAccountNotFoundException e) {
-            logger.error("Deposit Account with iban={} not found", iban, e);
+            logger.error(e.getMessage(), e);
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -133,7 +98,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             List<DepositAccountDetailsBO> depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, BASE_TIME, false);
             logger.info("{} deposit accounts were found", depositAccounts.size());
 
-            return depositAccounts.stream().map(accountDetailsMapper::toAccountDetailsTO).collect(Collectors.toList());
+            return depositAccounts.stream()
+                           .map(accountDetailsMapper::toAccountDetailsTO)
+                           .collect(Collectors.toList());
         } catch (UserNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new UserNotFoundMiddlewareException(e.getMessage());

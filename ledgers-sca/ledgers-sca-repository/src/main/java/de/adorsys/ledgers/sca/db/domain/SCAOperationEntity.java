@@ -18,14 +18,9 @@ package de.adorsys.ledgers.sca.db.domain;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 @Entity
@@ -33,6 +28,10 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
 public class SCAOperationEntity {
 
     @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    private String id;
+
     @Column(name = "op_id", nullable = false, updatable = false)
     private String opId;
 
@@ -57,6 +56,14 @@ public class SCAOperationEntity {
     @Column(name = "status_time", nullable = false)
 	@Convert(converter=LocalDateTimeConverter.class)
     private LocalDateTime statusTime;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getOpId() {
         return opId;
@@ -117,6 +124,7 @@ public class SCAOperationEntity {
     @Override
     public String toString() {
         return "SCAOperationEntity{" +
+                       "id='" + id + '\'' +
                        ", opId='" + opId + '\'' +
                        ", validitySeconds=" + validitySeconds +
                        ", authCodeHash='" + authCodeHash + '\'' +

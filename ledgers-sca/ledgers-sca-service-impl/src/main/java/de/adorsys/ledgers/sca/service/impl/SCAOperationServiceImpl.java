@@ -111,7 +111,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(data.getOpData(), tan));
 
-        SCAOperationEntity scaOperation = buildSCAOperation(data.getPaymentId(), hashItem);
+        SCAOperationEntity scaOperation = buildSCAOperation(data.getOpId(), hashItem);
 
         repository.save(scaOperation);
 
@@ -119,7 +119,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
         senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
 
-        return scaOperation.getOpId();
+        return scaOperation.getId();
     }
 
     private void checkMethodSupported(ScaUserDataBO scaMethod) throws SCAMethodNotSupportedException {
@@ -171,7 +171,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     @SuppressWarnings("PMD.PrematureDeclaration")
     public boolean validateAuthCode(String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
-        Optional<SCAOperationEntity> operationOptional = repository.findById(opId);
+        Optional<SCAOperationEntity> operationOptional = repository.findOneByOpIdOrderByCreatedDesc(opId);
 
         String authCodeHash = operationOptional
                                       .map(SCAOperationEntity::getAuthCodeHash)
