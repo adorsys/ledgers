@@ -13,6 +13,10 @@ export class UserService {
   constructor(private http: HttpClient) {
   }
 
+  getAll() {
+    return this.http.get(this.url + '/all');
+  }
+
   createUser(user: User) {
     return this.http.post(this.url, JSON.stringify(user));
   }
