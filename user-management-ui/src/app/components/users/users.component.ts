@@ -24,4 +24,8 @@ export class UsersComponent implements OnInit {
         this.users = users;
       });
   }
+
+  editUser(id: number) {
+
+  }
 }

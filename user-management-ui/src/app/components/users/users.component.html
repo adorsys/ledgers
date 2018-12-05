@@ -1,13 +1,13 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
   <h1 class="h2">Users</h1>
   <div class="btn-toolbar mb-2 mb-md-0">
-    <div class="btn-group mr-2">
-      <button class="btn btn-sm btn-outline-secondary">Share</button>
-      <button class="btn btn-sm btn-outline-secondary">Export</button>
-    </div>
+    <!--<div class="btn-group mr-2">-->
+      <!--<button class="btn btn-sm btn-outline-secondary">Share</button>-->
+      <!--<button class="btn btn-sm btn-outline-secondary">Export</button>-->
+    <!--</div>-->
     <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
       <span data-feather="calendar"></span>
-      This week
+      Some filter to manipulate data
     </button>
   </div>
 </div>
@@ -24,7 +24,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let user of users; index as i">
+      <tr *ngFor="let user of users; index as i" [routerLink]="['/users/' + user.id]">
         <th scope="row">{{i + 1}}</th>
         <td>{{user.login}}</td>
         <td>{{user.email}}</td>
