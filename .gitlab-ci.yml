@@ -6,6 +6,7 @@ stages:
 - "build:src"    # build jar and provide as artifact
 - "build:qa"     # run tests and code quality checks
 - "build:image"  # dockerize jar and push to docker registry
+- "deploy"       # push to openshift registry (snapshot deployment) or release registry
 
 # ------------------------------------------------------------------
 # variables
@@ -39,15 +40,15 @@ variables: &variables
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 
-    ###########################
-    # Deployment variables    #
-    ###########################
+  ###########################
+  # Deployment variables    #
+  ###########################
 
-    DEV_NAMESPACE: adorsys-psd2-develop
-    INTEG_NAMESPACE: adorsys-psd2-integ
-    DEMO_NAMESPACE: adorsys-psd2-demo
-    TILLER_NAMESPACE: adorsys-psd2-tiller
-    ANSIBLE_VAULT_PASSWORD_FILE: /tmp/vault_pass
+  DEV_NAMESPACE: adorsys-psd2-develop
+  INTEG_NAMESPACE: adorsys-psd2-integ
+  DEMO_NAMESPACE: adorsys-psd2-demo
+  TILLER_NAMESPACE: adorsys-psd2-tiller
+  ANSIBLE_VAULT_PASSWORD_FILE: /tmp/vault_pass
 # ------------------------------------------------------------------
 # reusable yaml anchors
 # ------------------------------------------------------------------
