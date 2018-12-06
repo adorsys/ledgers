@@ -12,6 +12,7 @@ import { AccountsComponent } from './components/accounts/accounts.component';
 import { UserNewComponent } from './components/users/user-new/user-new.component';
 import { HttpClientModule } from '@angular/common/http';
 import { UserEditComponent } from './components/users/user-edit/user-edit.component';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -28,7 +29,9 @@ import { UserEditComponent } from './components/users/user-edit/user-edit.compon
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
