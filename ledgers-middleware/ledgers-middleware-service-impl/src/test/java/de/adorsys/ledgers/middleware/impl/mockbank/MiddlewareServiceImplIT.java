@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareEx
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
@@ -75,7 +77,14 @@ public class MiddlewareServiceImplIT {
 	private LedgerService ledgerService;
 	@Autowired
 	private DepositAccountConfigService depositAccountConfigService;
+    @Autowired
+    private AppManagementService appManagementService;
 
+    @Before
+    public void initDepositAccount() throws IOException {
+    	appManagementService.initApp();
+    }
+    
 	@Test
 	public void execute_payment_read_tx_ok()
 			throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException,

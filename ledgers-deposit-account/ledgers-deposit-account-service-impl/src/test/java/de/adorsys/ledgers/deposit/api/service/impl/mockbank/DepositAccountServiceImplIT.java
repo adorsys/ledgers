@@ -8,6 +8,8 @@ import java.time.Month;
 
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
@@ -62,8 +65,15 @@ public class DepositAccountServiceImplIT {
     private LedgerService ledgerService;
     @Autowired
     private DepositAccountConfigService depositAccountConfigService;
+    @Autowired
+    private DepositAccountInitService depositAccountInitService;
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    
+    @Before
+    public void initDepositAccount() throws IOException {
+    	depositAccountInitService.initConfigData();
+    }
 
     /**
      * Testing the test. Negative case, if comparison with wrong balance works.

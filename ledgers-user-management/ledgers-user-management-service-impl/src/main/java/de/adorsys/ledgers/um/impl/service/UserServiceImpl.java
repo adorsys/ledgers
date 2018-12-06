@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -56,6 +57,7 @@ import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
@@ -139,8 +141,10 @@ public class UserServiceImpl implements UserService {
 				confirmAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
 			});
 
-			userEntity.setAccountAccesses(accountAccessesFromToken);
-			return userConverter.toUserBO(userEntity);
+			
+			UserBO userBO = userConverter.toUserBO(userEntity);
+			userBO.setAccountAccesses(userConverter.toAccountAccessListBO(accountAccessesFromToken));
+			return userBO;
 			
 		} catch (ParseException e) {
 			// If we can not parse the token, we log the error and return false.
