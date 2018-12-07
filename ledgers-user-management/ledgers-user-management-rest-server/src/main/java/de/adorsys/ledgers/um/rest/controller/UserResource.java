@@ -21,7 +21,14 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
@@ -54,7 +61,7 @@ public class UserResource {
     @GetMapping("{id}")
     ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
         try {
-        	return ResponseEntity.ok(userService.findById(id));
+            return ResponseEntity.ok(userService.findById(id));
         } catch (UserNotFoundException e) {
             throw new NotFoundRestException(e.getMessage());
         }
@@ -63,7 +70,7 @@ public class UserResource {
     @GetMapping
     ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
         try {
-        	return ResponseEntity.ok(userService.findByLogin(login));
+            return ResponseEntity.ok(userService.findByLogin(login));
         } catch (UserNotFoundException e) {
             throw new NotFoundRestException(e.getMessage());
         }
@@ -76,7 +83,7 @@ public class UserResource {
             UserBO user = userService.updateScaData(data, userBO.getLogin());
 
             URI uri = UriComponentsBuilder.fromUriString(USERS + user.getId())
-                    .build().toUri();
+                              .build().toUri();
 
             return ResponseEntity.created(uri).build();
         } catch (UserNotFoundException e) {

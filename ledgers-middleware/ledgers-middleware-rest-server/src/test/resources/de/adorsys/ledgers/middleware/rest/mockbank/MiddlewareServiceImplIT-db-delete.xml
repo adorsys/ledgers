@@ -8,6 +8,7 @@
     <USERS />
 	<ACCOUNT_ACCESSES />
     <SCA_DATA />
+    <USERS_ROLES />
     
     <DEPOSIT_ACCOUNT />
     <PAYMENT />

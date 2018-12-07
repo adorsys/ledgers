@@ -85,14 +85,14 @@ public class UserServiceImpl implements UserService {
         userPO.setPin(passwordEnc.encode(userPO.getId(),user.getPin()));
 
         try {
-        	return userConverter.toUserBO(userRepository.save(userPO));
-        } catch(ConstraintViolationException c) {
-        	if(UserEntity.USER_EMAIL_UNIQUE.equals(c.getConstraintName()) ||   //TODO by @speex Let's UserAlreadyExistsException will decide what to do, just pass user and exception args to it
-        			UserEntity.USER_LOGIN_UNIQUE.equals(c.getConstraintName())){
-        		throw new UserAlreadyExistsException(user, c);
-        	} else {
-        		throw new UserAlreadyExistsException(c.getMessage(), c);
-        	}
+            return userConverter.toUserBO(userRepository.save(userPO));
+        } catch (ConstraintViolationException c) {
+            if (UserEntity.USER_EMAIL_UNIQUE.equals(c.getConstraintName()) ||   //TODO by @speex Let's UserAlreadyExistsException will decide what to do, just pass user and exception args to it
+                        UserEntity.USER_LOGIN_UNIQUE.equals(c.getConstraintName())) {
+                throw new UserAlreadyExistsException(user, c);
+            } else {
+                throw new UserAlreadyExistsException(c.getMessage(), c);
+            }
         }
     }
 
@@ -186,6 +186,7 @@ public class UserServiceImpl implements UserService {
         	.claim("login", user.getLogin())
         	.claim("accountAccesses", user.getAccountAccesses())
         	.claim("scaUserData", user.getScaUserData())
+        	.claim("userRoles", user.getUserRoles())
         	.issueTime(iat)
         	.expirationTime(DateUtils.addMinutes(iat, 30)).build();
         
@@ -231,9 +232,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-	public UserBO findByLogin(String login) throws UserNotFoundException {
-    	return userConverter.toUserBO(getUser(login));
-	}
+    public UserBO findByLogin(String login) throws UserNotFoundException {
+        return userConverter.toUserBO(getUser(login));
+    }
 
     @Override
     public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException {
@@ -255,7 +256,7 @@ public class UserServiceImpl implements UserService {
             throws UserNotFoundException {
         logger.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
-                .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
+                                  .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
 
         List<AccountAccess> accountAccesses = userConverter.toAccountAccessListEntity(accountAccessListBO);
         user.getAccountAccesses().clear();

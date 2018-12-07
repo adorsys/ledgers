@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -63,7 +64,7 @@ public class AppManagementResource {
 	
     @PostMapping("/init")
     @ApiOperation("Initializes the deposit account module.")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> initApp() {
     	try {
 			appManagementService.initApp();
@@ -86,6 +87,7 @@ public class AppManagementResource {
     	user.setLogin(adminUser.getLogin());
     	user.setPin(adminUser.getPin());
     	user.setEmail(adminUser.getEmail());
+    	user.getUserRoles().add(UserRoleTO.SYSTEM);
 		try {
 			userManagementService.create(user);
 		} catch (UserAlreadyExistsMiddlewareException e) {

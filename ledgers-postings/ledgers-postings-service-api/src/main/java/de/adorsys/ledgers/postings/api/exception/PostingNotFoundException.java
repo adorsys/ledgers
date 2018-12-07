@@ -14,7 +14,7 @@ public class PostingNotFoundException extends Exception {
 	}
 
 	public PostingNotFoundException(String accountId, String oprSrcId) {
-		this(String.format("Posting with account id %s  and oprSrcId %s could not be found", accountId, oprSrcId));
+		this(String.format("Posting with account id %s  and transaction id %s could not be found", accountId, oprSrcId));
 	}
 	
 	

@@ -23,11 +23,15 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
-        if(logger.isTraceEnabled()) logger.trace("doFilter start");
+        if(logger.isTraceEnabled()) {
+        	logger.trace("doFilter start");
+        }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            if(logger.isDebugEnabled()) logger.debug("Authentication is null. Try to get authentication from request...");
+            if(logger.isDebugEnabled()) {
+            	logger.debug("Authentication is null. Try to get authentication from request...");
+            }
 
             authentication = tokenAuthenticationService.getAuthentication((HttpServletRequest) request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -35,6 +39,8 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
 
         filterChain.doFilter(request, response);
 
-        if(logger.isTraceEnabled()) logger.trace("doFilter end");
+        if(logger.isTraceEnabled()) {
+        	logger.trace("doFilter end");
+        }
     }
 }

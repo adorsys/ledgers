@@ -21,9 +21,9 @@ public class AuthCodeDataConverterTest {
 
         AuthCodeDataBO bo = mapper.toAuthCodeDataBO(to);
 
-        assertThat(bo.getOpData(), is(to.getOpData()));
+        assertThat(bo.getOpId(), is(to.getOpId()));
         assertThat(bo.getUserLogin(), is(to.getUserLogin()));
-        assertThat(bo.getPaymentId(), is(to.getPaymentId()));
+        assertThat(bo.getOpData(), is(to.getOpData()));
         assertThat(bo.getScaUserDataId(), is(to.getScaUserDataId()));
     }
 

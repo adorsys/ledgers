@@ -92,7 +92,7 @@ public class AccountResourceTest {
         });
         assertThat(mvcResult.getResponse().getStatus(), is(200));
         assertThat(Optional.ofNullable(actual).map(AccountDetailsTO::getId).orElse(null), is(ACCOUNT_ID));
-        verify(middlewareService, times(1)).getDepositAccountById(ACCOUNT_ID, DATE_TIME, true);
+        verify(middlewareService, times(1)).getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class AccountResourceTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
 
-        verify(middlewareService, times(1)).getDepositAccountById(ACCOUNT_ID, DATE_TIME, true);
+        verify(middlewareService, times(1)).getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class AccountResourceTest {
     public void getBalances_Success() throws Exception {
         AccountDetailsTO accountDetails = readBalances();
 
-        when(middlewareService.getDepositAccountById(ACCOUNT_ID, DATE_TIME, true)).thenReturn(accountDetails);
+        when(middlewareService.getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true))).thenReturn(accountDetails);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
                                       .andDo(print())
@@ -169,12 +169,12 @@ public class AccountResourceTest {
         actual.forEach(a -> assertThat(a).isNotNull());
         assertThat(actual.get(0)).isEqualToComparingFieldByFieldRecursively(accountDetails.getBalances().get(0));
         assertThat(actual.get(1)).isEqualToComparingFieldByFieldRecursively(accountDetails.getBalances().get(1));
-        verify(middlewareService, times(1)).getDepositAccountById(ACCOUNT_ID, DATE_TIME, true);
+        verify(middlewareService, times(1)).getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true));
     }
 
     @Test
     public void getBalances_Failure_NotFound() throws Exception {
-        when(middlewareService.getDepositAccountById(ACCOUNT_ID, DATE_TIME, true))
+        when(middlewareService.getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true)))
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with id=" + ACCOUNT_ID + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
@@ -183,7 +183,7 @@ public class AccountResourceTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
 
-        verify(middlewareService, times(1)).getDepositAccountById(ACCOUNT_ID, DATE_TIME, true);
+        verify(middlewareService, times(1)).getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true));
     }
 
     @Test

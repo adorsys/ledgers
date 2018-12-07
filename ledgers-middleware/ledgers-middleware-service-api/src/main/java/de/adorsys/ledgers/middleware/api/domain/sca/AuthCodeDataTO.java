@@ -21,19 +21,19 @@ import java.util.Objects;
 public class AuthCodeDataTO {
     private String userLogin;
     private String scaUserDataId;
-    private String paymentId;
     private String opData;
+    private String opId;
     private String userMessage;
     private int validitySeconds;
 
     public AuthCodeDataTO() {
     }
 
-    public AuthCodeDataTO(String userLogin, String scaUserDataId, String paymentId, String opData, String userMessage, int validitySeconds) {
+    public AuthCodeDataTO(String userLogin, String scaUserDataId, String opData, String opId, String userMessage, int validitySeconds) {
         this.userLogin = userLogin;
         this.scaUserDataId = scaUserDataId;
-        this.paymentId = paymentId;
         this.opData = opData;
+        this.opId = opId;
         this.userMessage = userMessage;
         this.validitySeconds = validitySeconds;
     }
@@ -54,20 +54,20 @@ public class AuthCodeDataTO {
         this.scaUserDataId = scaUserDataId;
     }
 
-    public String getPaymentId() {
-        return paymentId;
-    }
-
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
-    }
-
     public String getOpData() {
         return opData;
     }
 
     public void setOpData(String opData) {
         this.opData = opData;
+    }
+
+    public String getOpId() {
+        return opId;
+    }
+
+    public void setOpId(String opId) {
+        this.opId = opId;
     }
 
     public String getUserMessage() {
@@ -94,14 +94,14 @@ public class AuthCodeDataTO {
         return validitySeconds == that.validitySeconds &&
                        Objects.equals(userLogin, that.userLogin) &&
                        Objects.equals(scaUserDataId, that.scaUserDataId) &&
-                       Objects.equals(paymentId, that.paymentId) &&
                        Objects.equals(opData, that.opData) &&
+                       Objects.equals(opId, that.opId) &&
                        Objects.equals(userMessage, that.userMessage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userLogin, scaUserDataId, paymentId, opData, userMessage, validitySeconds);
+        return Objects.hash(userLogin, scaUserDataId, opData, opId, userMessage, validitySeconds);
     }
 
     @Override
@@ -109,8 +109,8 @@ public class AuthCodeDataTO {
         return "AuthCodeDataTO{" +
                        "userLogin='" + userLogin + '\'' +
                        ", scaUserDataId='" + scaUserDataId + '\'' +
-                       ", paymentId='" + paymentId + '\'' +
                        ", opData='" + opData + '\'' +
+                       ", opId='" + opId + '\'' +
                        ", userMessage='" + userMessage + '\'' +
                        ", validitySeconds=" + validitySeconds +
                        '}';

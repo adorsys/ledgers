@@ -111,7 +111,7 @@ public class AccountResource {
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId) {
         try {
-            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true);
+            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
             return ResponseEntity.ok(accountDetails.getBalances());
         } catch (AccountNotFoundMiddlewareException e) {
             throw notFoundRestException(e);

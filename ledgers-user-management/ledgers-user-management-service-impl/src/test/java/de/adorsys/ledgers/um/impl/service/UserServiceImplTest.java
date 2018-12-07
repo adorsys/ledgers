@@ -159,7 +159,7 @@ public class UserServiceImplTest {
 
     private UserBO readUserBO() {
         try {
-            return reader.getObjectFromResource(getClass(),"user-BO.yml", UserBO.class);
+            return reader.getObjectFromResource(getClass(), "user-BO.yml", UserBO.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -168,7 +168,7 @@ public class UserServiceImplTest {
 
     private UserEntity readUserEntity() {
         try {
-            return reader.getObjectFromResource(getClass(),"user-entity.yml", UserEntity.class);
+            return reader.getObjectFromResource(getClass(), "user-entity.yml", UserEntity.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
