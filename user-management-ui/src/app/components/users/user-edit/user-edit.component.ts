@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {User} from "../../../models/user.model";
 import {UserService} from "../../../services/user.service";
 import {ActivatedRoute, Params} from "@angular/router";
-import {FormGroup} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'user-edit',
@@ -17,11 +17,22 @@ export class UserEditComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private formBuilder: FormBuilder,) {
   }
 
   ngOnInit() {
     this.getUser();
+    this.editUserForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      pin: ['', [Validators.required, Validators.minLength(8)]],
+      // password_confirmation: ['', Validators.required],
+      login: ['', Validators.required]
+    });
+  }
+
+  get formControl() {
+    return this.editUserForm.controls;
   }
 
   getUser(): void {
