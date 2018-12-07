@@ -14,10 +14,10 @@ public interface LedgerStmtRepository extends PagingAndSortingRepository<LedgerS
 	/**
 	 * Select the latest statement for the given reference time.
 	 * 
-	 * @param ledger
-	 * @param stmtStatus
-	 * @param refTime
-	 * @return
+	 * @param ledger ledger
+	 * @param stmtStatus statement status
+	 * @param refTime reference time
+	 * @return the latest statement for the given reference time
 	 */
 	Optional<LedgerStmt> findFirstByLedgerAndStmtStatusAndPstTimeLessThanEqualOrderByPstTimeDescStmtSeqNbrDesc(
 			Ledger ledger, StmtStatus stmtStatus, LocalDateTime refTime);

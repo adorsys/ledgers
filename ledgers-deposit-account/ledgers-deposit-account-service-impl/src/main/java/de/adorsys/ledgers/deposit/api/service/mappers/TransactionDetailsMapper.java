@@ -21,8 +21,8 @@ public class TransactionDetailsMapper {
     /**
      * Produces a signed transaction detail object.
      * 
-     * @param line
-     * @return
+     * @param pl posting line
+     * @return converted TransactionDetailsBO object
      */
 	public TransactionDetailsBO toTransactionSigned(PostingLineBO pl) {
 		TransactionDetailsBO transaction = toTransaction(pl);

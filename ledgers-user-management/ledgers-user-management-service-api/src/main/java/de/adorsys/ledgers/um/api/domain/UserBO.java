@@ -18,6 +18,7 @@ package de.adorsys.ledgers.um.api.domain;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +35,8 @@ public class UserBO {
     private List<ScaUserDataBO> scaUserData = new ArrayList<>();
 
     private List<AccountAccessBO> accountAccesses = new ArrayList<>();
+
+    private Collection<UserRoleBO> userRoles =  new ArrayList<>();
 
     public UserBO() {
     }
@@ -92,6 +95,14 @@ public class UserBO {
 
     public void setAccountAccesses(List<AccountAccessBO> accountAccesses) {
         this.accountAccesses = accountAccesses;
+    }
+
+    public Collection<UserRoleBO> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Collection<UserRoleBO> userRoles) {
+        this.userRoles = userRoles;
     }
 
     @Override

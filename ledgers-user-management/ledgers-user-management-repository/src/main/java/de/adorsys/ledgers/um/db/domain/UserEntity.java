@@ -17,18 +17,10 @@
 package de.adorsys.ledgers.um.db.domain;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -64,7 +56,13 @@ public class UserEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<AccountAccess> accountAccesses = new ArrayList<>();
-    
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name="users_roles", joinColumns = @JoinColumn(name="user_id"))
+    @Column(name="role")
+    @Enumerated(EnumType.STRING)
+    private Collection<UserRole> userRoles =  new ArrayList<>();
+
     public String getId() {
         return id;
     }
@@ -111,5 +109,13 @@ public class UserEntity {
 
     public void setAccountAccesses(List<AccountAccess> accountAccesses) {
         this.accountAccesses = accountAccesses;
+    }
+
+    public Collection<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Collection<UserRole> userRoles) {
+        this.userRoles = userRoles;
     }
 }

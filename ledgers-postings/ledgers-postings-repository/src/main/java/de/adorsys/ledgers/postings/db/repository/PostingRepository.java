@@ -12,8 +12,8 @@ public interface PostingRepository extends PagingAndSortingRepository<Posting, S
     /**
      * Load the non discaded posting.
      *
-     * @param oprId
-     * @return
+     * @param oprId operation id
+     * @return posting wrapped with Optional
      */
     Optional<Posting> findByOprIdAndDiscardingIdIsNull(String oprId);
 
