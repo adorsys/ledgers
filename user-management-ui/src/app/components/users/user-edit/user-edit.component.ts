@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {User} from "../../../models/user.model";
 import {UserService} from "../../../services/user.service";
 import {ActivatedRoute, Params} from "@angular/router";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'user-edit',
@@ -22,12 +22,11 @@ export class UserEditComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getUser();
+    // this.getUser();
     this.editUserForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
-      pin: ['', [Validators.required, Validators.minLength(8)]],
-      // password_confirmation: ['', Validators.required],
-      login: ['', Validators.required]
+      email: ['sdjhsdhj', [Validators.required, Validators.email]],
+      login: ['', Validators.required],
+      pin: ['jsjs', [Validators.required, Validators.minLength(8)]]
     });
   }
 
@@ -45,6 +44,10 @@ export class UserEditComponent implements OnInit {
             this.user = user;
           });
       });
+  }
+
+  onSubmit() {
+    console.log('sjhjhsj');
   }
 
 }
