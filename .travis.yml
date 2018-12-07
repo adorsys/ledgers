@@ -38,7 +38,7 @@ deploy:
     provider: script
     script: mvn --settings scripts/mvn-release-settings.xml -Prelease -DskipTests -B -U deploy
     on:
-      repo: adorsys/xs2a
+      repo: adorsys/ledgers
       all_branches: true
       # matches: tags with format X.Y.Z, X.Y.Z-A, X.Y.Z-RCA, X.Y.Z-A-B.C.D, X.Y.Z-A-B.C.D-E, X.Y.Z-RCA-B.C.D-E or develop
       condition: >-
