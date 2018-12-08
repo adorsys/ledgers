@@ -1,6 +1,9 @@
 package de.adorsys.ledgers.middleware.api.service;
 
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 
@@ -20,11 +23,14 @@ public interface MiddlewareOnlineBankingService {
 	 *
 	 * @param login User login
 	 * @param pin   User PIN
+	 * @param role The intended role.
+	 * 
 	 * @return a session id for success, false for failure or trows a
 	 *         UserNotFoundMiddlewareException
 	 * @throws UserNotFoundMiddlewareException is thrown if user can`t be found
+	 * @throws InsufficientPermissionMiddlewareException 
 	 */
-	String authorise(String login, String pin) throws UserNotFoundMiddlewareException;
+	String authorise(String login, String pin, UserRoleTO role) throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	/**
 	 * Caller can be sure that returned user object contains a miror of permissions
@@ -37,7 +43,7 @@ public interface MiddlewareOnlineBankingService {
 	 * @return
 	 * @throws UserNotFoundMiddlewareException
 	 */
-	UserTO validate(String accessToken) throws UserNotFoundMiddlewareException;
+	AccessTokenTO validate(String accessToken) throws UserNotFoundMiddlewareException;
 
 	/**
 	 * Registers a new User.
@@ -49,5 +55,4 @@ public interface MiddlewareOnlineBankingService {
 	 * @throws UserAlreadyExistsMiddlewareException
 	 */
 	UserTO register(String login, String email, String pin) throws UserAlreadyExistsMiddlewareException;
-
 }

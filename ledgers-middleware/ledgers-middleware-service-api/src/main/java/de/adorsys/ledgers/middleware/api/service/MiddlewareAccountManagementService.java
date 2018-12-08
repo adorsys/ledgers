@@ -8,6 +8,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
@@ -52,7 +53,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws AccountWithPrefixGoneMiddlewareException
 	 * @throws AccountWithSuffixExistsMiddlewareException
 	 */
-	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix)
+	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
 			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException;
 	
 
@@ -75,10 +76,12 @@ public interface MiddlewareAccountManagementService {
 	 * @param accountAccess
 	 * @param fromTime
 	 * @param toTime
+	 * @return the corresponding access token describing the account access
+	 * 
 	 * @throws AccountNotFoundMiddlewareException
 	 * @throws InsufficientPermissionMiddlewareException
 	 */
-	void grantDeferedThirdPartyReadAccessToDepositAccount(AccountAccessTO accountAccess, LocalDateTime fromTime, LocalDateTime toTime)
+	String grantAisConsent(AisConsentTO aisConsent)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	/**
@@ -151,4 +154,6 @@ public interface MiddlewareAccountManagementService {
      * @throws AccountNotFoundMiddlewareException
      */
     boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws AccountNotFoundMiddlewareException;
+
+	String iban(String id);
 }

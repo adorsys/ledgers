@@ -16,6 +16,10 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
@@ -28,9 +32,6 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
@@ -107,4 +108,14 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
             paymentRepository.save(storedPayment);
         }
     }
+
+	@Override
+	public String readIbanByPaymentId(String paymentId) {
+		Payment payment = paymentRepository.findById(paymentId).orElse(null);
+		if(payment==null) {
+			return null;
+		}
+				
+		return payment.getDebtorAccount().getIban();
+	}
 }

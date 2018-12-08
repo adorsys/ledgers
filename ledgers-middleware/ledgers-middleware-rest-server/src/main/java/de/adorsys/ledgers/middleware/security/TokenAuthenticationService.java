@@ -72,7 +72,7 @@ public class TokenAuthenticationService {
             }
         }
 
-        return new BearerTokenAuthentication(userTO.getId(), userTO, authorities, accessToken);
+        return new MiddlewareAuthentication(userTO.getId(), userTO, authorities, accessToken);
     }
 	
 	private void debug(String s) {

@@ -20,9 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
@@ -102,18 +105,18 @@ public class UserServiceImplTest {
         return reader.getListFromInputStream(getClass().getResourceAsStream("sca-user-methods.yml"), clazz);
     }
 
-    @Test
-    public void authorizeWithLoginAndPin() throws UserNotFoundException {
+    @Test(expected=UserNotFoundException.class)
+    public void authorizeWithLoginAndPin() throws UserNotFoundException, InsufficientPermissionException {
 
-        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
+        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
 
-        String auth = userService.authorise(USER_LOGIN, USER_PIN);
+        String auth = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
 
         assertTrue(auth==null);
     }
     
     @Test
-    public void testValidate() throws UserNotFoundException {
+    public void testValidate() throws UserNotFoundException, InsufficientPermissionException {
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
         when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
         when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
@@ -121,13 +124,12 @@ public class UserServiceImplTest {
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
         when(converter.toUserBO(userEntity)).thenReturn(userBO);
 
-        String accessToken = userService.authorise(USER_LOGIN, USER_PIN);
+        String accessToken = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
         
-        UserBO user = userService.validate(accessToken, new Date());
-        assertTrue(user!=null);
-        assertThat(user.getId(), is(USER_ID));
-        assertThat(user.getEmail(), is(USER_EMAIL));
-        assertThat(user.getLogin(), is(USER_LOGIN));
+        AccessTokenBO at = userService.validate(accessToken, new Date());
+        assertTrue(at!=null);
+        assertThat(at.getSub(), is(USER_ID));
+        assertThat(at.getActor(), is(USER_LOGIN));
     }
 
     @Test
@@ -150,11 +152,11 @@ public class UserServiceImplTest {
     }
 
     @Test(expected = UserNotFoundException.class)
-    public void authorizeWithException() throws UserNotFoundException {
+    public void authorizeWithException() throws UserNotFoundException, InsufficientPermissionException {
 
         when(repository.findFirstByLogin(USER_NON_EXISTING_LOGIN)).thenReturn(Optional.empty());
 
-        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin");
+        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin", UserRoleBO.CUSTOMER);
     }
 
     private UserBO readUserBO() {

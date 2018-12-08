@@ -19,9 +19,13 @@ package de.adorsys.ledgers.um.api.service;
 import java.util.Date;
 import java.util.List;
 
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 
@@ -43,8 +47,9 @@ public interface UserService {
      * @param pin   User PIN
      * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
+     * @throws InsufficientPermissionException 
      */
-    String authorise(String login, String pin) throws UserNotFoundException;
+    String authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException;
 
     /**
      * Performs user authorisation
@@ -54,8 +59,9 @@ public interface UserService {
      * @param accountId Account identifier
      * @return String representation of authorisation token for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
+     * @throws InsufficientPermissionException 
      */
-    String authorise(String id, String pin, String accountId) throws UserNotFoundException;
+    String authorise(String id, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException;
 
     /**
      * Finds a User by its identifier
@@ -97,5 +103,15 @@ public interface UserService {
 	 * @return
 	 * @throws UserNotFoundException 
 	 */
-	UserBO validate(String accessToken, Date refTime) throws UserNotFoundException;
+	AccessTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException;
+	
+	/**
+	 * Provides a token used to gain read access to an account.
+	 * 
+	 * @param aisConsent
+	 * @return
+	 * @throws InsufficientPermissionException 
+	 */
+	String grant(AisConsentBO aisConsent) throws InsufficientPermissionException;
+
 }

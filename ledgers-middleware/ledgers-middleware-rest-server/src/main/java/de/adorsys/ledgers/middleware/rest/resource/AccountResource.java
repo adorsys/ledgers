@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +70,7 @@ public class AccountResource {
 
     @GetMapping("/{accountId}")
     @ApiOperation("Returns account details information")
+    @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId) {
@@ -99,6 +101,7 @@ public class AccountResource {
      */
     @GetMapping("/balances/{accountId}")
     @ApiOperation("Returns balances of the deposit account")
+    @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId) {
@@ -107,6 +110,7 @@ public class AccountResource {
 
     @GetMapping("/{accountId}/balances")
     @ApiOperation("Returns balances of the deposit account with the given id")
+    @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<List<AccountBalanceTO>> getBalances2(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId) {
@@ -122,6 +126,7 @@ public class AccountResource {
     
     @GetMapping("{accountId}/transactions/{transactionId}")
     @ApiOperation("Returns the transaction with the given account id and transaction id.")
+    @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<TransactionTO> getTransactionById(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId, 
@@ -139,6 +144,7 @@ public class AccountResource {
 
     @GetMapping("/{accountId}/transactions")
     @ApiOperation("Returns all transactions for the given account id")
+    @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<List<TransactionTO>> getTransactionByDates(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId,
@@ -164,6 +170,7 @@ public class AccountResource {
      */
     @GetMapping("/users/{userLogin}")
     @ApiOperation("Returns the list of all accounts linked to the given user.")
+    @PreAuthorize("userLogin(#userLogin)")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
     	return getListOfAccountDetailsByUserLogin(userLogin);
     }
@@ -187,6 +194,7 @@ public class AccountResource {
      */
     @GetMapping("/ibans/{iban}")
     @ApiOperation("Returns account details information given the account IBAN")
+    @PreAuthorize("accountInfoByIban(#iban)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
     		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
     		@PathVariable String iban) {
@@ -194,6 +202,7 @@ public class AccountResource {
     }
     @GetMapping(params="iban")
     @ApiOperation("Returns account details information given the account IBAN")
+    @PreAuthorize("accountInfoByIban(#iban)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(
     		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
     		@RequestParam(required = true, name = "iban") String iban) {
@@ -207,6 +216,7 @@ public class AccountResource {
     }
 
     @PostMapping(value = "/funds-confirmation")
+    @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
     public ResponseEntity<Boolean> fundsConfirmation(@RequestBody FundsConfirmationRequestTO request) {
         try {
             boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);

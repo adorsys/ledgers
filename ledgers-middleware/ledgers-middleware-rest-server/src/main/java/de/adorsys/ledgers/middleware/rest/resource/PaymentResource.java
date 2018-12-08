@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -53,6 +54,7 @@ public class PaymentResource {
     }
 
     @GetMapping(value = "/{payment-type}/{payment-product}/{paymentId}"/*, produces = {"application/json", "application/xml", "multipart/form-data"}*/)
+    @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity<?> getPaymentById(@PathVariable(name = "payment-type") PaymentTypeTO paymentType,
                                             @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
                                             @PathVariable(name = "paymentId") String paymentId) {
@@ -65,6 +67,7 @@ public class PaymentResource {
     }
 
     @PostMapping("/{paymentType}")
+    @PreAuthorize("paymentInitByIban(#payment.debtorAccount.iban)")
     public ResponseEntity<?> initiatePayment(@PathVariable PaymentTypeTO paymentType, @RequestBody Object payment) {
         try {
             return new ResponseEntity(middlewareService.initiatePayment(payment, paymentType), HttpStatus.CREATED);
@@ -75,6 +78,7 @@ public class PaymentResource {
     }
 
     @PostMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
+    @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
                                                                    @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
                                                                    @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
@@ -88,6 +92,7 @@ public class PaymentResource {
     }
 
     @PostMapping(value = "/cancel-initiation/{psuId}/{paymentId}")
+    @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity<PaymentCancellationResponseTO> initiatePmtCancellation(@PathVariable String psuId, @PathVariable String paymentId) {
         try {
             PaymentCancellationResponseTO response = middlewareService.initiatePaymentCancellation(psuId, paymentId);
@@ -100,6 +105,7 @@ public class PaymentResource {
     }
 
     @DeleteMapping("/cancel/{paymentId}")
+    @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity cancelPaymentNoSca(@PathVariable String paymentId) {
         try {
             middlewareService.cancelPayment(paymentId);

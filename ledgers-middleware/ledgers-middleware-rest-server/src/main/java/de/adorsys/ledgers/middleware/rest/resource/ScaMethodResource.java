@@ -47,7 +47,6 @@ public class ScaMethodResource {
     }
 
 	@GetMapping("/{userLogin}")
-
     public List<ScaUserDataTO> getUserScaMethods(@PathVariable String userLogin) {
         try {
             UserTO user = middlewareUserService.findByUserLogin(userLogin);
