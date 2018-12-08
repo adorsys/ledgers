@@ -78,13 +78,13 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
 	@Override
 	public void createDepositAccount(AccountDetailsTO depositAccount)
-			throws AccountWithPrefixGoneMiddlewareException, UserNotFoundMiddlewareException, AccountWithSuffixExistsMiddlewareException{
+			throws UserNotFoundMiddlewareException {
 		createDepositAccount(depositAccount, Collections.emptyList());
 	}
 	
 	@Override
 	public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss)
-			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException{
+			throws UserNotFoundMiddlewareException{
 		// TODO: Access Control
         try {
         	Map<String, UserBO> persistBuffer = new HashMap<>();

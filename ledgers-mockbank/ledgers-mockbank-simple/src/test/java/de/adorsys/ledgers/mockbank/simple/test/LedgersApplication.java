@@ -30,7 +30,6 @@ import de.adorsys.ledgers.um.impl.EnableUserManagementService;
 
 @EnableScheduling
 @SpringBootApplication
-
 @EnableUserManagementService
 @EnableSCAService
 @EnablePostingService
