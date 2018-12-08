@@ -276,12 +276,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 				.map(a -> a.getIban()).collect(Collectors.toList());
 	}
 
-	private List<String> mapAccounts(List<AccountAccessBO> accountAccesses) {
-		// All iban owned by this user.
-		return  accountAccesses.stream()
-				.map(a -> a.getIban()).collect(Collectors.toList());
-	}
-	
 	@Override
 	public void grantAccessToDepositAccount(AccountAccessTO accountAccess)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {

@@ -254,4 +254,10 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 			? null 
 					: account.getIban();
 	}
+
+	@Override
+	public List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix) {
+		List<DepositAccount> accounts = depositAccountRepository.findByIbanStartingWith(accountNumberPrefix);
+        return depositAccountMapper.toDepositAccountListBO(accounts);
+	}
 }

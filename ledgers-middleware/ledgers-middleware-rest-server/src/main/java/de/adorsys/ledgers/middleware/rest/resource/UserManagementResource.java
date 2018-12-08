@@ -23,8 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 
 @RestController
@@ -46,13 +49,17 @@ public class UserManagementResource {
      * @return
      */
     @PostMapping("/authorise")
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
     public boolean authorise(@RequestParam("login")String login, @RequestParam("pin") String pin){
         try {
-        	return middlewareUserService.authorise(login, pin)!=null;
+        	return middlewareUserService.authorise(login, pin, UserRoleTO.CUSTOMER)!=null;
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
+		}
     }
 
     /**
@@ -63,12 +70,16 @@ public class UserManagementResource {
      * @return
      */
     @PostMapping("/authorise2")
+	@SuppressWarnings("PMD.IdenticalCatchBranches")
     public String authorise2(@RequestParam("login")String login, @RequestParam("pin") String pin){
         try {
-            return middlewareUserService.authorise(login, pin);
+            return middlewareUserService.authorise(login, pin, UserRoleTO.CUSTOMER);
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
+		}
     }
 }

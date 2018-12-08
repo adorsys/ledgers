@@ -12,8 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 
@@ -33,22 +37,22 @@ public class MiddlewareUserLoginServiceImplTest {
 	private UserMapper userMapper;
 
 	@Test
-	public void authorise() throws UserNotFoundException, UserNotFoundMiddlewareException {
+	public void authorise() throws UserNotFoundException, UserNotFoundMiddlewareException, InsufficientPermissionException, InsufficientPermissionMiddlewareException {
 
-		when(userService.authorise(LOGIN, PIN)).thenReturn(ANY_TOKEN);
+		when(userService.authorise(LOGIN, PIN, UserRoleBO.CUSTOMER)).thenReturn(ANY_TOKEN);
 
-		String isAuthorised = middlewareUserService.authorise(LOGIN, PIN);
+		String isAuthorised = middlewareUserService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER);
 
 		assertThat(isAuthorised, is(ANY_TOKEN));
 
-		verify(userService, times(1)).authorise(LOGIN, PIN);
+		verify(userService, times(1)).authorise(LOGIN, PIN, UserRoleBO.CUSTOMER);
 	}
 
 	@Test(expected = UserNotFoundMiddlewareException.class)
-	public void authoriseUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException {
+	public void authoriseUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException, InsufficientPermissionException, InsufficientPermissionMiddlewareException {
 
-		when(userService.authorise(LOGIN, PIN)).thenThrow(UserNotFoundException.class);
+		when(userService.authorise(LOGIN, PIN, UserRoleBO.CUSTOMER)).thenThrow(UserNotFoundException.class);
 
-		middlewareUserService.authorise(LOGIN, PIN);
+		middlewareUserService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER);
 	}
 }

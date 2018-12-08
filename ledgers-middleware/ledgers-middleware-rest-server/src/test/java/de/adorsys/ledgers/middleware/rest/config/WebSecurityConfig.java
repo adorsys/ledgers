@@ -15,7 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.context.WebApplicationContext;
 
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.security.JWTAuthenticationFilter;
+import de.adorsys.ledgers.middleware.security.MiddlewareAuthentication;
 import de.adorsys.ledgers.middleware.security.TokenAuthenticationService;
 
 @Configuration
@@ -43,5 +45,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public Principal getPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication;
+    }
+
+	//	AccessTokenTO
+	@Bean
+    @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST,proxyMode = ScopedProxyMode.TARGET_CLASS)
+    public AccessTokenTO getAccessTokenTO() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication==null || !(authentication instanceof MiddlewareAuthentication)){
+        	return null;
+        }
+        MiddlewareAuthentication ma = (MiddlewareAuthentication) authentication;
+        return (AccessTokenTO) ma.getCredentials();
     }
 }

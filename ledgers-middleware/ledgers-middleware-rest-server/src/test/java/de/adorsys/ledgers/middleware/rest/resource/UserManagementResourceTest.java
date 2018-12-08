@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.rest.exception.ExceptionAdvisor;
@@ -51,7 +52,7 @@ public class UserManagementResourceTest {
 
     @Test
     public void authorise() throws Exception {
-        when(userService.authorise(LOGIN, PIN)).thenReturn(null);
+        when(userService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER)).thenReturn(null);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post(UserManagementResource.USERS + "/authorise")
@@ -68,12 +69,12 @@ public class UserManagementResourceTest {
         assertThat(mvcResult.getResponse().getStatus(), is(200));
         assertThat(content, is(Boolean.FALSE.toString()));
 
-        verify(userService, times(1)).authorise(LOGIN, PIN);
+        verify(userService, times(1)).authorise(LOGIN, PIN, UserRoleTO.CUSTOMER);
     }
 
     @Test
     public void authoriseUserNotFound() throws Exception {
-        when(userService.authorise(LOGIN, PIN)).thenThrow(new UserNotFoundMiddlewareException("User with login="+LOGIN+" not found"));
+        when(userService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER)).thenThrow(new UserNotFoundMiddlewareException("User with login="+LOGIN+" not found"));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post(UserManagementResource.USERS + "/authorise")
@@ -85,6 +86,6 @@ public class UserManagementResourceTest {
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
 
-        verify(userService, times(1)).authorise(LOGIN, PIN);
+        verify(userService, times(1)).authorise(LOGIN, PIN, UserRoleTO.CUSTOMER);
     }
 }

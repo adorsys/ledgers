@@ -2,7 +2,6 @@ package de.adorsys.ledgers.middleware.security;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,8 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 
@@ -49,15 +47,15 @@ public class TokenAuthenticationService {
         // Strip prefix
         String accessToken = StringUtils.substringAfterLast(headerValue, " ");
 
-        UserTO userTO;
+        AccessTokenTO token;
 		try {
-			userTO = onlineBankingService.validate(accessToken);
+			token = onlineBankingService.validate(accessToken);
 		} catch (UserNotFoundMiddlewareException e) {
             debug("User with token not found.");
             return null;
 		}
 
-        if (userTO==null) {
+        if (token==null) {
         	debug("Token is not valid.");
             return null;
         }
@@ -65,14 +63,11 @@ public class TokenAuthenticationService {
         // process roles
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        Collection<UserRoleTO> roles = userTO.getUserRoles();
-        if (roles != null) {
-            for (UserRoleTO role : roles) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
-            }
+        if(token.getRole()!=null) {
+        	authorities.add(new SimpleGrantedAuthority("ROLE_" + token.getRole().name()));
         }
 
-        return new MiddlewareAuthentication(userTO.getId(), userTO, authorities, accessToken);
+        return new MiddlewareAuthentication(token.getSub(), token, authorities, accessToken);
     }
 	
 	private void debug(String s) {

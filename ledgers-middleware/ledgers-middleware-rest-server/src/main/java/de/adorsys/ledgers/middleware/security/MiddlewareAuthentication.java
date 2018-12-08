@@ -10,10 +10,10 @@ import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 
 public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToken {
 
@@ -25,7 +25,7 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
         this.token = token;
     }
 
-    public MiddlewareAuthentication(Object principal, UserTO credentials, Collection<? extends GrantedAuthority> authorities, String token) {
+    public MiddlewareAuthentication(Object principal, AccessTokenTO credentials, Collection<? extends GrantedAuthority> authorities, String token) {
         super(principal, credentials, authorities);
         this.token = token;
     }
@@ -36,20 +36,20 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
         return token;
     }
     
-    private UserTO getUserTO() {
-    	return (UserTO) getCredentials();
+    private AccessTokenTO getAccessTokenTO() {
+    	return (AccessTokenTO) getCredentials();
     }
     
     public boolean checkAccountInfoAccess(String iban) {
-    	UserTO userTO = getUserTO();
-    	// Staff allways have account access
-    	if(userTO.getUserRoles().contains(UserRoleTO.STAFF)) {
+    	AccessTokenTO token = getAccessTokenTO();
+    	// Staff always have account access
+    	if(UserRoleTO.STAFF == token.getRole() || UserRoleTO.SYSTEM == token.getRole()) {
     		return true;
     	}
 
     	// Customer must have explicit permission
-    	if(userTO.getUserRoles().contains(UserRoleTO.CUSTOMER)) {
-	    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
+    	if(UserRoleTO.CUSTOMER == token.getRole()) {
+	    	List<AccountAccessTO> accountAccesses = token.getAccountAccesses();
 	    	return accountAccesses.stream()
 	    		.filter(a -> equalsIgnoreCase(iban, a.getIban()))
 	    		.findAny().isPresent();
@@ -59,10 +59,10 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
     }
 
     public boolean checkPaymentInitAccess(String iban) {
-    	UserTO userTO = getUserTO();
+    	AccessTokenTO token = getAccessTokenTO();
     	// Customer must have explicit permission
-    	if(userTO.getUserRoles().contains(UserRoleTO.CUSTOMER)) {
-	    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
+    	if(UserRoleTO.CUSTOMER == token.getRole()) {
+	    	List<AccountAccessTO> accountAccesses = token.getAccountAccesses();
 	    	return accountAccesses.stream()
 	    		.filter(a -> paymentAccess(a, iban))
 	    		.findAny().isPresent();

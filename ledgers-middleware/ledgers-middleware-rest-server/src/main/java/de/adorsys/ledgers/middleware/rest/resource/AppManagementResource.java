@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
@@ -46,6 +47,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/management/app")
 @Api(tags = "Management" , description= "Application management")
 public class AppManagementResource {
+
 	private static final Logger logger = LoggerFactory.getLogger(AppManagementResource.class);
 	
 	@Autowired
@@ -76,6 +78,7 @@ public class AppManagementResource {
     
     @PostMapping("/admin")
     @ApiOperation(value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
     public ResponseEntity<String> admin(@RequestBody(required=true) UserTO adminUser){
     	List<UserTO> users = userManagementService.listUsers(0, 1);
     	if(!users.isEmpty()) {
@@ -96,11 +99,16 @@ public class AppManagementResource {
 		}
 		
 		try {
-			String accessToken = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin());
+			String accessToken = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
 			return ResponseEntity.ok(accessToken);
 		} catch (UserNotFoundMiddlewareException e) {
-            logger.error("Shall not happen. We just created admin user.", e);
-			throw new IllegalStateException(e);
+			String USER_NOT_FOUND_SHALL_NOT_HAPPEN = "Shall not happen. We just created admin user.";
+            logger.error(USER_NOT_FOUND_SHALL_NOT_HAPPEN, e);
+			throw new IllegalStateException(USER_NOT_FOUND_SHALL_NOT_HAPPEN, e);
+		} catch (InsufficientPermissionMiddlewareException e) {
+			String ISSUFICIENT_PERM_SHALL_NOT_HAPPEN = "Unknownd exception, shall not happen.";
+            logger.error(ISSUFICIENT_PERM_SHALL_NOT_HAPPEN, e);
+			throw new IllegalStateException(ISSUFICIENT_PERM_SHALL_NOT_HAPPEN, e);
 		} 
     }
 }

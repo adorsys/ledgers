@@ -3,13 +3,13 @@ package de.adorsys.ledgers.deposit.api.service.impl.mockbank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +55,11 @@ public class DepositAccountServiceImplIT {
         public ASPSPConfigSource configSource() {
             return new MockBankConfigSource();
         }
+
+    	@Bean
+    	public Principal getPrincipal(){
+    		return () -> "anonymous";
+    	}
     }
 
     @Autowired
