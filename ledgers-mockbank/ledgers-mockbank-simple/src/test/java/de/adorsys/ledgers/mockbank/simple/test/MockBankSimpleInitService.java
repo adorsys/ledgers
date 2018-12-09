@@ -164,7 +164,7 @@ public class MockBankSimpleInitService {
 			throws MalformedURLException, IOException, ProtocolException {
 		HttpURLConnection con = null;
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(PaymentResource.BASE_PATH)
-				.path(PaymentResource.EXECUTE_NO_SCA_PAYMENT_ID__PAYMENT_PRODUCT__PAYMENT_TYPE_PATH)
+				.path(PaymentResource.EXECUTE_NO_SCA_PATH)
 				.build(paymentId, paymentProduct, paymentTypeTO.name()).toURL();
 
 		try {

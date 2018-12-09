@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(PaymentResource.BASE_PATH)
 public class PaymentResource {
-    public static final String EXECUTE_NO_SCA_PAYMENT_ID__PAYMENT_PRODUCT__PAYMENT_TYPE_PATH = "/execute-no-sca/{payment-id}/{payment-product}/{payment-type}";
+    public static final String EXECUTE_NO_SCA_PATH = "/execute-no-sca/{payment-id}/{payment-product}/{payment-type}";
 
 	public static final String PAYMENT_TYPE_PATH_VARIABLE = "/{paymentType}";
 
@@ -83,7 +83,7 @@ public class PaymentResource {
         }
     }
 
-    @PostMapping(EXECUTE_NO_SCA_PAYMENT_ID__PAYMENT_PRODUCT__PAYMENT_TYPE_PATH)
+    @PostMapping(EXECUTE_NO_SCA_PATH)
     @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
                                                                    @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,

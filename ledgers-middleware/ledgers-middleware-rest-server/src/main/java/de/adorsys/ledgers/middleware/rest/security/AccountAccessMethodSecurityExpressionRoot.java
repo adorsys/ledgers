@@ -2,7 +2,6 @@ package de.adorsys.ledgers.middleware.rest.security;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
@@ -61,18 +60,22 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 		return accountInfoByIban(iban);
 	}
 
+	@Override
 	public void setFilterObject(Object filterObject) {
 		this.filterObject = filterObject;
 	}
 
+	@Override
 	public Object getFilterObject() {
 		return filterObject;
 	}
 
+	@Override
 	public void setReturnObject(Object returnObject) {
 		this.returnObject = returnObject;
 	}
 
+	@Override
 	public Object getReturnObject() {
 		return returnObject;
 	}
@@ -88,6 +91,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 		this.target = target;
 	}
 
+	@Override
 	public Object getThis() {
 		return target;
 	}
