@@ -24,21 +24,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 
 @RestController
-@RequestMapping(UserManagementResource.USERS)
+@RequestMapping(UserManagementResource.BASE_PATH)
 public class UserManagementResource {
-    private static final Logger logger = LoggerFactory.getLogger(UserManagementResource.class);
-    static final String USERS = "/users";
-    private final MiddlewareOnlineBankingService middlewareUserService;
+	public static final String BASE_PATH = "/users";
+	public static final String REGISTER_PATH = "/register";
+	public static final String AUTHORISE_PATH = "/authorise";
+	public static final String AUTHORISE2_PATH = "/authorise2";
+	public static final String EMAIL_REQUEST_PARAM = "email";
+	public static final String ROLE_REQUEST_PARAM = "role";
+	public static final String PIN_REQUEST_PARAM = "pin";
+	public static final String LOGIN_REQUEST_PARAM = "login";
+	public static final Logger logger = LoggerFactory.getLogger(UserManagementResource.class);
+    private final MiddlewareOnlineBankingService onlineBankingService;
 
-    public UserManagementResource(MiddlewareOnlineBankingService middlewareUserService) {
-        this.middlewareUserService = middlewareUserService;
+    public UserManagementResource(MiddlewareOnlineBankingService onlineBankingService) {
+        this.onlineBankingService = onlineBankingService;
     }
 
     /**
@@ -50,9 +60,9 @@ public class UserManagementResource {
      */
     @PostMapping("/authorise")
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public boolean authorise(@RequestParam("login")String login, @RequestParam("pin") String pin){
+    public boolean authorise(@RequestParam(LOGIN_REQUEST_PARAM)String login, @RequestParam(PIN_REQUEST_PARAM) String pin){
         try {
-        	return middlewareUserService.authorise(login, pin, UserRoleTO.CUSTOMER)!=null;
+        	return onlineBankingService.authorise(login, pin, UserRoleTO.CUSTOMER)!=null;
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -69,11 +79,11 @@ public class UserManagementResource {
      * @param pin
      * @return
      */
-    @PostMapping("/authorise2")
+    @PostMapping(AUTHORISE2_PATH)
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
-    public String authorise2(@RequestParam("login")String login, @RequestParam("pin") String pin){
+    public String authorise2(@RequestParam(LOGIN_REQUEST_PARAM)String login, @RequestParam(PIN_REQUEST_PARAM) String pin, @RequestParam(ROLE_REQUEST_PARAM) UserRoleTO role){
         try {
-            return middlewareUserService.authorise(login, pin, UserRoleTO.CUSTOMER);
+            return onlineBankingService.authorise(login, pin, role);
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -81,5 +91,21 @@ public class UserManagementResource {
             logger.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
 		}
+    }
+    
+    @PostMapping(REGISTER_PATH)
+    public UserTO register(@RequestParam(LOGIN_REQUEST_PARAM)String login, 
+    		@RequestParam(EMAIL_REQUEST_PARAM) String email, 
+    		@RequestParam(PIN_REQUEST_PARAM) String pin,
+    		@RequestParam(name=ROLE_REQUEST_PARAM, defaultValue="CUSTOMER") UserRoleTO role) {
+    	try {
+			UserTO user = onlineBankingService.register(login, email, pin, role);
+			user.setPin(null);
+			return user;
+		} catch (UserAlreadyExistsMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
+    	
     }
 }

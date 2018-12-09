@@ -6,7 +6,7 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
-import de.adorsys.ledgers.middleware.security.AccountAccessPermissionEvaluator;
+import de.adorsys.ledgers.middleware.rest.security.AccountAccessPermissionEvaluator;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)

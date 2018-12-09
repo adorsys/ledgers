@@ -55,7 +55,7 @@ public class UserManagementResourceTest {
         when(userService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER)).thenReturn(null);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post(UserManagementResource.USERS + "/authorise")
+                                                      .post(UserManagementResource.BASE_PATH + "/authorise")
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
         )
@@ -77,7 +77,7 @@ public class UserManagementResourceTest {
         when(userService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER)).thenThrow(new UserNotFoundMiddlewareException("User with login="+LOGIN+" not found"));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post(UserManagementResource.USERS + "/authorise")
+                                                      .post(UserManagementResource.BASE_PATH + "/authorise")
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
         )

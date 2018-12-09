@@ -33,9 +33,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/payments")
+@RequestMapping(PaymentResource.BASE_PATH)
 public class PaymentResource {
-    private static final Logger logger = LoggerFactory.getLogger(PaymentResource.class);
+    public static final String EXECUTE_NO_SCA_PAYMENT_ID__PAYMENT_PRODUCT__PAYMENT_TYPE_PATH = "/execute-no-sca/{payment-id}/{payment-product}/{payment-type}";
+
+	public static final String PAYMENT_TYPE_PATH_VARIABLE = "/{paymentType}";
+
+	public static final String BASE_PATH = "/payments";
+
+	private static final Logger logger = LoggerFactory.getLogger(PaymentResource.class);
 
     private final MiddlewareService middlewareService;
 
@@ -66,8 +72,8 @@ public class PaymentResource {
         }
     }
 
-    @PostMapping("/{paymentType}")
-    @PreAuthorize("paymentInitByIban(#payment.debtorAccount.iban)")
+    @PostMapping(PAYMENT_TYPE_PATH_VARIABLE)
+    @PreAuthorize("paymentInit(#payment)")
     public ResponseEntity<?> initiatePayment(@PathVariable PaymentTypeTO paymentType, @RequestBody Object payment) {
         try {
             return new ResponseEntity(middlewareService.initiatePayment(payment, paymentType), HttpStatus.CREATED);
@@ -77,7 +83,7 @@ public class PaymentResource {
         }
     }
 
-    @PostMapping("/execute-no-sca/{payment-id}/{payment-product}/{payment-type}")
+    @PostMapping(EXECUTE_NO_SCA_PAYMENT_ID__PAYMENT_PRODUCT__PAYMENT_TYPE_PATH)
     @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
                                                                    @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,

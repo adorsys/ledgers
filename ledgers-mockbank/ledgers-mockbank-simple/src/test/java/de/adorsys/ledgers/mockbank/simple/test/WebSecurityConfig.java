@@ -16,9 +16,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.context.WebApplicationContext;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.security.JWTAuthenticationFilter;
-import de.adorsys.ledgers.middleware.security.MiddlewareAuthentication;
-import de.adorsys.ledgers.middleware.security.TokenAuthenticationService;
+import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
+import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
+import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
 
 @Configuration
 @EnableWebSecurity(debug=true)
@@ -30,7 +30,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-            .authorizeRequests().antMatchers("/management/app/admin","/management/app/ping").permitAll()
+            .authorizeRequests().antMatchers("/management/app/admin",
+            		"/management/app/ping", 
+            		"/users/authorise2", 
+            		"/users/authorise",
+            		"/users/register").permitAll()
+            .and()
+            .authorizeRequests().antMatchers("/v2/api-docs", "/swagger-resources", "/swagger-ui.html", "/webjars/**").permitAll()
             .and()
             .authorizeRequests().antMatchers("/console/**").permitAll()
             .and()

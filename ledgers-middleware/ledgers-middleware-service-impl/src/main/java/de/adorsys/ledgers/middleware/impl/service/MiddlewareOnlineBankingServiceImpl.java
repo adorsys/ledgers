@@ -66,8 +66,9 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	}
 
 	@Override
-	public UserTO register(String login, String email, String pin) throws UserAlreadyExistsMiddlewareException {
+	public UserTO register(String login, String email, String pin, UserRoleTO role) throws UserAlreadyExistsMiddlewareException {
 		UserTO user = new UserTO(login, email, pin);
+		user.getUserRoles().add(role);
 		UserBO userBO = userTOMapper.toUserBO(user);
 		try {
 			return userTOMapper.toUserTO(userService.create(userBO));

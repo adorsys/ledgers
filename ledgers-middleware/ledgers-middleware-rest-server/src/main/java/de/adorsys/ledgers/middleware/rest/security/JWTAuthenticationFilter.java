@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.middleware.security;
+package de.adorsys.ledgers.middleware.rest.security;
 
 import java.io.IOException;
 

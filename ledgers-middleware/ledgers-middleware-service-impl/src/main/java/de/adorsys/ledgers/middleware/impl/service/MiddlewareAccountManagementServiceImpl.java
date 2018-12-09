@@ -30,6 +30,8 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
@@ -99,6 +101,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 							AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
 					addAccess(user, accountAccessBO, persistBuffer);
 				}
+            	persistBuffer.values().forEach(u -> {
+            		try {
+						userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
+					} catch (UserNotFoundException e) {
+			            logger.error(e.getMessage(), e);
+			            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+					}
+            	});
             }
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -226,11 +236,20 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		validateInput(accounts, accountNumberPrefix, accountNumberSuffix);
 
 		accDetails.setIban(accNbr);
+		
 		List<AccountAccessTO> accountAccesses = new ArrayList<>();
-		AccountAccessTO accountAccess = new AccountAccessTO();
-		accountAccess.setAccessType(AccessTypeTO.OWNER);
-		accountAccess.setIban(accNbr);
-		accountAccesses.add(accountAccess);
+		// if caller is a customer
+		if(accessToken.getRole()==UserRoleTO.CUSTOMER) {
+			// then make him owner of the account.
+			UserTO userTO = new UserTO();
+			userTO.setId(accessToken.getSub());
+			userTO.setLogin(accessToken.getActor());
+			AccountAccessTO accountAccess = new AccountAccessTO();
+			accountAccess.setAccessType(AccessTypeTO.OWNER);
+			accountAccess.setIban(accNbr);
+			accountAccess.setUser(userTO);
+			accountAccesses.add(accountAccess);
+		}
 		try {
 			createDepositAccount(accDetails, accountAccesses);
 		} catch (UserNotFoundMiddlewareException e) {

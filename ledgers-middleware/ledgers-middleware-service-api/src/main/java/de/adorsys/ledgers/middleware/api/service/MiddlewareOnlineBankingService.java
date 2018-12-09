@@ -48,11 +48,12 @@ public interface MiddlewareOnlineBankingService {
 	/**
 	 * Registers a new User.
 	 * 
-	 * @param login
-	 * @param email
-	 * @param pin
+	 * @param login the login of the user
+	 * @param email the email of the user
+	 * @param pin the pin of this user
+	 * @param role the initial role of the user.
 	 * @return
 	 * @throws UserAlreadyExistsMiddlewareException
 	 */
-	UserTO register(String login, String email, String pin) throws UserAlreadyExistsMiddlewareException;
+	UserTO register(String login, String email, String pin, UserRoleTO role) throws UserAlreadyExistsMiddlewareException;
 }

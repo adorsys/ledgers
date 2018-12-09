@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,6 +41,8 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -53,11 +56,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping(AccountResource.BASE_PATH)
 @Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 @SuppressWarnings("PMD.IdenticalCatchBranches")
 public class AccountResource {
-    private static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
+	public static final String BASE_PATH = "/accounts";
+	public static final String IBAN_QUERY_PARAM = "iban";
+	private static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
     private static final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
 
 	private static final Logger logger = LoggerFactory.getLogger(AccountResource.class);
@@ -172,10 +177,22 @@ public class AccountResource {
     @ApiOperation("Returns the list of all accounts linked to the given user.")
     @PreAuthorize("userLogin(#userLogin)")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
-    	return getListOfAccountDetailsByUserLogin(userLogin);
+    	return getListOfAccountDetailsInternal(userLogin);
     }
 
-    private ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserLogin(String userLogin) {
+    /**
+     * Return the list of accounts linked with the current customer.
+     * 
+     * @return : the list of accounts linked with the current customer.
+     */
+    @GetMapping
+    @ApiOperation("Returns the list of all accounts linked to the connected user. Call only available to customer.")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
+        return ResponseEntity.ok(middlewareAccountService.listOfDepositAccounts());
+    }
+    
+    private ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsInternal(String userLogin) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getAllAccountDetailsByUserLogin(userLogin));
         } catch (UserNotFoundMiddlewareException | AccountNotFoundMiddlewareException e) {
@@ -200,12 +217,12 @@ public class AccountResource {
     		@PathVariable String iban) {
     	return getAccountDetailsByIban2(iban);
     }
-    @GetMapping(params="iban")
+    @GetMapping(params=IBAN_QUERY_PARAM)
     @ApiOperation("Returns account details information given the account IBAN")
     @PreAuthorize("accountInfoByIban(#iban)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(
     		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
-    		@RequestParam(required = true, name = "iban") String iban) {
+    		@RequestParam(required = true, name = IBAN_QUERY_PARAM) String iban) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
         } catch (AccountNotFoundMiddlewareException e) {
@@ -225,6 +242,8 @@ public class AccountResource {
             throw notFoundRestException(e);
         }
     }
+    
+    
 
     private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
         if (!validDate(dateFrom).isEqual(validDate(dateTo))
@@ -236,5 +255,23 @@ public class AccountResource {
     private LocalDate validDate(LocalDate date) {
         return Optional.ofNullable(date)
                        .orElseGet(LocalDate::now);
+    }
+    
+    @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Void> createDepositAccount(@RequestBody AccountDetailsTO accountDetailsTO) {
+		// create account. It does not exist.
+		String iban = accountDetailsTO.getIban();
+		// Splitt in prefix and suffix
+		String accountNumberPrefix = StringUtils.substring(iban, 0, iban.length()-2);
+		String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
+    	
+    	try {
+			middlewareAccountService.createDepositAccount(accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
+            return ResponseEntity.ok().build();
+		} catch (AccountWithPrefixGoneMiddlewareException | AccountWithSuffixExistsMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
     }
 }

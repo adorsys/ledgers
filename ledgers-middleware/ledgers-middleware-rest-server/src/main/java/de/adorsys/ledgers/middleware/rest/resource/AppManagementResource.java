@@ -44,10 +44,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping("/management/app")
+@RequestMapping(AppManagementResource.BASE_PATH)
 @Api(tags = "Management" , description= "Application management")
 public class AppManagementResource {
 
+	public static final String BASE_PATH = "/management/app";
+	public static final String ADMIN_PATH = "/admin";
+	public static final String INIT_PATH = "/init";
+	
 	private static final Logger logger = LoggerFactory.getLogger(AppManagementResource.class);
 	
 	@Autowired
@@ -64,7 +68,7 @@ public class AppManagementResource {
     	return ResponseEntity.ok("pong");
     }
 	
-    @PostMapping("/init")
+    @PostMapping(INIT_PATH)
     @ApiOperation("Initializes the deposit account module.")
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> initApp() {
@@ -76,7 +80,7 @@ public class AppManagementResource {
 		}
     }
     
-    @PostMapping("/admin")
+    @PostMapping(ADMIN_PATH)
     @ApiOperation(value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
     @SuppressWarnings("PMD.IdenticalCatchBranches")
     public ResponseEntity<String> admin(@RequestBody(required=true) UserTO adminUser){

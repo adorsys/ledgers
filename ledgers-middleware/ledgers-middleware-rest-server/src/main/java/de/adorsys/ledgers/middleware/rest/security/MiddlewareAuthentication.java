@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.middleware.security;
+package de.adorsys.ledgers.middleware.rest.security;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 

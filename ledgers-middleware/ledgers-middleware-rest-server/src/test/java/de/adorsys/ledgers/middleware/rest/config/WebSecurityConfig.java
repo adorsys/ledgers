@@ -16,9 +16,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.context.WebApplicationContext;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.security.JWTAuthenticationFilter;
-import de.adorsys.ledgers.middleware.security.MiddlewareAuthentication;
-import de.adorsys.ledgers.middleware.security.TokenAuthenticationService;
+import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
+import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
+import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
 
 @Configuration
 @EnableWebSecurity(debug=true)
