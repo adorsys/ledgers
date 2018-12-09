@@ -16,9 +16,9 @@
 
 package de.adorsys.ledgers.mockbank.simple.test;
 
-import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -29,16 +29,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
 import de.adorsys.ledgers.mockbank.simple.EnableMockBankSimple;
+import de.adorsys.ledgers.mockbank.simple.MockBankSimpleInitService;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
 import de.adorsys.ledgers.um.impl.EnableUserManagementService;
@@ -63,18 +57,14 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
+		String ip = null;
 		try {
-
-//			String ip = InetAddress.getLocalHost().getHostAddress();
-			int port = context.getBean(Environment.class).getProperty("server.port", Integer.class);
-			String baseUrl = String.format("%s:%d", "http://localhost", port);
-
-			context.getBean(MockBankSimpleInitService.class).runInit(baseUrl);
-		} catch (BeansException | AccountNotFoundMiddlewareException | PaymentProcessingMiddlewareException
-				| UserAlreadyExistsMiddlewareException | AccountWithPrefixGoneMiddlewareException
-				| AccountWithSuffixExistsMiddlewareException | UserNotFoundMiddlewareException
-				| InsufficientPermissionMiddlewareException | IOException e) {
+			ip = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
 			throw new IllegalStateException(e);
 		}
+		int port = context.getBean(Environment.class).getProperty("server.port", Integer.class);
+		String baseUrl = String.format("http://%s:%d", ip, port);
+		context.getBean(MockBankSimpleInitService.class).runInit(baseUrl);
 	}
 }

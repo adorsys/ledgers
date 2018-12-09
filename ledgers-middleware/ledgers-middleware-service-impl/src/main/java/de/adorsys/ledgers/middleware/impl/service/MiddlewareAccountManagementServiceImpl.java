@@ -2,7 +2,6 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -204,8 +203,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                                              ? today.atStartOfDay()
                                              : dateFrom.atStartOfDay();
         LocalDateTime dateTimeTo = dateTo == null
-                                           ? today.atTime(LocalTime.MAX)
-                                           : dateTo.atTime(LocalTime.MAX);
+                                           ? today.atTime(23,59,59,99)
+                                           : dateTo.atTime(23,59,59,99);
         try {
             List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
             return paymentConverter.toTransactionTOList(transactions);

@@ -16,14 +16,30 @@
 	</properties>
 
 	<dependencies>
-
-		<!-- project dependencies -->
-
 		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-middleware-rest-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-deposit-account-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- project dependencies 
+				<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-middleware-service-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-deposit-account-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>de.adorsys.ledgers</groupId>
@@ -31,17 +47,13 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-deposit-account-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-user-management-service-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
@@ -49,11 +61,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-deposit-account-service-impl</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 
 		<!-- spring dependencies -->
 
@@ -82,27 +89,30 @@
 		</dependency>
 
 		<!-- Need these service because we are activating the module from their implementation packages. -->
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-sca-service-impl</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-user-management-service-impl</artifactId>
 			<version>${project.version}</version>
             <scope>test</scope>
 		</dependency>
-
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-sca-service-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
             <groupId>de.adorsys.ledgers</groupId>
             <artifactId>ledgers-postings-service-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-middleware-service-impl</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
         <!-- test dependencies -->
 
@@ -146,18 +156,8 @@
 			<artifactId>spring-test-dbunit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-middleware-service-impl</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-middleware-rest-server</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
+		
+		<!--  Runtime dependencies -->
 
     </dependencies>
 

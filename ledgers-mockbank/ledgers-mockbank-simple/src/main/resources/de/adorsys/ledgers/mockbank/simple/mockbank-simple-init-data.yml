@@ -376,6 +376,10 @@ balancesList:
       - accNbr: 11031
         balance: 2800.00
 
+### List accounts and the number of transaction they have.
+### if for all accounts listed the number of transactions in the database is above 
+### the count we have here, it means system has been fully initialized. Loading
+### will no take place.
 transactions: 
   - iban: DE69760700240340283600
     dateFrom: 2018-05-30
@@ -431,8 +435,4 @@ transactions:
         amount:
           amount: -700.00
         creditorName: Max Musterman
-        
-        
-### Marker used to prevent repeated processing of this config file.
-### If deposit account with this number is present, config will not be read.
-updateMarkerAccountNbr: DE38760700240320465700
+

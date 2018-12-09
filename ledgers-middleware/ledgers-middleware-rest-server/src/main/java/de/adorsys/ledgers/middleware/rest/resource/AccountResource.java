@@ -60,6 +60,10 @@ import io.swagger.annotations.ApiParam;
 @Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 @SuppressWarnings("PMD.IdenticalCatchBranches")
 public class AccountResource {
+	public static final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
+	public static final String DATE_TO_QUERY_PARAM = "dateTo";
+	public static final String DATE_FROM_QUERY_PARAM = "dateFrom";
+	public static final String ACCOUNT_ID__TRANSACTIONS_PATH = "/{accountId}/transactions";
 	public static final String BASE_PATH = "/accounts";
 	public static final String IBAN_QUERY_PARAM = "iban";
 	private static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
@@ -147,14 +151,14 @@ public class AccountResource {
 		}
     }
 
-    @GetMapping("/{accountId}/transactions")
+    @GetMapping(path=ACCOUNT_ID__TRANSACTIONS_PATH, params= {DATE_FROM_QUERY_PARAM,DATE_TO_QUERY_PARAM})
     @ApiOperation("Returns all transactions for the given account id")
     @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<List<TransactionTO>> getTransactionByDates(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId,
-    		@RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
-    		@RequestParam @Nullable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo) {
+    		@RequestParam(name=DATE_FROM_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
+    		@RequestParam(name=DATE_TO_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo) {
         dateChecker(dateFrom, dateTo);
         try {
             List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
@@ -217,6 +221,7 @@ public class AccountResource {
     		@PathVariable String iban) {
     	return getAccountDetailsByIban2(iban);
     }
+    
     @GetMapping(params=IBAN_QUERY_PARAM)
     @ApiOperation("Returns account details information given the account IBAN")
     @PreAuthorize("accountInfoByIban(#iban)")

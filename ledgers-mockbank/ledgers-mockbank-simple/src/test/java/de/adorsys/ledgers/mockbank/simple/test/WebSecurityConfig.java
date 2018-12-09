@@ -21,7 +21,7 @@ import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
 import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
 
 @Configuration
-@EnableWebSecurity(debug=true)
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired

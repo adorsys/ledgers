@@ -22,7 +22,6 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 	protected MethodSecurityExpressionHandler createExpressionHandler() {
 		AccountAccessMethodSecurityExpressionHandler expressionHandler = 
 				new AccountAccessMethodSecurityExpressionHandler(middlewareAccountService, middlewareService);
-//		expressionHandler.setPermissionEvaluator(getPermissionEvaluator());
 		return expressionHandler;
 	}
 }
