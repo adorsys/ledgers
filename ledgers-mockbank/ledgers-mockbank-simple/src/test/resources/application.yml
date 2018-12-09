@@ -1,7 +1,7 @@
 server:
   # Authorization HTTP header requires to enlarge max header size.
   max-http-header-size: 65000
-  port: 8088
+  port: 0
 
 spring:
   application.name: ledgers

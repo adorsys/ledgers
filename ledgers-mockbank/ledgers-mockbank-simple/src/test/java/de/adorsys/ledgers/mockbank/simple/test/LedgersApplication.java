@@ -63,7 +63,7 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 		} catch (UnknownHostException e) {
 			throw new IllegalStateException(e);
 		}
-		int port = context.getBean(Environment.class).getProperty("server.port", Integer.class);
+		int port = context.getBean(Environment.class).getProperty("local.server.port", Integer.class);
 		String baseUrl = String.format("http://%s:%d", ip, port);
 		context.getBean(MockBankSimpleInitService.class).runInit(baseUrl);
 	}
