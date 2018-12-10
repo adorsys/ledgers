@@ -73,7 +73,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
         try {
-            DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, false);
+            DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
             return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);

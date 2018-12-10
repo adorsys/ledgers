@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
@@ -132,6 +133,8 @@ public class UserServiceImplTest {
         List<UserBO> response = userService.getAll();
 
         assertThat(response.size(), is(1));
+        assertThat(response, instanceOf(List.class));
+        assertThat(response.get(0), instanceOf(UserBO.class));
     }
 
     @Test
