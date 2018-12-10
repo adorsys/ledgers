@@ -35,6 +35,10 @@ public abstract class NamedBO {
     public NamedBO() {
     }
 
+    public NamedBO(String name) {
+        this.name = name;
+    }
+
     public NamedBO(String name, String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
         this.name = name;
         this.id = id;

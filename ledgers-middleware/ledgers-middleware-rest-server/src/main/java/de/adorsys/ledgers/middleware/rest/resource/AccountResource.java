@@ -52,7 +52,7 @@ public class AccountResource {
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(@PathVariable String accountId) {
         try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true));
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -107,7 +107,7 @@ public class AccountResource {
     @GetMapping("/ibans/{iban}")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(@PathVariable String iban) {
         try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.now(), true));
         } catch (AccountNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
