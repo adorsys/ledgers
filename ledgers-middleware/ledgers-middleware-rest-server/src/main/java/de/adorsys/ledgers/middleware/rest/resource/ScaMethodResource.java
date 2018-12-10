@@ -18,7 +18,6 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import java.util.List;
 
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +29,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 
 @RestController
 @RequestMapping(ScaMethodResource.SCA_METHODS)
+@Api(tags = "SCA Methods" , description= "Provide endpoint for reading and updating user SCA Methods.")
+@MiddlewareUserResource
 public class ScaMethodResource {
     static final String SCA_METHODS = "/sca-methods";
     private static final Logger logger = LoggerFactory.getLogger(ScaMethodResource.class);
@@ -47,6 +53,7 @@ public class ScaMethodResource {
     }
 
 	@GetMapping("/{userLogin}")
+    @ApiOperation(value="Read SCA Methods", notes="Returns user sca methods", authorizations =@Authorization(value="apiKey"))
     public List<ScaUserDataTO> getUserScaMethods(@PathVariable String userLogin) {
         try {
             UserTO user = middlewareUserService.findByUserLogin(userLogin);
@@ -58,6 +65,7 @@ public class ScaMethodResource {
     }
 
     @PutMapping("{userLogin}")
+    @ApiOperation(value="Updates SCA Methods", notes="Update the user sca methods", authorizations =@Authorization(value="apiKey"))
     public ResponseEntity updateUserScaMethods(@PathVariable String userLogin, @RequestBody List<ScaUserDataTO> methods) {
         try {
         	middlewareUserService.updateScaData(userLogin, methods);

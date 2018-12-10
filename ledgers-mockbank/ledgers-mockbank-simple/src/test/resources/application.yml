@@ -1,3 +1,18 @@
+
+# Copyright 2018-2018 adorsys GmbH & Co KG
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 server:
   # Authorization HTTP header requires to enlarge max header size.
   max-http-header-size: 65000
@@ -14,8 +29,9 @@ spring:
       hibrenate.globally_quoted_identifiers: true
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
-      hibernate.ddl.auto: update
-  jackson.serialization.write_dates_as_timestamps: false
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
   mail:
     default-encoding: UTF-8
     host: smtp.gmail.com
@@ -50,6 +66,7 @@ spring:
   h2:
     console:
       enabled: true
+      path: /h2
   datasource:
     url: jdbc:h2:./target/ledgersdbs/ledgers-mockbank-simple
     username: sa

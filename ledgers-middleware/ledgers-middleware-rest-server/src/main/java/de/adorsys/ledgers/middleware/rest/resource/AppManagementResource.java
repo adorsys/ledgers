@@ -38,6 +38,7 @@ import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareExcepti
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import io.swagger.annotations.Api;
@@ -46,6 +47,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(AppManagementResource.BASE_PATH)
 @Api(tags = "Management" , description= "Application management")
+@MiddlewareUserResource
 public class AppManagementResource {
 
 	public static final String BASE_PATH = "/management/app";

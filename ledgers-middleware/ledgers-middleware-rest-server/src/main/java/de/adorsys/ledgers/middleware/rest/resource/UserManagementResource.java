@@ -29,12 +29,17 @@ import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlew
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(UserManagementResource.BASE_PATH)
+@Api(tags = "User Login" , description= "Provide endpoint for registering and authorizing user.")
+@MiddlewareUserResource
 public class UserManagementResource {
 	public static final String BASE_PATH = "/users";
 	public static final String REGISTER_PATH = "/register";
@@ -60,6 +65,7 @@ public class UserManagementResource {
      */
     @PostMapping("/authorise")
     @SuppressWarnings("PMD.IdenticalCatchBranches")
+    @ApiOperation(value="Authorize Customer returns Boolean", notes="Authorize a customer and return an access token.")
     public boolean authorise(@RequestParam(LOGIN_REQUEST_PARAM)String login, @RequestParam(PIN_REQUEST_PARAM) String pin){
         try {
         	return onlineBankingService.authorise(login, pin, UserRoleTO.CUSTOMER)!=null;
@@ -80,6 +86,7 @@ public class UserManagementResource {
      * @return
      */
     @PostMapping(AUTHORISE2_PATH)
+    @ApiOperation(value="Authorize User returns Access Token", notes="Authorize any user. But user most specify the target role. return an access token.")
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
     public String authorise2(@RequestParam(LOGIN_REQUEST_PARAM)String login, @RequestParam(PIN_REQUEST_PARAM) String pin, @RequestParam(ROLE_REQUEST_PARAM) UserRoleTO role){
         try {
@@ -94,11 +101,13 @@ public class UserManagementResource {
     }
     
     @PostMapping(REGISTER_PATH)
+    @ApiOperation(value="Register User", notes="Registers a user. Registered as a staff member, user will have to be activated.")
     public UserTO register(@RequestParam(LOGIN_REQUEST_PARAM)String login, 
     		@RequestParam(EMAIL_REQUEST_PARAM) String email, 
     		@RequestParam(PIN_REQUEST_PARAM) String pin,
     		@RequestParam(name=ROLE_REQUEST_PARAM, defaultValue="CUSTOMER") UserRoleTO role) {
     	try {
+    		// TODO: add activation of non customer members.
 			UserTO user = onlineBankingService.register(login, email, pin, role);
 			user.setPin(null);
 			return user;

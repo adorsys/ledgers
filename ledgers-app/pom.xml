@@ -112,12 +112,13 @@
 		</dependency>
 
 		<!-- user management -->
-
+		<!-- 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-user-management-rest-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		 -->
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
@@ -187,6 +188,9 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<mainClass>de.adorsys.ledgers.LedgersApplication</mainClass>
+					<profiles>
+						<profile>h2</profile>
+					</profiles>
 				</configuration>
 				<executions>
 					<execution>

@@ -38,8 +38,8 @@ public class DepositAccountHelper {
 		HttpURLConnection con = null;
 		try {
 			byte[] content = jsonMapper.writeValueAsBytes(accountDetailsTO);
-			URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AccountResource.BASE_PATH)
-					.queryParam(AccountResource.IBAN_QUERY_PARAM, accountDetailsTO.getIban()).build().toUri().toURL();
+			URL url = UriComponentsBuilder.fromUriString(baseUrl)
+					.path(AccountResource.BASE_PATH).build().toUri().toURL();
 			con = HttpURLConnectionHelper.postContent(url, userBag.getAccessToken(), content, APPLICATION_JSON);
 			if (con.getResponseCode() == HttpURLConnection.HTTP_OK || con.getResponseCode() == HttpURLConnection.HTTP_CONFLICT) {
 				// Reauthenticate.
@@ -59,7 +59,7 @@ public class DepositAccountHelper {
 	public static List<AccountDetailsTO> readAccessibleAccounts(String baseUrl, UserBag userBag)
 			throws MalformedURLException, IOException, ProtocolException, JsonParseException, JsonMappingException {
 		List<AccountDetailsTO> accessibleAccounts = Collections.emptyList();
-		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AccountResource.BASE_PATH).build().toUri().toURL();
+		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AccountResource.BASE_PATH).path(AccountResource.LIST_OF_ACCOUNTS_PATH).build().toUri().toURL();
 		HttpURLConnection con = null;
 		try {
 			con = HttpURLConnectionHelper.getContent(url, userBag.getAccessToken());
@@ -87,7 +87,7 @@ public class DepositAccountHelper {
 		HttpURLConnection con =  null;
 		try {
 			URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AccountResource.BASE_PATH)
-					.queryParam(AccountResource.IBAN_QUERY_PARAM, iban).build().toUri().toURL();
+					.path(AccountResource.IBANS_IBAN_PARAM).build(iban).toURL();
 			con = HttpURLConnectionHelper.getContent(url, bag.getAccessToken());
 			if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				accountDetailsTO = jsonMapper.readValue(HttpURLConnectionHelper.readToString(con), AccountDetailsTO.class);

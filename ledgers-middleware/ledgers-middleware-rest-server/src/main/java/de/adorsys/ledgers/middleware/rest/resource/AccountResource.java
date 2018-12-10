@@ -47,6 +47,7 @@ import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlew
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
@@ -54,18 +55,22 @@ import de.adorsys.ledgers.middleware.rest.exception.RestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 
 @RestController
 @RequestMapping(AccountResource.BASE_PATH)
 @Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 @SuppressWarnings("PMD.IdenticalCatchBranches")
+@MiddlewareUserResource
 public class AccountResource {
+	public static final String IBANS_IBAN_PARAM = "/ibans/{iban}";
+	public static final String LIST_OF_ACCOUNTS_PATH = "/listOfAccounts";
 	public static final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
 	public static final String DATE_TO_QUERY_PARAM = "dateTo";
 	public static final String DATE_FROM_QUERY_PARAM = "dateFrom";
 	public static final String ACCOUNT_ID__TRANSACTIONS_PATH = "/{accountId}/transactions";
 	public static final String BASE_PATH = "/accounts";
-	public static final String IBAN_QUERY_PARAM = "iban";
+//	public static final String IBAN_QUERY_PARAM = "iban";
 	private static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
     private static final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
 
@@ -78,7 +83,7 @@ public class AccountResource {
     }
 
     @GetMapping("/{accountId}")
-    @ApiOperation("Returns account details information")
+    @ApiOperation(value="Load Account by AccountIs", notes="Returns account details information", authorizations =@Authorization(value="apiKey"))
     @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
@@ -109,7 +114,7 @@ public class AccountResource {
      * @return
      */
     @GetMapping("/balances/{accountId}")
-    @ApiOperation("Returns balances of the deposit account")
+    @ApiOperation(value="Get Balances", notes="Returns balances of the deposit account", authorizations =@Authorization(value="apiKey"))
     @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
@@ -134,7 +139,7 @@ public class AccountResource {
     }
     
     @GetMapping("{accountId}/transactions/{transactionId}")
-    @ApiOperation("Returns the transaction with the given account id and transaction id.")
+    @ApiOperation(value="Load Transaction", notes="Returns the transaction with the given account id and transaction id.", authorizations =@Authorization(value="apiKey"))
     @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<TransactionTO> getTransactionById(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
@@ -152,7 +157,7 @@ public class AccountResource {
     }
 
     @GetMapping(path=ACCOUNT_ID__TRANSACTIONS_PATH, params= {DATE_FROM_QUERY_PARAM,DATE_TO_QUERY_PARAM})
-    @ApiOperation("Returns all transactions for the given account id")
+    @ApiOperation(value="Find Transactions By Date", notes="Returns all transactions for the given account id", authorizations =@Authorization(value="apiKey"))
     @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<List<TransactionTO>> getTransactionByDates(
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
@@ -178,7 +183,7 @@ public class AccountResource {
      * @return
      */
     @GetMapping("/users/{userLogin}")
-    @ApiOperation("Returns the list of all accounts linked to the given user.")
+    @ApiOperation(value="Load Accounts By User Login", notes="Returns the list of all accounts linked to the given user.", authorizations =@Authorization(value="apiKey"))
     @PreAuthorize("userLogin(#userLogin)")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(@PathVariable String userLogin) {
     	return getListOfAccountDetailsInternal(userLogin);
@@ -189,8 +194,8 @@ public class AccountResource {
      * 
      * @return : the list of accounts linked with the current customer.
      */
-    @GetMapping
-    @ApiOperation("Returns the list of all accounts linked to the connected user. Call only available to customer.")
+    @GetMapping(path=LIST_OF_ACCOUNTS_PATH)
+    @ApiOperation(value="List Accounts", authorizations =@Authorization(value="apiKey"), notes="Returns the list of all accounts linked to the connected user. Call only available to customer.")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listOfDepositAccounts());
@@ -213,8 +218,8 @@ public class AccountResource {
      * @param iban
      * @return
      */
-    @GetMapping("/ibans/{iban}")
-    @ApiOperation("Returns account details information given the account IBAN")
+    @GetMapping(IBANS_IBAN_PARAM)
+    @ApiOperation(value="Load Account Details By IBAN", authorizations =@Authorization(value="apiKey"), notes="Returns account details information given the account IBAN")
     @PreAuthorize("accountInfoByIban(#iban)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
     		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
@@ -222,12 +227,9 @@ public class AccountResource {
     	return getAccountDetailsByIban2(iban);
     }
     
-    @GetMapping(params=IBAN_QUERY_PARAM)
-    @ApiOperation("Returns account details information given the account IBAN")
-    @PreAuthorize("accountInfoByIban(#iban)")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(
-    		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
-    		@RequestParam(required = true, name = IBAN_QUERY_PARAM) String iban) {
+//    @GetMapping(path="/byIban" params=IBAN_QUERY_PARAM)
+//    @PreAuthorize("accountInfoByIban(#iban)")
+    private ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(String iban) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
         } catch (AccountNotFoundMiddlewareException e) {
@@ -237,6 +239,7 @@ public class AccountResource {
 		}
     }
 
+    @ApiOperation(value="Fund Confirmation", authorizations =@Authorization(value="apiKey"), notes="Returns account details information given the account IBAN")
     @PostMapping(value = "/funds-confirmation")
     @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
     public ResponseEntity<Boolean> fundsConfirmation(@RequestBody FundsConfirmationRequestTO request) {
@@ -264,6 +267,7 @@ public class AccountResource {
     
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
+    @ApiOperation(value="Create Deposit Account", authorizations =@Authorization(value="apiKey"), notes="Creates a deposit account")
     public ResponseEntity<Void> createDepositAccount(@RequestBody AccountDetailsTO accountDetailsTO) {
 		// create account. It does not exist.
 		String iban = accountDetailsTO.getIban();
