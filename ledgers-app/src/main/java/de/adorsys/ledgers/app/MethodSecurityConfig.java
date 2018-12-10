@@ -20,6 +20,6 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
 	@Override
 	protected MethodSecurityExpressionHandler createExpressionHandler() {
-		return new AccountAccessMethodSecurityExpressionHandler(middlewareAccountService, middlewareService);
+		return 	new AccountAccessMethodSecurityExpressionHandler(middlewareAccountService, middlewareService);
 	}
 }
