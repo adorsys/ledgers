@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {User} from "../../../models/user.model";
 import {UserService} from "../../../services/user.service";
 import {ActivatedRoute, Params} from "@angular/router";
-import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'user-edit',
@@ -18,23 +18,12 @@ export class UserEditComponent implements OnInit {
   constructor(
     private userService: UserService,
     private route: ActivatedRoute,
-    private formBuilder: FormBuilder,) {
+    private formBuilder: FormBuilder) {
   }
 
   ngOnInit() {
-    // this.getUser();
-    this.editUserForm = this.formBuilder.group({
-      email: ['sdjhsdhj', [Validators.required, Validators.email]],
-      login: ['', Validators.required],
-      pin: ['jsjs', [Validators.required, Validators.minLength(8)]]
-    });
-  }
+    this.setupUserFormControl();
 
-  get formControl() {
-    return this.editUserForm.controls;
-  }
-
-  getUser(): void {
     this.route.params.subscribe(
       (params: Params) => {
         this.id = params['id'];
@@ -42,12 +31,36 @@ export class UserEditComponent implements OnInit {
         this.userService.getUserById(this.id)
           .subscribe( (user: User) => {
             this.user = user;
+          }, error => {
+            console.log(error)
+          }, () => {
+            this.setUserFormValue();
           });
       });
   }
 
+  get formControl() {
+    return this.editUserForm.controls;
+  }
+
+  setupUserFormControl(): void {
+    this.editUserForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      login: ['', Validators.required],
+      pin: ['', [Validators.required, Validators.minLength(8)]]
+    });
+  }
+
+  setUserFormValue(): void {
+    this.editUserForm.setValue({
+      login: this.user.login,
+      email: this.user.email,
+      pin: this.user.pin
+    });
+  }
+
   onSubmit() {
-    console.log('sjhjhsj');
+    console.log(this.editUserForm.value);
   }
 
 }
