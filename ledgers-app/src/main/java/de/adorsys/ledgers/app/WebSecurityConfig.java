@@ -9,6 +9,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -19,7 +22,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
            .authorizeRequests().antMatchers("/").permitAll()
            .and()
-           .authorizeRequests().antMatchers("/console/**").permitAll();
+           .authorizeRequests().antMatchers("/console/**").permitAll()
+                .and()
+                .cors();
 
         http.csrf().disable();
         http.headers().frameOptions().disable();
@@ -41,5 +46,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				return "anonymous";
 			}
 		};
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+        return source;
     }
 }
