@@ -33,18 +33,7 @@ public class DepositAccountMapperTest {
         DepositAccountBO account = depositAccountMapper.toDepositAccountBO(getDepositAccount());
 
         //Then
-        assertThat(account.getId()).isEqualTo(getDepositAccountBO().getId());
-        assertThat(account.getIban()).isEqualTo(getDepositAccountBO().getIban());
-        assertThat(account.getMsisdn()).isEqualTo(getDepositAccountBO().getMsisdn());
-        assertThat(account.getCurrency()).isEqualTo(getDepositAccountBO().getCurrency());
-        assertThat(account.getName()).isEqualTo(getDepositAccountBO().getName());
-        assertThat(account.getProduct()).isEqualTo(getDepositAccountBO().getProduct());
-        assertThat(account.getAccountType()).isEqualTo(getDepositAccountBO().getAccountType());
-        assertThat(account.getAccountStatus()).isEqualTo(getDepositAccountBO().getAccountStatus());
-        assertThat(account.getBic()).isEqualTo(getDepositAccountBO().getBic());
-        assertThat(account.getLinkedAccounts()).isEqualTo(getDepositAccountBO().getLinkedAccounts());
-        assertThat(account.getUsageType()).isEqualTo(getDepositAccountBO().getUsageType());
-        assertThat(account.getDetails()).isEqualTo(getDepositAccountBO().getDetails());
+        assertThat(account).isEqualToComparingFieldByFieldRecursively(getDepositAccountBO());
     }
 
     @Test
@@ -53,18 +42,25 @@ public class DepositAccountMapperTest {
         DepositAccount account = depositAccountMapper.toDepositAccount(getDepositAccountBO());
 
         //Then
-        assertThat(account.getId()).isEqualTo(getDepositAccount().getId());
-        assertThat(account.getIban()).isEqualTo(getDepositAccount().getIban());
-        assertThat(account.getMsisdn()).isEqualTo(getDepositAccount().getMsisdn());
-        assertThat(account.getCurrency()).isEqualTo(getDepositAccount().getCurrency());
-        assertThat(account.getName()).isEqualTo(getDepositAccount().getName());
-        assertThat(account.getProduct()).isEqualTo(getDepositAccount().getProduct());
-        assertThat(account.getAccountType()).isEqualTo(getDepositAccount().getAccountType());
-        assertThat(account.getAccountStatus()).isEqualTo(getDepositAccount().getAccountStatus());
-        assertThat(account.getBic()).isEqualTo(getDepositAccount().getBic());
-        assertThat(account.getLinkedAccounts()).isEqualTo(getDepositAccount().getLinkedAccounts());
-        assertThat(account.getUsageType()).isEqualTo(getDepositAccount().getUsageType());
-        assertThat(account.getDetails()).isEqualTo(getDepositAccount().getDetails());
+        assertThat(account).isEqualToComparingFieldByFieldRecursively(getDepositAccount());
+    }
+
+    @Test
+    public void createDepositAccountObj() {
+        DepositAccount result = depositAccountMapper.createDepositAccountObj(getDepositAccount());
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getIban()).isEqualTo(getDepositAccount().getIban());
+        assertThat(result.getMsisdn()).isEqualTo(getDepositAccount().getMsisdn());
+        assertThat(result.getCurrency()).isEqualTo(getDepositAccount().getCurrency());
+        assertThat(result.getName()).isEqualTo(getDepositAccount().getName());
+        assertThat(result.getProduct()).isEqualTo(getDepositAccount().getProduct());
+        assertThat(result.getAccountType()).isEqualTo(getDepositAccount().getAccountType());
+        assertThat(result.getAccountStatus()).isEqualTo(getDepositAccount().getAccountStatus());
+        assertThat(result.getBic()).isEqualTo(getDepositAccount().getBic());
+        assertThat(result.getLinkedAccounts()).isEqualTo(getDepositAccount().getLinkedAccounts());
+        assertThat(result.getUsageType()).isEqualTo(getDepositAccount().getUsageType());
+        assertThat(result.getDetails()).isEqualTo(getDepositAccount().getDetails());
+
     }
 
     private DepositAccount getDepositAccount() {

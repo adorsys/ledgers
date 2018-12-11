@@ -56,7 +56,7 @@ public class AccountResourceTest {
     private static final String IBAN = "DE91100000000123456789";
     private static final LocalDate DATE_FROM = LocalDate.of(2018, 12, 12);
     private static final LocalDate DATE_TO = LocalDate.of(2018, 12, 18);
-    private static final LocalDateTime DATE_TIME = LocalDateTime.MAX;
+    private static final LocalDateTime DATE_TIME = LocalDateTime.now();
 
     private MockMvc mockMvc;
 
@@ -97,7 +97,7 @@ public class AccountResourceTest {
 
     @Test
     public void getAccountDetailsByAccountId_Failure_NotFound() throws Exception {
-        when(middlewareService.getDepositAccountById(ACCOUNT_ID, DATE_TIME, true))
+        when(middlewareService.getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true)))
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with id=" + ACCOUNT_ID + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}", ACCOUNT_ID))
@@ -269,7 +269,7 @@ public class AccountResourceTest {
         AccountDetailsTO actual = JsonReader.getInstance().getObjectFromString(content, AccountDetailsTO.class);
 
         assertThat(actual).isEqualToComparingFieldByFieldRecursively(details);
-        verify(middlewareService, times(1)).getDepositAccountByIban(IBAN, DATE_TIME, false);
+        verify(middlewareService, times(1)).getDepositAccountByIban(eq(IBAN), any(), eq(true));
     }
 
     @Test
@@ -283,7 +283,7 @@ public class AccountResourceTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
 
-        verify(middlewareService, times(1)).getDepositAccountByIban(IBAN, DATE_TIME, false);
+        verify(middlewareService, times(1)).getDepositAccountByIban(eq(IBAN), any(), eq(true));
     }
 
 

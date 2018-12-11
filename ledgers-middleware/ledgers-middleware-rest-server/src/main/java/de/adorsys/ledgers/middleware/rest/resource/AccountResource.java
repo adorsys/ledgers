@@ -89,7 +89,7 @@ public class AccountResource {
     		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
     		@PathVariable String accountId) {
         try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.MAX, true));
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
         } catch (AccountNotFoundMiddlewareException e) {
             throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
@@ -231,7 +231,7 @@ public class AccountResource {
 //    @PreAuthorize("accountInfoByIban(#iban)")
     private ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(String iban) {
         try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.MAX, false));
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.now(), true));
         } catch (AccountNotFoundMiddlewareException e) {
             throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {

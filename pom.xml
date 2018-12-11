@@ -50,7 +50,7 @@
         <developer>
             <name>Francis Pouatcha</name>
             <email>fpo@adorsys.de</email>
-            <organization>adorsys</organization>
+            <organization>adorsys GmbH &amp; Co KG</organization>
             <organizationUrl>https://adorsys.de/</organizationUrl>
         </developer>
         <developer>
@@ -68,13 +68,13 @@
         <developer>
             <name>Vladimir Nechai</name>
             <email>vne@adorsys.de</email>
-            <organization>adorsys</organization>
+            <organization>adorsys GmbH &amp; Co KG</organization>
             <organizationUrl>https://adorsys.de/</organizationUrl>
         </developer>
         <developer>
             <name>Ibragim Sautiev</name>
             <email>isa@adorsys.de</email>
-            <organization>adorsys</organization>
+            <organization>adorsys GmbH &amp; Co KG</organization>
             <organizationUrl>https://adorsys.de/</organizationUrl>
         </developer>
     </developers>
