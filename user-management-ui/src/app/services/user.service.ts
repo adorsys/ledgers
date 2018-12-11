@@ -10,12 +10,6 @@ export class UserService {
 
   public url = `${environment.userManagementEndPoint}`;
 
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type':  'application/json',
-    })
-  };
-
   constructor(private http: HttpClient) {
   }
 
@@ -28,7 +22,11 @@ export class UserService {
   }
 
   createUser(user: User) {
-    return this.http.post(this.url, JSON.stringify(user));
+    let header = new HttpHeaders();
+    header = header
+      .append('Content-Type', 'application/json')
+      .append('Accept', 'application/json');
+    return this.http.post(this.url + '/', JSON.stringify(user), {headers: header});
   }
 
   getUserByLogin() {

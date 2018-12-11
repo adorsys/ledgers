@@ -10,9 +10,10 @@ import { SidebarComponent } from './commons/sidebar/sidebar.component';
 import { UsersComponent } from './components/users/users.component';
 import { AccountsComponent } from './components/accounts/accounts.component';
 import { UserNewComponent } from './components/users/user-new/user-new.component';
-import { HttpClientModule } from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { UserEditComponent } from './components/users/user-edit/user-edit.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {TokenInterceptor} from "./interceptors/token-interceptor";
 
 @NgModule({
   declarations: [
@@ -33,7 +34,9 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
     FormsModule,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
