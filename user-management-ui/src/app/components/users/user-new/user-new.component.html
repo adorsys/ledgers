@@ -1,9 +1,9 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 class="h2">User "{{user?.login}}"</h1>
+  <h1 class="h2">New user: {{user?.login}}</h1>
 </div>
 
 <div class="container">
-  <form>
+  <form autocomplete="off" [formGroup]="userForm" (ngSubmit)="onSubmit()">
 
     <div class="form-group">
       <div class="row">
@@ -37,15 +37,15 @@
     </div>
 
     <div class="form-group">
-      <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+      <input type="email" class="form-control" formControlName="email" id="email" autocomplete="off" aria-describedby="emailHelp" placeholder="Enter email">
       <small id="emailHelp" class="form-text text-muted">Contact Email of the user</small>
     </div>
     <div class="form-group">
-      <input autocomplete="off" type="text" class="form-control" id="login" aria-describedby="emailHelp" placeholder="Enter your banking login">
+      <input type="text" class="form-control" formControlName="login" id="login" autocomplete="off" aria-describedby="emailHelp" placeholder="Enter your banking login">
       <small id="loginHelp" class="form-text text-muted">User login to banking service</small>
     </div>
     <div class="form-group">
-      <input type="password" class="form-control" id="pin" aria-describedby="pinHelp" placeholder="Enter your pin">
+      <input type="password" class="form-control" formControlName="pin" id="pin" autocomplete="off" aria-describedby="pinHelp" placeholder="Enter your pin">
       <small id="pinHelp" class="form-text text-muted">Pin to access online banking for the user</small>
     </div>
 

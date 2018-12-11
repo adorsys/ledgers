@@ -18,26 +18,32 @@ export class UserNewComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    // private formBuilder: FormBuilder,
+    private formBuilder: FormBuilder,
     private route: ActivatedRoute) {
   }
 
   ngOnInit() {
-    // this.userForm = this.formBuilder.group({
-    //   login: ['', Validators.required]
-    // });
-    this.getUser();
+    this.setupUserFormControl();
+
   }
 
-  getUser(): void {
-    this.route.params.subscribe(
-      (params: Params) => {
-        this.id = params['id'];
+  setupUserFormControl(): void {
+    this.userForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      login: ['', Validators.required],
+      pin: ['', [Validators.required, Validators.minLength(8)]]
+    });
+  }
 
-        this.userService.getUserById(this.id)
-          .subscribe( (user: User) => {
-            this.user = user;
-          });
+  get formControl() {
+    return this.userForm.controls;
+  }
+
+  onSubmit() {
+    console.log(this.userForm.value);
+    this.userService.createUser(this.userForm.value)
+      .subscribe(response => {
+        console.log(response);
       });
   }
 
