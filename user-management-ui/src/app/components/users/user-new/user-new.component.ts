@@ -29,6 +29,9 @@ export class UserNewComponent implements OnInit {
 
   setupUserFormControl(): void {
     this.userForm = this.formBuilder.group({
+      scaUserData: this.formBuilder.array([
+        this.initScaData()
+      ]),
       email: ['', [Validators.required, Validators.email]],
       login: ['', Validators.required],
       pin: ['', [Validators.required, Validators.minLength(8)]]
@@ -37,6 +40,13 @@ export class UserNewComponent implements OnInit {
 
   get formControl() {
     return this.userForm.controls;
+  }
+
+  initScaData() {
+    return this.formBuilder.group({
+      scaMethod: ['', Validators.required],
+      methodValue: ['', Validators.required]
+    })
   }
 
   onSubmit() {
