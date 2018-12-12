@@ -225,10 +225,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
 	@Override
 	public String readIbanById(String id) {
-		DepositAccount account = depositAccountRepository.findById(id).orElse(null);
-		return account ==null
-			? null 
-					: account.getIban();
+		return depositAccountRepository.findById(id).map(DepositAccount::getIban).orElse(null);
 	}
 
 	@Override

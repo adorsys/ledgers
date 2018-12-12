@@ -86,28 +86,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	@Override
 	public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss)
 			throws UserNotFoundMiddlewareException{
-		// TODO: Access Control
         try {
         	Map<String, UserBO> persistBuffer = new HashMap<>();
             DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(accountDetailsMapper.toDepositAccountBO(depositAccount));
             if(accountAccesss!=null) {
-            	for (AccountAccessTO accountAccessTO : accountAccesss) {
-            		UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
-            		if(user==null) {
-            			user = userService.findById(accountAccessTO.getUser().getId());
-            		}
-					AccountAccessBO accountAccessBO = new AccountAccessBO(depositAccountBO.getIban(), 
-							AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
-					addAccess(user, accountAccessBO, persistBuffer);
-				}
-            	persistBuffer.values().forEach(u -> {
-            		try {
-						userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
-					} catch (UserNotFoundException e) {
-			            logger.error(e.getMessage(), e);
-			            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-					}
-            	});
+            	addAccess(accountAccesss, depositAccountBO, persistBuffer);
             }
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -116,6 +99,27 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
 		}
     }
+
+	private void addAccess(List<AccountAccessTO> accountAccesss, DepositAccountBO depositAccountBO, 
+			final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
+		for (AccountAccessTO accountAccessTO : accountAccesss) {
+			UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
+			if(user==null) {
+				user = userService.findById(accountAccessTO.getUser().getId());
+			}
+			AccountAccessBO accountAccessBO = new AccountAccessBO(depositAccountBO.getIban(), 
+					AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
+			addAccess(user, accountAccessBO, persistBuffer);
+		}
+		persistBuffer.values().forEach(u -> {
+			try {
+				userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
+			} catch (UserNotFoundException e) {
+		        logger.error(e.getMessage(), e);
+		        throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+			}
+		});
+	}
 
     private void addAccess(final UserBO user, AccountAccessBO accountAccessBO, final Map<String, UserBO> persistBuffer) {
 		AccountAccessBO existingAac = user.getAccountAccesses().stream().filter(a -> a.getIban().equals(accountAccessBO.getIban()))

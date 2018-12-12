@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
-import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
@@ -37,7 +36,6 @@ import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
-
 
 	@InjectMocks
     public UserServiceImpl userService;
@@ -62,13 +60,8 @@ public class UserServiceImplTest {
     private static final String USER_PIN = "12345678";
     private static final String THE_ENCODED_VALUE = "25d55ad283aa400af464c76d713c07ad";
     private static final String USER_NON_EXISTING_LOGIN = "NonExistingLogin";
-    private static final String USER_NON_EXISTING_ID = "NonExistingID";
     private UserEntity userEntity;
     private UserBO userBO;
-    private static final String USER_IBAN = "3737463673647";
-    private static final AccessTypeBO USER_ACC_ACCESS_TYPE_1 = AccessTypeBO.READ;
-    private static final AccessTypeBO USER_ACC_ACCESS_TYPE_2 = AccessTypeBO.DISPOSE;
-
 
     @Before
     public void setUp() {

@@ -23,14 +23,14 @@ public class PasswordEnc {
 	private PasswordEncoder pe = new BCryptPasswordEncoder();
 	
     public String encode(String userId, String password) {
-    	return pe.encode(conatenate(userId, password));
+    	return pe.encode(concatenate(userId, password));
     }
 
-    private String conatenate(String userId, String password) {
+    private String concatenate(String userId, String password) {
     	return userId+password;
 	}
     
 	public boolean verify(String userId, String rawPassword, String encodedPassword) {
-        return pe.matches(conatenate(userId, rawPassword), encodedPassword);
+        return pe.matches(concatenate(userId, rawPassword), encodedPassword);
     }
 }

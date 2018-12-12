@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
 			List<AccountAccessBO> accountAccessesBOFromToken = accessTokenJWT.getAccountAccesses();
 			List<AccountAccess> accountAccessesFromToken = userConverter.toAccountAccessListEntity(accountAccessesBOFromToken);
 			accountAccessesFromToken.forEach(accountAccessFT -> {
-				confirmAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
+				confirmAndReturnAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
 			});
 			return accessTokenJWT;
 			
@@ -167,7 +167,7 @@ public class UserServiceImpl implements UserService {
 		}
 	}
     
-	private AccountAccess confirmAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
+	private AccountAccess confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
 		return accountAccesses.stream()
 			.filter(a -> matchAccess(accountAccessFT, a))
 			.findFirst().orElseGet(() -> {
@@ -178,11 +178,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private boolean matchAccess(AccountAccess requested, AccountAccess existent) {
-		if(!StringUtils.equals(requested.getIban(), existent.getIban())) {
-			return false;
-		}
-		// Make sure old access still valid
-		return requested.getAccessType().compareTo(existent.getAccessType())<=0;
+		return 
+				// Same iban
+				StringUtils.equals(requested.getIban(), existent.getIban())
+				&&
+				// Make sure old access still valid
+				requested.getAccessType().compareTo(existent.getAccessType())<=0;
 
 	}
 
@@ -195,17 +196,22 @@ public class UserServiceImpl implements UserService {
         // Check user has defined role.
         UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
         	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
-        Date iat = new Date();
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+        // Generating claim
+        JWTClaimsSet claimsSet = genJWT(user, userRole, new Date(), 60);
+        // signing jwt
+		return signJWT(claimsSet);
+	}
+
+	private JWTClaimsSet genJWT(UserEntity user, UserRole userRole, Date issueTime, int validitySeconds) {
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
         	.subject(user.getId())
         	.jwtID(Ids.id())
         	.claim("actor", user.getLogin())
         	.claim("role", userRole)
         	.claim("accountAccesses", user.getAccountAccesses())
-        	.issueTime(iat)
-        	.expirationTime(DateUtils.addMinutes(iat, 60)).build();
-        
-		return signJWT(claimsSet);
+        	.issueTime(issueTime)
+        	.expirationTime(DateUtils.addMinutes(issueTime, validitySeconds)).build();
+		return claimsSet;
 	}
 
 	private String signJWT(JWTClaimsSet claimsSet) {
