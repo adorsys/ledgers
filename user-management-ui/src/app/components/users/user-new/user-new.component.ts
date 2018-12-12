@@ -60,11 +60,10 @@ export class UserNewComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.userForm.value);
-    this.userService.createUser(this.userForm.value)
-      .subscribe(response => {
-        console.log(response);
-      });
+    // this.userService.createUser(this.userForm.value)
+    //   .subscribe(response => {
+    //     console.log(response);
+    //   });
   }
 
 }

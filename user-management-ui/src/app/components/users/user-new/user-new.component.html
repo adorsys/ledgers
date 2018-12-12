@@ -11,12 +11,13 @@
           Account Information
         </div>
         <div class="card-body">
-          <div class="row" *ngFor="let accountAccess of userForm.controls.accountAccesses.controls; let i=index">
+          <div class="row" *ngFor="let accountAccess of userForm.controls['accountAccesses'].controls; let i=index">
             <div class="col-lg-8 col-md-8 col-sm-6 my-1" [formGroupName]="i">
               <input type="text"
                      class="form-control"
                      formControlName="iban"
                      id="iban" aria-describedby="ibanHelp"
+                     [ngClass]="{ 'is-invalid': accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors }"
                      placeholder="Please select account for which user is created">
               <small id="ibanHelp" class="form-text text-muted">Account IBAN for user</small>
             </div>
@@ -77,13 +78,20 @@
                      formControlName="email"
                      id="email" autocomplete="off"
                      aria-describedby="emailHelp"
+                     [ngClass]="{ 'is-invalid': formControl['email'].touched && formControl['email'].errors }"
                      placeholder="Enter email">
               <small id="emailHelp" class="form-text text-muted">Contact Email of the user</small>
             </div>
           </div>
           <div class="row">
             <div class="col-lg-8 col-md-8 col-sm-6 my-1">
-              <input type="text" class="form-control" formControlName="login" id="login" autocomplete="off" aria-describedby="emailHelp" placeholder="Enter your banking login">
+              <input type="text"
+                     class="form-control"
+                     formControlName="login"
+                     id="login" autocomplete="off"
+                     aria-describedby="emailHelp"
+                     [ngClass]="{ 'is-invalid': formControl['login'].touched && formControl['login'].errors }"
+                     placeholder="Enter your banking login">
               <small id="loginHelp" class="form-text text-muted">User login to banking service</small>
             </div>
           </div>
@@ -94,6 +102,7 @@
                      formControlName="pin"
                      id="pin" autocomplete="off"
                      aria-describedby="pinHelp"
+                     [ngClass]="{ 'is-invalid': formControl['pin'].touched && formControl['pin'].errors }"
                      placeholder="Enter your pin">
               <small id="pinHelp" class="form-text text-muted">Pin to access online banking for the user</small>
             </div>
@@ -115,6 +124,7 @@
                      id="scaData"
                      formControlName="methodValue"
                      aria-describedby="scaDataHelp"
+                     [ngClass]="{ 'is-invalid': scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors }"
                      placeholder="Please input SCA method for user">
               <small id="scaDataHelp" class="form-text text-muted">Account IBAN for user</small>
             </div>
