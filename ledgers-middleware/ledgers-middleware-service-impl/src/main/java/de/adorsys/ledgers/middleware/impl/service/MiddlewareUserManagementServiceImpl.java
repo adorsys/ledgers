@@ -3,13 +3,13 @@ package de.adorsys.ledgers.middleware.impl.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -104,14 +104,4 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	public List<UserTO> listUsers(int page, int size) {
 		return userTOMapper.toUserTOList(userService.listUsers(page, size));
 	}
-	
-    @Override
-    public boolean authorise(String login, String pin) throws UserNotFoundMiddlewareException {
-        try {
-            return userService.authorise(login, pin);
-        } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-        }
-    }
 }

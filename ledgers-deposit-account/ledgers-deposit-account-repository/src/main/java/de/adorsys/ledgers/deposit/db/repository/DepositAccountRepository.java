@@ -10,4 +10,7 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
 //	Optional<DepositAccount> findByIban(String iban);
 
 	List<DepositAccount> findByIbanIn(List<String> ibans);
+	
+	List<DepositAccount> findByIbanStartingWith(String iban);
+	
 }

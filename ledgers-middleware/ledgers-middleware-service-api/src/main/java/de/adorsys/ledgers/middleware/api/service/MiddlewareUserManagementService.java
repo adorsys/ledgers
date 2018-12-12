@@ -55,14 +55,4 @@ public interface MiddlewareUserManagementService {
 
     List<UserTO> listUsers(int page, int size);
 
-    /**
-     * Performs user authorisation
-     *
-     * @param login User login
-     * @param pin   User PIN
-     * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
-     * @throws UserNotFoundMiddlewareException is thrown if user can`t be found
-     */
-    boolean authorise(String login, String pin) throws UserNotFoundMiddlewareException;
-
 }

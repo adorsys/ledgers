@@ -1,0 +1,19 @@
+<dataset>
+    <CHART_OF_ACCOUNT />
+	<LEDGER />
+    <LEDGER_ACCOUNT />
+    <POSTING />
+    <POSTING_LINE />
+
+    <USERS />
+	<ACCOUNT_ACCESSES />
+    <SCA_DATA />
+    <USERS_ROLES />
+    
+    <DEPOSIT_ACCOUNT />
+    <PAYMENT />
+    <PAYMENT_TARGET />
+    <PAYMENT_TARGETS />
+    <SCHEDULED_PAYMENT_ORDER />
+    
+</dataset>

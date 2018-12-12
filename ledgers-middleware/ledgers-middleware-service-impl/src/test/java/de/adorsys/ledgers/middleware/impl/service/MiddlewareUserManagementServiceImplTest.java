@@ -19,7 +19,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.middleware.impl.service.MiddlewareUserManagementServiceImpl;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -27,6 +26,7 @@ import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareUserManagementServiceImplTest {
+	private static final String ANY_TOKEN = "anyToken";
 	private static final String LOGIN = "login";
 	private static final String PIN = "pin";
 
@@ -46,26 +46,6 @@ public class MiddlewareUserManagementServiceImplTest {
 	public static void before() {
 		userBO = readYml(UserBO.class, "user.yml");
 		userTO = readYml(UserTO.class, "user.yml");
-	}
-
-	@Test
-	public void authorise() throws UserNotFoundException, UserNotFoundMiddlewareException {
-
-		when(userService.authorise(LOGIN, PIN)).thenReturn(Boolean.TRUE);
-
-		boolean isAuthorised = middlewareUserService.authorise(LOGIN, PIN);
-
-		assertThat(isAuthorised, is(Boolean.TRUE));
-
-		verify(userService, times(1)).authorise(LOGIN, PIN);
-	}
-
-	@Test(expected = UserNotFoundMiddlewareException.class)
-	public void authoriseUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException {
-
-		when(userService.authorise(LOGIN, PIN)).thenThrow(UserNotFoundException.class);
-
-		middlewareUserService.authorise(LOGIN, PIN);
 	}
 
 	@Test

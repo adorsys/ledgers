@@ -32,4 +32,6 @@ public interface DepositAccountPaymentService {
     TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException;
 
     void cancelPayment(String paymentId) throws PaymentNotFoundException;
+
+	String readIbanByPaymentId(String paymentId);
 }
