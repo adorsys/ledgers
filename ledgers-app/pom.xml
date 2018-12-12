@@ -112,12 +112,13 @@
 		</dependency>
 
 		<!-- user management -->
-
+		<!-- 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-user-management-rest-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		 -->
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>

@@ -16,18 +16,18 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.db.domain.AccountAccess;
-import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
-import de.adorsys.ledgers.um.db.repository.UserRepository;
-import de.adorsys.ledgers.um.impl.converter.UserConverter;
-import de.adorsys.ledgers.util.MD5Util;
+import java.security.Principal;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -35,30 +35,69 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
+import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
+import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
+import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.domain.UserRole;
+import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.PasswordEnc;
+import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final UserConverter userConverter;
+    private final PasswordEnc passwordEnc;
 
     @Autowired
+    private Principal principal;
+    
+    private final HashMacSecretSource secretSource;
+    
+    @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           UserConverter userConverter) {
+                           UserConverter userConverter, 
+                           PasswordEnc passwordEnc, HashMacSecretSource secretSource) {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
+        this.passwordEnc = passwordEnc;
+        this.secretSource = secretSource;
     }
 
     @Override
     public UserBO create(UserBO user) throws UserAlreadyExistsException {
         UserEntity userPO = userConverter.toUserPO(user);
+        userPO.setId(Ids.id());
+        userPO.setPin(passwordEnc.encode(userPO.getId(),user.getPin()));
 
-        userPO.setPin(MD5Util.encode(user.getPin()));
         try {
             return userConverter.toUserBO(userRepository.save(userPO));
         } catch (ConstraintViolationException c) {
@@ -72,29 +111,144 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean authorise(String login, String pin) throws UserNotFoundException {
+    public String authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException {
         UserEntity user = getUser(login);
-        return MD5Util.verify(pin, user.getPin());
+        return authorizeInternal(pin, user, role);
     }
+
+	@Override
+	public AccessTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException {
+		try {
+			SignedJWT jwt = SignedJWT.parse(accessToken);
+			JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
+			JWSHeader header = jwt.getHeader();
+			
+			// CHeck algorithm
+			if(!JWSAlgorithm.HS256.equals(header.getAlgorithm())) {
+				logger.warn("Wrong jws algo for token with subject : " + jwtClaimsSet.getSubject());
+				return null;
+			}
+			
+			// CHeck expiration
+			if(jwtClaimsSet.getExpirationTime()==null || jwtClaimsSet.getExpirationTime().before(refTime)) {
+				logger.warn(String.format("Token with subject %s is expired at %s and reference time is % : " + jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime));
+				return null;
+			}
+			
+			// check signature.
+			boolean verified = jwt.verify(new MACVerifier(secretSource.getHmacSecret()));
+			if(!verified) {
+				logger.warn("Could not verify signature of token with subject : " + jwtClaimsSet.getSubject());
+				return null;
+			}
+			
+			// Retrieve user.
+			UserEntity userEntity = userRepository.findById(jwtClaimsSet.getSubject())
+				.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, jwtClaimsSet.getSubject())));
+
+			// Check to make sure all privileges contained in the token are still valid.
+			AccessTokenBO accessTokenJWT = SerializationUtils.readValueFromString(jwt.getJWTClaimsSet().toJSONObject(false).toJSONString(), AccessTokenBO.class);
+			
+			List<AccountAccess> accountAccesses = userEntity.getAccountAccesses();
+			List<AccountAccessBO> accountAccessesBOFromToken = accessTokenJWT.getAccountAccesses();
+			List<AccountAccess> accountAccessesFromToken = userConverter.toAccountAccessListEntity(accountAccessesBOFromToken);
+			accountAccessesFromToken.forEach(accountAccessFT -> {
+				confirmAndReturnAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
+			});
+			return accessTokenJWT;
+			
+		} catch (ParseException e) {
+			// If we can not parse the token, we log the error and return false.
+			logger.warn(e.getMessage());
+			return null;
+		} catch (JOSEException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+    
+	private AccountAccess confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
+		return accountAccesses.stream()
+			.filter(a -> matchAccess(accountAccessFT, a))
+			.findFirst().orElseGet(() -> {
+				logger.warn(String.format("Permission model changed for user with subject %s no sufficient permission on account %s.", subject, accountAccessFT.getIban()));
+				return null;
+			});
+			
+	}
+
+	private boolean matchAccess(AccountAccess requested, AccountAccess existent) {
+		return 
+				// Same iban
+				StringUtils.equals(requested.getIban(), existent.getIban())
+				&&
+				// Make sure old access still valid
+				requested.getAccessType().compareTo(existent.getAccessType())<=0;
+
+	}
+
+	private String authorizeInternal(String pin, UserEntity user, UserRoleBO role) throws InsufficientPermissionException {
+		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
+        if(!success) {
+        	return null;
+        }
+        
+        // Check user has defined role.
+        UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
+        	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
+        // Generating claim
+        JWTClaimsSet claimsSet = genJWT(user, userRole, new Date(), 60);
+        // signing jwt
+		return signJWT(claimsSet);
+	}
+
+	private JWTClaimsSet genJWT(UserEntity user, UserRole userRole, Date issueTime, int validitySeconds) {
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+        	.subject(user.getId())
+        	.jwtID(Ids.id())
+        	.claim("actor", user.getLogin())
+        	.claim("role", userRole)
+        	.claim("accountAccesses", user.getAccountAccesses())
+        	.issueTime(issueTime)
+        	.expirationTime(DateUtils.addMinutes(issueTime, validitySeconds)).build();
+		return claimsSet;
+	}
+
+	private String signJWT(JWTClaimsSet claimsSet) {
+		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).keyID(Ids.id()).build();
+		SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+		try {
+			signedJWT.sign(new MACSigner(secretSource.getHmacSecret()));
+		} catch (JOSEException e) {
+			throw new UserManagementUnexpectedException("Error signing user token", e);
+		}
+		return signedJWT.serialize();
+	}
 
     /**
      * If the rationale is knowing if the account belongs toi the user.
+     * @throws UserNotFoundException 
+     * @throws InsufficientPermissionException 
      */
     @Override
-    public boolean authorise(String login, String pin, String accountId) throws UserNotFoundException {
-//        todo: do something with accountid
-        return authorise(login, pin);
+    public String authorise(String login, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException {
+        UserEntity user = getUser(login);
+        String token = authorizeInternal(pin, user, UserRoleBO.CUSTOMER);
+        if(token!=null) {
+	        List<AccountAccess> accountAccesses = user.getAccountAccesses();
+	        for (AccountAccess accountAccess : accountAccesses) {
+				if(StringUtils.equals(accountId, accountAccess.getIban())){
+					return token;
+				}
+			}
+        }
+        return token;
     }
 
     @Override
     public List<UserBO> listUsers(int page, int size) {
         List<UserEntity> content = userRepository.findAll(PageRequest.of(page, size)).getContent();
         return userConverter.toUserBOList(content);
-    }
-
-    @Override
-    public List<UserBO> getAll() {
-        return userConverter.toUserBOList(userRepository.findAll());
     }
 
     @Override
@@ -151,4 +305,60 @@ public class UserServiceImpl implements UserService {
     private UserNotFoundException userNotFoundException(String login) {
         return new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login));
     }
+
+	@Override
+	public String grant(AisConsentBO aisConsent) throws InsufficientPermissionException {
+		UserBO user;
+		try {
+			user = findById(principal.getName());
+		} catch (UserNotFoundException e) {
+			throw new UserManagementUnexpectedException(e);
+		}
+		aisConsent.setUserId(user.getId());
+
+		List<String> accessibleAccounts = user.getAccountAccesses().stream().map(a -> a.getIban()).collect(Collectors.toList());
+		
+		AisAccountAccessInfoBO access = aisConsent.getAccess();
+		checkAccountAccess(accessibleAccounts, access.getAccounts(), "No account access. User with id %s does not have access to accounts %s" ,user.getId());
+		checkAccountAccess(accessibleAccounts, access.getBalances(), "No balance access. User with id %s does not have access to accounts %s" , user.getId());
+		checkAccountAccess(accessibleAccounts, access.getTransactions(), "No transaction access. User with id %s does not have access to accounts %s" , user.getId());
+		
+		// Produce the token
+        Date iat = new Date();
+        LocalDate expirLocalDate = aisConsent.getValidUntil();
+        Date expir = expirLocalDate==null
+        		? DateUtils.addMinutes(iat, 30)
+        		:Date.from(expirLocalDate.atTime(23, 59, 59, 99).atZone(ZoneId.systemDefault()).toInstant());
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+        	.subject(user.getId())
+        	.jwtID(Ids.id())
+        	.claim("actor", user.getLogin())
+        	.claim("role", UserRoleBO.TECHNICAL)// Always a technical user.
+        	.claim("consent", aisConsent)
+        	.issueTime(iat)
+        	.expirationTime(expir).build();
+
+		return signJWT(claimsSet);
+	}
+
+	/**
+	 * Makes sure the user has access to all those accounts.
+	 * 
+	 * @param accessibleAccounts
+	 * @param requestedAccounts
+	 * @param message
+	 * @throws InsufficientPermissionException
+	 */
+	private void checkAccountAccess(List<String> accessibleAccounts, List<String> requestedAccounts, String message, String userId) throws InsufficientPermissionException {
+		ArrayList<String> copy = new ArrayList<>();
+		if(requestedAccounts!=null) {
+			copy.addAll(requestedAccounts);
+		}
+		
+		copy.removeAll(accessibleAccounts);
+		
+		if(!copy.isEmpty()) {
+			throw new InsufficientPermissionException(String.format(message, userId, copy.toString()));
+		}
+	}
 }

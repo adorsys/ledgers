@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,8 @@ public class UserTO {
 
     private List<AccountAccessTO> accountAccesses = new ArrayList<>();
 
+    private Collection<UserRoleTO> userRoles =  new ArrayList<>();
+    
     public UserTO() {
     }
 
@@ -80,4 +83,13 @@ public class UserTO {
     public void setAccountAccesses(List<AccountAccessTO> accountAccesses) {
         this.accountAccesses = accountAccesses;
     }
+
+	public Collection<UserRoleTO> getUserRoles() {
+		return userRoles;
+	}
+
+	public void setUserRoles(Collection<UserRoleTO> userRoles) {
+		this.userRoles = userRoles;
+	}
+    
 }

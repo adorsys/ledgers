@@ -1,8 +1,5 @@
 package de.adorsys.ledgers.um.db.domain;
 
-public enum AccessType {
-
-    OWNER,
-    READ,
-    DISPOSE;
+public enum AccessType{
+    READ,DISPOSE,OWNER;
 }
