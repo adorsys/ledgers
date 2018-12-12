@@ -32,6 +32,9 @@ export class UserNewComponent implements OnInit {
       scaUserData: this.formBuilder.array([
         this.initScaData()
       ]),
+      accountAccesses: this.formBuilder.array([
+        this.initAccountAccessData()
+      ]),
       email: ['', [Validators.required, Validators.email]],
       login: ['', Validators.required],
       pin: ['', [Validators.required, Validators.minLength(8)]]
@@ -46,6 +49,13 @@ export class UserNewComponent implements OnInit {
     return this.formBuilder.group({
       scaMethod: ['', Validators.required],
       methodValue: ['', Validators.required]
+    })
+  }
+
+  initAccountAccessData() {
+    return this.formBuilder.group({
+      accessType: ['', Validators.required],
+      iban: ['', Validators.required]
     })
   }
 

@@ -1,73 +1,148 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 class="h2">New user: {{user?.login}}</h1>
+  <h1 class="h2">New user</h1>
 </div>
 
 <div class="container">
   <form autocomplete="off" [formGroup]="userForm" (ngSubmit)="onSubmit()">
 
-    <div class="form-group">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-6 my-1">
-          <input type="text" class="form-control" id="iban" aria-describedby="ibanHelp" placeholder="Please select account for which user is created">
-          <small id="ibanHelp" class="form-text text-muted">Account IBAN for user</small>
+    <div class="form-group" formArrayName="accountAccesses">
+      <div class="card">
+        <div class="card-header">
+          Account Information
         </div>
-        <div class="col-auto my-1">
+        <div class="card-body">
+          <div class="row" *ngFor="let accountAccess of userForm.controls.accountAccesses.controls; let i=index">
+            <div class="col-lg-8 col-md-8 col-sm-6 my-1" [formGroupName]="i">
+              <input type="text"
+                     class="form-control"
+                     formControlName="iban"
+                     id="iban" aria-describedby="ibanHelp"
+                     placeholder="Please select account for which user is created">
+              <small id="ibanHelp" class="form-text text-muted">Account IBAN for user</small>
+            </div>
+
+            <div class="col-auto my-1" [formGroupName]="i">
+              <div class="row">
+                <div class="form-check col">
+                  <input class="form-check-input"
+                         type="radio"
+                         name="accessType"
+                         id="ownerAccount"
+                         formControlName="accessType"
+                         value="OWNER" checked>
+                  <label class="form-check-label" for="ownerAccount">
+                    Owner
+                  </label>
+                </div>
+                <div class="form-check col">
+                  <input class="form-check-input"
+                         type="radio"
+                         name="accessType"
+                         id="readAccount"
+                         formControlName="accessType"
+                         value="READ">
+                  <label class="form-check-label" for="readAccount">
+                    Read
+                  </label>
+                </div>
+                <div class="form-check col">
+                  <input class="form-check-input"
+                         type="radio"
+                         name="accessType"
+                         id="disposeAccount"
+                         formControlName="accessType"
+                         value="DISPOSE">
+                  <label class="form-check-label" for="disposeAccount">
+                    Dispose
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <div class="card">
+        <div class="card-header">
+          User Information
+        </div>
+        <div class="card-body">
           <div class="row">
-            <div class="form-check col">
-              <input class="form-check-input" type="radio" name="accountAccessType" id="ownerAccount" value="OWNER" checked>
-              <label class="form-check-label" for="ownerAccount">
-                Owner
-              </label>
+            <div class="col-lg-8 col-md-8 col-sm-6 my-1">
+              <input type="email"
+                     class="form-control"
+                     formControlName="email"
+                     id="email" autocomplete="off"
+                     aria-describedby="emailHelp"
+                     placeholder="Enter email">
+              <small id="emailHelp" class="form-text text-muted">Contact Email of the user</small>
             </div>
-            <div class="form-check col">
-              <input class="form-check-input" type="radio" name="accountAccessType" id="readAccount" value="READ">
-              <label class="form-check-label" for="readAccount">
-                Read
-              </label>
+          </div>
+          <div class="row">
+            <div class="col-lg-8 col-md-8 col-sm-6 my-1">
+              <input type="text" class="form-control" formControlName="login" id="login" autocomplete="off" aria-describedby="emailHelp" placeholder="Enter your banking login">
+              <small id="loginHelp" class="form-text text-muted">User login to banking service</small>
             </div>
-            <div class="form-check col">
-              <input class="form-check-input" type="radio" name="accountAccessType" id="disposeAccount" value="DISPOSE">
-              <label class="form-check-label" for="disposeAccount">
-                Dispose
-              </label>
+          </div>
+          <div class="row">
+            <div class="col-lg-8 col-md-8 col-sm-6 my-1">
+              <input type="password"
+                     class="form-control"
+                     formControlName="pin"
+                     id="pin" autocomplete="off"
+                     aria-describedby="pinHelp"
+                     placeholder="Enter your pin">
+              <small id="pinHelp" class="form-text text-muted">Pin to access online banking for the user</small>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="form-group">
-      <input type="email" class="form-control" formControlName="email" id="email" autocomplete="off" aria-describedby="emailHelp" placeholder="Enter email">
-      <small id="emailHelp" class="form-text text-muted">Contact Email of the user</small>
-    </div>
-    <div class="form-group">
-      <input type="text" class="form-control" formControlName="login" id="login" autocomplete="off" aria-describedby="emailHelp" placeholder="Enter your banking login">
-      <small id="loginHelp" class="form-text text-muted">User login to banking service</small>
-    </div>
-    <div class="form-group">
-      <input type="password" class="form-control" formControlName="pin" id="pin" autocomplete="off" aria-describedby="pinHelp" placeholder="Enter your pin">
-      <small id="pinHelp" class="form-text text-muted">Pin to access online banking for the user</small>
-    </div>
-
-    <div class="form-group">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-6 my-1">
-          <input type="text" class="form-control" id="scaData" aria-describedby="scaDataHelp" placeholder="Please input SCA method for user">
-          <small id="scaDataHelp" class="form-text text-muted">Account IBAN for user</small>
+    <div class="form-group" formArrayName="scaUserData">
+      <div class="card">
+        <div class="card-header">
+          User authentication Information
         </div>
-        <div class="col-auto my-1">
-          <div class="row">
-            <div class="form-check col">
-              <input class="form-check-input" type="radio" name="scaUserData" id="scaUserDataEmail" value="EMAIL" checked>
-              <label class="form-check-label" for="scaUserDataEmail">
-                Email
-              </label>
+        <div class="card-body">
+          <div class="row" *ngFor="let scaDataItem of userForm.controls.scaUserData.controls; let i=index">
+            <div class="col-lg-8 col-md-8 col-sm-6 my-1" [formGroupName]="i">
+              <input type="text"
+                     class="form-control"
+                     id="scaData"
+                     formControlName="methodValue"
+                     aria-describedby="scaDataHelp"
+                     placeholder="Please input SCA method for user">
+              <small id="scaDataHelp" class="form-text text-muted">Account IBAN for user</small>
             </div>
-            <div class="form-check col">
-              <input class="form-check-input" type="radio" name="scaUserData" id="scaUserDataPhone" value="PHONE">
-              <label class="form-check-label" for="scaUserDataPhone">
-                Phone
-              </label>
+            <div class="col-auto my-1" [formGroupName]="i">
+              <div class="row">
+                <div class="form-check col">
+                  <input class="form-check-input"
+                         type="radio"
+                         name="scaMethod"
+                         id="scaUserDataEmail"
+                         formControlName="scaMethod"
+                         value="EMAIL" checked>
+                  <label class="form-check-label" for="scaUserDataEmail">
+                    Email
+                  </label>
+                </div>
+                <div class="form-check col">
+                  <input class="form-check-input"
+                         type="radio"
+                         name="scaMethod"
+                         id="scaUserDataPhone"
+                         formControlName="scaMethod"
+                         value="MOBILE">
+                  <label class="form-check-label" for="scaUserDataPhone">
+                    Mobile phone
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
