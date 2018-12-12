@@ -361,4 +361,10 @@ public class UserServiceImpl implements UserService {
 			throw new InsufficientPermissionException(String.format(message, userId, copy.toString()));
 		}
 	}
+
+	@Override
+	public List<UserBO> getAll() {
+		return userConverter.toUserBOList(userRepository.findAll());
+	}
+
 }

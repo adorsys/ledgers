@@ -90,4 +90,10 @@ public class UserResource {
             throw new NotFoundRestException(e.getMessage());
         }
     }
+
+    @GetMapping("all")
+    ResponseEntity<List<UserBO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAll());
+    }
+
 }

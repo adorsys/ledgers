@@ -20,6 +20,9 @@ import org.springframework.web.context.WebApplicationContext;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
 import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -44,6 +47,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests().antMatchers("/v2/api-docs", "/swagger-resources", "/swagger-ui.html", "/webjars/**").permitAll()
             .and()
             .authorizeRequests().antMatchers("/console/**").permitAll()
+			.and()
+			.cors()
             .and()
         	.authorizeRequests().anyRequest().authenticated();
         http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -80,5 +85,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			return (AccessTokenTO) credentials;
 		}
 		return null;
+	}
+
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+		return source;
 	}
 }
