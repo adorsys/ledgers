@@ -94,6 +94,8 @@ public interface UserService {
 
     List<UserBO> listUsers(int page, int size);
 
+	List<UserBO> getAll();
+
 	/**
 	 * Check if the provided token is valid at the given reference time and return the corresponding user.
 	 * 
