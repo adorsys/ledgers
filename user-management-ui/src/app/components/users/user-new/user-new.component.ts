@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {UserService} from "../../../services/user.service";
 import {User} from "../../../models/user.model";
-import {ActivatedRoute, Params} from "@angular/router";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
@@ -19,6 +19,7 @@ export class UserNewComponent implements OnInit {
   constructor(
     private userService: UserService,
     private formBuilder: FormBuilder,
+    private router: Router,
     private route: ActivatedRoute) {
   }
 
@@ -60,10 +61,10 @@ export class UserNewComponent implements OnInit {
   }
 
   onSubmit() {
-    // this.userService.createUser(this.userForm.value)
-    //   .subscribe(response => {
-    //     console.log(response);
-    //   });
+    this.userService.createUser(this.userForm.value)
+      .subscribe(response => {
+        this.router.navigateByUrl('/users');
+      });
   }
 
 }
