@@ -20,6 +20,10 @@ server:
 
 spring:
   application.name: ledgers
+  datasource:
+    username: ${db.user}
+    password: ${db.password}
+    url: ${db.url}
   jpa:
     show-sql: true
     generate-ddl: true
@@ -66,7 +70,10 @@ spring:
     url: jdbc:h2:~/ledgersdbs/gateway-app;DB_CLOSE_DELAY=-1
     username: sa
     password: sa
-
+db:
+  user: sa
+  password: sa
+  url: jdbc:h2:~/ledgersdbs/ledgers-app;DB_CLOSE_DELAY=-1
 ---
 spring:
   profiles: postgres
@@ -75,13 +82,13 @@ spring:
       url: ${db.url}
       username: ${db.user}
       password: ${db.password}
-    db:
-      host: localhost
-      user: ledgers
-      password: ledgers
-      database: ledgers
-      port: 5432
-      url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+db:
+  host: localhost
+  user: ledgers
+  password: ledgers
+  database: ledgers
+  port: 5432
+  url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
 ---
 spring:
   profiles: dev
