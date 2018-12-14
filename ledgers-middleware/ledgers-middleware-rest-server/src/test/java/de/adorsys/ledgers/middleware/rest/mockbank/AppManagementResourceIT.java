@@ -23,11 +23,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 
 import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -42,7 +44,7 @@ public class AppManagementResourceIT {
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
-	private String accessToken;
+	private BearerTokenTO bearerToken;
 	@Before
 	public void before() throws Exception {
 		this.mockMvc = MockMvcBuilders
@@ -57,7 +59,8 @@ public class AppManagementResourceIT {
         			.andExpect(MockMvcResultMatchers.status().isOk())
         			.andDo(print())
         			.andExpect(MockMvcResultMatchers.content().string(StringContains.containsString("."))).andReturn();
-        accessToken = mvcResult.getResponse().getContentAsString();
+        String bearerTokenString = mvcResult.getResponse().getContentAsString();
+        bearerToken = new ObjectMapper().readValue(bearerTokenString, BearerTokenTO.class);
 	}
 
 	@Test
@@ -65,7 +68,7 @@ public class AppManagementResourceIT {
 
 		this.mockMvc.perform(
         		MockMvcRequestBuilders.post("/management/app/init")
-        			.header("Authorization", "Bearer " + accessToken))
+        			.header("Authorization", "Bearer " + bearerToken.getAccess_token()))
         			.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 }

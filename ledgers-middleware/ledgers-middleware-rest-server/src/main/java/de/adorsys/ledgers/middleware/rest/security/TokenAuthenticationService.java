@@ -15,6 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 
@@ -47,27 +49,29 @@ public class TokenAuthenticationService {
         // Strip prefix
         String accessToken = StringUtils.substringAfterLast(headerValue, " ");
 
-        AccessTokenTO token;
+        BearerTokenTO bearerToken;
 		try {
-			token = onlineBankingService.validate(accessToken);
+			bearerToken = onlineBankingService.validate(accessToken);
 		} catch (UserNotFoundMiddlewareException e) {
             debug("User with token not found.");
             return null;
 		}
 
-        if (token==null) {
+        if (bearerToken==null) {
         	debug("Token is not valid.");
             return null;
         }
 
         // process roles
         List<GrantedAuthority> authorities = new ArrayList<>();
-
-        if(token.getRole()!=null) {
-        	authorities.add(new SimpleGrantedAuthority("ROLE_" + token.getRole().name()));
+        
+        AccessTokenTO accessTokenTO = bearerToken.getAccessTokenObject();
+        UserRoleTO role = accessTokenTO.getRole();
+        if(role!=null) {
+        	authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
         }
 
-        return new MiddlewareAuthentication(token.getSub(), token, authorities, accessToken);
+        return new MiddlewareAuthentication(accessTokenTO.getSub(), bearerToken, authorities);
     }
 	
 	private void debug(String s) {

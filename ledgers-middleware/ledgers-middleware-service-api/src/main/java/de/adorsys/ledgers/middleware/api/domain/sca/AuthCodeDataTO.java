@@ -16,103 +16,128 @@
 
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
-import java.util.Objects;
-
 public class AuthCodeDataTO {
     private String userLogin;
     private String scaUserDataId;
-    private String opData;
     private String opId;
+    private String opData;
     private String userMessage;
     private int validitySeconds;
 
     public AuthCodeDataTO() {
     }
 
-    public AuthCodeDataTO(String userLogin, String scaUserDataId, String opData, String opId, String userMessage, int validitySeconds) {
-        this.userLogin = userLogin;
-        this.scaUserDataId = scaUserDataId;
-        this.opData = opData;
-        this.opId = opId;
-        this.userMessage = userMessage;
-        this.validitySeconds = validitySeconds;
-    }
+	public AuthCodeDataTO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
+			int validitySeconds) {
+		super();
+		this.userLogin = userLogin;
+		this.scaUserDataId = scaUserDataId;
+		this.opId = opId;
+		this.opData = opData;
+		this.userMessage = userMessage;
+		this.validitySeconds = validitySeconds;
+	}
 
-    public String getUserLogin() {
-        return userLogin;
-    }
+	public String getUserLogin() {
+		return userLogin;
+	}
 
-    public void setUserLogin(String userLogin) {
-        this.userLogin = userLogin;
-    }
+	public void setUserLogin(String userLogin) {
+		this.userLogin = userLogin;
+	}
 
-    public String getScaUserDataId() {
-        return scaUserDataId;
-    }
+	public String getScaUserDataId() {
+		return scaUserDataId;
+	}
 
-    public void setScaUserDataId(String scaUserDataId) {
-        this.scaUserDataId = scaUserDataId;
-    }
+	public void setScaUserDataId(String scaUserDataId) {
+		this.scaUserDataId = scaUserDataId;
+	}
 
-    public String getOpData() {
-        return opData;
-    }
+	public String getOpData() {
+		return opData;
+	}
 
-    public void setOpData(String opData) {
-        this.opData = opData;
-    }
+	public void setOpData(String opData) {
+		this.opData = opData;
+	}
 
-    public String getOpId() {
-        return opId;
-    }
+	public String getOpId() {
+		return opId;
+	}
 
-    public void setOpId(String opId) {
-        this.opId = opId;
-    }
+	public void setOpId(String opId) {
+		this.opId = opId;
+	}
 
-    public String getUserMessage() {
-        return userMessage;
-    }
+	public String getUserMessage() {
+		return userMessage;
+	}
 
-    public void setUserMessage(String userMessage) {
-        this.userMessage = userMessage;
-    }
+	public void setUserMessage(String userMessage) {
+		this.userMessage = userMessage;
+	}
 
-    public int getValiditySeconds() {
-        return validitySeconds;
-    }
+	public int getValiditySeconds() {
+		return validitySeconds;
+	}
 
-    public void setValiditySeconds(int validitySeconds) {
-        this.validitySeconds = validitySeconds;
-    }
+	public void setValiditySeconds(int validitySeconds) {
+		this.validitySeconds = validitySeconds;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
-        AuthCodeDataTO that = (AuthCodeDataTO) o;
-        return validitySeconds == that.validitySeconds &&
-                       Objects.equals(userLogin, that.userLogin) &&
-                       Objects.equals(scaUserDataId, that.scaUserDataId) &&
-                       Objects.equals(opData, that.opData) &&
-                       Objects.equals(opId, that.opId) &&
-                       Objects.equals(userMessage, that.userMessage);
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((opData == null) ? 0 : opData.hashCode());
+		result = prime * result + ((opId == null) ? 0 : opId.hashCode());
+		result = prime * result + ((scaUserDataId == null) ? 0 : scaUserDataId.hashCode());
+		result = prime * result + ((userLogin == null) ? 0 : userLogin.hashCode());
+		result = prime * result + ((userMessage == null) ? 0 : userMessage.hashCode());
+		result = prime * result + validitySeconds;
+		return result;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userLogin, scaUserDataId, opData, opId, userMessage, validitySeconds);
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AuthCodeDataTO other = (AuthCodeDataTO) obj;
+		if (opData == null) {
+			if (other.opData != null)
+				return false;
+		} else if (!opData.equals(other.opData))
+			return false;
+		if (opId == null) {
+			if (other.opId != null)
+				return false;
+		} else if (!opId.equals(other.opId))
+			return false;
+		if (scaUserDataId == null) {
+			if (other.scaUserDataId != null)
+				return false;
+		} else if (!scaUserDataId.equals(other.scaUserDataId))
+			return false;
+		if (userLogin == null) {
+			if (other.userLogin != null)
+				return false;
+		} else if (!userLogin.equals(other.userLogin))
+			return false;
+		if (userMessage == null) {
+			if (other.userMessage != null)
+				return false;
+		} else if (!userMessage.equals(other.userMessage))
+			return false;
+		if (validitySeconds != other.validitySeconds)
+			return false;
+		return true;
+	}
+	
+	
 
-    @Override
-    public String toString() {
-        return "AuthCodeDataTO{" +
-                       "userLogin='" + userLogin + '\'' +
-                       ", scaUserDataId='" + scaUserDataId + '\'' +
-                       ", opData='" + opData + '\'' +
-                       ", opId='" + opId + '\'' +
-                       ", userMessage='" + userMessage + '\'' +
-                       ", validitySeconds=" + validitySeconds +
-                       '}';
-    }
 }

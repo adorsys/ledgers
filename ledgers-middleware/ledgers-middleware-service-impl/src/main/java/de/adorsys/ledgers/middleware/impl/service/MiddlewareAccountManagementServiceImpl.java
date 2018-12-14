@@ -29,6 +29,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
@@ -41,6 +42,7 @@ import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareExcepti
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AisConsentMapper;
+import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
@@ -61,21 +63,26 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final UserService userService;
     private final UserMapper userMapper;
     private final AisConsentMapper aisConsentMapper;
+    private final BearerTokenMapper bearerTokenMapper;
     
     @Autowired
     private AccessTokenTO accessToken;
 
-    @Autowired
-    public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService, 
-    		AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, 
-    		UserService userService, UserMapper userMapper, AisConsentMapper aisConsentMapper) {
-        this.depositAccountService = depositAccountService;
-        this.accountDetailsMapper = accountDetailsMapper;
-        this.paymentConverter = paymentConverter;
-        this.userService = userService;
-        this.userMapper = userMapper;
-        this.aisConsentMapper  = aisConsentMapper;
-    }
+    
+	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
+			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
+			UserMapper userMapper, AisConsentMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
+			AccessTokenTO accessToken) {
+		super();
+		this.depositAccountService = depositAccountService;
+		this.accountDetailsMapper = accountDetailsMapper;
+		this.paymentConverter = paymentConverter;
+		this.userService = userService;
+		this.userMapper = userMapper;
+		this.aisConsentMapper = aisConsentMapper;
+		this.bearerTokenMapper = bearerTokenMapper;
+		this.accessToken = accessToken;
+	}
 
 	@Override
 	public void createDepositAccount(AccountDetailsTO depositAccount)
@@ -328,9 +335,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	}
 
 	@Override
-	public String grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+	public BearerTokenTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
 		try {
-			return userService.grant(aisConsentMapper.toAisConsentBO(aisConsent));
+			return bearerTokenMapper.toBearerTokenTO(userService.grant(aisConsentMapper.toAisConsentBO(aisConsent)));
 		} catch (InsufficientPermissionException e) {
 			throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
 		}

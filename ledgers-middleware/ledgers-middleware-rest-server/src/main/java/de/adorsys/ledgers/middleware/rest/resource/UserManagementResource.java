@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
@@ -44,7 +45,6 @@ public class UserManagementResource {
 	public static final String BASE_PATH = "/users";
 	public static final String REGISTER_PATH = "/register";
 	public static final String AUTHORISE_PATH = "/authorise";
-	public static final String AUTHORISE2_PATH = "/authorise2";
 	public static final String EMAIL_REQUEST_PARAM = "email";
 	public static final String ROLE_REQUEST_PARAM = "role";
 	public static final String PIN_REQUEST_PARAM = "pin";
@@ -56,50 +56,6 @@ public class UserManagementResource {
         this.onlineBankingService = onlineBankingService;
     }
 
-    /**
-     * We shall deprecate this. Authorize must return a bearer token.
-     * 
-     * @param login
-     * @param pin
-     * @return
-     */
-    @PostMapping("/authorise")
-    @SuppressWarnings("PMD.IdenticalCatchBranches")
-    @ApiOperation(value="Authorize Customer returns Boolean", notes="Authorize a customer and return an access token.")
-    public boolean authorise(@RequestParam(LOGIN_REQUEST_PARAM)String login, @RequestParam(PIN_REQUEST_PARAM) String pin){
-        try {
-        	return onlineBankingService.authorise(login, pin, UserRoleTO.CUSTOMER)!=null;
-        } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
-		}
-    }
-
-    /**
-     * Authorize returns a bearer token that can be reused by the consuming application.
-     * 
-     * @param login
-     * @param pin
-     * @return
-     */
-    @PostMapping(AUTHORISE2_PATH)
-    @ApiOperation(value="Authorize User returns Access Token", notes="Authorize any user. But user most specify the target role. return an access token.")
-	@SuppressWarnings("PMD.IdenticalCatchBranches")
-    public String authorise2(@RequestParam(LOGIN_REQUEST_PARAM)String login, @RequestParam(PIN_REQUEST_PARAM) String pin, @RequestParam(ROLE_REQUEST_PARAM) UserRoleTO role){
-        try {
-            return onlineBankingService.authorise(login, pin, role);
-        } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
-		}
-    }
-    
     @PostMapping(REGISTER_PATH)
     @ApiOperation(value="Register User", notes="Registers a user. Registered as a staff member, user will have to be activated.")
     public UserTO register(@RequestParam(LOGIN_REQUEST_PARAM)String login, 
@@ -114,6 +70,47 @@ public class UserManagementResource {
 		} catch (UserAlreadyExistsMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
+    	
+    }
+    
+    /**
+     * Authorize returns a bearer token that can be reused by the consuming application.
+     * 
+     * @param login
+     * @param pin
+     * @return
+     */
+    @PostMapping(AUTHORISE_PATH)
+    @ApiOperation(value="Authorize User returns Access Token", notes="Authorize any user. But user most specify the target role. return an access token.")
+	@SuppressWarnings("PMD.IdenticalCatchBranches")
+    public BearerTokenTO authorise(
+    		@RequestParam(LOGIN_REQUEST_PARAM)String login, 
+    		@RequestParam(PIN_REQUEST_PARAM) String pin, 
+    		@RequestParam(ROLE_REQUEST_PARAM) UserRoleTO role){
+        try {
+            return onlineBankingService.authorise(login, pin, role);
+        } catch (UserNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
+		}
+    }
+
+    @PostMapping("/validate")
+    @ApiOperation(value="Validate Access Token")
+    public BearerTokenTO validate(@RequestParam("accessToken")String token) {
+    	try {
+    		BearerTokenTO tokenTO = onlineBankingService.validate(token);
+    		if(tokenTO!=null) {
+    			return tokenTO;
+    		} else {
+                throw new ForbiddenRestException("Token invalid");    		
+    		}
+		} catch (UserNotFoundMiddlewareException e) {
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
 		}
     	
     }

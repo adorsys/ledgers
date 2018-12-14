@@ -16,14 +16,34 @@
 
 package de.adorsys.ledgers.sca.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.exception.*;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
+import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
@@ -31,22 +51,11 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class SCAOperationServiceImpl implements SCAOperationService {
@@ -108,14 +117,21 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         checkMethodSupported(scaUserData);
 
         String tan = authCodeGenerator.generate();
+        
+        if(StringUtils.isBlank(data.getOpId())) {
+        	data.setOpId(Ids.id());
+        }
 
-        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(data.getOpData(), tan));
+        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(data.getOpId(), data.getOpData(), tan));
 
-        SCAOperationEntity scaOperation = buildSCAOperation(data.getOpId(), hashItem);
+        SCAOperationEntity scaOperation = buildSCAOperation(data, hashItem);
 
         repository.save(scaOperation);
 
-        String message = String.format(authCodeEmailBody,tan);
+        String usderMessageTemplate = StringUtils.isBlank(data.getUserMessage())
+        		? authCodeEmailBody
+        				:data.getUserMessage();
+        String message =  String.format(usderMessageTemplate,tan);
 
         senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
 
@@ -141,14 +157,17 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @NotNull
-    private SCAOperationEntity buildSCAOperation(String opId, BaseHashItem<OperationHashItem> hashItem) throws AuthCodeGenerationException {
+    private SCAOperationEntity buildSCAOperation(AuthCodeDataBO data, BaseHashItem<OperationHashItem> hashItem) throws AuthCodeGenerationException {
 
         String authCodeHash = generateHashByOpData(hashItem);
 
         SCAOperationEntity scaOperation = new SCAOperationEntity();
-        scaOperation.setOpId(opId);
+        scaOperation.setOpId(data.getOpId());
         scaOperation.setCreated(LocalDateTime.now());
-        scaOperation.setValiditySeconds(authCodeValiditySeconds);
+        int validitySeconds = data.getValiditySeconds()<=0
+        		? authCodeValiditySeconds
+        		: data.getValiditySeconds();
+        scaOperation.setValiditySeconds(validitySeconds);
         scaOperation.setStatus(AuthCodeStatus.NEW);
         scaOperation.setStatusTime(LocalDateTime.now());
         scaOperation.setHashAlg(hashItem.getAlg());
@@ -183,7 +202,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
         checkOperationNotExpired(operation);
 
-        String generatedHash = generateHash(opData, authCode);
+        String generatedHash = generateHash(opId, opData, authCode);
 
         boolean isAuthCodeValid = generatedHash.equals(authCodeHash);
 
@@ -195,10 +214,10 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         return isAuthCodeValid;
     }
 
-    private String generateHash(String opData, String authCode) throws SCAOperationValidationException {
+    private String generateHash(String opId, String opData, String authCode) throws SCAOperationValidationException {
         String hash;
         try {
-            hash = hashGenerator.hash(new BaseHashItem<>(new OperationHashItem(opData, authCode)));
+            hash = hashGenerator.hash(new BaseHashItem<>(new OperationHashItem(opId, opData, authCode)));
         } catch (HashGenerationException e) {
             logger.error(TAN_VALIDATION_ERROR, e);
             throw new SCAOperationValidationException(TAN_VALIDATION_ERROR, e);
@@ -259,11 +278,14 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
     private final static class OperationHashItem {
         @JsonProperty
+        private String opId;// attach to the database line. Pinning!!!
+        @JsonProperty
         private String opData;
         @JsonProperty
         private String tan;
 
-        OperationHashItem(String opData, String tan) {
+        OperationHashItem(String opId, String opData, String tan) {
+        	this.opId = opId;
             this.opData = opData;
             this.tan = tan;
         }

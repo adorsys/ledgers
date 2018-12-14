@@ -8,15 +8,17 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+
 public class HttpURLConnectionHelper {
 
-	public static void setAuthHeader(String accessToken, HttpURLConnection con) {
+	public static void setAuthHeader(BearerTokenTO accessToken, HttpURLConnection con) {
 		if (accessToken != null) {
-			con.setRequestProperty("Authorization", "Bearer " + accessToken);
+			con.setRequestProperty("Authorization", "Bearer " + accessToken.getAccess_token());
 		}
 	}
 	
-	public static HttpURLConnection getContent(URL url, String accessToken) throws IOException, ProtocolException {
+	public static HttpURLConnection getContent(URL url, BearerTokenTO accessToken) throws IOException, ProtocolException {
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 		con.setDoInput(true);
@@ -30,7 +32,7 @@ public class HttpURLConnectionHelper {
 	}
 	
 
-	public static HttpURLConnection postContent(URL url, String accessToken, byte[] content, String contentType)
+	public static HttpURLConnection postContent(URL url, BearerTokenTO accessToken, byte[] content, String contentType)
 			throws IOException, ProtocolException {
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("POST");

@@ -49,6 +49,7 @@ import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
@@ -70,6 +71,7 @@ import de.adorsys.ledgers.util.SerializationUtils;
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
+	
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -111,13 +113,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException {
+    public BearerTokenBO authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException {
         UserEntity user = getUser(login);
         return authorizeInternal(pin, user, role);
     }
 
 	@Override
-	public AccessTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException {
+	public BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException {
 		try {
 			SignedJWT jwt = SignedJWT.parse(accessToken);
 			JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
@@ -129,8 +131,9 @@ public class UserServiceImpl implements UserService {
 				return null;
 			}
 			
-			// CHeck expiration
-			if(jwtClaimsSet.getExpirationTime()==null || jwtClaimsSet.getExpirationTime().before(refTime)) {
+			int expires_in = expiresIn(refTime, jwtClaimsSet);
+			
+			if(expires_in<=0) {
 				logger.warn(String.format("Token with subject %s is expired at %s and reference time is % : " + jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime));
 				return null;
 			}
@@ -146,8 +149,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userRepository.findById(jwtClaimsSet.getSubject())
 				.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, jwtClaimsSet.getSubject())));
 
-			// Check to make sure all privileges contained in the token are still valid.
-			AccessTokenBO accessTokenJWT = SerializationUtils.readValueFromString(jwt.getJWTClaimsSet().toJSONObject(false).toJSONString(), AccessTokenBO.class);
+			AccessTokenBO accessTokenJWT = toAccessTokenObject(jwtClaimsSet);
 			
 			List<AccountAccess> accountAccesses = userEntity.getAccountAccesses();
 			List<AccountAccessBO> accountAccessesBOFromToken = accessTokenJWT.getAccountAccesses();
@@ -155,7 +157,8 @@ public class UserServiceImpl implements UserService {
 			accountAccessesFromToken.forEach(accountAccessFT -> {
 				confirmAndReturnAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
 			});
-			return accessTokenJWT;
+			
+			return bearerToken(accessToken, expires_in, accessTokenJWT);
 			
 		} catch (ParseException e) {
 			// If we can not parse the token, we log the error and return false.
@@ -165,6 +168,28 @@ public class UserServiceImpl implements UserService {
 			logger.error(e.getMessage(), e);
 			return null;
 		}
+	}
+
+	private BearerTokenBO bearerToken(String accessToken, int expires_in, AccessTokenBO accessTokenJWT) {
+		BearerTokenBO bt = new BearerTokenBO();
+		bt.setAccess_token(accessToken);
+		bt.setAccessTokenObject(accessTokenJWT);
+		bt.setExpires_in(expires_in);
+		return bt;
+	}
+
+	private int expiresIn(Date refTime, JWTClaimsSet jwtClaimsSet) {
+		// CHeck expiration
+		Long expireLong = jwtClaimsSet.getExpirationTime()==null
+				? -1
+				:jwtClaimsSet.getExpirationTime().getTime()-refTime.getTime();
+		return expireLong.intValue();
+	}
+
+	private AccessTokenBO toAccessTokenObject(JWTClaimsSet jwtClaimsSet) {
+		// Check to make sure all privileges contained in the token are still valid.
+		AccessTokenBO accessTokenJWT = SerializationUtils.readValueFromString(jwtClaimsSet.toJSONObject(false).toJSONString(), AccessTokenBO.class);
+		return accessTokenJWT;
 	}
     
 	private AccountAccess confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
@@ -187,7 +212,10 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-	private String authorizeInternal(String pin, UserEntity user, UserRoleBO role) throws InsufficientPermissionException {
+	private BearerTokenBO authorizeInternal(String pin, UserEntity user, UserRoleBO role) throws InsufficientPermissionException {
+		
+		int expires_in = 60;
+		
 		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
         if(!success) {
         	return null;
@@ -197,9 +225,13 @@ public class UserServiceImpl implements UserService {
         UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
         	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
         // Generating claim
-        JWTClaimsSet claimsSet = genJWT(user, userRole, new Date(), 60);
+        JWTClaimsSet claimsSet = genJWT(user, userRole, new Date(), expires_in);
+        
+        AccessTokenBO accessTokenObject = toAccessTokenObject(claimsSet);
         // signing jwt
-		return signJWT(claimsSet);
+		String accessTokenString = signJWT(claimsSet);
+		
+		return bearerToken(accessTokenString, expires_in, accessTokenObject);
 	}
 
 	private JWTClaimsSet genJWT(UserEntity user, UserRole userRole, Date issueTime, int validitySeconds) {
@@ -231,9 +263,11 @@ public class UserServiceImpl implements UserService {
      * @throws InsufficientPermissionException 
      */
     @Override
-    public String authorise(String login, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException {
+    public BearerTokenBO authorise(String login, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException {
         UserEntity user = getUser(login);
-        String token = authorizeInternal(pin, user, UserRoleBO.CUSTOMER);
+        BearerTokenBO token = authorizeInternal(pin, user, UserRoleBO.CUSTOMER);
+        
+        // Validate
         if(token!=null) {
 	        List<AccountAccess> accountAccesses = user.getAccountAccesses();
 	        for (AccountAccess accountAccess : accountAccesses) {
@@ -307,7 +341,7 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public String grant(AisConsentBO aisConsent) throws InsufficientPermissionException {
+	public BearerTokenBO grant(AisConsentBO aisConsent) throws InsufficientPermissionException {
 		UserBO user;
 		try {
 			user = findById(principal.getName());
@@ -327,8 +361,9 @@ public class UserServiceImpl implements UserService {
         Date iat = new Date();
         LocalDate expirLocalDate = aisConsent.getValidUntil();
         Date expir = expirLocalDate==null
-        		? DateUtils.addMinutes(iat, 30)
+        		? DateUtils.addDays(iat, 90) // default to 90 days
         		:Date.from(expirLocalDate.atTime(23, 59, 59, 99).atZone(ZoneId.systemDefault()).toInstant());
+        		
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
         	.subject(user.getId())
         	.jwtID(Ids.id())
@@ -338,7 +373,11 @@ public class UserServiceImpl implements UserService {
         	.issueTime(iat)
         	.expirationTime(expir).build();
 
-		return signJWT(claimsSet);
+        int expires_in = expiresIn(iat, claimsSet);		
+		String accessTokenString = signJWT(claimsSet);
+		AccessTokenBO accessTokenObject = toAccessTokenObject(claimsSet);
+		
+		return bearerToken(accessTokenString, expires_in, accessTokenObject);
 	}
 
 	/**

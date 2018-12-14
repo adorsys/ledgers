@@ -11,10 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 
-import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +26,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationResponse;
 import de.adorsys.ledgers.middleware.rest.domain.SCAValidationRequest;
@@ -155,8 +160,7 @@ public class AuthCodeResourceTest {
 
     @Test
     public void generateWithScaUserDataNotFound() throws Exception {
-
-        AuthCodeDataTO data = new AuthCodeDataTO(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
+    	AuthCodeDataTO data = new AuthCodeDataTO(USER_LOGIN, SCA_USER_DATA_ID, PAYMENT_ID, OP_DATA, USER_MESSAGE, VALIDITY_SECONDS);
 
         String message = "Sca User Data with such id is not found";
         when(middlewareService.generateAuthCode(data)).thenThrow(new UserScaDataNotFoundMiddlewareException(message));

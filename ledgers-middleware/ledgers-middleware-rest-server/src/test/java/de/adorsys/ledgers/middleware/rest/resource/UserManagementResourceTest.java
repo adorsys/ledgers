@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
@@ -52,12 +54,14 @@ public class UserManagementResourceTest {
 
     @Test
     public void authorise() throws Exception {
-        when(userService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER)).thenReturn(null);
+        BearerTokenTO token = new BearerTokenTO("access_token", 60, null, new AccessTokenTO());
+		when(userService.authorise(LOGIN, PIN, UserRoleTO.valueOf("CUSTOMER"))).thenReturn(token);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post(UserManagementResource.BASE_PATH + "/authorise")
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
+                                                      .param("role", "CUSTOMER")
         )
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
@@ -67,19 +71,19 @@ public class UserManagementResourceTest {
         String content = mvcResult.getResponse().getContentAsString();
 
         assertThat(mvcResult.getResponse().getStatus(), is(200));
-        assertThat(content, is(Boolean.FALSE.toString()));
 
         verify(userService, times(1)).authorise(LOGIN, PIN, UserRoleTO.CUSTOMER);
     }
 
     @Test
     public void authoriseUserNotFound() throws Exception {
-        when(userService.authorise(LOGIN, PIN, UserRoleTO.CUSTOMER)).thenThrow(new UserNotFoundMiddlewareException("User with login="+LOGIN+" not found"));
+        when(userService.authorise(LOGIN, PIN, UserRoleTO.valueOf("CUSTOMER"))).thenThrow(new UserNotFoundMiddlewareException("User with login="+LOGIN+" not found"));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .post(UserManagementResource.BASE_PATH + "/authorise")
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
+                                                      .param("role", "CUSTOMER")
         )
                                       .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))

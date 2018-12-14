@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
@@ -27,17 +28,17 @@ public class UserAccountHelper {
 	private static ObjectMapper jsonMapper = new ObjectMapper();
 	private static final String UTF_8 = "utf-8";
 
-	private static String readAccessToken(HttpURLConnection con) throws UnsupportedEncodingException, IOException {
+	private static BearerTokenTO readAccessToken(HttpURLConnection con) throws UnsupportedEncodingException, IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), UTF_8));
 		String accessToken = br.readLine();
 		br.close();
-		return accessToken;
+		return jsonMapper.readValue(accessToken, BearerTokenTO.class);
 	}
 
-	public static String authorize(String baseUrl, String login, String pin, UserRoleTO role)
+	public static BearerTokenTO authorize(String baseUrl, String login, String pin, UserRoleTO role)
 			throws UnsupportedEncodingException, IOException, ProtocolException {
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(UserManagementResource.BASE_PATH)
-				.path(UserManagementResource.AUTHORISE2_PATH).build().toUri().toURL();
+				.path(UserManagementResource.AUTHORISE_PATH).build().toUri().toURL();
 
 		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put(UserManagementResource.LOGIN_REQUEST_PARAM, login);
@@ -59,7 +60,7 @@ public class UserAccountHelper {
 		}
 	}
 	
-	public static String authorizeAdmin(String baseUrl) throws IOException {
+	public static BearerTokenTO authorizeAdmin(String baseUrl) throws IOException {
 		UserTO adminUser = AdminPayload.adminUser();
 		try {
 			return authorize(baseUrl, adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
@@ -68,7 +69,7 @@ public class UserAccountHelper {
 		}
 	}
 
-	private static String createAdminAccount(String baseUrl) throws IOException {
+	private static BearerTokenTO createAdminAccount(String baseUrl) throws IOException {
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppManagementResource.BASE_PATH)
 				.path(AppManagementResource.ADMIN_PATH).build().toUri().toURL();
 		
@@ -83,7 +84,7 @@ public class UserAccountHelper {
 		}
 	}
 	
-	public static String authOrCreateCustomer(String baseUrl, UserTO user)
+	public static BearerTokenTO authOrCreateCustomer(String baseUrl, UserTO user)
 			throws UnsupportedEncodingException, ProtocolException, IOException {
 		try {
 			return UserAccountHelper.authorize(baseUrl, user.getLogin(), user.getPin(), UserRoleTO.CUSTOMER);
@@ -92,7 +93,7 @@ public class UserAccountHelper {
 		}
 	}
 
-	private static String registerCustomer(String baseUrl, UserTO user) throws ProtocolException, IOException {
+	private static BearerTokenTO registerCustomer(String baseUrl, UserTO user) throws ProtocolException, IOException {
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(UserManagementResource.BASE_PATH)
 				.path(UserManagementResource.REGISTER_PATH).build().toUri().toURL();
 

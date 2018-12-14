@@ -9,6 +9,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequest
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
@@ -76,7 +77,7 @@ public interface MiddlewareAccountManagementService {
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
-	String grantAisConsent(AisConsentTO aisConsent)
+	BearerTokenTO grantAisConsent(AisConsentTO aisConsent)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	/**

@@ -62,6 +62,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         	return null;
         }
         MiddlewareAuthentication ma = (MiddlewareAuthentication) authentication;
-        return (AccessTokenTO) ma.getCredentials();
+        return ma.getBearerToken().getAccessTokenObject();
     }
 }

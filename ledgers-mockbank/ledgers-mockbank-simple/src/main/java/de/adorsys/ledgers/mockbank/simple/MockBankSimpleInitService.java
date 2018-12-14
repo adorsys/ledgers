@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
@@ -45,7 +46,7 @@ public class MockBankSimpleInitService {
 
 		try {
 			// If !hasAdmin
-			String accessToken = UserAccountHelper.authorizeAdmin(baseUrl);
+			BearerTokenTO accessToken = UserAccountHelper.authorizeAdmin(baseUrl);
 			// if !updateRequired
 			initLedgers(baseUrl, accessToken);
 	
@@ -87,7 +88,7 @@ public class MockBankSimpleInitService {
 	}
 
 	
-	private void initLedgers(String baseUrl, String accessToken) throws IOException {
+	private void initLedgers(String baseUrl, BearerTokenTO accessToken) throws IOException {
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppManagementResource.BASE_PATH)
 				.path(AppManagementResource.INIT_PATH).build().toUri().toURL();
 
@@ -112,7 +113,7 @@ public class MockBankSimpleInitService {
 		List<UserTO> users = sampleData.getUsers();
 		for (UserTO userTO : users) {
 			// Create user
-			String accessToken = UserAccountHelper.authOrCreateCustomer(baseUrl, userTO);
+			BearerTokenTO accessToken = UserAccountHelper.authOrCreateCustomer(baseUrl, userTO);
 			UserBag userBag = new UserBag(userTO, accessToken, UserRoleTO.CUSTOMER);
 			List<AccountDetailsTO> accessibleAccounts = DepositAccountHelper.readAccessibleAccounts(baseUrl, userBag);
 			userBag.getAccessibleAccounts().addAll(accessibleAccounts);

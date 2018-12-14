@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.rest.resource.AccountResource;
@@ -43,7 +44,7 @@ public class DepositAccountHelper {
 			con = HttpURLConnectionHelper.postContent(url, userBag.getAccessToken(), content, APPLICATION_JSON);
 			if (con.getResponseCode() == HttpURLConnection.HTTP_OK || con.getResponseCode() == HttpURLConnection.HTTP_CONFLICT) {
 				// Reauthenticate.
-				String accessToken = UserAccountHelper.authorize(baseUrl, userTO.getLogin(), userTO.getPin(), UserRoleTO.CUSTOMER);
+				BearerTokenTO accessToken = UserAccountHelper.authorize(baseUrl, userTO.getLogin(), userTO.getPin(), UserRoleTO.CUSTOMER);
 				userBag.setAccessToken(accessToken);
 			} else {
 				throw new IOException(String.format("Error creating account responseCode %s message %s.",

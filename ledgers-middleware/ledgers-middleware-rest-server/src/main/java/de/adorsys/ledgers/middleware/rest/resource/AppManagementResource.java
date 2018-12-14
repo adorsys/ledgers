@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
@@ -85,7 +86,7 @@ public class AppManagementResource {
     @PostMapping(ADMIN_PATH)
     @ApiOperation(value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public ResponseEntity<String> admin(@RequestBody(required=true) UserTO adminUser){
+    public ResponseEntity<BearerTokenTO> admin(@RequestBody(required=true) UserTO adminUser){
     	List<UserTO> users = userManagementService.listUsers(0, 1);
     	if(!users.isEmpty()) {
     		final String ADMIN_FIRST = "Admin user can not be created after initialization. This must be the first user of the system.";
@@ -105,8 +106,8 @@ public class AppManagementResource {
 		}
 		
 		try {
-			String accessToken = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
-			return ResponseEntity.ok(accessToken);
+			BearerTokenTO bearerTokenTO = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
+			return ResponseEntity.ok(bearerTokenTO);
 		} catch (UserNotFoundMiddlewareException e) {
 			String USER_NOT_FOUND_SHALL_NOT_HAPPEN = "Shall not happen. We just created admin user.";
             logger.error(USER_NOT_FOUND_SHALL_NOT_HAPPEN, e);

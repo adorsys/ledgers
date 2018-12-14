@@ -4,26 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 
 public class UserBag {
 	private UserTO user;
-	private String accessToken;
+	private BearerTokenTO accessToken;
 	private UserRoleTO role;
 	private List<AccountDetailsTO> accessibleAccounts = new ArrayList<>();
 
-	public UserBag(UserTO user, String accessToken, UserRoleTO role) {
+	public UserBag(UserTO user, BearerTokenTO accessToken, UserRoleTO role) {
 		this.user = user;
 		this.accessToken = accessToken;
 		this.role = role;
 	}
 
-	public String getAccessToken() {
+	public BearerTokenTO getAccessToken() {
 		return accessToken;
 	}
 
-	public void setAccessToken(String accessToken) {
+	public void setAccessToken(BearerTokenTO accessToken) {
 		this.accessToken = accessToken;
 	}
 

@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
@@ -103,9 +103,9 @@ public class UserServiceImplTest {
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
 
-        String auth = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
+        BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
 
-        assertTrue(auth==null);
+        assertTrue(bearerTokenBO==null);
     }
     
     @Test
@@ -117,12 +117,12 @@ public class UserServiceImplTest {
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
         when(converter.toUserBO(userEntity)).thenReturn(userBO);
 
-        String accessToken = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
+        BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
         
-        AccessTokenBO at = userService.validate(accessToken, new Date());
-        assertTrue(at!=null);
-        assertThat(at.getSub(), is(USER_ID));
-        assertThat(at.getActor(), is(USER_LOGIN));
+        BearerTokenBO bearerTokenBO2 = userService.validate(bearerTokenBO.getAccess_token(), new Date());
+        assertTrue(bearerTokenBO2!=null);
+        assertThat(bearerTokenBO2.getAccessTokenObject().getSub(), is(USER_ID));
+        assertThat(bearerTokenBO2.getAccessTokenObject().getActor(), is(USER_LOGIN));
     }
 
     @Test
