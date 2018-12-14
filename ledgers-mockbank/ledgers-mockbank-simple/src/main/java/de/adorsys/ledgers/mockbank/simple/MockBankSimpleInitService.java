@@ -19,6 +19,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.resource.AppManagementResource;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
@@ -45,10 +46,16 @@ public class MockBankSimpleInitService {
 	public void runInit(String baseUrl) {
 
 		try {
+			
 			// If !hasAdmin
-			BearerTokenTO accessToken = UserAccountHelper.authorizeAdmin(baseUrl);
+			BearerTokenTO bearerToken = null;
+			try {
+				bearerToken = UserAccountHelper.createAdminAccount(baseUrl);
+			} catch (ConflictRestException c) {
+				bearerToken = UserAccountHelper.authorizeAdmin(baseUrl);
+			}
 			// if !updateRequired
-			initLedgers(baseUrl, accessToken);
+			initLedgers(baseUrl, bearerToken);
 	
 			// CHeck if update is required.
 			updateIfRequired(baseUrl);

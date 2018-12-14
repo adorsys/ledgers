@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.resource.AppManagementResource;
@@ -64,12 +65,12 @@ public class UserAccountHelper {
 		UserTO adminUser = AdminPayload.adminUser();
 		try {
 			return authorize(baseUrl, adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
-		} catch (ForbiddenRestException | NotFoundRestException e) {
-			return createAdminAccount(baseUrl);
+		} catch (ForbiddenRestException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
-	private static BearerTokenTO createAdminAccount(String baseUrl) throws IOException {
+	public static BearerTokenTO createAdminAccount(String baseUrl) throws IOException, ConflictRestException {
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppManagementResource.BASE_PATH)
 				.path(AppManagementResource.ADMIN_PATH).build().toUri().toURL();
 		
@@ -78,6 +79,8 @@ public class UserAccountHelper {
 
 		if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
 			return readAccessToken(con);
+		} else if (con.getResponseCode() == HttpURLConnection.HTTP_CONFLICT) {
+			throw new ConflictRestException("Admin account exists. No need to create");
 		} else {
 			throw new IOException(String.format("Error creating admin user responseCode %s message %s.",
 					con.getResponseCode(), con.getResponseMessage()));

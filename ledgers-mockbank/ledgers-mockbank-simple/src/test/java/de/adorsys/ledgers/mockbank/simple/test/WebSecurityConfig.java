@@ -32,7 +32,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests().antMatchers("/management/app/admin",
             		"/management/app/ping", 
-            		"/users/authorise2", 
             		"/users/authorise",
             		"/users/register").permitAll()
             .and()

@@ -41,7 +41,6 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -91,7 +90,7 @@ public class AppManagementResource {
     	if(!users.isEmpty()) {
     		final String ADMIN_FIRST = "Admin user can not be created after initialization. This must be the first user of the system.";
             logger.error(ADMIN_FIRST);
-            throw new ForbiddenRestException("Can not create admin user.").withDevMessage(ADMIN_FIRST);    		
+            throw new ConflictRestException("Can not create admin user.").withDevMessage(ADMIN_FIRST);    		
     	}
     	UserTO user = new UserTO();
     	user.setLogin(adminUser.getLogin());

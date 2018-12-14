@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
+import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
 import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -38,7 +39,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             		"/",
             		"/management/app/admin",
             		"/management/app/ping", 
-            		"/users/authorise2", 
             		"/users/authorise",
             		"/users/register").permitAll()
             .and()
@@ -80,11 +80,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 	private AccessTokenTO extractToken(Authentication authentication) {
-		Object credentials = authentication.getCredentials();
-		if(credentials instanceof AccessTokenTO) {
-			return (AccessTokenTO) credentials;
+		if(!(authentication instanceof MiddlewareAuthentication)) {
+			return null;
 		}
-		return null;
+		
+		return ((MiddlewareAuthentication)authentication).getBearerToken().getAccessTokenObject();
 	}
 
 	@Bean

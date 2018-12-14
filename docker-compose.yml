@@ -23,6 +23,7 @@ services:
       - ledgers-db
     environment:
       - DB_HOST=ledgers_db
+      - SPRING_PROFILES_ACTIVE=postgres
 
   ledgers-db:
     image: centos/postgresql-95-centos7

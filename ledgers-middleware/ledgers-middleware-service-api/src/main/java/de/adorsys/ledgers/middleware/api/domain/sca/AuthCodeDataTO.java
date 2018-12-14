@@ -16,6 +16,8 @@
 
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
+import java.util.Objects;
+
 public class AuthCodeDataTO {
     private String userLogin;
     private String scaUserDataId;
@@ -86,58 +88,23 @@ public class AuthCodeDataTO {
 		this.validitySeconds = validitySeconds;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((opData == null) ? 0 : opData.hashCode());
-		result = prime * result + ((opId == null) ? 0 : opId.hashCode());
-		result = prime * result + ((scaUserDataId == null) ? 0 : scaUserDataId.hashCode());
-		result = prime * result + ((userLogin == null) ? 0 : userLogin.hashCode());
-		result = prime * result + ((userMessage == null) ? 0 : userMessage.hashCode());
-		result = prime * result + validitySeconds;
-		return result;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        AuthCodeDataTO that = (AuthCodeDataTO) o;
+        return validitySeconds == that.validitySeconds &&
+                       Objects.equals(userLogin, that.userLogin) &&
+                       Objects.equals(scaUserDataId, that.scaUserDataId) &&
+                       Objects.equals(opData, that.opData) &&
+                       Objects.equals(opId, that.opId) &&
+                       Objects.equals(userMessage, that.userMessage);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AuthCodeDataTO other = (AuthCodeDataTO) obj;
-		if (opData == null) {
-			if (other.opData != null)
-				return false;
-		} else if (!opData.equals(other.opData))
-			return false;
-		if (opId == null) {
-			if (other.opId != null)
-				return false;
-		} else if (!opId.equals(other.opId))
-			return false;
-		if (scaUserDataId == null) {
-			if (other.scaUserDataId != null)
-				return false;
-		} else if (!scaUserDataId.equals(other.scaUserDataId))
-			return false;
-		if (userLogin == null) {
-			if (other.userLogin != null)
-				return false;
-		} else if (!userLogin.equals(other.userLogin))
-			return false;
-		if (userMessage == null) {
-			if (other.userMessage != null)
-				return false;
-		} else if (!userMessage.equals(other.userMessage))
-			return false;
-		if (validitySeconds != other.validitySeconds)
-			return false;
-		return true;
-	}
-	
+    @Override
+    public int hashCode() {
+        return Objects.hash(userLogin, scaUserDataId, opData, opId, userMessage, validitySeconds);
+    }
 	
 
 }

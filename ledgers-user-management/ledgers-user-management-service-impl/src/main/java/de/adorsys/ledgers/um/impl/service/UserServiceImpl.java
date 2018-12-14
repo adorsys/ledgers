@@ -188,8 +188,7 @@ public class UserServiceImpl implements UserService {
 
 	private AccessTokenBO toAccessTokenObject(JWTClaimsSet jwtClaimsSet) {
 		// Check to make sure all privileges contained in the token are still valid.
-		AccessTokenBO accessTokenJWT = SerializationUtils.readValueFromString(jwtClaimsSet.toJSONObject(false).toJSONString(), AccessTokenBO.class);
-		return accessTokenJWT;
+		return SerializationUtils.readValueFromString(jwtClaimsSet.toJSONObject(false).toJSONString(), AccessTokenBO.class);
 	}
     
 	private AccountAccess confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
@@ -214,7 +213,6 @@ public class UserServiceImpl implements UserService {
 
 	private BearerTokenBO authorizeInternal(String pin, UserEntity user, UserRoleBO role) throws InsufficientPermissionException {
 		
-		int expires_in = 60;
 		
 		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
         if(!success) {
@@ -224,6 +222,7 @@ public class UserServiceImpl implements UserService {
         // Check user has defined role.
         UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
         	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
+		int expires_in = 60*30;
         // Generating claim
         JWTClaimsSet claimsSet = genJWT(user, userRole, new Date(), expires_in);
         

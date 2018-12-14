@@ -68,7 +68,6 @@ public class UserManagementResource {
 			user.setPin(null);
 			return user;
 		} catch (UserAlreadyExistsMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
 		}
     	
@@ -91,10 +90,8 @@ public class UserManagementResource {
         try {
             return onlineBankingService.authorise(login, pin, role);
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
 		}
     }
