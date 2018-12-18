@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import {User} from "../../../models/user.model";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {UserService} from "../../../services/user.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'edit-account-access',
@@ -7,9 +11,43 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EditAccountAccessComponent implements OnInit {
 
-  constructor() { }
+  id: string;
+  user: User;
+
+  accountAccessForm: FormGroup;
+
+  constructor(
+    private userService: UserService,
+    private formBuilder: FormBuilder,
+    private router: Router) { }
 
   ngOnInit() {
+    this.accountAccessForm = this.formBuilder.group({
+      accountAccesses: this.formBuilder.array([
+        this.initAccountAccessData(),
+      ])
+    });
+  }
+
+  initAccountAccessData() {
+    return this.formBuilder.group({
+      accessType: ['', Validators.required],
+      iban: ['', Validators.required]
+    })
+  }
+
+  addAccountAccess() {
+    const control = <FormArray>this.accountAccessForm.controls['scaUserData'];
+    control.push(this.initAccountAccessData());
+  }
+
+  removeAccountAccess(i: number) {
+    const control = <FormArray>this.accountAccessForm.controls['scaUserData'];
+    control.removeAt(i);
+  }
+
+  onSubmit() {
+    console.log(this.accountAccessForm.value);
   }
 
 }
