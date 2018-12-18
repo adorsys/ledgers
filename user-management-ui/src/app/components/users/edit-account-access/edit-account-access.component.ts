@@ -37,12 +37,12 @@ export class EditAccountAccessComponent implements OnInit {
   }
 
   addAccountAccess() {
-    const control = <FormArray>this.accountAccessForm.controls['scaUserData'];
+    const control = <FormArray>this.accountAccessForm.controls['accountAccesses'];
     control.push(this.initAccountAccessData());
   }
 
   removeAccountAccess(i: number) {
-    const control = <FormArray>this.accountAccessForm.controls['scaUserData'];
+    const control = <FormArray>this.accountAccessForm.controls['accountAccesses'];
     control.removeAt(i);
   }
 
