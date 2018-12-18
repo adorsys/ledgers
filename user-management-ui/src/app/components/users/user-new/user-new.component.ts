@@ -25,7 +25,6 @@ export class UserNewComponent implements OnInit {
 
   ngOnInit() {
     this.setupUserFormControl();
-
   }
 
   setupUserFormControl(): void {
