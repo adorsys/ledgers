@@ -21,7 +21,7 @@ server:
 spring:
   application.name: ledgers
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -59,6 +59,8 @@ sca:
 
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4      
+
+logging.level.org.hibernate: WARN
 
 ---
 spring:

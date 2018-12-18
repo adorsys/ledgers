@@ -55,7 +55,6 @@ public class AppManagementResourceIT {
         			.contentType(MediaType.APPLICATION_JSON)
         			.content(payload))
         			.andExpect(MockMvcResultMatchers.status().isOk())
-        			.andDo(print())
         			.andExpect(MockMvcResultMatchers.content().string(StringContains.containsString("."))).andReturn();
         accessToken = mvcResult.getResponse().getContentAsString();
 	}
