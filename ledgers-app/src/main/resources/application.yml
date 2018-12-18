@@ -24,7 +24,7 @@ spring:
     password: ${db.password}
     url: ${db.url}
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -43,6 +43,12 @@ spring:
 #      mail:
 #        smtp:
 #          auth: false
+
+logging:
+  level:
+    org:
+      hibernate: WARN
+
 
 sca:
   authCode:

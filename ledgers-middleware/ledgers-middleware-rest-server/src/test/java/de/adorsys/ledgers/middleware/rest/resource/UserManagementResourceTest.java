@@ -59,7 +59,6 @@ public class UserManagementResourceTest {
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
         )
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -81,7 +80,6 @@ public class UserManagementResourceTest {
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
         )
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
