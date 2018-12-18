@@ -5,6 +5,8 @@ import {UsersComponent} from "./components/users/users.component";
 import {UserNewComponent} from "./components/users/user-new/user-new.component";
 import {AccountsComponent} from "./components/accounts/accounts.component";
 import {UserEditComponent} from "./components/users/user-edit/user-edit.component";
+import {EditScaComponent} from "./components/users/edit-sca/edit-sca.component";
+import {EditAccountAccessComponent} from "./components/users/edit-account-access/edit-account-access.component";
 
 const routes: Routes = [
   {
@@ -27,6 +29,14 @@ const routes: Routes = [
     path: 'users/:id',
     component: UserEditComponent
   },
+  {
+    path: 'users/:id/authentication-methods',
+    component: EditScaComponent
+  },
+  {
+    path: 'users/:id/account-accesses',
+    component: EditAccountAccessComponent
+  }
 ];
 
 @NgModule({

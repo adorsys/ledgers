@@ -14,6 +14,8 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { UserEditComponent } from './components/users/user-edit/user-edit.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {TokenInterceptor} from "./interceptors/token-interceptor";
+import { EditScaComponent } from './components/users/edit-sca/edit-sca.component';
+import { EditAccountAccessComponent } from './components/users/edit-account-access/edit-account-access.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +27,9 @@ import {TokenInterceptor} from "./interceptors/token-interceptor";
     UsersComponent,
     AccountsComponent,
     UserNewComponent,
-    UserEditComponent
+    UserEditComponent,
+    EditScaComponent,
+    EditAccountAccessComponent
   ],
   imports: [
     BrowserModule,
