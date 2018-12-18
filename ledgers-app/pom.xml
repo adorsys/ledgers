@@ -143,6 +143,12 @@
 			<artifactId>ledgers-mockbank-simple</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-mockbank-simple-data-test</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- spring dependency -->
 

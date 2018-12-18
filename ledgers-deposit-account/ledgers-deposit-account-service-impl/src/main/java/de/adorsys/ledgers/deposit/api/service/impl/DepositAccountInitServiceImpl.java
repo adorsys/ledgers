@@ -65,17 +65,25 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
 
 	private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws IOException, LedgerNotFoundException,
 			LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
-		ChartOfAccountBO coa = createCoa(ledgerName);
-		coa = coaService.findChartOfAccountsByName(ledgerName).orElse(coaService.newChartOfAccount(coa));
 
-		LedgerBO ledger = createLedger(ledgerName, coa);
-		ledger = ledgerService.findLedgerByName(ledgerName).orElse(ledgerService.newLedger(ledger));
-
+		final ChartOfAccountBO coaEntity = createCoa(ledgerName);
+		ChartOfAccountBO coa = coaService.findChartOfAccountsByName(ledgerName).orElseGet(() -> coaService.newChartOfAccount(coaEntity));
+		
+		LedgerBO ledger = loadLedgerOrNew(ledgerName, coa);
 		List<LedgerAccountModel> ledgerAccounts = configSource.chartOfAccount(coaFile);
+		
 		for (LedgerAccountModel model : ledgerAccounts) {
 			newLedgerAccount(ledger, model);
 		}
 		return ledger;
+	}
+
+	private LedgerBO loadLedgerOrNew(String ledgerName, ChartOfAccountBO coa)
+			throws LedgerNotFoundException, ChartOfAccountNotFoundException {
+		if(!ledgerService.findLedgerByName(ledgerName).isPresent()) {
+			ledgerService.newLedger(createLedger(ledgerName, coa));
+		}
+		return ledgerService.findLedgerByName(ledgerName).get();
 	}
 
 	// todo: @fpo do we really need to return results by this method? because it
