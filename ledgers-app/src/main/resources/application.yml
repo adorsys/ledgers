@@ -84,11 +84,12 @@ db:
 ---
 spring:
   profiles: postgres
-  postgres:
-    datasource:
-      url: ${db.url}
-      username: ${db.user}
-      password: ${db.password}
+  datasource:
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
+  liquibase:
+    change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
   user: ledgers
