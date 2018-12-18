@@ -21,8 +21,8 @@
                      [ngClass]="{ 'is-invalid': scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors }"
                      placeholder="Please input SCA method for user">
               <small id="scaDataHelp" class="form-text text-muted">Authentication Email or Phone number</small>
-              <div *ngIf="formControl['scaUserData'].controls[i].controls['methodValue'].touched && formControl['scaUserData'].controls[i].controls['methodValue'].errors" class="alert alert-danger">
-                <div *ngIf="formControl['scaUserData'].controls[i].controls['methodValue'].touched && formControl['scaUserData'].controls[i].controls['methodValue'].errors.required"
+              <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors" class="alert alert-danger">
+                <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors.required"
                      class="alert-size">Email or Phone number is required</div>
               </div>
             </div>

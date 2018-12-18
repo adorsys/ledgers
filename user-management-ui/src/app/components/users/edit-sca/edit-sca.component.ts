@@ -29,10 +29,6 @@ export class EditScaComponent implements OnInit {
     });
   }
 
-  get formControl() {
-    return this.scaForm.controls;
-  }
-
   initScaData() {
     return this.formBuilder.group({
       scaMethod: ['', Validators.required],

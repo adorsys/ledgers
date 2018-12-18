@@ -37,7 +37,7 @@ export class UserNewComponent implements OnInit {
       ]),
       email: ['', [Validators.required, Validators.email]],
       login: ['', Validators.required],
-      pin: ['', [Validators.required, Validators.minLength(8)]]
+      pin: ['', [Validators.required, Validators.minLength(5)]]
     });
   }
 

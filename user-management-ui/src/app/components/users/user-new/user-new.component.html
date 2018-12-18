@@ -3,7 +3,7 @@
 </div>
 
 <div class="container">
-  <form autocomplete="off" [formGroup]="userForm" (ngSubmit)="onSubmit()">
+  <form autocomplete="off" [formGroup]="userForm">
 
     <div class="form-group" formArrayName="accountAccesses">
       <div class="card">
@@ -20,6 +20,10 @@
                      [ngClass]="{ 'is-invalid': accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors }"
                      placeholder="Please select account for which user is created">
               <small id="ibanHelp" class="form-text text-muted">Account IBAN for user</small>
+              <div *ngIf="accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors" class="alert alert-danger">
+                <div *ngIf="accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors.required"
+                     class="alert-size">Account IBAN is required</div>
+              </div>
             </div>
 
             <div class="col-auto my-1" [formGroupName]="i">
@@ -81,8 +85,8 @@
                      placeholder="Enter email">
               <small id="emailHelp" class="form-text text-muted">Contact Email of the user</small>
               <div *ngIf="formControl['email'].touched && formControl['email'].errors" class="alert alert-danger">
-                <div class="alert-size" *ngIf="formControl['email'].touched && formControl['email'].errors.required">Email is required</div>
-                <div class="alert-size" *ngIf="formControl['email'].touched && formControl['email'].errors.email">Email is invalid</div>
+                <div class="alert-size" *ngIf="formControl['email'].touched && formControl['email'].hasError('required')">Email is required</div>
+                <div class="alert-size" *ngIf="formControl['email'].touched && formControl['email'].hasError('email')">Email is invalid</div>
               </div>
             </div>
           </div>
@@ -97,7 +101,11 @@
                      placeholder="Enter your banking login">
               <small id="loginHelp" class="form-text text-muted">User login to banking service</small>
               <div *ngIf="formControl['login'].touched && formControl['login'].errors" class="alert alert-danger">
-                <div class="alert-size" *ngIf="formControl['login'].touched && formControl['login'].errors.required">Login is required</div>
+                <div class="alert-size" *ngIf="formControl['login'].touched && formControl['login'].hasError('required')">Login is required</div>
+              </div>
+              <div *ngIf="formControl['pin'].touched && formControl['pin'].errors" class="alert alert-danger">
+                <div class="alert-size" *ngIf="formControl['pin'].touched && formControl['pin'].hasError('required')">Pin is required</div>
+                <div class="alert-size" *ngIf="formControl['pin'].touched && formControl['pin'].hasError('minlength')">Pin must contain minimum 5 characters</div>
               </div>
             </div>
             <div class="row">
@@ -133,6 +141,10 @@
                      [ngClass]="{ 'is-invalid': scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors }"
                      placeholder="Please input SCA method for user">
               <small id="scaDataHelp" class="form-text text-muted">Authentication Email or Phone number</small>
+              <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors" class="alert alert-danger">
+                <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors.required"
+                     class="alert-size">Authentication Email or Phone number is required</div>
+              </div>
             </div>
             <div class="col-auto my-1" [formGroupName]="i">
               <div class="row">
@@ -165,7 +177,10 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit"
+            class="btn btn-primary"
+            [disabled]="userForm.invalid"
+            (click)="onSubmit()">Submit</button>
 
   </form>
 </div>
