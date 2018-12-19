@@ -1,38 +1,43 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
-import de.adorsys.ledgers.um.db.repository.UserRepository;
-import de.adorsys.ledgers.um.impl.converter.UserConverter;
-import de.adorsys.ledgers.util.MD5Util;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import de.adorsys.ledgers.util.PasswordEnc;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
 
-    @InjectMocks
+	@InjectMocks
     public UserServiceImpl userService;
 
     @Mock
@@ -40,6 +45,12 @@ public class UserServiceImplTest {
 
     @Mock
     private UserConverter converter;
+    
+    @Mock
+    private PasswordEnc passwordEnc;
+    
+    @Mock
+    private HashMacSecretSource secretSource;
 
     private ResourceReader reader = YamlReader.getInstance();
 
@@ -47,14 +58,10 @@ public class UserServiceImplTest {
     private static final String USER_EMAIL = "vne@adorsys.de";
     private static final String USER_LOGIN = "vne";
     private static final String USER_PIN = "12345678";
+    private static final String THE_ENCODED_VALUE = "25d55ad283aa400af464c76d713c07ad";
     private static final String USER_NON_EXISTING_LOGIN = "NonExistingLogin";
-    private static final String USER_NON_EXISTING_ID = "NonExistingID";
     private UserEntity userEntity;
     private UserBO userBO;
-    private static final String USER_IBAN = "3737463673647";
-    private static final AccessTypeBO USER_ACC_ACCESS_TYPE_1 = AccessTypeBO.READ;
-    private static final AccessTypeBO USER_ACC_ACCESS_TYPE_2 = AccessTypeBO.DISPOSE;
-
 
     @Before
     public void setUp() {
@@ -91,14 +98,31 @@ public class UserServiceImplTest {
         return reader.getListFromInputStream(getClass().getResourceAsStream("sca-user-methods.yml"), clazz);
     }
 
+    @Test(expected=UserNotFoundException.class)
+    public void authorizeWithLoginAndPin() throws UserNotFoundException, InsufficientPermissionException {
+
+        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
+
+        String auth = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
+
+        assertTrue(auth==null);
+    }
+    
     @Test
-    public void authorizeWithLoginAndPin() throws UserNotFoundException {
-
+    public void testValidate() throws UserNotFoundException, InsufficientPermissionException {
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
+        when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
+        when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
+        when(secretSource.getHmacSecret()).thenReturn("6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4");
+        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
+        when(converter.toUserBO(userEntity)).thenReturn(userBO);
 
-        boolean auth = userService.authorise(USER_LOGIN, USER_PIN);
-
-        assertThat(auth, is(true));
+        String accessToken = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
+        
+        AccessTokenBO at = userService.validate(accessToken, new Date());
+        assertTrue(at!=null);
+        assertThat(at.getSub(), is(USER_ID));
+        assertThat(at.getActor(), is(USER_LOGIN));
     }
 
     @Test
@@ -106,43 +130,26 @@ public class UserServiceImplTest {
 
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
         when(converter.toUserBO(any())).thenReturn(userBO);
+        when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
+        when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
 
         UserBO user = userService.findById(USER_ID);
 
         assertThat(user.getId(), is(USER_ID));
         assertThat(user.getEmail(), is(USER_EMAIL));
         assertThat(user.getLogin(), is(USER_LOGIN));
-        assertThat(MD5Util.encode(user.getPin()), is(MD5Util.encode(USER_PIN)));
+        assertTrue(passwordEnc.verify(user.getId(), user.getPin(), passwordEnc.encode(USER_ID, USER_PIN)));
 
         verify(repository, times(1)).findById(USER_ID);
         verify(converter, times(1)).toUserBO(userEntity);
     }
 
     @Test(expected = UserNotFoundException.class)
-    public void authorizeWithException() throws UserNotFoundException {
+    public void authorizeWithException() throws UserNotFoundException, InsufficientPermissionException {
 
         when(repository.findFirstByLogin(USER_NON_EXISTING_LOGIN)).thenReturn(Optional.empty());
 
-        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin");
-    }
-
-    @Test
-    public void getAll() {
-        when(repository.findAll()).thenReturn(Collections.singletonList(readUserEntity()));
-        when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(readUserBO()));
-        List<UserBO> response = userService.getAll();
-
-        assertThat(response.size(), is(1));
-        assertThat(response, instanceOf(List.class));
-        assertThat(response.get(0), instanceOf(UserBO.class));
-    }
-
-    @Test
-    public void getAll_empty() {
-        when(repository.findAll()).thenReturn(Collections.emptyList());
-        List<UserBO> response = userService.getAll();
-
-        assertThat(response.size(), is(0));
+        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin", UserRoleBO.CUSTOMER);
     }
 
     private UserBO readUserBO() {

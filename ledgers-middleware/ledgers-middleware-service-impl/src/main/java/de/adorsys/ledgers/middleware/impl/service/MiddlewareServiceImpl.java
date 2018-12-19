@@ -17,6 +17,15 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 
+import static de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO.ACSC;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -31,23 +40,30 @@ import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO.ACSC;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
@@ -194,4 +210,9 @@ public class MiddlewareServiceImpl implements MiddlewareService {
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
+
+	@Override
+	public String iban(String paymentId) {
+		return paymentService.readIbanByPaymentId(paymentId);
+	}
 }

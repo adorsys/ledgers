@@ -30,7 +30,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -72,7 +71,6 @@ public class UserResourceTest {
                                                       .post("/users/")
                                                       .contentType(APPLICATION_JSON_UTF8_VALUE)
                                                       .content(jsonUser))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.CREATED.value()))
                                       .andReturn();
 
@@ -88,7 +86,6 @@ public class UserResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .get("/users/").param("login", USER_LOGIN))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -109,7 +106,6 @@ public class UserResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .get("/users/" + USER_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -135,7 +131,6 @@ public class UserResourceTest {
                                                       .put("/users/" + USER_ID + "/sca-data")
                                                       .contentType(APPLICATION_JSON_UTF8_VALUE)
                                                       .content(jsonScaUserData))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.CREATED.value()))
                                       .andReturn();
 
@@ -152,7 +147,6 @@ public class UserResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .get("/users/all"))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();

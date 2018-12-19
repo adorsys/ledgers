@@ -56,4 +56,9 @@ public class AccountAccess {
     public void setAccessType(AccessType accessType) {
         this.accessType = accessType;
     }
+
+	public void setId(String id) {
+		this.id = id;
+	}
+    
 }

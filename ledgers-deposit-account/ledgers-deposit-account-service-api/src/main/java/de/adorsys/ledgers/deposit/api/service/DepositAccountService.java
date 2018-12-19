@@ -1,14 +1,14 @@
 package de.adorsys.ledgers.deposit.api.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 public interface DepositAccountService {
 
@@ -25,4 +25,8 @@ public interface DepositAccountService {
     List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException;
 
     boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) throws DepositAccountNotFoundException;
+
+	String readIbanById(String id);
+
+	List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix);
 }

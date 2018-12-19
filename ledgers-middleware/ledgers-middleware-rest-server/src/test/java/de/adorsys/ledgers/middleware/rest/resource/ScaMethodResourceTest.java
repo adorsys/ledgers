@@ -91,7 +91,7 @@ public class ScaMethodResourceTest {
 
 		MvcResult mvcResult = mockMvc
 				.perform(MockMvcRequestBuilders.get(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN))
-				.andDo(print()).andExpect(status().is(HttpStatus.OK.value()))
+				.andExpect(status().is(HttpStatus.OK.value()))
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andReturn();
 
 		String content = mvcResult.getResponse().getContentAsString();
@@ -109,7 +109,7 @@ public class ScaMethodResourceTest {
 		when(middlewareUserService.findByUserLogin(USER_LOGIN)).thenThrow(UserNotFoundMiddlewareException.class);
 
 		mockMvc.perform(MockMvcRequestBuilders.get(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN))
-				.andDo(print()).andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+				.andExpect(status().is(HttpStatus.NOT_FOUND.value()))
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andReturn();
 
 		verify(middlewareUserService, times(1)).findByUserLogin(USER_LOGIN);
@@ -121,7 +121,7 @@ public class ScaMethodResourceTest {
 
 		String stringContent = jsonMapper.writeValueAsString(scaMethodTOS);
 		mockMvc.perform(MockMvcRequestBuilders.put(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN)
-				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent)).andDo(print())
+				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent))
 				.andExpect(status().is(HttpStatus.ACCEPTED.value())).andReturn();
 
 		verify(middlewareUserService, times(1)).updateScaData(USER_LOGIN, userTO.getScaUserData());
@@ -133,7 +133,7 @@ public class ScaMethodResourceTest {
 
 		String stringContent = jsonMapper.writeValueAsString(scaMethodTOS);
 		mockMvc.perform(MockMvcRequestBuilders.put(ScaMethodResource.SCA_METHODS + "/{login}", USER_LOGIN)
-				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent)).andDo(print())
+				.contentType(MediaType.APPLICATION_JSON_UTF8).content(stringContent))
 				.andExpect(status().is(HttpStatus.NOT_FOUND.value())).andReturn();
 
 		verify(middlewareUserService, times(1)).updateScaData(USER_LOGIN, userTO.getScaUserData());

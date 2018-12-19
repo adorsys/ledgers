@@ -16,30 +16,26 @@
 
 package de.adorsys.ledgers;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
-import de.adorsys.ledgers.mockbank.simple.EnableMockBankSimple;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
+import de.adorsys.ledgers.sca.service.EnableSCAService;
+import de.adorsys.ledgers.um.impl.EnableUserManagementService;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EntityScan
 @EnableScheduling
-@EnableJpaAuditing
-@EnableJpaRepositories
-@SpringBootApplication(scanBasePackages = {"de.adorsys.ledgers.sca","de.adorsys.ledgers.um","de.adorsys.ledgers.app"})
-@EnableLedgersMiddlewareRest
-@EnableLedgersMiddlewareService
-@EnableDepositAccountService
+@SpringBootApplication
+@EnableUserManagementService
+@EnableSCAService
 @EnablePostingService
-@EnableMockBankSimple
+@EnableDepositAccountService
+@EnableLedgersMiddlewareService
+@EnableLedgersMiddlewareRest
 public class LedgersApplication {
+
     public static void main(String[] args) {
         new SpringApplicationBuilder(LedgersApplication.class).run(args);
     }

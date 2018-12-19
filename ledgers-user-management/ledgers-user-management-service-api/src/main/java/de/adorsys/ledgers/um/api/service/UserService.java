@@ -16,13 +16,18 @@
 
 package de.adorsys.ledgers.um.api.service;
 
+import java.util.Date;
+import java.util.List;
+
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-
-import java.util.List;
 
 public interface UserService {
 
@@ -42,8 +47,9 @@ public interface UserService {
      * @param pin   User PIN
      * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
+     * @throws InsufficientPermissionException 
      */
-    boolean authorise(String login, String pin) throws UserNotFoundException;
+    String authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException;
 
     /**
      * Performs user authorisation
@@ -51,10 +57,11 @@ public interface UserService {
      * @param id        User identifier
      * @param pin       User PIN
      * @param accountId Account identifier
-     * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
+     * @return String representation of authorisation token for success, false for failure or trows a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
+     * @throws InsufficientPermissionException 
      */
-    boolean authorise(String id, String pin, String accountId) throws UserNotFoundException;
+    String authorise(String id, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException;
 
     /**
      * Finds a User by its identifier
@@ -87,5 +94,26 @@ public interface UserService {
 
     List<UserBO> listUsers(int page, int size);
 
-    List<UserBO> getAll();
+	List<UserBO> getAll();
+
+	/**
+	 * Check if the provided token is valid at the given reference time and return the corresponding user.
+	 * 
+	 * 
+	 * @param accessToken
+	 * @param refTime
+	 * @return
+	 * @throws UserNotFoundException 
+	 */
+	AccessTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException;
+	
+	/**
+	 * Provides a token used to gain read access to an account.
+	 * 
+	 * @param aisConsent
+	 * @return
+	 * @throws InsufficientPermissionException 
+	 */
+	String grant(AisConsentBO aisConsent) throws InsufficientPermissionException;
+
 }

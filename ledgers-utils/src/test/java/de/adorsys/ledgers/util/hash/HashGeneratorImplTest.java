@@ -2,7 +2,7 @@ package de.adorsys.ledgers.util.hash;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.adorsys.ledgers.util.Base16;
-import de.adorsys.ledgers.util.MD5Util;
+import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.SerializationUtils;
 import org.junit.Test;
 

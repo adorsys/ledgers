@@ -86,7 +86,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(data)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -111,7 +110,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(data)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -138,7 +136,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(data)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -165,7 +162,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/generate")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(data)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -190,7 +186,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/{id}/validate", OP_ID)
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(operation)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -213,7 +208,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/{id}/validate", OP_ID)
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(operation)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -239,7 +233,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/{id}/validate", OP_ID)
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(operation)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -265,7 +258,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/{id}/validate", OP_ID)
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(operation)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.CONFLICT.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -291,7 +283,6 @@ public class AuthCodeResourceTest {
                                                       .post("/auth-codes/{id}/validate", OP_ID)
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                                                       .content(SerializationUtils.writeValueAsBytes(operation)))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.CONFLICT.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();

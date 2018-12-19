@@ -22,3 +22,5 @@ accountAccesses:
   - id: 4
     accessType: READ
     iban: 7777777
+userRoles:
+  - CUSTOMER

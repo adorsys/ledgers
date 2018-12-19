@@ -39,6 +39,10 @@
 		</dependency>
 
 		<!-- spring dependencies -->
+        <dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-core</artifactId>
+		</dependency>
 
 		<!-- other dependencies -->
 
@@ -50,6 +54,12 @@
 		<dependency>
 			<groupId>pro.javatar.commons</groupId>
 			<artifactId>javatar-commons</artifactId>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.nimbusds</groupId>
+		    <artifactId>nimbus-jose-jwt</artifactId>
+		    <version>${nimbus-jose-jwt.version}</version>
 		</dependency>
 
 		<!-- test dependencies -->

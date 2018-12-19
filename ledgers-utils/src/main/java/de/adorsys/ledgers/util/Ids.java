@@ -2,18 +2,24 @@ package de.adorsys.ledgers.util;
 
 import java.nio.ByteBuffer;
 import java.util.Base64;
-import java.util.Base64.Encoder;
 import java.util.UUID;
 
 public class Ids {
-	private static final Encoder URL_ENCODER = Base64.getUrlEncoder();
 
 	@SuppressWarnings("PMD")
 	public static String id() {
 		UUID uuid = UUID.randomUUID();
-		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-		bb.putLong(uuid.getMostSignificantBits());
-		bb.putLong(uuid.getLeastSignificantBits());
-		return URL_ENCODER.encodeToString(bb.array());
+		return base64UrlEncodeWithoutPadding(uuid.getMostSignificantBits()) +
+			base64UrlEncodeWithoutPadding(uuid.getLeastSignificantBits());
+	}
+	
+	private static String base64UrlEncodeWithoutPadding(long l) {
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(longToBytes(l));
+	}
+
+	private static byte[] longToBytes(long x) {
+	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+	    buffer.putLong(x);
+	    return buffer.array();
 	}
 }

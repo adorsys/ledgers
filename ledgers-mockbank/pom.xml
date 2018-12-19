@@ -28,5 +28,6 @@
 
 	<modules>
 		<module>ledgers-mockbank-simple</module>
+		<module>ledgers-mockbank-simple-data-test</module>
 	</modules>
 </project>

@@ -1,0 +1,102 @@
+# Chart of account of a bank
+
+# Assets
+- shortDesc: Assets
+  name: 1
+  category: AS
+  balanceSide: Dr
+
+# Cash and Cash Equivalents
+- shortDesc: Cash and Cash Equivalents
+  name: 1000
+  parent: 1
+
+
+- shortDesc: Cash in vault
+  name: 1001
+  parent: 1000
+- shortDesc: Cash in ATM
+  name: 1002
+  parent: 1000
+- shortDesc: Cash in transit
+  name: 1003
+  parent: 1000
+# ...
+
+# Deposits with Central Banks
+- shortDesc: Deposits with Central Banks
+  name: 1100
+  parent: 1
+  
+- shortDesc: Deposits with CBM - Non-Interest bearing
+  name: 1103
+  parent: 1100
+- shortDesc: Deposits with CBM - Interest bearing
+  name: 1104
+  parent: 1100
+- shortDesc: Deposits with other Central Banks - Non-Interest bearing
+  name: 1107
+  parent: 1100
+- shortDesc: Deposits with other Central Banks - Interest bearing
+  name: 1108
+  parent: 1100
+
+# Deposits with Banks and Other Financial Institutions
+- shortDesc: Deposits with Banks and Other Financial Institutions
+  name: 1119
+  parent: 1
+
+- shortDesc: State owned domestic banks - Non-Interest bearing
+  name: 1120
+  parent: 1119
+- shortDesc: State owned domestic banks - Interest bearing
+  name: 1121
+  parent: 1119
+- shortDesc: Privately owned domestic banks - Non-Interest bearing
+  name: 1124
+  parent: 1119
+#...
+- shortDesc: Reserves
+  name: 1149
+  parent: 1119
+  
+# ...
+
+# Liabilities
+- shortDesc: Liabilities
+  name: 2
+  category: LI
+  balanceSide: Cr
+
+# Borrowings from Central Banks
+- shortDesc: Borrowings from Central Banks
+  name: 2100
+  parent: 2
+
+- shortDesc: Borrowings from CBM
+  name: 2101
+  parent: 2100
+  
+- shortDesc: Borrowings from other central banks
+  name: 2102
+  parent: 2100
+
+# ...
+
+
+
+# Sight (Demand) Deposits from Non Financial Institutions & Other Clients
+- shortDesc: Sight (Demand) Deposits from Non Financial Institutions & Other Clients
+  name: 2320
+  parent: 2
+# ...
+- shortDesc: Natural persons (households), residents, Interest bearing
+  name: 2332
+  parent: 2320
+- shortDesc: Natural persons (households), non-residents, Non-Interest bearing
+  name: 2333
+  parent: 2320
+
+
+
+  

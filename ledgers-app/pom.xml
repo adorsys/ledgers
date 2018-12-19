@@ -112,12 +112,13 @@
 		</dependency>
 
 		<!-- user management -->
-
+		<!-- 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-user-management-rest-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		 -->
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
@@ -140,6 +141,18 @@
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-mockbank-simple</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-mockbank-simple-data-test</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-db</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
