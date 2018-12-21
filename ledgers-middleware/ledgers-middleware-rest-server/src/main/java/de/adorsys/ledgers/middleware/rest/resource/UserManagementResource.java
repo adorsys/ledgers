@@ -128,15 +128,8 @@ public class UserManagementResource {
     	
     }
 
-    @PostMapping()
-    ResponseEntity<Void> createUser(@RequestBody UserBO user) throws UserAlreadyExistsException {
-        UserBO userBO;
-        userBO = userService.create(user);
-        URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + userBO.getLogin()).build().toUri();
-        return ResponseEntity.created(uri).build();
-    }
-
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
+    @ApiOperation(value="Retrieves User by ID", notes="Retrieves User by ID")
     ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
         try {
             return ResponseEntity.ok(userService.findById(id));
@@ -146,6 +139,7 @@ public class UserManagementResource {
     }
 
     @GetMapping
+    @ApiOperation(value="Retrieves User by login", notes="Retrieves User by login")
     ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
         try {
             return ResponseEntity.ok(userService.findByLogin(login));
@@ -154,7 +148,8 @@ public class UserManagementResource {
         }
     }
 
-    @PutMapping("{id}/" + SCA_DATA_PATH)
+    @PutMapping("/{id}/" + SCA_DATA_PATH)
+    @ApiOperation(value="Updates user SCA", notes="Updates user authentication methods")
     ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
         try {
             UserBO userBO = userService.findById(id);
@@ -169,11 +164,11 @@ public class UserManagementResource {
         }
     }
 
-    @GetMapping("all")
+    // TODO: refactor for user collection pagination
+    @GetMapping("/all")
     @ApiOperation(value="Lists users collection", notes="Lists users collection.")
     ResponseEntity<List<UserBO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAll());
     }
-
 
 }
