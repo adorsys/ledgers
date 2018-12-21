@@ -11,43 +11,6 @@
 <div class="container">
   <form [formGroup]="editUserForm" (ngSubmit)="onSubmit()" >
 
-    <!--<div class="form-group">-->
-      <!--<div class="row">-->
-        <!--<div class="col-lg-8 col-md-8 col-sm-6 my-1">-->
-          <!--<input type="text"-->
-                 <!--class="form-control"-->
-                 <!--id="iban" aria-describedby="ibanHelp"-->
-                 <!--placeholder="Please select account for which user is created">-->
-          <!--<small id="ibanHelp" class="form-text text-muted">Account IBAN for user</small>-->
-        <!--</div>-->
-        <!--<div class="col-auto my-1">-->
-          <!--<div class="row">-->
-            <!--<div class="form-check col">-->
-              <!--<input class="form-check-input"-->
-                     <!--type="radio"-->
-                     <!--name="accountAccessType"-->
-                     <!--id="ownerAccount" value="OWNER" checked>-->
-              <!--<label class="form-check-label" for="ownerAccount">-->
-                <!--Owner-->
-              <!--</label>-->
-            <!--</div>-->
-            <!--<div class="form-check col">-->
-              <!--<input class="form-check-input" type="radio" name="accountAccessType" id="readAccount" value="READ">-->
-              <!--<label class="form-check-label" for="readAccount">-->
-                <!--Read-->
-              <!--</label>-->
-            <!--</div>-->
-            <!--<div class="form-check col">-->
-              <!--<input class="form-check-input" type="radio" name="accountAccessType" id="disposeAccount" value="DISPOSE">-->
-              <!--<label class="form-check-label" for="disposeAccount">-->
-                <!--Dispose-->
-              <!--</label>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
-      <!--</div>-->
-    <!--</div>-->
-
     <div class="form-group">
       <input type="email"
              class="form-control"
@@ -61,6 +24,7 @@
         <div class="alert-size" *ngIf="formControl['email'].touched && formControl['email'].errors.email">Email is invalid</div>
       </div>
     </div>
+
     <div class="form-group">
       <input autocomplete="off"
              type="text"
@@ -74,6 +38,7 @@
         <div class="alert-size" *ngIf="formControl['login'].touched && formControl['login'].errors.required">Login is required</div>
       </div>
     </div>
+
     <div class="form-group">
       <input type="password"
              class="form-control"
@@ -86,31 +51,6 @@
         <div class="alert-size" *ngIf="formControl['pin'].touched && formControl['pin'].errors.required">Pin is required</div>
       </div>
     </div>
-
-    <!--<div class="form-group">-->
-      <!--<div class="row">-->
-        <!--<div class="col-lg-8 col-md-8 col-sm-6 my-1">-->
-          <!--<input type="text" class="form-control" id="scaData" aria-describedby="scaDataHelp" placeholder="Please input SCA method for user">-->
-          <!--<small id="scaDataHelp" class="form-text text-muted">Account IBAN for user</small>-->
-        <!--</div>-->
-        <!--<div class="col-auto my-1">-->
-          <!--<div class="row">-->
-            <!--<div class="form-check col">-->
-              <!--<input class="form-check-input" type="radio" name="scaUserData" id="scaUserDataEmail" value="EMAIL" checked>-->
-              <!--<label class="form-check-label" for="scaUserDataEmail">-->
-                <!--Email-->
-              <!--</label>-->
-            <!--</div>-->
-            <!--<div class="form-check col">-->
-              <!--<input class="form-check-input" type="radio" name="scaUserData" id="scaUserDataPhone" value="PHONE">-->
-              <!--<label class="form-check-label" for="scaUserDataPhone">-->
-                <!--Phone-->
-              <!--</label>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
-      <!--</div>-->
-    <!--</div>-->
 
     <button type="submit" class="btn btn-primary">Update user</button>
   </form>
