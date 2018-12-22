@@ -1,0 +1,500 @@
+# Simple Book keeping system.
+# We use the chart of account from the file: sample_coa_banking.yml
+
+# The name of our business is SimpleBank
+
+
+###############################################
+#
+# Description of case :
+#
+# There is a monthly standing order about 100.00 Euro (on the 15th of month) of the giro account Anton Brueckner to the giro account Max Musterman
+# Anton Brueckner has a start capital of 1000.00 Euro and Max Mustermann of 1.00 Euro
+#
+###############################################
+
+###############################################
+#
+# Accounts :
+# 
+# to be created by the test system
+#
+###############################################
+accounts: 
+  - iban: DE69760700240340283600
+    currency: EUR
+    name: Marion Mueller
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE80760700240271232400
+    currency: EUR
+    name: Anton Brueckner
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE38760700240320465700
+    currency: EUR
+    name: Max Musterman
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+    
+###############################################
+#
+# Users :
+# 
+# Online banking users to be created by the test system
+#
+###############################################
+users:
+  - login: marion.mueller
+    email: marion.mueller@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: marion.mueller@mail.de
+    accountAccesses:
+      - iban: DE69760700240340283600
+        accessType: OWNER
+  - login: anton.brueckner
+    email: anton.brueckner@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: anton.brueckner@mail.de
+    accountAccesses:
+      - iban: DE80760700240271232400
+        accessType: OWNER
+  - login: max.musterman
+    email: max.musterman@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: max.musterman@mail.de
+    accountAccesses:
+      - iban: DE38760700240320465700
+        accessType: OWNER  
+
+
+singlePayments:
+# 1st payment from Anton Brueckner to Max Musterman on 2018-01-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-01-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-01-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 1000.00
+          - accNbr: DE38760700240320465700
+            balance: 1.00
+      - refTime: 2018-01-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 900.00
+          - accNbr: DE38760700240320465700
+            balance: 101.00
+
+# 2nd payment from Anton Brueckner to Max Musterman on 2018-02-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-02-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-02-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 900.00
+          - accNbr: DE38760700240320465700
+            balance: 101.00
+      - refTime: 2018-02-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 800.00
+          - accNbr: DE38760700240320465700
+            balance: 201.00
+    
+# 3rd payment from Anton Brueckner to Max Musterman on 2018-03-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-03-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-03-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 800.00
+          - accNbr: DE38760700240320465700
+            balance: 201.00
+      - refTime: 2018-03-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 700.00
+          - accNbr: DE38760700240320465700
+            balance: 301.00
+    
+# 4th payment from Anton Brueckner to Max Musterman on 2018-04-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-04-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-04-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 700.00
+          - accNbr: DE38760700240320465700
+            balance: 301.00
+      - refTime: 2018-04-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 600.00
+          - accNbr: DE38760700240320465700
+            balance: 401.00
+
+# 5th payment from Anton Brueckner to Max Musterman on 2018-05-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-05-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-05-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 600.00
+          - accNbr: DE38760700240320465700
+            balance: 401.00
+      - refTime: 2018-05-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 500.00
+          - accNbr: DE38760700240320465700
+            balance: 501.00
+
+# 6th payment from Anton Brueckner to Max Musterman on 2018-06-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-06-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-06-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 500.00
+          - accNbr: DE38760700240320465700
+            balance: 501.00
+      - refTime: 2018-06-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 400.00
+          - accNbr: DE38760700240320465700
+            balance: 601.00
+
+# 7th payment from Anton Brueckner to Max Musterman on 2018-07-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-07-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-07-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 400.00
+          - accNbr: DE38760700240320465700
+            balance: 601.00
+      - refTime: 2018-07-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 300.00
+          - accNbr: DE38760700240320465700
+            balance: 701.00
+
+# 8th payment from Anton Brueckner to Max Musterman on 2018-08-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-08-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-08-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 300.00
+          - accNbr: DE38760700240320465700
+            balance: 701.00
+      - refTime: 2018-08-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 200.00
+          - accNbr: DE38760700240320465700
+            balance: 801.00
+
+# 9th payment from Anton Brueckner to Max Musterman on 2018-09-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-09-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-09-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 200.00
+          - accNbr: DE38760700240320465700
+            balance: 801.00
+      - refTime: 2018-09-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 100.00
+          - accNbr: DE38760700240320465700
+            balance: 901.00
+
+# 10th payment from Anton Brueckner to Max Musterman on 2018-10-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-10-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-10-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 100.00
+          - accNbr: DE38760700240320465700
+            balance: 901.00
+      - refTime: 2018-10-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 0.00
+          - accNbr: DE38760700240320465700
+            balance: 1001.00
+
+# 11th payment from Anton Brueckner to Max Musterman on 2018-11-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-11-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-11-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: 0.00
+          - accNbr: DE38760700240320465700
+            balance: 1001.00
+      - refTime: 2018-11-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: -100.00
+          - accNbr: DE38760700240320465700
+            balance: 1101.00
+
+# 12th payment from Anton Brueckner to Max Musterman on 2018-12-15 at 08:10:00
+  - singlePayment:
+      requestedExecutionDate: 2018-12-15
+      requestedExecutionTime: 08:10:00
+      debtorAccount:
+        iban: DE80760700240271232400
+        currency: EUR
+      instructedAmount:
+        amount: 100
+      creditorAccount:
+        iban: DE38760700240320465700
+        currency: EUR
+      creditorName: Max Musterman
+      remittanceInformationUnstructured: Payment
+      paymentProduct: SEPA
+    balancesList:
+      - refTime: 2018-12-15T08:00:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: -100.00
+          - accNbr: DE38760700240320465700
+            balance: 1101.00
+      - refTime: 2018-12-15T08:30:00
+        balances:
+          - accNbr: DE80760700240271232400
+            balance: -200.00
+          - accNbr: DE38760700240320465700
+            balance: 1201.00
+
+
+balancesList:
+  - refTime: 2018-12-30T23:59:00
+    balances:
+      - accNbr: DE69760700240340283600
+        balance: 0.00
+      - accNbr: DE80760700240271232400
+        balance: -200.00
+      - accNbr: DE38760700240320465700
+        balance: 1201.00
+
+
+### List accounts and the number of transaction they have.
+### if for all accounts listed the number of transactions in the database is above 
+### the count we have here, it means system has been fully initialized. Loading
+### will no take place.
+transactions: 
+  - iban: DE80760700240271232400
+    dateFrom: 2018-01-01
+    dateTo: 2018-12-30
+    transactions: 
+      - bookingDate: 2018-01-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-02-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-03-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-04-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-05-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-06-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-07-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-08-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-09-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-10-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-11-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman 
+      - bookingDate: 2018-12-15
+        amount:
+          amount: -100.00
+        creditorName: Max Musterman

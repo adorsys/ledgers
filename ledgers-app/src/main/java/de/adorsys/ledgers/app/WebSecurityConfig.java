@@ -40,7 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             		"/management/app/ping", 
             		"/users/authorise2", 
             		"/users/authorise",
-            		"/upload-mockbank-data",
+            		"/data-test/upload-mockbank-data",
+            		"/data-test/db-flush",
             		"/users/register").permitAll()
             .and()
             .authorizeRequests().antMatchers("/index.css", "/img/*", "/favicon.ico").permitAll()
