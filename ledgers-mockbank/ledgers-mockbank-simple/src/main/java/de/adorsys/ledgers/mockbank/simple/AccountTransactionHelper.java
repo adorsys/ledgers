@@ -1,9 +1,18 @@
 package de.adorsys.ledgers.mockbank.simple;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.rest.resource.AccountResource;
+import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -11,21 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.rest.resource.AccountResource;
-import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
 
 public class AccountTransactionHelper {
 	private static ObjectMapper jsonMapper = new ObjectMapper();
@@ -55,7 +49,7 @@ public class AccountTransactionHelper {
 				.orElseThrow(() -> new IllegalStateException(String.format("Owner of this account with iban %s not found.", t.getIban())));
 		
 		AccountDetailsTO accountDetailsTO = DepositAccountHelper.loadAccountDetailsByIban(baseUrl, t.getIban(), bag);
-		List<TransactionTO> loadedTransactions = loadTransactions(baseUrl, bag, accountDetailsTO, t.getDateFrom(), t.getDateTo());
+		List<TransactionTO> loadedTransactions = loadTransactions(baseUrl, bag, accountDetailsTO, t.getDateFrom(), LocalDate.now());
 		
 		// Now compare the transactions
 		List<TransactionTO> expectedTransactions = t.getTransactions();
@@ -100,7 +94,7 @@ public class AccountTransactionHelper {
 	}
 
 	private List<TransactionTO> loadTransactions(String baseUrl, UserBag bag, AccountDetailsTO accountDetailsTO, LocalDate from, LocalDate to)
-			throws MalformedURLException, IOException, ProtocolException, JsonParseException, JsonMappingException {
+			throws IOException {
 		List<TransactionTO> loadedTransactions = null;
 		HttpURLConnection con = null;
 		try {

@@ -12,35 +12,33 @@ import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
+    private static final String DOBLE_ENTRY_ERROR_MSG = "Debit sums up to %s while credit sums up to %s";
     private final PostingRepository postingRepository;
     private final AccountStmtRepository accountStmtRepository;
-    private final PostingMapper postingMapper;
+    private final PostingMapper postingMapper = Mappers.getMapper(PostingMapper.class);
     private final PostingLineRepository postingLineRepository;
     private final PostingLineMapper postingLineMapper;
 
     public PostingServiceImpl(LedgerAccountRepository ledgerAccountRepository,
-                              ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository,
+                              ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository,
                               PostingRepository postingRepository, AccountStmtRepository accountStmtRepository,
-                              PostingMapper postingMapper, PostingLineRepository postingLineRepository,
+                              PostingLineRepository postingLineRepository,
                               PostingLineMapper postingLineMapper) {
-        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
+        super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
         this.postingRepository = postingRepository;
         this.accountStmtRepository = accountStmtRepository;
-        this.postingMapper = postingMapper;
         this.postingLineRepository = postingLineRepository;
         this.postingLineMapper = postingLineMapper;
     }
@@ -79,7 +77,6 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         // check posting time is not before a closing.
         //		validatePostingTime(posting);
         Posting p = createPostingObj(posting, now);
-
         Ledger ledger = loadLedger(posting.getLedger());
         p.setLedger(ledger);
 
@@ -121,7 +118,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         p.setPstTime(posting.getPstTime());
         p.setPstType(posting.getPstType());
         p.setRecordTime(now);
-        p.setRecordUser(principal.getName());
+        p.setRecordUser(posting.getRecordUser());
         p.setValTime(posting.getValTime());
         return p;
     }
@@ -139,7 +136,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
      */
     private void processPostingLine(Posting p, PostingLine model) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
         PostingLine l = new PostingLine();
-        l.setId(model.getId()/*Ids.id()*/);
+        l.setId(model.getId());
         LedgerAccount account = loadLedgerAccount(model.getAccount());
         l.setAccount(account);
         String baseLine = validatePostingTime(p, account).orElse(new AccountStmt()).getId();
@@ -169,7 +166,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         }
 
         if (!sumDebit.equals(sumCredit)) {
-            throw new DoubleEntryAccountingException(String.format("Debit summs up to %s while credit sums up to %s", sumDebit, sumCredit));
+            throw new DoubleEntryAccountingException(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit));
         }
     }
 

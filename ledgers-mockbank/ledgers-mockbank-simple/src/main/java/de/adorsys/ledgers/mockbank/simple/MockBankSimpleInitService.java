@@ -1,26 +1,23 @@
 package de.adorsys.ledgers.mockbank.simple;
 
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.rest.resource.AppManagementResource;
+import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
+import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.rest.resource.AppManagementResource;
-import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
-import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
 
 @Service
 public class MockBankSimpleInitService {
@@ -102,7 +99,7 @@ public class MockBankSimpleInitService {
 	 * Check if update required. If then process the config file.
 	 */
 	private void updateIfRequired(String baseUrl)
-			throws InsufficientPermissionMiddlewareException, UnsupportedEncodingException, ProtocolException, IOException {
+			throws IOException {
 		// No users, not
 		if (sampleData.getUsers() == null || sampleData.getUsers().isEmpty()) {
 			return;
@@ -118,11 +115,15 @@ public class MockBankSimpleInitService {
 			userBag.getAccessibleAccounts().addAll(accessibleAccounts);
 			usersMap.put(userTO.getLogin(), userBag);
 			
-			List<String> accessibleAccountsFromDBIbans = accessibleAccounts.stream().map(a -> a.getIban()).collect(Collectors.toList());
-			List<String> accessibleAccountsFromFileIbans = userTO.getAccountAccesses().stream().map(a -> a.getIban()).collect(Collectors.toList());
+			List<String> accessibleAccountsFromDBIbans = accessibleAccounts.stream()
+					                                             .map(AccountDetailsTO::getIban)
+					                                             .collect(Collectors.toList());
+			List<String> accessibleAccountsFromFileIbans = userTO.getAccountAccesses().stream()
+					                                               .map(AccountAccessTO::getIban)
+					                                               .collect(Collectors.toList());
 			for (AccountDetailsTO accountDetailsTO : accounts) {
 				if(!accessibleAccountsFromFileIbans.contains(accountDetailsTO.getIban())) {
-					// no assignement of this account to this user in the current files.
+					// no assignment of this account to this user in the current files.
 					continue;
 				}
 				

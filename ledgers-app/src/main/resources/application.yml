@@ -49,6 +49,9 @@ logging:
     org:
       hibernate: WARN
 
+paymentScheduler:
+  initialDelay: 3000
+  delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
 
 sca:
   authCode:

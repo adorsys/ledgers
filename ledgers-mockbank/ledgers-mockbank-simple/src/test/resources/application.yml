@@ -45,6 +45,10 @@ spring:
           starttls:
             enable: true
 
+paymentScheduler:
+  initialDelay: 3000
+  delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
+
 sca:
   authCode:
     validity.seconds: 180

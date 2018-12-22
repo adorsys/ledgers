@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -63,8 +64,9 @@ public class Posting extends HashRecord {
     private String oprType;
 
     /* Details associated with this operation. */
-    @Lob
-    private String oprDetails;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private OperationDetails oprDetails;
 
     /*
      * The source of the operation. For example, payment order may result into many
@@ -193,7 +195,7 @@ public class Posting extends HashRecord {
         return oprType;
     }
 
-    public String getOprDetails() {
+    public OperationDetails getOprDetails() {
         return oprDetails;
     }
 
@@ -273,7 +275,7 @@ public class Posting extends HashRecord {
         this.oprType = oprType;
     }
 
-    public void setOprDetails(String oprDetails) {
+    public void setOprDetails(OperationDetails oprDetails) {
         this.oprDetails = oprDetails;
     }
 
@@ -304,5 +306,4 @@ public class Posting extends HashRecord {
     public void setLines(List<PostingLine> lines) {
         this.lines = lines;
     }
-
 }

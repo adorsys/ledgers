@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 public class AccessTokenTO {
-	
+	//TODO @fpo add doc here. Field values are unclear.
 	private String sub;
 	
 	private String jti;

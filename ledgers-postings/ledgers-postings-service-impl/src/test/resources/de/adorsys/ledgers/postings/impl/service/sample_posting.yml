@@ -3,6 +3,7 @@
 # The name of out business is SimpleBank
 # Initial Capital of the Bank. Deposit with the central bank
 - oprId: "deposit_with_central_bank_001"
+  recordUser: "TEST"
   oprDetails: "Initial deposit in the central bank account of SimpleBank"
   pstTime: 2018-10-15T22:40:00.000
   pstType: BUSI_TX

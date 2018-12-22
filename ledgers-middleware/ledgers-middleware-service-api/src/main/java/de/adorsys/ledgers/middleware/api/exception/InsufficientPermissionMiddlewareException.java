@@ -18,17 +18,21 @@ package de.adorsys.ledgers.middleware.api.exception;
 
 /**
  * The connected user does not have enough permission to executed the requested
- * action on the specified account. 
- * 
- * @author fpo
+ * action on the specified account.
  *
+ * @author fpo
  */
 public class InsufficientPermissionMiddlewareException extends Exception {
 
-    public InsufficientPermissionMiddlewareException() {}
+    public InsufficientPermissionMiddlewareException() {
+    }
 
     public InsufficientPermissionMiddlewareException(String message) {
         super(message);
+    }
+
+    public InsufficientPermissionMiddlewareException(String userId, String userLogin, String requestedIban) {
+        super(String.format("Current user with id %s and login %s not owner of the target account with iban %s", userId, userLogin, requestedIban));
     }
 
     public InsufficientPermissionMiddlewareException(String message, Throwable cause) {

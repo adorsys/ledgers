@@ -26,6 +26,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +43,7 @@ import java.time.Month;
 @DatabaseTearDown(value = {"AccountStmtServiceImplIT-db-delete.xml"}, type = DatabaseOperation.DELETE_ALL)
 public class AccountStmtServiceImplIT {
 
+    private static final String SYSTEM = "System";
     @Autowired
     private AccountStmtService accountStmtService;
     @Autowired
@@ -302,8 +304,16 @@ public class AccountStmtServiceImplIT {
             la.setCoa(coa);
             la.setBalanceSide(balanceSide);
             la.setCategory(category);
-            ledgerService.newLedgerAccount(la);
+            ledgerService.newLedgerAccount(la, SYSTEM);
         }
     }
 
+    private static <T> T readYml(Class<T> aClass, String fileName) {
+        try {
+            return YamlReader.getInstance().getObjectFromResource(PostingServiceImpl.class, fileName, aClass);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

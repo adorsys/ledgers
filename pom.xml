@@ -109,7 +109,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
         <liquibase.version>3.6.2</liquibase.version>
-	</properties>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -278,6 +278,8 @@
                         <excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
                         <excludeRoot>../ledgers-middleware-service-impl/target/generated-sources/annotations/
+                        </excludeRoot>
+                        <excludeRoot>../ledgers-postings-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
                     </excludeRoots>
                 </configuration>

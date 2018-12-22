@@ -1,12 +1,22 @@
 package de.adorsys.ledgers.deposit.api.service.impl.mockbank;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.Month;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
+import de.adorsys.ledgers.deposit.api.service.impl.PaymentExecutionService;
+import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.exception.*;
+import de.adorsys.ledgers.postings.api.service.AccountStmtService;
+import de.adorsys.ledgers.postings.api.service.LedgerService;
+import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
+import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -21,27 +31,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
-import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
-import de.adorsys.ledgers.postings.api.service.AccountStmtService;
-import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
-import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.Month;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = DepositAccountServiceApplication.class)
@@ -72,6 +67,8 @@ public class DepositAccountServiceImplIT {
     private DepositAccountConfigService depositAccountConfigService;
     @Autowired
     private DepositAccountInitService depositAccountInitService;
+    @Autowired
+    private PaymentExecutionService paymentExecutionService;
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     
