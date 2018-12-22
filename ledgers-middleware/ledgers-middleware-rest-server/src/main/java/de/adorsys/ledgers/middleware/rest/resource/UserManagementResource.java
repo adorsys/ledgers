@@ -16,12 +16,14 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -35,10 +37,14 @@ import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(UserManagementResource.BASE_PATH)
-@Api(tags = "User Login" , description= "Provide endpoint for registering and authorizing user.")
+@Api(tags = "User Management" , description= "Provides endpoint for registering, authorizing and managing users.")
 @MiddlewareUserResource
 public class UserManagementResource {
 	public static final String BASE_PATH = "/users";
@@ -49,16 +55,19 @@ public class UserManagementResource {
 	public static final String ROLE_REQUEST_PARAM = "role";
 	public static final String PIN_REQUEST_PARAM = "pin";
 	public static final String LOGIN_REQUEST_PARAM = "login";
+    private static final String SCA_DATA_PATH = "/sca-data";
 	public static final Logger logger = LoggerFactory.getLogger(UserManagementResource.class);
     private final MiddlewareOnlineBankingService onlineBankingService;
+    private final UserService userService;
 
-    public UserManagementResource(MiddlewareOnlineBankingService onlineBankingService) {
+    public UserManagementResource(MiddlewareOnlineBankingService onlineBankingService, UserService userService) {
         this.onlineBankingService = onlineBankingService;
+        this.userService = userService;
     }
 
     /**
      * We shall deprecate this. Authorize must return a bearer token.
-     * 
+     * @deprecated
      * @param login
      * @param pin
      * @return
@@ -117,4 +126,48 @@ public class UserManagementResource {
 		}
     	
     }
+
+    @GetMapping("/{id}")
+    @ApiOperation(value="Retrieves User by ID", notes="Retrieves User by ID")
+    ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
+        try {
+            return ResponseEntity.ok(userService.findById(id));
+        } catch (UserNotFoundException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    @ApiOperation(value="Retrieves User by login", notes="Retrieves User by login")
+    ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
+        try {
+            return ResponseEntity.ok(userService.findByLogin(login));
+        } catch (UserNotFoundException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/" + SCA_DATA_PATH)
+    @ApiOperation(value="Updates user SCA", notes="Updates user authentication methods")
+    ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
+        try {
+            UserBO userBO = userService.findById(id);
+            UserBO user = userService.updateScaData(data, userBO.getLogin());
+
+            URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
+                    .build().toUri();
+
+            return ResponseEntity.created(uri).build();
+        } catch (UserNotFoundException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    // TODO: refactor for user collection pagination
+    @GetMapping("/all")
+    @ApiOperation(value="Lists users collection", notes="Lists users collection.")
+    ResponseEntity<List<UserBO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAll());
+    }
+
 }
