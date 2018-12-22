@@ -11,7 +11,6 @@ import de.adorsys.ledgers.util.Ids;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -20,8 +19,8 @@ import java.util.Optional;
 public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements ChartOfAccountService {
     private final ChartOfAccountMapper chartOfAccountMapper;
 
-    public ChartOfAccountServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository, ChartOfAccountMapper chartOfAccountMapper) {
-        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
+    public ChartOfAccountServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, ChartOfAccountMapper chartOfAccountMapper) {
+        super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
         this.chartOfAccountMapper = chartOfAccountMapper;
     }
 
@@ -35,9 +34,8 @@ public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements Ch
     @Override
     public ChartOfAccountBO newChartOfAccount(ChartOfAccountBO coa) {
         LocalDateTime created = LocalDateTime.now();
-        String user = principal.getName();
         // Save new coa
-        ChartOfAccount chartOfAccount = new ChartOfAccount(Ids.id(), created, user, coa.getShortDesc(), coa.getLongDesc(), coa.getName());
+        ChartOfAccount chartOfAccount = new ChartOfAccount(Ids.id(), created, coa.getUserDetails(), coa.getShortDesc(), coa.getLongDesc(), coa.getName());
 
         // Return clone.
         return chartOfAccountMapper.toChartOfAccountBO(chartOfAccountRepo.save(chartOfAccount));

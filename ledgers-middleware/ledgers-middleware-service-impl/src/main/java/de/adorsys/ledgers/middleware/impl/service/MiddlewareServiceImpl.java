@@ -17,15 +17,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 
-import static de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO.ACSC;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -38,36 +29,32 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO.ACSC;
 
 @Service
 public class MiddlewareServiceImpl implements MiddlewareService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareServiceImpl.class);
+    private static final String NOT_THIS_USERS_ACCOUNT_MSG = "Account: %s doesn't belong to current User";
 
     private final DepositAccountPaymentService paymentService;
     private final SCAOperationService scaOperationService;
@@ -75,14 +62,18 @@ public class MiddlewareServiceImpl implements MiddlewareService {
     private final PaymentConverter paymentConverter;
     private final AuthCodeDataConverter authCodeDataConverter;
     private final MiddlewareUserManagementServiceImpl userManagementService;
+    private final AccessTokenTO accessTokenTO;
+    private final Principal principal;
 
-    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter, MiddlewareUserManagementServiceImpl userManagementService) {
+    public MiddlewareServiceImpl(DepositAccountPaymentService paymentService, SCAOperationService scaOperationService, DepositAccountService accountService, PaymentConverter paymentConverter, AuthCodeDataConverter authCodeDataConverter, MiddlewareUserManagementServiceImpl userManagementService, AccessTokenTO accessTokenTO, Principal principal) {
         this.paymentService = paymentService;
         this.scaOperationService = scaOperationService;
         this.accountService = accountService;
         this.paymentConverter = paymentConverter;
         this.authCodeDataConverter = authCodeDataConverter;
         this.userManagementService = userManagementService;
+        this.accessTokenTO = accessTokenTO;
+        this.principal = principal;
     }
 
     @Override
@@ -155,10 +146,14 @@ public class MiddlewareServiceImpl implements MiddlewareService {
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public boolean validateAuthCode(String opId, String opData, String authCode) throws
-            SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
+    public boolean validateAuthCode(String opId, String opData, String authCode) throws //NOPMD
+                                                                                                SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
         try {
-            return scaOperationService.validateAuthCode(opId, opData, authCode);
+            boolean isValidated = scaOperationService.validateAuthCode(opId, opData, authCode);
+            if (opData.contains("Payment")) { //TODO @fpo this is implemented as is without any info please clarify
+                paymentService.updatePaymentStatusToAuthorised(opId);
+            }
+            return isValidated;
         } catch (SCAOperationNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new SCAOperationNotFoundMiddlewareException(e);
@@ -171,28 +166,45 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         } catch (SCAOperationUsedOrStolenException e) {
             logger.error(e.getMessage(), e);
             throw new SCAOperationUsedOrStolenMiddlewareException(e);
+        } catch (PaymentNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new PaymentNotFoundMiddlewareException(e.getMessage());
         }
     }
 
     @Override
-    public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException {
-        @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
+    public <T> Object initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException {
         PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
+        UserTO user = null;
         try {
+            user = userManagementService.findByUserLogin(accessTokenTO.getActor());
+            boolean isUsersAccount = user.getAccountAccesses().stream()
+                                             .anyMatch(a -> a.getIban().equals(paymentBO.getDebtorAccount().getIban()));
+            if (!isUsersAccount) {
+                throw new NoAccessMiddlewareException(String.format(NOT_THIS_USERS_ACCOUNT_MSG, paymentBO.getDebtorAccount().getIban()));
+            }
             accountService.getDepositAccountByIban(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
 
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new AccountNotFoundMiddlewareException(e.getMessage());
+        } catch (UserNotFoundMiddlewareException e) {
+            logger.error(e.getMessage());
+            throw new NoAccessMiddlewareException(e.getMessage());
         }
-        PaymentBO paymentInitiationResult = paymentService.initiatePayment(paymentBO);
+        TransactionStatusBO status = !user.getScaUserData().isEmpty()
+                                             ? TransactionStatusBO.ACCP
+                                             : TransactionStatusBO.ACTC;
+        PaymentBO paymentInitiationResult = paymentService.initiatePayment(paymentBO, status);
         return paymentConverter.toPaymentTO(paymentInitiationResult);
     }
 
     @Override
     public TransactionStatusTO executePayment(String paymentId) throws PaymentProcessingMiddlewareException {
         try {
-            TransactionStatusBO executePayment = paymentService.executePayment(paymentId);
+            //TODO fill in AUTH CHECK with USER ROLE CHECK @dmiex
+            TransactionStatusBO executePayment = paymentService.executePayment(paymentId, principal.getName());
             return TransactionStatusTO.valueOf(executePayment.name());
         } catch (PaymentNotFoundException | PaymentProcessingException e) {
             throw new PaymentProcessingMiddlewareException(paymentId, e);
@@ -211,8 +223,8 @@ public class MiddlewareServiceImpl implements MiddlewareService {
         }
     }
 
-	@Override
-	public String iban(String paymentId) {
-		return paymentService.readIbanByPaymentId(paymentId);
-	}
+    @Override
+    public String iban(String paymentId) {
+        return paymentService.readIbanByPaymentId(paymentId);
+    }
 }

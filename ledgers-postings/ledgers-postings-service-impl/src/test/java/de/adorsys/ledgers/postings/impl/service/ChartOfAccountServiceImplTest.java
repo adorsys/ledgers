@@ -36,7 +36,6 @@ public class ChartOfAccountServiceImplTest {
     public void new_coa_must_produce_id_created_user_and_copy_name_shortdesc_longdesc() {
         ChartOfAccount coa = new ChartOfAccount("id", LocalDateTime.now(), "TestName", "shortDesc", "longDesc", "coaName");
 
-        when(principal.getName()).thenReturn(USER_NAME);
         when(chartOfAccountRepo.save(any())).thenAnswer(i -> i.getArgument(0));
         when(chartOfAccountMapper.toChartOfAccountBO(any())).thenReturn(mapper.toChartOfAccountBO(coa));
         //When

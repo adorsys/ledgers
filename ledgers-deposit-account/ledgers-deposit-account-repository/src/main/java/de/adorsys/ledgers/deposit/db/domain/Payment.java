@@ -1,31 +1,17 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateConverter;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalTimeConverter;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Payment {
@@ -47,31 +33,63 @@ public class Payment {
      */
     private Boolean batchBookingPreferred;
 
+    /**
+     * Is used for any kind of payments except Periodic
+     */
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	@Convert(converter=LocalDateConverter.class)
-	private LocalDate requestedExecutionDate;
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate requestedExecutionDate;
 
-	@Convert(converter=LocalTimeConverter.class)
+    /**
+     * Is used for regular payments when User is eager to have them executed at certain time (not before)
+     */
+    //@Convert(converter = LocalTimeConverter.class)
     private LocalTime requestedExecutionTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentType paymentType;
 
+    /**
+     * Represents the starting date for Periodic payments
+     */
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	@Convert(converter=LocalDateConverter.class)
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate startDate;
 
+    /**
+     * Represents the latest possible date for Periodic payments
+     */
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	@Convert(converter=LocalDateConverter.class)
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate endDate;
 
+    /**
+     * String representation of proceeding / following indication for pay day. Example: requested ExecutionDate is set to 15.12.2018 and that is a Saturday
+     * So the payment should be executed either 14.12.2018 or 17.12.2018 (Friday or Monday)
+     */
     private String executionRule;
 
+    /**
+     * Represents the frequency for Periodic payment (weekly/two weeks/monthly etc.)
+     */
     @Enumerated(EnumType.STRING)
     private FrequencyCode frequency; // TODO consider using an enum similar to FrequencyCode based on the the "EventFrequency7Code" of ISO 20022
 
-    private int dayOfExecution; //Day here max 31
+    /**
+     * Day of execution for Periodic Payments if it is necessary to execute a payment on certain dates
+     */
+    private Integer dayOfExecution; //Day here max 31
+
+    /**
+     * Last execution date (when the payment was executed at last)
+     */
+    private LocalDateTime executedDate;
+
+    /**
+     * Date when the Execution Scheduler will pick the payment for execution (Should be null if the payment is executed for the last time)
+     */
+    private LocalDateTime nextScheduledExecution;
 
     @NotNull
     @Embedded
@@ -92,6 +110,21 @@ public class Payment {
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     private List<PaymentTarget> targets = new ArrayList<>();
 
+
+    //Additional PaymentRelated Logic
+    public boolean isInstant() {
+        return getTargets().stream()
+                       .findFirst()
+                       .map(t -> t.getPaymentProduct() == PaymentProduct.INSTANT_SEPA
+                                         || t.getPaymentProduct() == PaymentProduct.TARGET2)
+                       .orElse(false);
+    }
+
+    public boolean isLastExecuted(LocalDate nextPossibleExecutionDate){
+        return endDate != null && nextPossibleExecutionDate.isAfter(endDate);
+    }
+
+    // Getters - Setters
     public String getPaymentId() {
         return paymentId;
     }
@@ -164,12 +197,28 @@ public class Payment {
         this.frequency = frequency;
     }
 
-    public int getDayOfExecution() {
+    public Integer getDayOfExecution() {
         return dayOfExecution;
     }
 
-    public void setDayOfExecution(int dayOfExecution) {
+    public void setDayOfExecution(Integer dayOfExecution) {
         this.dayOfExecution = dayOfExecution;
+    }
+
+    public LocalDateTime getExecutedDate() {
+        return executedDate;
+    }
+
+    public void setExecutedDate(LocalDateTime executedDate) {
+        this.executedDate = executedDate;
+    }
+
+    public LocalDateTime getNextScheduledExecution() {
+        return nextScheduledExecution;
+    }
+
+    public void setNextScheduledExecution(LocalDateTime nextScheduledExecution) {
+        this.nextScheduledExecution = nextScheduledExecution;
     }
 
     public AccountReference getDebtorAccount() {

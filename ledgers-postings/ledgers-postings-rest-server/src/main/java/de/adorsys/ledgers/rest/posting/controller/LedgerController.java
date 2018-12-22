@@ -13,12 +13,15 @@ import org.springframework.web.util.UriBuilder;
 
 import javax.websocket.server.PathParam;
 import java.net.URI;
+import java.security.Principal;
 
 @RestController
 public class LedgerController {
+    private final Principal principal;
     private final LedgerService ledgerService;
 
-    public LedgerController(LedgerService ledgerService) {
+    public LedgerController(Principal principal, LedgerService ledgerService) {
+        this.principal = principal;
         this.ledgerService = ledgerService;
     }
 
@@ -70,7 +73,7 @@ public class LedgerController {
     public ResponseEntity<Void> newLedgerAccount(@RequestBody LedgerAccountBO ledgerAccount, UriBuilder uri) {
         LedgerAccountBO newLedgerAccount;
         try {
-            newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount);
+            newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount, principal.getName());
         } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
             throw new NotFoundRestException(e.getMessage());
         }

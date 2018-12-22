@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,8 +25,8 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
 
     private AccountStmtMapper accountStmtMapper;
 
-    public AccountStmtServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository, AccountStmtRepository accountStmtRepository, PostingLineRepository postingLineRepository, AccountStmtMapper accountStmtMapper) {
-        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
+    public AccountStmtServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, AccountStmtRepository accountStmtRepository, PostingLineRepository postingLineRepository, AccountStmtMapper accountStmtMapper) {
+        super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
         this.accountStmtRepository = accountStmtRepository;
         this.postingLineRepository = postingLineRepository;
         this.accountStmtMapper = accountStmtMapper;
@@ -79,7 +78,8 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
         accStmt.setTotalDebit(BigDecimal.ZERO);
         return accStmt;
     }
-@SuppressWarnings("PMD.AvoidReassigningParameters")
+
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private AccountStmt computeBalance(AccountStmt stmt, List<PostingLine> lines) {
         if (!lines.isEmpty()) {
             for (PostingLine line : lines) {

@@ -11,12 +11,12 @@ public class PeriodicPaymentTO extends SinglePaymentTO {
     private LocalDate endDate;
     private String executionRule;
     private FrequencyCodeTO frequency;
-    private int dayOfExecution;
+    private Integer dayOfExecution;
 
     public PeriodicPaymentTO() {
     }
 
-    public PeriodicPaymentTO(String paymentId, String endToEndIdentification, AccountReferenceTO debtorAccount, AmountTO instructedAmount, AccountReferenceTO creditorAccount, String creditorAgent, String creditorName, AddressTO creditorAddress, String remittanceInformationUnstructured, TransactionStatusTO paymentStatus, PaymentProductTO paymentProduct, LocalDate requestedExecutionDate, LocalTime requestedExecutionTime, LocalDate startDate, LocalDate endDate, String executionRule, FrequencyCodeTO frequency, int dayOfExecution) {
+    public PeriodicPaymentTO(String paymentId, String endToEndIdentification, AccountReferenceTO debtorAccount, AmountTO instructedAmount, AccountReferenceTO creditorAccount, String creditorAgent, String creditorName, AddressTO creditorAddress, String remittanceInformationUnstructured, TransactionStatusTO paymentStatus, PaymentProductTO paymentProduct, LocalDate requestedExecutionDate, LocalTime requestedExecutionTime, LocalDate startDate, LocalDate endDate, String executionRule, FrequencyCodeTO frequency, Integer dayOfExecution) {
         super(paymentId, endToEndIdentification, debtorAccount, instructedAmount, creditorAccount, creditorAgent, creditorName, creditorAddress, remittanceInformationUnstructured, paymentStatus, paymentProduct, requestedExecutionDate, requestedExecutionTime);
         this.startDate = startDate;
         this.endDate = endDate;
@@ -58,11 +58,11 @@ public class PeriodicPaymentTO extends SinglePaymentTO {
         this.frequency = frequency;
     }
 
-    public int getDayOfExecution() {
+    public Integer getDayOfExecution() {
         return dayOfExecution;
     }
 
-    public void setDayOfExecution(int dayOfExecution) {
+    public void setDayOfExecution(Integer dayOfExecution) {
         this.dayOfExecution = dayOfExecution;
     }
 }

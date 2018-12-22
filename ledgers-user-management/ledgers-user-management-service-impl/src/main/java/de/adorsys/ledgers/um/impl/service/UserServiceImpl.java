@@ -16,27 +16,6 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import java.security.Principal;
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.exception.ConstraintViolationException;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -44,14 +23,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
-import de.adorsys.ledgers.um.api.domain.AisConsentBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
@@ -66,6 +38,26 @@ import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.exception.ConstraintViolationException;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.security.Principal;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -76,20 +68,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
     private final PasswordEnc passwordEnc;
-
-    @Autowired
-    private Principal principal;
-    
+    private final Principal principal;
     private final HashMacSecretSource secretSource;
     
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           UserConverter userConverter, 
-                           PasswordEnc passwordEnc, HashMacSecretSource secretSource) {
+                           UserConverter userConverter,
+                           PasswordEnc passwordEnc, HashMacSecretSource secretSource, Principal principal) {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
         this.passwordEnc = passwordEnc;
         this.secretSource = secretSource;
+	    this.principal = principal;
     }
 
     @Override
@@ -316,7 +306,9 @@ public class UserServiceImpl implements UserService {
 		}
 		aisConsent.setUserId(user.getId());
 
-		List<String> accessibleAccounts = user.getAccountAccesses().stream().map(a -> a.getIban()).collect(Collectors.toList());
+		List<String> accessibleAccounts = user.getAccountAccesses().stream()
+				                                  .map(AccountAccessBO::getIban)
+				                                  .collect(Collectors.toList());
 		
 		AisAccountAccessInfoBO access = aisConsent.getAccess();
 		checkAccountAccess(accessibleAccounts, access.getAccounts(), "No account access. User with id %s does not have access to accounts %s" ,user.getId());

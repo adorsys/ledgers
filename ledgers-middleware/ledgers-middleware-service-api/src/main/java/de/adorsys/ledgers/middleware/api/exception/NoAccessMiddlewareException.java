@@ -18,19 +18,19 @@ package de.adorsys.ledgers.middleware.api.exception;
 
 /**
  * The connected user is not the owner of the target account.
- * 
- * @author fpo
  *
+ * @author fpo
  */
-public class ConnectedUserNotAccountOwnerMiddlewareException extends Exception {
+public class NoAccessMiddlewareException extends Exception {
 
-    public ConnectedUserNotAccountOwnerMiddlewareException() {}
+    public NoAccessMiddlewareException() {
+    }
 
-    public ConnectedUserNotAccountOwnerMiddlewareException(String message) {
+    public NoAccessMiddlewareException(String message) {
         super(message);
     }
 
-    public ConnectedUserNotAccountOwnerMiddlewareException(String message, Throwable cause) {
+    public NoAccessMiddlewareException(String message, Throwable cause) {
         super(message, cause);
     }
 }

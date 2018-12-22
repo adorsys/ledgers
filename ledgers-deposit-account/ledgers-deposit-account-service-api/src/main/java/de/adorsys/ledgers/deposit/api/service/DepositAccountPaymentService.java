@@ -27,11 +27,13 @@ public interface DepositAccountPaymentService {
 
     PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException;
 
-    PaymentBO initiatePayment(PaymentBO paymentBO);
+    PaymentBO initiatePayment(PaymentBO paymentBO, TransactionStatusBO status);
 
-    TransactionStatusBO executePayment(String paymentId) throws PaymentNotFoundException, PaymentProcessingException;
+    TransactionStatusBO executePayment(String paymentId, String userName) throws PaymentNotFoundException, PaymentProcessingException;
 
     void cancelPayment(String paymentId) throws PaymentNotFoundException;
 
-	String readIbanByPaymentId(String paymentId);
+    String readIbanByPaymentId(String paymentId);
+
+    void updatePaymentStatusToAuthorised(String paymentId) throws PaymentNotFoundException;
 }

@@ -16,23 +16,8 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.domain.SCAGenerationResponse;
@@ -43,6 +28,9 @@ import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(AuthCodeResource.AUTH_CODES)
@@ -89,7 +77,7 @@ public class AuthCodeResource {
         } catch (SCAOperationValidationMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new ValidationRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (SCAOperationNotFoundMiddlewareException e) {
+        } catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (SCAOperationUsedOrStolenMiddlewareException | SCAOperationExpiredMiddlewareException e) {
