@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -20,6 +20,8 @@ import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareEx
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
+import de.adorsys.ledgers.mockbank.simple.data.test.api.DataUploadService;
+import de.adorsys.ledgers.mockbank.simple.data.test.impl.DataUploadServiceImpl;
 
 /**
  * Register a MockbankInitData for the data-test module.
@@ -33,7 +35,6 @@ import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
  *
  */
 @Configuration
-@Profile("data-test")
 @ComponentScan(basePackageClasses = MockBankSimpleDataTestBasePackage.class)
 public class MockBankSimpleDataTestConfiguration {
 	private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -58,6 +59,11 @@ public class MockBankSimpleDataTestConfiguration {
             throws AccountNotFoundMiddlewareException, PaymentProcessingMiddlewareException, UserAlreadyExistsMiddlewareException, AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
 
         return loadTestData("mockbank-simple-data-test-init-data.yml");
+    }
+    
+    @Bean
+    public DataUploadService mockBankSimpleDataUploadService(Environment env) {
+    	return new DataUploadServiceImpl(env);
     }
 
 
