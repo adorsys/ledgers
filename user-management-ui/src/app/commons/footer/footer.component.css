@@ -1,0 +1,44 @@
+/*-- Footer css --*/
+footer{
+  display: block;
+  background-color:#014c78;
+  min-height:100px;
+  padding:10px 0px;
+}
+.footer_h3{
+  padding: 20px 0px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+ul.footer_ul{
+  padding:0px;
+  list-style-position: inside;
+}
+
+
+.footer_ul > li {
+  padding-bottom: 10px;
+  font-size: 15px;
+
+}
+.footer_ul > li >a {
+  color: #fff;
+  text-decoration: none;
+}
+.footer_ul > li > a:hover{
+  color: #ffffff;
+}
+
+.copyright{
+  color:white;
+  font-size: 12px;
+  margin-bottom: 12px;
+  margin-top: 15px;
+
+}
+.copyright p{
+  font-size:15px;
+  padding-left: 10px;
+}
