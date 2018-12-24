@@ -16,99 +16,109 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.deposit.api.service.PaymentSchedulerService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
-	private static final String PAYMENT_EXECUTION_FAILED = "Payment execution failed due to: %s, payment id: %s";
-	private static final String PAYMENT_CANCELLATION_FAILED = "Can`t cancel payment id:%s, as it is already executed";
+    private static final String PAYMENT_EXECUTION_FAILED = "Payment execution failed due to: %s, payment id: %s";
+    private static final String PAYMENT_CANCELLATION_FAILED = "Can`t cancel payment id:%s, as it is already executed";
 
-	private final PaymentRepository paymentRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentMapper paymentMapper;
+    private final PaymentExecutionService executionService;
 
-	private final PaymentMapper paymentMapper;
+    public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService,
+                                            LedgerService ledgerService, PaymentRepository paymentRepository,
+                                            PaymentMapper paymentMapper, PaymentExecutionService executionService) {
+        super(depositAccountConfigService, ledgerService);
+        this.paymentRepository = paymentRepository;
+        this.paymentMapper = paymentMapper;
+        this.executionService = executionService;
+    }
 
-	private final PaymentSchedulerService paymentSchedulerService;
+    @Override
+    public TransactionStatusBO getPaymentStatusById(String paymentId) throws PaymentNotFoundException {
+        Optional<Payment> payment = paymentRepository.findById(paymentId);
+        TransactionStatus transactionStatus = payment.map(Payment::getTransactionStatus)
+                                                      .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
-	public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService,
-			LedgerService ledgerService, PaymentRepository paymentRepository, PaymentMapper paymentMapper,
-			PaymentSchedulerService paymentSchedulerService) {
-		super(depositAccountConfigService, ledgerService);
-		this.paymentRepository = paymentRepository;
-		this.paymentMapper = paymentMapper;
-		this.paymentSchedulerService = paymentSchedulerService;
-	}
+        return TransactionStatusBO.valueOf(transactionStatus.name());
+    }
 
-	@Override
-	public TransactionStatusBO getPaymentStatusById(String paymentId) throws PaymentNotFoundException {
-		Optional<Payment> payment = paymentRepository.findById(paymentId);
-		TransactionStatus transactionStatus = payment.map(Payment::getTransactionStatus)
-				.orElseThrow(() -> new PaymentNotFoundException(paymentId));
+    @Override
+    public PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException {
+        return paymentRepository.findById(paymentId).map(paymentMapper::toPaymentBO)
+                       .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+    }
 
-		return TransactionStatusBO.valueOf(transactionStatus.name());
-	}
+    @Override
+    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) {
+        Payment persistedPayment = paymentMapper.toPayment(payment);
+        persistedPayment.getTargets().forEach(t -> t.setPayment(persistedPayment));
+        persistedPayment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
+        Payment savedPayment = paymentRepository.save(persistedPayment);
+        return paymentMapper.toPaymentBO(savedPayment);
+    }
 
-	@Override
-	public PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException {
-		return paymentRepository.findById(paymentId).map(paymentMapper::toPaymentBO)
-				.orElseThrow(() -> new PaymentNotFoundException(paymentId));
-	}
+    /**
+     * Execute a payment. This principally applies to: - Single payment - Future
+     * date payment - Periodic Payment - Bulk Payment with batch execution
+     * <p>
+     * + Bulk payment without batch execution will be split into single payments and
+     * each single payment will be individually sent to this method.
+     */
+    @Override
+    public TransactionStatusBO executePayment(String paymentId, String userName) throws PaymentProcessingException {
+        Optional<Payment> payment = paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACTC);
+        if (payment.isPresent()) {
+            Payment pmt = payment.get();
+            return pmt.isInstant()
+                           ? executionService.executePayment(pmt, userName)
+                           : executionService.schedulePayment(pmt);
+        }
+        throw new PaymentProcessingException(String.format(PAYMENT_EXECUTION_FAILED, "Payment not found", paymentId));
 
-	@Override
-	public PaymentBO initiatePayment(PaymentBO payment) {
-		Payment persistedPayment = paymentMapper.toPayment(payment);
-		persistedPayment.getTargets().forEach(t -> t.setPayment(persistedPayment));
-		persistedPayment.setTransactionStatus(TransactionStatus.RCVD);
-		Payment save = paymentRepository.save(persistedPayment);
-		return paymentMapper.toPaymentBO(save);
-	}
+    }
 
-	/**
-	 * Execute a payment. This principally applies to: - Single payment - Future
-	 * date payment - Periodic Payment - Bulk Payment with batch execution
-	 * <p>
-	 * + Bulk payment without batch execution will be split into single payments and
-	 * each single payment will be individually sent to this method.
-	 */
-	@Override
-	public TransactionStatusBO executePayment(String paymentId) throws PaymentProcessingException {
-		try {
-			return paymentSchedulerService.schedulePaymentExecution(paymentId);
-		} catch (PaymentNotFoundException e) {
-			throw new PaymentProcessingException(String.format(PAYMENT_EXECUTION_FAILED, e.getMessage(), paymentId));
-		}
-	}
+    @Override
+    public void cancelPayment(String paymentId) throws PaymentNotFoundException {
+        Payment storedPayment = paymentRepository.findById(paymentId)
+                                        .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
-	@Override
-	public void cancelPayment(String paymentId) throws PaymentNotFoundException {
-		Payment storedPayment = paymentRepository.findById(paymentId)
-				.orElseThrow(() -> new PaymentNotFoundException(paymentId));
+        if (storedPayment.getTransactionStatus() == TransactionStatus.ACSC) {
+            throw new PaymentProcessingException(String.format(PAYMENT_CANCELLATION_FAILED, paymentId));
+        }
+        updatePaymentStatus(storedPayment, TransactionStatus.CANC);
+    }
 
-		if (storedPayment.getTransactionStatus() == TransactionStatus.ACSC) {
-			throw new PaymentProcessingException(String.format(PAYMENT_CANCELLATION_FAILED, paymentId));
-		} else {
-			storedPayment.setTransactionStatus(TransactionStatus.CANC);
-			paymentRepository.save(storedPayment);
-		}
-	}
+    @Override
+    public String readIbanByPaymentId(String paymentId) {
+        return paymentRepository.findById(paymentId).map(p -> p.getDebtorAccount().getIban())
+                       .orElse(null);
+    }
 
-	@Override
-	public String readIbanByPaymentId(String paymentId){
-		return paymentRepository.findById(paymentId).map(p -> p.getDebtorAccount().getIban())
-				.orElse(null);
-	}
+    @Override
+    public void updatePaymentStatusToAuthorised(String paymentId) throws PaymentNotFoundException {
+        Payment payment = paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACCP)
+                                  .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+        updatePaymentStatus(payment, TransactionStatus.ACTC);
+    }
+
+    private void updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {
+        payment.setTransactionStatus(updatedStatus);
+        paymentRepository.save(payment);
+    }
 }

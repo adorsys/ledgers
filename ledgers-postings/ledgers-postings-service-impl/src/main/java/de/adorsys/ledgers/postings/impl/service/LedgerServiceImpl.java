@@ -16,7 +16,6 @@ import de.adorsys.ledgers.util.Ids;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -26,8 +25,8 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
     private final LedgerMapper ledgerMapper;
     private final LedgerAccountMapper ledgerAccountMapper;
 
-    public LedgerServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository, LedgerMapper ledgerMapper, LedgerAccountMapper ledgerAccountMapper) {
-        super(ledgerAccountRepository, chartOfAccountRepo, principal, ledgerRepository);
+    public LedgerServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, LedgerMapper ledgerMapper, LedgerAccountMapper ledgerAccountMapper) {
+        super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
         this.ledgerMapper = ledgerMapper;
         this.ledgerAccountMapper = ledgerAccountMapper;
     }
@@ -37,7 +36,7 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
         Ledger newLedger = new Ledger(
                 Ids.id(),
                 LocalDateTime.now(),
-                principal.getName(),
+                ledger.getName(),
                 ledger.getShortDesc(),
                 ledger.getLongDesc(),
                 ledger.getName(),
@@ -60,7 +59,7 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
     }
 
     @Override
-    public LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccount) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    public LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccount, String userName) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         // Validations
         if (StringUtils.isBlank(ledgerAccount.getName())) {
             throw new IllegalArgumentException("Missing model name.");
@@ -82,12 +81,11 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 
         String id = Ids.id();
         LocalDateTime created = LocalDateTime.now();
-        String user = principal.getName();
         String shortDesc = ledgerAccount.getShortDesc();
         String longDesc = ledgerAccount.getLongDesc();
         String name = ledgerAccount.getName();
         ChartOfAccount coa = ledger.getCoa();
-        LedgerAccount newLedgerAccount = new LedgerAccount(id, created, user, shortDesc, longDesc, name, ledger, parentAccount, coa, balanceSide, category);
+        LedgerAccount newLedgerAccount = new LedgerAccount(id, created, userName, shortDesc, longDesc, name, ledger, parentAccount, coa, balanceSide, category);
         return ledgerAccountMapper.toLedgerAccountBO(ledgerAccountRepository.save(newLedgerAccount));
     }
 

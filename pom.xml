@@ -18,11 +18,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <groupId>de.adorsys.ledgers</groupId>
     <artifactId>ledgers</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
+
     <modules>
         <module>ledgers-app</module>
         <module>ledgers-postings</module>
@@ -32,9 +33,12 @@
         <module>ledgers-middleware</module>
         <module>ledgers-sca</module>
         <module>ledgers-mockbank</module>
+        <module>ledgers-db</module>
     </modules>
+
     <packaging>pom</packaging>
 
+    <name>Ledgers</name>
     <description>OpenSource Implementation Of Accounting Functionalities</description>
 
     <url>https://github.com/adorsys/ledgers</url>
@@ -104,7 +108,8 @@
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
         <slf4j.version>1.7.25</slf4j.version>
         <nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
-	</properties>
+        <liquibase.version>3.6.2</liquibase.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -273,6 +278,8 @@
                         <excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
                         <excludeRoot>../ledgers-middleware-service-impl/target/generated-sources/annotations/
+                        </excludeRoot>
+                        <excludeRoot>../ledgers-postings-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
                     </excludeRoots>
                 </configuration>

@@ -57,7 +57,6 @@ public class AppManagementResourceIT {
         			.contentType(MediaType.APPLICATION_JSON)
         			.content(payload))
         			.andExpect(MockMvcResultMatchers.status().isOk())
-        			.andDo(print())
         			.andExpect(MockMvcResultMatchers.content().string(StringContains.containsString("."))).andReturn();
         String bearerTokenString = mvcResult.getResponse().getContentAsString();
         bearerToken = new ObjectMapper().readValue(bearerTokenString, BearerTokenTO.class);

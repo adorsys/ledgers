@@ -54,10 +54,10 @@ public class ScaMethodResource {
 
 	@GetMapping("/{userLogin}")
     @ApiOperation(value="Read SCA Methods", notes="Returns user sca methods", authorizations =@Authorization(value="apiKey"))
-    public List<ScaUserDataTO> getUserScaMethods(@PathVariable String userLogin) {
+    public ResponseEntity<List<ScaUserDataTO>> getUserScaMethods(@PathVariable String userLogin) {
         try {
             UserTO user = middlewareUserService.findByUserLogin(userLogin);
-            return user.getScaUserData();
+            return ResponseEntity.ok(user.getScaUserData());
         } catch (UserNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -66,7 +66,7 @@ public class ScaMethodResource {
 
     @PutMapping("{userLogin}")
     @ApiOperation(value="Updates SCA Methods", notes="Update the user sca methods", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity updateUserScaMethods(@PathVariable String userLogin, @RequestBody List<ScaUserDataTO> methods) {
+    public ResponseEntity<Void> updateUserScaMethods(@PathVariable String userLogin, @RequestBody List<ScaUserDataTO> methods) {
         try {
         	middlewareUserService.updateScaData(userLogin, methods);
         } catch (UserNotFoundMiddlewareException e) {

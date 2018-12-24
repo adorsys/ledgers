@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
@@ -56,6 +56,7 @@ import de.adorsys.ledgers.um.api.service.UserService;
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareAccountManagementServiceImpl.class);
     private static final LocalDateTime BASE_TIME = LocalDateTime.MIN; //TODO @fpo why we use minimal possible time value?
+    private static final String ERROR_MESSAGE_USER_NF = "Can not find user with id %s. But this user is supposed to exist.";
 
     private final DepositAccountService depositAccountService;
     private final AccountDetailsMapper accountDetailsMapper;
@@ -65,14 +66,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final AisConsentMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
     
-    @Autowired
-    private AccessTokenTO accessToken;
+    private final AccessTokenTO accessToken;
+    private final Principal principal;
 
     
 	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
 			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
 			UserMapper userMapper, AisConsentMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
-			AccessTokenTO accessToken) {
+			AccessTokenTO accessToken, Principal principal) {
 		super();
 		this.depositAccountService = depositAccountService;
 		this.accountDetailsMapper = accountDetailsMapper;
@@ -82,71 +83,69 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		this.aisConsentMapper = aisConsentMapper;
 		this.bearerTokenMapper = bearerTokenMapper;
 		this.accessToken = accessToken;
+		this.principal = principal;
 	}
 
-	@Override
-	public void createDepositAccount(AccountDetailsTO depositAccount)
-			throws UserNotFoundMiddlewareException {
-		createDepositAccount(depositAccount, Collections.emptyList());
-	}
-	
-	@Override
-	public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss)
-			throws UserNotFoundMiddlewareException{
+    @Override
+    public void createDepositAccount(AccountDetailsTO depositAccount)
+            throws UserNotFoundMiddlewareException {
+        createDepositAccount(depositAccount, Collections.emptyList());
+    }
+
+    @Override
+    public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss)
+            throws UserNotFoundMiddlewareException {
         try {
-        	Map<String, UserBO> persistBuffer = new HashMap<>();
-            DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(accountDetailsMapper.toDepositAccountBO(depositAccount));
-            if(accountAccesss!=null) {
-            	addAccess(accountAccesss, depositAccountBO, persistBuffer);
+            Map<String, UserBO> persistBuffer = new HashMap<>();
+
+            DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(accountDetailsMapper.toDepositAccountBO(depositAccount), principal.getName());
+            if (accountAccesss != null) {
+                addAccess(accountAccesss, depositAccountBO, persistBuffer);
             }
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
         } catch (UserNotFoundException e) {
-			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-		}
+            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
+        }
     }
 
-	private void addAccess(List<AccountAccessTO> accountAccesss, DepositAccountBO depositAccountBO, 
-			final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
-		for (AccountAccessTO accountAccessTO : accountAccesss) {
-			UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
-			if(user==null) {
-				user = userService.findById(accountAccessTO.getUser().getId());
-			}
-			AccountAccessBO accountAccessBO = new AccountAccessBO(depositAccountBO.getIban(), 
-					AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
-			addAccess(user, accountAccessBO, persistBuffer);
-		}
-		persistBuffer.values().forEach(u -> {
-			try {
-				userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
-			} catch (UserNotFoundException e) {
-		        logger.error(e.getMessage(), e);
-		        throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-			}
-		});
-	}
+    private void addAccess(List<AccountAccessTO> accountAccess, DepositAccountBO depositAccountBO,
+                           final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
+        for (AccountAccessTO accountAccessTO : accountAccess) {
+            UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
+            if (user == null) {
+                user = userService.findById(accountAccessTO.getUser().getId());
+            }
+            AccountAccessBO accountAccessBO = new AccountAccessBO(depositAccountBO.getIban(),
+                    AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
+            addAccess(user, accountAccessBO, persistBuffer);
+        }
+        for (UserBO u : persistBuffer.values()) {
+            userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
+        }
+    }
 
     private void addAccess(final UserBO user, AccountAccessBO accountAccessBO, final Map<String, UserBO> persistBuffer) {
-		AccountAccessBO existingAac = user.getAccountAccesses().stream().filter(a -> a.getIban().equals(accountAccessBO.getIban()))
-			.findFirst()
-			.orElseGet(() -> {
-				AccountAccessBO aac = new AccountAccessBO();
-				aac.setAccessType(accountAccessBO.getAccessType());
-				aac.setIban(accountAccessBO.getIban());
-				user.getAccountAccesses().add(aac);
-				persistBuffer.put(user.getId(), user);
-				return aac;
-			});
-		if(existingAac.getId()==null && existingAac.getAccessType().equals(accountAccessBO.getAccessType())){
-			existingAac.setAccessType(accountAccessBO.getAccessType());
-			persistBuffer.put(user.getId(), user);
-		}
-	}
+        AccountAccessBO existingAac = user.getAccountAccesses().stream().filter(a -> a.getIban().equals(accountAccessBO.getIban()))
+                                              .findFirst()
+                                              .orElseGet(() -> {
+                                                  AccountAccessBO aac = new AccountAccessBO();
+                                                  aac.setAccessType(accountAccessBO.getAccessType());
+                                                  aac.setIban(accountAccessBO.getIban());
+                                                  user.getAccountAccesses().add(aac);
+                                                  persistBuffer.put(user.getId(), user);
+                                                  return aac;
+                                              });
+        if (existingAac.getId() == null && existingAac.getAccessType().equals(accountAccessBO.getAccessType())) {
+            existingAac.setAccessType(accountAccessBO.getAccessType());
+            persistBuffer.put(user.getId(), user);
+        }
+    }
 
-	@Override
-    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
+    @Override
+    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws
+            AccountNotFoundMiddlewareException {
         try {
             DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
             return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
@@ -157,7 +156,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
+    public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) throws
+            AccountNotFoundMiddlewareException {
         try {
             DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
             return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
@@ -168,7 +168,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
+    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws
+            UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
         logger.info("Retrieving accounts by user login {}", userLogin);
         try {
             UserBO userBO = userService.findByLogin(userLogin);
@@ -197,7 +198,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public TransactionTO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundMiddlewareException {
+    public TransactionTO getTransactionById(String accountId, String transactionId) throws
+            TransactionNotFoundMiddlewareException {
         try {
             TransactionDetailsBO transaction = depositAccountService.getTransactionById(accountId, transactionId);
             return paymentConverter.toTransactionTO(transaction);
@@ -208,14 +210,15 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws AccountNotFoundMiddlewareException {
+    public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws
+            AccountNotFoundMiddlewareException {
         LocalDate today = LocalDate.now();
         LocalDateTime dateTimeFrom = dateFrom == null
                                              ? today.atStartOfDay()
                                              : dateFrom.atStartOfDay();
         LocalDateTime dateTimeTo = dateTo == null
-                                           ? today.atTime(23,59,59,99)
-                                           : dateTo.atTime(23,59,59,99);
+                                           ? getTimeAtEndOfTheDay(today)
+                                           : getTimeAtEndOfTheDay(dateTo);
         try {
             List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
             return paymentConverter.toTransactionTOList(transactions);
@@ -225,7 +228,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws AccountNotFoundMiddlewareException {
+    public boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws
+            AccountNotFoundMiddlewareException {
         try {
             FundsConfirmationRequestBO requestBO = accountDetailsMapper.toFundsConfirmationRequestBO(request);
             return depositAccountService.confirmationOfFunds(requestBO);
@@ -254,11 +258,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			UserTO userTO = new UserTO();
 			userTO.setId(accessToken.getSub());
 			userTO.setLogin(accessToken.getActor());
-			AccountAccessTO accountAccess = new AccountAccessTO();
-			accountAccess.setAccessType(AccessTypeTO.OWNER);
-			accountAccess.setIban(accNbr);
-			accountAccess.setUser(userTO);
-			accountAccesses.add(accountAccess);
+	        accountAccesses.add(createAccountAccess(accNbr, userTO));
 		}
 		try {
 			createDepositAccount(accDetails, accountAccesses);
@@ -292,47 +292,50 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			throw new AccountWithSuffixExistsMiddlewareException(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix));
 		}
 		
-		// user owns all accounts with this prefix
-		accounts.stream().forEach(a -> {
-			ownedAccounts.contains(a.getIban());
-		});
+		// All accounts with this prefix must be owned by this user.
+		for (DepositAccountBO a : accounts) {
+			if(ownedAccounts.contains(a.getIban())) {
+				throw new AccountWithSuffixExistsMiddlewareException(String.format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(),accountNumberPrefix));
+			}
+		}
 	}
 
-	private List<String> filterOwnedAccounts(List<AccountAccessTO> accountAccesses) {
-		// All iban owned by this user.
-		return accountAccesses.stream()
-				.filter(a -> AccessTypeBO.OWNER.equals(a.getAccessType()))
-				.map(a -> a.getIban()).collect(Collectors.toList());
-	}
+    private List<String> filterOwnedAccounts(List<AccountAccessTO> accountAccesses) {
+        // All iban owned by this user.
+        //TODO should be moved to UM @dmiex
+        return accountAccesses.stream()
+                       .filter(a -> a.getAccessType()!=null && AccessTypeBO.OWNER.name().equals(a.getAccessType().name()))
+                       .map(AccountAccessTO::getIban)
+                       .collect(Collectors.toList());
+    }
 
 	@Override
 	public void grantAccessToDepositAccount(AccountAccessTO accountAccess)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
-		UserBO userBo = loadCurrentUser();
-		List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
-		
-		// Check that current user owns the account.
-		List<String> ownedAccounts = filterOwnedAccounts(accountAccesses);
-		
-		if(!ownedAccounts.contains(accountAccess.getIban())) {
-			throw new InsufficientPermissionMiddlewareException(String.format("Current user with id %s and login %s not owner of the target account with iban %s", userBo.getId(), userBo.getLogin(), accountAccess.getIban()));
-		}
-		
-		addAccess(userBo, userMapper.toAccountAccessBO(accountAccess), new HashMap<>());
-		
-	}
+        UserBO userBo = loadCurrentUser();
+        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
 
-	private UserBO loadCurrentUser() {
-		// Load owner
-		UserBO userBo;
-		try {
-			userBo = userService.findById(accessToken.getSub());
-		} catch (UserNotFoundException e) {
-			throw new DepositAccountUncheckedException(String.format(
-					"Can not find user with id %s. But this user is supposed to exist.", accessToken.getSub()), e);
-		}
-		return userBo;
-	}
+        // Check that current user owns the account.
+        List<String> ownedAccounts = filterOwnedAccounts(accountAccesses);
+
+        if (!ownedAccounts.contains(accountAccess.getIban())) {
+            throw new InsufficientPermissionMiddlewareException(userBo.getId(), userBo.getLogin(), accountAccess.getIban());
+        }
+
+        addAccess(userBo, userMapper.toAccountAccessBO(accountAccess), new HashMap<>());
+
+    }
+
+    private UserBO loadCurrentUser() {
+        // Load owner
+        UserBO userBo;
+        try {
+            userBo = userService.findById(accessToken.getSub());
+        } catch (UserNotFoundException e) {
+            throw new DepositAccountUncheckedException(String.format(ERROR_MESSAGE_USER_NF, accessToken.getSub()), e);
+        }
+        return userBo;
+    }
 
 	@Override
 	public BearerTokenTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
@@ -343,26 +346,41 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		}
 	}
 
-	@Override
-	public List<AccountDetailsTO> listOfDepositAccounts() {
-		List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
-		if(accountAccesses==null || accountAccesses.isEmpty()) {
-			return Collections.emptyList();
-		}
-		List<String> ibans = accountAccesses.stream().map(a -> a.getIban()).collect(Collectors.toList());
-		List<DepositAccountDetailsBO> depositAccounts;
-		try {
-			depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
-		} catch (DepositAccountNotFoundException e) {
-			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-		}
-        return depositAccounts.stream()
-                .map(accountDetailsMapper::toAccountDetailsTO)
-                .collect(Collectors.toList());
-	}
 
-	@Override
-	public String iban(String id) {
-		return depositAccountService.readIbanById(id);
-	}
+    @Override
+    public List<AccountDetailsTO> listOfDepositAccounts() {
+        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
+        if (accountAccesses == null || accountAccesses.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> ibans = accountAccesses.stream()
+                                     .map(AccountAccessTO::getIban)
+                                     .collect(Collectors.toList());
+        List<DepositAccountDetailsBO> depositAccounts;
+        try {
+            depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
+        } catch (DepositAccountNotFoundException e) {
+            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+        }
+        return depositAccounts.stream()
+                       .map(accountDetailsMapper::toAccountDetailsTO)
+                       .collect(Collectors.toList());
+    }
+
+    private AccountAccessTO createAccountAccess(String accNbr, UserTO userTO) {
+        AccountAccessTO accountAccess = new AccountAccessTO();
+        accountAccess.setAccessType(AccessTypeTO.OWNER);
+        accountAccess.setIban(accNbr);
+        accountAccess.setUser(userTO);
+        return accountAccess;
+    }
+
+    private LocalDateTime getTimeAtEndOfTheDay(LocalDate date) {
+        return date.atTime(23, 59, 59, 99);
+    }
+
+    @Override
+    public String iban(String id) {
+        return depositAccountService.readIbanById(id);
+    }
 }

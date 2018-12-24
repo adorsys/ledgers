@@ -1,28 +1,21 @@
 package de.adorsys.ledgers.mockbank.simple;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.web.util.UriComponentsBuilder;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
 import de.adorsys.ledgers.middleware.rest.resource.PaymentResource;
 import de.adorsys.ledgers.mockbank.simple.data.BulkPaymentsData;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.SinglePaymentsData;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 public class PaymentProcessingHelper {
 	private static final String APPLICATION_JSON = "application/json;";
@@ -37,7 +30,7 @@ public class PaymentProcessingHelper {
 	}
 
 	void processSinglePayments(String baseUrl)
-			throws AccountNotFoundMiddlewareException, PaymentProcessingMiddlewareException, ProtocolException, IOException {
+			throws IOException {
 		List<SinglePaymentsData> singlePayments = sampleData.getSinglePayments();
 		for (SinglePaymentsData singlePayment : singlePayments) {
 			// find the debtor iban
@@ -54,7 +47,7 @@ public class PaymentProcessingHelper {
 	}
 
 	void processBulkPayments(String baseUrl)
-			throws AccountNotFoundMiddlewareException, PaymentProcessingMiddlewareException, UnsupportedEncodingException, ProtocolException, IOException {
+			throws IOException {
 		List<BulkPaymentsData> bulkPaymentTests = sampleData.getBulkPayments();
 		if (bulkPaymentTests == null) {
 			return;
@@ -73,7 +66,7 @@ public class PaymentProcessingHelper {
 	}
 
 	private <T> void executePayment(String baseUrl, UserBag bag, String paymentId, String paymentProduct, PaymentTypeTO paymentTypeTO)
-			throws MalformedURLException, IOException, ProtocolException {
+			throws IOException {
 		HttpURLConnection con = null;
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(PaymentResource.BASE_PATH)
 				.path(PaymentResource.EXECUTE_NO_SCA_PATH)
@@ -99,7 +92,7 @@ public class PaymentProcessingHelper {
 	}
 
 	private <T> T initiatePymt(String baseUrl, T payment, UserBag bag, Class<T> klass, PaymentTypeTO paymentTypeTO)
-			throws UnsupportedEncodingException, IOException, ProtocolException {
+			throws IOException {
 		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(PaymentResource.BASE_PATH)
 				.path(PaymentResource.PAYMENT_TYPE_PATH_VARIABLE).build(paymentTypeTO.name()).toURL();
 		HttpURLConnection con = null;

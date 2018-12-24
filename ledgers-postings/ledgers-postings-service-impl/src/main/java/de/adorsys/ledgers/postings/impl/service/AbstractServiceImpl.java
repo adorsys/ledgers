@@ -13,22 +13,17 @@ import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 
-import java.security.Principal;
-
 public class AbstractServiceImpl {
 
     protected final LedgerAccountRepository ledgerAccountRepository;
 
     protected final ChartOfAccountRepository chartOfAccountRepo;
 
-    protected final Principal principal;
-
     protected final LedgerRepository ledgerRepository;
 
-    public AbstractServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, Principal principal, LedgerRepository ledgerRepository) {
+    public AbstractServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository) {
         this.ledgerAccountRepository = ledgerAccountRepository;
         this.chartOfAccountRepo = chartOfAccountRepo;
-        this.principal = principal;
         this.ledgerRepository = ledgerRepository;
     }
 

@@ -7,6 +7,7 @@
 
 # Initial Capital of the Bank. Deposit with the central bank
 - oprId: "deposit_with_central_bank_001"
+  recordUser: "TEST"
   oprDetails: "Initial deposit in the central bank account of SimpleBank"
   pstTime: 2018-01-01T22:40:00.000
   pstType: BUSI_TX
@@ -29,6 +30,7 @@
 
 # The bank opens an account with another bank, given a check of the central bank 2 000 000
 - oprId: "deposit_with_hello_bank_002"
+  recordUser: "TEST"
   oprDetails: "Initial deposit in the central bank account of SimpleBank"
   pstTime: 2018-01-02T15:40:00.000
   pstType: BUSI_TX
@@ -50,6 +52,7 @@
     
 # Then the Bank withdraw some cahsh from hello bank. 150 000 
 - oprId: "withdrew_cash_hellobank_004"
+  recordUser: "TEST"
   oprDetails: "Withdrew cash from hello bank"
   pstTime: 2018-01-03T06:30:00.000
   pstType: BUSI_TX
@@ -71,6 +74,7 @@
     
 # Then the Bank purchases some office furniture with a check of hello bank 14 400 
 - oprId: "purchased_furniture_003"
+  recordUser: "TEST"
   oprDetails: "Purchased Furniture per check"
   pstTime: 2018-01-03T12:32:00.000
   pstType: BUSI_TX
@@ -93,6 +97,7 @@
 
 # The bank pays for de.adorsys.ledgers.um.rest.controller for cleaning and refurbishing rental office: 32 000 check of helo bank
 - oprId: "cleaning_and_refurbishing_service_005"
+  recordUser: "TEST"
   oprDetails: "Cleaning and refurbishing services, check of hello bank"
   pstTime: 2018-01-08T09:15:00.000
   pstType: BUSI_TX
@@ -115,6 +120,7 @@
 ## Changing the transaction account number of a posting. This shall modify all balances going forward for affected accounts.
 # Then the Bank purchases some office furniture with a check of cash 14 400 instead of  hello bank 14 400 
 - oprId: "purchased_furniture_003"
+  recordUser: "TEST"
   oprDetails: "Purchased Furniture per check"
   pstTime: 2018-01-03T12:32:00.000
   pstType: BUSI_TX
@@ -137,6 +143,7 @@
 
 # The bank opens employee accounts. Marion mueller with casch deposit of 1500
 - oprId: "employee_account_marion_muller_006"
+  recordUser: "TEST"
   oprDetails: "Opened employee account for marion mueller."
   pstTime: 2018-01-12T08:30:00.000
   pstType: BUSI_TX
@@ -158,6 +165,7 @@
 
 # The bank opens employee accounts for anton brueckner with check deposit of 3 500.
 - oprId: "employee_account_anton_brueckner_007"
+  recordUser: "TEST"
   oprDetails: "Opened employee account for anton brueckner."
   pstTime: 2018-01-12T09:30:00.000
   pstType: BUSI_TX
@@ -180,6 +188,7 @@
 
 # The bank opens employee accounts for max mustermann with cash 5 000.
 - oprId: "employee_account_max_mustermann_008"
+  recordUser: "TEST"
   oprDetails: "Opened employee account for Max Mustermann."
   pstTime: 2018-01-12T10:30:00.000
   pstType: BUSI_TX

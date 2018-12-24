@@ -1,58 +1,38 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.security.Principal;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareServiceImplTest {
@@ -63,6 +43,7 @@ public class MiddlewareServiceImplTest {
     private static final String SINGLE_BO = "PaymentSingle.yml";
     private static final String SINGLE_TO = "PaymentSingleTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
+    private static final String SYSTEM = "System";
 
     @InjectMocks
     private MiddlewareServiceImpl middlewareService;
@@ -79,6 +60,10 @@ public class MiddlewareServiceImplTest {
     private AuthCodeDataConverter codeDataConverter;
     @Mock
     private MiddlewareUserManagementServiceImpl userManagementService;
+    @Mock
+    private AccessTokenTO accessToken;
+    @Mock
+    Principal principal;
 
     @Test
     public void getPaymentStatusById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
@@ -132,7 +117,7 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test
-    public void validateAuthCode() throws SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
+    public void validateAuthCode() throws SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
         String myAuthCode = "my auth code";
 
         when(operationService.validateAuthCode(OP_ID, OP_DATA, myAuthCode)).thenReturn(Boolean.TRUE);
@@ -145,7 +130,7 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test(expected = SCAOperationNotFoundMiddlewareException.class)
-    public void validateAuthCodeWithNotFoundException() throws SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
+    public void validateAuthCodeWithNotFoundException() throws SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
         String myAuthCode = "my auth code";
 
         when(operationService.validateAuthCode(OP_ID, OP_DATA, myAuthCode)).thenThrow(new SCAOperationNotFoundException());
@@ -154,7 +139,7 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test(expected = SCAOperationValidationMiddlewareException.class)
-    public void validateAuthCodeWithValidationException() throws SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
+    public void validateAuthCodeWithValidationException() throws SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
         String myAuthCode = "my auth code";
 
         when(operationService.validateAuthCode(OP_ID, OP_DATA, myAuthCode)).thenThrow(new SCAOperationValidationException());
@@ -180,9 +165,11 @@ public class MiddlewareServiceImplTest {
     }
 
     @Test
-    public void initiatePayment() throws AccountNotFoundMiddlewareException {
+    public void initiatePayment() throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, UserNotFoundMiddlewareException {
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-        when(paymentService.initiatePayment(any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(paymentService.initiatePayment(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(userManagementService.findByUserLogin(anyString())).thenReturn(readYml(UserTO.class, "user2.yml"));
+        when(accessToken.getActor()).thenReturn("login");
         when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
 
         Object result = middlewareService.initiatePayment(readYml(SinglePaymentTO.class, SINGLE_TO), PaymentTypeTO.SINGLE);
@@ -191,7 +178,8 @@ public class MiddlewareServiceImplTest {
 
     @Test
     public void executePayment_Success() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
-        when(paymentService.executePayment(any())).thenReturn(TransactionStatusBO.ACSP);
+        when(principal.getName()).thenReturn(SYSTEM);
+        when(paymentService.executePayment(any(), eq(SYSTEM))).thenReturn(TransactionStatusBO.ACSP);
 
         TransactionStatusTO result = middlewareService.executePayment(PAYMENT_ID);
         assertThat(result).isNotNull();
@@ -199,7 +187,8 @@ public class MiddlewareServiceImplTest {
 
     @Test(expected = PaymentProcessingMiddlewareException.class)
     public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
-        when(paymentService.executePayment(any())).thenThrow(new PaymentNotFoundException());
+        when(principal.getName()).thenReturn(SYSTEM);
+        when(paymentService.executePayment(any(), eq(SYSTEM))).thenThrow(new PaymentNotFoundException());
 
         middlewareService.executePayment(PAYMENT_ID);
     }

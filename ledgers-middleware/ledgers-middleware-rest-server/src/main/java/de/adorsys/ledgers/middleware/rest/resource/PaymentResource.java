@@ -16,6 +16,8 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,15 +29,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessInfoTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
@@ -57,16 +70,20 @@ public class PaymentResource {
 	private static final Logger logger = LoggerFactory.getLogger(PaymentResource.class);
 
     private final MiddlewareService middlewareService;
+    
+    private final MiddlewareAccountManagementService accountManagementService;
 
-    public PaymentResource(MiddlewareService middlewareService) {
+
+    public PaymentResource(MiddlewareService middlewareService, MiddlewareAccountManagementService accountManagementService) {
         this.middlewareService = middlewareService;
+        this.accountManagementService = accountManagementService;
     }
 
     @GetMapping("/{id}/status")
     @ApiOperation(value="Read Payment Status", notes="Returns the status of a payment", authorizations =@Authorization(value="apiKey"))
-    public TransactionStatusTO getPaymentStatusById(@PathVariable String id) {
+    public ResponseEntity<TransactionStatusTO> getPaymentStatusById(@PathVariable String id) {
         try {
-            return middlewareService.getPaymentStatusById(id);
+            return ResponseEntity.ok(middlewareService.getPaymentStatusById(id));
         } catch (PaymentNotFoundMiddlewareException e) {
             logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -114,6 +131,32 @@ public class PaymentResource {
         }
     }
 
+    @PostMapping(path="/{payment-id}/auth", params= {"authCode", "opId"})
+    @PreAuthorize("paymentInitById(#paymentId)")
+    @ApiOperation(value="Execute a Payment", notes="Executes a payment", authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<BearerTokenTO> authorizePayment(@PathVariable(name = "payment-id") String paymentId,
+    		@RequestParam(name="authCode") String authCode,
+    		@RequestParam(name="opId") String opId) {
+        try {
+        	BearerTokenTO bearerTokenTO = middlewareService.authorizePayment(paymentId, opId, authCode);
+            return ResponseEntity.ok(bearerTokenTO);
+        } catch (SCAOperationNotFoundMiddlewareException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.notFound().header("message", e.getMessage()).build(); 
+            //TODO Create formal rest error messaging, fix all internal service errors to comply some pattern.
+		} catch (SCAOperationValidationMiddlewareException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).header("message", e.getMessage()).build(); 
+		} catch (SCAOperationExpiredMiddlewareException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.GONE).header("message", e.getMessage()).build(); 
+		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header("message", e.getMessage()).build(); 
+		}
+    }
+
+    
     @PostMapping(value = "/cancel-initiation/{psuId}/{paymentId}")
     @PreAuthorize("paymentInitById(#paymentId)")
     @ApiOperation(value="Initiates a Payment Cancelation", notes="Initiates a Payment Cancelation", authorizations =@Authorization(value="apiKey"))

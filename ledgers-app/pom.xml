@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.2-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -141,6 +141,18 @@
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-mockbank-simple</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-mockbank-simple-data-test</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-db</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

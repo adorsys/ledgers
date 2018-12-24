@@ -25,9 +25,9 @@ spring:
     url: ${db.url}
   jpa:
     show-sql: true
-    generate-ddl: true
+    generate-ddl: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibrenate.globally_quoted_identifiers: true
       hibernate.jdbc.lob.non_contextual_creation: true
@@ -43,6 +43,15 @@ spring:
 #      mail:
 #        smtp:
 #          auth: false
+
+logging:
+  level:
+    org:
+      hibernate: WARN
+
+paymentScheduler:
+  initialDelay: 3000
+  delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
 
 sca:
   authCode:
@@ -65,10 +74,8 @@ spring:
   h2:
     console:
       enabled: true
-  datasource:
-    url: jdbc:h2:~/ledgersdbs/gateway-app;DB_CLOSE_DELAY=-1
-    username: sa
-    password: sa
+  liquibase:
+    change-log: classpath:liquibase-master-changelog.xml
 db:
   user: sa
   password: sa
@@ -76,11 +83,12 @@ db:
 ---
 spring:
   profiles: postgres
-  postgres:
-    datasource:
-      url: ${db.url}
-      username: ${db.user}
-      password: ${db.password}
+  datasource:
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
+  liquibase:
+    change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
   user: ledgers

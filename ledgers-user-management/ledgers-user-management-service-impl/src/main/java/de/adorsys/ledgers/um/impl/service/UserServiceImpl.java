@@ -78,20 +78,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
     private final PasswordEnc passwordEnc;
-
-    @Autowired
-    private Principal principal;
-    
+    private final Principal principal;
     private final HashMacSecretSource secretSource;
     
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           UserConverter userConverter, 
-                           PasswordEnc passwordEnc, HashMacSecretSource secretSource) {
+                           UserConverter userConverter,
+                           PasswordEnc passwordEnc, HashMacSecretSource secretSource, Principal principal) {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
         this.passwordEnc = passwordEnc;
         this.secretSource = secretSource;
+	    this.principal = principal;
     }
 
     @Override
@@ -349,7 +347,9 @@ public class UserServiceImpl implements UserService {
 		}
 		aisConsent.setUserId(user.getId());
 
-		List<String> accessibleAccounts = user.getAccountAccesses().stream().map(a -> a.getIban()).collect(Collectors.toList());
+		List<String> accessibleAccounts = user.getAccountAccesses().stream()
+				                                  .map(AccountAccessBO::getIban)
+				                                  .collect(Collectors.toList());
 		
 		AisAccountAccessInfoBO access = aisConsent.getAccess();
 		checkAccountAccess(accessibleAccounts, access.getAccounts(), "No account access. User with id %s does not have access to accounts %s" ,user.getId());

@@ -2,3 +2,6 @@
 	path = scripts/release-scripts
 	url = git@github.com:borisskert/release-scripts.git
 	branch = master
+[submodule "scripts/release-scripts"]
+	path = scripts/release-scripts
+	url = https://github.com/borisskert/release-scripts

@@ -16,19 +16,16 @@
 
 package de.adorsys.ledgers.deposit.api.service;
 
-import java.time.LocalDateTime;
+import de.adorsys.ledgers.deposit.db.domain.Payment;
 
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+import java.time.LocalDateTime;
 
 /**
  * Proceed with booking of payments orders.
- * 
- * @author fpo
  *
+ * @author fpo
  */
 public interface DepositAccountTransactionService {
 
-    TransactionStatusBO bookPayment(String paymentId, LocalDateTime postingTime) throws PaymentNotFoundException, PaymentProcessingException;
+    void bookPayment(Payment payment, LocalDateTime postingTime, String userName);
 }

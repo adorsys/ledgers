@@ -65,7 +65,6 @@ public class PaymentResourceTest {
         when(middlewareService.getPaymentStatusById(PAYMENT_ID)).thenReturn(TransactionStatusTO.ACSP);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/payments/{id}/status", PAYMENT_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -79,7 +78,6 @@ public class PaymentResourceTest {
                 .thenThrow(new PaymentNotFoundMiddlewareException("Payment with id=" + PAYMENT_ID + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/payments/{id}/status", PAYMENT_ID))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -93,7 +91,6 @@ public class PaymentResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(
                 "/payments/{payment-type}/{payment-product}/{paymentId}", PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, PAYMENT_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -114,7 +111,6 @@ public class PaymentResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(
                 "/payments/{payment-type}/{payment-product}/{paymentId}", PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, "WRONG_ID"))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -131,7 +127,6 @@ public class PaymentResourceTest {
                 "/payments/{paymentType}", PaymentTypeTO.SINGLE
                 ).contentType(APPLICATION_JSON_UTF8).content(fileToString("SinglePayment.json"))
         )
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.CREATED.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -151,7 +146,6 @@ public class PaymentResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
                 "/payments/execute-no-sca/{payment-id}/{payment-product}/{payment-type}", PAYMENT_ID, PaymentProductTO.SEPA, PaymentTypeTO.SINGLE))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -170,7 +164,6 @@ public class PaymentResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
                 "/payments/cancel-initiation/{psuId}/{paymentId}","PSU_ID", PAYMENT_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -185,7 +178,6 @@ public class PaymentResourceTest {
     public void cancelPaymentNoSca() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete(
                 "/payments/cancel/{paymentId}",PAYMENT_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.NO_CONTENT.value()))
                                       .andReturn();
 

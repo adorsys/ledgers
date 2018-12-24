@@ -1,10 +1,9 @@
 package de.adorsys.ledgers.middleware.rest.mockbank;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
-import javax.servlet.ServletContext;
-
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,12 +25,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import javax.servlet.ServletContext;
 
-import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
-import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -49,7 +46,7 @@ public class AppManagementResourceAdminIT {
 
 	
 	@Before
-	public void before() throws UserAlreadyExistsMiddlewareException {
+	public void before() {
 		this.mockMvc = MockMvcBuilders
 				.webAppContextSetup(this.wac)
 				.apply(springSecurity())

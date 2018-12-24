@@ -52,7 +52,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws AccountWithSuffixExistsMiddlewareException : user has an acount with prefix and this suffix.
 	 */
 	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
-			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException;
+			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException;
 	
 
 	/**

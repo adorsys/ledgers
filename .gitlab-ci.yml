@@ -63,6 +63,7 @@ variables: &variables
   - "ledgers-middleware/ledgers-middleware-service-api/target/ledgers-middleware-service-api*jar"
   - "ledgers-middleware/ledgers-middleware-service-impl/target/ledgers-middleware-service-impl*jar"
   - "ledgers-mockbank/ledgers-mockbank-simple/target/ledgers-mockbank-simple*jar"
+  - "ledgers-mockbank/ledgers-mockbank-simple-data-test/target/ledgers-mockbank-simple-data-test*jar"
   - "ledgers-postings/ledgers-postings-repository/target/ledgers-postings-repository*jar"
   - "ledgers-postings/ledgers-postings-rest-server/target/ledgers-postings-rest-server*jar"
   - "ledgers-postings/ledgers-postings-service-api/target/ledgers-postings-service-api*jar"

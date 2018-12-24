@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="asn (generated)" id="1544703183211-1">
+        <createTable tableName="account_accesses">
+            <column name="account_access_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="account_accesses_pkey"/>
+            </column>
+            <column name="access_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="iban" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-2">
+        <createTable tableName="account_stmt">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="account_stmt_pkey"/>
+            </column>
+            <column name="pst_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stmt_seq_nbr" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stmt_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_credit" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_debit" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latest_pst_id" type="VARCHAR(255)"/>
+            <column name="posting_id" type="VARCHAR(255)"/>
+            <column name="account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="youngest_pst_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-3">
+        <createTable tableName="chart_of_account">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="chart_of_account_pkey"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="long_desc" type="VARCHAR(255)"/>
+            <column name="short_desc" type="VARCHAR(255)"/>
+            <column name="user_details" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-4">
+        <createTable tableName="deposit_account">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="deposit_account_pkey"/>
+            </column>
+            <column name="account_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_type" type="VARCHAR(255)"/>
+            <column name="bic" type="VARCHAR(255)"/>
+            <column name="currency" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="details" type="VARCHAR(255)"/>
+            <column name="iban" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="linked_accounts" type="VARCHAR(255)"/>
+            <column name="msisdn" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="product" type="VARCHAR(255)"/>
+            <column name="usage_type" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-5">
+        <createTable tableName="ledger">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="ledger_pkey"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="long_desc" type="VARCHAR(255)"/>
+            <column name="short_desc" type="VARCHAR(255)"/>
+            <column name="user_details" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coa_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-6">
+        <createTable tableName="ledger_account">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="ledger_account_pkey"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="long_desc" type="VARCHAR(255)"/>
+            <column name="short_desc" type="VARCHAR(255)"/>
+            <column name="user_details" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balance_side" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coa_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ledger_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-7">
+        <createTable tableName="ledger_stmt">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="ledger_stmt_pkey"/>
+            </column>
+            <column name="pst_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stmt_seq_nbr" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stmt_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latest_pst_id" type="VARCHAR(255)"/>
+            <column name="posting_id" type="VARCHAR(255)"/>
+            <column name="ledger_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-8">
+        <createTable tableName="op_note">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="op_note_pkey"/>
+            </column>
+            <column name="content" type="VARCHAR(255)"/>
+            <column name="exec_status" type="VARCHAR(255)"/>
+            <column name="exec_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="premature_exc" type="BOOLEAN"/>
+            <column name="rec_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repeated_exec" type="BOOLEAN"/>
+            <column name="type" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-9">
+        <createTable tableName="payment">
+            <column name="payment_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="payment_pkey"/>
+            </column>
+            <column name="batch_booking_preferred" type="BOOLEAN"/>
+            <column name="day_of_execution" type="INTEGER"/>
+            <column name="debt_bban" type="VARCHAR(255)"/>
+            <column name="currency" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="debt_iban" type="VARCHAR(255)"/>
+            <column name="debt_masked_pan" type="VARCHAR(255)"/>
+            <column name="debt_msisdn" type="VARCHAR(255)"/>
+            <column name="debt_pan" type="VARCHAR(255)"/>
+            <column name="end_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="execution_rule" type="VARCHAR(255)"/>
+            <column name="frequency" type="VARCHAR(255)"/>
+            <column name="payment_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_execution_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="requested_execution_time" type="TIME WITHOUT TIME ZONE"/>
+            <column name="start_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="transaction_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="executed_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="next_scheduled_execution" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-10">
+        <createTable tableName="payment_target">
+            <column name="payment_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="payment_target_pkey"/>
+            </column>
+            <column name="cred_bban" type="VARCHAR(255)"/>
+            <column name="currency" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cred_iban" type="VARCHAR(255)"/>
+            <column name="cred_masked_pan" type="VARCHAR(255)"/>
+            <column name="cred_msisdn" type="VARCHAR(255)"/>
+            <column name="cred_pan" type="VARCHAR(255)"/>
+            <column name="cred_bld_nbr" type="VARCHAR(255)"/>
+            <column name="cred_city" type="VARCHAR(255)"/>
+            <column name="cred_ctry" type="VARCHAR(255)"/>
+            <column name="cred_zip" type="VARCHAR(255)"/>
+            <column name="cred_street" type="VARCHAR(255)"/>
+            <column name="creditor_agent" type="VARCHAR(255)"/>
+            <column name="creditor_name" type="VARCHAR(255)"/>
+            <column name="end_to_end_identification" type="VARCHAR(255)"/>
+            <column name="amt" type="numeric(19, 2)"/>
+            <column name="cur" type="VARCHAR(255)"/>
+            <column name="payment_product" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remittance_information_unstructured" type="VARCHAR(255)"/>
+            <column name="payment_payment_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-11">
+        <createTable tableName="payment_targets">
+            <column name="payment_payment_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targets_payment_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-12">
+        <createTable tableName="posting">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="posting_pkey"/>
+            </column>
+            <column name="antecedent_hash" type="VARCHAR(255)"/>
+            <column name="antecedent_id" type="VARCHAR(255)"/>
+            <column name="hash" type="VARCHAR(255)"/>
+            <column name="hash_alg" type="VARCHAR(255)"/>
+            <column name="discarded_id" type="VARCHAR(255)"/>
+            <column name="discarded_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="discarding_id" type="VARCHAR(255)"/>
+            <column name="opr_details_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="opr_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="opr_src" type="VARCHAR(255)"/>
+            <column name="opr_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="opr_type" type="VARCHAR(255)"/>
+            <column name="pst_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pst_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pst_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="record_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="record_user" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="val_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="ledger_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-13">
+        <createTable tableName="posting_line">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="posting_line_pkey"/>
+            </column>
+            <column name="base_line" type="VARCHAR(255)"/>
+            <column name="credit_amount" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="debit_amount" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="details_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discarded_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="opr_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="opr_src" type="VARCHAR(255)"/>
+            <column name="pst_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pst_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pst_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="record_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="src_account" type="VARCHAR(255)"/>
+            <column name="sub_opr_src_id" type="VARCHAR(255)"/>
+            <column name="account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="posting_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-14">
+        <createTable tableName="posting_trace">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="posting_trace_pkey"/>
+            </column>
+            <column name="credit_amount" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="debit_amount" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="src_opr_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="src_pst_hash" type="VARCHAR(255)"/>
+            <column name="src_pst_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="src_pst_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="tgt_pst_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-15">
+        <createTable tableName="sca_data">
+            <column name="sca_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="sca_data_pkey"/>
+            </column>
+            <column name="method_value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sca_method" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-16">
+        <createTable tableName="sca_operation">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="sca_operation_pkey"/>
+            </column>
+            <column name="auth_code_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hash_alg" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="op_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validity_seconds" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-17">
+        <createTable tableName="scheduled_payment_order">
+            <column name="payment_order_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="scheduled_payment_order_pkey"/>
+            </column>
+            <column name="current_executor" type="VARCHAR(255)"/>
+            <column name="exec_status_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_exec_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_posting_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="lease_expiration" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="next_exec_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="next_posting_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-18">
+        <createTable tableName="users">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="users_pkey"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pin" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-19">
+        <createTable tableName="users_roles">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-20">
+        <addUniqueConstraint columnNames="name" constraintName="chartofaccount_name_unique"
+                             tableName="chart_of_account"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-21">
+        <addUniqueConstraint columnNames="iban, currency" constraintName="depositaccount_iban_currency_unique"
+                             tableName="deposit_account"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-22">
+        <addUniqueConstraint columnNames="name" constraintName="ledger_name_unique" tableName="ledger"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-23">
+        <addUniqueConstraint columnNames="ledger_id, name" constraintName="ledgeraccount_ledger_id_name_unique"
+                             tableName="ledger_account"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-24">
+        <addUniqueConstraint columnNames="opr_id, discarding_id" constraintName="posting_opr_id_discarding_id_unique"
+                             tableName="posting"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-25">
+        <addUniqueConstraint columnNames="tgt_pst_id, src_opr_id"
+                             constraintName="postingtrace_tgt_pst_id_src_opr_id_unique" tableName="posting_trace"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-26">
+        <addUniqueConstraint columnNames="targets_payment_id" constraintName="uk_fk5c4pe0920l6cefbjgwlu8d7"
+                             tableName="payment_targets"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-27">
+        <addUniqueConstraint columnNames="email" constraintName="user_email_unique" tableName="users"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-28">
+        <addUniqueConstraint columnNames="login" constraintName="user_login_unique" tableName="users"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-29">
+        <addForeignKeyConstraint baseColumnNames="latest_pst_id" baseTableName="ledger_stmt"
+                                 constraintName="fk2dq97onlof15vgl5nyl5j9oj4" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-30">
+        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="posting_line"
+                                 constraintName="fk2k39eeo527fjc5txgw2pb92q6" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="posting" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-31">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="users_roles"
+                                 constraintName="fk2o0jvgh89lemvvo17cbqvdxaa" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-32">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="sca_data"
+                                 constraintName="fk34m2nuvnqkg5tf0vgtfn3oukw" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-33">
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="account_stmt"
+                                 constraintName="fk3ld2phkbjnwoswsnb25ri6s9x" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-34">
+        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="posting"
+                                 constraintName="fk44hvpcbwm5uk8x6twtlwxfnjo" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-35">
+        <addForeignKeyConstraint baseColumnNames="targets_payment_id" baseTableName="payment_targets"
+                                 constraintName="fk4s2q7fymrw203en73thtqcsdi" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="payment_id" referencedTableName="payment_target"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-36">
+        <addForeignKeyConstraint baseColumnNames="payment_payment_id" baseTableName="payment_targets"
+                                 constraintName="fkdbswydm3gbe0lfxlv9007iv2" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="payment_id" referencedTableName="payment" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-37">
+        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="ledger_account"
+                                 constraintName="fkdsijuu0mjrbfsajc6p9583eok" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-38">
+        <addForeignKeyConstraint baseColumnNames="parent_id" baseTableName="ledger_account"
+                                 constraintName="fkgfm064gjuphiotq1njlmh01x2" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-39">
+        <addForeignKeyConstraint baseColumnNames="payment_payment_id" baseTableName="payment_target"
+                                 constraintName="fkgj5f42v991x5x07oo1l8x7yfc" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="payment_id" referencedTableName="payment" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-40">
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="posting_line"
+                                 constraintName="fkgx4e4g1rc6mwx0hso6addxxdl" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-41">
+        <addForeignKeyConstraint baseColumnNames="coa_id" baseTableName="ledger"
+                                 constraintName="fki26vmd50f27hr2a95vcw07dr6" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="chart_of_account" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-42">
+        <addForeignKeyConstraint baseColumnNames="youngest_pst_id" baseTableName="account_stmt"
+                                 constraintName="fkidscm80jobbpscr27jrbn35a0" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-43">
+        <addForeignKeyConstraint baseColumnNames="latest_pst_id" baseTableName="account_stmt"
+                                 constraintName="fkils4krp02ps9hgvq6rgo6u7ot" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-44">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="account_accesses"
+                                 constraintName="fkkmn209kkb94b5rk9sibugk4xe" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-45">
+        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="ledger_stmt"
+                                 constraintName="fklk3yxr5m48t113xrdk2rei8eu" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-46">
+        <addForeignKeyConstraint baseColumnNames="coa_id" baseTableName="ledger_account"
+                                 constraintName="fkn73ghcvp95m7g429tk9eai56h" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="chart_of_account" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-47">
+        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="account_stmt"
+                                 constraintName="fkny52khbot3x1f20cq7w7iiu73" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="posting" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-48">
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="posting_trace"
+                                 constraintName="fkpxds6x797xgvtsu3rlqunipf3" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+    </changeSet>
+    <changeSet author="asn (generated)" id="1544703183211-49">
+        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="ledger_stmt"
+                                 constraintName="fkw7uj0igvn1xf5vfpxeok2p3p" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="posting" validate="true"/>
+    </changeSet>
+    <changeSet author="dmiex" id="1544703183211-50">
+        <createTable tableName="operation_details">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="opr_id_pkey"/>
+            </column>
+            <column name="op_details" type="TEXT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

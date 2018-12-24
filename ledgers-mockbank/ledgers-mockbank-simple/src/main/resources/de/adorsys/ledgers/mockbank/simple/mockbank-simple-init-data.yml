@@ -87,7 +87,7 @@ singlePayments:
         currency: EUR
       creditorName: Max Musterman
       remittanceInformationUnstructured: Payment
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
     balancesList:
       - refTime: 2018-06-01T00:00:01
         balances:
@@ -116,7 +116,7 @@ singlePayments:
         currency: EUR
       creditorName: Max Musterman
       remittanceInformationUnstructured: Payment
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
     balancesList:
       - refTime: 2018-06-01T13:00:00
         balances:
@@ -145,7 +145,7 @@ singlePayments:
         currency: EUR
       creditorName: Rainer Maier
       remittanceInformationUnstructured: Payment
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
     balancesList:
       - refTime: 2018-06-02T10:00:00
         balances:
@@ -174,7 +174,7 @@ singlePayments:
         currency: EUR
       creditorName: Miriam Krause
       remittanceInformationUnstructured: Payment
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
     balancesList:
       - refTime: 2018-06-02T18:00:00
         balances:
@@ -203,7 +203,7 @@ singlePayments:
         currency: EUR
       creditorName: Anton Brueckner
       remittanceInformationUnstructured: Payment
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
     balancesList:
       - refTime: 2018-06-14T10:59:00
         balances:
@@ -232,7 +232,7 @@ singlePayments:
         currency: EUR
       creditorName: Marion Mueller
       remittanceInformationUnstructured: Payment
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
     balancesList:
       - refTime: 2018-06-17T18:00:00
         balances:
@@ -262,14 +262,14 @@ bulkPayments:
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
       payments:
         - creditorAccount:
             iban: DE67760700240243265400
             currency: EUR
           creditorName: Maria Brueckner
           remittanceInformationUnstructured: Payment
-          paymentProduct: SEPA
+          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 150
         - creditorAccount:
@@ -277,7 +277,7 @@ bulkPayments:
             currency: EUR
           creditorName: Patrick Brueckner
           remittanceInformationUnstructured: Payment
-          paymentProduct: SEPA
+          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 100
     balancesList:
@@ -301,14 +301,14 @@ bulkPayments:
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
       payments:
         - creditorAccount:
             iban: DE69760700240340283600
             currency: EUR
           creditorName: Marion Mueller
           remittanceInformationUnstructured: Payment
-          paymentProduct: SEPA
+          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 2300.00
     balancesList:
@@ -332,14 +332,14 @@ bulkPayments:
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      paymentProduct: SEPA
+      paymentProduct: INSTANT_SEPA
       payments:
         - creditorAccount:
             iban: DE67760700240243265400
             currency: EUR
           creditorName: Maria Brueckner
           remittanceInformationUnstructured: Payment
-          paymentProduct: SEPA
+          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 150
         - creditorAccount:
@@ -347,7 +347,7 @@ bulkPayments:
             currency: EUR
           creditorName: Patrick Brueckner
           remittanceInformationUnstructured: Payment
-          paymentProduct: SEPA
+          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 100
     balancesList:
@@ -383,7 +383,7 @@ balancesList:
 transactions: 
   - iban: DE69760700240340283600
     dateFrom: 2018-05-30
-    dateTo: 2018-06-30
+    #dateTo: 2018-06-30
     transactions: 
       - bookingDate: 2018-06-24
         amount:
@@ -405,7 +405,7 @@ transactions:
 # Supposed to have 7 Payments instead of 6.
   - iban: DE80760700240271232400
     dateFrom: 2018-05-30
-    dateTo: 2018-06-30
+    #dateTo: 2018-06-30
     transactions: 
       - bookingDate: 2018-06-25
         amount:

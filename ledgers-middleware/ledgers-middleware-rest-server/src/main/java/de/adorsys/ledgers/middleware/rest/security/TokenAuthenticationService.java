@@ -28,21 +28,21 @@ public class TokenAuthenticationService {
     private static final String HEADER_KEY = "Authorization";
 
     private final MiddlewareOnlineBankingService onlineBankingService;
-    
-    public TokenAuthenticationService(MiddlewareOnlineBankingService onlineBankingService) {
-		this.onlineBankingService = onlineBankingService;
-	}
 
-	public Authentication getAuthentication(HttpServletRequest request) {
+    public TokenAuthenticationService(MiddlewareOnlineBankingService onlineBankingService) {
+        this.onlineBankingService = onlineBankingService;
+    }
+
+    public Authentication getAuthentication(HttpServletRequest request) {
         String headerValue = request.getHeader(HEADER_KEY);
-        if(StringUtils.isBlank(headerValue)) {
-            debug(String.format("Header value '{}' is blank.", HEADER_KEY));
+        if (StringUtils.isBlank(headerValue)) {
+            debug(String.format("Header value '%s' is blank.", HEADER_KEY));
             return null;
         }
 
         // Accepts only Bearer token
-        if(!StringUtils.startsWithIgnoreCase(headerValue, TOKEN_PREFIX)) {
-            debug(String.format("Header value does not start with '$s'.", TOKEN_PREFIX));
+        if (!StringUtils.startsWithIgnoreCase(headerValue, TOKEN_PREFIX)) {
+            debug(String.format("Header value does not start with '%s'.", TOKEN_PREFIX));
             return null;
         }
 
@@ -55,7 +55,7 @@ public class TokenAuthenticationService {
 		} catch (UserNotFoundMiddlewareException e) {
             debug("User with token not found.");
             return null;
-		}
+        }
 
         if (bearerToken==null) {
         	debug("Token is not valid.");
@@ -73,10 +73,10 @@ public class TokenAuthenticationService {
 
         return new MiddlewareAuthentication(accessTokenTO.getSub(), bearerToken, authorities);
     }
-	
-	private void debug(String s) {
-        if(logger.isDebugEnabled()) {
-        	logger.debug(s);
+
+    private void debug(String s) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(s);
         }
-	}
+    }
 }

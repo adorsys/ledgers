@@ -82,7 +82,6 @@ public class AccountResourceTest {
         when(middlewareService.getDepositAccountById(any(), any(), anyBoolean())).thenReturn(getDetails());
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}", ACCOUNT_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -101,7 +100,6 @@ public class AccountResourceTest {
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with id=" + ACCOUNT_ID + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}", ACCOUNT_ID))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -118,7 +116,6 @@ public class AccountResourceTest {
         when(middlewareService.getAllAccountDetailsByUserLogin(userLogin)).thenReturn(details);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/users/{login}", userLogin))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -141,7 +138,6 @@ public class AccountResourceTest {
         when(middlewareService.getAllAccountDetailsByUserLogin(userLogin)).thenThrow(new UserNotFoundMiddlewareException());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/users/{login}", userLogin))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -156,7 +152,6 @@ public class AccountResourceTest {
         when(middlewareService.getDepositAccountById(eq(ACCOUNT_ID), any(), eq(true))).thenReturn(accountDetails);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -178,7 +173,6 @@ public class AccountResourceTest {
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with id=" + ACCOUNT_ID + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/balances/{accountId}", ACCOUNT_ID))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -192,7 +186,6 @@ public class AccountResourceTest {
                 .thenReturn(readYml(TransactionTO.class, "Transaction.yml"));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions/{transactionId}", ACCOUNT_ID, TRANSACTION_ID))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -212,7 +205,6 @@ public class AccountResourceTest {
                 .thenThrow(new TransactionNotFoundMiddlewareException("Transaction with id=" + TRANSACTION_ID + "account " + ACCOUNT_ID + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions/{transactionId}", ACCOUNT_ID, TRANSACTION_ID))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -228,7 +220,6 @@ public class AccountResourceTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions", ACCOUNT_ID)
                                                       .param("dateFrom", DATE_FROM.toString())
                                                       .param("dateTo", DATE_TO.toString()))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -247,7 +238,6 @@ public class AccountResourceTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/{accountId}/transactions", ACCOUNT_ID)
                                 .param("dateFrom", DATE_TO.toString())
                                 .param("dateTo", DATE_FROM.toString()))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.CONFLICT.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -260,7 +250,6 @@ public class AccountResourceTest {
         AccountDetailsTO details = getDetails();
         when(middlewareService.getDepositAccountByIban(any(), any(), anyBoolean())).thenReturn(details);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/ibans/{iban}", IBAN))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -278,7 +267,6 @@ public class AccountResourceTest {
                 .thenThrow(new AccountNotFoundMiddlewareException("Account with iban=" + IBAN + " not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/accounts/ibans/{iban}", IBAN))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
@@ -296,7 +284,6 @@ public class AccountResourceTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/accounts/funds-confirmation")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8)
                                                       .content(requestJson))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -317,7 +304,6 @@ public class AccountResourceTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/accounts/funds-confirmation")
                                                       .contentType(MediaType.APPLICATION_JSON_UTF8)
                                                       .content(requestJson))
-                                      .andDo(print())
                                       .andExpect(status().is(HttpStatus.OK.value()))
                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                                       .andReturn();
@@ -338,7 +324,6 @@ public class AccountResourceTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/funds-confirmation")
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(requestJson))
-                .andDo(print())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();

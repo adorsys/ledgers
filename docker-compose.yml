@@ -22,8 +22,16 @@ services:
     depends_on:
       - ledgers-db
     environment:
-      - DB_HOST=ledgers_db
       - SPRING_PROFILES_ACTIVE=postgres
+      - DB_HOST=ledgers_db
+<<<<<<< HEAD
+      - SPRING_PROFILES_ACTIVE=postgres
+=======
+      - DB_DATABASE=ledgers
+      - DB_USER=ledgers
+      - DB_PASSWORD=ledgers
+
+>>>>>>> develop
 
   ledgers-db:
     image: centos/postgresql-95-centos7

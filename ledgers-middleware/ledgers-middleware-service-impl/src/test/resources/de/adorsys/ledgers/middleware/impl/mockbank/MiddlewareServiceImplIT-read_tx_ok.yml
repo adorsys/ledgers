@@ -5,7 +5,7 @@
 # to be created by the test system
 #
 ###############################################
-accounts: 
+accounts:
   - iban: DE69760700240340283600
     currency: EUR
     name: Marion Mueller
@@ -27,7 +27,7 @@ accounts:
     accountType: CASH
     accountStatus: ENABLED
     usageType: PRIV
-    
+
 ###############################################
 #
 # Users :
@@ -45,6 +45,8 @@ users:
     accountAccesses:
       - iban: DE69760700240340283600
         accessType: OWNER
+    userRoles:
+      - CUSTOMER
   - login: anton.brueckner
     email: anton.brueckner@mail.de
     pin: 12345
@@ -54,6 +56,8 @@ users:
     accountAccesses:
       - iban: DE80760700240271232400
         accessType: OWNER
+    userRoles:
+      - CUSTOMER
   - login: max.musterman
     email: max.musterman@mail.de
     pin: 12345
@@ -63,6 +67,8 @@ users:
     accountAccesses:
       - iban: DE38760700240320465700
         accessType: OWNER
+    userRoles:
+      - CUSTOMER
 
 
 ###############################################
@@ -73,12 +79,12 @@ users:
 #
 ###############################################
 singlePayments:
-# Payment from Marion Mueller to Max Musterman on 2018-06-01 at 12:25:00
+  # Payment from Marion Mueller to Max Musterman on 2018-06-01 at 12:25:00
   - singlePayment:
       requestedExecutionDate: 2018-06-01
       requestedExecutionTime: 12:25:00
       debtorAccount:
-        iban: DE69760700240340283600
+        iban: DE80760700240271232400
         currency: EUR
       instructedAmount:
         amount: 3000
@@ -101,8 +107,8 @@ singlePayments:
             balance: -3000.00
           - accNbr: DE38760700240320465700
             balance: 3000.00
-    
-# Payment from Anton Brueckner to Max Musterman on 2018-06-01 at 13:10:00
+
+  # Payment from Anton Brueckner to Max Musterman on 2018-06-01 at 13:10:00
   - singlePayment:
       requestedExecutionDate: 2018-06-01
       requestedExecutionTime: 13:10:00
@@ -131,7 +137,7 @@ singlePayments:
           - accNbr: DE38760700240320465700
             balance: 3700.00
 
-# Payment from Anton Brueckner to Bank external Rainer Maier on 2018-06-02 at 10:10:00
+  # Payment from Anton Brueckner to Bank external Rainer Maier on 2018-06-02 at 10:10:00
   - singlePayment:
       requestedExecutionDate: 2018-06-02
       requestedExecutionTime: 10:10:00
@@ -160,12 +166,12 @@ singlePayments:
           - accNbr: 11031
             balance: 900.00
 
-# Payment from Marion Mueller to Miriam Krause on 2018-06-02 at 18:23:00
+  # Payment from Marion Mueller to Miriam Krause on 2018-06-02 at 18:23:00
   - singlePayment:
       requestedExecutionDate: 2018-06-02
       requestedExecutionTime: 18:23:00
       debtorAccount:
-        iban: DE69760700240340283600
+        iban: DE80760700240271232400
         currency: EUR
       instructedAmount:
         amount: 1400
@@ -189,12 +195,12 @@ singlePayments:
           - accNbr: 11031
             balance: 2300.00
 
-# Payment from Max Musterman to Anton Brueckner on 2018-06-14 at 11:00:00
+  # Payment from Max Musterman to Anton Brueckner on 2018-06-14 at 11:00:00
   - singlePayment:
       requestedExecutionDate: 2018-06-14
       requestedExecutionTime: 11:00:00
       debtorAccount:
-        iban: DE38760700240320465700
+        iban: DE80760700240271232400
         currency: EUR
       instructedAmount:
         amount: 2300
@@ -218,12 +224,12 @@ singlePayments:
           - accNbr: DE80760700240271232400
             balance: 700.00
 
-# Payment from Max Musterman to Marion Mueller on 2018-06-17 at 18:10:00
+  # Payment from Max Musterman to Marion Mueller on 2018-06-17 at 18:10:00
   - singlePayment:
       requestedExecutionDate: 2018-06-17
       requestedExecutionTime: 18:10:00
       debtorAccount:
-        iban: DE38760700240320465700
+        iban: DE80760700240271232400
         currency: EUR
       instructedAmount:
         amount: 1280
@@ -255,7 +261,7 @@ singlePayments:
 #
 ###############################################
 bulkPayments:
-# BUlk Payment batch from Anton Brueckner to to 2 children with external bank account on 2018-06-01 at 12:25:00
+  # BUlk Payment batch from Anton Brueckner to to 2 children with external bank account on 2018-06-01 at 12:25:00
   - bulkPayment:
       batchBookingPreferred: true
       requestedExecutionDate: 2018-06-23
@@ -294,7 +300,7 @@ bulkPayments:
           - accNbr: 11031
             balance: 2550.00
 
-# BUlk Payment batch with single creditor entry. Payment from Anton Brueckner to Marion Mueller on 2018-06-01 at 12:25:00
+  # BUlk Payment batch with single creditor entry. Payment from Anton Brueckner to Marion Mueller on 2018-06-01 at 12:25:00
   - bulkPayment:
       batchBookingPreferred: true
       requestedExecutionDate: 2018-06-24
@@ -325,7 +331,7 @@ bulkPayments:
           - accNbr: DE69760700240340283600
             balance: -820.00
 
-# Bulk Payment no batch from Anton Brueckner to to 2 children with external bank account on 2018-06-25 at 12:25:00
+  # Bulk Payment no batch from Anton Brueckner to to 2 children with external bank account on 2018-06-25 at 12:25:00
   - bulkPayment:
       batchBookingPreferred: false
       requestedExecutionDate: 2018-06-25
@@ -376,11 +382,11 @@ balancesList:
       - accNbr: 11031
         balance: 2800.00
 
-transactions: 
+transactions:
   - iban: DE69760700240340283600
     dateFrom: 2018-05-30
     dateTo: 2018-06-30
-    transactions: 
+    transactions:
       - bookingDate: 2018-06-24
         amount:
           amount: 2300.00
@@ -397,12 +403,12 @@ transactions:
         amount:
           amount: -3000.00
         creditorName: Max Musterman
-# Anton Brueckner's account suitable for testing no batch payment.
-# Supposed to have 7 Payments instead of 6.
+  # Anton Brueckner's account suitable for testing no batch payment.
+  # Supposed to have 7 Payments instead of 6.
   - iban: DE80760700240271232400
     dateFrom: 2018-05-30
     dateTo: 2018-06-30
-    transactions: 
+    transactions:
       - bookingDate: 2018-06-25
         amount:
           amount: -100.00

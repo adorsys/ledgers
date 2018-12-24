@@ -21,7 +21,7 @@ server:
 spring:
   application.name: ledgers
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -45,6 +45,10 @@ spring:
           starttls:
             enable: true
 
+paymentScheduler:
+  initialDelay: 3000
+  delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
+
 sca:
   authCode:
     validity.seconds: 180
@@ -59,6 +63,8 @@ sca:
 
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4      
+
+logging.level.org.hibernate: WARN
 
 ---
 spring:
