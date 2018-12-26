@@ -16,29 +16,20 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
@@ -48,25 +39,14 @@ import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddl
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
 
 @RestController
-@RequestMapping(PaymentResource.BASE_PATH)
-@Api(tags = "Payment" , description= "Provide endpoint for initiating and executing payment.")
 @MiddlewareUserResource
-public class PaymentResource {
-    public static final String EXECUTE_NO_SCA_PATH = "/execute-no-sca/{payment-id}/{payment-product}/{payment-type}";
-
-	public static final String PAYMENT_TYPE_PATH_VARIABLE = "/{paymentType}";
-
-	public static final String BASE_PATH = "/payments";
-
+@RequestMapping(PaymentRestAPI.BASE_PATH)
+public class PaymentResource implements PaymentRestAPI {
 	private static final Logger logger = LoggerFactory.getLogger(PaymentResource.class);
 
     private final MiddlewareService middlewareService;
@@ -79,8 +59,7 @@ public class PaymentResource {
         this.accountManagementService = accountManagementService;
     }
 
-    @GetMapping("/{id}/status")
-    @ApiOperation(value="Read Payment Status", notes="Returns the status of a payment", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<TransactionStatusTO> getPaymentStatusById(@PathVariable String id) {
         try {
             return ResponseEntity.ok(middlewareService.getPaymentStatusById(id));
@@ -90,9 +69,7 @@ public class PaymentResource {
         }
     }
 
-    @GetMapping(value = "/{payment-type}/{payment-product}/{paymentId}"/*, produces = {"application/json", "application/xml", "multipart/form-data"}*/)
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Load Payment", notes="Returns a payment", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<?> getPaymentById(@PathVariable(name = "payment-type") PaymentTypeTO paymentType,
                                             @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
                                             @PathVariable(name = "paymentId") String paymentId) {
@@ -104,9 +81,7 @@ public class PaymentResource {
         }
     }
 
-    @PostMapping(PAYMENT_TYPE_PATH_VARIABLE)
-    @PreAuthorize("paymentInit(#payment)")
-    @ApiOperation(value="Initiates a Payment", notes="Initiates a payment", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<?> initiatePayment(@PathVariable PaymentTypeTO paymentType, @RequestBody Object payment) {
         try {
             return new ResponseEntity(middlewareService.initiatePayment(payment, paymentType), HttpStatus.CREATED);
@@ -116,9 +91,7 @@ public class PaymentResource {
         }
     }
 
-    @PostMapping(EXECUTE_NO_SCA_PATH)
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Execute a Payment", notes="Executes a payment", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<TransactionStatusTO> executePaymentNoSca(@PathVariable(name = "payment-id") String paymentId,
                                                                    @PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
                                                                    @PathVariable(name = "payment-type") PaymentTypeTO paymentType) {
@@ -131,9 +104,7 @@ public class PaymentResource {
         }
     }
 
-    @PostMapping(path="/{payment-id}/auth", params= {"authCode", "opId"})
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Execute a Payment", notes="Executes a payment", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<BearerTokenTO> authorizePayment(@PathVariable(name = "payment-id") String paymentId,
     		@RequestParam(name="authCode") String authCode,
     		@RequestParam(name="opId") String opId) {
@@ -156,10 +127,7 @@ public class PaymentResource {
 		}
     }
 
-    
-    @PostMapping(value = "/cancel-initiation/{psuId}/{paymentId}")
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Initiates a Payment Cancelation", notes="Initiates a Payment Cancelation", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<PaymentCancellationResponseTO> initiatePmtCancellation(@PathVariable String psuId, @PathVariable String paymentId) {
         try {
             PaymentCancellationResponseTO response = middlewareService.initiatePaymentCancellation(psuId, paymentId);
@@ -171,10 +139,8 @@ public class PaymentResource {
         }
     }
 
-    @DeleteMapping("/cancel/{paymentId}")
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Confirm Cancelation", notes="Confirms the Cancelation of a Payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity cancelPaymentNoSca(@PathVariable String paymentId) {
+    @Override
+    public ResponseEntity<Void> cancelPaymentNoSca(@PathVariable String paymentId) {
         try {
             middlewareService.cancelPayment(paymentId);
         } catch (UserNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {

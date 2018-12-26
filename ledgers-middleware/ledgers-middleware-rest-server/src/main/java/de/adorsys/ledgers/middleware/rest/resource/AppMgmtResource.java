@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,20 +39,14 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import de.adorsys.ledgers.middleware.rest.exception.RestException;
 
 @RestController
-@RequestMapping(AppManagementResource.BASE_PATH)
-@Api(tags = "Management" , description= "Application management")
+@RequestMapping(AppMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
-public class AppManagementResource {
+public class AppMgmtResource implements AppMgmtRestAPI {
 
-	public static final String BASE_PATH = "/management/app";
-	public static final String ADMIN_PATH = "/admin";
-	public static final String INIT_PATH = "/init";
-	
-	private static final Logger logger = LoggerFactory.getLogger(AppManagementResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(AppMgmtResource.class);
 	
 	@Autowired
     private AppManagementService appManagementService;
@@ -64,26 +56,23 @@ public class AppManagementResource {
 	@Autowired
     private MiddlewareOnlineBankingService middlewareUserService;
 
-    @GetMapping("/ping")
-    @ApiOperation("Echo the server")
+    @Override
     public ResponseEntity<String> ping() {
     	return ResponseEntity.ok("pong");
     }
 	
-    @PostMapping(INIT_PATH)
-    @ApiOperation("Initializes the deposit account module.")
+    @Override
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> initApp() {
     	try {
 			appManagementService.initApp();
 			return ResponseEntity.ok().build();
 		} catch (IOException e) {
-			throw new IllegalStateException("Error initializing deposit account module.", e);
+			throw new RestException("Error initializing deposit account module.", e);
 		}
     }
     
-    @PostMapping(ADMIN_PATH)
-    @ApiOperation(value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
+    @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
     public ResponseEntity<BearerTokenTO> admin(@RequestBody(required=true) UserTO adminUser){
     	List<UserTO> users = userManagementService.listUsers(0, 1);

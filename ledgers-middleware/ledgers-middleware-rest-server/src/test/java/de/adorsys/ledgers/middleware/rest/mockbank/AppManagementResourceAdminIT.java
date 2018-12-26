@@ -4,6 +4,8 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
+import de.adorsys.ledgers.middleware.rest.resource.AppMgmtResource;
+
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,7 +61,7 @@ public class AppManagementResourceAdminIT {
 	     
 	    Assert.assertNotNull(servletContext);
 	    Assert.assertTrue(servletContext instanceof MockServletContext);
-	    Assert.assertNotNull(wac.getBean("appManagementResource"));
+	    Assert.assertNotNull(wac.getBean(AppMgmtResource.class));
 	}
 
 	@Test

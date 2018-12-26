@@ -109,8 +109,20 @@
         <slf4j.version>1.7.25</slf4j.version>
         <nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
         <liquibase.version>3.6.2</liquibase.version>
+		<spring-boot-dependencies.version>2.1.1.RELEASE</spring-boot-dependencies.version>
+		<spring-cloud-dependencies.version>Greenwich.M3</spring-cloud-dependencies.version>
     </properties>
 
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
     <dependencyManagement>
         <dependencies>
 
@@ -119,10 +131,17 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.0.4.RELEASE</version>
+				<version>${spring-boot-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
             <!-- swagger -->
 

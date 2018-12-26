@@ -36,7 +36,7 @@ public class UserManagementResourceTest {
     private MockMvc mockMvc;
 
     @InjectMocks
-    private UserManagementResource resource;
+    private UserMgmtResource resource;
 
     @Mock
     private MiddlewareOnlineBankingService userService;
@@ -58,7 +58,7 @@ public class UserManagementResourceTest {
 		when(userService.authorise(LOGIN, PIN, UserRoleTO.valueOf("CUSTOMER"))).thenReturn(token);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post(UserManagementResource.BASE_PATH + "/authorise")
+                                                      .post(UserMgmtResource.BASE_PATH + "/authorise")
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
                                                       .param("role", "CUSTOMER")
@@ -79,7 +79,7 @@ public class UserManagementResourceTest {
         when(userService.authorise(LOGIN, PIN, UserRoleTO.valueOf("CUSTOMER"))).thenThrow(new UserNotFoundMiddlewareException("User with login="+LOGIN+" not found"));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post(UserManagementResource.BASE_PATH + "/authorise")
+                                                      .post(UserMgmtResource.BASE_PATH + "/authorise")
                                                       .param("login", LOGIN)
                                                       .param("pin", PIN)
                                                       .param("role", "CUSTOMER")

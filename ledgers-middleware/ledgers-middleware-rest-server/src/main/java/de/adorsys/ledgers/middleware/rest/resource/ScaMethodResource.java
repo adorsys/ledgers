@@ -21,9 +21,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,16 +32,11 @@ import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareExcepti
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
 
 @RestController
-@RequestMapping(ScaMethodResource.SCA_METHODS)
-@Api(tags = "SCA Methods" , description= "Provide endpoint for reading and updating user SCA Methods.")
 @MiddlewareUserResource
-public class ScaMethodResource {
-    static final String SCA_METHODS = "/sca-methods";
+@RequestMapping(ScaMethodRestAPI.SCA_METHODS)
+public class ScaMethodResource implements ScaMethodRestAPI {
     private static final Logger logger = LoggerFactory.getLogger(ScaMethodResource.class);
 
     private final MiddlewareUserManagementService middlewareUserService;
@@ -52,8 +45,7 @@ public class ScaMethodResource {
 		this.middlewareUserService = middlewareAccountService;
     }
 
-	@GetMapping("/{userLogin}")
-    @ApiOperation(value="Read SCA Methods", notes="Returns user sca methods", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<List<ScaUserDataTO>> getUserScaMethods(@PathVariable String userLogin) {
         try {
             UserTO user = middlewareUserService.findByUserLogin(userLogin);
@@ -64,8 +56,7 @@ public class ScaMethodResource {
         }
     }
 
-    @PutMapping("{userLogin}")
-    @ApiOperation(value="Updates SCA Methods", notes="Update the user sca methods", authorizations =@Authorization(value="apiKey"))
+    @Override
     public ResponseEntity<Void> updateUserScaMethods(@PathVariable String userLogin, @RequestBody List<ScaUserDataTO> methods) {
         try {
         	middlewareUserService.updateScaData(userLogin, methods);

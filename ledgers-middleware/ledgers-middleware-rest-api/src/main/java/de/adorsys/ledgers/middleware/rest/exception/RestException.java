@@ -16,11 +16,11 @@
 
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import org.springframework.http.HttpStatus;
-
 import java.time.LocalDateTime;
 
-public abstract class RestException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class RestException extends RuntimeException {
 
     protected HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -37,7 +37,11 @@ public abstract class RestException extends RuntimeException {
         super(message);
     }
 
-    public String getDevMessage() {
+    public RestException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public String getDevMessage() {
         return devMessage;
     }
 

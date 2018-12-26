@@ -22,10 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,33 +44,22 @@ import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(UserManagementResource.BASE_PATH)
-@Api(tags = "User Management" , description= "Provides endpoint for registering, authorizing and managing users.")
+@RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
-public class UserManagementResource {
-	public static final String BASE_PATH = "/users";
-	public static final String REGISTER_PATH = "/register";
-	public static final String AUTHORISE_PATH = "/authorise";
-	public static final String EMAIL_REQUEST_PARAM = "email";
-	public static final String ROLE_REQUEST_PARAM = "role";
-	public static final String PIN_REQUEST_PARAM = "pin";
-	public static final String LOGIN_REQUEST_PARAM = "login";
-    private static final String SCA_DATA_PATH = "/sca-data";
-	public static final Logger logger = LoggerFactory.getLogger(UserManagementResource.class);
+public class UserMgmtResource implements UserMgmtRestAPI {
+
+	private static final Logger logger = LoggerFactory.getLogger(UserMgmtResource.class);
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final UserService userService;
 
-    public UserManagementResource(MiddlewareOnlineBankingService onlineBankingService, UserService userService) {
+    public UserMgmtResource(MiddlewareOnlineBankingService onlineBankingService, UserService userService) {
         this.onlineBankingService = onlineBankingService;
         this.userService = userService;
     }
 
-    @PostMapping(REGISTER_PATH)
-    @ApiOperation(value="Register User", notes="Registers a user. Registered as a staff member, user will have to be activated.")
+    @Override
     public ResponseEntity<UserTO> register(@RequestParam(LOGIN_REQUEST_PARAM)String login, 
     		@RequestParam(EMAIL_REQUEST_PARAM) String email, 
     		@RequestParam(PIN_REQUEST_PARAM) String pin,
@@ -95,8 +81,7 @@ public class UserManagementResource {
      * @param pin
      * @return
      */
-    @PostMapping(AUTHORISE_PATH)
-    @ApiOperation(value="Authorize User returns Access Token", notes="Authorize any user. But user most specify the target role. return an access token.")
+    @Override
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
     public ResponseEntity<BearerTokenTO> authorise(
     		@RequestParam(LOGIN_REQUEST_PARAM)String login, 
@@ -111,8 +96,7 @@ public class UserManagementResource {
 		}
     }
 
-    @PostMapping("/validate")
-    @ApiOperation(value="Validate Access Token")
+    @Override
     public ResponseEntity<BearerTokenTO> validate(@RequestParam("accessToken")String token) {
     	try {
     		BearerTokenTO tokenTO = onlineBankingService.validate(token);
@@ -127,8 +111,7 @@ public class UserManagementResource {
     	
     }
 
-    @GetMapping("/{id}")
-    @ApiOperation(value="Retrieves User by ID", notes="Retrieves User by ID")
+    @Override
     public ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
         try {
             return ResponseEntity.ok(userService.findById(id));
@@ -137,8 +120,7 @@ public class UserManagementResource {
         }
     }
 
-    @GetMapping
-    @ApiOperation(value="Retrieves User by login", notes="Retrieves User by login")
+    @Override
     public ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
         try {
             return ResponseEntity.ok(userService.findByLogin(login));
@@ -147,8 +129,7 @@ public class UserManagementResource {
         }
     }
 
-    @PutMapping("/{id}/" + SCA_DATA_PATH)
-    @ApiOperation(value="Updates user SCA", notes="Updates user authentication methods")
+    @Override
     public ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
         try {
             UserBO userBO = userService.findById(id);
@@ -164,8 +145,7 @@ public class UserManagementResource {
     }
 
     // TODO: refactor for user collection pagination
-    @GetMapping("/all")
-    @ApiOperation(value="Lists users collection", notes="Lists users collection.")
+    @Override
     public ResponseEntity<List<UserBO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAll());
     }

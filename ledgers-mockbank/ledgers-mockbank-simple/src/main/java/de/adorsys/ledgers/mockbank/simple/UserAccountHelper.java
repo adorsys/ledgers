@@ -20,8 +20,8 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.rest.resource.AppManagementResource;
-import de.adorsys.ledgers.middleware.rest.resource.UserManagementResource;
+import de.adorsys.ledgers.middleware.rest.resource.AppMgmtResource;
+import de.adorsys.ledgers.middleware.rest.resource.UserMgmtResource;
 
 public class UserAccountHelper {
 	private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
@@ -38,13 +38,13 @@ public class UserAccountHelper {
 
 	public static BearerTokenTO authorize(String baseUrl, String login, String pin, UserRoleTO role)
 			throws UnsupportedEncodingException, IOException, ProtocolException {
-		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(UserManagementResource.BASE_PATH)
-				.path(UserManagementResource.AUTHORISE_PATH).build().toUri().toURL();
+		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(UserMgmtResource.BASE_PATH)
+				.path(UserMgmtResource.AUTHORISE_PATH).build().toUri().toURL();
 
 		Map<String, String> paramMap = new HashMap<>();
-		paramMap.put(UserManagementResource.LOGIN_REQUEST_PARAM, login);
-		paramMap.put(UserManagementResource.PIN_REQUEST_PARAM, pin);
-		paramMap.put(UserManagementResource.ROLE_REQUEST_PARAM, role.name());
+		paramMap.put(UserMgmtResource.LOGIN_REQUEST_PARAM, login);
+		paramMap.put(UserMgmtResource.PIN_REQUEST_PARAM, pin);
+		paramMap.put(UserMgmtResource.ROLE_REQUEST_PARAM, role.name());
 
 		byte[] content = HTTPParameterStringBuilder.getParamsString(paramMap).getBytes("UTF-8");
 		HttpURLConnection con = HttpURLConnectionHelper.postContent(url, null, content, APPLICATION_X_WWW_FORM_URLENCODED);
@@ -71,8 +71,8 @@ public class UserAccountHelper {
 	}
 
 	public static BearerTokenTO createAdminAccount(String baseUrl) throws IOException, ConflictRestException {
-		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppManagementResource.BASE_PATH)
-				.path(AppManagementResource.ADMIN_PATH).build().toUri().toURL();
+		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppMgmtResource.BASE_PATH)
+				.path(AppMgmtResource.ADMIN_PATH).build().toUri().toURL();
 		
 		byte[] content = jsonMapper.writeValueAsBytes(AdminPayload.adminUser());
 		HttpURLConnection con = HttpURLConnectionHelper.postContent(url, null, content, APPLICATION_JSON);
@@ -97,13 +97,13 @@ public class UserAccountHelper {
 	}
 
 	private static BearerTokenTO registerCustomer(String baseUrl, UserTO user) throws ProtocolException, IOException {
-		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(UserManagementResource.BASE_PATH)
-				.path(UserManagementResource.REGISTER_PATH).build().toUri().toURL();
+		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(UserMgmtResource.BASE_PATH)
+				.path(UserMgmtResource.REGISTER_PATH).build().toUri().toURL();
 
 		Map<String, String> paramMap = new HashMap<>();
-		paramMap.put(UserManagementResource.LOGIN_REQUEST_PARAM, user.getLogin());
-		paramMap.put(UserManagementResource.EMAIL_REQUEST_PARAM, user.getEmail());
-		paramMap.put(UserManagementResource.PIN_REQUEST_PARAM, user.getPin());
+		paramMap.put(UserMgmtResource.LOGIN_REQUEST_PARAM, user.getLogin());
+		paramMap.put(UserMgmtResource.EMAIL_REQUEST_PARAM, user.getEmail());
+		paramMap.put(UserMgmtResource.PIN_REQUEST_PARAM, user.getPin());
 
 		byte[] content = HTTPParameterStringBuilder.getParamsString(paramMap).getBytes("UTF-8");
 		HttpURLConnection con = null;

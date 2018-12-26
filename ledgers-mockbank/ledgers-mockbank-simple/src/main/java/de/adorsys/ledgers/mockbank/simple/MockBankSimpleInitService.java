@@ -18,7 +18,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.resource.AppManagementResource;
+import de.adorsys.ledgers.middleware.rest.resource.AppMgmtResource;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
 
@@ -94,8 +94,8 @@ public class MockBankSimpleInitService {
 
 	
 	private void initLedgers(String baseUrl, BearerTokenTO accessToken) throws IOException {
-		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppManagementResource.BASE_PATH)
-				.path(AppManagementResource.INIT_PATH).build().toUri().toURL();
+		URL url = UriComponentsBuilder.fromUriString(baseUrl).path(AppMgmtResource.BASE_PATH)
+				.path(AppMgmtResource.INIT_PATH).build().toUri().toURL();
 
 		HttpURLConnection con = HttpURLConnectionHelper.postContent(url, accessToken, new byte[] {}, APPLICATION_JSON);
 		if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
