@@ -71,10 +71,6 @@ spring:
   h2:
     console:
       enabled: true
-  datasource:
-    url: jdbc:h2:~/ledgersdbs/gateway-app;DB_CLOSE_DELAY=-1
-    username: sa
-    password: sa
   liquibase:
     change-log: classpath:liquibase-master-changelog.xml
 db:

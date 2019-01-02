@@ -3,6 +3,7 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,11 +66,10 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
 
 	private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws IOException, LedgerNotFoundException,
 			LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
-
-		final ChartOfAccountBO coaEntity = createCoa(ledgerName);
-		ChartOfAccountBO coa = coaService.findChartOfAccountsByName(ledgerName).orElseGet(() -> coaService.newChartOfAccount(coaEntity));
 		
-		LedgerBO ledger = loadLedgerOrNew(ledgerName, coa);
+		ChartOfAccountBO coa = getOrCreateCoa(ledgerName);
+		LedgerBO ledger = getOrCreateLedger(ledgerName, coa);
+
 		List<LedgerAccountModel> ledgerAccounts = configSource.chartOfAccount(coaFile);
 		
 		for (LedgerAccountModel model : ledgerAccounts) {
@@ -78,13 +78,23 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
 		return ledger;
 	}
 
-	private LedgerBO loadLedgerOrNew(String ledgerName, ChartOfAccountBO coa)
-			throws LedgerNotFoundException, ChartOfAccountNotFoundException {
-		if(!ledgerService.findLedgerByName(ledgerName).isPresent()) {
-			ledgerService.newLedger(createLedger(ledgerName, coa));
-		}
-		return ledgerService.findLedgerByName(ledgerName).get();
+	private ChartOfAccountBO getOrCreateCoa(final String ledgerName) {
+		return coaService.findChartOfAccountsByName(ledgerName).orElseGet(() -> {
+			ChartOfAccountBO coa = createCoa(ledgerName);
+			return coaService.newChartOfAccount(coa);
+		});
 	}
+	
+	private LedgerBO getOrCreateLedger(final String ledgerName, final ChartOfAccountBO coa) throws LedgerNotFoundException, ChartOfAccountNotFoundException {
+		Optional<LedgerBO> ledger = ledgerService.findLedgerByName(ledgerName);
+		
+		if(ledger.isPresent()) {return ledger.get();}
+		
+		LedgerBO rawLedger = createLedger(ledgerName, coa);
+		return ledgerService.newLedger(rawLedger);
+	}
+
+	
 
 	// todo: @fpo do we really need to return results by this method? because it
 	// never used
