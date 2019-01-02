@@ -16,6 +16,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {TokenInterceptor} from "./interceptors/token-interceptor";
 import { EditScaComponent } from './components/users/edit-sca/edit-sca.component';
 import { EditAccountAccessComponent } from './components/users/edit-account-access/edit-account-access.component';
+import { LoginComponent } from './components/auth/login/login.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { EditAccountAccessComponent } from './components/users/edit-account-acce
     UserNewComponent,
     UserEditComponent,
     EditScaComponent,
-    EditAccountAccessComponent
+    EditAccountAccessComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
