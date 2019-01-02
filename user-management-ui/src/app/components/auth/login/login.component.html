@@ -30,10 +30,8 @@
             <p class="text-danger" *ngIf="loginForm.controls['pin'].touched && loginForm.controls['pin'].errors">Pin is required</p>
             <div class="form-group">
               <button type="submit"
-                      [disabled]="loginForm.invalid"
                       (click)="onSubmit()"
                       class="btn btn-info">Sign in</button>
-              <a href="/register" class="btn btn-link">Register</a>
             </div>
           </form>
         </div>

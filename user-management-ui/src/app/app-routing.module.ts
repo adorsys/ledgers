@@ -7,6 +7,7 @@ import {AccountsComponent} from "./components/accounts/accounts.component";
 import {UserEditComponent} from "./components/users/user-edit/user-edit.component";
 import {EditScaComponent} from "./components/users/edit-sca/edit-sca.component";
 import {EditAccountAccessComponent} from "./components/users/edit-account-access/edit-account-access.component";
+import {LoginComponent} from "./components/auth/login/login.component";
 
 const routes: Routes = [
   {
@@ -36,7 +37,12 @@ const routes: Routes = [
   {
     path: 'users/:id/account-accesses',
     component: EditAccountAccessComponent
-  }
+  },
+  {
+    path: 'login',
+    component: LoginComponent
+  },
+
 ];
 
 @NgModule({
