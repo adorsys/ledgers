@@ -5,9 +5,9 @@ import java.net.UnknownHostException;
 
 import org.springframework.core.env.Environment;
 
-import de.adorsys.ledgers.mockbank.simple.MockBankSimpleInitService;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.test.api.DataUploadService;
+import de.adorsys.ledgers.mockbank.simple.service.MockBankSimpleInitService;
 
 /**
  * 
@@ -33,8 +33,8 @@ public class DataUploadServiceImpl implements DataUploadService{
 		uploadToRemoteMockBank(initData, buildUrl());
 	}
 	private void uploadToRemoteMockBank(MockbankInitData initData, String baseUrl) {
-		MockBankSimpleInitService initService = new MockBankSimpleInitService(initData);
-		initService.runInit(baseUrl);
+//		MockBankSimpleInitService initService = new MockBankSimpleInitService(initData);
+//		initService.runInit(baseUrl);
 	}
 
 	private String buildUrl() {

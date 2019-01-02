@@ -18,6 +18,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.UsageTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -56,13 +57,14 @@ public class LedgersClientIT {
 		a.setUsageType(UsageTypeTO.PRIV);
 		a.setName("Francis Pouatcha");
 
-		ResponseEntity<BearerTokenTO> token = userMgmtRestClient.authorise("francis.pouatcha", "12345", UserRoleTO.CUSTOMER);
+		ResponseEntity<SCALoginResponseTO> response = userMgmtRestClient.authorise("francis.pouatcha", "12345", UserRoleTO.CUSTOMER);
+		SCALoginResponseTO scaLoginResponseTO = response.getBody();
+		BearerTokenTO token = scaLoginResponseTO.getBearerToken();
 		
-		authHeader.setAccessToken(token.getBody().getAccess_token());
+		authHeader.setAccessToken(token.getAccess_token());
 		ResponseEntity<Void> createDepositAccountResponse = accountRestClient.createDepositAccount(a);
 		Assert.assertTrue(HttpStatus.OK.equals(createDepositAccountResponse.getStatusCode()));
 	}
-
 
 	private void initApp() throws IOException, ConflictRestException {
 		UserTO adminUser = new UserTO("admin", "admin@ledgers.ldg", "12345");

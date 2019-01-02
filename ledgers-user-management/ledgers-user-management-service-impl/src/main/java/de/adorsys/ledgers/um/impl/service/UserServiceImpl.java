@@ -16,11 +16,11 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import java.security.Principal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +43,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 
 import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
@@ -53,16 +54,20 @@ import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
+import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
+import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
@@ -72,27 +77,35 @@ import de.adorsys.ledgers.util.SerializationUtils;
 @Transactional
 public class UserServiceImpl implements UserService {
 	
-    private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
+    private static final String SCA_ID = "scaId";
+	private static final String ACCOUNT_ACCESSES = "accountAccesses";
+	private static final String ROLE = "role";
+	private static final String ACTOR = "actor";
+	private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
+    private static final String CONESENT_WITH_ID_NOT_FOUND = "Consent with id=%s not found";
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
+    private final AisConsentRepository consentRepository;
     private final UserConverter userConverter;
     private final PasswordEnc passwordEnc;
-    private final Principal principal;
     private final HashMacSecretSource secretSource;
+    private final AisConsentMapper aisConsentMapper;
     
     @Autowired
-    public UserServiceImpl(UserRepository userRepository,
-                           UserConverter userConverter,
-                           PasswordEnc passwordEnc, HashMacSecretSource secretSource, Principal principal) {
-        this.userRepository = userRepository;
-        this.userConverter = userConverter;
-        this.passwordEnc = passwordEnc;
-        this.secretSource = secretSource;
-	    this.principal = principal;
-    }
+    public UserServiceImpl(UserRepository userRepository, AisConsentRepository consentRepository,
+			UserConverter userConverter, PasswordEnc passwordEnc, HashMacSecretSource secretSource,
+			AisConsentMapper aisConsentMapper) {
+		super();
+		this.userRepository = userRepository;
+		this.consentRepository = consentRepository;
+		this.userConverter = userConverter;
+		this.passwordEnc = passwordEnc;
+		this.secretSource = secretSource;
+		this.aisConsentMapper = aisConsentMapper;
+	}
 
-    @Override
+	@Override
     public UserBO create(UserBO user) throws UserAlreadyExistsException {
         UserEntity userPO = userConverter.toUserPO(user);
         userPO.setId(Ids.id());
@@ -110,10 +123,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
+	@Override
     public BearerTokenBO authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException {
         UserEntity user = getUser(login);
-        return authorizeInternal(pin, user, role);
+		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
+		if (!success) {
+			return null;
+		}
+      
+      // Check user has defined role.
+      UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
+      	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
+        return authorizeInternal(user.getId(), user.getLogin(), null, userRole, null, new Date(), 1800);
     }
 
 	@Override
@@ -209,20 +230,10 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-	private BearerTokenBO authorizeInternal(String pin, UserEntity user, UserRoleBO role) throws InsufficientPermissionException {
-		
-		
-		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
-        if(!success) {
-        	return null;
-        }
-        
-        // Check user has defined role.
-        UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
-        	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
-		int expires_in = 60*30;
+	private BearerTokenBO authorizeInternal(String userId, String userLogin, List<AccountAccess> accountAccesses, UserRole role, String scaId, Date refDate, int validitySeconds) throws InsufficientPermissionException {
+		int expires_in = validitySeconds;
         // Generating claim
-        JWTClaimsSet claimsSet = genJWT(user, userRole, new Date(), expires_in);
+        JWTClaimsSet claimsSet = genJWT(userId, userLogin, accountAccesses, role, scaId, refDate, expires_in);
         
         AccessTokenBO accessTokenObject = toAccessTokenObject(claimsSet);
         // signing jwt
@@ -231,16 +242,23 @@ public class UserServiceImpl implements UserService {
 		return bearerToken(accessTokenString, expires_in, accessTokenObject);
 	}
 
-	private JWTClaimsSet genJWT(UserEntity user, UserRole userRole, Date issueTime, int validitySeconds) {
-		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-        	.subject(user.getId())
+	private JWTClaimsSet genJWT(String userId, String userLogin, List<AccountAccess> accountAccesses, UserRole userRole, String scaId, Date issueTime, int validitySeconds) {
+		Builder builder = new JWTClaimsSet.Builder()
+        	.subject(userId)
         	.jwtID(Ids.id())
-        	.claim("actor", user.getLogin())
-        	.claim("role", userRole)
-        	.claim("accountAccesses", user.getAccountAccesses())
+        	.claim(ACTOR, userLogin)
+        	.claim(ROLE, userRole)
         	.issueTime(issueTime)
-        	.expirationTime(DateUtils.addMinutes(issueTime, validitySeconds)).build();
-		return claimsSet;
+        	.expirationTime(DateUtils.addSeconds(issueTime, validitySeconds));
+		
+		if(accountAccesses!=null && !accountAccesses.isEmpty()) {
+			builder = builder.claim(ACCOUNT_ACCESSES, accountAccesses);
+		}
+		
+		if(StringUtils.isNotBlank(scaId)) {
+			builder = builder.claim(SCA_ID, scaId);
+		}
+		return builder.build();
 	}
 
 	private String signJWT(JWTClaimsSet claimsSet) {
@@ -262,7 +280,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public BearerTokenBO authorise(String login, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException {
         UserEntity user = getUser(login);
-        BearerTokenBO token = authorizeInternal(pin, user, UserRoleBO.CUSTOMER);
+		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
+		if (!success) {
+			return null;
+		}
+      
+        BearerTokenBO token = authorizeInternal(user.getId(), user.getLogin(), Collections.emptyList(), UserRole.CUSTOMER, null, new Date(), 1800);
         
         // Validate
         if(token!=null) {
@@ -338,10 +361,10 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public BearerTokenBO grant(AisConsentBO aisConsent) throws InsufficientPermissionException {
+	public BearerTokenBO grant(String userId, AisConsentBO aisConsent) throws InsufficientPermissionException {
 		UserBO user;
 		try {
-			user = findById(principal.getName());
+			user = findById(userId);
 		} catch (UserNotFoundException e) {
 			throw new UserManagementUnexpectedException(e);
 		}
@@ -366,8 +389,8 @@ public class UserServiceImpl implements UserService {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
         	.subject(user.getId())
         	.jwtID(Ids.id())
-        	.claim("actor", user.getLogin())
-        	.claim("role", UserRoleBO.TECHNICAL)// Always a technical user.
+        	.claim(ACTOR, user.getLogin())
+        	.claim(ROLE, UserRoleBO.TECHNICAL)// Always a technical user.
         	.claim("consent", aisConsent)
         	.issueTime(iat)
         	.expirationTime(expir).build();
@@ -405,4 +428,22 @@ public class UserServiceImpl implements UserService {
 		return userConverter.toUserBOList(userRepository.findAll());
 	}
 
+	@Override
+	public BearerTokenBO scaToken(String userId, String scaId, int validitySeconds, UserRoleBO role) throws InsufficientPermissionException {
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("Can not load user with id: " + userId));
+		return authorizeInternal(user.getId(), user.getLogin(), user.getAccountAccesses(), UserRole.valueOf(role.name()), scaId, new Date(), 1800);
+	}
+
+	@Override
+	public AisConsentBO storeConsent(AisConsentBO consentBO) {
+		AisConsentEntity consentEntity = consentRepository.findById(consentBO.getId()).orElse(consentRepository.save(aisConsentMapper.toAisConsentPO(consentBO)));
+		return aisConsentMapper.toAisConsentBO(consentEntity);
+	}
+	
+	@Override
+	public AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException {
+		AisConsentEntity aisConsentEntity = consentRepository.findById(consentId)
+			.orElseThrow(() -> new ConsentNotFoundException(String.format(CONESENT_WITH_ID_NOT_FOUND, consentId)));
+		return aisConsentMapper.toAisConsentBO(aisConsentEntity);
+	}
 }

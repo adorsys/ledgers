@@ -26,67 +26,125 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ExpectationFailedRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
+import de.adorsys.ledgers.middleware.rest.exception.GoneRestException;
+import de.adorsys.ledgers.middleware.rest.exception.NotAcceptableRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 
 @Api(tags = "User Management" , description= "Provides endpoint for registering, authorizing and managing users.")
 public interface UserMgmtRestAPI {
 	public static final String BASE_PATH = "/users";
-	public static final String REGISTER_PATH = "/register";
-	public static final String AUTHORISE_PATH = "/authorise";
-	public static final String EMAIL_REQUEST_PARAM = "email";
-	public static final String ROLE_REQUEST_PARAM = "role";
-	public static final String PIN_REQUEST_PARAM = "pin";
-	public static final String LOGIN_REQUEST_PARAM = "login";
-    public static final String SCA_DATA_PATH = "/sca-data";
 
-    @PostMapping(REGISTER_PATH)
+    @PostMapping("/register")
     @ApiOperation(value="Register User", notes="Registers a user. Registered as a staff member, user will have to be activated.")
-    public ResponseEntity<UserTO> register(@RequestParam(LOGIN_REQUEST_PARAM)String login, 
-    		@RequestParam(EMAIL_REQUEST_PARAM) String email, 
-    		@RequestParam(PIN_REQUEST_PARAM) String pin,
-    		@RequestParam(name=ROLE_REQUEST_PARAM, defaultValue="CUSTOMER") UserRoleTO role) throws ConflictRestException;
+    public ResponseEntity<UserTO> register(@RequestParam("login")String login, 
+    		@RequestParam("email") String email, 
+    		@RequestParam("pin") String pin,
+    		@RequestParam(name="role", defaultValue="CUSTOMER") UserRoleTO role) throws ConflictRestException;
 
     /**
-     * Authorize returns a bearer token that can be reused by the consuming application.
+     * Initiates the user login process. Returns a login response object describing how to proceed.
+     * 
+     * This response object contains an scaId that must be used to proceed with the login.
+     * 
+     * if the {@link SCALoginResponseTO#getScaStatus()} equals 
+     *   	{@link ScaStatusTO#EXEMPTED} the response will contain the final bearer token.
+     * 	 	{@link ScaStatusTO#PSUIDENTIFIED} there will be a list of scaMethods for selection in the response.
+     * 		{@link ScaStatusTO#SCAMETHODSELECTED} means the auth code has been sent to the user. Must be entered by the user. 
      * 
      * @param login
      * @param pin
+     * @param role
      * @return
+     * @throws NotFoundRestException
+     * @throws ForbiddenRestException
      */
-    @PostMapping(AUTHORISE_PATH)
-    @ApiOperation(value="Authorize User returns Access Token", notes="Authorize any user. But user most specify the target role. return an access token.")
-    public ResponseEntity<BearerTokenTO> authorise(
-    		@RequestParam(LOGIN_REQUEST_PARAM)String login, 
-    		@RequestParam(PIN_REQUEST_PARAM) String pin, 
-    		@RequestParam(ROLE_REQUEST_PARAM) UserRoleTO role) throws NotFoundRestException, ForbiddenRestException;
+    @PostMapping("/login")
+    @ApiOperation(value="Authorize User returns Access Token", 
+    	notes="Initiates the user login process. Returns a login response object describing how to proceed. This response object contains an scaId that must be used to proceed with the login."
+    			+ "if the ScaStatus is EXEMPTED, the response will contain the final bearer token. If the ScaStatus is PSUIDENTIFIED there will be a list of scaMethods for selection in the response."
+    			+ "if ScaStatus is SCAMETHODSELECTED means the auth code has been sent to the user. Must be entered by the user.")
+    public ResponseEntity<SCALoginResponseTO> authorise(
+    		@RequestParam("login")String login, 
+    		@RequestParam("pin") String pin, 
+    		@RequestParam("role") UserRoleTO role) throws NotFoundRestException, ForbiddenRestException;
 
+    /**
+     * Selects the scaMethod to use for sending a login transaction number to the user. This is only valid for the login.
+     * 
+     * The authorization id is used for the identification an authorization process.
+     * 
+     * Result must be {@link ScaStatusTO#SCAMETHODSELECTED} means the auth code has been sent to the user. Must be entered by the user.
+     *  
+     * @param scaId
+     * @param authorisationId
+     * @param scaMethodId
+     * @return
+     * @throws ValidationRestException
+     * @throws ConflictRestException
+     * @throws NotFoundRestException
+     */
+    @PutMapping(value = "/{scaId}/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
+	@ApiOperation(value = "Select SCA Method", notes="Selects the scaMethod to use for sending a login transaction number to the user. This is only valid for the login. "
+			+ "The authorization id is used for the identification an authorization process. "
+			+ "Result must be ScaStatus is SCAMETHODSELECTED means the auth code has been sent to the user. Must be entered by the user. ", 
+		authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCALoginResponseTO> selectMethod(@PathVariable("scaId") String scaId, 
+    		@PathVariable("authorisationId") String authorisationId,
+    		@PathVariable("scaMethodId") String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException, ForbiddenRestException;
+
+    /**
+     * Send the auth code for two factor login. The returned response contains a bearer token that can be used 
+     * to authenticate further operations.
+     * 
+     * @param scaId
+     * @param authorisationId
+     * @param authCode
+     * @return
+     * @throws GoneRestException
+     * @throws NotFoundRestException
+     * @throws ConflictRestException
+     * @throws ExpectationFailedRestException
+     * @throws NotAcceptableRestException
+     */
+    @PutMapping(value = "/{scaId}/authorisations/{authorisationId}/authCode")
+	@ApiOperation(value = "Send an authentication code for validation", 
+		notes="Send the auth code for two factor login. The returned response contains a bearer "
+				+ "token that can be used to authenticate further operations.", authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCALoginResponseTO> authorizeLogin(@PathVariable("scaId") String scaId,
+    		@PathVariable("authorisationId") String authorisationId, 
+    		@RequestParam(name="authCode") String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException;
+    
     @PostMapping("/validate")
     @ApiOperation(value="Validate Access Token")
     public ResponseEntity<BearerTokenTO> validate(@RequestParam("accessToken")String token) throws ForbiddenRestException;
 
-    @GetMapping("/{id}")
+    @GetMapping("/{userId}")
     @ApiOperation(value="Retrieves User by ID", notes="Retrieves User by ID")
-    public ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) throws NotFoundRestException; 
+    public ResponseEntity<UserTO> getUserById(@PathVariable("userId") String userId) throws NotFoundRestException; 
 
     @GetMapping
     @ApiOperation(value="Retrieves User by login", notes="Retrieves User by login")
-    public ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) throws NotFoundRestException;
+    public ResponseEntity<UserTO> getUserByLogin(@RequestParam("login") String login) throws NotFoundRestException;
 
-    @PutMapping("/{id}/" + SCA_DATA_PATH)
+    @PutMapping("/{userId}/sca-data")
     @ApiOperation(value="Updates user SCA", notes="Updates user authentication methods")
-    public ResponseEntity<Void> updateUserScaData(@PathVariable("id") String id, @RequestBody List<ScaUserDataBO> data) throws NotFoundRestException;
+    public ResponseEntity<Void> updateUserScaData(@PathVariable("userId") String userId, @RequestBody List<ScaUserDataTO> data) throws NotFoundRestException;
 
     // TODO: refactor for user collection pagination
     @GetMapping("/all")
     @ApiOperation(value="Lists users collection", notes="Lists users collection.")
-    public ResponseEntity<List<UserBO>> getAllUsers();
+    public ResponseEntity<List<UserTO>> getAllUsers();
 }

@@ -17,76 +17,85 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCancellationResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.rest.exception.BadRequestRestException;
+import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
+import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ExpectationFailedRestException;
 import de.adorsys.ledgers.middleware.rest.exception.GoneRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotAcceptableRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 
 @Api(tags = "Payment" , description= "Provide endpoint for initiating and executing payment.")
 public interface PaymentRestAPI {
-    public static final String EXECUTE_NO_SCA_PATH = "/execute-no-sca/{payment-id}/{payment-product}/{payment-type}";
-	public static final String PAYMENT_TYPE_PATH_VARIABLE = "/{paymentType}";
 	public static final String BASE_PATH = "/payments";
 
-    @GetMapping("/{id}/status")
+    @GetMapping("/{paymentId}/status")
     @ApiOperation(value="Read Payment Status", notes="Returns the status of a payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<TransactionStatusTO> getPaymentStatusById(@PathVariable String id) throws NotFoundRestException; 
+    public ResponseEntity<TransactionStatusTO> getPaymentStatusById(@PathVariable("paymentId") String paymentId) throws NotFoundRestException; 
 
-    @GetMapping(value = "/{payment-type}/{payment-product}/{paymentId}"/*, produces = {"application/json", "application/xml", "multipart/form-data"}*/)
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Load Payment", notes="Returns a payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<?> getPaymentById(
-    		@PathVariable(name = "payment-type") PaymentTypeTO paymentType,
-    		@PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
-    		@PathVariable(name = "paymentId") String paymentId) throws NotFoundRestException;
+    @GetMapping(value = "/{paymentId}")
+    @ApiOperation(value="Load Payment", notes="Returns the payment", authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<?> getPaymentById(@PathVariable(name = "paymentId") String paymentId) throws NotFoundRestException;
 
-    @PostMapping(PAYMENT_TYPE_PATH_VARIABLE)
-    @PreAuthorize("paymentInit(#payment)")
+    @PostMapping(params="paymentType")
     @ApiOperation(value="Initiates a Payment", notes="Initiates a payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<?> initiatePayment(
-    		@PathVariable PaymentTypeTO paymentType, 
+    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(
+    		@RequestParam("paymentType") PaymentTypeTO paymentType, 
     		@RequestBody Object payment) throws NotFoundRestException;
 
-    @PostMapping(EXECUTE_NO_SCA_PATH)
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Execute a Payment", notes="Executes a payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<TransactionStatusTO> executePaymentNoSca(
-    		@PathVariable(name = "payment-id") String paymentId,
-    		@PathVariable(name = "payment-product") PaymentProductTO paymentProduct,
-    		@PathVariable(name = "payment-type") PaymentTypeTO paymentType) throws BadRequestRestException;
-
-    @PostMapping(path="/{payment-id}/auth", params= {"authCode", "opId"})
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Execute a Payment", notes="Executes a payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<BearerTokenTO> authorizePayment(@PathVariable(name = "payment-id") String paymentId,
-    		@RequestParam(name="authCode") String authCode,
-    		@RequestParam(name="opId") String opId) throws NotFoundRestException, ExpectationFailedRestException, GoneRestException, NotAcceptableRestException;
+    @GetMapping(value = "/{paymentId}/authorisations/{authorisationId}")
+	@ApiOperation(value = "Get SCA", notes="Get the authorization response object eventually containing the list of selected sca methods.", 
+		authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCAPaymentResponseTO> getSCA(@PathVariable("paymentId") String paymentId, 
+    		@PathVariable("authorisationId") String authorisationId) throws ConflictRestException;
     
-    @PostMapping(value = "/cancel-initiation/{psuId}/{paymentId}")
-    @PreAuthorize("paymentInitById(#paymentId)")
+    @PutMapping(value = "/{paymentId}/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
+	@ApiOperation(value = "Select SCA Method", notes="Select teh given sca method and request for authentication code generation.", 
+		authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCAPaymentResponseTO> selectMethod(@PathVariable("paymentId") String paymentId, 
+    		@PathVariable("authorisationId") String authorisationId,
+    		@PathVariable("scaMethodId") String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException;
+    
+    @PutMapping(value = "/{paymentId}/authorisations/{authorisationId}/authCode")
+	@ApiOperation(value = "Send an authentication code for validation", notes="Validate an authetication code and returns the cosent token", authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCAPaymentResponseTO> authorizePayment(@PathVariable("paymentId") String paymentId,
+    		@PathVariable("authorisationId") String authorisationId, 
+    		@RequestParam(name="authCode") String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException;
+    
+// =======
+    @PostMapping(value = "/{paymentId}/cancellation-authorisations")
     @ApiOperation(value="Initiates a Payment Cancelation", notes="Initiates a Payment Cancelation", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<PaymentCancellationResponseTO> initiatePmtCancellation(@PathVariable String psuId, @PathVariable String paymentId)
+    public ResponseEntity<SCAPaymentResponseTO> initiatePmtCancellation(@PathVariable("paymentId") String paymentId)
     	throws NotFoundRestException, NotAcceptableRestException;
-
-    @DeleteMapping("/cancel/{paymentId}")
-    @PreAuthorize("paymentInitById(#paymentId)")
-    @ApiOperation(value="Confirm Cancelation", notes="Confirms the Cancelation of a Payment", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity cancelPaymentNoSca(@PathVariable String paymentId) throws NotFoundRestException, NotAcceptableRestException;
+    
+    @GetMapping(value = "/{paymentId}/cancellation-authorisations/{cancellationId}")
+	@ApiOperation(value = "Get SCA", notes="Get the authorization response object eventually containing the list of selected sca methods.", 
+		authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCAPaymentResponseTO> getCancelSCA(@PathVariable("paymentId") String paymentId, 
+    		@PathVariable("cancellationId") String cancellationId) throws ConflictRestException;
+    
+    @PutMapping(value = "/{paymentId}/cancellation-authorisations/{cancellationId}/scaMethods/{scaMethodId}")
+	@ApiOperation(value = "Select SCA Method", notes="Select teh given sca method and request for authentication code generation.", 
+		authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCAPaymentResponseTO> selecCancelPaymentSCAtMethod(@PathVariable("paymentId") String paymentId, 
+    		@PathVariable("cancellationId") String cancellationId,
+    		@PathVariable("scaMethodId") String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException;
+    
+    @PutMapping(value = "/{paymentId}/cancellation-authorisations/{cancellationId}/authCode")
+	@ApiOperation(value = "Send an authentication code for validation", notes="Validate an authetication code and returns the cosent token", authorizations =@Authorization(value="apiKey"))
+    public ResponseEntity<SCAPaymentResponseTO> authorizeCancelPayment(@PathVariable("paymentId") String paymentId,
+    		@PathVariable("cancellationId") String cancellationId, 
+    		@RequestParam(name="authCode") String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException;
 }

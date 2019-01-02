@@ -25,6 +25,7 @@ import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -106,7 +107,7 @@ public interface UserService {
 	 * @throws UserNotFoundException 
 	 */
 	BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException;
-	
+
 	/**
 	 * Provides a token used to gain read access to an account.
 	 * 
@@ -114,6 +115,34 @@ public interface UserService {
 	 * @return
 	 * @throws InsufficientPermissionException the current user does not have sufficient permission.
 	 */
-	BearerTokenBO grant(AisConsentBO aisConsent) throws InsufficientPermissionException;
+	BearerTokenBO grant(String userId, AisConsentBO aisConsent) throws InsufficientPermissionException;
+
+	/**
+	 * Create a new token for the current user, after a successfull auth code proces..
+	 * 
+	 * @param userId
+	 * @param scaId
+	 * @param validitySeconds
+	 * @return
+	 * @throws InsufficientPermissionException
+	 */
+	BearerTokenBO scaToken(String userId, String scaId, int validitySeconds, UserRoleBO role) throws InsufficientPermissionException;
+
+	/**
+	 * Stores a consent in the consent database and returns the original consent
+	 * if already existng there.
+	 * 
+	 * @param consentBO
+	 */
+	AisConsentBO storeConsent(AisConsentBO consentBO);
+
+	/**
+	 * Loads a consent given the consent id. Throws a consent not found exception.
+	 * 
+	 * @param consentId
+	 * @return
+	 * @throws ConsentNotFoundException
+	 */
+	AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
 
 }

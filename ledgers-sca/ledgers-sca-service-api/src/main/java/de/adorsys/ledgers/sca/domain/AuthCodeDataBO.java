@@ -23,6 +23,8 @@ public class AuthCodeDataBO {
     private String opData;
     private String userMessage;
     private int validitySeconds;
+    private OpTypeBO opType;
+    private String authorisationId;
 
     public String getUserLogin() {
         return userLogin;
@@ -72,4 +74,19 @@ public class AuthCodeDataBO {
 		this.validitySeconds = validitySeconds;
 	}
 
+	public OpTypeBO getOpType() {
+		return opType;
+	}
+
+	public void setOpType(OpTypeBO opType) {
+		this.opType = opType;
+	}
+
+	public String getAuthorisationId() {
+		return authorisationId;
+	}
+
+	public void setAuthorisationId(String authorisationId) {
+		this.authorisationId = authorisationId;
+	}
 }

@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.sca.domain;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * Documentation for impl.
@@ -18,6 +17,21 @@ public class SCAOperationBO {
 	private String hashAlg;
 	private LocalDateTime created;
 	private LocalDateTime statusTime;
+	
+	private OpTypeBO opType;
+	/*
+	 * Stores the sca method is associated with this authorization. The sca method
+	 * id is not supposed to change after the code was sent out.
+	 */
+	private String scaMethodId;
+
+	/*
+	 * Records the number of failed attempts.
+	 * 
+	 */
+	private int failledCount;
+	
+	private ScaStatusBO scaStatus;
 
     public String getId() {
         return id;
@@ -83,37 +97,35 @@ public class SCAOperationBO {
         this.statusTime = statusTime;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
-        SCAOperationBO that = (SCAOperationBO) o;
-        return validitySeconds == that.validitySeconds &&
-                       Objects.equals(id, that.id) &&
-                       Objects.equals(opId, that.opId) &&
-                       Objects.equals(authCodeHash, that.authCodeHash) &&
-                       status == that.status &&
-                       Objects.equals(hashAlg, that.hashAlg) &&
-                       Objects.equals(created, that.created) &&
-                       Objects.equals(statusTime, that.statusTime);
-    }
+    public OpTypeBO getOpType() {
+		return opType;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, opId, validitySeconds, authCodeHash, status, hashAlg, created, statusTime);
-    }
+	public void setOpType(OpTypeBO opType) {
+		this.opType = opType;
+	}
 
-    @Override
-    public String toString() {
-        return "SCAOperationBO{" +
-                       "id='" + id + '\'' +
-                       ", opId='" + opId + '\'' +
-                       ", validitySeconds=" + validitySeconds +
-                       ", authCodeHash='" + authCodeHash + '\'' +
-                       ", status=" + status +
-                       ", hashAlg='" + hashAlg + '\'' +
-                       ", created=" + created +
-                       ", statusTime=" + statusTime +
-                       '}';
-    }
+	public String getScaMethodId() {
+		return scaMethodId;
+	}
+
+	public void setScaMethodId(String scaMethodId) {
+		this.scaMethodId = scaMethodId;
+	}
+
+	public int getFailledCount() {
+		return failledCount;
+	}
+
+	public void setFailledCount(int failledCount) {
+		this.failledCount = failledCount;
+	}
+
+	public ScaStatusBO getScaStatus() {
+		return scaStatus;
+	}
+
+	public void setScaStatus(ScaStatusBO scaStatus) {
+		this.scaStatus = scaStatus;
+	}
 }

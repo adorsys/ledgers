@@ -7,7 +7,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.rest.security.AccountAccessMethodSecurityExpressionHandler;
 
 @Configuration
@@ -16,7 +16,7 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 	@Autowired
     private MiddlewareAccountManagementService middlewareAccountService;
 	@Autowired
-	private MiddlewareService middlewareService;
+	private MiddlewarePaymentService middlewareService;
 
 	@Override
 	protected MethodSecurityExpressionHandler createExpressionHandler() {

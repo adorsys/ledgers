@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.rest.mockbank;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import org.hamcrest.core.StringContains;

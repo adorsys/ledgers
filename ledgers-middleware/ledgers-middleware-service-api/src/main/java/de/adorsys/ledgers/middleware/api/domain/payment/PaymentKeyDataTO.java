@@ -4,6 +4,10 @@ public class PaymentKeyDataTO {
 	public static final String SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time transfer order to %s at date %s; account %s; %s %s is: ";
 	public static final String PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
 	public static final String BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
+
+	public static final String CANCEL_SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for the cancellation of your one time transfer order to %s at date %s; account %s; %s %s is: ";
+	public static final String CANCEL_PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for the cancellation of your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
+	public static final String CANCEL_BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for for the cancellation of your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
 	
 	private String paymentId;
     private String creditorName;
@@ -23,6 +27,8 @@ public class PaymentKeyDataTO {
     
     // Bulk, Future Dated
     private String requestedExecutionDate;
+    
+    private boolean cancellation;
 
 	public String getPaymentId() {
 		return paymentId;
@@ -112,15 +118,31 @@ public class PaymentKeyDataTO {
 		this.requestedExecutionDate = requestedExecutionDate;
 	}
 	
+	
+	
+	public boolean isCancellation() {
+		return cancellation;
+	}
+
+	public void setCancellation(boolean cancellation) {
+		this.cancellation = cancellation;
+	}
+
 	public String template() {
 		PaymentTypeTO pt = PaymentTypeTO.valueOf(paymentType);
 		switch (pt) {
 		case PERIODIC:
-			return periodicPaymentMessageTemplate();
+			return cancellation
+					? cancelPeriodicPaymentMessageTemplate()
+							:periodicPaymentMessageTemplate();
 		case BULK:
-			return bulkPaymentMessageTemplate();
+			return cancellation
+					? cancelBulkPaymentMessageTemplate()
+							:bulkPaymentMessageTemplate();
 		default:
-			return singlePaymentMessageTemplate();
+			return cancellation
+					? cancelSinglePaymentMessageTemplate()
+							:singlePaymentMessageTemplate();
 		}
 	}
 
@@ -146,6 +168,36 @@ public class PaymentKeyDataTO {
 
 	private String bulkPaymentMessageTemplate() {
 		return String.format(BULK_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentsSize,
+				creditorName, 
+				requestedExecutionDate,
+				creditorIban, 
+				currency, 
+				amount)  + "%s";
+	}
+
+	private String cancelSinglePaymentMessageTemplate() {
+		return String.format(CANCEL_SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				creditorName, 
+				requestedExecutionDate, 
+				creditorIban, 
+				currency, 
+				amount)  + "%s";
+	}
+
+	private String cancelPeriodicPaymentMessageTemplate() {
+		return String.format(CANCEL_PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				creditorName, 
+				creditorIban, 
+				dayOfExecution,
+				executionRule,
+				frequency,
+				currency, 
+				amount)  + "%s";
+	}
+
+	private String cancelBulkPaymentMessageTemplate() {
+		return String.format(CANCEL_BULK_PAYMENT_TAN_MESSAGE_TEMPLATE, 
 				paymentsSize,
 				creditorName, 
 				requestedExecutionDate,

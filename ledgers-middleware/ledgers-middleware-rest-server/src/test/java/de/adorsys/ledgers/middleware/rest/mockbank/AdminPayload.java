@@ -6,7 +6,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 
 public class AdminPayload {
 	static Gson gson = new Gson();
-
+	
 	public static String adminPayload() {
 		UserTO admin = new UserTO();
 		admin.setEmail("admin@admin.me");

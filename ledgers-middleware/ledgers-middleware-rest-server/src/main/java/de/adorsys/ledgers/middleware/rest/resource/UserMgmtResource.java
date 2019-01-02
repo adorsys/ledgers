@@ -19,51 +19,52 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import java.net.URI;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ExpectationFailedRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
+import de.adorsys.ledgers.middleware.rest.exception.GoneRestException;
+import de.adorsys.ledgers.middleware.rest.exception.NotAcceptableRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 
 @RestController
 @RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class UserMgmtResource implements UserMgmtRestAPI {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserMgmtResource.class);
     private final MiddlewareOnlineBankingService onlineBankingService;
-    private final UserService userService;
+    private final MiddlewareUserManagementService middlewareUserService;
 
-    public UserMgmtResource(MiddlewareOnlineBankingService onlineBankingService, UserService userService) {
-        this.onlineBankingService = onlineBankingService;
-        this.userService = userService;
-    }
+    public UserMgmtResource(MiddlewareOnlineBankingService onlineBankingService,
+			MiddlewareUserManagementService middlewareUserService) {
+		this.onlineBankingService = onlineBankingService;
+		this.middlewareUserService = middlewareUserService;
+	}
 
     @Override
-    public ResponseEntity<UserTO> register(@RequestParam(LOGIN_REQUEST_PARAM)String login, 
-    		@RequestParam(EMAIL_REQUEST_PARAM) String email, 
-    		@RequestParam(PIN_REQUEST_PARAM) String pin,
-    		@RequestParam(name=ROLE_REQUEST_PARAM, defaultValue="CUSTOMER") UserRoleTO role) {
+    public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
     	try {
     		// TODO: add activation of non customer members.
 			UserTO user = onlineBankingService.register(login, email, pin, role);
@@ -73,8 +74,8 @@ public class UserMgmtResource implements UserMgmtRestAPI {
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
 		}
     }
-    
-    /**
+
+	/**
      * Authorize returns a bearer token that can be reused by the consuming application.
      * 
      * @param login
@@ -83,10 +84,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
      */
     @Override
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
-    public ResponseEntity<BearerTokenTO> authorise(
-    		@RequestParam(LOGIN_REQUEST_PARAM)String login, 
-    		@RequestParam(PIN_REQUEST_PARAM) String pin, 
-    		@RequestParam(ROLE_REQUEST_PARAM) UserRoleTO role){
+    public ResponseEntity<SCALoginResponseTO> authorise(String login, String pin, UserRoleTO role){
         try {
             return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
         } catch (UserNotFoundMiddlewareException e) {
@@ -96,8 +94,44 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 		}
     }
 
+	@Override
+	public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId)
+			throws ValidationRestException, ConflictRestException, 
+			NotFoundRestException, ForbiddenRestException {
+		try {
+			return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaMethodId, authorisationId, null, 1800));
+		} catch (SCAOperationNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {
+			throw new NotFoundRestException(e.getMessage());
+		} catch (InsufficientPermissionMiddlewareException e) {
+			throw new ForbiddenRestException(e.getMessage());
+		} catch (SCAMethodNotSupportedMiddleException e) {
+			throw new NotAcceptableRestException(e.getMessage());
+		} catch (SCAOperationValidationMiddlewareException e) {
+			throw new ValidationRestException(e.getMessage());
+		}
+	}
+
+	@Override
+	public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode)
+			throws GoneRestException, NotFoundRestException, ConflictRestException, ExpectationFailedRestException,
+			NotAcceptableRestException {
+		try {
+			return ResponseEntity.ok(onlineBankingService.authenticateForLogin(authorisationId, authCode));
+		} catch (SCAOperationNotFoundMiddlewareException e) {
+			throw new NotFoundRestException(e.getMessage());
+		} catch (SCAOperationValidationMiddlewareException e) {
+			throw new ExpectationFailedRestException(e.getMessage());
+		} catch (SCAOperationExpiredMiddlewareException e) {
+			throw new GoneRestException(e.getMessage());
+		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
+			throw new NotAcceptableRestException(e.getMessage());
+		} catch (InsufficientPermissionMiddlewareException e) {
+			throw new ForbiddenRestException(e.getMessage());
+		}
+	}
+
     @Override
-    public ResponseEntity<BearerTokenTO> validate(@RequestParam("accessToken")String token) {
+    public ResponseEntity<BearerTokenTO> validate(String token) {
     	try {
     		BearerTokenTO tokenTO = onlineBankingService.validate(token);
     		if(tokenTO!=null) {
@@ -112,42 +146,41 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    public ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
+    public ResponseEntity<UserTO> getUserById(String userId) {
         try {
-            return ResponseEntity.ok(userService.findById(id));
-        } catch (UserNotFoundException e) {
+            return ResponseEntity.ok(middlewareUserService.findById(userId));
+        } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
 
     @Override
-    public ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
+    public ResponseEntity<UserTO> getUserByLogin(String login) {
         try {
-            return ResponseEntity.ok(userService.findByLogin(login));
-        } catch (UserNotFoundException e) {
+            return ResponseEntity.ok(middlewareUserService.findByUserLogin(login));
+        } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
 
     @Override
-    public ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
+    public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
         try {
-            UserBO userBO = userService.findById(id);
-            UserBO user = userService.updateScaData(data, userBO.getLogin());
+            UserTO userTO = middlewareUserService.findById(userId);
+            UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
             URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
                     .build().toUri();
 
             return ResponseEntity.created(uri).build();
-        } catch (UserNotFoundException e) {
+        } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
 
     // TODO: refactor for user collection pagination
     @Override
-    public ResponseEntity<List<UserBO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAll());
+    public ResponseEntity<List<UserTO>> getAllUsers() {
+        return ResponseEntity.ok(middlewareUserService.listUsers(1, 150));
     }
-
 }

@@ -137,9 +137,9 @@ public class DepositAccountPaymentServiceImplTest {
     public void cancelPayment() throws PaymentNotFoundException {
         //Given
         ArgumentCaptor<Payment> captor = ArgumentCaptor.forClass(Payment.class);
-
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(readFile(Payment.class, "PaymentSingle.yml")));
-        when(paymentRepository.save(captor.capture())).thenReturn(mock(Payment.class));
+        Payment payment = readFile(Payment.class, "PaymentSingle.yml");
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(captor.capture())).thenReturn(payment);
 
         //When
         paymentService.cancelPayment(PAYMENT_ID);

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -94,8 +95,8 @@ public class AppMgmtResource implements AppMgmtRestAPI {
 		}
 		
 		try {
-			BearerTokenTO bearerTokenTO = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
-			return ResponseEntity.ok(bearerTokenTO);
+			SCALoginResponseTO scaLoginResponseTO = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
+			return ResponseEntity.ok(scaLoginResponseTO.getBearerToken());
 		} catch (UserNotFoundMiddlewareException e) {
 			String USER_NOT_FOUND_SHALL_NOT_HAPPEN = "Shall not happen. We just created admin user.";
             logger.error(USER_NOT_FOUND_SHALL_NOT_HAPPEN, e);

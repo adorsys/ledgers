@@ -25,31 +25,57 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
-import de.adorsys.ledgers.middleware.impl.converter.AisConsentMapper;
+import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.sca.domain.OpTypeBO;
+import de.adorsys.ledgers.sca.domain.SCAOperationBO;
+import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
+import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
+import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
+import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
+import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 
 @Service
@@ -63,17 +89,19 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final PaymentConverter paymentConverter;
     private final UserService userService;
     private final UserMapper userMapper;
-    private final AisConsentMapper aisConsentMapper;
+    private final AisConsentBOMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
     
     private final AccessTokenTO accessToken;
     private final Principal principal;
+	private final SCAOperationService scaOperationService;
+	private final SCAUtils scaUtils;
 
-    
 	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
 			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
-			UserMapper userMapper, AisConsentMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
-			AccessTokenTO accessToken, Principal principal) {
+			UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
+			AccessTokenTO accessToken, Principal principal, SCAOperationService scaOperationService,
+			SCAUtils scaUtils) {
 		super();
 		this.depositAccountService = depositAccountService;
 		this.accountDetailsMapper = accountDetailsMapper;
@@ -84,9 +112,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		this.bearerTokenMapper = bearerTokenMapper;
 		this.accessToken = accessToken;
 		this.principal = principal;
+		this.scaOperationService = scaOperationService;
+		this.scaUtils = scaUtils;
 	}
 
-    @Override
+	@Override
     public void createDepositAccount(AccountDetailsTO depositAccount)
             throws UserNotFoundMiddlewareException {
         createDepositAccount(depositAccount, Collections.emptyList());
@@ -337,19 +367,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         return userBo;
     }
 
-	@Override
-	public BearerTokenTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
-		try {
-			return bearerTokenMapper.toBearerTokenTO(userService.grant(aisConsentMapper.toAisConsentBO(aisConsent)));
-		} catch (InsufficientPermissionException e) {
-			throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
-		}
-	}
-
-
     @Override
     public List<AccountDetailsTO> listOfDepositAccounts() {
-        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
+    	UserBO user = loadCurrentUser();
+    	UserTO userTO = userMapper.toUserTO(user);
+    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
+//        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
         if (accountAccesses == null || accountAccesses.isEmpty()) {
             return Collections.emptyList();
         }
@@ -376,11 +399,212 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     private LocalDateTime getTimeAtEndOfTheDay(LocalDate date) {
-        return date.atTime(23, 59, 59, 99);
+        return date.atTime(23, 59, 59, 00);
     }
 
     @Override
     public String iban(String id) {
         return depositAccountService.readIbanById(id);
     }
+
+    // ======================= CONSENT ======================//
+
+    /*
+     * Starts the SCA process. Might directly produce the consent token if
+     * sca is not needed.
+     * 
+     * (non-Javadoc)
+     * @see de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService#startSCA(java.lang.String, de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO)
+     */
+	@Override
+	public SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent)
+			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
+		BearerTokenBO bearerToken = checkAisConsent(aisConsent);
+		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
+		SCAConsentResponseTO response = prepareSCA(scaUtils.userBO(), aisConsent, consentKeyData);
+		if(ScaStatusTO.EXEMPTED.equals(response.getScaStatus())) {
+			response.setBearerToken(bearerTokenMapper.toBearerTokenTO(bearerToken));
+		}
+		return response;
+	}
+
+	@Override
+	public SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId)
+			throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException {
+		UserTO user = scaUtils.user();
+		AisConsentBO consent = consent(consentId);
+		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
+		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
+		SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
+		return toScaConsentResponse(user, consent, consentKeyData.template(), scaOperationBO);
+	}
+
+	@Override
+	public SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId,
+			String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException,
+			UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
+			SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException {
+		UserBO userBO = scaUtils.userBO();
+		UserTO userTO = scaUtils.user(userBO);
+		AisConsentBO consent = consent(consentId);
+		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
+		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
+		AuthCodeDataBO a = authCodeData(consentId, userBO, consentKeyData.template(), authorisationId, scaMethodId);
+		try {
+			SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
+			return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+		} catch (SCAMethodNotSupportedException e) {
+			logger.error(e.getMessage(), e);
+			throw new SCAMethodNotSupportedMiddleException(e);
+		} catch (UserScaDataNotFoundException e) {
+			logger.error(e.getMessage(), e);
+			throw new UserScaDataNotFoundMiddlewareException(e);
+		} catch (SCAOperationValidationException e) {
+			throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
+		} catch (SCAOperationNotFoundException e) {
+			throw new SCAOperationNotFoundMiddlewareException(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
+			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
+			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, AisConsentNotFoundMiddlewareException {
+		AisConsentBO consent = consent(consentId);
+		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
+		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
+		try {
+			boolean validAuthCode = scaOperationService.validateAuthCode(authorisationId, consentId,
+					consentKeyData.template(), authCode);
+			if (!validAuthCode) {
+				throw new SCAOperationValidationMiddlewareException("Wrong auth code");
+			}
+			UserBO userBO = scaUtils.userBO();
+			UserTO userTO = scaUtils.user(userBO);
+			SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
+			SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+			if(scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
+				BearerTokenTO bearerToken = bearerTokenMapper.toBearerTokenTO(userService.grant(userBO.getId(), consent));
+				response.setBearerToken(bearerToken);
+			}
+			return response;
+		} catch (SCAOperationNotFoundException e) {
+			logger.error(e.getMessage(), e);
+			throw new SCAOperationNotFoundMiddlewareException(e);
+		} catch (SCAOperationValidationException e) {
+			logger.error(e.getMessage(), e);
+			throw new SCAOperationValidationMiddlewareException(e);
+		} catch (SCAOperationExpiredException e) {
+			logger.error(e.getMessage(), e);
+			throw new SCAOperationExpiredMiddlewareException(e);
+		} catch (SCAOperationUsedOrStolenException e) {
+			logger.error(e.getMessage(), e);
+			throw new SCAOperationUsedOrStolenMiddlewareException(e);
+		} catch (InsufficientPermissionException e) {
+			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public BearerTokenTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+		try {
+			UserBO userBO = scaUtils.userBO();
+			return bearerTokenMapper.toBearerTokenTO(userService.grant(userBO.getId(), aisConsentMapper.toAisConsentBO(aisConsent)));
+		} catch (InsufficientPermissionException e) {
+			throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
+		}
+	}
+
+	
+	/*
+	 * Returns a bearer token matching the consent if user has enougth permission
+	 * to execute the operation.
+	 */
+	private BearerTokenBO checkAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+		AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
+		try {
+			UserBO userBO = scaUtils.userBO();
+			return userService.grant(userBO.getId(),consentBO);
+		} catch (InsufficientPermissionException e) {
+			throw new InsufficientPermissionMiddlewareException("Not enougth permission for requested consent.", e);
+		}
+	}
+
+	/*
+	 * The SCA requirement shall be added as property of a deposit account permission.
+	 * 
+	 * For now we will assume there is no sca requirement, when the user having access
+	 * to the account does not habe any sca data configured.
+	 */
+	private boolean scaRequired(AisConsentTO aisConsent, UserBO user, OpTypeBO opType) {
+		return scaUtils.hasSCA(user);
+	}
+
+	private SCAConsentResponseTO prepareSCA(UserBO user, AisConsentTO aisConsent, ConsentKeyDataTO consentKeyData) {
+		if (!scaRequired(aisConsent, user, OpTypeBO.CONSENT)) {
+			SCAConsentResponseTO response = new SCAConsentResponseTO();
+			response.setConsentId(aisConsent.getId());
+			response.setScaStatus(ScaStatusTO.EXEMPTED);
+			return response;
+		} else {
+			// start SCA
+			SCAOperationBO scaOperationBO;
+			UserTO userTo =scaUtils.user(user);
+			String consentKeyDataTemplate = consentKeyData.template();
+			AuthCodeDataBO authCodeData = authCodeData(aisConsent.getId(), user, consentKeyDataTemplate, null, null);
+			AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
+			consentBO = userService.storeConsent(consentBO);
+			if (userTo.getScaUserData().size() == 1) {
+				ScaUserDataTO chosenScaMethod = userTo.getScaUserData().iterator().next();
+				authCodeData.setScaUserDataId(chosenScaMethod.getId());
+				try {
+					scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
+				} catch (SCAMethodNotSupportedException | UserScaDataNotFoundException | SCAOperationValidationException
+						| SCAOperationNotFoundException e) {
+					throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+				}
+			} else {
+				scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
+			}
+			return toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
+		}
+	}
+
+	private AuthCodeDataBO authCodeData(String consentId, UserBO user, String consentKeyDataTemplate, String authorisationId, String scaMethodId) {
+		AuthCodeDataBO authCodeData = new AuthCodeDataBO();
+		authCodeData.setOpData(consentKeyDataTemplate);
+		authCodeData.setOpId(consentId);
+		authCodeData.setOpType(OpTypeBO.CONSENT);
+		authCodeData.setUserLogin(user.getLogin());
+		authCodeData.setUserMessage(consentKeyDataTemplate);
+		authCodeData.setValiditySeconds(1800);
+		authCodeData.setAuthorisationId(authorisationId);
+		authCodeData.setScaUserDataId(scaMethodId);
+		return authCodeData;
+	}
+
+	private SCAConsentResponseTO toScaConsentResponse(UserTO user,
+			AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
+		SCAConsentResponseTO response = new SCAConsentResponseTO();
+		response.setChallengeData(consent.getId());
+		response.setAuthorisationId(operation.getId());
+		response.setChosenScaMethod(scaUtils.getScaMethod(user, operation.getScaMethodId()));
+		response.setChallengeData(null);
+		response.setExpiresInSeconds(operation.getValiditySeconds());
+		response.setConsentId(consent.getId());
+		response.setPsuMessage(messageTemplate);
+		response.setScaMethods(user.getScaUserData());
+		response.setStatusDate(operation.getStatusTime());
+		response.setScaStatus(ScaStatusTO.valueOf(operation.getScaStatus().name()));
+		return response;
+	}
+	private AisConsentBO consent(String consentId) throws AisConsentNotFoundMiddlewareException {
+		try {
+			return userService.loadConsent(consentId);
+		} catch (ConsentNotFoundException e) {
+			throw new AisConsentNotFoundMiddlewareException(e.getMessage(), e);
+		}
+	}
+
+	
 }

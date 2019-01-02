@@ -1,28 +1,10 @@
 package de.adorsys.ledgers.middleware.impl.mockbank;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
-import de.adorsys.ledgers.middleware.api.service.*;
-import de.adorsys.ledgers.middleware.impl.test.MiddlewareServiceApplication;
-import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.service.AccountStmtService;
-import de.adorsys.ledgers.postings.api.service.LedgerService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,10 +18,31 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
+
+import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.impl.test.MiddlewareServiceApplication;
+import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.exception.BaseLineException;
+import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.service.AccountStmtService;
+import de.adorsys.ledgers.postings.api.service.LedgerService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = MiddlewareServiceApplication.class)
@@ -51,7 +54,7 @@ public class MiddlewareServiceImplIT {
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     @Autowired
-    private MiddlewareService middlewareService;
+    private MiddlewarePaymentService middlewareService;
     @Autowired
     private MiddlewareAccountManagementService accountService;
     @Autowired
@@ -117,49 +120,49 @@ public class MiddlewareServiceImplIT {
         return ledgerBO;
     }
 
-    private void processSinglePayments(List<SinglePaymentsData> singlePaymentTests, LedgerBO ledgerBO)
-            throws AccountNotFoundMiddlewareException, PaymentNotFoundMiddlewareException,
-                           PaymentProcessingMiddlewareException, NoAccessMiddlewareException {
-        for (SinglePaymentsData singlePaymentTest : singlePaymentTests) {
+//    private void processSinglePayments(List<SinglePaymentsData> singlePaymentTests, LedgerBO ledgerBO)
+//            throws AccountNotFoundMiddlewareException, PaymentNotFoundMiddlewareException,
+//                           PaymentProcessingMiddlewareException, NoAccessMiddlewareException {
+//        for (SinglePaymentsData singlePaymentTest : singlePaymentTests) {
+//
+//            // Initiate
+//            SinglePaymentTO pmt = (SinglePaymentTO) middlewareService.initiatePayment(singlePaymentTest.getSinglePayment(),
+//                    PaymentTypeTO.SINGLE);
+//            TransactionStatusTO initiatedPaymentStatus = middlewareService.getPaymentStatusById(pmt.getPaymentId());
+//            Assert.assertEquals(TransactionStatusTO.RCVD, initiatedPaymentStatus);
+//
+//            // Execute
+//            TransactionStatusTO executedPaymentStatus = middlewareService.executePayment(pmt.getPaymentId());
+//            Assert.assertEquals(TransactionStatusTO.ACSP, executedPaymentStatus);
+//
+//            // Check balances
+//            checkBalances(singlePaymentTest.getBalancesList(), ledgerBO);
+//        }
+//    }
 
-            // Initiate
-            SinglePaymentTO pmt = (SinglePaymentTO) middlewareService.initiatePayment(singlePaymentTest.getSinglePayment(),
-                    PaymentTypeTO.SINGLE);
-            TransactionStatusTO initiatedPaymentStatus = middlewareService.getPaymentStatusById(pmt.getPaymentId());
-            Assert.assertEquals(TransactionStatusTO.RCVD, initiatedPaymentStatus);
-
-            // Execute
-            TransactionStatusTO executedPaymentStatus = middlewareService.executePayment(pmt.getPaymentId());
-            Assert.assertEquals(TransactionStatusTO.ACSP, executedPaymentStatus);
-
-            // Check balances
-            checkBalances(singlePaymentTest.getBalancesList(), ledgerBO);
-        }
-    }
-
-    private void processBulkPayments(List<BulkPaymentsData> bulkPaymentTests, LedgerBO ledgerBO)
-            throws AccountNotFoundMiddlewareException, PaymentNotFoundMiddlewareException,
-                           PaymentProcessingMiddlewareException, NoAccessMiddlewareException {
-        if (bulkPaymentTests == null) {
-            return;
-        }
-        for (BulkPaymentsData bulkPaymentTest : bulkPaymentTests) {
-
-            BulkPaymentTO bulkPayment = bulkPaymentTest.getBulkPayment();
-
-            // Initiate
-            BulkPaymentTO pymt = (BulkPaymentTO) middlewareService.initiatePayment(bulkPayment, PaymentTypeTO.BULK);
-            TransactionStatusTO initiatedPaymentStatus = middlewareService.getPaymentStatusById(pymt.getPaymentId());
-            Assert.assertEquals(TransactionStatusTO.RCVD, initiatedPaymentStatus);
-
-            // Execute
-            TransactionStatusTO executedPaymentStatus = middlewareService.executePayment(pymt.getPaymentId());
-            Assert.assertEquals(TransactionStatusTO.ACSP, executedPaymentStatus);
-
-            // Check balances
-            checkBalances(bulkPaymentTest.getBalancesList(), ledgerBO);
-        }
-    }
+//    private void processBulkPayments(List<BulkPaymentsData> bulkPaymentTests, LedgerBO ledgerBO)
+//            throws AccountNotFoundMiddlewareException, PaymentNotFoundMiddlewareException,
+//                           PaymentProcessingMiddlewareException, NoAccessMiddlewareException {
+//        if (bulkPaymentTests == null) {
+//            return;
+//        }
+//        for (BulkPaymentsData bulkPaymentTest : bulkPaymentTests) {
+//
+//            BulkPaymentTO bulkPayment = bulkPaymentTest.getBulkPayment();
+//
+//            // Initiate
+//            BulkPaymentTO pymt = (BulkPaymentTO) middlewareService.initiatePayment(bulkPayment, PaymentTypeTO.BULK);
+//            TransactionStatusTO initiatedPaymentStatus = middlewareService.getPaymentStatusById(pymt.getPaymentId());
+//            Assert.assertEquals(TransactionStatusTO.RCVD, initiatedPaymentStatus);
+//
+//            // Execute
+//            TransactionStatusTO executedPaymentStatus = middlewareService.executePayment(pymt.getPaymentId());
+//            Assert.assertEquals(TransactionStatusTO.ACSP, executedPaymentStatus);
+//
+//            // Check balances
+//            checkBalances(bulkPaymentTest.getBalancesList(), ledgerBO);
+//        }
+//    }
 
     private void readTransactions(List<TransactionTestData> transactions)
             throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {

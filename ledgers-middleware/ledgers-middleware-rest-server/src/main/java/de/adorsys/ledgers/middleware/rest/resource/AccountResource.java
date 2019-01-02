@@ -60,93 +60,6 @@ public class AccountResource implements AccountRestAPI {
         this.middlewareAccountService = middlewareAccountService;
     }
 
-    @Override
-    @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
-        try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw notFoundRestException(e);
-        } catch (InsufficientPermissionMiddlewareException e) {
-            throw forbiddenRestException(e);
-		}
-    }
-
-	private RestException forbiddenRestException(InsufficientPermissionMiddlewareException e) {
-		logger.error(e.getMessage(), e);
-		return new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
-	}
-
-	private RestException notFoundRestException(AccountNotFoundMiddlewareException e) {
-		logger.error(e.getMessage(), e);
-		return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-	}
-
-    /**
-     * @deprecated : wrong REST principles applied here
-     * 
-     * @param accountId
-     * @return
-     */
-    @Override
-    @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<List<AccountBalanceTO>> getBalances(String accountId) {
-    	return getBalances2(accountId);
-    }
-
-    @Override
-    @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<List<AccountBalanceTO>> getBalances2(String accountId) {
-        try {
-            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
-            return ResponseEntity.ok(accountDetails.getBalances());
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw notFoundRestException(e);
-        } catch (InsufficientPermissionMiddlewareException e) {
-            throw forbiddenRestException(e);
-		}
-    }
-    
-    @Override
-    @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<TransactionTO> getTransactionById(String accountId, String transactionId) {
-        try {
-            return ResponseEntity.ok(middlewareAccountService.getTransactionById(accountId, transactionId));
-        } catch (AccountNotFoundMiddlewareException | TransactionNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            throw forbiddenRestException(e);
-		}
-    }
-
-    @Override
-    @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<List<TransactionTO>> getTransactionByDates(String accountId,LocalDate dateFrom,LocalDate dateTo) {
-        dateChecker(dateFrom, dateTo);
-        try {
-            List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
-            return ResponseEntity.ok(transactions);
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw notFoundRestException(e);
-        } catch (InsufficientPermissionMiddlewareException e) {
-            throw forbiddenRestException(e);
-		}
-    }
-
-    /**
-     * TODO: Bad REST design. Use query parameter instead.
-     * 
-     * @deprecated: Access list of accounts thru the user resource and use the iban to read account details.
-     * @param userLogin
-     * @return
-     */
-    @Override
-    @PreAuthorize("userLogin(#userLogin)")
-    public ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(String userLogin) {
-    	return getListOfAccountDetailsInternal(userLogin);
-    }
-
     /**
      * Return the list of accounts linked with the current customer.
      * 
@@ -156,64 +69,6 @@ public class AccountResource implements AccountRestAPI {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listOfDepositAccounts());
-    }
-    
-    private ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsInternal(String userLogin) {
-        try {
-            return ResponseEntity.ok(middlewareAccountService.getAllAccountDetailsByUserLogin(userLogin));
-        } catch (UserNotFoundMiddlewareException | AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
-		}
-    }
-    
-    /**
-     * @deprecated: user request param instead
-     * @param iban
-     * @return
-     */
-    @Override
-    @PreAuthorize("accountInfoByIban(#iban)")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(String iban) {
-    	return getAccountDetailsByIban2(iban);
-    }
-    
-    private ResponseEntity<AccountDetailsTO> getAccountDetailsByIban2(String iban) {
-        try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.now(), true));
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw notFoundRestException(e);
-        } catch (InsufficientPermissionMiddlewareException e) {
-            throw forbiddenRestException(e);
-		}
-    }
-
-    @Override
-    @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
-    public ResponseEntity<Boolean> fundsConfirmation( FundsConfirmationRequestTO request) {
-        try {
-            boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
-            return ResponseEntity.ok(fundsAvailable);
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw notFoundRestException(e);
-        }
-    }
-    
-    
-
-    private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
-        if (!validDate(dateFrom).isEqual(validDate(dateTo))
-                    && validDate(dateFrom).isAfter(validDate(dateTo))) {
-            throw new ConflictRestException("Illegal request dates sequence, possibly swapped 'date from' with 'date to'");
-        }
-    }
-
-    private LocalDate validDate(LocalDate date) {
-        return Optional.ofNullable(date)
-                       .orElseGet(LocalDate::now);
     }
     
     @Override
@@ -233,4 +88,107 @@ public class AccountResource implements AccountRestAPI {
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
 		}
     }
+
+    @Override
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        } catch (InsufficientPermissionMiddlewareException e) {
+            throw forbiddenRestException(e);
+		}
+    }
+
+    @Override
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<List<AccountBalanceTO>> getBalances(String accountId) {
+        try {
+            AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
+            return ResponseEntity.ok(accountDetails.getBalances());
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        } catch (InsufficientPermissionMiddlewareException e) {
+            throw forbiddenRestException(e);
+		}
+    }
+
+    @Override
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<List<TransactionTO>> getTransactionByDates(String accountId,LocalDate dateFrom,LocalDate dateTo) {
+        dateChecker(dateFrom, dateTo);
+        try {
+            List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
+            return ResponseEntity.ok(transactions);
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        } catch (InsufficientPermissionMiddlewareException e) {
+            throw forbiddenRestException(e);
+		}
+    }
+    
+    @Override
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<TransactionTO> getTransactionById(String accountId, String transactionId) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.getTransactionById(accountId, transactionId));
+        } catch (AccountNotFoundMiddlewareException | TransactionNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (InsufficientPermissionMiddlewareException e) {
+            throw forbiddenRestException(e);
+		}
+    }
+    
+    /**
+     * @deprecated: user request param instead
+     * @param iban
+     * @return
+     */
+    @Override
+    @PreAuthorize("accountInfoByIban(#iban)")
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(String iban) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.now(), true));
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        } catch (InsufficientPermissionMiddlewareException e) {
+            throw forbiddenRestException(e);
+		}
+    }
+
+    @Override
+    @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
+    public ResponseEntity<Boolean> fundsConfirmation( FundsConfirmationRequestTO request) {
+        try {
+            boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
+            return ResponseEntity.ok(fundsAvailable);
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        }
+    }
+
+    private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
+        if (!validDate(dateFrom).isEqual(validDate(dateTo))
+                    && validDate(dateFrom).isAfter(validDate(dateTo))) {
+            throw new ConflictRestException("Illegal request dates sequence, possibly swapped 'date from' with 'date to'");
+        }
+    }
+
+    private LocalDate validDate(LocalDate date) {
+        return Optional.ofNullable(date)
+                       .orElseGet(LocalDate::now);
+    }
+
+	private RestException forbiddenRestException(InsufficientPermissionMiddlewareException e) {
+		logger.error(e.getMessage(), e);
+		return new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+	}
+
+	private RestException notFoundRestException(AccountNotFoundMiddlewareException e) {
+		logger.error(e.getMessage(), e);
+		return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+	}
+
 }

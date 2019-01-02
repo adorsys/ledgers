@@ -22,7 +22,6 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,106 +42,78 @@ import io.swagger.annotations.Authorization;
 
 @Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 public interface AccountRestAPI {
-	public static final String IBANS_IBAN_PARAM = "/ibans/{iban}";
-	public static final String LIST_OF_ACCOUNTS_PATH = "/listOfAccounts";
+	public static final String IBAN_QUERY_PARAM = "iban";
 	public static final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
 	public static final String DATE_TO_QUERY_PARAM = "dateTo";
 	public static final String DATE_FROM_QUERY_PARAM = "dateFrom";
-	public static final String ACCOUNT_ID__TRANSACTIONS_PATH = "/{accountId}/transactions";
 	public static final String BASE_PATH = "/accounts";
+	public static final String ACCOUNT_ID = "accountId";
+    public static final String TRANSACTION_ID = "transactionId";
 	public static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
     public static final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
-
-    @GetMapping("/{accountId}")
-    @ApiOperation(value="Load Account by AccountIs", 
-    	notes="Returns account details information", 
-    	authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<AccountDetailsTO> getAccountDetailsById(
-    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
-    		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
-
-    /**
-     * @deprecated : wrong REST principles applied here
-     * 
-     * @param accountId
-     * @return
-     */
-    @GetMapping("/balances/{accountId}")
-    @ApiOperation(value="Get Balances", notes="Returns balances of the deposit account", 
-    	authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<List<AccountBalanceTO>> getBalances(
-    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
-    		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
-
-    @GetMapping("/{accountId}/balances")
-    @ApiOperation(value="Returns balances of the deposit account with the given id", authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<List<AccountBalanceTO>> getBalances2(
-    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
-    		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
-    
-    @GetMapping("{accountId}/transactions/{transactionId}")
-    @ApiOperation(value="Load Transaction", notes="Returns the transaction with the given account id and transaction id.", 
-    	authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<TransactionTO> getTransactionById(
-    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
-    		@PathVariable(name="accountId") String accountId, 
-    		@ApiParam(THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY)
-    		@PathVariable(name="transactionId") String transactionId)  throws NotFoundRestException, ForbiddenRestException;
-
-    @GetMapping(path=ACCOUNT_ID__TRANSACTIONS_PATH, params= {DATE_FROM_QUERY_PARAM,DATE_TO_QUERY_PARAM})
-    @ApiOperation(value="Find Transactions By Date", notes="Returns all transactions for the given account id", 
-    	authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<List<TransactionTO>> getTransactionByDates(
-    		@ApiParam(THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY)
-    		@PathVariable(name="accountId") String accountId,
-    		@RequestParam(name=DATE_FROM_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
-    		@RequestParam(name=DATE_TO_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo)
-    				 throws NotFoundRestException, ForbiddenRestException;
-
-    /**
-     * TODO: Bad REST design. Use query parameter instead.
-     * 
-     * @deprecated: Access list of accounts thru the user resource and use the iban to read account details.
-     * @param userLogin
-     * @return
-     */
-    @GetMapping("/users/{userLogin}")
-    @ApiOperation(value="Load Accounts By User Login", notes="Returns the list of all accounts linked to the given user.", 
-    	authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<List<AccountDetailsTO>> getListOfAccountDetailsByUserId(
-    		@PathVariable(name="userLogin") String userLogin)
-    		 throws NotFoundRestException, ForbiddenRestException;
 
     /**
      * Return the list of accounts linked with the current customer.
      * 
      * @return : the list of accounts linked with the current customer.
      */
-    @GetMapping(path=LIST_OF_ACCOUNTS_PATH)
+    @GetMapping
     @ApiOperation(value="List Accounts", authorizations =@Authorization(value="apiKey"), notes="Returns the list of all accounts linked to the connected user. Call only available to customer.")
     ResponseEntity<List<AccountDetailsTO>> getListOfAccounts()  throws ForbiddenRestException;
+
+    @PostMapping
+    @ApiOperation(value="Create Deposit Account", authorizations =@Authorization(value="apiKey"), notes="Creates a deposit account")
+    ResponseEntity<Void> createDepositAccount(
+    		@RequestBody AccountDetailsTO accountDetailsTO) 
+    		 throws ForbiddenRestException, ConflictRestException;
+    
+    @GetMapping("/{accountId}")
+    @ApiOperation(value="Load Account by AccountId", 
+    	notes="Returns account details information", 
+    	authorizations =@Authorization(value="apiKey"))
+    ResponseEntity<AccountDetailsTO> getAccountDetailsById(
+    		@ApiParam(ACCOUNT_ID)
+    		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
+
+    @GetMapping("/{accountId}/balances")
+    @ApiOperation(value="Returns balances of the deposit account with the given id", authorizations =@Authorization(value="apiKey"))
+    ResponseEntity<List<AccountBalanceTO>> getBalances(
+    		@ApiParam(ACCOUNT_ID)
+    		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
+    
+    @GetMapping(path="/{accountId}/transactions", params= {DATE_FROM_QUERY_PARAM,DATE_TO_QUERY_PARAM})
+    @ApiOperation(value="Find Transactions By Date", notes="Returns all transactions for the given account id", 
+    	authorizations =@Authorization(value="apiKey"))
+    ResponseEntity<List<TransactionTO>> getTransactionByDates(
+    		@ApiParam(ACCOUNT_ID)
+    		@PathVariable(name="accountId") String accountId,
+    		@RequestParam(name=DATE_FROM_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
+    		@RequestParam(name=DATE_TO_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo)
+    				 throws NotFoundRestException, ForbiddenRestException;
+
+    @GetMapping("/{accountId}/transactions/{transactionId}")
+    @ApiOperation(value="Load Transaction", notes="Returns the transaction with the given account id and transaction id.", 
+    	authorizations =@Authorization(value="apiKey"))
+    ResponseEntity<TransactionTO> getTransactionById(
+    		@ApiParam(ACCOUNT_ID)
+    		@PathVariable(name="accountId") String accountId, 
+    		@ApiParam(TRANSACTION_ID)
+    		@PathVariable(name="transactionId") String transactionId)  throws NotFoundRestException, ForbiddenRestException;
 
     /**
      * @deprecated: user request param instead
      * @param iban
      * @return
      */
-    @GetMapping(IBANS_IBAN_PARAM)
+    @GetMapping(path="/query", params= {IBAN_QUERY_PARAM})
     @ApiOperation(value="Load Account Details By IBAN", authorizations =@Authorization(value="apiKey"), notes="Returns account details information given the account IBAN")
     ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
     		@ApiParam(value="The IBAN of the requested account: e.g.: DE69760700240340283600", example="DE69760700240340283600")
-    		@PathVariable(name="iban") String iban)  throws NotFoundRestException, ForbiddenRestException;
+    		@RequestParam(name=IBAN_QUERY_PARAM) String iban)  throws NotFoundRestException, ForbiddenRestException;
 
     @ApiOperation(value="Fund Confirmation", authorizations =@Authorization(value="apiKey"), notes="Returns account details information given the account IBAN")
     @PostMapping(value = "/funds-confirmation")
     ResponseEntity<Boolean> fundsConfirmation(
     		@RequestBody FundsConfirmationRequestTO request) 
     		 throws NotFoundRestException, ForbiddenRestException;
-
-
-    @PostMapping("/")
-    @ApiOperation(value="Create Deposit Account", authorizations =@Authorization(value="apiKey"), notes="Creates a deposit account")
-    ResponseEntity<Void> createDepositAccount(
-    		@RequestBody AccountDetailsTO accountDetailsTO) 
-    		 throws ForbiddenRestException, ConflictRestException;
 }
