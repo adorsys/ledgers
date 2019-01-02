@@ -30,6 +30,7 @@ import de.adorsys.ledgers.mockbank.simple.data.SinglePaymentsData;
 import feign.FeignException;
 
 @Service
+@SuppressWarnings({"PMD.EmptyIfStmt"})
 public class PaymentProcessingService {
 
 	@Autowired	
@@ -78,7 +79,7 @@ public class PaymentProcessingService {
 			throws MalformedURLException, IOException, ProtocolException, JsonParseException, JsonMappingException {
 		UserContext bag = contextService.bagByIbanOrEx(iban);
 		AccountDetailsTO accountDetails = depositAccountService.account(iban)
-				.orElseThrow(() -> depositAccountService.nf(iban));
+				.orElseThrow(() -> depositAccountService.numberFormater(iban));
 		List<TransactionTO> transactions = transactions(execDate, accountDetails);
 		if(!containsPayment(end2EndId, transactions)) {
 			SCAPaymentResponseTO response = initiatePymt(bag, payment, pymentType);

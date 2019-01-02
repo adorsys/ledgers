@@ -230,6 +230,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 	 * 
 	 */
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCAPaymentResponseTO authorizePayment(String paymentId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
@@ -292,19 +293,19 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 	@Override
 	public SCAPaymentResponseTO loadSCAForPaymentData(String paymentId, String authorisationId)
 			throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException {
-		UserTO user = scaUtils.user();
-		PaymentBO payment = payment(paymentId);
-		PaymentKeyDataTO paymentKeyData = getPaymentKeyDataById(payment);
 		SCAOperationBO a;
 		try {
 			a = scaOperationService.loadAuthCode(authorisationId);
 		} catch (SCAOperationNotFoundException e) {
 			throw new SCAOperationExpiredMiddlewareException(e.getMessage(), e);
 		}
-		return toScaPaymentResponse(user, payment, paymentKeyData, a);
+		PaymentBO payment = payment(paymentId);
+		PaymentKeyDataTO paymentKeyData = getPaymentKeyDataById(payment);
+		return toScaPaymentResponse(scaUtils.user(), payment, paymentKeyData, a);
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCAPaymentResponseTO selectSCAMethodForPayment(String paymentId, String authorisationId, String scaMethodId)
 			throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, 
 			UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, 
@@ -340,19 +341,20 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 	@Override
 	public SCAPaymentResponseTO loadSCAForCancelPaymentData(String paymentId, String cancellationId)
 			throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException {
-		UserTO user = scaUtils.user();
-		PaymentBO payment = payment(paymentId);
-		PaymentKeyDataTO paymentKeyData = getCancelPaymentKeyDataById(payment);
 		SCAOperationBO a;
 		try {
 			a = scaOperationService.loadAuthCode(cancellationId);
 		} catch (SCAOperationNotFoundException e) {
 			throw new SCAOperationExpiredMiddlewareException(e.getMessage(), e);
 		}
+		UserTO user = scaUtils.user();
+		PaymentBO payment = payment(paymentId);
+		PaymentKeyDataTO paymentKeyData = getCancelPaymentKeyDataById(payment);
 		return toScaPaymentResponse(user, payment, paymentKeyData, a);
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCAPaymentResponseTO selectSCAMethodForCancelPayment(String paymentId, String cancellationId,
 			String scaMethodId)
 					throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, 
@@ -387,6 +389,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCAPaymentResponseTO authorizeCancelPayment(String paymentId, String cancellationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
@@ -424,14 +427,15 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 	}
 
 	private PaymentKeyDataTO getPaymentKeyDataById(PaymentBO payment) {
-		return getPaymentKeyDataById(payment, false);
+		return getPaymentKeyDataInternal(payment);
 	}
 
 	private PaymentKeyDataTO getCancelPaymentKeyDataById(PaymentBO payment) {
-		return getPaymentKeyDataById(payment, true);
+		return getPaymentKeyDataInternal(payment);
 	}
 
-	private PaymentKeyDataTO getPaymentKeyDataById(PaymentBO r, Boolean cancellation) {
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
+	private PaymentKeyDataTO getPaymentKeyDataInternal(PaymentBO r) {
 		try {
 			PaymentKeyDataTO p = new PaymentKeyDataTO();
 			p.setPaymentType(r.getPaymentType().name());
@@ -462,7 +466,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 					}
 					p.setCurrency(t.getInstructedAmount().getCurrency().getCurrencyCode());
 					md.update(t.getCreditorAccount().getIban().getBytes(UTF_8));
-					amt.add(t.getInstructedAmount().getAmount());
+					amt = amt.add(t.getInstructedAmount().getAmount());
 				}
 				p.setAmount(formatAmount(amt));
 				p.setCreditorIban(DatatypeConverter.printHexBinary(md.digest()));
@@ -502,6 +506,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 	 * For now we will assume there is no sca requirement, when the user having access
 	 * to the account does not habe any sca data configured.
 	 */
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private boolean scaRequired(PaymentBO payment, UserBO user, OpTypeBO opType) {
 		return scaUtils.hasSCA(user);
 	}

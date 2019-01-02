@@ -120,13 +120,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     @Override
     public SCAOperationBO generateAuthCode(AuthCodeDataBO data, UserBO user, ScaStatusBO scaStatus) throws SCAOperationValidationException, SCAMethodNotSupportedException, UserScaDataNotFoundException, SCAOperationNotFoundException {
 
-    	SCAOperationEntity scaOperation;
-    	if(data.getAuthorisationId()!=null) {
-    		String authorisationId = data.getAuthorisationId();
-    		scaOperation = repository.findById(data.getAuthorisationId()).orElseThrow(() -> new SCAOperationNotFoundException(authorisationId));
-    	} else {
-    		scaOperation = createAuthCodeInternal(data, scaStatus);
-    	}
+    	SCAOperationEntity scaOperation = loadOrCreateScaOperation(data, scaStatus);
     	
     	// One sca method is set, we do not change it anymore.
     	if(scaOperation.getScaMethodId()==null) {
@@ -165,6 +159,18 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
         return scaOperationMapper.toBO(scaOperation);
     }
+
+	private SCAOperationEntity loadOrCreateScaOperation(AuthCodeDataBO data, ScaStatusBO scaStatus)
+			throws SCAOperationNotFoundException {
+		SCAOperationEntity scaOperation;
+    	if(data.getAuthorisationId()!=null) {
+    		String authorisationId = data.getAuthorisationId();
+    		scaOperation = repository.findById(data.getAuthorisationId()).orElseThrow(() -> new SCAOperationNotFoundException(authorisationId));
+    	} else {
+    		scaOperation = createAuthCodeInternal(data, scaStatus);
+    	}
+		return scaOperation;
+	}
     
     private void checkMethodSupported(ScaUserDataBO scaMethod) throws SCAMethodNotSupportedException {
         if (!senders.containsKey(scaMethod.getScaMethod())) {

@@ -95,6 +95,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
 	public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId)
 			throws ValidationRestException, ConflictRestException, 
 			NotFoundRestException, ForbiddenRestException {
@@ -112,6 +113,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode)
 			throws GoneRestException, NotFoundRestException, ConflictRestException, ExpectationFailedRestException,
 			NotAcceptableRestException {

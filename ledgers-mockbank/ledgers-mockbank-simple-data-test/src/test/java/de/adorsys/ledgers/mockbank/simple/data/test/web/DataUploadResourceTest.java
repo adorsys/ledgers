@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import de.adorsys.ledgers.mockbank.simple.data.test.api.DataUploadService;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = DataUploadResource.class)
 public class DataUploadResourceTest {

@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,23 +31,21 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "Management" , description= "Application management")
+@SuppressWarnings({"PMD.UnnecessaryModifier"})
 public interface AppMgmtRestAPI {
-
 	public static final String BASE_PATH = "/management/app";
-	public static final String ADMIN_PATH = "/admin";
-	public static final String INIT_PATH = "/init";
 
     @GetMapping("/ping")
     @ApiOperation("Echo the server")
-    public ResponseEntity<String> ping();
+    ResponseEntity<String> ping();
 	
-    @PostMapping(INIT_PATH)
+    @PostMapping("/init")
     @ApiOperation("Initializes the deposit account module.")
-    public ResponseEntity<Void> initApp() throws RestException;
+    ResponseEntity<Void> initApp() throws RestException;
     
-    @PostMapping(ADMIN_PATH)
+    @PostMapping("/admin")
     @ApiOperation(value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
-    public ResponseEntity<BearerTokenTO> admin(@RequestBody(required=true) UserTO adminUser)
+    ResponseEntity<BearerTokenTO> admin(@RequestBody(required=true) UserTO adminUser)
     		throws NotFoundRestException, ForbiddenRestException, ConflictRestException;
 
 }

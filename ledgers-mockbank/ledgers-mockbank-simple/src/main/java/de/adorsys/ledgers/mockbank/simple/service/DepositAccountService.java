@@ -106,7 +106,7 @@ public class DepositAccountService {
 		}
 	}
 	
-	public IOException nf(String iban) {
+	public IOException numberFormater(String iban) {
 		return new IOException(String.format("Deposit account with iban %s not found.", iban));
 	}
 }

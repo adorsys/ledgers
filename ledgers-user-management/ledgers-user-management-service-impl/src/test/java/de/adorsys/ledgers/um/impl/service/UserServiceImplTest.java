@@ -51,6 +51,9 @@ public class UserServiceImplTest {
     
     @Mock
     private HashMacSecretSource secretSource;
+    
+    @Mock
+    private BearerTokenService bearerTokenService;
 
     private ResourceReader reader = YamlReader.getInstance();
 
@@ -106,23 +109,6 @@ public class UserServiceImplTest {
         BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
 
         assertTrue(bearerTokenBO==null);
-    }
-    
-    @Test
-    public void testValidate() throws UserNotFoundException, InsufficientPermissionException {
-        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
-        when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
-        when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
-        when(secretSource.getHmacSecret()).thenReturn("6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4");
-        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
-        when(converter.toUserBO(userEntity)).thenReturn(userBO);
-
-        BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
-        
-        BearerTokenBO bearerTokenBO2 = userService.validate(bearerTokenBO.getAccess_token(), new Date());
-        assertTrue(bearerTokenBO2!=null);
-        assertThat(bearerTokenBO2.getAccessTokenObject().getSub(), is(USER_ID));
-        assertThat(bearerTokenBO2.getAccessTokenObject().getActor(), is(USER_LOGIN));
     }
 
     @Test

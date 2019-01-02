@@ -32,16 +32,15 @@ public class AccountTransactionService {
 	/**
 	 * Validate if all transactions listed in the upload file are in the databse.
 	 * 
-	 * @param baseUrl : server address
 	 * @param t : the data holder
 	 * @param strict : if there is more transaction in that time frame, return true.
 	 * 
-	 * @return
-	 * @throws IOException
+	 * @return : true if transaction match specification given.
+	 * @throws IOException : error
 	 */
 	public boolean validateTransactions(TransactionData t, boolean strict) throws IOException {
 		AccountDetailsTO accountDetailsTO = depositAccountService.account(t.getIban())
-				.orElseThrow(() -> depositAccountService.nf(t.getIban()));
+				.orElseThrow(() -> depositAccountService.numberFormater(t.getIban()));
 		List<TransactionTO> loadedTransactions = loadTransactions(accountDetailsTO, t.getDateFrom(), LocalDate.now());
 		
 		// Now compare the transactions
@@ -89,7 +88,7 @@ public class AccountTransactionService {
 	private List<TransactionTO> loadTransactions(AccountDetailsTO accountDetailsTO, LocalDate from, LocalDate to)
 			throws IOException {
 		AccountDetailsTO account = depositAccountService.account(accountDetailsTO.getIban())
-				.orElseThrow(() -> depositAccountService.nf(accountDetailsTO.getIban()));
+				.orElseThrow(() -> depositAccountService.numberFormater(accountDetailsTO.getIban()));
 		
 		try {
 			contextService.setContext(accountDetailsTO.getIban());

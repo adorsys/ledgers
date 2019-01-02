@@ -19,7 +19,6 @@ import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
@@ -29,7 +28,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -82,7 +80,6 @@ import de.adorsys.ledgers.um.api.service.UserService;
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
     private static final Logger logger = LoggerFactory.getLogger(MiddlewareAccountManagementServiceImpl.class);
     private static final LocalDateTime BASE_TIME = LocalDateTime.MIN; //TODO @fpo why we use minimal possible time value?
-    private static final String ERROR_MESSAGE_USER_NF = "Can not find user with id %s. But this user is supposed to exist.";
 
     private final DepositAccountService depositAccountService;
     private final AccountDetailsMapper accountDetailsMapper;
@@ -96,12 +93,13 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final Principal principal;
 	private final SCAOperationService scaOperationService;
 	private final SCAUtils scaUtils;
+	private final AccessService accessService;
 
 	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
 			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
 			UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
-			AccessTokenTO accessToken, Principal principal, SCAOperationService scaOperationService,
-			SCAUtils scaUtils) {
+			AccessTokenTO accessToken, Principal principal, SCAOperationService scaOperationService, SCAUtils scaUtils,
+			AccessService accessService) {
 		super();
 		this.depositAccountService = depositAccountService;
 		this.accountDetailsMapper = accountDetailsMapper;
@@ -114,6 +112,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		this.principal = principal;
 		this.scaOperationService = scaOperationService;
 		this.scaUtils = scaUtils;
+		this.accessService = accessService;
 	}
 
 	@Override
@@ -130,7 +129,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
             DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(accountDetailsMapper.toDepositAccountBO(depositAccount), principal.getName());
             if (accountAccesss != null) {
-                addAccess(accountAccesss, depositAccountBO, persistBuffer);
+            	accessService.addAccess(accountAccesss, depositAccountBO, persistBuffer);
             }
         } catch (DepositAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -139,40 +138,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
-
-    private void addAccess(List<AccountAccessTO> accountAccess, DepositAccountBO depositAccountBO,
-                           final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
-        for (AccountAccessTO accountAccessTO : accountAccess) {
-            UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
-            if (user == null) {
-                user = userService.findById(accountAccessTO.getUser().getId());
-            }
-            AccountAccessBO accountAccessBO = new AccountAccessBO(depositAccountBO.getIban(),
-                    AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
-            addAccess(user, accountAccessBO, persistBuffer);
-        }
-        for (UserBO u : persistBuffer.values()) {
-            userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
-        }
-    }
-
-    private void addAccess(final UserBO user, AccountAccessBO accountAccessBO, final Map<String, UserBO> persistBuffer) {
-        AccountAccessBO existingAac = user.getAccountAccesses().stream().filter(a -> a.getIban().equals(accountAccessBO.getIban()))
-                                              .findFirst()
-                                              .orElseGet(() -> {
-                                                  AccountAccessBO aac = new AccountAccessBO();
-                                                  aac.setAccessType(accountAccessBO.getAccessType());
-                                                  aac.setIban(accountAccessBO.getIban());
-                                                  user.getAccountAccesses().add(aac);
-                                                  persistBuffer.put(user.getId(), user);
-                                                  return aac;
-                                              });
-        if (existingAac.getId() == null && existingAac.getAccessType().equals(accountAccessBO.getAccessType())) {
-            existingAac.setAccessType(accountAccessBO.getAccessType());
-            persistBuffer.put(user.getId(), user);
-        }
-    }
-
     @Override
     public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws
             AccountNotFoundMiddlewareException {
@@ -247,8 +212,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                                              ? today.atStartOfDay()
                                              : dateFrom.atStartOfDay();
         LocalDateTime dateTimeTo = dateTo == null
-                                           ? getTimeAtEndOfTheDay(today)
-                                           : getTimeAtEndOfTheDay(dateTo);
+                                           ? accessService.getTimeAtEndOfTheDay(today)
+                                           : accessService.getTimeAtEndOfTheDay(dateTo);
         try {
             List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
             return paymentConverter.toTransactionTOList(transactions);
@@ -288,7 +253,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			UserTO userTO = new UserTO();
 			userTO.setId(accessToken.getSub());
 			userTO.setLogin(accessToken.getActor());
-	        accountAccesses.add(createAccountAccess(accNbr, userTO));
+	        accountAccesses.add(accessService.createAccountAccess(accNbr, userTO));
 		}
 		try {
 			createDepositAccount(accDetails, accountAccesses);
@@ -314,7 +279,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			throw new AccountWithPrefixGoneMiddlewareException(String.format("Account prefix %s is gone.", accountNumberPrefix));
 		}
 		
-		List<String> ownedAccounts = filterOwnedAccounts(accountAccesses);
+		List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
 		
 		// user already has account with this prefix and suffix
 		String accNbr = accountNumberPrefix+accountNumberSuffix;
@@ -330,46 +295,25 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		}
 	}
 
-    private List<String> filterOwnedAccounts(List<AccountAccessTO> accountAccesses) {
-        // All iban owned by this user.
-        //TODO should be moved to UM @dmiex
-        return accountAccesses.stream()
-                       .filter(a -> a.getAccessType()!=null && AccessTypeBO.OWNER.name().equals(a.getAccessType().name()))
-                       .map(AccountAccessTO::getIban)
-                       .collect(Collectors.toList());
-    }
-
 	@Override
 	public void grantAccessToDepositAccount(AccountAccessTO accountAccess)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
-        UserBO userBo = loadCurrentUser();
+        UserBO userBo = accessService.loadCurrentUser();
         List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
 
         // Check that current user owns the account.
-        List<String> ownedAccounts = filterOwnedAccounts(accountAccesses);
+        List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
 
         if (!ownedAccounts.contains(accountAccess.getIban())) {
             throw new InsufficientPermissionMiddlewareException(userBo.getId(), userBo.getLogin(), accountAccess.getIban());
         }
 
-        addAccess(userBo, userMapper.toAccountAccessBO(accountAccess), new HashMap<>());
-
-    }
-
-    private UserBO loadCurrentUser() {
-        // Load owner
-        UserBO userBo;
-        try {
-            userBo = userService.findById(accessToken.getSub());
-        } catch (UserNotFoundException e) {
-            throw new DepositAccountUncheckedException(String.format(ERROR_MESSAGE_USER_NF, accessToken.getSub()), e);
-        }
-        return userBo;
+        accessService.addAccess(userBo, userMapper.toAccountAccessBO(accountAccess), new HashMap<>());
     }
 
     @Override
     public List<AccountDetailsTO> listOfDepositAccounts() {
-    	UserBO user = loadCurrentUser();
+    	UserBO user = accessService.loadCurrentUser();
     	UserTO userTO = userMapper.toUserTO(user);
     	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
 //        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
@@ -388,18 +332,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         return depositAccounts.stream()
                        .map(accountDetailsMapper::toAccountDetailsTO)
                        .collect(Collectors.toList());
-    }
-
-    private AccountAccessTO createAccountAccess(String accNbr, UserTO userTO) {
-        AccountAccessTO accountAccess = new AccountAccessTO();
-        accountAccess.setAccessType(AccessTypeTO.OWNER);
-        accountAccess.setIban(accNbr);
-        accountAccess.setUser(userTO);
-        return accountAccess;
-    }
-
-    private LocalDateTime getTimeAtEndOfTheDay(LocalDate date) {
-        return date.atTime(23, 59, 59, 00);
     }
 
     @Override
@@ -440,6 +372,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	}
 
 	@Override
+	@SuppressWarnings("PMD.IdenticalCatchBranches")
 	public SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId,
 			String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException,
 			UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
@@ -467,6 +400,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, AisConsentNotFoundMiddlewareException {
@@ -536,6 +470,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	 * For now we will assume there is no sca requirement, when the user having access
 	 * to the account does not habe any sca data configured.
 	 */
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private boolean scaRequired(AisConsentTO aisConsent, UserBO user, OpTypeBO opType) {
 		return scaUtils.hasSCA(user);
 	}

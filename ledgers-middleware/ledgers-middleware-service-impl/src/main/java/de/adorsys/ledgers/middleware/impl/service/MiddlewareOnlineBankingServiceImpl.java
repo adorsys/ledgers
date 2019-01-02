@@ -67,6 +67,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role)
 			throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
 		try {
@@ -137,6 +138,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCALoginResponseTO generateLoginAuthCode(String scaUserDataId, String authorisationId, String userMessage,
 			int validitySeconds) throws SCAOperationNotFoundMiddlewareException, InsufficientPermissionMiddlewareException, 
 			SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException{
@@ -166,6 +168,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	}
 
 	@Override
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public SCALoginResponseTO authenticateForLogin(String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
@@ -223,6 +226,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 		authCodeData.setValiditySeconds(1800);
 		return authCodeData;
 	}
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private boolean scaRequired(UserBO user, OpTypeBO opType) {
 		return scaUtils.hasSCA(user);
 	}

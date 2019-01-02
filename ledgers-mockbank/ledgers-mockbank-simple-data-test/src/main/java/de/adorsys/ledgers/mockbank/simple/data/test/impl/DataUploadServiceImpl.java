@@ -7,7 +7,6 @@ import org.springframework.core.env.Environment;
 
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.test.api.DataUploadService;
-import de.adorsys.ledgers.mockbank.simple.service.MockBankSimpleInitService;
 
 /**
  * 
@@ -32,6 +31,8 @@ public class DataUploadServiceImpl implements DataUploadService{
 	public void loadData(MockbankInitData initData) {
 		uploadToRemoteMockBank(initData, buildUrl());
 	}
+
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private void uploadToRemoteMockBank(MockbankInitData initData, String baseUrl) {
 //		MockBankSimpleInitService initService = new MockBankSimpleInitService(initData);
 //		initService.runInit(baseUrl);

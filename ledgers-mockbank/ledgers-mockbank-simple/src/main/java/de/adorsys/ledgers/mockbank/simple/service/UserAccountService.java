@@ -33,6 +33,7 @@ public class UserAccountService {
 	@Autowired
 	private AuthCodeReader authCodeReader;
 
+	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
 	public BearerTokenTO authorize(String login, String pin, UserRoleTO role)
 			throws UnsupportedEncodingException, IOException, ProtocolException {
 
@@ -72,7 +73,7 @@ public class UserAccountService {
 		}
 	}
 	
-	private BearerTokenTO authoriseLogin(UserContext bag, SCALoginResponseTO scaLoginResponseTO, String string) throws IOException {
+	private BearerTokenTO authoriseLogin(UserContext bag, SCALoginResponseTO scaLoginResponseTO, String authCode) throws IOException {
 		try {
 			contextService.setContext(bag);
 			bag.setAccessToken(scaLoginResponseTO.getBearerToken());
@@ -80,7 +81,7 @@ public class UserAccountService {
 			HttpStatus statusCode = null;
 			try {
 				res = ledgersUserMgmt.authorizeLogin(scaLoginResponseTO.getScaId(), 
-						scaLoginResponseTO.getAuthorisationId(), authCodeReader.readAuthCode(scaLoginResponseTO.getScaId(), scaLoginResponseTO.getAuthorisationId()));
+						scaLoginResponseTO.getAuthorisationId(), authCode);
 				statusCode = res.getStatusCode();
 			} catch (FeignException f) {
 				statusCode = HttpStatus.valueOf(f.status());
@@ -143,8 +144,10 @@ public class UserAccountService {
 		}
 	}
 
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private UserContext updateBag(String login, BearerTokenTO accessToken) {
 		UserContext bag = contextService.byLoginOrEx(login);
+		bag.setAccessToken(accessToken);
 		contextService.updateCredentials(login, bag);
 		return bag;
 	}

@@ -31,8 +31,8 @@ public interface MiddlewareOnlineBankingService {
 	 * @param email the email of the user
 	 * @param pin the pin of this user
 	 * @param role the initial role of the user.
-	 * @return
-	 * @throws UserAlreadyExistsMiddlewareException
+	 * @return : user
+	 * @throws UserAlreadyExistsMiddlewareException : user with login exists.
 	 */
 	UserTO register(String login, String email, String pin, UserRoleTO role) throws UserAlreadyExistsMiddlewareException;
 	
@@ -47,9 +47,8 @@ public interface MiddlewareOnlineBankingService {
 	 * @param role The intended role.
 	 * 
 	 * @return a session id for success, false for failure or trows a
-	 *         UserNotFoundMiddlewareException
-	 * @throws UserNotFoundMiddlewareException is thrown if user can`t be found
-	 * @throws InsufficientPermissionMiddlewareException 
+	 * @throws UserNotFoundMiddlewareException :sis thrown if user can`t be found
+	 * @throws InsufficientPermissionMiddlewareException  : permission not sufficient
 	 */
 	SCALoginResponseTO authorise(String login, String pin, UserRoleTO role) throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
@@ -60,9 +59,9 @@ public interface MiddlewareOnlineBankingService {
 	 * for the listed account, the token will be discarded an no user object will be
 	 * returned.
 	 * 
-	 * @param accessToken
-	 * @return
-	 * @throws UserNotFoundMiddlewareException
+	 * @param accessToken : the access token
+	 * @return the bearer token
+	 * @throws UserNotFoundMiddlewareException : user not found in db.
 	 */
 	BearerTokenTO validate(String accessToken) throws UserNotFoundMiddlewareException;
 	
@@ -72,13 +71,17 @@ public interface MiddlewareOnlineBankingService {
      * <p>
      * After the PSU selects the SCA method, this is called to generate and send the login auth code.
      *
-     * @param authCodeData Data that needed for auth code generation
+     * @param scaUserDataId scaMethod
+     * @param authorisationId the id of the auth process
+     * @param userMessage message to user
+     * @param validitySeconds validity in secondn.
      * @return SCALoginResponseTO the response object.
-     * @throws SCAOperationValidationMiddlewareException 
-     * @throws AuthCodeGenerationMiddlewareException  if something happens during auth code generation
+     * 
+     * @throws SCAOperationNotFoundMiddlewareException op not found
+     * @throws InsufficientPermissionMiddlewareException : missing permissions
      * @throws SCAMethodNotSupportedMiddleException   if user sca method doesn't support by ledgers
-     * @throws UserNotFoundMiddlewareException        if user not found by id
      * @throws UserScaDataNotFoundMiddlewareException if sca user data not found by id
+     * @throws SCAOperationValidationMiddlewareException : inputs not valid
      */
 	SCALoginResponseTO generateLoginAuthCode(String scaUserDataId, String authorisationId, String userMessage,
 			int validitySeconds) throws SCAOperationNotFoundMiddlewareException, 
@@ -90,14 +93,14 @@ public interface MiddlewareOnlineBankingService {
      * <p>
      * This is called when the user enters the received code.
      * 
-     * @param opId
-     * @param authCode
-     * @return
-     * @throws SCAOperationNotFoundMiddlewareException
-     * @throws SCAOperationValidationMiddlewareException
-     * @throws SCAOperationExpiredMiddlewareException
-     * @throws SCAOperationUsedOrStolenMiddlewareException
-     * @throws InsufficientPermissionMiddlewareException 
+     * @param authorisationId : the operation id
+     * @param authCode the auth code.
+     * @return the login response.
+     * @throws SCAOperationNotFoundMiddlewareException : operation not found.
+     * @throws SCAOperationValidationMiddlewareException : input data not valid.
+     * @throws SCAOperationExpiredMiddlewareException : expired
+     * @throws SCAOperationUsedOrStolenMiddlewareException : malicious input
+     * @throws InsufficientPermissionMiddlewareException  : not enough permissions.
      */
 	SCALoginResponseTO authenticateForLogin(String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,

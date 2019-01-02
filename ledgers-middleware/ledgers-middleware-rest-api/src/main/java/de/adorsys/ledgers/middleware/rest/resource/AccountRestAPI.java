@@ -41,16 +41,17 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 
 @Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
+@SuppressWarnings({"PMD.UnnecessaryModifier"})
 public interface AccountRestAPI {
-	public static final String IBAN_QUERY_PARAM = "iban";
-	public static final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
-	public static final String DATE_TO_QUERY_PARAM = "dateTo";
-	public static final String DATE_FROM_QUERY_PARAM = "dateFrom";
-	public static final String BASE_PATH = "/accounts";
-	public static final String ACCOUNT_ID = "accountId";
-    public static final String TRANSACTION_ID = "transactionId";
-	public static final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
-    public static final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
+	public final String BASE_PATH = "/accounts";
+	final String IBAN_QUERY_PARAM = "iban";
+	final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
+	final String DATE_TO_QUERY_PARAM = "dateTo";
+	final String DATE_FROM_QUERY_PARAM = "dateFrom";
+	final String ACCOUNT_ID = "accountId";
+    final String TRANSACTION_ID = "transactionId";
+	final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
+    final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
 
     /**
      * Return the list of accounts linked with the current customer.
@@ -102,8 +103,8 @@ public interface AccountRestAPI {
 
     /**
      * @deprecated: user request param instead
-     * @param iban
-     * @return
+     * @param iban : the iban
+     * @return : account details
      */
     @GetMapping(path="/query", params= {IBAN_QUERY_PARAM})
     @ApiOperation(value="Load Account Details By IBAN", authorizations =@Authorization(value="apiKey"), notes="Returns account details information given the account IBAN")

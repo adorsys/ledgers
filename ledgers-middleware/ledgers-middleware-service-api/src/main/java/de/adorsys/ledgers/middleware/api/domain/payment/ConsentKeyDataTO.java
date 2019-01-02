@@ -22,15 +22,12 @@ public class ConsentKeyDataTO {
 	}
 
 	public String template() {
-		if(consent==null) {
-			throw new IllegalStateException("Not expecting consent to be null.");
-		}
-		if(consent.getTppId()==null) {
-			throw new IllegalStateException("Not expecting tppId to be null.");
-		}
+		checkNullConsent();
 		// Deleting the consent of a TPP by replacing it with an empty consent.
 		AisAccountAccessInfoTO access = consent.getAccess();
-		if(access==null) return String.format("No account access to tpp with id: %s", consent.getTppId());
+		if(access==null) {
+			return String.format("No account access to tpp with id: %s", consent.getTppId());
+		}
 
 		StringBuilder b = new StringBuilder(String.format("Account access for TPP with id %s:\n", consent.getTppId()));
 		if(consent.getFrequencyPerDay()<=1) {
@@ -62,6 +59,15 @@ public class ConsentKeyDataTO {
 
 		b.append("TAN: %s");
 		return b.toString();
+	}
+
+	private void checkNullConsent() {
+		if(consent==null) {
+			throw new IllegalStateException("Not expecting consent to be null.");
+		}
+		if(consent.getTppId()==null) {
+			throw new IllegalStateException("Not expecting tppId to be null.");
+		}
 	}
 
 	private void format(StringBuilder b, List<String> accounts, String templ) {

@@ -90,4 +90,13 @@ public class AisConsentEntity {
 	public void setRecurringIndicator(boolean recurringIndicator) {
 		this.recurringIndicator = recurringIndicator;
 	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+	
 }

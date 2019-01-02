@@ -33,7 +33,7 @@ import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 
 @RestController
 @RequestMapping(AccountRestAPI.BASE_PATH)
-@SuppressWarnings("PMD.IdenticalCatchBranches")
+@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
 

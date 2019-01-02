@@ -54,11 +54,12 @@ public interface MiddlewareAccountManagementService {
 	/**
 	 * Creates a new DepositAccount for the connected user.
 	 * 
-	 * @param accountNumberPrefix : the account prefix
-	 * @param accountNumberSuffix : the account suffix.
-	 * @param accDetails : additional params
-	 * @throws AccountWithPrefixGoneMiddlewareException : account with prefixe gone.
-	 * @throws AccountWithSuffixExistsMiddlewareException : user has an acount with prefix and this suffix.
+	 * @param accountNumberPrefix : the account number prefix : the account number prefix
+	 * @param accountNumberSuffix : th eaccount number suffix
+	 * @param accDetails : account to create.
+	 * @throws AccountWithPrefixGoneMiddlewareException : another user owns this prefic
+	 * @throws AccountWithSuffixExistsMiddlewareException : user has account with same prefix and this suffix
+	 * @throws UserNotFoundMiddlewareException : no user 
 	 */
 	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
 			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException;
@@ -88,7 +89,7 @@ public interface MiddlewareAccountManagementService {
      * @param Id DepositAccount identifier
      * @param time the reference time.
      * @param withBalance boolean specifying if Balances has to be added to AccountDetails
-     * @return
+     * @return account details.
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
      */
@@ -99,7 +100,7 @@ public interface MiddlewareAccountManagementService {
      * @param iban DepositAccount iban
      * @param time the reference time.
      * @param withBalance boolean specifying if Balances has to be added to AccountDetails
-     * @return
+     * @return account details.
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
      */
@@ -110,7 +111,7 @@ public interface MiddlewareAccountManagementService {
     /**
      * Retrieves a List of AccountDetails by user login (psuId)
      * @param userLogin the user login
-     * @return
+     * @return list of account details.
      * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
@@ -121,9 +122,9 @@ public interface MiddlewareAccountManagementService {
      * Retrieves transaction by accountId and transactionId
      * @param accountId the account id
      * @param transactionId the transaction id
-     * @return
+     * @return the corresponding transaction
      * @throws AccountNotFoundMiddlewareException : target account not found.
-     * @throws TransactionNotFoundMiddlewareException
+     * @throws TransactionNotFoundMiddlewareException : no transation with this id.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
      */
     TransactionTO getTransactionById(String accountId, String transactionId) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
@@ -133,7 +134,7 @@ public interface MiddlewareAccountManagementService {
      * @param accountId the account id
      * @param dateFrom from this time 
      * @param dateTo to this time
-     * @return
+     * @return : List of transactions.
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked of the account.
      */
@@ -142,7 +143,7 @@ public interface MiddlewareAccountManagementService {
     /**
      * Confirm the availability of funds on user account to perform the operation with specified amount
      * @param request : teh fund confirmation request.
-     * @return
+     * @return : true if fund available else false.
      * @throws AccountNotFoundMiddlewareException : target account not found.
      */
     boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws AccountNotFoundMiddlewareException;
@@ -154,15 +155,15 @@ public interface MiddlewareAccountManagementService {
 	/**
 	 * Start an account consent process.
 	 * 
+	 * @param consentId : the cosent id.
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
 	 * 
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
-	 * @throws InsufficientPermissionException : acting user does not have sufficient permission to gran corresponding consent.
 	 */
 	SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent)
-			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException, InsufficientPermissionMiddlewareException;
+			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId) throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException;
 
@@ -171,20 +172,20 @@ public interface MiddlewareAccountManagementService {
 	/**
 	 * Authorizes a consent request. If the authentication is completed, the returned response will contain a valid bearer token.
 	 * 
-	 * @param consentId
-	 * @param authorisationId
-	 * @param authCode
-	 * @return
-	 * @throws SCAOperationNotFoundMiddlewareException
-	 * @throws SCAOperationValidationMiddlewareException
-	 * @throws SCAOperationExpiredMiddlewareException
-	 * @throws SCAOperationUsedOrStolenMiddlewareException
-	 * @throws AuthorisationNotFoundMiddlewareException
-	 * @throws AisConsentNotFoundMiddlewareException
+	 * @param consentId : the cosent id
+	 * @param authorisationId : the authorization id.
+	 * @param authCode : SCAConsentResponseTO
+	 * @return SCAConsentResponseTO : the consent response.
+	 * @throws SCAOperationNotFoundMiddlewareException : operation no logger in db
+	 * @throws SCAOperationValidationMiddlewareException : operation data not valid.
+	 * @throws SCAOperationExpiredMiddlewareException : expired
+	 * @throws SCAOperationUsedOrStolenMiddlewareException : user sca method not supported.
+	 * @throws AisConsentNotFoundMiddlewareException : consent not found.
 	 */
 	SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, AisConsentNotFoundMiddlewareException;
+			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
+			AisConsentNotFoundMiddlewareException;
 	
 	/**
 	 * Provide a third party provider with necessary permission to read accounts and

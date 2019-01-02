@@ -35,40 +35,42 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 
 @Api(tags = "Consent" , description= "Provide an API to manage consent at the core banking level.")
+@SuppressWarnings({"PMD.UnnecessaryModifier"})
 public interface ConsentRestAPI {
 	public static final String BASE_PATH = "/consents";
 
     /**
      * Initiates an sca process. The result of this initiation is the user's authorization id.
      * 
-     * @param scaId : identifies the sca id among the users from which authorization is expected.
+     * @param consentId : identifies the sca id among the users from which authorization is expected.
      * @param aisConsent : The ais consent target of the authorization. If the authorisation was started
      * by another user, this ais consent must match the one stored in the authorization object.
      * 
      * @return the authorization id. Might send the 
-     * @throws ConflictRestException
+     * @throws ConflictRestException : consent exists with id
+     * 
      */
     @PostMapping(value = "/{consentId}/authorisations")
 	@ApiOperation(value = "Start SCA", notes="Starts an authorisation process for establishing account information consent data on the server.", 
 		authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<SCAConsentResponseTO> startSCA(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent) throws ConflictRestException;
+    ResponseEntity<SCAConsentResponseTO> startSCA(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent) throws ConflictRestException;
     
     @GetMapping(value = "/{consentId}/authorisations/{authorisationId}")
 	@ApiOperation(value = "Get SCA", notes="Get the authorization response object eventually containing the list of selected sca methods.", 
 		authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<SCAConsentResponseTO> getSCA(@PathVariable("consentId") String consentId, 
+    ResponseEntity<SCAConsentResponseTO> getSCA(@PathVariable("consentId") String consentId, 
     		@PathVariable("authorisationId") String authorisationId) throws ConflictRestException;
     
     @PutMapping(value = "/{consentId}/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
 	@ApiOperation(value = "Select SCA Method", notes="Select teh given sca method and request for authentication code generation.", 
 		authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<SCAConsentResponseTO> selectMethod(@PathVariable("consentId") String consentId, 
+    ResponseEntity<SCAConsentResponseTO> selectMethod(@PathVariable("consentId") String consentId, 
     		@PathVariable("authorisationId") String authorisationId,
     		@PathVariable("scaMethodId") String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException;
     
     @PutMapping(value = "/{consentId}/authorisations/{authorisationId}/authCode")
 	@ApiOperation(value = "Send an authentication code for validation", notes="Validate an authetication code and returns the cosent token", authorizations =@Authorization(value="apiKey"))
-    public ResponseEntity<BearerTokenTO> validate(@PathVariable("consentId") String consentId,
+    ResponseEntity<BearerTokenTO> validate(@PathVariable("consentId") String consentId,
     		@PathVariable("authorisationId") String authorisationId, 
     		@RequestParam(name="authCode") String authCode) throws ValidationRestException,NotFoundRestException, ConflictRestException;
 }

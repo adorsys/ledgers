@@ -83,6 +83,7 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("paymentInit(#payment)")
+	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, Object payment) {
     	try {
 			return new ResponseEntity<SCAPaymentResponseTO>(paymentService.initiatePayment(payment, paymentType), HttpStatus.CREATED);
@@ -108,6 +109,7 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
+	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, 
     		String authorisationId,
     		String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException
@@ -125,6 +127,7 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
+	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> authorizePayment(String paymentId,
     		String authorisationId, 
     		String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException
@@ -173,6 +176,7 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
+	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> selecCancelPaymentSCAtMethod(String paymentId, 
     	    String cancellationId, String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException
     {
@@ -189,6 +193,7 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
+	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> authorizeCancelPayment(String paymentId,String cancellationId, String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException
     {
         try {

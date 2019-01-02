@@ -39,46 +39,30 @@ public interface MiddlewarePaymentService {
      * <p>
      * This call sets the status RCVD
      *
-     * @param payment
-     * @param paymentType
-     * @return
-	 * @throws AccountNotFoundMiddlewareException
-	 * @throws NoAccessMiddlewareException
+     * @param payment : the payment object
+     * @param paymentType : the payment type
+     * @return : the sca response object.
+	 * @throws AccountNotFoundMiddlewareException : account non existant.
+	 * @throws NoAccessMiddlewareException : missing permissions
 	 */
     <T> SCAPaymentResponseTO initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException;
 
 
     // ================= SCA =======================================//
-
-    /**
-     * PROC: 02b
-     * <p>
-     * After the PSU selects the SCA method, this is called to generate and send the auth code.
-     *
-     * @param authCodeData Data that needed for auth code generation
-     * @return opId id of operation created on the request
-     * @throws AuthCodeGenerationMiddlewareException  if something happens during auth code generation
-     * @throws SCAMethodNotSupportedMiddleException   if user sca method doesn't support by ledgers
-     * @throws UserNotFoundMiddlewareException        if user not found by id
-     * @throws UserScaDataNotFoundMiddlewareException if sca user data not found by id
-    String generateAuthCode(AuthCodeDataTO authCodeData) throws AuthCodeGenerationMiddlewareException, SCAMethodNotSupportedMiddleException, UserNotFoundMiddlewareException, UserScaDataNotFoundMiddlewareException;
-     */
-
     /**
      * PROC: 02c
      * <p>
      * This is called when the user enters the received code.
      * 
-     * @param paymentId
-     * @param authorisationId
-     * @param authCode
-     * @return
-     * @throws SCAOperationNotFoundMiddlewareException
-     * @throws SCAOperationValidationMiddlewareException
-     * @throws SCAOperationExpiredMiddlewareException
-     * @throws SCAOperationUsedOrStolenMiddlewareException
-     * @throws PaymentNotFoundMiddlewareException 
-     * @throws AuthorisationNotFoundMiddlewareException
+     * @param paymentId : the payment id
+     * @param authorisationId : the authorization id
+     * @param authCode : the auth code.
+     * @return : auth response.
+     * @throws SCAOperationNotFoundMiddlewareException : not found
+     * @throws SCAOperationValidationMiddlewareException : not valid
+     * @throws SCAOperationExpiredMiddlewareException : expired
+     * @throws SCAOperationUsedOrStolenMiddlewareException : malicious
+     * @throws PaymentNotFoundMiddlewareException  : payment not found.
      */
 	SCAPaymentResponseTO authorizePayment(String paymentId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
@@ -87,20 +71,6 @@ public interface MiddlewarePaymentService {
 
     //============================ Payment Execution ==============================//
 
-    /**
-     * PROC: 03
-     * <p>
-     * Is called by the channel layer after successfull SCA or no SCA.
-     * - When SCA is not needed
-     * - After a successfull SCA
-     * payment status will be set to ACSP.
-     *
-     * @param paymentId
-     * @return
-     * @throws PaymentProcessingMiddlewareException
-    TransactionStatusTO executePayment(String paymentId) throws PaymentProcessingMiddlewareException;
-     */
-
     //============================ Payment Status ==============================//
 
     /**
@@ -108,9 +78,9 @@ public interface MiddlewarePaymentService {
      * <p>
      * Read the status of a payment. Can be called repetitively after initiation of a payment.
      *
-     * @param paymentId
-     * @return
-     * @throws PaymentNotFoundMiddlewareException
+     * @param paymentId : the payment id
+     * @return : the transaction status
+     * @throws PaymentNotFoundMiddlewareException : payment with id not found.
      */
     TransactionStatusTO getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
 
@@ -119,24 +89,9 @@ public interface MiddlewarePaymentService {
 
     /**
      * Reads and return a payment.
-     * 
-     * @deprecated: no need for specifying payment product and payment type.
      *
-     * @param paymentType
-     * @param paymentProduct
-     * @param paymentId
-     * @return
-     * @throws PaymentNotFoundMiddlewareException
-    <T> T getPaymentById(PaymentTypeTO paymentType, PaymentProductTO paymentProduct, String paymentId) throws PaymentNotFoundMiddlewareException;
-     */
-
-    /**
-     * Reads and return a payment.
-     *
-     * @param paymentType
-     * @param paymentProduct
-     * @param paymentId
-     * @return
+     * @param paymentId : the payment id
+     * @return the payment
      * @throws PaymentNotFoundMiddlewareException
      */
     Object getPaymentById(String paymentId) throws PaymentNotFoundMiddlewareException;
@@ -144,22 +99,12 @@ public interface MiddlewarePaymentService {
     /**
      * Checks the possibility of payment cancellation
      *
-     * @param paymentId
-     * @return
-     * @throws PaymentNotFoundMiddlewareException
-     * @throws PaymentProcessingMiddlewareException
+     * @param paymentId : the payment id
+     * @return : the auth response object.
+     * @throws PaymentNotFoundMiddlewareException : not found
+     * @throws PaymentProcessingMiddlewareException : processing
      */
     SCAPaymentResponseTO initiatePaymentCancellation(String paymentId) throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
-
-    /**
-     * Cancels payment if possible
-     *
-     * @param paymentId payment identifier
-     * @throws PaymentNotFoundMiddlewareException
-     * @throws PaymentProcessingMiddlewareException
-    void cancelPayment(String paymentId) throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
-    PaymentKeyDataTO getPaymentKeyDataById(String paymentId) throws PaymentNotFoundMiddlewareException;
-     */
 
 	String iban(String paymentId);
 
