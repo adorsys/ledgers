@@ -296,6 +296,8 @@
                     <excludeRoots>
                         <excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
+                        <excludeRoot>../ledgers-middleware-rest-server/target/generated-sources/annotations/
+                        </excludeRoot>
                         <excludeRoot>../ledgers-middleware-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
                         <excludeRoot>../ledgers-postings-service-impl/target/generated-sources/annotations/
@@ -303,8 +305,6 @@
                         <excludeRoot>../ledgers-sca-service-impl/target/generated-sources/annotations/
                         </excludeRoot>
                         <excludeRoot>../ledgers-user-management-service-impl/target/generated-sources/annotations/
-                        </excludeRoot>
-                        <excludeRoot>../ledgers-middleware-rest-server/target/generated-sources/annotations/
                         </excludeRoot>
                     </excludeRoots>
                 </configuration>
