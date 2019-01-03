@@ -18,7 +18,7 @@ export class AuthService {
   }
 
   authorize(credentials: any) {
-    return this.http.post(this.url + '/users/authorise2', null, {
+    return this.http.post(this.url + '/authorise2', null, {
       params: credentials as any,
       responseType: 'text'
     });
