@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 import io.swagger.annotations.Api;
@@ -47,13 +47,13 @@ public interface ConsentRestAPI {
      * by another user, this ais consent must match the one stored in the authorization object.
      * 
      * @return the authorization id. Might send the 
-     * @throws ConflictRestException : consent exists with id
+     * @throws ForbiddenRestException : consent exists with id
      * 
      */
     @PostMapping(value = "/{consentId}/authorisations")
 	@ApiOperation(value = "Start SCA", notes="Starts an authorisation process for establishing account information consent data on the server.", 
 		authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<SCAConsentResponseTO> startSCA(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent) throws ConflictRestException;
+    ResponseEntity<SCAConsentResponseTO> startSCA(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent) throws ForbiddenRestException;
     
     @GetMapping(value = "/{consentId}/authorisations/{authorisationId}")
 	@ApiOperation(value = "Get SCA", notes="Get the authorization response object eventually containing the list of selected sca methods.", 
@@ -70,7 +70,7 @@ public interface ConsentRestAPI {
     
     @PutMapping(value = "/{consentId}/authorisations/{authorisationId}/authCode")
 	@ApiOperation(value = "Send an authentication code for validation", notes="Validate an authetication code and returns the cosent token", authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<BearerTokenTO> validate(@PathVariable("consentId") String consentId,
+    ResponseEntity<SCAConsentResponseTO> authorizeConsent(@PathVariable("consentId") String consentId,
     		@PathVariable("authorisationId") String authorisationId, 
     		@RequestParam(name="authCode") String authCode) throws ValidationRestException,NotFoundRestException, ConflictRestException;
 }

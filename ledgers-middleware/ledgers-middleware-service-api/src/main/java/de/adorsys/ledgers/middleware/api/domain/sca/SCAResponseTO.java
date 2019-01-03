@@ -7,12 +7,12 @@ import java.util.List;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 
-public abstract class SCAResponseTO {
+public abstract class SCAResponseTO implements AspspConsentDataSerial {
 	private ScaStatusTO scaStatus;
 	private String authorisationId;
 	private List<ScaUserDataTO> scaMethods = new ArrayList<>();
 	private ScaUserDataTO chosenScaMethod;
-	private String challengeData;
+	private ChallengeDataTO challengeData;
 	private String psuMessage;
     private LocalDateTime statusDate;
     private int expiresInSeconds;
@@ -21,7 +21,12 @@ public abstract class SCAResponseTO {
      * the requested operation has been executed.
      */
     private BearerTokenTO bearerToken;
-	
+    
+    private String objectType;
+
+	public SCAResponseTO(String objectType) {
+		this.objectType = objectType;
+	}
 	public ScaStatusTO getScaStatus() {
 		return scaStatus;
 	}
@@ -46,12 +51,7 @@ public abstract class SCAResponseTO {
 	public void setChosenScaMethod(ScaUserDataTO chosenScaMethod) {
 		this.chosenScaMethod = chosenScaMethod;
 	}
-	public String getChallengeData() {
-		return challengeData;
-	}
-	public void setChallengeData(String challengeData) {
-		this.challengeData = challengeData;
-	}
+
 	public String getPsuMessage() {
 		return psuMessage;
 	}
@@ -76,4 +76,17 @@ public abstract class SCAResponseTO {
 	public void setBearerToken(BearerTokenTO bearerToken) {
 		this.bearerToken = bearerToken;
 	}
+	public String getObjectType() {
+		return objectType;
+	}
+	public void setObjectType(String objectType) {
+		this.objectType = objectType;
+	}
+	public ChallengeDataTO getChallengeData() {
+		return challengeData;
+	}
+	public void setChallengeData(ChallengeDataTO challengeData) {
+		this.challengeData = challengeData;
+	}
+	
 }

@@ -6,6 +6,10 @@ public class SCAPaymentResponseTO extends SCAResponseTO {
 	private String paymentId;
 	private TransactionStatusTO transactionStatus;
 
+	public SCAPaymentResponseTO() {
+		super("SCAPaymentResponseTO");
+	}
+
 	public String getPaymentId() {
 		return paymentId;
 	}

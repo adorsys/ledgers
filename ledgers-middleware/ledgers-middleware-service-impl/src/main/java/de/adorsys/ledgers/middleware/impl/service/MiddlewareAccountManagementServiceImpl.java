@@ -349,8 +349,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
      * @see de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService#startSCA(java.lang.String, de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO)
      */
 	@Override
-	public SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent)
-			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
+	public SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
 		BearerTokenBO bearerToken = checkAisConsent(aisConsent);
 		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
 		SCAConsentResponseTO response = prepareSCA(scaUtils.userBO(), aisConsent, consentKeyData);
@@ -521,7 +520,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	private SCAConsentResponseTO toScaConsentResponse(UserTO user,
 			AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
 		SCAConsentResponseTO response = new SCAConsentResponseTO();
-		response.setChallengeData(consent.getId());
 		response.setAuthorisationId(operation.getId());
 		response.setChosenScaMethod(scaUtils.getScaMethod(user, operation.getScaMethodId()));
 		response.setChallengeData(null);

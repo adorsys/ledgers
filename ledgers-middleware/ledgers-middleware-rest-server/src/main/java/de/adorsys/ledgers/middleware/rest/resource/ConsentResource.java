@@ -24,10 +24,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
+import de.adorsys.ledgers.middleware.rest.exception.GoneRestException;
+import de.adorsys.ledgers.middleware.rest.exception.NotAcceptableRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 
@@ -36,7 +47,6 @@ import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
-
 	private static final Logger logger = LoggerFactory.getLogger(ConsentResource.class);
 
     private final MiddlewareAccountManagementService middlewareAccountService;
@@ -46,30 +56,61 @@ public class ConsentResource implements ConsentRestAPI {
     }
 
 	@Override
-	public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent)
-			throws ConflictRestException {
-		return null;
+	public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent){
+		try {
+			return ResponseEntity.ok(middlewareAccountService.startSCA(consentId, aisConsent));
+		} catch (InsufficientPermissionMiddlewareException e) {
+			logger.error(e.getMessage(), e);
+			throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
 	}
 
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> getSCA(String consentId, String authorisationId)
 			throws ConflictRestException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(consentId, authorisationId));
+		} catch (SCAOperationExpiredMiddlewareException | AisConsentNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage());
+		}
 	}
 
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> selectMethod(String consentId, String authorisationId,
 			String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(consentId, authorisationId, scaMethodId));
+		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new NotFoundRestException(e.getMessage());
+		} catch (SCAOperationValidationMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new ValidationRestException(e.getMessage());
+		} catch (SCAMethodNotSupportedMiddleException e) {
+            logger.error(e.getMessage(), e);
+			throw new NotAcceptableRestException(e.getMessage());
+		}
 	}
 
 	@Override
-	public ResponseEntity<BearerTokenTO> validate(String consentId, String authorisationId, String authCode)
-			throws ValidationRestException, NotFoundRestException, ConflictRestException {
-		// TODO Auto-generated method stub
-		return null;
+	public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode)
+			throws ValidationRestException, NotFoundRestException, GoneRestException {
+		try {
+			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(consentId, authorisationId, authCode));
+		} catch (SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new NotFoundRestException(e.getMessage());
+		} catch (SCAOperationValidationMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new ValidationRestException(e.getMessage());
+		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new NotAcceptableRestException(e.getMessage());
+		} catch (SCAOperationExpiredMiddlewareException e) {
+            logger.error(e.getMessage());
+			throw new GoneRestException(e.getMessage());
+		}
 	}
 
 }

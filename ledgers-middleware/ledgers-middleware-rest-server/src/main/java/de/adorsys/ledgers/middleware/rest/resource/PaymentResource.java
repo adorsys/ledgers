@@ -117,10 +117,13 @@ public class PaymentResource implements PaymentRestAPI {
     	try {
 			return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(paymentId, authorisationId, scaMethodId));
 		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException e) {
+            logger.error(e.getMessage());
 			throw new NotFoundRestException(e.getMessage());
 		} catch (SCAMethodNotSupportedMiddleException e) {
+            logger.error(e.getMessage());
 			throw new NotAcceptableRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
+            logger.error(e.getMessage());
 			throw new ValidationRestException(e.getMessage());
 		}
     }
@@ -136,17 +139,16 @@ public class PaymentResource implements PaymentRestAPI {
         	return ResponseEntity.ok(paymentService.authorizePayment(paymentId, authorisationId, authCode));
         } catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {
             logger.error(e.getMessage());
-            return ResponseEntity.notFound().header("message", e.getMessage()).build(); 
-            //TODO Create formal rest error messaging, fix all internal service errors to comply some pattern.
+			throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).header("message", e.getMessage()).build(); 
+			throw new ValidationRestException(e.getMessage());
 		} catch (SCAOperationExpiredMiddlewareException e) {
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.GONE).header("message", e.getMessage()).build(); 
+			throw new GoneRestException(e.getMessage());
 		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header("message", e.getMessage()).build(); 
+			throw new NotAcceptableRestException(e.getMessage());
 		}
     }
 
@@ -198,21 +200,15 @@ public class PaymentResource implements PaymentRestAPI {
     {
         try {
         	return ResponseEntity.ok(paymentService.authorizeCancelPayment(paymentId, cancellationId, authCode));
-        } catch (SCAOperationNotFoundMiddlewareException e) {
+		} catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException | SCAOperationExpiredMiddlewareException e) {
             logger.error(e.getMessage());
-            return ResponseEntity.notFound().header("message", e.getMessage()).build(); 
-            //TODO Create formal rest error messaging, fix all internal service errors to comply some pattern.
-		} catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).header("message", e.getMessage()).build(); 
-		} catch (SCAOperationExpiredMiddlewareException e) {
-            logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.GONE).header("message", e.getMessage()).build(); 
-		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header("message", e.getMessage()).build(); 
-		} catch (PaymentNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
+		} catch (SCAOperationValidationMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new ValidationRestException(e.getMessage());
+		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+			throw new NotAcceptableRestException(e.getMessage());
 		}
     }
 }

@@ -159,11 +159,10 @@ public interface MiddlewareAccountManagementService {
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
 	 * 
-     * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
 	SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent)
-			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
+			throws InsufficientPermissionMiddlewareException;
 
 	SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId) throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException;
 
