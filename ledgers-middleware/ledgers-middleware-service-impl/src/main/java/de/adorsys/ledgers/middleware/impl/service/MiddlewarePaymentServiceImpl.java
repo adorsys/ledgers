@@ -239,8 +239,9 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 		try {
 			PaymentBO r = payment(paymentId);
 			PaymentKeyDataTO paymentKeyData = getPaymentKeyDataById(r);
+			String template = paymentKeyData.template();
 			boolean validAuthCode = scaOperationService.validateAuthCode(authorisationId, paymentId,
-					paymentKeyData.template(), authCode);
+					template, authCode);
 			if (!validAuthCode) {
 				throw new SCAOperationValidationMiddlewareException("Wrong auth code");
 			}
