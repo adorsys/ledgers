@@ -16,12 +16,12 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public enum AccountStatus {
     ENABLED("enabled"),
@@ -32,7 +32,7 @@ public enum AccountStatus {
     private String value;
 
     @JsonCreator
-    private AccountStatus(String value) {
+    AccountStatus(String value) {
         this.value = value;
     }
 

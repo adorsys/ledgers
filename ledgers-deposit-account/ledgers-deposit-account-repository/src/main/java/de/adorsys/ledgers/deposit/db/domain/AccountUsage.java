@@ -16,12 +16,12 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public enum AccountUsage {
     PRIV("PRIV"),
@@ -31,7 +31,7 @@ public enum AccountUsage {
     private String value;
 
     @JsonCreator
-    private AccountUsage(String value) {
+    AccountUsage(String value) {
         this.value = value;
     }
 

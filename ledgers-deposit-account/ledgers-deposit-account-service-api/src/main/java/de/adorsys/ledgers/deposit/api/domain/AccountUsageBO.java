@@ -28,7 +28,7 @@ public enum AccountUsageBO {
     private String value;
 
     
-    private AccountUsageBO(String value) {
+    AccountUsageBO(String value) {
         this.value = value;
     }
 

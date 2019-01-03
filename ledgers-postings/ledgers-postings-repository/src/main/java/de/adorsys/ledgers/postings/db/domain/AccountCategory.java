@@ -24,7 +24,7 @@ public enum AccountCategory {
 	private final String desc;
 	private final BalanceSide defaultBs;
 	
-	private AccountCategory(String desc, BalanceSide bs) {
+	AccountCategory(String desc, BalanceSide bs) {
 		this.desc = desc;
 		this.defaultBs=bs;
 	}

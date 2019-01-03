@@ -49,8 +49,7 @@ public class TokenStorageServiceImpl implements TokenStorageService {
 		if(objectType==null) {
 			return null;
 		}
-		String type = objectType.toString();
-		return type;
+		return objectType.toString();
 	}
 
 	@Override
