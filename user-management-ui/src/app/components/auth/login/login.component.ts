@@ -27,13 +27,16 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-    this.authService.login(this.loginForm.value)
-      .subscribe(success => {
-        if (success) {
-          this.router.navigate(['/']);
-        }
-      });
+    if (this.loginForm.valid) {
+      this.authService.login(this.loginForm.value)
+        .subscribe(
+          success => {
+            if (success) {
+              this.router.navigate(['/']);
+            }
+          },
+          error1 => {
+          });
+    }
   }
-
-
 }
