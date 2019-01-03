@@ -31,6 +31,7 @@
 			<artifactId>springfox-bean-validators</artifactId>
 			<version>2.9.2</version>
 		</dependency>
+		
 		<!-- other dependencies -->
 
 		<dependency>

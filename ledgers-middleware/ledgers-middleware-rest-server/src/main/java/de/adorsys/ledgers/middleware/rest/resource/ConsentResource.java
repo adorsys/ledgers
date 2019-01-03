@@ -44,7 +44,6 @@ import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 
 @RestController
 @RequestMapping(AccountRestAPI.BASE_PATH)
-@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
 	private static final Logger logger = LoggerFactory.getLogger(ConsentResource.class);

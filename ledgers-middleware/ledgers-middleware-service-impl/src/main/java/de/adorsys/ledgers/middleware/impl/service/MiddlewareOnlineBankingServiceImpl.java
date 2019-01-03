@@ -67,7 +67,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	}
 
 	@Override
-	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
+	@SuppressWarnings({"PMD.CyclomaticComplexity"})
 	public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role)
 			throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
 		try {

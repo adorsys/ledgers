@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.mockbank;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 	DbUnitTestExecutionListener.class })
 @DatabaseTearDown(value = { "MiddlewareServiceImplIT-db-delete.xml" }, type = DatabaseOperation.DELETE_ALL)
 public class AppManagementResourceAdminIT {
-	
+	ObjectMapper mapper = new ObjectMapper();
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
@@ -74,7 +75,7 @@ public class AppManagementResourceAdminIT {
 
 	@Test
     public void givenAdminURI_whenMockMVC_thenReturnsAccessToken() throws Exception {
-		String payload = AdminPayload.adminPayload();
+		String payload = mapper.writeValueAsString(AdminPayload.adminPayload());
         this.mockMvc.perform(
         		MockMvcRequestBuilders.post("/management/app/admin")
         			.contentType(MediaType.APPLICATION_JSON)

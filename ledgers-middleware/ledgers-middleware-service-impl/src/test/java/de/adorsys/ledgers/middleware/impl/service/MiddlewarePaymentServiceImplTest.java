@@ -2,13 +2,14 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.security.Principal;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,30 +21,20 @@ import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import pro.javatar.commons.reader.YamlReader;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -74,8 +65,6 @@ public class MiddlewarePaymentServiceImplTest {
     private MiddlewareUserManagementServiceImpl userManagementService;
     @Mock
     private AccessTokenTO accessToken;
-    @Mock
-    Principal principal;
     @Mock
     private SCAUtils scaUtils;
 
@@ -139,24 +128,23 @@ public class MiddlewarePaymentServiceImplTest {
 //
 //        middlewareService.generateAuthCode(codeDataTO);
 //    }
-//
-//    @Test
-//    public void getPaymentById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
-//        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-//        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
-//        Object result = middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, PAYMENT_ID);
-//
-//        assertThat(result).isNotNull();
-//        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(SinglePaymentTO.class, SINGLE_TO));
-//    }
-//
-//    @Test(expected = PaymentNotFoundMiddlewareException.class)
-//    public void getPaymentById_Fail_wrong_id() throws PaymentNotFoundException, PaymentNotFoundMiddlewareException {
-//        when(paymentService.getPaymentById(WRONG_PAYMENT_ID))
-//                .thenThrow(new PaymentNotFoundException(WRONG_PAYMENT_ID));
-//        middlewareService.getPaymentById(PaymentTypeTO.SINGLE, PaymentProductTO.SEPA, WRONG_PAYMENT_ID);
-//    }
-//
+
+    @Test
+    public void getPaymentById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
+        SinglePaymentTO result = (SinglePaymentTO)middlewareService.getPaymentById(PAYMENT_ID);
+        
+        Assert.assertNotNull(result);
+    }
+
+    @Test(expected = PaymentNotFoundMiddlewareException.class)
+    public void getPaymentById_Fail_wrong_id() throws PaymentNotFoundException, PaymentNotFoundMiddlewareException {
+        when(paymentService.getPaymentById(WRONG_PAYMENT_ID))
+                .thenThrow(new PaymentNotFoundException(WRONG_PAYMENT_ID));
+        middlewareService.getPaymentById(WRONG_PAYMENT_ID);
+    }
+
 //    @Test
 //    public void initiatePayment() throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, UserNotFoundMiddlewareException {
 //        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
@@ -177,14 +165,14 @@ public class MiddlewarePaymentServiceImplTest {
 //        TransactionStatusTO result = middlewareService.executePayment(PAYMENT_ID);
 //        assertThat(result).isNotNull();
 //    }
-//
-//    @Test(expected = PaymentProcessingMiddlewareException.class)
-//    public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException {
-//        when(principal.getName()).thenReturn(SYSTEM);
-//        when(paymentService.executePayment(any(), eq(SYSTEM))).thenThrow(new PaymentNotFoundException());
-//
-//        middlewareService.executePayment(PAYMENT_ID);
-//    }
+
+    @Test(expected = SCAOperationValidationMiddlewareException.class)
+    public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        String authorisationId = "authId";
+		String authCode = "123456";
+		middlewareService.authorizePayment(PAYMENT_ID, authorisationId, authCode);
+    }
 //
 //    @Test
 //    public void initiatePaymentCancellation() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
@@ -197,33 +185,31 @@ public class MiddlewarePaymentServiceImplTest {
 //        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(PaymentCancellationResponseTO.class, "CancellationResponse.yml"));
 //    }
 //
-//    @Test(expected = UserNotFoundMiddlewareException.class)
-//    public void initiatePaymentCancellation_Failure_user_NF() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException {
-//        when(userManagementService.findById(any())).thenThrow(new UserNotFoundMiddlewareException());
-//        middlewareService.initiatePaymentCancellation("PSU_ID", PAYMENT_ID);
-//    }
-//
-//    @Test(expected = PaymentNotFoundMiddlewareException.class)
-//    public void initiatePaymentCancellation_Failure_pmt_NF() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
-//        when(userManagementService.findById(any())).thenReturn(readYml(UserTO.class, "user2.yml"));
-//        when(paymentService.getPaymentById(any())).thenThrow(new PaymentNotFoundException());
-//        middlewareService.initiatePaymentCancellation("PSU_ID", PAYMENT_ID);
-//    }
-//
-//    @Test(expected = PaymentNotFoundMiddlewareException.class)
-//    public void initiatePaymentCancellation_Failure_pmt_and_acc_no_equal_iban() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
-//        when(userManagementService.findById(any())).thenReturn(readYml(UserTO.class, "randomUser.yml"));
-//        when(paymentService.getPaymentById(any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-//        middlewareService.initiatePaymentCancellation("PSU_ID", PAYMENT_ID);
-//    }
-//
-//    @Test(expected = PaymentProcessingMiddlewareException.class)
-//    public void initiatePaymentCancellation_Failure_pmt_status_acsc() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
-//        when(userManagementService.findById(any())).thenReturn(readYml(UserTO.class, "user2.yml"));
-//        when(paymentService.getPaymentById(any())).thenReturn(readYml(PaymentBO.class, "PaymentSingleBoStatusAcsc.yml"));
-//        middlewareService.initiatePaymentCancellation("PSU_ID", PAYMENT_ID);
-//    }
-//
+    @Test(expected = AccountMiddlewareUncheckedException.class)
+    public void initiatePaymentCancellation_Failure_user_NF() throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException {
+        when(scaUtils.userBO()).thenThrow(AccountMiddlewareUncheckedException.class);
+
+        middlewareService.initiatePaymentCancellation(PAYMENT_ID);
+    }
+
+    @Test(expected = PaymentNotFoundMiddlewareException.class)
+    public void initiatePaymentCancellation_Failure_pmt_NF() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
+        when(paymentService.getPaymentById(any())).thenThrow(new PaymentNotFoundException());
+        middlewareService.initiatePaymentCancellation(PAYMENT_ID);
+    }
+
+    @Test(expected = PaymentNotFoundMiddlewareException.class)
+    public void initiatePaymentCancellation_Failure_pmt_and_acc_no_equal_iban() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
+        when(paymentService.getPaymentById(any())).thenThrow(PaymentNotFoundException.class);
+        middlewareService.initiatePaymentCancellation(PAYMENT_ID);
+    }
+
+    @Test(expected = PaymentProcessingMiddlewareException.class)
+    public void initiatePaymentCancellation_Failure_pmt_status_acsc() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
+        when(paymentService.getPaymentById(any())).thenReturn(readYml(PaymentBO.class, "PaymentSingleBoStatusAcsc.yml"));
+        middlewareService.initiatePaymentCancellation(PAYMENT_ID);
+    }
+
     private static <T> T readYml(Class<T> aClass, String fileName) {
         try {
             return YamlReader.getInstance().getObjectFromResource(PaymentConverter.class, fileName, aClass);

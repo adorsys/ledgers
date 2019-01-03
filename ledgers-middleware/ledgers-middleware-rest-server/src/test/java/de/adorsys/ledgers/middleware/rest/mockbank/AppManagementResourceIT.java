@@ -39,7 +39,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 	DbUnitTestExecutionListener.class })
 @DatabaseTearDown(value = { "MiddlewareServiceImplIT-db-delete.xml" }, type = DatabaseOperation.DELETE_ALL)
 public class AppManagementResourceIT {
-	
+	ObjectMapper mapper = new ObjectMapper();
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
@@ -50,7 +50,7 @@ public class AppManagementResourceIT {
 				.webAppContextSetup(this.wac)
 				.apply(springSecurity())
 				.build();
-		String payload = AdminPayload.adminPayload();
+		String payload = mapper.writeValueAsString(AdminPayload.adminPayload());
         MvcResult mvcResult = this.mockMvc.perform(
         		MockMvcRequestBuilders.post("/management/app/admin")
         			.contentType(MediaType.APPLICATION_JSON)

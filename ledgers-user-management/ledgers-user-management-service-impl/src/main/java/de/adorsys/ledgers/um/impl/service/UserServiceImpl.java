@@ -313,10 +313,7 @@ public class UserServiceImpl implements UserService {
 		
 		// Produce the token
         Date iat = new Date();
-        LocalDate expirLocalDate = aisConsent.getValidUntil();
-        Date expir = expirLocalDate==null
-        		? DateUtils.addDays(iat, 90) // default to 90 days
-        		:Date.from(expirLocalDate.atTime(23, 59, 59, 99).atZone(ZoneId.systemDefault()).toInstant());
+        Date expir = getExpirDate(aisConsent, iat);
         		
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
         	.subject(user.getId())
@@ -332,6 +329,14 @@ public class UserServiceImpl implements UserService {
 		AccessTokenBO accessTokenObject = bearerTokenService.toAccessTokenObject(claimsSet);
 		
 		return bearerTokenService.bearerToken(accessTokenString, expires_in, accessTokenObject);
+	}
+
+	private Date getExpirDate(AisConsentBO aisConsent, Date iat) {
+		LocalDate expirLocalDate = aisConsent.getValidUntil();
+        Date expir = expirLocalDate==null
+        		? DateUtils.addDays(iat, 90) // default to 90 days
+        		:Date.from(expirLocalDate.atTime(23, 59, 59, 99).atZone(ZoneId.systemDefault()).toInstant());
+		return expir;
 	}
 
 	/**

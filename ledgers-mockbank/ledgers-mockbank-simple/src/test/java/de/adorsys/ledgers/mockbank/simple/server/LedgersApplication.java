@@ -41,20 +41,10 @@ import de.adorsys.ledgers.um.impl.EnableUserManagementService;
 
 @EnableMockBankSimple
 @EnableFeignClients(basePackageClasses=AccountRestClient.class)
-public class LedgersApplication {//implements ApplicationListener<ApplicationReadyEvent> {
-//	@Autowired
-//	private ApplicationContext context;
+public class LedgersApplication {
 
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(LedgersApplication.class).run(args);
 
 	}
-
-//	@Override
-//	public void onApplicationEvent(ApplicationReadyEvent event) {
-//		int port = context.getBean(Environment.class).getProperty("local.server.port", Integer.class);
-//		String baseUrl = String.format("http://localhost:%d", port);
-////		context.getBean(MockBankSimpleInitService.class).runInit();
-////		new SpringApplicationBuilder(MockBankApplication.class).run("--ledgers.url="+baseUrl);
-//	}
 }

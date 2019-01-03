@@ -34,6 +34,7 @@ public class DataUploadServiceImpl implements DataUploadService{
 
 	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private void uploadToRemoteMockBank(MockbankInitData initData, String baseUrl) {
+		// TODO FIX
 //		MockBankSimpleInitService initService = new MockBankSimpleInitService(initData);
 //		initService.runInit(baseUrl);
 	}

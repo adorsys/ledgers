@@ -134,7 +134,6 @@ public class SCAOperationServiceImplTest {
 
     private <T> T readFromFile(String file, Class<T> tClass) {
     	InputStream is = SCAOperationServiceImplTest.class.getResourceAsStream(file);
-//        String fileName = "de/adorsys/ledgers/sca/service/impl/" + file;
         try {
             return YamlReader.getInstance().getObjectFromInputStream(is, tClass);
         } catch (IOException e) {
@@ -249,7 +248,6 @@ public class SCAOperationServiceImplTest {
 
         verify(repository, times(1)).findById(AUTH_ID);
         verify(hashGenerator, times(1)).hash(any());
-//        verify(repository, times(0)).save(scaOperationEntity);
     }
 
     @Test(expected = SCAOperationNotFoundException.class)
