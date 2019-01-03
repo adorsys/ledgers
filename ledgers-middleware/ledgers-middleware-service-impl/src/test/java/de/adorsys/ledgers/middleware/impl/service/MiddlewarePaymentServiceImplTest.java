@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,6 +47,9 @@ import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddleware
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
+import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
+import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
+import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
@@ -101,6 +105,10 @@ public class MiddlewarePaymentServiceImplTest {
     private UserService userService;
     @Mock
     private BearerTokenMapper bearerTokenMapper;
+    @Mock
+    private PaymentCoreDataPolicy coreDataPolicy;
+    @Mock
+    private PaymentCancelPolicy cancelPolicy;
 
     @Test
     public void getPaymentStatusById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
@@ -133,11 +141,13 @@ public class MiddlewarePaymentServiceImplTest {
         String scaMethodId = "1";
         String paymentId = "myPaymentId";
         String authorisationId = "1111";
+    	PaymentBO payment = readYml(PaymentBO.class, SINGLE_BO);
 
         when(scaUtils.userBO()).thenReturn(userBO);
         when(scaUtils.user(userBO)).thenReturn(userTO);
         when(operationService.generateAuthCode(any(), any(), any())).thenReturn(scaOperationBO);
-        when(paymentService.getPaymentById(paymentId)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(paymentService.getPaymentById(paymentId)).thenReturn(payment);
+		when(coreDataPolicy.getPaymentCoreData(payment)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(payment));
 		SCAPaymentResponseTO responseTO = middlewareService.selectSCAMethodForPayment(paymentId, authorisationId, scaMethodId);
 
         assertThat(responseTO.getPaymentId(), is(paymentId));
@@ -161,11 +171,12 @@ public class MiddlewarePaymentServiceImplTest {
 
     @Test
     public void initiatePayment() throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, UserNotFoundMiddlewareException, PaymentNotFoundException {
-        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-        when(paymentService.initiatePayment(any(), any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-//        when(userManagementService.findByUserLogin(anyString())).thenReturn(readYml(UserTO.class, "user2.yml"));
+    	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+		when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
+
+    	when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
+        when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(accessToken.getActor()).thenReturn("login");
-//        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(SinglePaymentTO.class, SINGLE_TO));
         when(paymentService.updatePaymentStatusToAuthorised(PAYMENT_ID)).thenReturn(TransactionStatusBO.ACSP);
         Object result = middlewareService.initiatePayment(readYml(SinglePaymentTO.class, SINGLE_TO), PaymentTypeTO.SINGLE);
         assertNotNull(result);
@@ -173,10 +184,13 @@ public class MiddlewarePaymentServiceImplTest {
 
     @Test
     public void executePayment_Success() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, InsufficientPermissionException {
+
+    	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
     	UserTO userTo = new UserTO("userId", email, "123456");
     	BearerTokenBO bearerTokenBO = new BearerTokenBO();
         when(accessToken.getActor()).thenReturn(SYSTEM);
-        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
+        when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(operationService.validateAuthCode(authorisationId, PAYMENT_ID,template, authCode)).thenReturn(Boolean.TRUE);
         when(userService.grant(any(), any())).thenReturn(bearerTokenBO);
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.FALSE);
@@ -196,7 +210,9 @@ public class MiddlewarePaymentServiceImplTest {
 
     @Test(expected = SCAOperationValidationMiddlewareException.class)
     public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
-        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+    	PaymentBO payment = readYml(PaymentBO.class, SINGLE_BO);
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(payment);
+		when(coreDataPolicy.getPaymentCoreData(payment)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(payment));
         String authorisationId = "authId";
 		String authCode = "123456";
 		middlewareService.authorizePayment(PAYMENT_ID, authorisationId, authCode);
@@ -204,8 +220,10 @@ public class MiddlewarePaymentServiceImplTest {
 
     @Test
     public void initiatePaymentCancellation() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
-        when(paymentService.getPaymentById(any())).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
+    	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+        when(paymentService.getPaymentById(any())).thenReturn(paymentBO);
         when(paymentService.cancelPayment(PAYMENT_ID)).thenReturn(TransactionStatusBO.CANC);
+        when(coreDataPolicy.getCancelPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         SCAPaymentResponseTO initiatePaymentCancellation = middlewareService.initiatePaymentCancellation(PAYMENT_ID);
 
         assertNotNull(initiatePaymentCancellation);
@@ -232,7 +250,9 @@ public class MiddlewarePaymentServiceImplTest {
 
     @Test(expected = PaymentProcessingMiddlewareException.class)
     public void initiatePaymentCancellation_Failure_pmt_status_acsc() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
-        when(paymentService.getPaymentById(any())).thenReturn(readYml(PaymentBO.class, "PaymentSingleBoStatusAcsc.yml"));
+    	PaymentBO payment = readYml(PaymentBO.class, "PaymentSingleBoStatusAcsc.yml");
+    	when(paymentService.getPaymentById(any())).thenReturn(payment);
+        doThrow(PaymentProcessingMiddlewareException.class).when(cancelPolicy).onCancel(any(), any());
         middlewareService.initiatePaymentCancellation(PAYMENT_ID);
     }
 

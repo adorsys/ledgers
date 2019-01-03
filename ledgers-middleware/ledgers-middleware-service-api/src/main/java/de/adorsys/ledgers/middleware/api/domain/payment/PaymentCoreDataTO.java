@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
-public class PaymentKeyDataTO {
+public class PaymentCoreDataTO {
 	public static final String SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time transfer order to %s at date %s; account %s; %s %s is: ";
 	public static final String PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
 	public static final String BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
