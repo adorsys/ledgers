@@ -81,7 +81,8 @@ spring:
   h2:
     console:
       enabled: true
-#  liquibase:
+      path: /h2-console
+  #  liquibase:
 #    enable: false
 #    change-log: classpath:liquibase-master-changelog.xml
   jpa:
