@@ -18,15 +18,17 @@ export class AuthService {
   }
 
   authorize(credentials: any) {
-    return this.http.post(this.url + '/authorise2', null, {
+    return this.http.post(this.url + '/login', null, {
       params: credentials as any,
-      responseType: 'text'
+      // responseType: 'text'
     });
   }
 
   login(credentials: any): Observable<boolean> {
     return this.authorize(credentials).pipe(
-      map(jwt => {
+      map((authData: any) => {
+        let jwt = authData.bearerToken.access_token;
+        console.log(jwt);
         if (jwt) {
           localStorage.setItem(AuthService.TOKEN_KEY, jwt);
           return true;
