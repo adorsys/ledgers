@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {User} from "../../../../models/user.model";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../../../services/user.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'edit-sca',
@@ -19,13 +19,18 @@ export class EditScaComponent implements OnInit {
   constructor(
     private userService: UserService,
     private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router) { }
 
   ngOnInit() {
-    this.scaForm = this.formBuilder.group({
-      scaUserData: this.formBuilder.array([
-        this.initScaData(),
-      ])
+    this.route.params.subscribe(params => {
+      this.id = params['id'];
+
+      this.scaForm = this.formBuilder.group({
+        scaUserData: this.formBuilder.array([
+          this.initScaData(),
+        ])
+      });
     });
   }
 
@@ -49,10 +54,16 @@ export class EditScaComponent implements OnInit {
 
   onSubmit() {
     console.log(this.scaForm.value);
-    // this.userService.createUser(this.userForm.value)
-    //   .subscribe(response => {
-    //     this.router.navigateByUrl('/users');
-    //   });
+    if (this.scaForm.invalid) {
+      return;
+    }
+
+    this.userService.updateScaData(this.id, this.scaForm.value)
+      .subscribe(response => {
+        console.log(response);
+        //this.router.navigate(['/users']);
+      });
+
   }
 
 }
