@@ -184,7 +184,9 @@
                 <constraints primaryKey="true" primaryKeyName="payment_pkey"/>
             </column>
             <column name="batch_booking_preferred" type="BOOLEAN"/>
-            <column name="day_of_execution" type="INTEGER"/>
+            <column name="day_of_execution" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
             <column name="debt_bban" type="VARCHAR(255)"/>
             <column name="currency" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -200,13 +202,11 @@
                 <constraints nullable="false"/>
             </column>
             <column name="requested_execution_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
-            <column name="requested_execution_time" type="TIME WITHOUT TIME ZONE"/>
+            <column name="requested_execution_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="start_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="transaction_status" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="executed_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
-            <column name="next_scheduled_execution" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-10">
@@ -263,9 +263,7 @@
             <column name="discarded_id" type="VARCHAR(255)"/>
             <column name="discarded_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="discarding_id" type="VARCHAR(255)"/>
-            <column name="opr_details_id" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="opr_details" type="TEXT"/>
             <column name="opr_id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -303,9 +301,7 @@
             <column name="debit_amount" type="numeric(19, 2)">
                 <constraints nullable="false"/>
             </column>
-            <column name="details_id" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="details" type="TEXT"/>
             <column name="discarded_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="hash" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -442,31 +438,25 @@
         </createTable>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-20">
-        <addUniqueConstraint columnNames="name" constraintName="chartofaccount_name_unique"
-                             tableName="chart_of_account"/>
+        <addUniqueConstraint columnNames="name" constraintName="chartofaccount_name_unique" tableName="chart_of_account"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-21">
-        <addUniqueConstraint columnNames="iban, currency" constraintName="depositaccount_iban_currency_unique"
-                             tableName="deposit_account"/>
+        <addUniqueConstraint columnNames="iban, currency" constraintName="depositaccount_iban_currency_unique" tableName="deposit_account"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-22">
         <addUniqueConstraint columnNames="name" constraintName="ledger_name_unique" tableName="ledger"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-23">
-        <addUniqueConstraint columnNames="ledger_id, name" constraintName="ledgeraccount_ledger_id_name_unique"
-                             tableName="ledger_account"/>
+        <addUniqueConstraint columnNames="ledger_id, name" constraintName="ledgeraccount_ledger_id_name_unique" tableName="ledger_account"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-24">
-        <addUniqueConstraint columnNames="opr_id, discarding_id" constraintName="posting_opr_id_discarding_id_unique"
-                             tableName="posting"/>
+        <addUniqueConstraint columnNames="opr_id, discarding_id" constraintName="posting_opr_id_discarding_id_unique" tableName="posting"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-25">
-        <addUniqueConstraint columnNames="tgt_pst_id, src_opr_id"
-                             constraintName="postingtrace_tgt_pst_id_src_opr_id_unique" tableName="posting_trace"/>
+        <addUniqueConstraint columnNames="tgt_pst_id, src_opr_id" constraintName="postingtrace_tgt_pst_id_src_opr_id_unique" tableName="posting_trace"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-26">
-        <addUniqueConstraint columnNames="targets_payment_id" constraintName="uk_fk5c4pe0920l6cefbjgwlu8d7"
-                             tableName="payment_targets"/>
+        <addUniqueConstraint columnNames="targets_payment_id" constraintName="uk_fk5c4pe0920l6cefbjgwlu8d7" tableName="payment_targets"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-27">
         <addUniqueConstraint columnNames="email" constraintName="user_email_unique" tableName="users"/>
@@ -475,138 +465,66 @@
         <addUniqueConstraint columnNames="login" constraintName="user_login_unique" tableName="users"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-29">
-        <addForeignKeyConstraint baseColumnNames="latest_pst_id" baseTableName="ledger_stmt"
-                                 constraintName="fk2dq97onlof15vgl5nyl5j9oj4" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="latest_pst_id" baseTableName="ledger_stmt" constraintName="fk2dq97onlof15vgl5nyl5j9oj4" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-30">
-        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="posting_line"
-                                 constraintName="fk2k39eeo527fjc5txgw2pb92q6" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="posting" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="posting_line" constraintName="fk2k39eeo527fjc5txgw2pb92q6" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posting" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-31">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="users_roles"
-                                 constraintName="fk2o0jvgh89lemvvo17cbqvdxaa" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="users_roles" constraintName="fk2o0jvgh89lemvvo17cbqvdxaa" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-32">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="sca_data"
-                                 constraintName="fk34m2nuvnqkg5tf0vgtfn3oukw" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="sca_data" constraintName="fk34m2nuvnqkg5tf0vgtfn3oukw" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-33">
-        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="account_stmt"
-                                 constraintName="fk3ld2phkbjnwoswsnb25ri6s9x" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="account_stmt" constraintName="fk3ld2phkbjnwoswsnb25ri6s9x" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-34">
-        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="posting"
-                                 constraintName="fk44hvpcbwm5uk8x6twtlwxfnjo" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="posting" constraintName="fk44hvpcbwm5uk8x6twtlwxfnjo" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-35">
-        <addForeignKeyConstraint baseColumnNames="targets_payment_id" baseTableName="payment_targets"
-                                 constraintName="fk4s2q7fymrw203en73thtqcsdi" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="payment_id" referencedTableName="payment_target"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="targets_payment_id" baseTableName="payment_targets" constraintName="fk4s2q7fymrw203en73thtqcsdi" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="payment_id" referencedTableName="payment_target" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-36">
-        <addForeignKeyConstraint baseColumnNames="payment_payment_id" baseTableName="payment_targets"
-                                 constraintName="fkdbswydm3gbe0lfxlv9007iv2" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="payment_id" referencedTableName="payment" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="payment_payment_id" baseTableName="payment_targets" constraintName="fkdbswydm3gbe0lfxlv9007iv2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="payment_id" referencedTableName="payment" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-37">
-        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="ledger_account"
-                                 constraintName="fkdsijuu0mjrbfsajc6p9583eok" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="ledger_account" constraintName="fkdsijuu0mjrbfsajc6p9583eok" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-38">
-        <addForeignKeyConstraint baseColumnNames="parent_id" baseTableName="ledger_account"
-                                 constraintName="fkgfm064gjuphiotq1njlmh01x2" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="parent_id" baseTableName="ledger_account" constraintName="fkgfm064gjuphiotq1njlmh01x2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-39">
-        <addForeignKeyConstraint baseColumnNames="payment_payment_id" baseTableName="payment_target"
-                                 constraintName="fkgj5f42v991x5x07oo1l8x7yfc" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="payment_id" referencedTableName="payment" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="payment_payment_id" baseTableName="payment_target" constraintName="fkgj5f42v991x5x07oo1l8x7yfc" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="payment_id" referencedTableName="payment" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-40">
-        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="posting_line"
-                                 constraintName="fkgx4e4g1rc6mwx0hso6addxxdl" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="posting_line" constraintName="fkgx4e4g1rc6mwx0hso6addxxdl" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-41">
-        <addForeignKeyConstraint baseColumnNames="coa_id" baseTableName="ledger"
-                                 constraintName="fki26vmd50f27hr2a95vcw07dr6" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="chart_of_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="coa_id" baseTableName="ledger" constraintName="fki26vmd50f27hr2a95vcw07dr6" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="chart_of_account" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-42">
-        <addForeignKeyConstraint baseColumnNames="youngest_pst_id" baseTableName="account_stmt"
-                                 constraintName="fkidscm80jobbpscr27jrbn35a0" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="youngest_pst_id" baseTableName="account_stmt" constraintName="fkidscm80jobbpscr27jrbn35a0" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-43">
-        <addForeignKeyConstraint baseColumnNames="latest_pst_id" baseTableName="account_stmt"
-                                 constraintName="fkils4krp02ps9hgvq6rgo6u7ot" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="latest_pst_id" baseTableName="account_stmt" constraintName="fkils4krp02ps9hgvq6rgo6u7ot" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posting_trace" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-44">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="account_accesses"
-                                 constraintName="fkkmn209kkb94b5rk9sibugk4xe" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="account_accesses" constraintName="fkkmn209kkb94b5rk9sibugk4xe" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-45">
-        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="ledger_stmt"
-                                 constraintName="fklk3yxr5m48t113xrdk2rei8eu" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="ledger_id" baseTableName="ledger_stmt" constraintName="fklk3yxr5m48t113xrdk2rei8eu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-46">
-        <addForeignKeyConstraint baseColumnNames="coa_id" baseTableName="ledger_account"
-                                 constraintName="fkn73ghcvp95m7g429tk9eai56h" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="chart_of_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="coa_id" baseTableName="ledger_account" constraintName="fkn73ghcvp95m7g429tk9eai56h" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="chart_of_account" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-47">
-        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="account_stmt"
-                                 constraintName="fkny52khbot3x1f20cq7w7iiu73" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="posting" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="account_stmt" constraintName="fkny52khbot3x1f20cq7w7iiu73" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posting" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-48">
-        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="posting_trace"
-                                 constraintName="fkpxds6x797xgvtsu3rlqunipf3" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="posting_trace" constraintName="fkpxds6x797xgvtsu3rlqunipf3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ledger_account" validate="true"/>
     </changeSet>
     <changeSet author="asn (generated)" id="1544703183211-49">
-        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="ledger_stmt"
-                                 constraintName="fkw7uj0igvn1xf5vfpxeok2p3p" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="id" referencedTableName="posting" validate="true"/>
-    </changeSet>
-    <changeSet author="dmiex" id="1544703183211-50">
-        <createTable tableName="operation_details">
-            <column name="id" type="VARCHAR(255)">
-                <constraints primaryKey="true" primaryKeyName="opr_id_pkey"/>
-            </column>
-            <column name="op_details" type="TEXT"/>
-        </createTable>
+        <addForeignKeyConstraint baseColumnNames="posting_id" baseTableName="ledger_stmt" constraintName="fkw7uj0igvn1xf5vfpxeok2p3p" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posting" validate="true"/>
     </changeSet>
 </databaseChangeLog>

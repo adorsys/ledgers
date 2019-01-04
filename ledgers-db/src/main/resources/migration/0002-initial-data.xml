@@ -365,8 +365,7 @@
             <column name="id" value="7O1fC3kxRj0pIvoNAKUWkc"/>
             <column name="created" valueDate="2018-12-13T18:45:41.043"/>
             <column name="long_desc"/>
-            <column name="short_desc"
-                    value="Sight (Demand) Deposits from Non Financial Institutions &amp; Other Clients"/>
+            <column name="short_desc" value="Sight (Demand) Deposits from Non Financial Institutions &amp; Other Clients"/>
             <column name="user_details" value="UCjbj1LnQ_wv6qN3b_XAok"/>
             <column name="name" value="2320"/>
             <column name="balance_side" value="Cr"/>
@@ -966,7 +965,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17279"/>
+            <column name="opr_details" value="17279"/>
             <column name="opr_id" value="2eTXqyKIQsEoLBM3SjlI24"/>
             <column name="opr_src" value="80a216e3-674e-4171-8a34-b41d03b8124c"/>
             <column name="opr_time" valueDate="2018-06-01T12:25:00"/>
@@ -988,7 +987,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17282"/>
+            <column name="opr_details" value="17282"/>
             <column name="opr_id" value="oSbMvrYSQZQnDHkqpK8iMQ"/>
             <column name="opr_src" value="503e49cc-ef8e-42e8-90c6-5a32783c81d8"/>
             <column name="opr_time" valueDate="2018-06-01T13:10:00"/>
@@ -1010,7 +1009,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17285"/>
+            <column name="opr_details" value="17285"/>
             <column name="opr_id" value="nRzGh5HVQGwvX-ZAkxHfrU"/>
             <column name="opr_src" value="dbd10b1d-be57-461f-a931-f7039dee0aa2"/>
             <column name="opr_time" valueDate="2018-06-02T10:10:00"/>
@@ -1032,7 +1031,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17288"/>
+            <column name="opr_details" value="17288"/>
             <column name="opr_id" value="i_iE0NGvQgsnPO3WXV1l_k"/>
             <column name="opr_src" value="a717d457-356a-4eee-90bc-468fbca856b5"/>
             <column name="opr_time" valueDate="2018-06-02T18:23:00"/>
@@ -1054,7 +1053,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17291"/>
+            <column name="opr_details" value="17291"/>
             <column name="opr_id" value="t3ryHUNeQ4cthZkxnbKz88"/>
             <column name="opr_src" value="36190561-7921-4c65-8200-437bd8c43a66"/>
             <column name="opr_time" valueDate="2018-06-14T11:00:00"/>
@@ -1076,7 +1075,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17294"/>
+            <column name="opr_details" value="17294"/>
             <column name="opr_id" value="IrSO15SASl4txCuXKVE1RU"/>
             <column name="opr_src" value="eabf26c6-a3b3-414b-89a9-59ea3ea5dfd9"/>
             <column name="opr_time" valueDate="2018-06-17T18:10:00"/>
@@ -1098,7 +1097,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17297"/>
+            <column name="opr_details" value="17297"/>
             <column name="opr_id" value="8p4ozyx6THAkDlKKzRU6iw"/>
             <column name="opr_src" value="b012368f-3020-48b5-a210-c11c1c60a9e4"/>
             <column name="opr_time" valueDate="2018-06-23T18:45:43.301"/>
@@ -1120,7 +1119,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17301"/>
+            <column name="opr_details" value="17301"/>
             <column name="opr_id" value="WAMcFQeNQWwra83F-h57f8"/>
             <column name="opr_src" value="4c8fb4c5-a1a8-4e4f-949f-272394440119"/>
             <column name="opr_time" valueDate="2018-06-24T18:45:43.431"/>
@@ -1142,7 +1141,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17304"/>
+            <column name="opr_details" value="17304"/>
             <column name="opr_id" value="oAI2Kt7HRBUsXWt-10gLTo"/>
             <column name="opr_src" value="602987e6-6ef5-4ca3-80e9-6cad96a606e7"/>
             <column name="opr_time" valueDate="2018-06-25T18:45:43.561"/>
@@ -1164,7 +1163,7 @@
             <column name="discarded_id"/>
             <column name="discarded_time"/>
             <column name="discarding_id"/>
-            <column name="opr_details_id" value="17307"/>
+            <column name="opr_details" value="17307"/>
             <column name="opr_id" value="okauJp1GTuQgHRgFxmNUME"/>
             <column name="opr_src" value="602987e6-6ef5-4ca3-80e9-6cad96a606e7"/>
             <column name="opr_time" valueDate="2018-06-25T18:45:43.561"/>
@@ -1184,7 +1183,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="3000.00"/>
-            <column name="details_id" value="17280"/>
+            <column name="details" value="17280"/>
             <column name="discarded_time"/>
             <column name="hash" value="8304AD896F3757488A75B2D8CE9EC1B121EAEA696D37E3CED77BA979950E1DF8"/>
             <column name="opr_id" value="2eTXqyKIQsEoLBM3SjlI24"/>
@@ -1203,7 +1202,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="3000.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17281"/>
+            <column name="details" value="17281"/>
             <column name="discarded_time"/>
             <column name="hash" value="8304AD896F3757488A75B2D8CE9EC1B121EAEA696D37E3CED77BA979950E1DF8"/>
             <column name="opr_id" value="2eTXqyKIQsEoLBM3SjlI24"/>
@@ -1222,7 +1221,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="700.00"/>
-            <column name="details_id" value="17283"/>
+            <column name="details" value="17283"/>
             <column name="discarded_time"/>
             <column name="hash" value="EAD16B78006A3C232B45CC4E3769BFA9EF9EA2DC0FC42E59C2D2F1B857B3096A"/>
             <column name="opr_id" value="oSbMvrYSQZQnDHkqpK8iMQ"/>
@@ -1241,7 +1240,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="700.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17284"/>
+            <column name="details" value="17284"/>
             <column name="discarded_time"/>
             <column name="hash" value="EAD16B78006A3C232B45CC4E3769BFA9EF9EA2DC0FC42E59C2D2F1B857B3096A"/>
             <column name="opr_id" value="oSbMvrYSQZQnDHkqpK8iMQ"/>
@@ -1260,7 +1259,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="900.00"/>
-            <column name="details_id" value="17286"/>
+            <column name="details" value="17286"/>
             <column name="discarded_time"/>
             <column name="hash" value="2523160D390C95E15805B25CFD722FB6BD22FBC630C894F07F1AE53AA80EEDEF"/>
             <column name="opr_id" value="nRzGh5HVQGwvX-ZAkxHfrU"/>
@@ -1279,7 +1278,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="900.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17287"/>
+            <column name="details" value="17287"/>
             <column name="discarded_time"/>
             <column name="hash" value="2523160D390C95E15805B25CFD722FB6BD22FBC630C894F07F1AE53AA80EEDEF"/>
             <column name="opr_id" value="nRzGh5HVQGwvX-ZAkxHfrU"/>
@@ -1298,7 +1297,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="1400.00"/>
-            <column name="details_id" value="17289"/>
+            <column name="details" value="17289"/>
             <column name="discarded_time"/>
             <column name="hash" value="F6A83CB307CCD519074A3C483A2EF2988A0DFFAFBE5B4B09E917E8004143FF29"/>
             <column name="opr_id" value="i_iE0NGvQgsnPO3WXV1l_k"/>
@@ -1317,7 +1316,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="1400.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17290"/>
+            <column name="details" value="17290"/>
             <column name="discarded_time"/>
             <column name="hash" value="F6A83CB307CCD519074A3C483A2EF2988A0DFFAFBE5B4B09E917E8004143FF29"/>
             <column name="opr_id" value="i_iE0NGvQgsnPO3WXV1l_k"/>
@@ -1336,7 +1335,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="2300.00"/>
-            <column name="details_id" value="17292"/>
+            <column name="details" value="17292"/>
             <column name="discarded_time"/>
             <column name="hash" value="129EA18D2F25CC41D95C33750393A0BACF1B32C0EA5943EC006B22704B6FBBD8"/>
             <column name="opr_id" value="t3ryHUNeQ4cthZkxnbKz88"/>
@@ -1355,7 +1354,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="2300.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17293"/>
+            <column name="details" value="17293"/>
             <column name="discarded_time"/>
             <column name="hash" value="129EA18D2F25CC41D95C33750393A0BACF1B32C0EA5943EC006B22704B6FBBD8"/>
             <column name="opr_id" value="t3ryHUNeQ4cthZkxnbKz88"/>
@@ -1374,7 +1373,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="1280.00"/>
-            <column name="details_id" value="17295"/>
+            <column name="details" value="17295"/>
             <column name="discarded_time"/>
             <column name="hash" value="5BB078419FBD01DCBC3DA1A029709DA67D9541A63CBAD8F25011CBAB0AA92B5C"/>
             <column name="opr_id" value="IrSO15SASl4txCuXKVE1RU"/>
@@ -1393,7 +1392,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="1280.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17296"/>
+            <column name="details" value="17296"/>
             <column name="discarded_time"/>
             <column name="hash" value="5BB078419FBD01DCBC3DA1A029709DA67D9541A63CBAD8F25011CBAB0AA92B5C"/>
             <column name="opr_id" value="IrSO15SASl4txCuXKVE1RU"/>
@@ -1412,7 +1411,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="250.00"/>
-            <column name="details_id" value="17298"/>
+            <column name="details" value="17298"/>
             <column name="discarded_time"/>
             <column name="hash" value="4A42A60491092CBE0CCBABA61C44D1247C0EB3142C6F43F94E06F3FAB83724C3"/>
             <column name="opr_id" value="8p4ozyx6THAkDlKKzRU6iw"/>
@@ -1431,7 +1430,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="150.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17299"/>
+            <column name="details" value="17299"/>
             <column name="discarded_time"/>
             <column name="hash" value="4A42A60491092CBE0CCBABA61C44D1247C0EB3142C6F43F94E06F3FAB83724C3"/>
             <column name="opr_id" value="8p4ozyx6THAkDlKKzRU6iw"/>
@@ -1450,7 +1449,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="100.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17300"/>
+            <column name="details" value="17300"/>
             <column name="discarded_time"/>
             <column name="hash" value="4A42A60491092CBE0CCBABA61C44D1247C0EB3142C6F43F94E06F3FAB83724C3"/>
             <column name="opr_id" value="8p4ozyx6THAkDlKKzRU6iw"/>
@@ -1469,7 +1468,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="2300.00"/>
-            <column name="details_id" value="17302"/>
+            <column name="details" value="17302"/>
             <column name="discarded_time"/>
             <column name="hash" value="C9B4E60BAD68F2B89B99E668EFE2AC4A94433261E3B7965CE5BEC6E22C154054"/>
             <column name="opr_id" value="WAMcFQeNQWwra83F-h57f8"/>
@@ -1488,7 +1487,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="2300.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17303"/>
+            <column name="details" value="17303"/>
             <column name="discarded_time"/>
             <column name="hash" value="C9B4E60BAD68F2B89B99E668EFE2AC4A94433261E3B7965CE5BEC6E22C154054"/>
             <column name="opr_id" value="WAMcFQeNQWwra83F-h57f8"/>
@@ -1507,7 +1506,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="150.00"/>
-            <column name="details_id" value="17305"/>
+            <column name="details" value="17305"/>
             <column name="discarded_time"/>
             <column name="hash" value="57A1B3256FDEDD5FB749CC2E067951DA744246B2AFED3D620882B8DF81BA1122"/>
             <column name="opr_id" value="oAI2Kt7HRBUsXWt-10gLTo"/>
@@ -1526,7 +1525,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="150.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17306"/>
+            <column name="details" value="17306"/>
             <column name="discarded_time"/>
             <column name="hash" value="57A1B3256FDEDD5FB749CC2E067951DA744246B2AFED3D620882B8DF81BA1122"/>
             <column name="opr_id" value="oAI2Kt7HRBUsXWt-10gLTo"/>
@@ -1545,7 +1544,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="0.00"/>
             <column name="debit_amount" valueNumeric="100.00"/>
-            <column name="details_id" value="17308"/>
+            <column name="details" value="17308"/>
             <column name="discarded_time"/>
             <column name="hash" value="0CC93EB56580C6172661FBD3E3FA4EC8E02AEC88145130CBCF5D3358E380ACD1"/>
             <column name="opr_id" value="okauJp1GTuQgHRgFxmNUME"/>
@@ -1564,7 +1563,7 @@
             <column name="base_line"/>
             <column name="credit_amount" valueNumeric="100.00"/>
             <column name="debit_amount" valueNumeric="0.00"/>
-            <column name="details_id" value="17309"/>
+            <column name="details" value="17309"/>
             <column name="discarded_time"/>
             <column name="hash" value="0CC93EB56580C6172661FBD3E3FA4EC8E02AEC88145130CBCF5D3358E380ACD1"/>
             <column name="opr_id" value="okauJp1GTuQgHRgFxmNUME"/>

@@ -7,5 +7,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <include file="migration/0001-initial-schema.xml" relativeToChangelogFile="true"/>
-<!--     <include file="migration/0002-initial-data.xml" relativeToChangelogFile="true"/> -->
+      <include file="migration/0002-initial-data.xml" relativeToChangelogFile="true"/>
+    <include file="migration/0003-lob-to-separate-table.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmiex" id="1544703183211-50">
+        <comment>Create table OPERATION_DETAILS</comment>
+        <createTable tableName="operation_details">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="opr_id_pkey"/>
+            </column>
+            <column name="op_details" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-51">
+        <dropNotNullConstraint columnDataType="INTEGER"
+                               columnName="day_of_execution"
+                               tableName="payment"/>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-52">
+        <modifyDataType columnName="requested_execution_time"
+                        newDataType="TIME WITHOUT TIME ZONE"
+                        tableName="payment"/>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-53">
+        <addColumn tableName="payment">
+            <column name="executed_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-54">
+        <addColumn tableName="payment">
+            <column name="next_scheduled_execution" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-57">
+        <addColumn tableName="posting">
+            <column name="opr_details_id" type="VARCHAR(255)"/>
+        </addColumn>
+        <sql>
+            INSERT INTO operation_details(id, op_details)
+            SELECT id, opr_details
+            FROM posting;
+            UPDATE POSTING SET opr_details_id = id</sql>
+        <addNotNullConstraint columnDataType="VARCHAR(255)"
+                              columnName="opr_details_id"
+                              tableName="posting"/>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-58">
+        <addColumn tableName="posting_line">
+            <column name="details_id" type="VARCHAR(255)"/>
+        </addColumn>
+        <sql>
+            INSERT INTO operation_details(id, op_details)
+            SELECT id, details
+            FROM posting_line;
+            UPDATE POSTING_LINE SET details_id = id</sql>
+        <addNotNullConstraint columnDataType="VARCHAR(255)"
+                              columnName="details_id"
+                              tableName="posting_line"/>
+    </changeSet>
+
+   <changeSet author="dmiex" id="1544703183211-55">
+        <dropColumn columnName="opr_details"
+                    tableName="posting"/>
+    </changeSet>
+
+    <changeSet author="dmiex" id="1544703183211-56">
+        <dropColumn columnName="details"
+                    tableName="posting_line"/>
+    </changeSet>
+
+</databaseChangeLog>
