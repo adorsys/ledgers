@@ -101,8 +101,7 @@ public class UserAccountService {
 		try {
 			contextService.setContext(bag);
 			bag.setAccessToken(scaLoginResponseTO.getBearerToken());
-			ResponseEntity<SCALoginResponseTO> res = ledgersUserMgmt.selectMethod(scaLoginResponseTO.getScaId(), scaLoginResponseTO.getAuthorisationId(), scaMethodId);
-			SCALoginResponseTO scaResponse = res.getBody();
+			SCALoginResponseTO scaResponse = ledgersUserMgmt.selectMethod(scaLoginResponseTO.getScaId(), scaLoginResponseTO.getAuthorisationId(), scaMethodId).getBody();
 			ScaStatusTO scaSelectStatus = scaResponse.getScaStatus();
 			if (ScaStatusTO.SCAMETHODSELECTED.equals(scaSelectStatus)) {
 				// Enter TAN
@@ -112,6 +111,9 @@ public class UserAccountService {
 				throw new IOException(String.format("Unidentified state after select sca. SacStatus %s. User massage %s",
 						scaLoginResponseTO.getScaStatus(), scaLoginResponseTO.getPsuMessage() ));
 			}
+		}catch(FeignException f) {
+			throw new IOException(String.format("Error creating admin user responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
@@ -128,19 +130,20 @@ public class UserAccountService {
 	}
 
 	public BearerTokenTO createAdminAccount() throws IOException, ConflictRestException {
-		UserTO adminUser = AdminPayload.adminUser();
-		contextService.updateCredentials(adminUser.getLogin(), new UserContext(adminUser));
-		ResponseEntity<BearerTokenTO> res = ledgersAppMgmt.admin(adminUser);
-		HttpStatus statusCode = res.getStatusCode();
-		if (HttpStatus.OK.equals(statusCode)) {
-			BearerTokenTO accessToken = res.getBody();
+		try {
+			UserTO adminUser = AdminPayload.adminUser();
+			contextService.updateCredentials(adminUser.getLogin(), new UserContext(adminUser));
+			BearerTokenTO accessToken = ledgersAppMgmt.admin(adminUser).getBody();
 			updateBag(adminUser.getLogin(), accessToken);
 			return accessToken;
-		} else if (HttpStatus.CONFLICT.equals(statusCode)) {
-			throw new ConflictRestException("Admin account exists. No need to create");
-		} else {
-			throw new IOException(String.format("Error creating admin user responseCode %s message %s.",
-					res.getStatusCodeValue(), res.getStatusCode()));
+		} catch (FeignException f) {
+			HttpStatus statusCode = HttpStatus.valueOf(f.status());
+			if (HttpStatus.CONFLICT.equals(statusCode)) {
+				throw new ConflictRestException("Admin account exists. No need to create");
+			} else {
+				throw new IOException(String.format("Error creating admin user responseCode %s message %s.",
+						statusCode.value(), statusCode));
+			}
 		}
 	}
 
@@ -163,18 +166,17 @@ public class UserAccountService {
 	}
 
 	private BearerTokenTO registerCustomer(UserTO user) throws ProtocolException, IOException {
-		ResponseEntity<UserTO> res = ledgersUserMgmt.register(user.getLogin(), user.getEmail(), user.getPin(), UserRoleTO.CUSTOMER);
-		HttpStatus statusCode = res.getStatusCode();
-		if (HttpStatus.OK.equals(statusCode)) {
-			// registration worked. Get access token
+		try {
+			ledgersUserMgmt.register(user.getLogin(), user.getEmail(), user.getPin(), UserRoleTO.CUSTOMER);
 			try {
 				return authorize(user.getLogin(), user.getPin(), UserRoleTO.CUSTOMER);
 			} catch (ForbiddenRestException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
-		} else {
+		} catch(FeignException f) {
+			HttpStatus statusCode = HttpStatus.valueOf(f.status());
 			throw new IOException(String.format("Error registering customer responseCode %s message %s.",
-					res.getStatusCodeValue(), res.getStatusCode()));
+						statusCode.value(), statusCode));
 		}
 	}
 }

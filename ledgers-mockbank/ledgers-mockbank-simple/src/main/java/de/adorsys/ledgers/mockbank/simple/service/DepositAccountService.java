@@ -72,34 +72,27 @@ public class DepositAccountService {
 			throws MalformedURLException, IOException, ProtocolException, JsonParseException, JsonMappingException {
 		try {
 			contextService.setContext(userBag);
-	
-			ResponseEntity<List<AccountDetailsTO>> res = ledgersAccount.getListOfAccounts();
-			HttpStatus statusCode = res.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				return res.getBody();
-			} else {
-				throw new IOException(String.format("Error creating admin user responseCode %s message %s.",
-						res.getStatusCodeValue(), res.getStatusCode()));
-			}
+			return ledgersAccount.getListOfAccounts().getBody();
+		} catch(FeignException f) {
+			throw new IOException(String.format("Error creating admin user responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
-		
 	}
 	
 	public Optional<AccountDetailsTO> account(String iban)
 			throws MalformedURLException, IOException, ProtocolException, JsonParseException, JsonMappingException {
 		try {
 			contextService.setContext(iban);
-			ResponseEntity<AccountDetailsTO> res = ledgersAccount.getAccountDetailsByIban(iban);
-			HttpStatus statusCode = res.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				return Optional.ofNullable(res.getBody());
-			} else if (HttpStatus.NOT_FOUND.equals(statusCode)) {
+			return Optional.ofNullable(ledgersAccount.getAccountDetailsByIban(iban).getBody());
+		} catch(FeignException f) {
+			HttpStatus statusCode = HttpStatus.valueOf(f.status());
+			if (HttpStatus.NOT_FOUND.equals(statusCode)) {
 				return Optional.empty();
 			} else {
 				throw new IOException(String.format("Error reading account details responseCode %s message %s.",
-						res.getStatusCodeValue(), res.getStatusCode()));
+						f.status(), f.getMessage()));
 			}
 		} finally {
 			contextService.unsetContext();

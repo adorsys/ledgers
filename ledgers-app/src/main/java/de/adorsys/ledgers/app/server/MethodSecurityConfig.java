@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.app;
+package de.adorsys.ledgers.app.server;
 
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;

@@ -7,8 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -121,14 +119,10 @@ public class PaymentProcessingService {
 	private List<TransactionTO> transactions(LocalDate execDate, AccountDetailsTO accountDetails) throws IOException {
 		try {
 			contextService.setContext(accountDetails.getIban());
-			ResponseEntity<List<TransactionTO>> res = ledgersAccount.getTransactionByDates(accountDetails.getId(), execDate, LocalDate.now());
-			HttpStatus statusCode = res.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				return res.getBody();
-			} else {
-				throw new IOException(String.format("Error initiating payment: responseCode %s message %s.",
-						res.getStatusCodeValue(), res.getStatusCode()));
-			}
+			return ledgersAccount.getTransactionByDates(accountDetails.getId(), execDate, LocalDate.now()).getBody();
+		} catch(FeignException f) {
+			throw new IOException(String.format("Error initiating payment: responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
@@ -138,20 +132,10 @@ public class PaymentProcessingService {
 			throws IOException {
 		try {
 			contextService.setContext(bag);
-			ResponseEntity<SCAPaymentResponseTO> res = null;
-			HttpStatus statusCode;
-			try {
-				res = ledgersPayment.initiatePayment(paymentTypeTO, payment);
-				statusCode = res.getStatusCode();
-			} catch(FeignException f) {
-				statusCode = HttpStatus.valueOf(f.status());
-			}
-			if (HttpStatus.CREATED.equals(statusCode)) {
-				return res.getBody();
-			} else {
-				throw new IOException(String.format("Error initiating payment: responseCode %s message %s.",
-						statusCode.value(), statusCode));
-			}
+			return ledgersPayment.initiatePayment(paymentTypeTO, payment).getBody();
+		} catch(FeignException f) {
+			throw new IOException(String.format("Error initiating payment: responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
@@ -161,14 +145,10 @@ public class PaymentProcessingService {
 			throws IOException {
 		try {
 			contextService.setContext(bag);
-			ResponseEntity<SCAPaymentResponseTO> res = ledgersPayment.selectMethod(paymentResponse.getPaymentId(), paymentResponse.getAuthorisationId(), scaMethodId);
-			HttpStatus statusCode = res.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				return res.getBody();
-			} else {
-				throw new IOException(String.format("Error selecting sca method: responseCode %s message %s.",
-						res.getStatusCodeValue(), res.getStatusCode()));
-			}
+			return ledgersPayment.selectMethod(paymentResponse.getPaymentId(), paymentResponse.getAuthorisationId(), scaMethodId).getBody();
+		} catch(FeignException f) {
+			throw new IOException(String.format("Error selecting sca method: responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
@@ -178,14 +158,10 @@ public class PaymentProcessingService {
 			throws IOException {
 		try {
 			contextService.setContext(bag);
-			ResponseEntity<SCAPaymentResponseTO> res = ledgersPayment.authorizePayment(paymentResponse.getPaymentId(), paymentResponse.getAuthorisationId(), authCode);
-			HttpStatus statusCode = res.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				return res.getBody();
-			} else {
-				throw new IOException(String.format("Error authorizing payment: responseCode %s message %s.",
-						res.getStatusCodeValue(), res.getStatusCode()));
-			}
+			return ledgersPayment.authorizePayment(paymentResponse.getPaymentId(), paymentResponse.getAuthorisationId(), authCode).getBody();
+		} catch(FeignException f) {
+			throw new IOException(String.format("Error authorizing payment: responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}

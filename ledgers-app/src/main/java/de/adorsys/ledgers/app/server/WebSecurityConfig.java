@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.app;
+package de.adorsys.ledgers.app.server;
 
 import java.security.Principal;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             		"/",
             		"/management/app/admin",
             		"/management/app/ping", 
-            		"/users/authorise",
+            		"/users/login",
             		"/data-test/upload-mockbank-data",
             		"/data-test/db-flush",
             		"/users/register").permitAll()

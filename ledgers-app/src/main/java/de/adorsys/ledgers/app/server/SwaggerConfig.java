@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.app;
+package de.adorsys.ledgers.app.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;

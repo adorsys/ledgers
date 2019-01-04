@@ -8,14 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.mockbank.simple.data.TransactionData;
+import feign.FeignException;
 
 @Service
 public class AccountTransactionService {
@@ -92,15 +91,11 @@ public class AccountTransactionService {
 		
 		try {
 			contextService.setContext(accountDetailsTO.getIban());
-		
-			ResponseEntity<List<TransactionTO>> res = ledgersAccount.getTransactionByDates(account.getId(), from, to);
-			HttpStatus statusCode = res.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				return res.getBody();
-			} else {
-				throw new IOException(String.format("Error loading transaction for account %s responseCode %s message %s.",
-						accountDetailsTO.getIban(), res.getStatusCodeValue(), res.getStatusCode()));
-			}
+			return ledgersAccount.getTransactionByDates(account.getId(), from, to).getBody();
+		} catch(FeignException f) {
+			throw new IOException(String.format("Error loading transaction for account %s responseCode %s message %s.",
+					accountDetailsTO.getIban(), 
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
