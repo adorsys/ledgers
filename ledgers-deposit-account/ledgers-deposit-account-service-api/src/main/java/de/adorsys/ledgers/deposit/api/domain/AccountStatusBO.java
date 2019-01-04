@@ -28,7 +28,7 @@ public enum AccountStatusBO {
     private static final Map<String, AccountStatusBO> container = new HashMap<>();
     private String value;
 
-    private AccountStatusBO(String value) {
+    AccountStatusBO(String value) {
         this.value = value;
     }
 

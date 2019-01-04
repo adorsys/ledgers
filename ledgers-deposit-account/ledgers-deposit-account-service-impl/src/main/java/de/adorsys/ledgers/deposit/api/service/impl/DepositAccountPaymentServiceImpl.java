@@ -16,6 +16,10 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
@@ -27,9 +31,6 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
@@ -94,14 +95,17 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public void cancelPayment(String paymentId) throws PaymentNotFoundException {
+    public TransactionStatusBO cancelPayment(String paymentId) throws PaymentNotFoundException {
         Payment storedPayment = paymentRepository.findById(paymentId)
                                         .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
         if (storedPayment.getTransactionStatus() == TransactionStatus.ACSC) {
             throw new PaymentProcessingException(String.format(PAYMENT_CANCELLATION_FAILED, paymentId));
         }
-        updatePaymentStatus(storedPayment, TransactionStatus.CANC);
+        Payment p = updatePaymentStatus(storedPayment, TransactionStatus.CANC);
+        
+        return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
+        
     }
 
     @Override
@@ -111,14 +115,15 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public void updatePaymentStatusToAuthorised(String paymentId) throws PaymentNotFoundException {
-        Payment payment = paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACCP)
-                                  .orElseThrow(() -> new PaymentNotFoundException(paymentId));
-        updatePaymentStatus(payment, TransactionStatus.ACTC);
+    public TransactionStatusBO updatePaymentStatusToAuthorised(String paymentId) throws PaymentNotFoundException {
+    	Payment payment = paymentRepository.findByPaymentId(paymentId)
+    		.orElseThrow(() -> new PaymentNotFoundException(paymentId));
+        Payment p = updatePaymentStatus(payment, TransactionStatus.ACTC);
+        return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
     }
 
-    private void updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {
+    private Payment updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {
         payment.setTransactionStatus(updatedStatus);
-        paymentRepository.save(payment);
+        return paymentRepository.save(payment);
     }
 }

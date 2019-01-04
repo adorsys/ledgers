@@ -1,9 +1,32 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -24,25 +47,6 @@ import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareAccountManagementServiceImplTest {
@@ -197,21 +201,6 @@ public class MiddlewareAccountManagementServiceImplTest {
         middlewareService.getDepositAccountByIban(IBAN, TIME, false);
         verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
     }
-    
-    @Test
-    public void getTransactionsByDates() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-        when(accountService.getTransactionsByDates(any(), any(), any())).thenReturn(Collections.singletonList(new TransactionDetailsBO()));
-        when(paymentConverter.toTransactionTOList(any())).thenReturn(Collections.singletonList(new TransactionTO()));
-        List<TransactionTO> result = middlewareService.getTransactionsByDates(ACCOUNT_ID, LocalDate.of(2018, 12, 12), LocalDate.of(2018, 12, 18));
-        assertThat(result.isEmpty()).isFalse();
-    }
-
-    @Test(expected = AccountNotFoundMiddlewareException.class)
-    public void getTransactionsByDates_Failure() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-        when(accountService.getTransactionsByDates(any(), any(), any())).thenThrow(new DepositAccountNotFoundException());
-        middlewareService.getTransactionsByDates(ACCOUNT_ID, LocalDate.of(2018, 12, 12), LocalDate.of(2018, 12, 18));
-    }
-    
 
     //    todo: replace by javatar-commons version 0.7
     private <T> T getDataFromFile(String fileName, TypeReference<T> typeReference) {

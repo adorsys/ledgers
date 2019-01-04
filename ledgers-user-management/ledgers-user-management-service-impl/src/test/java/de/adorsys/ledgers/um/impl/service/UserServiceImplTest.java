@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
@@ -51,6 +51,9 @@ public class UserServiceImplTest {
     
     @Mock
     private HashMacSecretSource secretSource;
+    
+    @Mock
+    private BearerTokenService bearerTokenService;
 
     private ResourceReader reader = YamlReader.getInstance();
 
@@ -103,26 +106,9 @@ public class UserServiceImplTest {
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
 
-        String auth = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
+        BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
 
-        assertTrue(auth==null);
-    }
-    
-    @Test
-    public void testValidate() throws UserNotFoundException, InsufficientPermissionException {
-        when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
-        when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
-        when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
-        when(secretSource.getHmacSecret()).thenReturn("6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4");
-        when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
-        when(converter.toUserBO(userEntity)).thenReturn(userBO);
-
-        String accessToken = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
-        
-        AccessTokenBO at = userService.validate(accessToken, new Date());
-        assertTrue(at!=null);
-        assertThat(at.getSub(), is(USER_ID));
-        assertThat(at.getActor(), is(USER_LOGIN));
+        assertTrue(bearerTokenBO==null);
     }
 
     @Test

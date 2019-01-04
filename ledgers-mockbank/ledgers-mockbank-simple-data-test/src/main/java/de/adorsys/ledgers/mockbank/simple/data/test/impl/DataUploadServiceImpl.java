@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 
 import org.springframework.core.env.Environment;
 
-import de.adorsys.ledgers.mockbank.simple.MockBankSimpleInitService;
 import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
 import de.adorsys.ledgers.mockbank.simple.data.test.api.DataUploadService;
 
@@ -32,9 +31,12 @@ public class DataUploadServiceImpl implements DataUploadService{
 	public void loadData(MockbankInitData initData) {
 		uploadToRemoteMockBank(initData, buildUrl());
 	}
+
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private void uploadToRemoteMockBank(MockbankInitData initData, String baseUrl) {
-		MockBankSimpleInitService initService = new MockBankSimpleInitService(initData);
-		initService.runInit(baseUrl);
+		// TODO FIX
+//		MockBankSimpleInitService initService = new MockBankSimpleInitService(initData);
+//		initService.runInit(baseUrl);
 	}
 
 	private String buildUrl() {

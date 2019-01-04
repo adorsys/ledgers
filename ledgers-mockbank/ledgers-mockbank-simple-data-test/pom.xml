@@ -24,6 +24,11 @@
 			<artifactId>ledgers-mockbank-simple</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-deposit-account-service-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>

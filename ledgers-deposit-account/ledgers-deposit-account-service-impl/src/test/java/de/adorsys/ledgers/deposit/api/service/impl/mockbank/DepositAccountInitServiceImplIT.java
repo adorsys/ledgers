@@ -6,15 +6,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -22,15 +19,6 @@ import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApp
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class})
 public class DepositAccountInitServiceImplIT {
-	
-
-    @Configuration
-    static class Config {
-        @Bean
-        public ASPSPConfigSource configSource() {
-            return new MockBankConfigSource();
-        }
-    }
 
     @Autowired
     private DepositAccountInitService depositAccountInitService;

@@ -16,12 +16,12 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public enum AccountType {
     CACC("Current"),
@@ -49,7 +49,7 @@ public enum AccountType {
     private String value;
 
     @JsonCreator
-    private AccountType(String value) {
+    AccountType(String value) {
         this.value = value;
     }
 

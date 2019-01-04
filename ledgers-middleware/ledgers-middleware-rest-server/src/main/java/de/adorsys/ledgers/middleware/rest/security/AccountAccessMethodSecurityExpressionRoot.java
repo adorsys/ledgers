@@ -7,11 +7,11 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.core.Authentication;
 
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 
 public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations{
     private final MiddlewareAccountManagementService middlewareAccountService;
-	private final MiddlewareService middlewareService;
+	private final MiddlewarePaymentService middlewareService;
 	
 	private Object filterObject;
 	private Object returnObject;
@@ -20,7 +20,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 
 	
 	public AccountAccessMethodSecurityExpressionRoot(Authentication authentication,
-			MiddlewareAccountManagementService middlewareAccountService, MiddlewareService middlewareService) {
+			MiddlewareAccountManagementService middlewareAccountService, MiddlewarePaymentService middlewareService) {
 		super(authentication);
 		this.middlewareAccountService = middlewareAccountService;
 		this.middlewareService = middlewareService;

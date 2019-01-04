@@ -28,7 +28,6 @@ services:
       - DB_USER=ledgers
       - DB_PASSWORD=ledgers
 
-
   ledgers-db:
     image: centos/postgresql-95-centos7
     container_name: ledgers_db

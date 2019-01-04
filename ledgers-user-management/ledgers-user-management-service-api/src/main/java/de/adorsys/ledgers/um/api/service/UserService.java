@@ -19,12 +19,13 @@ package de.adorsys.ledgers.um.api.service;
 import java.util.Date;
 import java.util.List;
 
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -45,11 +46,11 @@ public interface UserService {
      *
      * @param login User login
      * @param pin   User PIN
-     * @return Boolean representation of authorisation status true for success, false for failure or trows a UserNotFoundException
+     * @return BearerTokenBO representation of authorization status true for success, false for failure or throws a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      * @throws InsufficientPermissionException 
      */
-    String authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException;
+    BearerTokenBO authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException;
 
     /**
      * Performs user authorisation
@@ -57,11 +58,11 @@ public interface UserService {
      * @param id        User identifier
      * @param pin       User PIN
      * @param accountId Account identifier
-     * @return String representation of authorisation token for success, false for failure or trows a UserNotFoundException
+     * @return BearerTokenBO representation of authorization token for success, false for failure or throws a UserNotFoundException
      * @throws UserNotFoundException is thrown if user can`t be found
      * @throws InsufficientPermissionException 
      */
-    String authorise(String id, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException;
+    BearerTokenBO authorise(String id, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException;
 
     /**
      * Finds a User by its identifier
@@ -100,20 +101,48 @@ public interface UserService {
 	 * Check if the provided token is valid at the given reference time and return the corresponding user.
 	 * 
 	 * 
-	 * @param accessToken
-	 * @param refTime
+	 * @param accessToken the access token to validate
+	 * @param refTime the reference time
 	 * @return
 	 * @throws UserNotFoundException 
 	 */
-	AccessTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException;
-	
+	BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException;
+
 	/**
 	 * Provides a token used to gain read access to an account.
 	 * 
-	 * @param aisConsent
+	 * @param aisConsent the ais consent.
 	 * @return
-	 * @throws InsufficientPermissionException 
+	 * @throws InsufficientPermissionException the current user does not have sufficient permission.
 	 */
-	String grant(AisConsentBO aisConsent) throws InsufficientPermissionException;
+	BearerTokenBO grant(String userId, AisConsentBO aisConsent) throws InsufficientPermissionException;
+
+	/**
+	 * Create a new token for the current user, after a successfull auth code proces..
+	 * 
+	 * @param userId
+	 * @param scaId
+	 * @param validitySeconds
+	 * @return
+	 * @throws InsufficientPermissionException
+	 */
+	BearerTokenBO scaToken(String userId, String scaId, int validitySeconds, UserRoleBO role) throws InsufficientPermissionException;
+
+	/**
+	 * Stores a consent in the consent database and returns the original consent
+	 * if already existng there.
+	 * 
+	 * @param consentBO
+	 */
+	AisConsentBO storeConsent(AisConsentBO consentBO);
+
+	/**
+	 * Loads a consent given the consent id. Throws a consent not found exception.
+	 * 
+	 * @param consentId
+	 * @return
+	 * @throws ConsentNotFoundException
+	 */
+	AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
 
 }

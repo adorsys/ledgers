@@ -1,0 +1,32 @@
+name: mockbank
+ledger: mockbank
+coaFile: sample_coa_banking.yml
+coaExtensions:
+### Clearing account as subaccount of  Deposits with Centralbank - Non-Interest bearing
+  - shortDesc: SEPA-Clearing Account (sepa-credit-transfers)
+    name: 11031
+    parent: 1103
+  - shortDesc: INSTANT_SEPA-Clearing Account (instant-sepa-credit-transfers)
+    name: 11032
+    parent: 1103
+  - shortDesc: TARGET2-Clearing Account (target-2-payments)
+    name: 11033
+    parent: 1103
+  - shortDesc: CROSS_BORDER-Clearing Account (cross-border-credit-transfers)
+    name: 11034
+    parent: 1103
+### Payment products supported.
+clearingAccounts:
+  - paymentProduct: SEPA
+    accountNbr: 11031
+  - paymentProduct: INSTANT_SEPA
+    accountNbr: 11032
+  - paymentProduct: TARGET2
+    accountNbr: 11033
+  - paymentProduct: CROSS_BORDER
+    accountNbr: 11034
+depositParentAccount: 2332
+
+### Marker used to prevent repeated processing of this config file.
+updateMarkerAccountNbr: 2320
+

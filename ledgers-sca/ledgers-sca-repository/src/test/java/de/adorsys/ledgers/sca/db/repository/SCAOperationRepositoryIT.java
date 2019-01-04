@@ -23,11 +23,12 @@ public class SCAOperationRepositoryIT {
 	@Test
 	public void test_create_ok() {
 		SCAOperationEntity scaOp = new SCAOperationEntity();
+		scaOp.setId(Ids.id());
 		scaOp.setAuthCodeHash("asdfdsfa");
 		scaOp.setCreated(LocalDateTime.now());
 		scaOp.setHashAlg("HS256");
 		scaOp.setOpId(Ids.id());
-		scaOp.setStatus(AuthCodeStatus.NEW);
+		scaOp.setStatus(AuthCodeStatus.SENT);
 		scaOp.setStatusTime(LocalDateTime.now());
 		scaOp.setValiditySeconds(300);
 		scaRepo.save(scaOp);

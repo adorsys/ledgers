@@ -44,19 +44,6 @@ import java.time.Month;
         TransactionalTestExecutionListener.class})
 public class DepositAccountServiceImplIT {
 
-    @Configuration
-    static class Config {
-        @Bean
-        public ASPSPConfigSource configSource() {
-            return new MockBankConfigSource();
-        }
-
-    	@Bean
-    	public Principal getPrincipal(){
-    		return () -> "anonymous";
-    	}
-    }
-
     @Autowired
     private AccountStmtService accountStmtService;
     @Autowired
