@@ -6,7 +6,6 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.service.PaymentSchedulerService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
@@ -44,8 +43,6 @@ public class DepositAccountPaymentServiceImplTest {
 
     @Mock
     private PaymentRepository paymentRepository;
-    @Mock
-    private PaymentSchedulerService paymentSchedulerService;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
@@ -86,22 +83,8 @@ public class DepositAccountPaymentServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getSinglePayment());
         when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePaymentBO());
 
-        PaymentBO result = paymentService.initiatePayment(getSinglePaymentBO());
+        PaymentBO result = paymentService.initiatePayment(getSinglePaymentBO(), TransactionStatusBO.ACTC);
         assertThat(result).isNotNull();
-    }
-
-    @Test
-    public void executePayment_Single_Success() throws PaymentNotFoundException, PaymentProcessingException {
-        when(paymentSchedulerService.schedulePaymentExecution(PAYMENT_ID)).thenReturn(TransactionStatusBO.ACSP);
-
-        TransactionStatusBO result = paymentService.executePayment(PAYMENT_ID);
-        assertThat(result).isEqualTo(TransactionStatusBO.ACSP);
-    }
-
-    @Test(expected = PaymentProcessingException.class)
-    public void executePayment_Single_Failure() throws PaymentNotFoundException {
-        when(paymentSchedulerService.schedulePaymentExecution(PAYMENT_ID)).thenThrow(new PaymentNotFoundException());
-        paymentService.executePayment(PAYMENT_ID);
     }
 
     private <T> void testGetPaymentById(String paymentId, Payment persistedPayment, PaymentBO expectedPayment) throws PaymentNotFoundException {
@@ -154,9 +137,9 @@ public class DepositAccountPaymentServiceImplTest {
     public void cancelPayment() throws PaymentNotFoundException {
         //Given
         ArgumentCaptor<Payment> captor = ArgumentCaptor.forClass(Payment.class);
-
-        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(readFile(Payment.class, "PaymentSingle.yml")));
-        when(paymentRepository.save(captor.capture())).thenReturn(mock(Payment.class));
+        Payment payment = readFile(Payment.class, "PaymentSingle.yml");
+        when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(captor.capture())).thenReturn(payment);
 
         //When
         paymentService.cancelPayment(PAYMENT_ID);

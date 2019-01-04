@@ -8,17 +8,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriBuilder;
 
 import java.net.URI;
+import java.security.Principal;
 
 @RestController
 public class ChartOfAccountController {
+    private final Principal principal;
     private final ChartOfAccountService chartOfAccountService;
 
-    public ChartOfAccountController(ChartOfAccountService chartOfAccountService) {
+    public ChartOfAccountController(Principal principal, ChartOfAccountService chartOfAccountService) {
+        this.principal = principal;
         this.chartOfAccountService = chartOfAccountService;
     }
 
     @PostMapping(path = "/coas")
     public ResponseEntity<Void> newChartOfAccount(ChartOfAccountBO chartOfAccount, UriBuilder uri) {
+        chartOfAccount.setUserDetails(principal.getName());
         ChartOfAccountBO coa = chartOfAccountService.newChartOfAccount(chartOfAccount);
         URI location = uri.path(coa.getId()).build();
         return ResponseEntity.created(location).build();

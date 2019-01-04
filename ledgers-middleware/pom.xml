@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
-		<version>0.1</version>
+		<version>0.2-SNAPSHOT</version>
         <relativePath>..</relativePath>
 	</parent>
 
@@ -30,6 +30,8 @@
 		<module>ledgers-middleware-service-api</module>
 		<module>ledgers-middleware-service-impl</module>
 		<module>ledgers-middleware-rest-server</module>
+		<module>ledgers-middleware-rest-api</module>
+		<module>ledgers-middleware-rest-client</module>
 	</modules>
 
 </project>

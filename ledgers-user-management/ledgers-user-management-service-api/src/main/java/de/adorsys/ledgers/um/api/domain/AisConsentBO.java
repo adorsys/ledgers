@@ -19,6 +19,8 @@ package de.adorsys.ledgers.um.api.domain;
 import java.time.LocalDate;
 
 public class AisConsentBO {
+	
+	private String id;
 
     private String userId;
 
@@ -79,6 +81,12 @@ public class AisConsentBO {
 	public void setRecurringIndicator(boolean recurringIndicator) {
 		this.recurringIndicator = recurringIndicator;
 	}
-    
-    
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 }

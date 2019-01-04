@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
-		<version>0.1</version>
+		<version>0.2-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -150,11 +150,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-db</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		 -->
 
 		<!-- spring dependency -->
 
@@ -199,7 +201,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>de.adorsys.ledgers.LedgersApplication</mainClass>
+					<mainClass>de.adorsys.ledgers.app.LedgersApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>

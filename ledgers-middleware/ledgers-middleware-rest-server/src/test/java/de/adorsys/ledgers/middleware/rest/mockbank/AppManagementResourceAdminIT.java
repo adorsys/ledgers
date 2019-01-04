@@ -1,9 +1,11 @@
 package de.adorsys.ledgers.middleware.rest.mockbank;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
-import javax.servlet.ServletContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
+import de.adorsys.ledgers.middleware.rest.resource.AppMgmtResource;
 
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
@@ -26,12 +28,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import javax.servlet.ServletContext;
 
-import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
-import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -42,14 +42,14 @@ import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareEx
 	DbUnitTestExecutionListener.class })
 @DatabaseTearDown(value = { "MiddlewareServiceImplIT-db-delete.xml" }, type = DatabaseOperation.DELETE_ALL)
 public class AppManagementResourceAdminIT {
-	
+	ObjectMapper mapper = new ObjectMapper();
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
 
 	
 	@Before
-	public void before() throws UserAlreadyExistsMiddlewareException {
+	public void before() {
 		this.mockMvc = MockMvcBuilders
 				.webAppContextSetup(this.wac)
 				.apply(springSecurity())
@@ -62,7 +62,7 @@ public class AppManagementResourceAdminIT {
 	     
 	    Assert.assertNotNull(servletContext);
 	    Assert.assertTrue(servletContext instanceof MockServletContext);
-	    Assert.assertNotNull(wac.getBean("appManagementResource"));
+	    Assert.assertNotNull(wac.getBean(AppMgmtResource.class));
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class AppManagementResourceAdminIT {
 
 	@Test
     public void givenAdminURI_whenMockMVC_thenReturnsAccessToken() throws Exception {
-		String payload = AdminPayload.adminPayload();
+		String payload = mapper.writeValueAsString(AdminPayload.adminPayload());
         this.mockMvc.perform(
         		MockMvcRequestBuilders.post("/management/app/admin")
         			.contentType(MediaType.APPLICATION_JSON)

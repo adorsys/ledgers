@@ -16,6 +16,13 @@ server:
   # Authorization HTTP header requires to enlarge max header size.
   max-http-header-size: 65000
   port: 8088
+ledgers.url: http://localhost:${server.port}
+# Francis : 04.01.2019 This file has to be redesigned to support both 
+# liquibase and non liquibase mode.
+liquibase.enabled: false
+
+# Load mock data
+ledgers.mockbank.data.load: false
 
 spring:
   application.name: ledgers
@@ -49,6 +56,9 @@ logging:
     org:
       hibernate: WARN
 
+paymentScheduler:
+  initialDelay: 3000
+  delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
 
 sca:
   authCode:
@@ -71,8 +81,15 @@ spring:
   h2:
     console:
       enabled: true
-  liquibase:
-    change-log: classpath:liquibase-master-changelog.xml
+#  liquibase:
+#    enable: false
+#    change-log: classpath:liquibase-master-changelog.xml
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+
 db:
   user: sa
   password: sa
@@ -84,8 +101,8 @@ spring:
     url: ${db.url}
     username: ${db.user}
     password: ${db.password}
-  liquibase:
-    change-log: classpath:liquibase-master-changelog.xml
+#  liquibase:
+#    change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
   user: ledgers

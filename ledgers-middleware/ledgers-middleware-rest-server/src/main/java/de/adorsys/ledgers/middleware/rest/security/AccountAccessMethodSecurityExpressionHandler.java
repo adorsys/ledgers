@@ -8,16 +8,16 @@ import org.springframework.security.authentication.AuthenticationTrustResolverIm
 import org.springframework.security.core.Authentication;
 
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 
 public class AccountAccessMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
 
 	private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
     private final MiddlewareAccountManagementService middlewareAccountService;
-	private final MiddlewareService middlewareService;
+	private final MiddlewarePaymentService middlewareService;
 
 	public AccountAccessMethodSecurityExpressionHandler(MiddlewareAccountManagementService middlewareAccountService,
-			MiddlewareService middlewareService) {
+			MiddlewarePaymentService middlewareService) {
 		super();
 		this.middlewareAccountService = middlewareAccountService;
 		this.middlewareService = middlewareService;

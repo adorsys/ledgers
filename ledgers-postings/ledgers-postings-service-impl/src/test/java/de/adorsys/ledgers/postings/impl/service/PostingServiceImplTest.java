@@ -58,11 +58,8 @@ public class PostingServiceImplTest {
 
     @Test
     public void newPosting() throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException, DoubleEntryAccountingException {
-        when(postingMapper.toPosting(any())).thenReturn(getPosting());
-        when(postingMapper.toPostingBO(any())).thenReturn(getPostingBO());
         when(postingRepository.findFirstByLedgerOrderByRecordTimeDesc(any()))
                 .thenReturn(Optional.of(new Posting()));
-        when(principal.getName()).thenReturn("name");
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         when(postingRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
         //When
@@ -83,9 +80,9 @@ public class PostingServiceImplTest {
     @Test
     public void findPostingsByDates() throws LedgerAccountNotFoundException, LedgerNotFoundException {
         when(postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(any(), any(), any()))
-                .thenReturn(Collections.singletonList(readYml(PostingLine.class,"PostingLine.yml")));
+                .thenReturn(Collections.singletonList(readYml(PostingLine.class, "PostingLine.yml")));
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(new LedgerAccount()));
-        when(postingLineMapper.toPostingLineBO(any())).thenReturn(readYml(PostingLineBO.class,"PostingLine.yml"));
+        when(postingLineMapper.toPostingLineBO(any())).thenReturn(readYml(PostingLineBO.class, "PostingLine.yml"));
         LedgerAccountBO readYml = readYml(LedgerAccountBO.class, "LedgerAccount.yml");
         List<PostingLineBO> result = postingService.findPostingsByDates(readYml, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 20, 0, 0));
         assertThat(CollectionUtils.isNotEmpty(result)).isTrue();
@@ -97,7 +94,7 @@ public class PostingServiceImplTest {
         p.setAntecedentHash("Antecedent HASH");
         p.setAntecedentId("AntecedentId");
         p.setOprId(OP_ID);
-        p.setOprDetails("Operation details");
+        p.setOprDetails(new OperationDetails("Operation details"));
         p.setPstTime(DATE_TIME);
         p.setRecordTime(DATE_TIME);
         p.setPstType(PostingType.ADJ_TX);

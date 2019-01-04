@@ -1,412 +1,448 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2018-2018 adorsys GmbH & Co KG
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~ http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
+<!-- ~ Copyright 2018-2018 adorsys GmbH & Co KG ~ ~ Licensed under the Apache 
+	License, Version 2.0 (the "License"); ~ you may not use this file except 
+	in compliance with the License. ~ You may obtain a copy of the License at 
+	~ ~ http://www.apache.org/licenses/LICENSE-2.0 ~ ~ Unless required by applicable 
+	law or agreed to in writing, software ~ distributed under the License is 
+	distributed on an "AS IS" BASIS, ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+	KIND, either express or implied. ~ See the License for the specific language 
+	governing permissions and ~ limitations under the License. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <groupId>de.adorsys.ledgers</groupId>
-    <artifactId>ledgers</artifactId>
-    <version>0.1</version>
-    <modules>
-        <module>ledgers-app</module>
-        <module>ledgers-postings</module>
-        <module>ledgers-utils</module>
-        <module>ledgers-deposit-account</module>
-        <module>ledgers-user-management</module>
-        <module>ledgers-middleware</module>
-        <module>ledgers-sca</module>
-        <module>ledgers-mockbank</module>
-        <module>ledgers-db</module>
-    </modules>
-    <packaging>pom</packaging>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.adorsys.ledgers</groupId>
+	<artifactId>ledgers</artifactId>
+	<version>0.2-SNAPSHOT</version>
 
-    <description>OpenSource Implementation Of Accounting Functionalities</description>
+	<modules>
+		<module>ledgers-app</module>
+		<module>ledgers-postings</module>
+		<module>ledgers-utils</module>
+		<module>ledgers-deposit-account</module>
+		<module>ledgers-user-management</module>
+		<module>ledgers-middleware</module>
+		<module>ledgers-sca</module>
+		<module>ledgers-mockbank</module>
+		<module>ledgers-db</module>
+	</modules>
 
-    <url>https://github.com/adorsys/ledgers</url>
+	<packaging>pom</packaging>
 
-    <licenses>
-        <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
+	<name>Ledgers</name>
+	<description>OpenSource Implementation Of Accounting Functionalities</description>
 
-    <developers>
-        <developer>
-            <name>Francis Pouatcha</name>
-            <email>fpo@adorsys.de</email>
-            <organization>adorsys GmbH &amp; Co KG</organization>
-            <organizationUrl>https://adorsys.de/</organizationUrl>
-        </developer>
-        <developer>
-            <name>Serhii Petrychenko</name>
-            <email>spe@adorsys.com.ua</email>
-            <organization>LLC Golden Dimension</organization>
-            <organizationUrl>https://adorsys.com.ua/</organizationUrl>
-        </developer>
-        <developer>
-            <name>Dmytro Mishchuck</name>
-            <email>dmi@adorsys.com.ua</email>
-            <organization>LLC Golden Dimension</organization>
-            <organizationUrl>https://adorsys.com.ua/</organizationUrl>
-        </developer>
-        <developer>
-            <name>Vladimir Nechai</name>
-            <email>vne@adorsys.de</email>
-            <organization>adorsys GmbH &amp; Co KG</organization>
-            <organizationUrl>https://adorsys.de/</organizationUrl>
-        </developer>
-        <developer>
-            <name>Ibragim Sautiev</name>
-            <email>isa@adorsys.de</email>
-            <organization>adorsys GmbH &amp; Co KG</organization>
-            <organizationUrl>https://adorsys.de/</organizationUrl>
-        </developer>
-    </developers>
+	<url>https://github.com/adorsys/ledgers</url>
 
-    <properties>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <ruleset.basedir>${project.basedir}</ruleset.basedir>
-        <dependency.locations.enabled>false</dependency.locations.enabled>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-        <pmd.plugin.version>3.10.0</pmd.plugin.version>
-        <apache.commons.collections>4.1</apache.commons.collections>
-        <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
-        <dbunit.version>2.5.1</dbunit.version>
-        <spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
-        <springfox-swagger2.version>2.8.0</springfox-swagger2.version>
-        <swagger-annotations.version>1.5.17</swagger-annotations.version>
-        <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
-        <org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
-        <lombok-plugin.version>1.16.22</lombok-plugin.version>
-        <hamcrest-library.version>1.3</hamcrest-library.version>
-        <javatar-commons.version>LATEST</javatar-commons.version>
-        <mockito.version>1.10.19</mockito.version>
-        <!-- automatically run annotation processors within the incremental compilation -->
-        <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-        <slf4j.version>1.7.25</slf4j.version>
-        <nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
-        <liquibase.version>3.6.2</liquibase.version>
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Francis Pouatcha</name>
+			<email>fpo@adorsys.de</email>
+			<organization>adorsys GmbH &amp; Co KG</organization>
+			<organizationUrl>https://adorsys.de/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Serhii Petrychenko</name>
+			<email>spe@adorsys.com.ua</email>
+			<organization>LLC Golden Dimension</organization>
+			<organizationUrl>https://adorsys.com.ua/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Dmytro Mishchuck</name>
+			<email>dmi@adorsys.com.ua</email>
+			<organization>LLC Golden Dimension</organization>
+			<organizationUrl>https://adorsys.com.ua/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Vladimir Nechai</name>
+			<email>vne@adorsys.de</email>
+			<organization>adorsys GmbH &amp; Co KG</organization>
+			<organizationUrl>https://adorsys.de/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Ibragim Sautiev</name>
+			<email>isa@adorsys.de</email>
+			<organization>adorsys GmbH &amp; Co KG</organization>
+			<organizationUrl>https://adorsys.de/</organizationUrl>
+		</developer>
+	</developers>
+
+	<properties>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<ruleset.basedir>${project.basedir}</ruleset.basedir>
+		<dependency.locations.enabled>false</dependency.locations.enabled>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<pmd.version>6.5.0</pmd.version>
+		<pmd.plugin.version>3.10.0</pmd.plugin.version>
+		<apache.commons.collections>4.1</apache.commons.collections>
+		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
+		<dbunit.version>2.5.1</dbunit.version>
+		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
+		<springfox-swagger2.version>2.8.0</springfox-swagger2.version>
+		<swagger-annotations.version>1.5.17</swagger-annotations.version>
+		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
+		<org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
+		<lombok-plugin.version>1.16.22</lombok-plugin.version>
+		<hamcrest-library.version>1.3</hamcrest-library.version>
+		<javatar-commons.version>LATEST</javatar-commons.version>
+		<mockito.version>1.10.19</mockito.version>
+		<!-- automatically run annotation processors within the incremental compilation -->
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+		<slf4j.version>1.7.25</slf4j.version>
+		<nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
+		<liquibase.version>3.6.2</liquibase.version>
+		<spring-boot-dependencies.version>2.1.1.RELEASE</spring-boot-dependencies.version>
+		<spring-cloud-dependencies.version>Greenwich.M3</spring-cloud-dependencies.version>
 	</properties>
 
-    <dependencyManagement>
-        <dependencies>
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<dependencyManagement>
+		<dependencies>
 
-            <!-- spring dependencies -->
+			<!-- spring dependencies -->
 
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.0.4.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
-            <!-- swagger -->
+			<!-- swagger -->
 
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger-annotations.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger-annotations.version}</version>
+			</dependency>
 
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${springfox-swagger2.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>${springfox-swagger2.version}</version>
+			</dependency>
 
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox-swagger2.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>${springfox-swagger2.version}</version>
+			</dependency>
 
-            <!-- logging dependencies -->
+			<!-- logging dependencies -->
 
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
 
-            <!-- other dependencies -->
+			<!-- other dependencies -->
 
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct-jdk8</artifactId>
-                <version>${org.mapstruct.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct-jdk8</artifactId>
+				<version>${org.mapstruct.version}</version>
+			</dependency>
 
-            <dependency>
-                <groupId>org.jetbrains</groupId>
-                <artifactId>annotations</artifactId>
-                <version>${jetbrains.annotations.version}</version>
-                <scope>compile</scope>
-            </dependency>
+			<dependency>
+				<groupId>org.jetbrains</groupId>
+				<artifactId>annotations</artifactId>
+				<version>${jetbrains.annotations.version}</version>
+				<scope>compile</scope>
+			</dependency>
 
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>${apache.commons.collections}</version>
-            </dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>${apache.commons.collections}</version>
+			</dependency>
 
-            <dependency>
-                <groupId>pro.javatar.commons</groupId>
-                <artifactId>javatar-commons</artifactId>
-                <version>${javatar-commons.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>pro.javatar.commons</groupId>
+				<artifactId>javatar-commons</artifactId>
+				<version>${javatar-commons.version}</version>
+			</dependency>
 
-            <!-- test dependencies -->
+			<!-- test dependencies -->
 
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
 
-            <dependency>
-                <groupId>org.dbunit</groupId>
-                <artifactId>dbunit</artifactId>
-                <version>${dbunit.version}</version>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>junit</artifactId>
-                        <groupId>junit</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+			<dependency>
+				<groupId>org.dbunit</groupId>
+				<artifactId>dbunit</artifactId>
+				<version>${dbunit.version}</version>
+				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<artifactId>junit</artifactId>
+						<groupId>junit</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
-            <dependency>
-                <groupId>com.github.springtestdbunit</groupId>
-                <artifactId>spring-test-dbunit</artifactId>
-                <version>${spring-test-dbunit.version}</version>
-                <scope>test</scope>
-            </dependency>
+			<dependency>
+				<groupId>com.github.springtestdbunit</groupId>
+				<artifactId>spring-test-dbunit</artifactId>
+				<version>${spring-test-dbunit.version}</version>
+				<scope>test</scope>
+			</dependency>
 
-        </dependencies>
-    </dependencyManagement>
+		</dependencies>
+	</dependencyManagement>
 
-    <dependencies>
+	<dependencies>
 
-        <!-- logging dependencies -->
+		<!-- logging dependencies -->
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 
-        <!-- other dependencies -->
+		<!-- other dependencies -->
 
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
-        <!-- test dependencies -->
+		<!-- test dependencies -->
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <plugins>
+	<build>
+		<plugins>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>${pmd.plugin.version}</version>
-                <configuration>
-                    <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-                    <minimumTokens>100</minimumTokens>
-                    <targetJdk>${java.version}</targetJdk>
-                    <analysisCache>true</analysisCache>
-                    <linkXRef>false</linkXRef>
-                    <rulesets>
-                        <ruleset>${ruleset.basedir}/qa/pmd/pmd-ruleset.xml</ruleset>
-                    </rulesets>
-                    <failOnViolation>true</failOnViolation>
-                    <printFailingErrors>true</printFailingErrors>
-                    <excludeRoots>
-                        <excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
-                        </excludeRoot>
-                        <excludeRoot>../ledgers-middleware-service-impl/target/generated-sources/annotations/
-                        </excludeRoot>
-                    </excludeRoots>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>${pmd.plugin.version}</version>
+				<configuration>
+					<sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
+					<minimumTokens>100</minimumTokens>
+					<targetJdk>${java.version}</targetJdk>
+					<analysisCache>true</analysisCache>
+					<linkXRef>false</linkXRef>
+					<rulesets>
+						<ruleset>${ruleset.basedir}/qa/pmd/pmd-ruleset.xml</ruleset>
+					</rulesets>
+					<failOnViolation>true</failOnViolation>
+					<printFailingErrors>true</printFailingErrors>
+					<excludeRoots>
+						<excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
+						</excludeRoot>
+						<excludeRoot>../ledgers-middleware-rest-server/target/generated-sources/annotations/
+						</excludeRoot>
+						<excludeRoot>../ledgers-middleware-service-impl/target/generated-sources/annotations/
+						</excludeRoot>
+						<excludeRoot>../ledgers-postings-service-impl/target/generated-sources/annotations/
+						</excludeRoot>
+						<excludeRoot>../ledgers-sca-service-impl/target/generated-sources/annotations/
+						</excludeRoot>
+						<excludeRoot>../ledgers-user-management-service-impl/target/generated-sources/annotations/
+						</excludeRoot>
+					</excludeRoots>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>net.sourceforge.pmd</groupId>
+						<artifactId>pmd-core</artifactId>
+						<version>${pmd.version}</version> <!-- <- Fixed IdenticalCatchBranches-->
+					</dependency>
+					<dependency>
+						<groupId>net.sourceforge.pmd</groupId>
+						<artifactId>pmd-java</artifactId>
+						<version>${pmd.version}</version> <!-- <- Fixed IdenticalCatchBranches-->
+					</dependency>
+				</dependencies>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok-plugin.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${org.mapstruct.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok-plugin.version}</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.1</version>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.1</version>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-        </plugins>
-    </build>
+		</plugins>
+	</build>
 
-    <scm>
-        <connection>scm:git@git.adorsys.de:adorsys/xs2a/ledgers.git</connection>
-        <developerConnection>scm:git:git@git.adorsys.de:adorsys/xs2a/ledgers.git</developerConnection>
-        <url>git@git.adorsys.de:adorsys/xs2a/ledgers.git</url>
-        <tag>HEAD</tag>
-    </scm>
+	<scm>
+		<connection>scm:git@git.adorsys.de:adorsys/xs2a/ledgers.git</connection>
+		<developerConnection>scm:git:git@git.adorsys.de:adorsys/xs2a/ledgers.git</developerConnection>
+		<url>git@git.adorsys.de:adorsys/xs2a/ledgers.git</url>
+		<tag>HEAD</tag>
+	</scm>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>sonatype</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <configuration>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <additionalOptions>-Xdoclint:none</additionalOptions>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>sonatype</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<configuration>
+						</configuration>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<additionalOptions>-Xdoclint:none</additionalOptions>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
-    <distributionManagement>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>sonatype</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+		<snapshotRepository>
+			<id>sonatype</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>

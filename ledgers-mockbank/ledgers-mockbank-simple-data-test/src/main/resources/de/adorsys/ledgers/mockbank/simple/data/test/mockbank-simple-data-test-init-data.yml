@@ -8,14 +8,14 @@
 accounts: 
   - iban: DE69760700240340283600
     currency: EUR
-    name: Marion Muelllller
+    name: Marion Mueller
     product: Cash24
     accountType: CASH
     accountStatus: ENABLED
     usageType: PRIV
   - iban: DE80760700240271232400
     currency: EUR
-    name: Anton Brueeeeckner
+    name: Anton Brueckner
     product: Cash24
     accountType: CASH
     accountStatus: ENABLED
@@ -323,7 +323,7 @@ bulkPayments:
           - accNbr: DE80760700240271232400
             balance: -1850.00
           - accNbr: DE69760700240340283600
-            balance: -900.00
+            balance: -820.00
 
 # Bulk Payment no batch from Anton Brueckner to to 2 children with external bank account on 2018-06-25 at 12:25:00
   - bulkPayment:
@@ -368,7 +368,7 @@ balancesList:
   - refTime: 2018-06-30T23:59:00
     balances:
       - accNbr: DE69760700240340283600
-        balance: -900.00
+        balance: -820.00
       - accNbr: DE80760700240271232400
         balance: -2100.00
       - accNbr: DE38760700240320465700
@@ -376,6 +376,10 @@ balancesList:
       - accNbr: 11031
         balance: 2800.00
 
+### List accounts and the number of transaction they have.
+### if for all accounts listed the number of transactions in the database is above 
+### the count we have here, it means system has been fully initialized. Loading
+### will no take place.
 transactions: 
   - iban: DE69760700240340283600
     dateFrom: 2018-05-30
@@ -431,4 +435,4 @@ transactions:
         amount:
           amount: -700.00
         creditorName: Max Musterman
-        
+

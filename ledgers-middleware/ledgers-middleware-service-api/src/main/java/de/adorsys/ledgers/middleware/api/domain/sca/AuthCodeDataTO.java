@@ -21,70 +21,72 @@ import java.util.Objects;
 public class AuthCodeDataTO {
     private String userLogin;
     private String scaUserDataId;
-    private String opData;
     private String opId;
+    private String opData;
     private String userMessage;
     private int validitySeconds;
 
     public AuthCodeDataTO() {
     }
 
-    public AuthCodeDataTO(String userLogin, String scaUserDataId, String opData, String opId, String userMessage, int validitySeconds) {
-        this.userLogin = userLogin;
-        this.scaUserDataId = scaUserDataId;
-        this.opData = opData;
-        this.opId = opId;
-        this.userMessage = userMessage;
-        this.validitySeconds = validitySeconds;
-    }
+	public AuthCodeDataTO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
+			int validitySeconds) {
+		super();
+		this.userLogin = userLogin;
+		this.scaUserDataId = scaUserDataId;
+		this.opId = opId;
+		this.opData = opData;
+		this.userMessage = userMessage;
+		this.validitySeconds = validitySeconds;
+	}
 
-    public String getUserLogin() {
-        return userLogin;
-    }
+	public String getUserLogin() {
+		return userLogin;
+	}
 
-    public void setUserLogin(String userLogin) {
-        this.userLogin = userLogin;
-    }
+	public void setUserLogin(String userLogin) {
+		this.userLogin = userLogin;
+	}
 
-    public String getScaUserDataId() {
-        return scaUserDataId;
-    }
+	public String getScaUserDataId() {
+		return scaUserDataId;
+	}
 
-    public void setScaUserDataId(String scaUserDataId) {
-        this.scaUserDataId = scaUserDataId;
-    }
+	public void setScaUserDataId(String scaUserDataId) {
+		this.scaUserDataId = scaUserDataId;
+	}
 
-    public String getOpData() {
-        return opData;
-    }
+	public String getOpData() {
+		return opData;
+	}
 
-    public void setOpData(String opData) {
-        this.opData = opData;
-    }
+	public void setOpData(String opData) {
+		this.opData = opData;
+	}
 
-    public String getOpId() {
-        return opId;
-    }
+	public String getOpId() {
+		return opId;
+	}
 
-    public void setOpId(String opId) {
-        this.opId = opId;
-    }
+	public void setOpId(String opId) {
+		this.opId = opId;
+	}
 
-    public String getUserMessage() {
-        return userMessage;
-    }
+	public String getUserMessage() {
+		return userMessage;
+	}
 
-    public void setUserMessage(String userMessage) {
-        this.userMessage = userMessage;
-    }
+	public void setUserMessage(String userMessage) {
+		this.userMessage = userMessage;
+	}
 
-    public int getValiditySeconds() {
-        return validitySeconds;
-    }
+	public int getValiditySeconds() {
+		return validitySeconds;
+	}
 
-    public void setValiditySeconds(int validitySeconds) {
-        this.validitySeconds = validitySeconds;
-    }
+	public void setValiditySeconds(int validitySeconds) {
+		this.validitySeconds = validitySeconds;
+	}
 
     @Override
     public boolean equals(Object o) {
@@ -103,16 +105,6 @@ public class AuthCodeDataTO {
     public int hashCode() {
         return Objects.hash(userLogin, scaUserDataId, opData, opId, userMessage, validitySeconds);
     }
+	
 
-    @Override
-    public String toString() {
-        return "AuthCodeDataTO{" +
-                       "userLogin='" + userLogin + '\'' +
-                       ", scaUserDataId='" + scaUserDataId + '\'' +
-                       ", opData='" + opData + '\'' +
-                       ", opId='" + opId + '\'' +
-                       ", userMessage='" + userMessage + '\'' +
-                       ", validitySeconds=" + validitySeconds +
-                       '}';
-    }
 }

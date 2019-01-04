@@ -39,6 +39,7 @@ public class LedgerServiceImplTest {
             AccountCategory.AS);
     private static final LedgerMapper LEDGER_MAPPER = new LedgerMapper();
     private static final LedgerAccountMapper LEDGER_ACCOUNT_MAPPER = new LedgerAccountMapper();
+    private static final String SYSTEM = "System";
 
     @InjectMocks
     private LedgerServiceImpl ledgerService;
@@ -60,7 +61,6 @@ public class LedgerServiceImplTest {
     public void new_ledger_must_produce_id_created_user_copy_other_fields()
             throws ChartOfAccountNotFoundException {
         when(chartOfAccountRepository.findById(COA.getId())).thenReturn(Optional.of(COA));
-        when(principal.getName()).thenReturn(USER_NAME);
         when(ledgerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(ledgerMapper.toLedgerBO(any())).thenReturn(LEDGER_MAPPER.toLedgerBO(LEDGER));
         // When
@@ -80,11 +80,10 @@ public class LedgerServiceImplTest {
     @Test
     public void new_ledgerAccount_must_produce_id_created_user_copy_other_fields() throws LedgerAccountNotFoundException, LedgerNotFoundException {
         when(ledgerAccountRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(principal.getName()).thenReturn(USER_NAME);
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(LEDGER));
         when(ledgerAccountMapper.toLedgerAccountBO(any())).thenReturn(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(LEDGER_ACCOUNT));
         // When
-        LedgerAccountBO result = ledgerService.newLedgerAccount(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(LEDGER_ACCOUNT));
+        LedgerAccountBO result = ledgerService.newLedgerAccount(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(LEDGER_ACCOUNT), SYSTEM);
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getId()).isNotNull();

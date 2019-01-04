@@ -13,7 +13,7 @@ public class PaymentOrderDetailsBO {
     private LocalDate endDate;
     private String executionRule;
     private FrequencyCodeBO frequency;
-    private int dayOfExecution; //Day here max 31
+    private Integer dayOfExecution; //Day here max 31
     private AccountReferenceBO debtorAccount;
     private TransactionStatusBO transactionStatus;
 
@@ -21,7 +21,7 @@ public class PaymentOrderDetailsBO {
     public PaymentOrderDetailsBO() {
     }
 
-    public PaymentOrderDetailsBO(String paymentId, Boolean batchBookingPreferred, LocalDate requestedExecutionDate, LocalTime requestedExecutionTime, PaymentTypeBO paymentType, LocalDate startDate, LocalDate endDate, String executionRule, FrequencyCodeBO frequency, int dayOfExecution, AccountReferenceBO debtorAccount, TransactionStatusBO transactionStatus) {
+    public PaymentOrderDetailsBO(String paymentId, Boolean batchBookingPreferred, LocalDate requestedExecutionDate, LocalTime requestedExecutionTime, PaymentTypeBO paymentType, LocalDate startDate, LocalDate endDate, String executionRule, FrequencyCodeBO frequency, Integer dayOfExecution, AccountReferenceBO debtorAccount, TransactionStatusBO transactionStatus) {
         this.paymentId = paymentId;
         this.batchBookingPreferred = batchBookingPreferred;
         this.requestedExecutionDate = requestedExecutionDate;
@@ -109,11 +109,11 @@ public class PaymentOrderDetailsBO {
         this.frequency = frequency;
     }
 
-    public int getDayOfExecution() {
+    public Integer getDayOfExecution() {
         return dayOfExecution;
     }
 
-    public void setDayOfExecution(int dayOfExecution) {
+    public void setDayOfExecution(Integer dayOfExecution) {
         this.dayOfExecution = dayOfExecution;
     }
 
