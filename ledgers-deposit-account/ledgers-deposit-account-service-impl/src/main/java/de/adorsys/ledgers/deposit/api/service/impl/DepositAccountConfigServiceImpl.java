@@ -47,4 +47,9 @@ public class DepositAccountConfigServiceImpl implements DepositAccountConfigServ
 	public String getClearingAccount(PaymentProductBO paymentProduct) {
 		return configData.getClearingAccount(paymentProduct.name());
 	}
+
+	@Override
+	public String getCashAccount() {
+		return configData.getCashAccount();
+	}
 }

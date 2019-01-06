@@ -2,7 +2,9 @@ package de.adorsys.ledgers.postings.db.repository;
 
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,8 +16,11 @@ public interface PostingLineRepository extends PagingAndSortingRepository<Postin
 
     List<PostingLine> findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(LedgerAccount account, LocalDateTime refTime);
 
+    @Query("select pl from PostingLine pl join fetch pl.details " +
+            "where pl.account = :account and pl.pstTime > :fromDt and pl.pstTime <= :toDt and pl.discardedTime is null " +
+            "order by pl.pstTime desc")
     List<PostingLine> findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(
-            LedgerAccount ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo);
+            @Param("account") LedgerAccount ledgerAccount, @Param("fromDt") LocalDateTime timeFrom, @Param("toDt") LocalDateTime timeTo);
 
     Optional<PostingLine> findFirstByIdAndAccount(String transactionId, LedgerAccount ledgerAccount);
 }

@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.deposit.api.service;
 
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 
@@ -29,4 +26,6 @@ public interface DepositAccountService {
     String readIbanById(String id);
 
     List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix);
+
+    void depositCash(String accountId, AmountBO amount, String user) throws DepositAccountNotFoundException;
 }

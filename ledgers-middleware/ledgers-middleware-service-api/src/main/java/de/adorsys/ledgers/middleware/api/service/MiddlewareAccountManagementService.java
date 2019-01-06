@@ -7,6 +7,7 @@ import java.util.List;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
@@ -59,7 +60,7 @@ public interface MiddlewareAccountManagementService {
 	 * @param accDetails : account to create.
 	 * @throws AccountWithPrefixGoneMiddlewareException : another user owns this prefic
 	 * @throws AccountWithSuffixExistsMiddlewareException : user has account with same prefix and this suffix
-	 * @throws UserNotFoundMiddlewareException : no user 
+	 * @throws UserNotFoundMiddlewareException : no user
 	 */
 	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
 			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException;
@@ -149,16 +150,16 @@ public interface MiddlewareAccountManagementService {
     boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws AccountNotFoundMiddlewareException;
 
 	String iban(String id);
-	
+
 	// ======================= CONSENT ======================//
-	
+
 	/**
 	 * Start an account consent process.
-	 * 
+	 *
 	 * @param consentId : the cosent id.
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
-	 * 
+	 *
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
 	SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent)
@@ -170,7 +171,7 @@ public interface MiddlewareAccountManagementService {
 
 	/**
 	 * Authorizes a consent request. If the authentication is completed, the returned response will contain a valid bearer token.
-	 * 
+	 *
 	 * @param consentId : the cosent id
 	 * @param authorisationId : the authorization id.
 	 * @param authCode : SCAConsentResponseTO
@@ -183,20 +184,29 @@ public interface MiddlewareAccountManagementService {
 	 */
 	SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
+			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException,
 			AisConsentNotFoundMiddlewareException;
-	
+
 	/**
 	 * Provide a third party provider with necessary permission to read accounts and
 	 * transaction informations for the specified account.
-	 * 
+	 *
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
-	 * 
+	 *
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
 	BearerTokenTO grantAisConsent(AisConsentTO aisConsent)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
+	/**
+	 * Deposits given amount in cash into specified account.
+	 * On the bank's books, the bank debits its cash account for the given amount in cash,
+	 * and credits a "deposits" liability account for an equal amount.
+	 * @param accountId id of the account deposited into
+	 * @param amount amount of cash deposited
+	 * @throws AccountNotFoundMiddlewareException target account not found
+	 */
+	void depositCash(String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException;
 }
