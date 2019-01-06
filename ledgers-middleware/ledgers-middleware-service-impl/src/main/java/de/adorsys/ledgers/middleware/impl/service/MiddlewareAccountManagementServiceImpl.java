@@ -1,19 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
@@ -24,57 +10,35 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
-import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
-import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
-import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
-import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AisConsentBO;
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
@@ -88,18 +52,19 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final UserMapper userMapper;
     private final AisConsentBOMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
-    
+
     private final AccessTokenTO accessToken;
     private final Principal principal;
 	private final SCAOperationService scaOperationService;
 	private final SCAUtils scaUtils;
 	private final AccessService accessService;
+    private final AmountMapper amountMapper;
 
 	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
 			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
 			UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
 			AccessTokenTO accessToken, Principal principal, SCAOperationService scaOperationService, SCAUtils scaUtils,
-			AccessService accessService) {
+			AccessService accessService, AmountMapper amountMapper) {
 		super();
 		this.depositAccountService = depositAccountService;
 		this.accountDetailsMapper = accountDetailsMapper;
@@ -113,6 +78,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		this.scaOperationService = scaOperationService;
 		this.scaUtils = scaUtils;
 		this.accessService = accessService;
+        this.amountMapper = amountMapper;
 	}
 
 	@Override
@@ -236,7 +202,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	@Override
 	public void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
 			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
-		
+
 		String accNbr = accountNumberPrefix+accountNumberSuffix;
 
 		// if the list is not empty, we mus make sure that account belong to the current user.s
@@ -245,7 +211,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		validateInput(accounts, accountNumberPrefix, accountNumberSuffix);
 
 		accDetails.setIban(accNbr);
-		
+
 		List<AccountAccessTO> accountAccesses = new ArrayList<>();
 		// if caller is a customer
 		if(accessToken.getRole()==UserRoleTO.CUSTOMER) {
@@ -260,33 +226,33 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		} catch (UserNotFoundMiddlewareException e) {
 			throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login", accessToken.getSub(), accessToken.getActor()));
 		}
-		
+
 	}
 
 	// Validate that
 	private void validateInput(List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
 		// This prefix is still free
-		if(accounts.isEmpty()) { 
+		if(accounts.isEmpty()) {
 			return;
 		}
-		
+
 		// XOR The user is the owner of this prefix
 		List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
-		
+
 		// EMpty if user is not owner of this prefix.
 		if(accountAccesses.isEmpty()) {
 			// User can not own any of those accounts.
 			throw new AccountWithPrefixGoneMiddlewareException(String.format("Account prefix %s is gone.", accountNumberPrefix));
 		}
-		
+
 		List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
-		
+
 		// user already has account with this prefix and suffix
 		String accNbr = accountNumberPrefix+accountNumberSuffix;
 		if(ownedAccounts.contains(accNbr)) {
 			throw new AccountWithSuffixExistsMiddlewareException(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix));
 		}
-		
+
 		// All accounts with this prefix must be owned by this user.
 		for (DepositAccountBO a : accounts) {
 			if(ownedAccounts.contains(a.getIban())) {
@@ -344,7 +310,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     /*
      * Starts the SCA process. Might directly produce the consent token if
      * sca is not needed.
-     * 
+     *
      * (non-Javadoc)
      * @see de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService#startSCA(java.lang.String, de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO)
      */
@@ -448,7 +414,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		}
 	}
 
-	
+
 	/*
 	 * Returns a bearer token matching the consent if user has enougth permission
 	 * to execute the operation.
@@ -465,7 +431,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
 	/*
 	 * The SCA requirement shall be added as property of a deposit account permission.
-	 * 
+	 *
 	 * For now we will assume there is no sca requirement, when the user having access
 	 * to the account does not habe any sca data configured.
 	 */
@@ -539,5 +505,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		}
 	}
 
-	
+    @Override
+    public void depositCash(String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException {
+        try {
+            depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), principal.getName());
+        } catch (DepositAccountNotFoundException e) {
+            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
 }

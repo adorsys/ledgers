@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import java.time.LocalDate;
 import java.util.List;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -117,4 +118,8 @@ public interface AccountRestAPI {
     ResponseEntity<Boolean> fundsConfirmation(
     		@RequestBody FundsConfirmationRequestTO request) 
     		 throws NotFoundRestException, ForbiddenRestException;
+
+	@PostMapping("/{accountId}/cash")
+	@ApiOperation(value="Deposit Cash", authorizations=@Authorization(value="apiKey"), notes = "Only technical users are authorized to perform this operation")
+	ResponseEntity<Void> depositCash(@PathVariable(name="accountId") String accountId, @RequestBody AmountTO amount);
 }

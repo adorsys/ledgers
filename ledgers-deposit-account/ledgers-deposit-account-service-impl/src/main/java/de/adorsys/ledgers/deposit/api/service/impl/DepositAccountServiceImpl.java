@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
@@ -11,17 +12,17 @@ import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -216,5 +217,90 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     public List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix) {
         List<DepositAccount> accounts = depositAccountRepository.findByIbanStartingWith(accountNumberPrefix);
         return depositAccountMapper.toDepositAccountListBO(accounts);
+    }
+
+    @Override
+    public void depositCash(String accountId, AmountBO amount, String recordUser) throws DepositAccountNotFoundException {
+        if (amount.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new DepositAccountUncheckedException("Deposited amount must be greater than zero");
+        }
+
+        DepositAccount depositAccount = depositAccountRepository.findById(accountId)
+                .orElseThrow(DepositAccountNotFoundException::new);
+        AccountReferenceBO accountReference = depositAccountMapper.toAccountReferenceBO(depositAccount);
+        if (!accountReference.getCurrency().equals(amount.getCurrency())) {
+            throw new DepositAccountUncheckedException("Deposited amount and account currencies are different");
+        }
+
+        LedgerBO ledger = loadLedger();
+        LocalDateTime postingDateTime = LocalDateTime.now();
+
+        depositCash(accountReference, amount, recordUser, ledger, postingDateTime);
+    }
+
+    private void depositCash(AccountReferenceBO accountReference, AmountBO amount, String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {
+        PostingBO posting = new PostingBO();
+        posting.setLedger(ledger);
+        posting.setPstTime(postingDateTime);
+        posting.setOprDetails("Cash Deposit");
+        posting.setOprId(Ids.id());
+        posting.setPstType(PostingTypeBO.BUSI_TX);
+        posting.setRecordUser(recordUser);
+
+        // debit line
+        String cashAccountName = depositAccountConfigService.getCashAccount();
+        LedgerAccountBO debitAccount;
+        try {
+            debitAccount = ledgerService.findLedgerAccount(ledger, cashAccountName);
+        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
+            throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
+        String debitLineId = Ids.id();
+        String debitTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, debitLineId);
+        PostingLineBO debitLine = newPostingLine(debitLineId, debitAccount, amount.getAmount(), BigDecimal.ZERO, debitTransactionDetails);
+        posting.getLines().add(debitLine);
+
+        // credit line
+        LedgerAccountBO creditAccount;
+        try {
+            creditAccount = ledgerService.findLedgerAccount(ledger, accountReference.getIban());
+        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
+            throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
+        String creditLineId = Ids.id();
+        String creditTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, creditLineId);
+        PostingLineBO creditLine = newPostingLine(creditLineId, creditAccount, BigDecimal.ZERO, amount.getAmount(), creditTransactionDetails);
+        posting.getLines().add(creditLine);
+
+        try {
+            postingService.newPosting(posting);
+        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
+            throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
+    }
+
+    private PostingLineBO newPostingLine(String id, LedgerAccountBO account, BigDecimal debitAmount, BigDecimal creditAmount, String details) {
+        PostingLineBO debitLine = new PostingLineBO();
+        debitLine.setId(id);
+        debitLine.setAccount(account);
+        debitLine.setDebitAmount(debitAmount);
+        debitLine.setCreditAmount(creditAmount);
+        debitLine.setDetails(details);
+        return debitLine;
+    }
+
+    private String newTransactionDetails(AmountBO amount, AccountReferenceBO creditor, LocalDateTime postingDateTime, String postingLineId) {
+        TransactionDetailsBO transactionDetails = new TransactionDetailsBO();
+        transactionDetails.setTransactionId(Ids.id());
+        transactionDetails.setEndToEndId(postingLineId);
+        transactionDetails.setBookingDate(postingDateTime.toLocalDate());
+        transactionDetails.setValueDate(postingDateTime.toLocalDate());
+        transactionDetails.setTransactionAmount(amount);
+        transactionDetails.setCreditorAccount(creditor);
+        try {
+            return SerializationUtils.writeValueAsString(transactionDetails);
+        } catch (JsonProcessingException e) {
+            throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
     }
 }

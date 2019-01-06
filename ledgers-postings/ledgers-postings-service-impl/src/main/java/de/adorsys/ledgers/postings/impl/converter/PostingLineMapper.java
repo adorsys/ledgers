@@ -1,19 +1,22 @@
 package de.adorsys.ledgers.postings.impl.converter;
 
-import org.springframework.stereotype.Component;
-
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.db.domain.OperationDetails;
 import de.adorsys.ledgers.postings.db.domain.PostingLine;
-import de.adorsys.ledgers.util.CloneUtils;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class PostingLineMapper {
-	
-    public PostingLineBO toPostingLineBO(PostingLine posting) {
-    	return CloneUtils.cloneObject(posting, PostingLineBO.class);
-    }
+@Mapper(componentModel = "spring", uses = LedgerAccountMapper.class)
+public interface PostingLineMapper {
 
-    public PostingLine toPostingLine(PostingLineBO posting) {
-    	return CloneUtils.cloneObject(posting, PostingLine.class);    	
+    @Mapping(source = "details.opDetails", target = "details")
+    PostingLineBO toPostingLineBO(PostingLine posting);
+
+    PostingLine toPostingLine(PostingLineBO posting);
+
+    default OperationDetails stringToOperationDetails(String opDetails) {
+        OperationDetails operationDetails = new OperationDetails();
+        operationDetails.setOpDetails(opDetails);
+        return operationDetails;
     }
 }

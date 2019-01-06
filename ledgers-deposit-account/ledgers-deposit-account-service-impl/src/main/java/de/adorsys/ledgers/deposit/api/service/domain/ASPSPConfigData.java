@@ -11,8 +11,8 @@ public class ASPSPConfigData {
 	private String coaFile;
 	private String depositParentAccount;
 	private List<LedgerAccountModel> coaExtensions = new ArrayList<>();
-
 	private List<ClearingAccount> clearingAccounts = new ArrayList<>();
+	private String cashAccount;
 	
 	/*Account number present means config is up to date*/
 	private String updateMarkerAccountNbr;
@@ -61,5 +61,11 @@ public class ASPSPConfigData {
 	}
 	public void setUpdateMarkerAccountNbr(String updateMarkerAccountNbr) {
 		this.updateMarkerAccountNbr = updateMarkerAccountNbr;
+	}
+	public String getCashAccount() {
+		return cashAccount;
+	}
+	public void setCashAccount(String cashAccount) {
+		this.cashAccount = cashAccount;
 	}
 }

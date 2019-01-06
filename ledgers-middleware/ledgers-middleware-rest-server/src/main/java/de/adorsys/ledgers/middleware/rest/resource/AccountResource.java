@@ -33,12 +33,8 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
@@ -62,7 +58,7 @@ public class AccountResource implements AccountRestAPI {
 
     /**
      * Return the list of accounts linked with the current customer.
-     * 
+     *
      * @return : the list of accounts linked with the current customer.
      */
     @Override
@@ -70,7 +66,7 @@ public class AccountResource implements AccountRestAPI {
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listOfDepositAccounts());
     }
-    
+
     @Override
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Void> createDepositAccount(AccountDetailsTO accountDetailsTO) {
@@ -79,7 +75,7 @@ public class AccountResource implements AccountRestAPI {
 		// Splitt in prefix and suffix
 		String accountNumberPrefix = StringUtils.substring(iban, 0, iban.length()-2);
 		String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
-    	
+
     	try {
 			middlewareAccountService.createDepositAccount(accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
             return ResponseEntity.ok().build();
@@ -191,4 +187,14 @@ public class AccountResource implements AccountRestAPI {
 		return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
 	}
 
+	@Override
+    @PreAuthorize("hasRole('TECHNICAL')")
+    public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
+        try {
+            middlewareAccountService.depositCash(accountId, amount);
+            return ResponseEntity.accepted().build();
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        }
+    }
 }
