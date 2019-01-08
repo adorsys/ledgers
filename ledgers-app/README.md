@@ -1,12 +1,12 @@
 # Ledgers Sample App
 This is a standalone deployment of the ledgers deposit account application. This module is not meant to be productively used. It can be deployed to explore the functionality of the ledgers module on a swagger rest interface.
 
-In orther to run, follow theses steps.
+In order to run, follow theses steps.
 
 
 ## Building and Running
 
-We offer two options: h2 with an external file at ~/ledgersdbs/gateway-app and postgres started with docker compose using /ledgers-app/docker-compose-postgres.yml
+We offer two options: h2 with an external file at ~/ledgersdbs/ledgers-app and postgres started with docker compose using /ledgers-app/docker-compose-postgres.yml
 
 ## Building
 
@@ -17,6 +17,8 @@ We offer two options: h2 with an external file at ~/ledgersdbs/gateway-app and p
 ```
 
 ### Running with H2
+
+H2 database files are found in: ~/ledgersdbs/
 
 ```
 	> cd ledgers-app
@@ -39,11 +41,21 @@ Running with the postgres profile.
 	> mvn spring-boot:run -Dspring.profiles.active=postgres
 ```
 
+### Provisioning with Test Data postgres
+
+The application automatically provision the database with sample data. To turn this functionality off while developing, use:
+
+```
+> mvn spring-boot:run -Dspring.profiles.active=postgres -Dledgers.mockbank.data.load=true
+
+```
+
 ## Visiting the API
 
 [http://localhost:8088/swagger-ui.html](http://localhost:8088/swagger-ui.html#/)
 
 Sample user and pin for preloaded users are provided on the swagger documentation.
+
 
 ## Security
 
@@ -60,6 +72,8 @@ Call will return an access token. Then add the access token to any other curl re
 The following call will return the list of accounts connected to the banking user marion.mueller:
 
 ```
-	> curl -X GET "http://localhost:8088/accounts/listOfAccounts" -H "accept: */*" -H "Authorization: Bearer <ACCESS_TOKE>"
+	> curl -X GET "http://localhost:8088/accounts" -H "accept: */*" -H "Authorization: Bearer <ACCESS_TOKE>"
 ```
+
+Get a look at the swagger documentation for other authentication flows.
 

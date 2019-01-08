@@ -20,7 +20,6 @@ import de.adorsys.ledgers.um.api.service.UserService;
 
 @Service
 public class SCAUtils {
-	private static final String CAN_NOT_FIND_USER_WITH_LOGIN_NAME_S_FROM_TOKEN = "Can not find user  with login name %s from token";
 	private static final Logger logger = LoggerFactory.getLogger(MiddlewarePaymentServiceImpl.class);
 	private final UserService userService;
 	private final SCAOperationService scaOperationService;
@@ -57,9 +56,9 @@ public class SCAUtils {
 
 	public UserBO userBO() {
 		try {
-			return userService.findByLogin(accessTokenTO.getActor());
+			return userService.findById(accessTokenTO.getSub());
 		} catch (UserNotFoundException e) {
-			String message = String.format(CAN_NOT_FIND_USER_WITH_LOGIN_NAME_S_FROM_TOKEN, accessTokenTO.getActor());
+			String message = String.format("Can not find user  with id (sub) %s from token", accessTokenTO.getSub());
 			logger.error(message, e);
 			throw new AccountMiddlewareUncheckedException(message, e);
 		}

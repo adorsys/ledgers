@@ -90,7 +90,7 @@ public class AccountTransactionService {
 				.orElseThrow(() -> depositAccountService.numberFormater(accountDetailsTO.getIban()));
 		
 		try {
-			contextService.setContext(accountDetailsTO.getIban());
+			contextService.setContextFromIban(accountDetailsTO.getIban());
 			return ledgersAccount.getTransactionByDates(account.getId(), from, to).getBody();
 		} catch(FeignException f) {
 			throw new IOException(String.format("Error loading transaction for account %s responseCode %s message %s.",

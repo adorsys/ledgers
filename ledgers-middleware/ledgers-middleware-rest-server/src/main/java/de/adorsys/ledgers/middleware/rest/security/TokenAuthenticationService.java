@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 
@@ -52,10 +53,10 @@ public class TokenAuthenticationService {
         BearerTokenTO bearerToken;
 		try {
 			bearerToken = onlineBankingService.validate(accessToken);
-		} catch (UserNotFoundMiddlewareException e) {
-            debug("User with token not found.");
+		} catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
+            debug("User with token not found.", e);
             return null;
-        }
+		}
 
         if (bearerToken==null) {
         	debug("Token is not valid.");
@@ -77,6 +78,11 @@ public class TokenAuthenticationService {
     private void debug(String s) {
         if (logger.isDebugEnabled()) {
             logger.debug(s);
+        }
+    }
+    private void debug(String s, Throwable e) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(s, e);
         }
     }
 }

@@ -22,6 +22,7 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
@@ -37,6 +38,7 @@ import de.adorsys.ledgers.middleware.api.exception.AuthCodeGenerationMiddlewareE
 import de.adorsys.ledgers.middleware.api.exception.NoAccessMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentWithIdMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
@@ -44,6 +46,7 @@ import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddl
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.impl.converter.AccessTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AuthCodeDataConverter;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
@@ -60,6 +63,7 @@ import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
 import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
@@ -109,6 +113,8 @@ public class MiddlewarePaymentServiceImplTest {
     private PaymentCoreDataPolicy coreDataPolicy;
     @Mock
     private PaymentCancelPolicy cancelPolicy;
+    @Mock
+    private AccessTokenMapper accessTokenMapper;
 
     @Test
     public void getPaymentStatusById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
@@ -170,14 +176,22 @@ public class MiddlewarePaymentServiceImplTest {
     }
 
     @Test
-    public void initiatePayment() throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, UserNotFoundMiddlewareException, PaymentNotFoundException {
+    public void initiatePayment() throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, UserNotFoundMiddlewareException, PaymentNotFoundException, PaymentWithIdMiddlewareException, PaymentWithIdExistsException {
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        UserTO userTO = readYml(UserTO.class, "user1.yml");
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
 		when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
     	when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
-        when(accessToken.getActor()).thenReturn("login");
+        when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
+        when(accessToken.getLogin()).thenReturn("login");
         when(paymentService.updatePaymentStatusToAuthorised(PAYMENT_ID)).thenReturn(TransactionStatusBO.ACSP);
+        when(accessTokenMapper.toAccessTokenBO(any())).thenReturn(new AccessTokenBO());
+        when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
+        when(scaUtils.userBO()).thenReturn(userBO);
+        when(scaUtils.user(userBO)).thenReturn(userTO);
+//        when(paymentService.getPaymentById(any())).thenThrow(PaymentNotFoundException.class);
         Object result = middlewareService.initiatePayment(readYml(SinglePaymentTO.class, SINGLE_TO), PaymentTypeTO.SINGLE);
         assertNotNull(result);
     }
@@ -188,11 +202,11 @@ public class MiddlewarePaymentServiceImplTest {
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
     	UserTO userTo = new UserTO("userId", email, "123456");
     	BearerTokenBO bearerTokenBO = new BearerTokenBO();
-        when(accessToken.getActor()).thenReturn(SYSTEM);
+        when(accessToken.getLogin()).thenReturn(SYSTEM);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(operationService.validateAuthCode(authorisationId, PAYMENT_ID,template, authCode)).thenReturn(Boolean.TRUE);
-        when(userService.grant(any(), any())).thenReturn(bearerTokenBO);
+        when(userService.consentToken(any(), any())).thenReturn(bearerTokenBO);
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.FALSE);
         when(bearerTokenMapper.toBearerTokenTO(bearerTokenBO)).thenReturn(new BearerTokenTO());
 		when(scaUtils.user()).thenReturn(userTo);
@@ -220,10 +234,14 @@ public class MiddlewarePaymentServiceImplTest {
 
     @Test
     public void initiatePaymentCancellation() throws UserNotFoundMiddlewareException, PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException, PaymentNotFoundException {
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        UserTO userTO = readYml(UserTO.class, "user1.yml");
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
         when(paymentService.getPaymentById(any())).thenReturn(paymentBO);
         when(paymentService.cancelPayment(PAYMENT_ID)).thenReturn(TransactionStatusBO.CANC);
         when(coreDataPolicy.getCancelPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
+        when(scaUtils.userBO()).thenReturn(userBO);
+        when(scaUtils.user(userBO)).thenReturn(userTO);
         SCAPaymentResponseTO initiatePaymentCancellation = middlewareService.initiatePaymentCancellation(PAYMENT_ID);
 
         assertNotNull(initiatePaymentCancellation);

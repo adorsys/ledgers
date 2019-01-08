@@ -3,7 +3,6 @@ package de.adorsys.ledgers.middleware.rest.security;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +11,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 
 public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToken {
@@ -44,8 +44,7 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
 
     	// Customer must have explicit permission
     	if(UserRoleTO.CUSTOMER == token.getRole()) {
-	    	List<AccountAccessTO> accountAccesses = token.getAccountAccesses();
-	    	return accountAccesses.stream()
+	    	return token.getAccountAccesses()!=null && token.getAccountAccesses().stream()
 	    		.filter(a -> equalsIgnoreCase(iban, a.getIban()))
 	    		.findAny().isPresent();
     	}
@@ -57,12 +56,10 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
     	AccessTokenTO token = getBearerToken().getAccessTokenObject();
     	// Customer must have explicit permission
     	if(UserRoleTO.CUSTOMER == token.getRole()) {
-	    	List<AccountAccessTO> accountAccesses = token.getAccountAccesses();
-	    	return accountAccesses.stream()
+	    	return token.getAccountAccesses()!=null && token.getAccountAccesses().stream()
 	    		.filter(a -> paymentAccess(a, iban))
 	    		.findAny().isPresent();
     	}
-    	
     	return false;
     }
     
@@ -73,4 +70,17 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
 				AccessTypeTO.DISPOSE.equals(a.getAccessType())
 			);
     }
+
+	public boolean checkTokenUsage(String usageType) {
+		return getBearerToken().getAccessTokenObject().getTokenUsage()!=null &&
+				getBearerToken().getAccessTokenObject().getTokenUsage().name().equals(usageType);
+	}
+
+	public boolean checkLoginToken(String scaId, String authorizationId) {
+		return checkTokenUsage(TokenUsageTO.LOGIN.name()) 
+				&&
+				scaId.equals(getBearerToken().getAccessTokenObject().getScaId())
+				&&
+				authorizationId.equals(getBearerToken().getAccessTokenObject().getAuthorisationId());
+	}
 }

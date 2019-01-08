@@ -51,7 +51,7 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 	@Autowired
 	private ApplicationContext context;
 	
-	@Value("${ledgers.mockbank.data.load}")
+	@Value("${ledgers.mockbank.data.load:false}")
 	private boolean loadMockData;
 	
     public static void main(String[] args) {

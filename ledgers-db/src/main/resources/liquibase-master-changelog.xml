@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <include file="migration/0001-initial-schema.xml" relativeToChangelogFile="true"/>
-      <include file="migration/0002-initial-data.xml" relativeToChangelogFile="true"/>
-    <include file="migration/0003-lob-to-separate-table.xml" relativeToChangelogFile="true"/>
+	<include file="migration/0001-initial-schema.xml" relativeToChangelogFile="true" />
+	
+	<!-- These tests data are discarded. Critical field missing. Can not be fixed manually.
+	<include file="migration/0002-initial-data.xml" relativeToChangelogFile="true"/>
+	 -->
+
+	<!-- This change log modifies the type of the field payment#requested_execution_time from timestamp to time.
+		make sure no future change revert this. Hibernate auto generates LocalTime as timestamp. 
+	-->
+	<include file="migration/0003-lob-to-separate-table.xml" relativeToChangelogFile="true" />
+	
+	<!-- Data type revert removed here. -->
+	<include file="migration/0004-ais-consent-and-sca-operations.xml" relativeToChangelogFile="true" />
+
+	<!-- 
+	<include file="migration/0005-initial-data-v2.xml" relativeToChangelogFile="true" />
+	 -->
 
 </databaseChangeLog>

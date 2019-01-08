@@ -6,6 +6,7 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
@@ -78,7 +79,7 @@ public class DepositAccountPaymentServiceImplTest {
     }
 
     @Test
-    public void initiatePayment() {
+    public void initiatePayment() throws PaymentWithIdExistsException {
         when(paymentMapper.toPayment(any())).thenReturn(getSinglePayment());
         when(paymentRepository.save(any())).thenReturn(getSinglePayment());
         when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePaymentBO());
