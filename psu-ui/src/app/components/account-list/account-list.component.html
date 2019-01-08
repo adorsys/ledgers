@@ -1,0 +1,8 @@
+<h1>Accounts</h1>
+<ul class="list-group list-group-flush">
+  <li class="list-group-item" *ngFor="let account of accounts">
+    {{account | json}}
+    <a [routerLink]="['/accounts/' + account.id + '/cash']" class="d-block">Make a cash deposit</a>
+  </li>
+</ul>
+<a routerLink="/accounts/new">Create new account</a>
