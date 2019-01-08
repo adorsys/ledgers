@@ -30,13 +30,12 @@ import de.adorsys.ledgers.middleware.rest.exception.RestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags = "Management" , description= "Application management")
-@SuppressWarnings({"PMD.UnnecessaryModifier"})
+@Api(tags = "LDG005 - Application Management" , description= "Application management")
 public interface AppMgmtRestAPI {
-	public static final String BASE_PATH = "/management/app";
+	String BASE_PATH = "/management/app";
 
     @GetMapping("/ping")
-    @ApiOperation("Echo the server")
+    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Echo the server")
     ResponseEntity<String> ping();
 	
     @PostMapping("/init")
@@ -44,7 +43,7 @@ public interface AppMgmtRestAPI {
     ResponseEntity<Void> initApp() throws RestException;
     
     @PostMapping("/admin")
-    @ApiOperation(value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
+    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
     ResponseEntity<BearerTokenTO> admin(@RequestBody(required=true) UserTO adminUser)
     		throws NotFoundRestException, ForbiddenRestException, ConflictRestException;
 

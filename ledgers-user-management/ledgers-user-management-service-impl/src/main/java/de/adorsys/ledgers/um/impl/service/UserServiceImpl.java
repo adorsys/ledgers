@@ -20,9 +20,10 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,7 @@ import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
 import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
@@ -73,8 +75,15 @@ import de.adorsys.ledgers.util.PasswordEnc;
 @Transactional
 public class UserServiceImpl implements UserService {
 	
-	private static final String ROLE = "role";
-	private static final String ACTOR = "actor";
+	private static final String NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS = "No transaction access. User with id %s does not have access to accounts %s";
+	private static final String NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS = "No balance access. User with id %s does not have access to accounts %s";
+	private static final String NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS = "No account access. User with id %s does not have access to accounts %s";
+	private static final String CAN_NOT_LOAD_USER_WITH_ID = "Can not load user with id: ";
+	private static final String PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION = "Permission model changed for user with subject %s no sufficient permission on account %s.";
+	private static final String COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT = "Could not verify signature of token with subject : ";
+	private static final String TOKEN_WITH_SUBJECT_EXPIRED = "Token with subject %s is expired at %s and reference time is % : ";
+	private static final String WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT = "Wrong jws algo for token with subject : ";
+	private static final String USER_DOES_NOT_HAVE_THE_ROLE_S = "User with id %s and login %s does not have the role %s";
 	private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
     private static final String CONESENT_WITH_ID_NOT_FOUND = "Consent with id=%s not found";
@@ -86,6 +95,8 @@ public class UserServiceImpl implements UserService {
     private final HashMacSecretSource secretSource;
     private final AisConsentMapper aisConsentMapper;
     private final BearerTokenService bearerTokenService;
+	private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
+	private int defaultScaTokenExpireInSeconds = 1800;
     
 	public UserServiceImpl(UserRepository userRepository, AisConsentRepository consentRepository,
 			UserConverter userConverter, PasswordEnc passwordEnc, HashMacSecretSource secretSource,
@@ -119,21 +130,32 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-    public BearerTokenBO authorise(String login, String pin, UserRoleBO role) throws UserNotFoundException, InsufficientPermissionException {
+    public BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws UserNotFoundException, InsufficientPermissionException {
         UserEntity user = getUser(login);
 		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
 		if (!success) {
 			return null;
 		}
       
-      // Check user has defined role.
-      UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
-      	.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format("User with id %s and login %s does not have the role %s", user.getId(), user.getLogin(), role)));
-        return authorizeInternal(user.getId(), user.getLogin(), null, userRole, null, new Date(), 1800);
+		// Check user has defined role.
+		UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
+				.findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), role)));
+		
+		String scaIdParam = scaId!=null
+				? scaId
+						: Ids.id();
+		String authorisationIdParam = authorisationId!=null
+				? authorisationId
+						: scaIdParam;
+
+		Date issueTime = new Date();
+		Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
+		return bearerTokenService.bearerToken(user.getId(), user.getLogin(), 
+				null, null, userRole, scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
     }
 
 	@Override
-	public BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException {
+	public BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException, InsufficientPermissionException {
 		try {
 			SignedJWT jwt = SignedJWT.parse(accessToken);
 			JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
@@ -141,21 +163,21 @@ public class UserServiceImpl implements UserService {
 			
 			// CHeck algorithm
 			if(!JWSAlgorithm.HS256.equals(header.getAlgorithm())) {
-				logger.warn("Wrong jws algo for token with subject : " + jwtClaimsSet.getSubject());
+				logger.warn(WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT + jwtClaimsSet.getSubject());
 				return null;
 			}
 			
 			int expires_in = bearerTokenService.expiresIn(refTime, jwtClaimsSet);
 			
 			if(expires_in<=0) {
-				logger.warn(String.format("Token with subject %s is expired at %s and reference time is % : " + jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime));
+				logger.warn(String.format(TOKEN_WITH_SUBJECT_EXPIRED + jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime));
 				return null;
 			}
 			
 			// check signature.
 			boolean verified = jwt.verify(new MACVerifier(secretSource.getHmacSecret()));
 			if(!verified) {
-				logger.warn("Could not verify signature of token with subject : " + jwtClaimsSet.getSubject());
+				logger.warn(COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT + jwtClaimsSet.getSubject());
 				return null;
 			}
 			
@@ -165,13 +187,11 @@ public class UserServiceImpl implements UserService {
 
 			AccessTokenBO accessTokenJWT = bearerTokenService.toAccessTokenObject(jwtClaimsSet);
 			
-			List<AccountAccess> accountAccesses = userEntity.getAccountAccesses();
-			List<AccountAccessBO> accountAccessesBOFromToken = accessTokenJWT.getAccountAccesses();
-			List<AccountAccess> accountAccessesFromToken = userConverter.toAccountAccessListEntity(accountAccessesBOFromToken);
-			accountAccessesFromToken.forEach(accountAccessFT -> {
-				confirmAndReturnAccess(jwtClaimsSet.getSubject(), accountAccessFT, accountAccesses);
-			});
-			
+			validateAccountAcesses(userEntity, accessTokenJWT);
+			UserBO user = userConverter.toUserBO(userEntity);
+			AisConsentBO aisConsent = accessTokenJWT.getConsent();
+			validateAisConsent(aisConsent, user);
+
 			return bearerTokenService.bearerToken(accessToken, expires_in, accessTokenJWT);
 			
 		} catch (ParseException e) {
@@ -183,13 +203,21 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 	}
-	
-	private AccountAccess confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
+
+	private void validateAccountAcesses(UserEntity userEntity, AccessTokenBO accessTokenJWT) throws InsufficientPermissionException {
+		List<AccountAccess> accountAccessesFromToken = userConverter.toAccountAccessListEntity(accessTokenJWT.getAccountAccesses());
+		for (AccountAccess accountAccessFT : accountAccessesFromToken) {
+			confirmAndReturnAccess(userEntity.getId(), accountAccessFT, userEntity.getAccountAccesses());
+		}
+	}
+
+	private AccountAccess confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) throws InsufficientPermissionException {
 		return accountAccesses.stream()
 			.filter(a -> matchAccess(accountAccessFT, a))
-			.findFirst().orElseGet(() -> {
-				logger.warn(String.format("Permission model changed for user with subject %s no sufficient permission on account %s.", subject, accountAccessFT.getIban()));
-				return null;
+			.findFirst().orElseThrow(() -> {
+				String message = String.format(PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION, subject, accountAccessFT.getIban());
+				logger.warn(message);
+				return new InsufficientPermissionException(message);
 			});
 			
 	}
@@ -201,35 +229,7 @@ public class UserServiceImpl implements UserService {
 				&&
 				// Make sure old access still valid
 				requested.getAccessType().compareTo(existent.getAccessType())<=0;
-
 	}
-
-	/**
-     * If the rationale is knowing if the account belongs toi the user.
-     * @throws UserNotFoundException 
-     * @throws InsufficientPermissionException 
-     */
-    @Override
-    public BearerTokenBO authorise(String login, String pin, String accountId) throws UserNotFoundException, InsufficientPermissionException {
-        UserEntity user = getUser(login);
-		boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
-		if (!success) {
-			return null;
-		}
-      
-        BearerTokenBO token = authorizeInternal(user.getId(), user.getLogin(), Collections.emptyList(), UserRole.CUSTOMER, null, new Date(), 1800);
-        
-        // Validate
-        if(token!=null) {
-	        List<AccountAccess> accountAccesses = user.getAccountAccesses();
-	        for (AccountAccess accountAccess : accountAccesses) {
-				if(StringUtils.equals(accountId, accountAccess.getIban())){
-					return token;
-				}
-			}
-        }
-        return token;
-    }
 
     @Override
     public List<UserBO> listUsers(int page, int size) {
@@ -293,44 +293,46 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public BearerTokenBO grant(String userId, AisConsentBO aisConsent) throws InsufficientPermissionException {
+	public BearerTokenBO consentToken(AccessTokenBO loginToken, AisConsentBO aisConsent) throws InsufficientPermissionException {
 		UserBO user;
 		try {
-			user = findById(userId);
+			user = findById(loginToken.getSub());
 		} catch (UserNotFoundException e) {
 			throw new UserManagementUnexpectedException(e);
 		}
 		aisConsent.setUserId(user.getId());
 
+		validateAisConsent(aisConsent, user);
+		
+		AisConsentEntity aisConsentPO = aisConsentMapper.toAisConsentPO(aisConsent);
+		
+		Date issueTime = new Date();
+        Date expires = getExpirDate(aisConsent, issueTime);
+		// Produce the token
+		Map<String, String> act = new HashMap<>();
+		String tppId = aisConsent.getTppId();
+		act.put("tppId", tppId);
+		UserRole userRole = UserRole.valueOf(loginToken.getRole().name());
+		return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null, 
+				aisConsentPO, userRole, 
+				loginToken.getScaId(), loginToken.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
+	}
+
+	private void validateAisConsent(AisConsentBO aisConsent, UserBO user) throws InsufficientPermissionException {
+		if(aisConsent==null) {
+			return;
+		}
+		
 		List<String> accessibleAccounts = user.getAccountAccesses().stream()
 				                                  .map(AccountAccessBO::getIban)
 				                                  .collect(Collectors.toList());
 		
 		AisAccountAccessInfoBO access = aisConsent.getAccess();
-		checkAccountAccess(accessibleAccounts, access.getAccounts(), "No account access. User with id %s does not have access to accounts %s" ,user.getId());
-		checkAccountAccess(accessibleAccounts, access.getBalances(), "No balance access. User with id %s does not have access to accounts %s" , user.getId());
-		checkAccountAccess(accessibleAccounts, access.getTransactions(), "No transaction access. User with id %s does not have access to accounts %s" , user.getId());
-		
-		// Produce the token
-        Date iat = new Date();
-        Date expir = getExpirDate(aisConsent, iat);
-        		
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-        	.subject(user.getId())
-        	.jwtID(Ids.id())
-        	.claim(ACTOR, user.getLogin())
-        	.claim(ROLE, UserRoleBO.TECHNICAL)// Always a technical user.
-        	.claim("consent", aisConsent)
-        	.issueTime(iat)
-        	.expirationTime(expir).build();
-
-        int expires_in = bearerTokenService.expiresIn(iat, claimsSet);		
-		String accessTokenString = bearerTokenService.signJWT(claimsSet);
-		AccessTokenBO accessTokenObject = bearerTokenService.toAccessTokenObject(claimsSet);
-		
-		return bearerTokenService.bearerToken(accessTokenString, expires_in, accessTokenObject);
+		checkAccountAccess(accessibleAccounts, access.getAccounts(), NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS ,user.getId());
+		checkAccountAccess(accessibleAccounts, access.getBalances(), NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS , user.getId());
+		checkAccountAccess(accessibleAccounts, access.getTransactions(), NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS , user.getId());
 	}
-
+	
 	private Date getExpirDate(AisConsentBO aisConsent, Date iat) {
 		LocalDate expirLocalDate = aisConsent.getValidUntil();
         Date expir = expirLocalDate==null
@@ -366,9 +368,25 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public BearerTokenBO scaToken(String userId, String scaId, int validitySeconds, UserRoleBO role) throws InsufficientPermissionException {
-		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("Can not load user with id: " + userId));
-		return authorizeInternal(user.getId(), user.getLogin(), user.getAccountAccesses(), UserRole.valueOf(role.name()), scaId, new Date(), 1800);
+	public BearerTokenBO scaToken(AccessTokenBO loginToken) throws InsufficientPermissionException, UserNotFoundException {
+		UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
+		Date issueTime = new Date();
+		Date expires = DateUtils.addSeconds(issueTime, defaultScaTokenExpireInSeconds);
+		return bearerTokenService.bearerToken(user.getId(), user.getLogin(), 
+				user.getAccountAccesses(), null, UserRole.valueOf(loginToken.getRole().name()), 
+				loginToken.getScaId(), loginToken.getAuthorisationId(), 
+				issueTime, expires, TokenUsageBO.DIRECT_ACCESS, null);
+	}
+
+	@Override
+	public BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws InsufficientPermissionException, UserNotFoundException {
+		UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
+		Date issueTime = new Date();
+		Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
+		return bearerTokenService.bearerToken(user.getId(), user.getLogin(), 
+				null, null, UserRole.valueOf(loginToken.getRole().name()), 
+				loginToken.getScaId(), authorisationId, 
+				issueTime, expires, TokenUsageBO.LOGIN, null);
 	}
 
 	@Override
@@ -382,18 +400,6 @@ public class UserServiceImpl implements UserService {
 		AisConsentEntity aisConsentEntity = consentRepository.findById(consentId)
 			.orElseThrow(() -> new ConsentNotFoundException(String.format(CONESENT_WITH_ID_NOT_FOUND, consentId)));
 		return aisConsentMapper.toAisConsentBO(aisConsentEntity);
-	}
-	
-	private BearerTokenBO authorizeInternal(String userId, String userLogin, List<AccountAccess> accountAccesses, UserRole role, String scaId, Date refDate, int validitySeconds) throws InsufficientPermissionException {
-		int expires_in = validitySeconds;
-        // Generating claim
-        JWTClaimsSet claimsSet = bearerTokenService.genJWT(userId, userLogin, accountAccesses, role, scaId, refDate, expires_in);
-        
-        AccessTokenBO accessTokenObject = bearerTokenService.toAccessTokenObject(claimsSet);
-        // signing jwt
-		String accessTokenString = bearerTokenService.signJWT(claimsSet);
-		
-		return bearerTokenService.bearerToken(accessTokenString, expires_in, accessTokenObject);
 	}
 
 }

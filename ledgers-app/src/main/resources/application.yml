@@ -16,13 +16,6 @@ server:
   # Authorization HTTP header requires to enlarge max header size.
   max-http-header-size: 65000
   port: 8088
-ledgers.url: http://localhost:${server.port}
-# Francis : 04.01.2019 This file has to be redesigned to support both 
-# liquibase and non liquibase mode.
-liquibase.enabled: false
-
-# Load mock data
-ledgers.mockbank.data.load: false
 
 spring:
   application.name: ledgers
@@ -81,14 +74,9 @@ spring:
   h2:
     console:
       enabled: true
-#  liquibase:
-#    enable: false
-#    change-log: classpath:liquibase-master-changelog.xml
-  jpa:
-    show-sql: true
-    generate-ddl: true
-    hibernate:
-      ddl-auto: update
+      path: /console
+  liquibase:
+    change-log: classpath:liquibase-master-changelog.xml
 
 db:
   user: sa
@@ -101,8 +89,9 @@ spring:
     url: ${db.url}
     username: ${db.user}
     password: ${db.password}
-#  liquibase:
-#    change-log: classpath:liquibase-master-changelog.xml
+  liquibase:
+    enabled: false
+    change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
   user: ledgers
@@ -110,6 +99,36 @@ db:
   database: ledgers
   port: 5432
   url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+---
+# hibernate-ddl profile is used to fully initialize the database 
+# from ddl generation and rest based upload of test data.
+# Result can be used by liquibase to produce a diff change log
+# instead of writing the change log manually.
+#
+# Following Profiles are possible:
+# --spring.profiles.active=h2,hibernate-ddl -> running on h2.
+# --spring.profiles.active=postgres,hibernate-ddl -> running on postgres.
+#       -> use the config docker-compose-postgres-5433.yml to start postgres on port 5433.
+#       -> Start db with: $ docker-compose -f docker-compose-postgres-5433.yml up
+#       -> make sure the existing volume is deleted if one.
+spring:
+  profiles: hibernate-ddl
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+  liquibase:
+    enabled: false
+db:
+  port: 5433
+    
+# Load mock data. Turn this off after the first load for faster roundtrip development.
+# as JVM -Dledgers.mockbank.data.load=false or as spring application param: --ledgers.mockbank.data.load=false 
+ledgers.mockbank.data.load: true
+
+# Default value set in application. de.adorsys.ledgers.middleware.client.rest.Ledgers#URL.LEDGERS_URL
+# ledgers.url: http://localhost:${server.port}    
 ---
 spring:
   profiles: dev

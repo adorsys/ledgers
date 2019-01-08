@@ -31,6 +31,7 @@ import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareExce
 import de.adorsys.ledgers.middleware.api.exception.NoAccessMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentWithIdMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
@@ -83,16 +84,16 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("paymentInit(#payment)")
-	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
-    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, Object payment) {
+    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, Object payment)
+    	throws NotFoundRestException, ForbiddenRestException, ConflictRestException{
     	try {
 			return new ResponseEntity<SCAPaymentResponseTO>(paymentService.initiatePayment(payment, paymentType), HttpStatus.CREATED);
 		} catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
 		} catch (NoAccessMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage());
+		} catch (PaymentWithIdMiddlewareException e) {
+			throw new ConflictRestException(e.getMessage());
 		}
     }
 
@@ -109,7 +110,6 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
-	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, 
     		String authorisationId,
     		String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException
@@ -130,7 +130,6 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
-	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> authorizePayment(String paymentId,
     		String authorisationId, 
     		String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException
@@ -138,16 +137,12 @@ public class PaymentResource implements PaymentRestAPI {
         try {
         	return ResponseEntity.ok(paymentService.authorizePayment(paymentId, authorisationId, authCode));
         } catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {
-            logger.error(e.getMessage());
 			throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage());
 			throw new ValidationRestException(e.getMessage());
 		} catch (SCAOperationExpiredMiddlewareException e) {
-            logger.error(e.getMessage());
 			throw new GoneRestException(e.getMessage());
 		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            logger.error(e.getMessage());
 			throw new NotAcceptableRestException(e.getMessage());
 		}
     }
@@ -178,7 +173,6 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
-	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> selecCancelPaymentSCAtMethod(String paymentId, 
     	    String cancellationId, String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException
     {
@@ -195,19 +189,15 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInitById(#paymentId)")
-	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
     public ResponseEntity<SCAPaymentResponseTO> authorizeCancelPayment(String paymentId,String cancellationId, String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException
     {
         try {
         	return ResponseEntity.ok(paymentService.authorizeCancelPayment(paymentId, cancellationId, authCode));
 		} catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException | SCAOperationExpiredMiddlewareException e) {
-            logger.error(e.getMessage());
             throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage(), e);
 			throw new ValidationRestException(e.getMessage());
 		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            logger.error(e.getMessage(), e);
 			throw new NotAcceptableRestException(e.getMessage());
 		}
     }

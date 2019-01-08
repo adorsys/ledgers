@@ -3,6 +3,8 @@ package de.adorsys.ledgers.mockbank.simple.service;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.ProtocolException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +35,7 @@ public class UserAccountService {
 	@Autowired
 	private AuthCodeReader authCodeReader;
 
-	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
+	@SuppressWarnings({"PMD.CyclomaticComplexity"})
 	public BearerTokenTO authorize(String login, String pin, UserRoleTO role)
 			throws UnsupportedEncodingException, IOException, ProtocolException {
 
@@ -77,21 +79,11 @@ public class UserAccountService {
 		try {
 			contextService.setContext(bag);
 			bag.setAccessToken(scaLoginResponseTO.getBearerToken());
-			ResponseEntity<SCALoginResponseTO> res = null;
-			HttpStatus statusCode = null;
-			try {
-				res = ledgersUserMgmt.authorizeLogin(scaLoginResponseTO.getScaId(), 
-						scaLoginResponseTO.getAuthorisationId(), authCode);
-				statusCode = res.getStatusCode();
-			} catch (FeignException f) {
-				statusCode = HttpStatus.valueOf(f.status());
-			}
-			if (HttpStatus.OK.equals(statusCode)) {
-				return res.getBody().getBearerToken();
-			} else {
-				throw new IOException(String.format("Error authorizing login: responseCode %s message %s.",
-						res.getStatusCodeValue(), res.getStatusCode()));
-			}
+			return ledgersUserMgmt.authorizeLogin(scaLoginResponseTO.getScaId(), 
+					scaLoginResponseTO.getAuthorisationId(), authCode).getBody().getBearerToken();
+		} catch (FeignException f) {
+			throw new IOException(String.format("Error authorizing login: responseCode %s message %s.",
+					f.status(), f.getMessage()));
 		} finally {
 			contextService.unsetContext();
 		}
@@ -147,7 +139,6 @@ public class UserAccountService {
 		}
 	}
 
-	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private UserContext updateBag(String login, BearerTokenTO accessToken) {
 		UserContext bag = contextService.byLoginOrEx(login);
 		bag.setAccessToken(accessToken);
@@ -178,5 +169,46 @@ public class UserAccountService {
 			throw new IOException(String.format("Error registering customer responseCode %s message %s.",
 						statusCode.value(), statusCode));
 		}
+	}
+
+	public void updateScaMethods(UserTO userTO) throws IOException {
+		try {
+			contextService.setContextFromLogin(userTO.getLogin());
+			
+			UserTO persistent = ledgersUserMgmt.getUser().getBody();
+			List<ScaUserDataTO> persistentScaUserData = persistent.getScaUserData();
+			List<ScaUserDataTO> scaUserData = userTO.getScaUserData();
+			
+			// We all all configured to the list of sca to create.
+			List<ScaUserDataTO> toCreateScaUserData = new ArrayList<>(scaUserData);
+			
+			// We collect all unchanged
+			List<ScaUserDataTO> unchangedScaUserData = new ArrayList<>();
+			
+			if(scaUserData!=null) {
+				// Anyone that is found in the persistent list:
+				scaUserData.forEach(s -> {
+					persistentScaUserData.stream()
+						.filter(a -> a.getScaMethod().equals(s.getScaMethod()) && 
+								a.getMethodValue().equals(s.getMethodValue()))
+						.findFirst().ifPresent(u -> {
+							// the persistent version is added to the unchanged list.
+							unchangedScaUserData.add(u);
+							// the transient version is removed from the list of sca to create.
+							toCreateScaUserData.remove(s);
+						});
+				});
+			}
+			
+			unchangedScaUserData.addAll(toCreateScaUserData);
+			ledgersUserMgmt.updateUserScaData(unchangedScaUserData);
+
+		}catch(FeignException f) {
+			throw new IOException(String.format("Error updating sca data responseCode %s message %s.",
+					f.status(), f.getMessage()));
+		} finally {
+			contextService.unsetContext();
+		}
+		
 	}
 }

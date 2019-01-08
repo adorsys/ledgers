@@ -118,7 +118,7 @@ public class PaymentProcessingService {
 
 	private List<TransactionTO> transactions(LocalDate execDate, AccountDetailsTO accountDetails) throws IOException {
 		try {
-			contextService.setContext(accountDetails.getIban());
+			contextService.setContextFromIban(accountDetails.getIban());
 			return ledgersAccount.getTransactionByDates(accountDetails.getId(), execDate, LocalDate.now()).getBody();
 		} catch(FeignException f) {
 			throw new IOException(String.format("Error initiating payment: responseCode %s message %s.",

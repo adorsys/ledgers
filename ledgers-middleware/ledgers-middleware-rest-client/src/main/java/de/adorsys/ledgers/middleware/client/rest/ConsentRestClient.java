@@ -20,5 +20,5 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 import de.adorsys.ledgers.middleware.rest.resource.ConsentRestAPI;
 
-@FeignClient(value = "ledgersConsent", url = "${ledgers.url}", path=ConsentRestAPI.BASE_PATH)
+@FeignClient(value = "ledgersConsent", url = LedgersURL.LEDGERS_URL, path=ConsentRestAPI.BASE_PATH)
 public interface ConsentRestClient extends ConsentRestAPI{}

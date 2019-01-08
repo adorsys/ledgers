@@ -3,7 +3,8 @@ package de.adorsys.ledgers.postings.db.domain;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import java.util.UUID;
+
+import de.adorsys.ledgers.util.Ids;
 
 @Entity
 public class OperationDetails {
@@ -16,7 +17,7 @@ public class OperationDetails {
     }
 
     public OperationDetails(String opDetails) {
-        this.id = UUID.randomUUID().toString();
+        this.id = Ids.id();
         this.opDetails = opDetails;
     }
 

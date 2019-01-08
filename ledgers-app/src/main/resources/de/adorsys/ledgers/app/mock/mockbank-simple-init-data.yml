@@ -36,15 +36,17 @@ accounts:
 #
 ###############################################
 users:
+  # Marion Mueller has not sca configured. So her login process has one single phase with an ScaStatus.EXEMPTED
   - login: marion.mueller
     email: marion.mueller@mail.de
     pin: 12345
-    scaUserData:
-      - scaMethod: EMAIL
-        methodValue: marion.mueller@mail.de
+#    scaUserData:
+#      - scaMethod: EMAIL
+#        methodValue: marion.mueller@mail.de
     accountAccesses:
       - iban: DE69760700240340283600
         accessType: OWNER
+  # Anton Brueckner has one sca configured. So her login process has one single phase with an ScaStatus.SCAMETHODSELECTED
   - login: anton.brueckner
     email: anton.brueckner@mail.de
     pin: 12345
@@ -54,12 +56,15 @@ users:
     accountAccesses:
       - iban: DE80760700240271232400
         accessType: OWNER
+  # Max Mustermann has two sca methods configured. So her login process has one single phase with an ScaStatus.PSUAUTHENTICATED
   - login: max.musterman
     email: max.musterman@mail.de
     pin: 12345
     scaUserData:
       - scaMethod: EMAIL
         methodValue: max.musterman@mail.de
+      - scaMethod: EMAIL
+        methodValue: max.musterman2@mail.de
     accountAccesses:
       - iban: DE38760700240320465700
         accessType: OWNER

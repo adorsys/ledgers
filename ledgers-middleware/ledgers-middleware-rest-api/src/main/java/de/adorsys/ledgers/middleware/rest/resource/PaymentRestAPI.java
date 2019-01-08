@@ -29,18 +29,20 @@ import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ExpectationFailedRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.GoneRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotAcceptableRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 
-@Api(tags = "Payment" , description= "Provide endpoint for initiating and executing payment.")
-@SuppressWarnings({"PMD.UnnecessaryModifier"})
+@Api(tags = "LDG003 - Payment" , description= "Provide endpoint for initiating and executing payment.")
 public interface PaymentRestAPI {
-	static final String BASE_PATH = "/payments";
+	String BASE_PATH = "/payments";
 
     @GetMapping("/{paymentId}/status")
     @ApiOperation(value="Read Payment Status", notes="Returns the status of a payment", authorizations =@Authorization(value="apiKey"))
@@ -52,9 +54,15 @@ public interface PaymentRestAPI {
 
     @PostMapping(params="paymentType")
     @ApiOperation(value="Initiates a Payment", notes="Initiates a payment", authorizations =@Authorization(value="apiKey"))
-    ResponseEntity<SCAPaymentResponseTO> initiatePayment(
+    @ApiResponses(value={
+        	@ApiResponse(code=200, response=SCAPaymentResponseTO.class, message="Success. ScaToken contained in the returned response object."),
+        	@ApiResponse(code=404, message="Specified account not found."),
+        	@ApiResponse(code=403, message="Not authorized to execute payment on this account"),
+        	@ApiResponse(code=409, message="Payment with specified paymentId exists. Either leaved it blank or generate a new one.")
+        })
+    ResponseEntity<SCAPaymentResponseTO> initiatePayment (
     		@RequestParam("paymentType") PaymentTypeTO paymentType, 
-    		@RequestBody Object payment) throws NotFoundRestException;
+    		@RequestBody Object payment) throws NotFoundRestException, ForbiddenRestException, ConflictRestException;
 
     @GetMapping(value = "/{paymentId}/authorisations/{authorisationId}")
 	@ApiOperation(value = "Get SCA", notes="Get the authorization response object eventually containing the list of selected sca methods.", 

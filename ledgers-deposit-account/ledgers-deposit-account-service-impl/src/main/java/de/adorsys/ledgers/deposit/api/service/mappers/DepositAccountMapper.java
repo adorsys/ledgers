@@ -21,4 +21,5 @@ public interface DepositAccountMapper {
     DepositAccount createDepositAccountObj(DepositAccount depositAccount);
 
     AccountReferenceBO toAccountReferenceBO(DepositAccount depositAccount);
+    
 }

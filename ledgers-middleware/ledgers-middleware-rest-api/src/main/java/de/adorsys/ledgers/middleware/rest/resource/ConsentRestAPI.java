@@ -34,10 +34,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 
-@Api(tags = "Consent" , description= "Provide an API to manage consent at the core banking level.")
-@SuppressWarnings({"PMD.UnnecessaryModifier"})
+@Api(tags = "LDG004 - Consent" , description= "Provide an API to manage consent at the core banking level.")
 public interface ConsentRestAPI {
-	public static final String BASE_PATH = "/consents";
+	String BASE_PATH = "/consents";
 
     /**
      * Initiates an sca process. The result of this initiation is the user's authorization id.

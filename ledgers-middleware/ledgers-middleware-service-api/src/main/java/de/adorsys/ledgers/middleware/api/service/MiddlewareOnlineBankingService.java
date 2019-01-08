@@ -61,8 +61,9 @@ public interface MiddlewareOnlineBankingService {
 	 * @param accessToken : the access token
 	 * @return the bearer token
 	 * @throws UserNotFoundMiddlewareException : user not found in db.
+	 * @throws InsufficientPermissionMiddlewareException : token contains more permission than the assigned to the user in the database.
 	 */
-	BearerTokenTO validate(String accessToken) throws UserNotFoundMiddlewareException;
+	BearerTokenTO validate(String accessToken) throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 	
     // ================= SCA =======================================//
 

@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,7 +82,9 @@ public class AccessService {
     public List<String> filterOwnedAccounts(List<AccountAccessTO> accountAccesses) {
         // All iban owned by this user.
         //TODO should be moved to UM @dmiex
-        return accountAccesses.stream()
+        return accountAccesses==null
+        		? Collections.emptyList()
+        				: accountAccesses.stream()
                        .filter(a -> a.getAccessType()!=null && AccessTypeBO.OWNER.name().equals(a.getAccessType().name()))
                        .map(AccountAccessTO::getIban)
                        .collect(Collectors.toList());

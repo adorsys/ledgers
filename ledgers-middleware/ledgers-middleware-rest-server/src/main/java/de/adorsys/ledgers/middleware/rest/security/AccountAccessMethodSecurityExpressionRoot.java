@@ -59,7 +59,17 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 		}
 		return accountInfoByIban(iban);
 	}
+	
+	public boolean tokenUsage(String usageType) {
+		MiddlewareAuthentication m = (MiddlewareAuthentication) getAuthentication();
+		return m.checkTokenUsage(usageType);
+	}
 
+	public boolean loginToken(String scaId, String authorizationId) {
+		MiddlewareAuthentication m = (MiddlewareAuthentication) getAuthentication();
+		return m.checkLoginToken(scaId, authorizationId);
+	}
+	
 	@Override
 	public void setFilterObject(Object filterObject) {
 		this.filterObject = filterObject;

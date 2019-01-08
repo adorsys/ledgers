@@ -20,5 +20,5 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 import de.adorsys.ledgers.middleware.rest.resource.AppMgmtRestAPI;
 
-@FeignClient(value = "ledgersAppMgmt", url = "${ledgers.url}", path=AppMgmtRestAPI.BASE_PATH)
+@FeignClient(value = "ledgersAppMgmt", url = LedgersURL.LEDGERS_URL, path=AppMgmtRestAPI.BASE_PATH)
 public interface AppMgmtRestClient extends AppMgmtRestAPI {}

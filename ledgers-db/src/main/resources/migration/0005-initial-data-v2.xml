@@ -1,0 +1,298 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet context="test" author="fpo (generated)" id="1546818352235-23">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/users.csv" quotchar="&quot;" separator="," tableName="users">
+            <column header="user_id" name="user_id" type="STRING"/>
+            <column header="email" name="email" type="STRING"/>
+            <column header="login" name="login" type="STRING"/>
+            <column header="pin" name="pin" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352235-24">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/users_roles.csv" quotchar="&quot;" separator="," tableName="users_roles">
+            <column header="user_id" name="user_id" type="STRING"/>
+            <column header="role" name="role" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-1">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/account_accesses.csv" quotchar="&quot;" separator="," tableName="account_accesses">
+            <column header="account_access_id" name="account_access_id" type="STRING"/>
+            <column header="access_type" name="access_type" type="STRING"/>
+            <column header="iban" name="iban" type="STRING"/>
+            <column header="user_id" name="user_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-2">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/account_stmt.csv" quotchar="&quot;" separator="," tableName="account_stmt">
+            <column header="id" name="id"/>
+            <column header="pst_time" name="pst_time"/>
+            <column header="stmt_seq_nbr" name="stmt_seq_nbr"/>
+            <column header="stmt_status" name="stmt_status"/>
+            <column header="total_credit" name="total_credit"/>
+            <column header="total_debit" name="total_debit"/>
+            <column header="latest_pst_id" name="latest_pst_id"/>
+            <column header="posting_id" name="posting_id"/>
+            <column header="account_id" name="account_id"/>
+            <column header="youngest_pst_id" name="youngest_pst_id"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-3">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/chart_of_account.csv" quotchar="&quot;" separator="," tableName="chart_of_account">
+            <column header="id" name="id" type="STRING"/>
+            <column header="created" name="created" type="DATE"/>
+            <column header="long_desc" name="long_desc"/>
+            <column header="short_desc" name="short_desc" type="STRING"/>
+            <column header="user_details" name="user_details" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-4">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/deposit_account.csv" quotchar="&quot;" separator="," tableName="deposit_account">
+            <column header="id" name="id" type="STRING"/>
+            <column header="account_status" name="account_status" type="STRING"/>
+            <column header="account_type" name="account_type" type="STRING"/>
+            <column header="bic" name="bic"/>
+            <column header="currency" name="currency" type="STRING"/>
+            <column header="details" name="details"/>
+            <column header="iban" name="iban" type="STRING"/>
+            <column header="linked_accounts" name="linked_accounts"/>
+            <column header="msisdn" name="msisdn"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="product" name="product" type="STRING"/>
+            <column header="usage_type" name="usage_type" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-5">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/ledger.csv" quotchar="&quot;" separator="," tableName="ledger">
+            <column header="id" name="id" type="STRING"/>
+            <column header="created" name="created" type="DATE"/>
+            <column header="long_desc" name="long_desc"/>
+            <column header="short_desc" name="short_desc" type="STRING"/>
+            <column header="user_details" name="user_details" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="coa_id" name="coa_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-6">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/ledger_account.csv" quotchar="&quot;" separator="," tableName="ledger_account">
+            <column header="id" name="id" type="STRING"/>
+            <column header="created" name="created" type="DATE"/>
+            <column header="long_desc" name="long_desc"/>
+            <column header="short_desc" name="short_desc" type="STRING"/>
+            <column header="user_details" name="user_details" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="balance_side" name="balance_side" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="coa_id" name="coa_id" type="STRING"/>
+            <column header="ledger_id" name="ledger_id" type="STRING"/>
+            <column header="parent_id" name="parent_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-7">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/ledger_stmt.csv" quotchar="&quot;" separator="," tableName="ledger_stmt">
+            <column header="id" name="id"/>
+            <column header="pst_time" name="pst_time"/>
+            <column header="stmt_seq_nbr" name="stmt_seq_nbr"/>
+            <column header="stmt_status" name="stmt_status"/>
+            <column header="latest_pst_id" name="latest_pst_id"/>
+            <column header="posting_id" name="posting_id"/>
+            <column header="ledger_id" name="ledger_id"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-8">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/op_note.csv" quotchar="&quot;" separator="," tableName="op_note">
+            <column header="id" name="id"/>
+            <column header="content" name="content"/>
+            <column header="exec_status" name="exec_status"/>
+            <column header="exec_time" name="exec_time"/>
+            <column header="premature_exc" name="premature_exc"/>
+            <column header="rec_id" name="rec_id"/>
+            <column header="rec_time" name="rec_time"/>
+            <column header="repeated_exec" name="repeated_exec"/>
+            <column header="type" name="type"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-9">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/operation_details.csv" quotchar="&quot;" separator="," tableName="operation_details">
+            <column header="id" name="id" type="STRING"/>
+            <column header="op_details" name="op_details" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-10">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/payment.csv" quotchar="&quot;" separator="," tableName="payment">
+            <column header="payment_id" name="payment_id" type="STRING"/>
+            <column header="batch_booking_preferred" name="batch_booking_preferred" type="BOOLEAN"/>
+            <column header="day_of_execution" name="day_of_execution"/>
+            <column header="debt_bban" name="debt_bban"/>
+            <column header="currency" name="currency" type="STRING"/>
+            <column header="debt_iban" name="debt_iban" type="STRING"/>
+            <column header="debt_masked_pan" name="debt_masked_pan"/>
+            <column header="debt_msisdn" name="debt_msisdn"/>
+            <column header="debt_pan" name="debt_pan"/>
+            <column header="end_date" name="end_date"/>
+            <column header="execution_rule" name="execution_rule"/>
+            <column header="frequency" name="frequency"/>
+            <column header="payment_type" name="payment_type" type="STRING"/>
+            <column header="requested_execution_date" name="requested_execution_date" type="DATE"/>
+            <column header="requested_execution_time" name="requested_execution_time" type="DATE"/>
+            <column header="start_date" name="start_date"/>
+            <column header="transaction_status" name="transaction_status" type="STRING"/>
+            <column header="executed_date" name="executed_date" type="DATE"/>
+            <column header="next_scheduled_execution" name="next_scheduled_execution"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-11">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/payment_target.csv" quotchar="&quot;" separator="," tableName="payment_target">
+            <column header="payment_id" name="payment_id" type="STRING"/>
+            <column header="cred_bban" name="cred_bban"/>
+            <column header="currency" name="currency" type="STRING"/>
+            <column header="cred_iban" name="cred_iban" type="STRING"/>
+            <column header="cred_masked_pan" name="cred_masked_pan"/>
+            <column header="cred_msisdn" name="cred_msisdn"/>
+            <column header="cred_pan" name="cred_pan"/>
+            <column header="cred_bld_nbr" name="cred_bld_nbr"/>
+            <column header="cred_city" name="cred_city"/>
+            <column header="cred_ctry" name="cred_ctry"/>
+            <column header="cred_zip" name="cred_zip"/>
+            <column header="cred_street" name="cred_street"/>
+            <column header="creditor_agent" name="creditor_agent"/>
+            <column header="creditor_name" name="creditor_name" type="STRING"/>
+            <column header="end_to_end_identification" name="end_to_end_identification" type="STRING"/>
+            <column header="amt" name="amt" type="NUMERIC"/>
+            <column header="cur" name="cur" type="STRING"/>
+            <column header="payment_product" name="payment_product" type="STRING"/>
+            <column header="remittance_information_unstructured" name="remittance_information_unstructured" type="STRING"/>
+            <column header="payment_payment_id" name="payment_payment_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-12">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/payment_targets.csv" quotchar="&quot;" separator="," tableName="payment_targets">
+            <column header="payment_payment_id" name="payment_payment_id" type="STRING"/>
+            <column header="targets_payment_id" name="targets_payment_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-13">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/posting.csv" quotchar="&quot;" separator="," tableName="posting">
+            <column header="id" name="id" type="STRING"/>
+            <column header="antecedent_hash" name="antecedent_hash" type="STRING"/>
+            <column header="antecedent_id" name="antecedent_id" type="STRING"/>
+            <column header="hash" name="hash" type="STRING"/>
+            <column header="hash_alg" name="hash_alg" type="STRING"/>
+            <column header="discarded_id" name="discarded_id"/>
+            <column header="discarded_time" name="discarded_time"/>
+            <column header="discarding_id" name="discarding_id"/>
+            <column header="opr_id" name="opr_id" type="STRING"/>
+            <column header="opr_src" name="opr_src" type="STRING"/>
+            <column header="opr_time" name="opr_time" type="DATE"/>
+            <column header="opr_type" name="opr_type"/>
+            <column header="pst_status" name="pst_status" type="STRING"/>
+            <column header="pst_time" name="pst_time" type="DATE"/>
+            <column header="pst_type" name="pst_type" type="STRING"/>
+            <column header="record_time" name="record_time" type="DATE"/>
+            <column header="record_user" name="record_user" type="STRING"/>
+            <column header="val_time" name="val_time" type="DATE"/>
+            <column header="ledger_id" name="ledger_id" type="STRING"/>
+            <column header="opr_details_id" name="opr_details_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-14">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/posting_line.csv" quotchar="&quot;" separator="," tableName="posting_line">
+            <column header="id" name="id" type="STRING"/>
+            <column header="base_line" name="base_line"/>
+            <column header="credit_amount" name="credit_amount" type="NUMERIC"/>
+            <column header="debit_amount" name="debit_amount" type="NUMERIC"/>
+            <column header="discarded_time" name="discarded_time"/>
+            <column header="hash" name="hash" type="STRING"/>
+            <column header="opr_id" name="opr_id" type="STRING"/>
+            <column header="opr_src" name="opr_src" type="STRING"/>
+            <column header="pst_status" name="pst_status" type="STRING"/>
+            <column header="pst_time" name="pst_time" type="DATE"/>
+            <column header="pst_type" name="pst_type" type="STRING"/>
+            <column header="record_time" name="record_time" type="DATE"/>
+            <column header="src_account" name="src_account"/>
+            <column header="sub_opr_src_id" name="sub_opr_src_id" type="STRING"/>
+            <column header="account_id" name="account_id" type="STRING"/>
+            <column header="posting_id" name="posting_id" type="STRING"/>
+            <column header="details_id" name="details_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-15">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/posting_trace.csv" quotchar="&quot;" separator="," tableName="posting_trace">
+            <column header="id" name="id"/>
+            <column header="credit_amount" name="credit_amount"/>
+            <column header="debit_amount" name="debit_amount"/>
+            <column header="src_opr_id" name="src_opr_id"/>
+            <column header="src_pst_hash" name="src_pst_hash"/>
+            <column header="src_pst_id" name="src_pst_id"/>
+            <column header="src_pst_time" name="src_pst_time"/>
+            <column header="tgt_pst_id" name="tgt_pst_id"/>
+            <column header="account_id" name="account_id"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-16">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/sca_ais_consent.csv" quotchar="&quot;" separator="," tableName="sca_ais_consent">
+            <column header="id" name="id"/>
+            <column header="all_psd2" name="all_psd2"/>
+            <column header="available_accounts" name="available_accounts"/>
+            <column header="frequency_per_day" name="frequency_per_day"/>
+            <column header="recurring_indicator" name="recurring_indicator"/>
+            <column header="tpp_id" name="tpp_id"/>
+            <column header="user_id" name="user_id"/>
+            <column header="valid_until" name="valid_until"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-17">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/sca_ais_consent_accounts.csv" quotchar="&quot;" separator="," tableName="sca_ais_consent_accounts">
+            <column header="ais_consent_entity_id" name="ais_consent_entity_id"/>
+            <column header="accounts" name="accounts"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-18">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/sca_ais_consent_balances.csv" quotchar="&quot;" separator="," tableName="sca_ais_consent_balances">
+            <column header="ais_consent_entity_id" name="ais_consent_entity_id"/>
+            <column header="balances" name="balances"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-19">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/sca_ais_consent_transactions.csv" quotchar="&quot;" separator="," tableName="sca_ais_consent_transactions">
+            <column header="ais_consent_entity_id" name="ais_consent_entity_id"/>
+            <column header="transactions" name="transactions"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-20">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/sca_data.csv" quotchar="&quot;" separator="," tableName="sca_data">
+            <column header="sca_id" name="sca_id" type="STRING"/>
+            <column header="method_value" name="method_value" type="STRING"/>
+            <column header="sca_method" name="sca_method" type="STRING"/>
+            <column header="user_id" name="user_id" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-21">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/sca_operation.csv" quotchar="&quot;" separator="," tableName="sca_operation">
+            <column header="id" name="id" type="STRING"/>
+            <column header="auth_code_hash" name="auth_code_hash" type="STRING"/>
+            <column header="created" name="created" type="DATE"/>
+            <column header="hash_alg" name="hash_alg" type="STRING"/>
+            <column header="op_id" name="op_id" type="STRING"/>
+            <column header="status" name="status" type="STRING"/>
+            <column header="status_time" name="status_time" type="DATE"/>
+            <column header="validity_seconds" name="validity_seconds" type="NUMERIC"/>
+            <column header="failled_count" name="failled_count" type="NUMERIC"/>
+            <column header="op_type" name="op_type" type="STRING"/>
+            <column header="sca_method_id" name="sca_method_id" type="STRING"/>
+            <column header="sca_status" name="sca_status" type="STRING"/>
+        </loadData>
+    </changeSet>
+    <changeSet context="test" author="fpo (generated)" id="1546818352236-22">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/scheduled_payment_order.csv" quotchar="&quot;" separator="," tableName="scheduled_payment_order">
+            <column header="payment_order_id" name="payment_order_id"/>
+            <column header="current_executor" name="current_executor"/>
+            <column header="exec_status_time" name="exec_status_time"/>
+            <column header="last_exec_time" name="last_exec_time"/>
+            <column header="last_posting_time" name="last_posting_time"/>
+            <column header="lease_expiration" name="lease_expiration"/>
+            <column header="next_exec_time" name="next_exec_time"/>
+            <column header="next_posting_time" name="next_posting_time"/>
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

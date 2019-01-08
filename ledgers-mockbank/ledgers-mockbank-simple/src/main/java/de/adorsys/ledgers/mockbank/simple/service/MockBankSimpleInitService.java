@@ -121,6 +121,8 @@ public class MockBankSimpleInitService {
 			// Create user
 			BearerTokenTO accessToken = userAccountService.authOrCreateCustomer(userTO);
 			UserContext bag = new UserContext(userTO, accessToken);
+			contextService.updateCredentials(userTO.getLogin(), bag);
+			userAccountService.updateScaMethods(userTO);
 			List<AccountDetailsTO> accessibleAccounts = depositAccountService.accessibleAccounts(bag);
 			bag.getAccessibleAccounts().addAll(accessibleAccounts);
 			contextService.updateCredentials(userTO.getLogin(), bag);

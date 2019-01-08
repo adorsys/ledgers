@@ -41,3 +41,4 @@ log
 .springBeans
 
 cms-db-schema/liquibase.properties
+ledgers-db/liquibase.properties

@@ -39,20 +39,21 @@ import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 
-@Api(tags = "Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
-@SuppressWarnings({"PMD.UnnecessaryModifier"})
+@Api(tags = "LDG002 - Accounts" , description= "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 public interface AccountRestAPI {
-	public final String BASE_PATH = "/accounts";
-	final String IBAN_QUERY_PARAM = "iban";
-	final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
-	final String DATE_TO_QUERY_PARAM = "dateTo";
-	final String DATE_FROM_QUERY_PARAM = "dateFrom";
-	final String ACCOUNT_ID = "accountId";
-    final String TRANSACTION_ID = "transactionId";
-	final String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
-    final String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
+	String BASE_PATH = "/accounts";
+	String IBAN_QUERY_PARAM = "iban";
+	String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
+	String DATE_TO_QUERY_PARAM = "dateTo";
+	String DATE_FROM_QUERY_PARAM = "dateFrom";
+	String ACCOUNT_ID = "accountId";
+    String TRANSACTION_ID = "transactionId";
+	String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
+    String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
 
     /**
      * Return the list of accounts linked with the current customer.
@@ -60,25 +61,54 @@ public interface AccountRestAPI {
      * @return : the list of accounts linked with the current customer.
      */
     @GetMapping
-    @ApiOperation(value="List Accounts", authorizations =@Authorization(value="apiKey"), notes="Returns the list of all accounts linked to the connected user. Call only available to customer.")
+    @ApiOperation(value="List fo Accessible Accounts", authorizations =@Authorization(value="apiKey"), 
+    	notes="Returns the list of all accounts linked to the connected user. "
+    			+ "Call only available to role CUSTOMER.")
+	@ApiResponses(value={
+			@ApiResponse(code=200, response=AccountDetailsTO[].class, message="List of accounts accessible to the user.")
+		})
     ResponseEntity<List<AccountDetailsTO>> getListOfAccounts()  throws ForbiddenRestException;
 
     @PostMapping
-    @ApiOperation(value="Create Deposit Account", authorizations =@Authorization(value="apiKey"), notes="Creates a deposit account")
+	@ApiOperation(value="Registers a new Deposit Account", 
+	notes="Registers a new deposit account and assigns account access OWNER to the current user."
+			+ "Following rules apply during and after registration of a new account:"
+			+ "<ul>"
+				+ "<li>Caller must have a role <b>CUSTOMER</b> this means STAFF and SYSTEM can not use this endpoint.</li>"
+				+ "<li>Caller must have a valid <b>DIRECT_ACCESS</b> token. Means this can not be called using a LOGIN or a DELEGATED_ACCESS (tpp) token.</li>"
+				+ "<li>The current access token of the user does not include the newly registered account. User must reauthenticate to obtain an updated access token.</li>"
+				+ "<li>Nevertheless the Endpoint '/accounts' returns all accounts of the user.</li>"
+				+ "<li>Endpoint for granting account access to another user is scheduled but not yet implemented.</li>"
+			+ "</ul>", 
+	authorizations =@Authorization(value="apiKey"))
+	@ApiResponses(value={
+		@ApiResponse(code=200, response=Void.class, message="Account creation successfull. Still planing to work with 201 here."),
+		@ApiResponse(code=409, message="Account with given IBAN already exists.")
+	})
     ResponseEntity<Void> createDepositAccount(
     		@RequestBody AccountDetailsTO accountDetailsTO) 
     		 throws ForbiddenRestException, ConflictRestException;
     
     @GetMapping("/{accountId}")
     @ApiOperation(value="Load Account by AccountId", 
-    	notes="Returns account details information", 
+    	notes="Returns account details information for the given account id. "
+    			+ "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)", 
     	authorizations =@Authorization(value="apiKey"))
+	@ApiResponses(value={
+			@ApiResponse(code=200, response=AccountDetailsTO.class, message="Account details.")
+		})
     ResponseEntity<AccountDetailsTO> getAccountDetailsById(
     		@ApiParam(ACCOUNT_ID)
     		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
 
     @GetMapping("/{accountId}/balances")
-    @ApiOperation(value="Returns balances of the deposit account with the given id", authorizations =@Authorization(value="apiKey"))
+    @ApiOperation(value="Read balances", 
+    	notes="Returns balances of the deposit account with the given accountId. "
+    			+ "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)",
+    	authorizations =@Authorization(value="apiKey"))
+	@ApiResponses(value={
+			@ApiResponse(code=200, response=AccountBalanceTO[].class, message="List of accounts balances for the given account.")
+		})
     ResponseEntity<List<AccountBalanceTO>> getBalances(
     		@ApiParam(ACCOUNT_ID)
     		@PathVariable(name="accountId") String accountId) throws NotFoundRestException, ForbiddenRestException;
