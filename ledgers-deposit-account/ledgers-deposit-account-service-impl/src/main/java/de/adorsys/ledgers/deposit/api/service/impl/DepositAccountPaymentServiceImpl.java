@@ -24,6 +24,7 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
@@ -31,6 +32,7 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import de.adorsys.ledgers.util.Ids;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
@@ -66,9 +68,16 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) {
+    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) throws PaymentWithIdExistsException {
+    	if(paymentRepository.existsById(payment.getPaymentId())) {
+    		throw new PaymentWithIdExistsException(payment.getPaymentId());
+    	}
+    	
         Payment persistedPayment = paymentMapper.toPayment(payment);
-        persistedPayment.getTargets().forEach(t -> t.setPayment(persistedPayment));
+        persistedPayment.getTargets().forEach(t -> {
+        	t.setPayment(persistedPayment);
+        	t.setPaymentId(Ids.id());
+        });
         persistedPayment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
         Payment savedPayment = paymentRepository.save(persistedPayment);
         return paymentMapper.toPaymentBO(savedPayment);

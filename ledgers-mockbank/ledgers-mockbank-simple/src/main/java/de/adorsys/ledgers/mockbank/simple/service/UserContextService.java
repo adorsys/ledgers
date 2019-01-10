@@ -48,8 +48,15 @@ public class UserContextService {
 		return accountAccessTO!=null;
 	}
 	
-	public void setContext(String iban) {
+	public void setContextFromIban(String iban) {
 		UserContext bag = bagByIbanOrNull(iban);
+		if(bag==null) {
+			return;
+		}
+		setContext(bag);
+	}
+	public void setContextFromLogin(String login) {
+		UserContext bag = bagByLoginOrNull(login);
 		if(bag==null) {
 			return;
 		}
@@ -70,7 +77,7 @@ public class UserContextService {
 		usersMap.put(login, bag);
 	}
 	public UserContext newToken(BearerTokenTO token) {
-		String login = token.getAccessTokenObject().getActor();
+		String login = token.getAccessTokenObject().getLogin();
 		UserContext bag = byLoginOrEx(login);
 		bag.setAccessToken(token);
 		bag.setRole(token.getAccessTokenObject().getRole());

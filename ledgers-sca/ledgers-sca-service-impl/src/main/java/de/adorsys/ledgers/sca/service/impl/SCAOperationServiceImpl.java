@@ -162,14 +162,10 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
 	private SCAOperationEntity loadOrCreateScaOperation(AuthCodeDataBO data, ScaStatusBO scaStatus)
 			throws SCAOperationNotFoundException {
-		SCAOperationEntity scaOperation;
-    	if(data.getAuthorisationId()!=null) {
-    		String authorisationId = data.getAuthorisationId();
-    		scaOperation = repository.findById(data.getAuthorisationId()).orElseThrow(() -> new SCAOperationNotFoundException(authorisationId));
-    	} else {
-    		scaOperation = createAuthCodeInternal(data, scaStatus);
-    	}
-		return scaOperation;
+		if(data.getAuthorisationId()==null) {
+			data.setAuthorisationId(Ids.id());
+		}
+		return repository.findById(data.getAuthorisationId()).orElse(createAuthCodeInternal(data, scaStatus));
 	}
     
     private void checkMethodSupported(ScaUserDataBO scaMethod) throws SCAMethodNotSupportedException {

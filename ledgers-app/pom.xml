@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
-		<version>0.2-SNAPSHOT</version>
+		<version>0.3-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -150,13 +150,11 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-db</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		 -->
 
 		<!-- spring dependency -->
 
@@ -224,5 +222,18 @@
 			</plugin>
 		</plugins>
 	</build>
+
+
+	<profiles>
+		<profile>
+			<id>mock-smtp</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.subethamail</groupId>
+					<artifactId>subethasmtp</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 
 </project>

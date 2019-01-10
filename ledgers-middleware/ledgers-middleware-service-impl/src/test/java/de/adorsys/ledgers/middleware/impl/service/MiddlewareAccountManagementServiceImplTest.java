@@ -6,6 +6,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,14 +38,18 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
+import de.adorsys.ledgers.middleware.impl.converter.AmountMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -58,7 +65,6 @@ public class MiddlewareAccountManagementServiceImplTest {
     
     @InjectMocks
     private MiddlewareAccountManagementServiceImpl middlewareService;
-
     @Mock
     private DepositAccountPaymentService paymentService;
     @Mock
@@ -69,12 +75,14 @@ public class MiddlewareAccountManagementServiceImplTest {
     private DepositAccountService accountService;
     @Mock
     private AccountDetailsMapper detailsMapper;
-
     @Mock
     private UserService userService;
-
+    @Mock
+    AmountMapper amountMapper;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private AccessTokenTO accessToken;
     
     static ObjectMapper mapper = getObjectMapper();
     
@@ -229,5 +237,17 @@ public class MiddlewareAccountManagementServiceImplTest {
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return objectMapper;
     }
-    
+
+    @Test
+    public void depositCashDelegatesToDepositAccountService() throws Exception {
+        doNothing().when(accountService).depositCash(eq(ACCOUNT_ID), any(), any());
+        middlewareService.depositCash(ACCOUNT_ID, new AmountTO());
+        verify(accountService, times(1)).depositCash(eq(ACCOUNT_ID), any(), any());
+    }
+
+    @Test(expected = AccountNotFoundMiddlewareException.class)
+    public void depositCashWrapsNotFoundException() throws Exception {
+        doThrow(DepositAccountNotFoundException.class).when(accountService).depositCash(any(), any(), any());
+        middlewareService.depositCash(ACCOUNT_ID, new AmountTO());
+    }
 }

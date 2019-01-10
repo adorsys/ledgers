@@ -105,8 +105,7 @@ public class UserServiceImplTest {
     public void authorizeWithLoginAndPin() throws UserNotFoundException, InsufficientPermissionException {
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
-
-        BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER);
+        BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER, null, null);
 
         assertTrue(bearerTokenBO==null);
     }
@@ -135,7 +134,7 @@ public class UserServiceImplTest {
 
         when(repository.findFirstByLogin(USER_NON_EXISTING_LOGIN)).thenReturn(Optional.empty());
 
-        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin", UserRoleBO.CUSTOMER);
+        userService.authorise(USER_NON_EXISTING_LOGIN, "SomePin", UserRoleBO.CUSTOMER, null, null);
     }
 
     private UserBO readUserBO() {

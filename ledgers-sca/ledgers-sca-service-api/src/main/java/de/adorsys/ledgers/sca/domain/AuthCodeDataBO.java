@@ -26,7 +26,23 @@ public class AuthCodeDataBO {
     private OpTypeBO opType;
     private String authorisationId;
 
-    public String getUserLogin() {
+    public AuthCodeDataBO() {
+	}
+
+	public AuthCodeDataBO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
+			int validitySeconds, OpTypeBO opType, String authorisationId) {
+		super();
+		this.userLogin = userLogin;
+		this.scaUserDataId = scaUserDataId;
+		this.opId = opId;
+		this.opData = opData;
+		this.userMessage = userMessage;
+		this.validitySeconds = validitySeconds;
+		this.opType = opType;
+		this.authorisationId = authorisationId;
+	}
+
+	public String getUserLogin() {
         return userLogin;
     }
 

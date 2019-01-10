@@ -2,7 +2,11 @@ package de.adorsys.ledgers.um.api.domain;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AccessTokenBO {
 	
@@ -10,10 +14,11 @@ public class AccessTokenBO {
 	
 	private String jti;
 	
-	private String actor;
+	private String login;
 	
 	private AisConsentBO consent;
 	
+	@JsonProperty("account_accesses")
     private List<AccountAccessBO> accountAccesses = new ArrayList<>();
     
     private UserRoleBO role;
@@ -21,6 +26,17 @@ public class AccessTokenBO {
     private Date iat;
     
     private Date exp;
+
+	private Map<String, String> act = new HashMap<>();
+	
+	@JsonProperty("sca_id")
+	private String scaId;
+	
+	@JsonProperty("authorisation_id")
+	private String authorisationId;
+
+	@JsonProperty("token_usage")
+	private TokenUsageBO tokenUsage;
 
 	public String getSub() {
 		return sub;
@@ -38,12 +54,12 @@ public class AccessTokenBO {
 		this.jti = jti;
 	}
 
-	public String getActor() {
-		return actor;
+	public String getLogin() {
+		return login;
 	}
 
-	public void setActor(String actor) {
-		this.actor = actor;
+	public void setLogin(String login) {
+		this.login = login;
 	}
 
 	public AisConsentBO getConsent() {
@@ -85,4 +101,37 @@ public class AccessTokenBO {
 	public void setExp(Date exp) {
 		this.exp = exp;
 	}
+
+	public Map<String, String> getAct() {
+		return act;
+	}
+
+	public void setAct(Map<String, String> act) {
+		this.act = act;
+	}
+
+	public String getScaId() {
+		return scaId;
+	}
+
+	public void setScaId(String scaId) {
+		this.scaId = scaId;
+	}
+
+	public String getAuthorisationId() {
+		return authorisationId;
+	}
+
+	public void setAuthorisationId(String authorisationId) {
+		this.authorisationId = authorisationId;
+	}
+
+	public TokenUsageBO getTokenUsage() {
+		return tokenUsage;
+	}
+
+	public void setTokenUsage(TokenUsageBO tokenUsage) {
+		this.tokenUsage = tokenUsage;
+	}
+	
 }

@@ -17,6 +17,6 @@ public interface PostingMapper {
     String toOprDetailsBO(OperationDetails operationDetails);
 
     @Mapping(target = "opDetails", source = "operationDetails")
-    @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID().toString())")
+    @Mapping(target = "id", expression = "java(de.adorsys.ledgers.util.Ids.id())")
     OperationDetails toOperationDetails(String operationDetails);
 }

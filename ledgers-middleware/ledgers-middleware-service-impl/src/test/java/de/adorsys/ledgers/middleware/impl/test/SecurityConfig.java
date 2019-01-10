@@ -17,7 +17,7 @@ public class SecurityConfig {
 	
 	@Bean AccessTokenTO getAccessTokenTO() {
 		AccessTokenTO token = new AccessTokenTO();
-		token.setActor("anonymous");
+		token.setLogin("anonymous");
 		token.setSub("anonymous");
 		return token;
 	}

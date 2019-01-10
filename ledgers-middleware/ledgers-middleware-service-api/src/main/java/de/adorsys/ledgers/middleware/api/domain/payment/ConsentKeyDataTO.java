@@ -29,6 +29,27 @@ public class ConsentKeyDataTO {
 			return String.format("No account access to tpp with id: %s", consent.getTppId());
 		}
 
+		StringBuilder b = prepareTemplate(access);
+
+		b.append("TAN: %s");
+		return b.toString();
+	}
+
+	public String exemptedTemplate() {
+		checkNullConsent();
+		// Deleting the consent of a TPP by replacing it with an empty consent.
+		AisAccountAccessInfoTO access = consent.getAccess();
+		if(access==null) {
+			return String.format("No account access to tpp with id: %s", consent.getTppId());
+		}
+
+		StringBuilder b = prepareTemplate(access);
+
+		b.append("This access has been granted. No TAN entry needed.");
+		return b.toString();
+	}
+
+	private StringBuilder prepareTemplate(AisAccountAccessInfoTO access) {
 		StringBuilder b = new StringBuilder(String.format("Account access for TPP with id %s:\n", consent.getTppId()));
 		if(consent.getFrequencyPerDay()<=1) {
 			if(consent.isRecurringIndicator()) {
@@ -56,9 +77,7 @@ public class ConsentKeyDataTO {
 		format(b, access.getAccounts(), "Without balances: %s.\n");
 		format(b, access.getBalances(), "With balances: %s.\n");
 		format(b, access.getTransactions(), "With balances and transactions: %s.\n");
-
-		b.append("TAN: %s");
-		return b.toString();
+		return b;
 	}
 
 	private void checkNullConsent() {
@@ -81,5 +100,4 @@ public class ConsentKeyDataTO {
 		accounts.stream().forEach(a -> sb.append(a).append(" "));
 		return sb.toString();
 	}
-	
 }

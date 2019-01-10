@@ -20,11 +20,13 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -56,14 +58,18 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
+	private final AccessTokenTO accessToken;
+
 
     public UserMgmtResource(MiddlewareOnlineBankingService onlineBankingService,
-			MiddlewareUserManagementService middlewareUserService) {
+			MiddlewareUserManagementService middlewareUserService, AccessTokenTO accessToken) {
+		super();
 		this.onlineBankingService = onlineBankingService;
 		this.middlewareUserService = middlewareUserService;
+		this.accessToken = accessToken;
 	}
 
-    @Override
+	@Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
     	try {
     		// TODO: add activation of non customer members.
@@ -95,10 +101,10 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
 	@Override
-	@SuppressWarnings({"PMD.IdenticalCatchBranches"})
+    @PreAuthorize("loginToken(#scaId,#authorisationId)")
 	public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId)
-			throws ValidationRestException, ConflictRestException, 
-			NotFoundRestException, ForbiddenRestException {
+			throws NotFoundRestException, ForbiddenRestException, 
+			NotAcceptableRestException, ValidationRestException {
 		try {
 			return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaMethodId, authorisationId, null, 1800));
 		} catch (SCAOperationNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {
@@ -113,10 +119,11 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 	}
 
 	@Override
-	@SuppressWarnings({"PMD.IdenticalCatchBranches", "PMD.CyclomaticComplexity"})
+	@SuppressWarnings("PMD.CyclomaticComplexity")
+    @PreAuthorize("loginToken(#scaId,#authorisationId)")
 	public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode)
-			throws GoneRestException, NotFoundRestException, ConflictRestException, ExpectationFailedRestException,
-			NotAcceptableRestException {
+			throws GoneRestException, NotFoundRestException, ExpectationFailedRestException,
+			NotAcceptableRestException, ForbiddenRestException {
 		try {
 			return ResponseEntity.ok(onlineBankingService.authenticateForLogin(authorisationId, authCode));
 		} catch (SCAOperationNotFoundMiddlewareException e) {
@@ -141,13 +148,14 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     		} else {
                 throw new ForbiddenRestException("Token invalid");    		
     		}
-		} catch (UserNotFoundMiddlewareException e) {
+		} catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
 		}
     	
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<UserTO> getUserById(String userId) {
         try {
             return ResponseEntity.ok(middlewareUserService.findById(userId));
@@ -157,18 +165,20 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    public ResponseEntity<UserTO> getUserByLogin(String login) {
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<UserTO> getUser() {
         try {
-            return ResponseEntity.ok(middlewareUserService.findByUserLogin(login));
+            return ResponseEntity.ok(middlewareUserService.findById(accessToken.getSub()));
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
 
     @Override
-    public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
         try {
-            UserTO userTO = middlewareUserService.findById(userId);
+            UserTO userTO = middlewareUserService.findById(accessToken.getSub());
             UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
             URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
@@ -181,6 +191,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<List<UserTO>> getAllUsers() {
         return ResponseEntity.ok(middlewareUserService.listUsers(1, 150));
     }

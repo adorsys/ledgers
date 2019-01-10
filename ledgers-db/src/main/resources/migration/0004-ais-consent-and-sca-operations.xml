@@ -1,0 +1,97 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="fpo (generated)" id="1546797402027-6">
+        <createTable tableName="sca_ais_consent">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="sca_ais_consent_pkey"/>
+            </column>
+            <column name="all_psd2" type="VARCHAR(255)"/>
+            <column name="available_accounts" type="VARCHAR(255)"/>
+            <column name="frequency_per_day" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recurring_indicator" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tpp_id" type="VARCHAR(255)"/>
+            <column name="user_id" type="VARCHAR(255)"/>
+            <column name="valid_until" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-7">
+        <createTable tableName="sca_ais_consent_accounts">
+            <column name="ais_consent_entity_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="accounts" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-8">
+        <createTable tableName="sca_ais_consent_balances">
+            <column name="ais_consent_entity_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balances" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-9">
+        <createTable tableName="sca_ais_consent_transactions">
+            <column name="ais_consent_entity_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transactions" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-10">
+        <addColumn tableName="sca_operation">
+            <column name="failled_count" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-11">
+        <addColumn tableName="sca_operation">
+            <column name="op_type" type="varchar(255 BYTE)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-12">
+        <addColumn tableName="sca_operation">
+            <column name="sca_method_id" type="varchar(255 BYTE)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-13">
+        <addColumn tableName="sca_operation">
+            <column name="sca_status" type="varchar(255 BYTE)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-14">
+        <addForeignKeyConstraint baseColumnNames="ais_consent_entity_id" baseTableName="sca_ais_consent_balances" constraintName="fk7yg39pq1r6vyvx4wkspy9l140" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sca_ais_consent" validate="true"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-15">
+        <addForeignKeyConstraint baseColumnNames="opr_details_id" baseTableName="posting" constraintName="fk94up7pmrxnghclo3hkegl71r0" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="operation_details" validate="true"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-16">
+        <addForeignKeyConstraint baseColumnNames="ais_consent_entity_id" baseTableName="sca_ais_consent_accounts" constraintName="fkdwi8e81hd1lwqea9ueo5it8be" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sca_ais_consent" validate="true"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-17">
+        <addForeignKeyConstraint baseColumnNames="details_id" baseTableName="posting_line" constraintName="fkgv8gn658lnq1qtbcocb6973g9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="operation_details" validate="true"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-18">
+        <addForeignKeyConstraint baseColumnNames="ais_consent_entity_id" baseTableName="sca_ais_consent_transactions" constraintName="fkmd5glhyigjkm65ilvi4decnu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sca_ais_consent" validate="true"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-1">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="auth_code_hash" tableName="sca_operation"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-2">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="details_id" tableName="posting_line"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-3">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="hash_alg" tableName="sca_operation"/>
+    </changeSet>
+    <changeSet author="fpo (generated)" id="1546797402027-4">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="opr_details_id" tableName="posting"/>
+    </changeSet>
+    <!-- This is auto generated by hibernate. Revert not not needed.
+    <changeSet author="fpo (generated)" id="1546797402027-5">
+        <modifyDataType columnName="requested_execution_time" newDataType="timestamp" tableName="payment"/>
+    </changeSet>
+     -->
+</databaseChangeLog>

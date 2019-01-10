@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.ledgers</groupId>
 	<artifactId>ledgers</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 
 	<modules>
 		<module>ledgers-app</module>
@@ -105,6 +105,7 @@
 		<liquibase.version>3.6.2</liquibase.version>
 		<spring-boot-dependencies.version>2.1.1.RELEASE</spring-boot-dependencies.version>
 		<spring-cloud-dependencies.version>Greenwich.M3</spring-cloud-dependencies.version>
+		<subethasmtp.version>3.1.7</subethasmtp.version>
 	</properties>
 
 	<repositories>
@@ -190,6 +191,12 @@
 				<groupId>pro.javatar.commons</groupId>
 				<artifactId>javatar-commons</artifactId>
 				<version>${javatar-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.subethamail</groupId>
+				<artifactId>subethasmtp</artifactId>
+				<version>${subethasmtp.version}</version>
 			</dependency>
 
 			<!-- test dependencies -->

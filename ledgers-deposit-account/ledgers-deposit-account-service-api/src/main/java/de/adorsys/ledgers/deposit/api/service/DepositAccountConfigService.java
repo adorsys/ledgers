@@ -9,4 +9,6 @@ public interface DepositAccountConfigService {
 	String getLedger();
 
 	String getClearingAccount(PaymentProductBO paymentProduct);
+
+	String getCashAccount();
 }

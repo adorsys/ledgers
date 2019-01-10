@@ -51,8 +51,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .authorizeRequests().antMatchers("/v2/api-docs", "/swagger-resources", "/swagger-ui.html", "/webjars/**").permitAll()
             .and()
-            .authorizeRequests().antMatchers("/console/**").permitAll()
-            .and()
             .authorizeRequests().antMatchers("/h2-console/**").permitAll()
 			.and()
 			.cors()

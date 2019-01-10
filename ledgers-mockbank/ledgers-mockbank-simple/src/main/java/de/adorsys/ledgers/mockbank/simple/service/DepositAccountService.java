@@ -84,7 +84,7 @@ public class DepositAccountService {
 	public Optional<AccountDetailsTO> account(String iban)
 			throws MalformedURLException, IOException, ProtocolException, JsonParseException, JsonMappingException {
 		try {
-			contextService.setContext(iban);
+			contextService.setContextFromIban(iban);
 			return Optional.ofNullable(ledgersAccount.getAccountDetailsByIban(iban).getBody());
 		} catch(FeignException f) {
 			HttpStatus statusCode = HttpStatus.valueOf(f.status());

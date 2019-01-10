@@ -23,6 +23,7 @@ import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareExce
 import de.adorsys.ledgers.middleware.api.exception.NoAccessMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.PaymentWithIdMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
@@ -44,8 +45,9 @@ public interface MiddlewarePaymentService {
      * @return : the sca response object.
 	 * @throws AccountNotFoundMiddlewareException : account non existant.
 	 * @throws NoAccessMiddlewareException : missing permissions
+     * @throws PaymentWithIdMiddlewareException : payment with given id exist. 
 	 */
-    <T> SCAPaymentResponseTO initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException;
+    <T> SCAPaymentResponseTO initiatePayment(T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, PaymentWithIdMiddlewareException;
 
 
     // ================= SCA =======================================//

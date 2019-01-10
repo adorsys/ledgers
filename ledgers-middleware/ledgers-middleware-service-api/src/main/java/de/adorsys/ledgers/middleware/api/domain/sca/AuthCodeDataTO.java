@@ -25,12 +25,14 @@ public class AuthCodeDataTO {
     private String opData;
     private String userMessage;
     private int validitySeconds;
+    private OpTypeTO opType;
+    private String authorisationId;
 
     public AuthCodeDataTO() {
     }
 
 	public AuthCodeDataTO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
-			int validitySeconds) {
+			int validitySeconds, OpTypeTO opType, String authorisationId) {
 		super();
 		this.userLogin = userLogin;
 		this.scaUserDataId = scaUserDataId;
@@ -38,6 +40,8 @@ public class AuthCodeDataTO {
 		this.opData = opData;
 		this.userMessage = userMessage;
 		this.validitySeconds = validitySeconds;
+		this.opType = opType;
+		this.authorisationId = authorisationId;
 	}
 
 	public String getUserLogin() {
@@ -88,7 +92,23 @@ public class AuthCodeDataTO {
 		this.validitySeconds = validitySeconds;
 	}
 
-    @Override
+    public OpTypeTO getOpType() {
+		return opType;
+	}
+
+	public void setOpType(OpTypeTO opType) {
+		this.opType = opType;
+	}
+
+	public String getAuthorisationId() {
+		return authorisationId;
+	}
+
+	public void setAuthorisationId(String authorisationId) {
+		this.authorisationId = authorisationId;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
@@ -105,6 +125,4 @@ public class AuthCodeDataTO {
     public int hashCode() {
         return Objects.hash(userLogin, scaUserDataId, opData, opId, userMessage, validitySeconds);
     }
-	
-
 }

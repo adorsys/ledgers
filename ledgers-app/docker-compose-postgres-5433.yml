@@ -1,0 +1,26 @@
+# Postgres file to start an empty database and run a full hibernate 
+# initialization of the database. 
+version: "3"
+
+volumes:
+  ledgers-data5433:
+
+services:
+
+  ledgers-app-hibernate:
+    image: centos/postgresql-95-centos7
+    container_name: ledgers_db
+    restart: on-failure
+    volumes:
+    - ledgers-data5433:/var/lib/pgsql/data
+    expose:
+    - 5432
+    ports:
+    - "5433:5432"    
+    environment:
+    - POSTGRESQL_ADMIN_PASSWORD=postgres
+    - POSTGRESQL_DATABASE=ledgers
+    - POSTGRESQL_USER=ledgers
+    - POSTGRESQL_PASSWORD=ledgers
+
+ 

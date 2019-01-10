@@ -1,0 +1,5 @@
+changeLogFile=src/main/resources/liquibase-master-changelog.xml
+
+url=jdbc:postgresql://localhost:5432/ledgers
+username=ledgers
+password=ledgers

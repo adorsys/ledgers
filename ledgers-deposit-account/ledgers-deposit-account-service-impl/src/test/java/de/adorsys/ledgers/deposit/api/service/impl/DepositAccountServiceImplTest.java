@@ -14,10 +14,7 @@ import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
-import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.api.exception.BaseLineException;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
@@ -29,6 +26,7 @@ import de.adorsys.ledgers.util.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -45,13 +43,15 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountServiceImplTest {
     private final static String ACCOUNT_ID = "ACCOUNT_ID";
     private final static String POSTING_ID = "posting_ID";
     private static final String SYSTEM = "System";
+    private static final String IBAN = "iban";
+    private static final Currency EUR = Currency.getInstance("EUR");
     @Mock
     private DepositAccountRepository depositAccountRepository;
     @Mock
@@ -235,5 +235,38 @@ public class DepositAccountServiceImplTest {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
+    }
+
+    @Test(expected = DepositAccountNotFoundException.class)
+    public void depositCash_accountNotFound() throws Exception {
+        depositAccountService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.TEN), "recordUser");
+    }
+
+    @Test
+    public void depositCashCreatesPostingWithTransactionAsDetails() throws Exception {
+        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(new DepositAccount()));
+        AccountReferenceBO accountReferenceBO = new AccountReferenceBO();
+        accountReferenceBO.setIban(IBAN);
+        accountReferenceBO.setCurrency(EUR);
+        when(depositAccountMapper.toAccountReferenceBO(any())).thenReturn(accountReferenceBO);
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+        AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
+
+        depositAccountService.depositCash(ACCOUNT_ID, amount, "recordUser");
+
+        ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
+        verify(postingService, times(1)).newPosting(postingCaptor.capture());
+        PostingBO posting = postingCaptor.getValue();
+        assertThat(posting.getLines()).hasSize(2);
+        for (PostingLineBO line : posting.getLines()) {
+            assertThat(line.getId()).isNotBlank();
+            TransactionDetailsBO transactionDetails = SerializationUtils.readValueFromString(line.getDetails(), TransactionDetailsBO.class);
+            assertThat(transactionDetails.getEndToEndId()).isEqualTo(line.getId());
+            assertThat(transactionDetails.getTransactionId()).isNotBlank();
+            assertThat(transactionDetails.getBookingDate()).isEqualTo(transactionDetails.getValueDate());
+            assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(accountReferenceBO);
+            assertThat(transactionDetails.getTransactionAmount()).isEqualToComparingFieldByField(amount);
+        }
+
     }
 }

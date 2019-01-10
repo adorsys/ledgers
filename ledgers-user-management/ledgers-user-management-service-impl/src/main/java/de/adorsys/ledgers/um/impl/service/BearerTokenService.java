@@ -2,9 +2,10 @@ package de.adorsys.ledgers.um.impl.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.JOSEException;
@@ -17,18 +18,27 @@ import com.nimbusds.jwt.SignedJWT;
 
 import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
+import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
 import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
+import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
 public class BearerTokenService {
-    private static final String SCA_ID = "scaId";
-	private static final String ACCOUNT_ACCESSES = "accountAccesses";
+    private static final String SCA_ID = "sca_id";
+    private static final String AUTHORISATION_ID = "authorisation_id";
+	private static final String ACCOUNT_ACCESSES = "account_accesses";
+	private static final String CONSENT = "consent";
+	private static final String USAGE = "token_usage";
 	private static final String ROLE = "role";
-	private static final String ACTOR = "actor";
+	private static final String LOGIN = "login";
+	private static final String ACT = "act";
+	private static final String MISSING_ROLE = "Missing field for claim role";
+	private static final String MISSING_LOGIN = "Missing field for claim login";
+	private static final String MISSING_USAGE = "Missing field for claim token_usage";
 
     private final HashMacSecretSource secretSource;
 	public BearerTokenService(HashMacSecretSource secretSource) {
@@ -36,15 +46,36 @@ public class BearerTokenService {
 		this.secretSource = secretSource;
 	}
 
-	public JWTClaimsSet genJWT(String userId, String userLogin, List<AccountAccess> accountAccesses, UserRole userRole, String scaId, Date issueTime, int validitySeconds) {
-		Builder builder = new JWTClaimsSet.Builder()
-        	.subject(userId)
-        	.jwtID(Ids.id())
-        	.claim(ACTOR, userLogin)
-        	.claim(ROLE, userRole)
-        	.issueTime(issueTime)
-        	.expirationTime(DateUtils.addSeconds(issueTime, validitySeconds));
+	public BearerTokenBO bearerToken(String userId, String userLogin, 
+			List<AccountAccess> accountAccesses, AisConsentEntity aisConsent,
+			UserRole userRole, String scaId, String authorisationId, 
+			Date issueTime, Date expires, TokenUsageBO usage, Map<String, String> act) {
+
+        // Generating claim
+        JWTClaimsSet claimsSet = genJWT(userId, userLogin, accountAccesses, aisConsent, userRole, scaId, authorisationId, issueTime, expires, usage, act);
+        
+        AccessTokenBO accessTokenObject = toAccessTokenObject(claimsSet);
+        // signing jwt
+		String accessTokenString = signJWT(claimsSet);
 		
+		Long expires_in_seconds = (expires.getTime()-issueTime.getTime())/1000;
+		return bearerToken(accessTokenString, expires_in_seconds.intValue(), accessTokenObject);
+	}
+
+	private JWTClaimsSet genJWT(String userId, String userLogin, 
+			List<AccountAccess> accountAccesses, AisConsentEntity aisConsent,
+			UserRole userRole, String scaId, String authorisationId, 
+			Date issueTime, Date expires, TokenUsageBO usage, Map<String, String> act) 
+	{
+		Builder builder = new JWTClaimsSet.Builder()
+        	.subject(Objects.requireNonNull(userId, "Missing userId"))
+        	.jwtID(Ids.id())
+        	.issueTime(issueTime)
+        	.expirationTime(expires)
+        	.claim(LOGIN, Objects.requireNonNull(userLogin, MISSING_LOGIN))
+        	.claim(ROLE, Objects.requireNonNull(userRole, MISSING_ROLE))
+			.claim(USAGE, Objects.requireNonNull(usage, MISSING_USAGE).name());
+
 		if(accountAccesses!=null && !accountAccesses.isEmpty()) {
 			builder = builder.claim(ACCOUNT_ACCESSES, accountAccesses);
 		}
@@ -52,10 +83,25 @@ public class BearerTokenService {
 		if(StringUtils.isNotBlank(scaId)) {
 			builder = builder.claim(SCA_ID, scaId);
 		}
+
+		if(StringUtils.isNotBlank(authorisationId)) {
+			builder = builder.claim(AUTHORISATION_ID, authorisationId);
+		}
+		
+		if(aisConsent!=null) {
+			builder = builder.claim(CONSENT, aisConsent);
+		}
+
+
+		if(act!=null) {
+			builder = builder.claim(ACT, act);
+		}
+		
+
 		return builder.build();
 	}
 
-	public String signJWT(JWTClaimsSet claimsSet) {
+	private String signJWT(JWTClaimsSet claimsSet) {
 		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).keyID(Ids.id()).build();
 		SignedJWT signedJWT = new SignedJWT(header, claimsSet);
 		try {
@@ -87,6 +133,7 @@ public class BearerTokenService {
 		// Check to make sure all privileges contained in the token are still valid.
 		return SerializationUtils.readValueFromString(jwtClaimsSet.toJSONObject(false).toJSONString(), AccessTokenBO.class);
 	}
-    
+	
+
 
 }
