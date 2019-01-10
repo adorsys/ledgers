@@ -11,8 +11,13 @@ export class UserService {
 
   public url = `${environment.userManagementEndPoint}`;
 
-  constructor(private http: HttpClient) {
+  private httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
   }
+
+  constructor(private http: HttpClient) {}
 
   getAll() {
     return this.http.get<User[]>(this.url);
@@ -27,10 +32,7 @@ export class UserService {
   }
 
   updateScaData(userID: string, scaData: ScaUserData[]) {
-    return this.http.put(this.url + '/' + userID + '/sca-data', JSON.stringify(scaData));
-  }
-
-  getUserByLogin() {
-
+    console.log(scaData);
+    return this.http.put(this.url + '/sca-data', JSON.stringify(scaData), this.httpOptions);
   }
 }

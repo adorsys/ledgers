@@ -45,6 +45,23 @@ export class EditScaComponent implements OnInit {
     this.userService.getUserById(this.id)
       .subscribe((user: User) => {
         this.user = user;
+        console.log(user);
+        if (this.user.scaUserData.length == 0) {
+          return this.initScaData();
+        } else {
+          const control = <FormArray>this.scaForm.controls['scaUserData'];
+
+          for (let i = 0; i < this.user.scaUserData.length; i++) {
+            control.push(
+              this.formBuilder.group({
+                scaMethod: [this.user.scaUserData[i].scaMethod, Validators.required],
+                methodValue: [this.user.scaUserData[i].methodValue, Validators.required]
+              })
+            );
+          }
+
+          return control;
+        }
       });
   }
 
@@ -65,7 +82,7 @@ export class EditScaComponent implements OnInit {
       return;
     }
 
-    this.userService.updateScaData(this.id, this.scaForm.value)
+    this.userService.updateScaData(this.id, this.scaForm.controls['scaUserData'].value)
       .subscribe(response => {
         console.log(response);
         //this.router.navigate(['/users']);
