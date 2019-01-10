@@ -16,14 +16,17 @@
 
 package de.adorsys.ledgers.app;
 
+import de.adorsys.ledgers.sca.mock.MockSmtpServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
@@ -65,4 +68,10 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 		}
 	}
 
+	// enabled when mock-smtp maven profile is active
+	@Bean
+	@ConditionalOnClass(name = "org.subethamail.smtp.server.SMTPServer")
+	MockSmtpServer mockSmtpServer() {
+		return new MockSmtpServer();
+	}
 }

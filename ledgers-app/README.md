@@ -41,6 +41,13 @@ Running with the postgres profile.
 	> mvn spring-boot:run -Dspring.profiles.active=postgres
 ```
 
+### Running with embedded SMTP server
+The application sends SCA auth codes via email. You can start the app with an embedded SMTP server that will log out 
+sent emails by activating mock-smtp maven profile.
+```
+    > mvn clean install -P mock-smtp
+```
+
 ### Provisioning with Test Data postgres
 
 The application automatically provision the database with sample data. To turn this functionality off while developing, use:
