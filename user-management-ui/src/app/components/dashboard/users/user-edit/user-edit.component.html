@@ -2,17 +2,18 @@
   <h1 class="h2">{{user?.login}}</h1>
   <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group mr-2">
-      <button class="btn btn-sm btn-outline-secondary" routerLink="./account-accesses">add account access</button>
+      <!--<button class="btn btn-sm btn-outline-secondary" routerLink="./account-accesses">add account access</button>-->
       <button class="btn btn-sm btn-outline-secondary" routerLink="./authentication-methods">add customer authentication</button>
     </div>
   </div>
 </div>
 
 <div class="container">
-  <form [formGroup]="editUserForm" (ngSubmit)="onSubmit()" >
+  <form [formGroup]="editUserForm">
 
     <div class="form-group">
       <input type="email"
+             disabled
              class="form-control"
              id="email"
              aria-describedby="emailHelp"
@@ -27,6 +28,7 @@
 
     <div class="form-group">
       <input autocomplete="off"
+             disabled
              type="text"
              class="form-control"
              id="login"
@@ -41,6 +43,7 @@
 
     <div class="form-group">
       <input type="password"
+             disabled
              class="form-control"
              id="pin"
              aria-describedby="pinHelp"
@@ -52,7 +55,7 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Update user</button>
+    <!--<button type="submit" class="btn btn-primary" (click)="onSubmit()">Update user</button>-->
   </form>
 </div>
 

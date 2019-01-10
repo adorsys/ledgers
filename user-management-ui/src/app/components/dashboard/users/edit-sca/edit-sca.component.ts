@@ -41,6 +41,13 @@ export class EditScaComponent implements OnInit {
     })
   }
 
+  loadScaData() {
+    this.userService.getUserById(this.id)
+      .subscribe((user: User) => {
+        this.user = user;
+      });
+  }
+
   addScaDataItem() {
     const control = <FormArray>this.scaForm.controls['scaUserData'];
     control.push(this.initScaData());
