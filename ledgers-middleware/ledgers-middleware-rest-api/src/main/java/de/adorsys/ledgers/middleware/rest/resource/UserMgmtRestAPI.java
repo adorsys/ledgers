@@ -270,6 +270,20 @@ public interface UserMgmtRestAPI {
         })
     ResponseEntity<Void> updateUserScaData(@RequestBody List<ScaUserDataTO> data) throws NotFoundRestException;
 
+//	@PutMapping("/{userId}/sca-data")
+//	@ApiOperation(value="Updates user SCA", notes="Updates user authentication methods."
+//			+ "<lu>"
+//			+ "<li>User is implied from the provided access token.</li>"
+//			+ "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
+//			+ "</ul>",
+//			authorizations =@Authorization(value="apiKey"))
+//	@ApiResponses(value={
+//			@ApiResponse(code=200, response=Void.class, message="The user data record without the user pin."),
+//			@ApiResponse(code=401, message="Provided bearer token could not be verified."),
+//			@ApiResponse(code=403, message="Provided bearer token not qualified for this operation."),
+//	})
+//	ResponseEntity<Void> updateScaDataByUserId(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) throws NotFoundRestException;
+
     //==========================================================================================================================
 	//
 	//	USER MANAGEMENT OPERATIONS. ACCESS TOKEN FROM STAFF, SYSTEM REQUIRED
