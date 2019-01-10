@@ -105,6 +105,7 @@
 		<liquibase.version>3.6.2</liquibase.version>
 		<spring-boot-dependencies.version>2.1.1.RELEASE</spring-boot-dependencies.version>
 		<spring-cloud-dependencies.version>Greenwich.M3</spring-cloud-dependencies.version>
+		<subethasmtp.version>3.1.7</subethasmtp.version>
 	</properties>
 
 	<repositories>
@@ -190,6 +191,12 @@
 				<groupId>pro.javatar.commons</groupId>
 				<artifactId>javatar-commons</artifactId>
 				<version>${javatar-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.subethamail</groupId>
+				<artifactId>subethasmtp</artifactId>
+				<version>${subethasmtp.version}</version>
 			</dependency>
 
 			<!-- test dependencies -->
