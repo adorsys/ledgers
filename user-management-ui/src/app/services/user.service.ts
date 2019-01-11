@@ -32,7 +32,6 @@ export class UserService {
   }
 
   updateScaData(userID: string, scaData: ScaUserData[]) {
-    console.log(scaData);
-    return this.http.put(this.url + '/sca-data', JSON.stringify(scaData), this.httpOptions);
+    return this.http.put(this.url + '/' + userID + '/sca-data', JSON.stringify(scaData), this.httpOptions);
   }
 }
