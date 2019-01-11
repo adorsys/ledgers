@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.formBuilder.group({
       login: ['', Validators.required],
       pin: ['', Validators.required],
-      role: ['STAFF'] // TODO: make dynamic -> allow either System or Staff
+      role: ['STAFF'] // check STAFF role by default
     });
     this.authService.logout();
   }

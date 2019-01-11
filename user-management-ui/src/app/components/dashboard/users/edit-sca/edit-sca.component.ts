@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {User} from "../../../../models/user.model";
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../../../services/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable} from "rxjs";
 
 @Component({
   selector: 'edit-sca',
@@ -46,8 +45,7 @@ export class EditScaComponent implements OnInit {
               }))
             });
           });
-
-    });
+      });
   }
 
   createScaForm() {
@@ -64,14 +62,6 @@ export class EditScaComponent implements OnInit {
       methodValue: ['', Validators.required]
     })
   }
-
-  loadUser() {
-    this.userService.getUserById(this.id)
-      .subscribe((user: User) => {
-        this.user = user;
-      });
-  }
-
 
   addScaDataItem() {
     const control = <FormArray>this.scaForm.controls['scaUserData'];
@@ -90,8 +80,7 @@ export class EditScaComponent implements OnInit {
     }
 
     this.userService.updateScaData(this.id, this.scaForm.controls['scaUserData'].value)
-      .subscribe(response => {
-        console.log(response);
+      .subscribe(() => {
         this.router.navigate(['/users/' + this.id]);
       });
 

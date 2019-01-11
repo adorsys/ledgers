@@ -28,6 +28,36 @@
                      class="form-control">
               <p class="text-danger" *ngIf="loginForm.controls['pin'].touched && loginForm.controls['pin'].errors">Pin is required</p>
             </div>
+
+            <div class="form-group">
+              <div class="container">
+                <div class="row">
+                  <div class="form-check col">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="staffUserRole"
+                           formControlName="role"
+                           value="STAFF">
+                    <label class="form-check-label" for="staffUserRole">
+                      Staff user
+                    </label>
+                  </div>
+                  <div class="form-check col">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="systemUserRole"
+                           formControlName="role"
+                           value="SYSTEM">
+                    <label class="form-check-label" for="systemUserRole">
+                      System user
+                    </label>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
             <div class="form-group">
               <button type="submit"
                       (click)="onSubmit()"
