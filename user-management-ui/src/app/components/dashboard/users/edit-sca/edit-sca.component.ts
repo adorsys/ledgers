@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {User} from "../../../../models/user.model";
-import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../../../services/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'edit-sca',
@@ -15,6 +16,7 @@ export class EditScaComponent implements OnInit {
   user: User;
 
   scaForm: FormGroup;
+  scaArray: FormArray;
 
   constructor(
     private userService: UserService,
@@ -23,14 +25,36 @@ export class EditScaComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.id = params['id'];
+    // create initial form
+    this.createScaForm();
 
-      this.scaForm = this.formBuilder.group({
-        scaUserData: this.formBuilder.array([
-          this.initScaData(),
-        ])
-      });
+    this.route.params
+      .subscribe(params => {
+        // loading user ID
+        this.id = params['id'];
+
+        // loading user
+        this.userService.getUserById(this.id)
+          .subscribe((user: User) => {
+            this.user = user;
+
+            this.scaForm = new FormGroup({
+              scaUserData: new FormArray(this.user.scaUserData.map(item => {
+                const group = this.initScaData();
+                group.patchValue(item);
+                return group;
+              }))
+            });
+          });
+
+    });
+  }
+
+  createScaForm() {
+    this.scaForm = this.formBuilder.group({
+      scaUserData: this.formBuilder.array([
+        this.scaArray
+      ])
     });
   }
 
@@ -41,29 +65,13 @@ export class EditScaComponent implements OnInit {
     })
   }
 
-  loadScaData() {
+  loadUser() {
     this.userService.getUserById(this.id)
       .subscribe((user: User) => {
         this.user = user;
-        console.log(user);
-        if (this.user.scaUserData.length == 0) {
-          return this.initScaData();
-        } else {
-          const control = <FormArray>this.scaForm.controls['scaUserData'];
-
-          for (let i = 0; i < this.user.scaUserData.length; i++) {
-            control.push(
-              this.formBuilder.group({
-                scaMethod: [this.user.scaUserData[i].scaMethod, Validators.required],
-                methodValue: [this.user.scaUserData[i].methodValue, Validators.required]
-              })
-            );
-          }
-
-          return control;
-        }
       });
   }
+
 
   addScaDataItem() {
     const control = <FormArray>this.scaForm.controls['scaUserData'];
@@ -75,7 +83,6 @@ export class EditScaComponent implements OnInit {
     control.removeAt(i);
   }
 
-
   onSubmit() {
     console.log(this.scaForm.value);
     if (this.scaForm.invalid) {
@@ -85,7 +92,7 @@ export class EditScaComponent implements OnInit {
     this.userService.updateScaData(this.id, this.scaForm.controls['scaUserData'].value)
       .subscribe(response => {
         console.log(response);
-        //this.router.navigate(['/users']);
+        this.router.navigate(['/users/' + this.id]);
       });
 
   }

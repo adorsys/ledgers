@@ -23,9 +23,7 @@ export class TokenInterceptor implements HttpInterceptor {
    * @returns {Observable<A>}
    */
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
     if (localStorage.getItem('token')) {
-      console.log(localStorage.getItem('token'));
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ` + localStorage.getItem('token')

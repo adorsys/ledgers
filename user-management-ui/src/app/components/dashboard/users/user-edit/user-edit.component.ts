@@ -45,9 +45,33 @@ export class UserEditComponent implements OnInit {
 
   setupUserFormControl(): void {
     this.editUserForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
-      login: ['', Validators.required],
-      pin: ['', [Validators.required, Validators.minLength(8)]]
+      email: [
+        {
+          value: null,
+          disabled: true
+        },
+        [
+          Validators.required,
+          Validators.email
+        ]
+      ],
+      login: [
+        {
+          value: null,
+          disabled: true
+        },
+        Validators.required
+      ],
+      pin: [
+        {
+          value: null,
+          disabled: true
+        },
+        [
+          Validators.required,
+          Validators.minLength(8)
+        ]
+      ]
     });
   }
 

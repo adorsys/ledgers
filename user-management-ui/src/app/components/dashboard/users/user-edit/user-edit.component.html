@@ -13,7 +13,6 @@
 
     <div class="form-group">
       <input type="email"
-             disabled
              class="form-control"
              id="email"
              aria-describedby="emailHelp"
@@ -28,7 +27,6 @@
 
     <div class="form-group">
       <input autocomplete="off"
-             disabled
              type="text"
              class="form-control"
              id="login"
@@ -43,7 +41,6 @@
 
     <div class="form-group">
       <input type="password"
-             disabled
              class="form-control"
              id="pin"
              aria-describedby="pinHelp"
@@ -57,5 +54,30 @@
 
     <!--<button type="submit" class="btn btn-primary" (click)="onSubmit()">Update user</button>-->
   </form>
+</div>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h3 class="h3">Authentication methods</h3>
+</div>
+
+<div class="container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Authentication method</th>
+        <th scope="col">Method Value</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let scaItem of user?.scaUserData; index as i">
+        <th scope="row">{{i + 1}}</th>
+        <td>{{scaItem.scaMethod}}</td>
+        <td>{{scaItem.methodValue}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
