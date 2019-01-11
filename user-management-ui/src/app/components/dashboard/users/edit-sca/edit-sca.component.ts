@@ -58,7 +58,7 @@ export class EditScaComponent implements OnInit {
 
   initScaData() {
     return this.formBuilder.group({
-      scaMethod: ['', Validators.required],
+      scaMethod: ['EMAIL', Validators.required], // by default Email option checked
       methodValue: ['', Validators.required]
     })
   }
@@ -74,7 +74,6 @@ export class EditScaComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.scaForm.value);
     if (this.scaForm.invalid) {
       return;
     }

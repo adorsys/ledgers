@@ -7,7 +7,7 @@
   </div>
 </div>
 
-<div class="container">
+<div class="container" *ngIf="user">
   <form autocomplete="off" [formGroup]="scaForm">
 
     <div class="form-group" formArrayName="scaUserData">
@@ -25,7 +25,6 @@
                      aria-describedby="scaDataHelp"
                      [ngClass]="{ 'is-invalid': scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors }"
                      placeholder="Please input SCA method for user">
-              <!--<small id="scaDataHelp" class="form-text text-muted">Authentication Email or Phone number</small>-->
               <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors" class="invalid-feedback d-block">
                 Email or Phone number is required
               </div>

@@ -14,8 +14,7 @@ export class AuthService {
   private static TOKEN_KEY = 'token'
   private jwtHelper = new JwtHelperService();
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   authorize(credentials: any) {
     return this.http.post(this.url + '/login', null, {
@@ -28,7 +27,7 @@ export class AuthService {
     return this.authorize(credentials).pipe(
       map((authData: any) => {
         let jwt = authData.bearerToken.access_token;
-        console.log(jwt);
+
         if (jwt) {
           localStorage.setItem(AuthService.TOKEN_KEY, jwt);
           return true;
