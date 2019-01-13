@@ -61,7 +61,7 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("paymentInitById(#paymentId)")
+    @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<TransactionStatusTO> getPaymentStatusById(String paymentId) {
         try {
             return ResponseEntity.ok(paymentService.getPaymentStatusById(paymentId));
@@ -72,7 +72,7 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("paymentInitById(#paymentId)")
+    @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<?> getPaymentById(String paymentId) {
         try {
             return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
@@ -98,7 +98,7 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("paymentInitById(#paymentId)")
+    @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> getSCA(String paymentId, String authorisationId) {
         try {
         	return ResponseEntity.ok(paymentService.loadSCAForPaymentData(paymentId, authorisationId));
@@ -160,7 +160,7 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("paymentInitById(#paymentId)")
+    @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> getCancelSCA(String paymentId, 
     		String cancellationId) throws ConflictRestException{
         try {

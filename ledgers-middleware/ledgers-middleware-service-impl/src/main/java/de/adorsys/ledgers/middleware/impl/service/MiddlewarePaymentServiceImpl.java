@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
@@ -33,6 +35,7 @@ import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
@@ -171,6 +174,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			response.setScaStatus(ScaStatusTO.FAILED);
 			response.setTransactionStatus(TransactionStatusTO.valueOf(status.name()));
 			response.setPaymentId(paymentBO.getPaymentId());
+			setPaymentProductAndType(paymentBO, response);
 		} else {
 			PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(paymentBO);
 			response = prepareSCA(userBO, paymentBO, paymentKeyData, OpTypeBO.PAYMENT);
@@ -190,6 +194,14 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			}
 		}
 		return response;
+	}
+
+	private void setPaymentProductAndType(final PaymentBO paymentBO, final SCAPaymentResponseTO response) {
+		response.setPaymentType(PaymentTypeTO.valueOf(paymentBO.getPaymentType().name()));
+		if(paymentBO.getTargets()!=null && !paymentBO.getTargets().isEmpty()) {
+			PaymentProductBO paymentProduct = paymentBO.getTargets().iterator().next().getPaymentProduct();
+			response.setPaymentProduct(PaymentProductTO.getByValue(paymentProduct.getValue()).orElse(null));
+		}
 	}
 
 	private PaymentBO persist(PaymentBO paymentBO, TransactionStatusBO status) throws PaymentWithIdMiddlewareException{
@@ -452,6 +464,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			response.setScaStatus(ScaStatusTO.EXEMPTED);
 			response.setStatusDate(LocalDateTime.now());
 			response.setTransactionStatus(TransactionStatusTO.valueOf(payment.getTransactionStatus().name()));
+			setPaymentProductAndType(payment, response);
 			return response;
 		} else {
 			AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, 
@@ -488,6 +501,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 		response.setScaStatus(ScaStatusTO.valueOf(a.getScaStatus().name()));
 		response.setStatusDate(a.getStatusTime());
 		response.setTransactionStatus(TransactionStatusTO.valueOf(tx.name()));
+		response.setPaymentProduct(PaymentProductTO.getByValue(paymentKeyData.getPaymentProduct()).orElse(null));
 		return response;
 	}
 	

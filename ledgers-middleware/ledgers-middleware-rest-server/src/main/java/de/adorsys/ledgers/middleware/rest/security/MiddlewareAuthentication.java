@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.rest.security;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,6 +11,8 @@ import org.springframework.security.core.GrantedAuthority;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessInfoTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -44,15 +47,46 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
 
     	// Customer must have explicit permission
     	if(UserRoleTO.CUSTOMER == token.getRole()) {
-	    	return token.getAccountAccesses()!=null && token.getAccountAccesses().stream()
+	    	boolean access = token.getAccountAccesses()!=null && token.getAccountAccesses().stream()
 	    		.filter(a -> equalsIgnoreCase(iban, a.getIban()))
 	    		.findAny().isPresent();
+	    	return access || checkCosentAccess(token, iban);
     	}
     	
     	return false;
     }
 
-    public boolean checkPaymentInitAccess(String iban) {
+    private boolean checkCosentAccess(AccessTokenTO token, String iban) {
+		if(token.getConsent()==null) {
+			return false;
+		}
+		AisConsentTO consent = token.getConsent();
+		
+		LocalDate validUntil = consent.getValidUntil();
+		if(validUntil!=null && validUntil.isBefore(LocalDate.now())) {
+			return false;
+		}
+		
+		if(consent.getAccess()==null) {
+			return false;
+		}
+		
+		AisAccountAccessInfoTO access = consent.getAccess();
+		
+		if(access.getAvailableAccounts()!=null) {
+			return true;
+		}
+		
+		if(access.getAllPsd2()!=null) {
+			return true;
+		}
+		
+		return access.getAccounts()!=null && access.getAccounts().contains(iban) ||
+				access.getBalances()!=null && access.getBalances().contains(iban) || 
+				access.getTransactions()!=null && access.getTransactions().contains(iban);
+	}
+
+	public boolean checkPaymentInitAccess(String iban) {
     	AccessTokenTO token = getBearerToken().getAccessTokenObject();
     	// Customer must have explicit permission
     	if(UserRoleTO.CUSTOMER == token.getRole()) {

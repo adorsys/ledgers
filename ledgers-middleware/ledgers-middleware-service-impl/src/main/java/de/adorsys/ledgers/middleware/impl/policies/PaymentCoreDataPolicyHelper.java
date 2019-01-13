@@ -37,8 +37,12 @@ public class PaymentCoreDataPolicyHelper {
 					p.setCurrency(r.getDebtorAccount().getCurrency().getCurrencyCode());
 				}
 				p.setAmount(formatAmount(t.getInstructedAmount().getAmount()));
+				setPaymentProduct(p, t);
 			} else {
 				List<PaymentTargetBO> targets = r.getTargets();
+				if(!targets.isEmpty()) {
+					setPaymentProduct(p, targets.iterator().next());					
+				}
 				// Bulk
 				p.setPaymentsSize("" + targets.size());
 				p.setCreditorName("Many Receipients");
@@ -71,6 +75,13 @@ public class PaymentCoreDataPolicyHelper {
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
 		}
+	}
+
+	private static void setPaymentProduct(PaymentCoreDataTO p, PaymentTargetBO t) {
+		String aymentProduct = t.getPaymentProduct()==null
+				? null
+						: t.getPaymentProduct().getValue();
+		p.setPaymentProduct(aymentProduct);
 	}
 
 	private static String formatAmount(BigDecimal amount) {

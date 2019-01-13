@@ -84,7 +84,7 @@ public class MiddlewarePaymentServiceImplTest {
     private static String email = "userId@mail.de";
     private static String authCode = "123456";
     private static String authorisationId = "authorisationId";
-    private static String template = "The TAN for your one time transfer order to Rozetka.ua at date 12-12-2018; account DE91100000000123456789; EUR 100 is: %s";
+    private static String template = "The TAN for your one time sepa-credit-transfers order to Rozetka.ua at date 12-12-2018; account DE91100000000123456789; EUR 100 is: %s";
     
     @InjectMocks
     private MiddlewarePaymentServiceImpl middlewareService;

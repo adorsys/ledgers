@@ -4,12 +4,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
+
+import de.adorsys.ledgers.util.Ids;
 
 /*
 *
@@ -23,10 +24,7 @@ public class AccountAccess {
 
     @Id
     @Column(name = "account_access_id")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
-
 
     @NotNull
     @Column(nullable = false)
@@ -36,6 +34,13 @@ public class AccountAccess {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AccessType accessType= AccessType.OWNER;
+    
+    @PrePersist
+    public void prePersist() {
+    	if(id==null) {
+    		id = Ids.id();
+    	}
+    }
 
     public String getId() {
         return id;

@@ -32,8 +32,12 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 	}
 	
 	public boolean paymentInit(Object payment) {
+		// Either the payment is directly available or wrapped
 		Map<String, ?> map = (Map<String, ?>) payment;
-		Map<String, ?> debtorAccount = (Map<String, ?>) map.get("debtorAccount");
+		if(map.size()==1) {
+			map = (Map<String, ?>) map.values().iterator().next();
+		}
+		Map<String, ?> debtorAccount = (Map<String, ?> ) map.get("debtorAccount");
 		String iban = (String) debtorAccount.get("iban");
 		MiddlewareAuthentication m = (MiddlewareAuthentication) getAuthentication();
 		return m.checkPaymentInitAccess(iban);
@@ -44,6 +48,13 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 		// load iban
 		String iban = middlewareService.iban(paymentId);
 		return paymentInitByIban(iban);
+	}
+
+	public boolean paymentInfoById(String paymentId) {
+		// load iban
+		String iban = middlewareService.iban(paymentId);
+		MiddlewareAuthentication m = (MiddlewareAuthentication) getAuthentication();
+		return m.checkAccountInfoAccess(iban) || paymentInitByIban(iban);
 	}
 	
 	public boolean accountInfoByIban(String iban) {

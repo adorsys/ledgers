@@ -1,8 +1,14 @@
 package de.adorsys.ledgers.um.db.domain;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
+import de.adorsys.ledgers.util.Ids;
 
 @Entity
 @Table(name = "sca_data")
@@ -10,8 +16,6 @@ public class ScaUserDataEntity {
 
     @Id
     @Column(name = "sca_id")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
     @Column(nullable = false)
@@ -20,6 +24,13 @@ public class ScaUserDataEntity {
 
     @Column(nullable = false)
     private String methodValue;
+    
+    @PrePersist
+    public void prePersist() {
+    	if(id==null) {
+    		id = Ids.id();
+    	}
+    }
 
     public String getId() {
         return id;
