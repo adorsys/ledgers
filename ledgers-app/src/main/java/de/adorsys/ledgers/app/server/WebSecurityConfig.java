@@ -43,6 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             		"/management/app/admin",
             		"/management/app/ping", 
             		"/users/login",
+            		"/users/loginForConsent",
             		"/data-test/upload-mockbank-data",
             		"/data-test/db-flush",
             		"/users/register").permitAll()

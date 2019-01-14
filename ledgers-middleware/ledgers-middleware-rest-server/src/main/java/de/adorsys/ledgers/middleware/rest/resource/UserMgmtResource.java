@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -89,7 +90,6 @@ public class UserMgmtResource implements UserMgmtRestAPI {
      * @return
      */
     @Override
-	@SuppressWarnings("PMD.IdenticalCatchBranches")
     public ResponseEntity<SCALoginResponseTO> authorise(String login, String pin, UserRoleTO role){
         try {
             return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
@@ -100,6 +100,18 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 		}
     }
 
+    @Override
+    public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String login, String pin, 
+    		String consentId, String authorisationId, OpTypeTO opType){
+        try {
+            return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
+        } catch (UserNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (InsufficientPermissionMiddlewareException e) {
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());    		
+		}
+    }
+    
 	@Override
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
 	public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId)
