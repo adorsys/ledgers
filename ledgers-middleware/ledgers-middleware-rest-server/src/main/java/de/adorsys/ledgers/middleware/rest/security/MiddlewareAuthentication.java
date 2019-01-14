@@ -57,33 +57,23 @@ public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToke
     }
 
     private boolean checkCosentAccess(AccessTokenTO token, String iban) {
-		if(token.getConsent()==null) {
-			return false;
-		}
-		AisConsentTO consent = token.getConsent();
-		
-		LocalDate validUntil = consent.getValidUntil();
-		if(validUntil!=null && validUntil.isBefore(LocalDate.now())) {
-			return false;
-		}
-		
-		if(consent.getAccess()==null) {
-			return false;
-		}
-		
-		AisAccountAccessInfoTO access = consent.getAccess();
-		
-		if(access.getAvailableAccounts()!=null) {
-			return true;
-		}
-		
-		if(access.getAllPsd2()!=null) {
-			return true;
-		}
-		
-		return access.getAccounts()!=null && access.getAccounts().contains(iban) ||
-				access.getBalances()!=null && access.getBalances().contains(iban) || 
-				access.getTransactions()!=null && access.getTransactions().contains(iban);
+		return validConsent(token.getConsent()) && checkConsentAccess(iban, token.getConsent().getAccess());
+	}
+
+	private boolean validConsent(AisConsentTO consent) {
+		return consent!=null && 
+				(consent.getValidUntil()==null || consent.getValidUntil().isAfter(LocalDate.now()));
+	}
+
+	private boolean checkConsentAccess(String iban, AisAccountAccessInfoTO access) {
+		return access!=null && 
+				(
+					access.getAvailableAccounts()!=null || 
+					access.getAllPsd2()!=null ||  
+					access.getAccounts()!=null && access.getAccounts().contains(iban) ||
+					access.getBalances()!=null && access.getBalances().contains(iban) || 
+					access.getTransactions()!=null && access.getTransactions().contains(iban)
+				);
 	}
 
 	public boolean checkPaymentInitAccess(String iban) {
