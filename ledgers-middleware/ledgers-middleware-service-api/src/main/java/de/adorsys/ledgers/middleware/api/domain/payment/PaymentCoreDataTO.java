@@ -1,21 +1,21 @@
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
 public class PaymentCoreDataTO {
-	public static final String SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time transfer order to %s at date %s; account %s; %s %s is: ";
-	public static final String PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
-	public static final String BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
+	public static final String SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time %s order to %s at date %s; account %s; %s %s is: ";
+	public static final String PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your recurring %s order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
+	public static final String BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time bulk %s order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
 
-	public static final String SINGLE_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "Your one time transfer order to %s at date %s; account %s; %s %s has been received.";
-	public static final String PERIODIC_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "Your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s  has been received.";
-	public static final String BULK_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "Your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s has been received.";
+	public static final String SINGLE_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "Your one time %s order to %s at date %s; account %s; %s %s has been received.";
+	public static final String PERIODIC_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "Your recurring %s order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s  has been received.";
+	public static final String BULK_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "Your one time bulk %s order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s has been received.";
 	
-	public static final String CANCEL_SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for the cancellation of your one time transfer order to %s at date %s; account %s; %s %s is: ";
-	public static final String CANCEL_PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for the cancellation of your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
-	public static final String CANCEL_BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for for the cancellation of your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
+	public static final String CANCEL_SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for the cancellation of your one time %s order to %s at date %s; account %s; %s %s is: ";
+	public static final String CANCEL_PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for the cancellation of your recurring %s order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
+	public static final String CANCEL_BULK_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for for the cancellation of your one time bulk %s order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s is: ";
 
-	public static final String CANCEL_SINGLE_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "The cancellation of your one time transfer order to %s at date %s; account %s; %s %s has been scheduled.";
-	public static final String CANCEL_PERIODIC_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "The cancellation of your recurring transfer order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s has been scheduled.";
-	public static final String CANCEL_BULK_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "The cancellation of your one time bulk transfer order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s has been scheduled.";
+	public static final String CANCEL_SINGLE_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "The cancellation of your one time %s order to %s at date %s; account %s; %s %s has been scheduled.";
+	public static final String CANCEL_PERIODIC_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "The cancellation of your recurring %s order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s has been scheduled.";
+	public static final String CANCEL_BULK_PAYMENT_EXEMPTED_MESSAGE_TEMPLATE = "The cancellation of your one time bulk %s order %s reciepient(s) with name(s) %s at date %s; account %s; %s %s has been scheduled.";
 
 	private String paymentId;
     private String creditorName;
@@ -37,6 +37,8 @@ public class PaymentCoreDataTO {
     private String requestedExecutionDate;
     
     private boolean cancellation;
+    
+    private String paymentProduct;
 
 	public String getPaymentId() {
 		return paymentId;
@@ -126,14 +128,20 @@ public class PaymentCoreDataTO {
 		this.requestedExecutionDate = requestedExecutionDate;
 	}
 	
-	
-	
 	public boolean isCancellation() {
 		return cancellation;
 	}
 
 	public void setCancellation(boolean cancellation) {
 		this.cancellation = cancellation;
+	}
+
+	public String getPaymentProduct() {
+		return paymentProduct;
+	}
+
+	public void setPaymentProduct(String paymentProduct) {
+		this.paymentProduct = paymentProduct;
 	}
 
 	public String template() {
@@ -174,6 +182,7 @@ public class PaymentCoreDataTO {
 	
 	private String singlePaymentMessageTemplate() {
 		return String.format(SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				requestedExecutionDate, 
 				creditorIban, 
@@ -183,6 +192,7 @@ public class PaymentCoreDataTO {
 
 	private String periodicPaymentMessageTemplate() {
 		return String.format(PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				creditorIban, 
 				dayOfExecution,
@@ -194,6 +204,7 @@ public class PaymentCoreDataTO {
 
 	private String bulkPaymentMessageTemplate() {
 		return String.format(BULK_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				paymentsSize,
 				creditorName, 
 				requestedExecutionDate,
@@ -204,6 +215,7 @@ public class PaymentCoreDataTO {
 
 	private String cancelSinglePaymentMessageTemplate() {
 		return String.format(CANCEL_SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				requestedExecutionDate, 
 				creditorIban, 
@@ -213,6 +225,7 @@ public class PaymentCoreDataTO {
 
 	private String cancelPeriodicPaymentMessageTemplate() {
 		return String.format(CANCEL_PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				creditorIban, 
 				dayOfExecution,
@@ -224,6 +237,7 @@ public class PaymentCoreDataTO {
 
 	private String cancelBulkPaymentMessageTemplate() {
 		return String.format(CANCEL_BULK_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				paymentsSize,
 				creditorName, 
 				requestedExecutionDate,
@@ -236,6 +250,7 @@ public class PaymentCoreDataTO {
 	
 	private String singlePaymentExemptedMessageTemplate() {
 		return String.format(SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				requestedExecutionDate, 
 				creditorIban, 
@@ -245,6 +260,7 @@ public class PaymentCoreDataTO {
 
 	private String periodicPaymentExemptedMessageTemplate() {
 		return String.format(PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				creditorIban, 
 				dayOfExecution,
@@ -256,6 +272,7 @@ public class PaymentCoreDataTO {
 
 	private String bulkPaymentExemptedMessageTemplate() {
 		return String.format(BULK_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				paymentsSize,
 				creditorName, 
 				requestedExecutionDate,
@@ -266,6 +283,7 @@ public class PaymentCoreDataTO {
 
 	private String cancelSinglePaymentExemptedMessageTemplate() {
 		return String.format(CANCEL_SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				requestedExecutionDate, 
 				creditorIban, 
@@ -275,6 +293,7 @@ public class PaymentCoreDataTO {
 
 	private String cancelPeriodicPaymentExemptedMessageTemplate() {
 		return String.format(CANCEL_PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				creditorName, 
 				creditorIban, 
 				dayOfExecution,
@@ -286,6 +305,7 @@ public class PaymentCoreDataTO {
 
 	private String cancelBulkPaymentExemptedMessageTemplate() {
 		return String.format(CANCEL_BULK_PAYMENT_TAN_MESSAGE_TEMPLATE, 
+				paymentProduct,
 				paymentsSize,
 				creditorName, 
 				requestedExecutionDate,

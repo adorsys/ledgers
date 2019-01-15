@@ -125,7 +125,7 @@ public class BearerTokenService {
 		// CHeck expiration
 		Long expireLong = jwtClaimsSet.getExpirationTime()==null
 				? -1
-				:jwtClaimsSet.getExpirationTime().getTime()-refTime.getTime();
+				:(jwtClaimsSet.getExpirationTime().getTime()-refTime.getTime())/1000;
 		return expireLong.intValue();
 	}
 

@@ -16,17 +16,29 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.*;
+import java.util.List;
+import java.util.Map;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTargetBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentResultTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PeriodicPaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 @SuppressWarnings("PMD")
 @Mapper(componentModel = "spring")
 public abstract class PaymentConverter {
@@ -85,13 +97,25 @@ public abstract class PaymentConverter {
     })
     public abstract SinglePaymentTO toSingleBulkPartTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
-    public <T> PaymentBO toPaymentBO(T payment, Class<T> tClass) {
+//    @SuppressWarnings("unchecked")
+	public <T> PaymentBO toPaymentBO(Object payment, Class<T> tClass) {
+    	Object o = payment;
+    	if(o instanceof Map) {
+	    	Map<String, ?> map = (Map<String, ?>) o;
+	    	if(map.size()==1) {
+	    		map = (Map<String, ?>) map.values().iterator().next();
+	    	}
+	    	o = map;
+    	}
+    	
         if (tClass.equals(SinglePaymentTO.class)) {
-            return toPaymentBO((SinglePaymentTO) mapper.convertValue(payment, tClass));
+            return toPaymentBO((SinglePaymentTO) mapper.convertValue(o, tClass));
         } else if (tClass.equals(PeriodicPaymentTO.class)) {
-            return toPaymentBO((PeriodicPaymentTO) mapper.convertValue(payment, tClass));
+            return toPaymentBO((PeriodicPaymentTO) mapper.convertValue(o, tClass));
+        } else if (tClass.equals(BulkPaymentTO.class)) {
+        	return toPaymentBO((BulkPaymentTO) mapper.convertValue(o, tClass));
         } else {
-            return toPaymentBO((BulkPaymentTO) mapper.convertValue(payment, tClass));
+        	throw new IllegalStateException(String.format("Unknown payment type %s", tClass.getName()));
         }
     }
 

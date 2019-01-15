@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
 			int expires_in = bearerTokenService.expiresIn(refTime, jwtClaimsSet);
 			
 			if(expires_in<=0) {
-				logger.warn(String.format(TOKEN_WITH_SUBJECT_EXPIRED + jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime));
+				logger.warn(String.format(TOKEN_WITH_SUBJECT_EXPIRED, jwtClaimsSet.getSubject(), ""+jwtClaimsSet.getExpirationTime(), ""+refTime));
 				return null;
 			}
 			

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -139,10 +140,58 @@ public interface UserMgmtRestAPI {
         	@ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
         })
     ResponseEntity<SCALoginResponseTO> authorise(
-    		@RequestParam("login")String login, 
+    		@RequestParam("login") String login, 
     		@RequestParam("pin") String pin, 
     		@RequestParam("role") UserRoleTO role) throws NotFoundRestException, ForbiddenRestException;
 
+    /**
+     * Initiates the user login process. Returns a login response object describing how to proceed.
+     * 
+     * This response object contains an scaId that must be used to proceed with the login.
+     * 
+     * if the {@link SCALoginResponseTO#getScaStatus()} equals 
+     *   	{@link ScaStatusTO#EXEMPTED} the response will contain the final bearer token.
+     * 		{@link ScaStatusTO#SCAMETHODSELECTED} means the auth code has been sent to the user. Must be entered by the user. 
+     * 	 	{@link ScaStatusTO#PSUAUTHENTICATED} there will be a list of scaMethods for selection in the response.
+     * 	 	{@link ScaStatusTO#PSUIDENTIFIED} the user exists but given password/pin did not match.
+     * 
+     * @param login
+     * @param pin
+     * @param consentId
+     * @param authorisationId
+     * @param opType
+     * @return
+     * @throws NotFoundRestException
+     * @throws ForbiddenRestException : role specified by the user did not match
+     */
+    @PostMapping("/loginForConsent")
+    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Login For Consent", 
+    	notes="Initiates the user login process for a payment or account information process. "
+    			+ "Returns a login response object describing how to proceed. "
+    			+ "This response object contains both an paymentId (consentId) and an authorizationId that must be used to identify this corresponding process.<br/>"
+    			+ "This response also contains an scaStatus that indicates the next stept to take."
+    			+ "<ul>"
+    			+ "<li>EXEMPTED: the operation to execute is exempted from sca. The operation can be complete in this single step. </li>"
+    			+ "<li>PSUAUTHENTICATED: the user has one or many sca methods configured for the operation."
+	    			+ "<ul>"
+	    				+ "<li>The response contains a list of scaMethods for selection</li>. "
+	    				+ "<li>Response contains a JWT token that must be used to authenticate for further calls.</li>"
+	    				+ "<li>This token can not be used to perform account access because the authentication process is not completed.</li>"
+    					+ "<li>Caller must proceed with the sca selection</li>"
+	    			+ "</ul>"
+    			+ "</li>"
+    			+ "</ul>")
+    @ApiResponses(value={
+        	@ApiResponse(code=200, response=SCALoginResponseTO.class, message="Success. LoginToken contained in the returned response object."),
+        	@ApiResponse(code=401, message="Wrong authentication credential."),
+        	@ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
+        })
+	ResponseEntity<SCALoginResponseTO> authoriseForConsent(
+			@RequestParam("login") String login, 
+			@RequestParam("pin") String pin, 
+			@RequestParam("consentId") String consentId,
+			@RequestParam("authorisationId") String authorisationId, 
+			@RequestParam("opType") OpTypeTO opType);
     
     @PostMapping("/validate")
     @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value= "Introspect Token", nickname="IntrospectToken", 
@@ -293,4 +342,6 @@ public interface UserMgmtRestAPI {
     		+ "</lu>",
     		authorizations =@Authorization(value="apiKey"))
     ResponseEntity<List<UserTO>> getAllUsers();
+
+
 }

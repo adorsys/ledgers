@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.api.service;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -50,6 +51,21 @@ public interface MiddlewareOnlineBankingService {
 	 * @throws InsufficientPermissionMiddlewareException  : permission not sufficient
 	 */
 	SCALoginResponseTO authorise(String login, String pin, UserRoleTO role) throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
+
+	/**
+	 * Special login associated with a account information, a payment or a payment cancellation consent.
+	 * 
+	 * @param login the login of the customer
+	 * @param pin the password of the customer
+	 * @param consentId the consentId or paymentId
+	 * @param authorisationId the authorisationId
+	 * @param opType the operation type
+	 * @return
+	 * @throws UserNotFoundMiddlewareException :sis thrown if user can`t be found
+	 * @throws InsufficientPermissionMiddlewareException  : permission not sufficient
+	 */
+	SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId,
+			OpTypeTO opType) throws UserNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	/**
 	 * Caller can be sure that returned user object contains a mirror of permissions
@@ -106,5 +122,5 @@ public interface MiddlewareOnlineBankingService {
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
 			InsufficientPermissionMiddlewareException;
-	
+
 }
