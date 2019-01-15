@@ -4,6 +4,7 @@ import {JwtHelperService} from "@auth0/angular-jwt";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
+import {Credentials} from "../models/credentials";
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class AuthService {
     });
   }
 
-  login(credentials: any): Observable<boolean> {
+  login(credentials: Credentials): Observable<boolean> {
     return this.authorize(credentials).pipe(
       map((authData: any) => {
         let jwt = authData.bearerToken.access_token;
