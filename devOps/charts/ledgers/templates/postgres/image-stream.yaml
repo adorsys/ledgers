@@ -1,0 +1,22 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  labels:
+    app: postgresql-95-centos7
+  name: postgresql-95-centos7
+  namespace: ledgers-dev
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+        openshift.io/imported-from: centos/postgresql-95-centos7
+      from:
+        kind: DockerImage
+        name: centos/postgresql-95-centos7
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
