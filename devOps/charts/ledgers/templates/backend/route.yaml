@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: server
+  name: ledgers
+  namespace: ledgers-dev
+spec:
+  host: ledgers-dev.cloud.adorsys.de
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: ledgers
+    weight: 100
+  wildcardPolicy: None
