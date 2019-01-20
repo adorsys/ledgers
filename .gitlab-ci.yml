@@ -112,9 +112,9 @@ variables: &variables
 # TODO remove when docker hub images will be applied to deployment https://git.adorsys.de/adorsys/xs2a/aspsp-xs2a/issues/169
 .push_docker_openshift: &push_docker_openshift
   script:
-  - docker build -t "OPENSHIFT_IMAGE_NAME_LEDGERS:$DOCKER_TAG" .
+  - docker build -t "$OPENSHIFT_IMAGE_NAME_LEDGERS:$DOCKER_TAG" .
   - docker login -u openshift -p $OPENSHIFT_TOKEN $OPENSHIFT_REGISTRY
-  - docker push $OPENSHIFT_IMAGE_NAME_LEDGERS:$DOCKER_TAG
+  - docker push "$OPENSHIFT_IMAGE_NAME_LEDGERS:$DOCKER_TAG"
 
 #.helm_env_deploy: &helm_env_deploy
 #  image: adorsys/ci-helm:2.10
