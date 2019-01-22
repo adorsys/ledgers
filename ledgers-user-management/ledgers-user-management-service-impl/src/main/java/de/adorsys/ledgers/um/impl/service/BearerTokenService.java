@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.um.impl.service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -24,7 +26,6 @@ import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.util.Ids;
-import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
 public class BearerTokenService {
@@ -41,9 +42,11 @@ public class BearerTokenService {
 	private static final String MISSING_USAGE = "Missing field for claim token_usage";
 
     private final HashMacSecretSource secretSource;
-	public BearerTokenService(HashMacSecretSource secretSource) {
-		super();
+    private final ObjectMapper objectMapper; 
+
+	public BearerTokenService(HashMacSecretSource secretSource, ObjectMapper objectMapper) {
 		this.secretSource = secretSource;
+		this.objectMapper = objectMapper;
 	}
 
 	public BearerTokenBO bearerToken(String userId, String userLogin, 
@@ -131,7 +134,11 @@ public class BearerTokenService {
 
 	public AccessTokenBO toAccessTokenObject(JWTClaimsSet jwtClaimsSet) {
 		// Check to make sure all privileges contained in the token are still valid.
-		return SerializationUtils.readValueFromString(jwtClaimsSet.toJSONObject(false).toJSONString(), AccessTokenBO.class);
+		try {
+			return objectMapper.readValue(jwtClaimsSet.toJSONObject(false).toJSONString(), AccessTokenBO.class);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 

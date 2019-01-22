@@ -328,9 +328,11 @@ public class UserServiceImpl implements UserService {
 				                                  .collect(Collectors.toList());
 		
 		AisAccountAccessInfoBO access = aisConsent.getAccess();
-		checkAccountAccess(accessibleAccounts, access.getAccounts(), NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS ,user.getId());
-		checkAccountAccess(accessibleAccounts, access.getBalances(), NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS , user.getId());
-		checkAccountAccess(accessibleAccounts, access.getTransactions(), NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS , user.getId());
+		if(access!=null) {
+			checkAccountAccess(accessibleAccounts, access.getAccounts(), NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS ,user.getId());
+			checkAccountAccess(accessibleAccounts, access.getBalances(), NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS , user.getId());
+			checkAccountAccess(accessibleAccounts, access.getTransactions(), NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS , user.getId());
+		}
 	}
 	
 	private Date getExpirDate(AisConsentBO aisConsent, Date iat) {

@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.adorsys.ledgers.deposit.api.domain.AmountBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
@@ -57,7 +58,6 @@ import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
-import de.adorsys.ledgers.util.SerializationUtils;
 
 @Service
 public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl implements DepositAccountTransactionService {
@@ -65,12 +65,14 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
     private final PaymentMapper paymentMapper;
     private final PostingService postingService;
+    private final ObjectMapper objectMapper;
 
     public DepositAccountTransactionServiceImpl(PaymentMapper paymentMapper,
-                                                PostingService postingService, LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService) {
+                                                PostingService postingService, LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService, ObjectMapper objectMapper) {
         super(depositAccountConfigService, ledgerService);
         this.paymentMapper = paymentMapper;
         this.postingService = postingService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -209,7 +211,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
     private <T> String serializeOprDetails(T orderDetails) throws PaymentProcessingException {
         try {
-            return SerializationUtils.writeValueAsString(orderDetails);
+            return objectMapper.writeValueAsString(orderDetails);
         } catch (JsonProcessingException e) {
             throw new PaymentProcessingException("Payment object can't be serialized", e);
         }

@@ -1,13 +1,11 @@
 package de.adorsys.ledgers.util.hash;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import de.adorsys.ledgers.util.Base16;
-import de.adorsys.ledgers.util.PasswordEnc;
-import de.adorsys.ledgers.util.SerializationUtils;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class HashGeneratorImplTest {
 
