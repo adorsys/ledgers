@@ -1,8 +1,13 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
@@ -79,7 +84,14 @@ public class DepositAccountServiceImplTest {
     private DepositAccountServiceImpl depositAccountService;
 
     private static final ObjectMapper STATIC_MAPPER = new ObjectMapper()
-                                                              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                                                              .findAndRegisterModules()
+                                                              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                                                              .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                                                              .configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false)
+                                                              .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+                                                              .registerModule(new Jdk8Module())
+                                                              .registerModule(new JavaTimeModule())
+                                                              .registerModule(new ParameterNamesModule());
 
     @Test
     public void createDepositAccount() throws LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
@@ -275,6 +287,5 @@ public class DepositAccountServiceImplTest {
             assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(accountReferenceBO);
             assertThat(transactionDetails.getTransactionAmount()).isEqualToComparingFieldByField(amount);
         }
-
     }
 }
