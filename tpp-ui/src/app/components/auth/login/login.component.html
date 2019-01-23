@@ -1,13 +1,12 @@
 <div id="login">
-  <h3 class="text-center text-white pt-5">Login form</h3>
   <div class="container">
     <div id="login-row" class="row justify-content-center align-items-center">
       <div id="login-column" class="col-md-6">
         <div id="login-box" class="col-md-12">
           <form id="login-form" class="form" [formGroup]="loginForm">
-            <h3 class="text-center text-adorsys">Login</h3>
+            <h3 class="text-center text-adorsys">TPP Sandbox</h3>
             <div class="form-group">
-              <label for="userLogin" class="text-adorsys">User login:</label><br>
+              <label for="userLogin" class="text-adorsys">Your login:</label><br>
               <input type="text"
                      id="userLogin"
                      name="login"
@@ -30,7 +29,6 @@
             <p class="text-danger" *ngIf="loginForm.controls['pin'].touched && loginForm.controls['pin'].errors">Pin is required</p>
             <div class="form-group">
               <button type="submit"
-                      [disabled]="loginForm.invalid"
                       (click)="onSubmit()"
                       class="btn btn-info">Sign in</button>
               <a href="/register" class="btn btn-link">Register</a>
