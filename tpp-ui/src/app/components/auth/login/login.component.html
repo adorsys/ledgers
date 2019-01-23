@@ -4,7 +4,10 @@
       <div id="login-column" class="col-md-6">
         <div id="login-box" class="col-md-12">
           <form id="login-form" class="form" [formGroup]="loginForm">
-            <h3 class="text-center text-adorsys">TPP Sandbox</h3>
+            <h3 class="text-center text-adorsys">Adorsys TPP Sandbox</h3>
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              {{errorMessage}}
+            </div>
             <div class="form-group">
               <label for="userLogin" class="text-adorsys">Your login:</label><br>
               <input type="text"
@@ -31,7 +34,7 @@
               <button type="submit"
                       (click)="onSubmit()"
                       class="btn btn-info">Sign in</button>
-              <a href="/register" class="btn btn-link">Register</a>
+              <a routerLink="/register" class="btn btn-link">Register</a>
             </div>
           </form>
         </div>

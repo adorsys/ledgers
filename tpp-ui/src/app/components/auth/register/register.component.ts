@@ -14,10 +14,10 @@ export class RegisterComponent implements OnInit {
     login: new FormControl('', Validators.required),
     email: new FormControl('', Validators.required),
     pin: new FormControl('', Validators.required),
-    role: new FormControl('CUSTOMER')
+    role: new FormControl('TECHNICAL') // TPPs are registered in Ledgers as users with role "TECHNICAL"
   });
   submitted: boolean;
-  respError;
+  errorMessage: string;
 
   constructor(private service: AuthService, private router: Router) { }
 
@@ -26,13 +26,14 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    this.respError = null;
     if (this.userForm.invalid) {
       return;
     }
 
     this.service.register(this.userForm.value)
-      .subscribe(() => this.router.navigate(['/login']), resp => this.respError = resp.error);
+      .subscribe(() => this.router.navigate(['/login']),
+          () =>
+            this.errorMessage = 'TPP with this login or email exists already');
   }
 
   get login() { return this.userForm.get('login'); }

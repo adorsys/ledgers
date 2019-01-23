@@ -11,6 +11,7 @@ import {Router} from "@angular/router";
 export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
+  errorMessage: string;
 
   constructor(
     private authService: AuthService,
@@ -31,6 +32,8 @@ export class LoginComponent implements OnInit {
       .subscribe(success => {
         if (success) {
           this.router.navigate(['/']);
+        } else {
+          this.errorMessage = 'Invalid credentials'
         }
       });
   }

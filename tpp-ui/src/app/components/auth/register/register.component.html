@@ -1,43 +1,57 @@
-<div class="container">
-  <h1>Register new banking user</h1>
-  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-    <div *ngIf="respError" class="alert alert-danger">
-      {{respError.status}} {{respError.error}}: {{respError.message}}
-    </div>
-    <div class="form-group">
-      <label for="login" class="form-group required">Login</label>
-      <input type="text" class="form-control" id="login" formControlName="login" autofocus
-             [ngClass]="{'is-invalid': login.invalid && (submitted || login.dirty || login.touched)}">
-      <div *ngIf="login.errors?.required && (submitted || login.dirty || login.touched)" class="invalid-feedback d-block">
-        Required
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" class="form-control" id="email" formControlName="email"
-             [ngClass]="{'is-invalid': email.invalid && (submitted || email.dirty || email.touched)}">
-      <div *ngIf="email.errors?.required && (submitted || email.dirty || email.touched)" class="invalid-feedback d-block">
-        Required
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="pin">PIN</label>
-      <input type="password" class="form-control" id="pin" formControlName="pin"
-             [ngClass]="{'is-invalid': pin.invalid && (submitted || pin.dirty || pin.touched)}">
-      <div *ngIf="pin.errors?.required && (submitted || pin.dirty || pin.touched)" class="invalid-feedback d-block">
-        Required
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="role">Role</label>
-      <select class="form-control" id="role" formControlName="role">
-        <option value="CUSTOMER">CUSTOMER</option>
-        <option value="STAFF">STAFF</option>
-        <option value="TECHNICAL">TECHNICAL</option>
-        <option value="SYSTEM">SYSTEM</option>
-      </select>
-    </div>
+<div id="register">
+  <div class="container">
+    <div id="register-row" class="row justify-content-center align-items-center">
+      <div id="register-column" class="col-md-6">
+        <div id="register-box" class="col-md-12">
 
-    <button type="submit" class="btn btn-primary">Register</button>
-  </form>
+          <form id="register-form" [formGroup]="userForm" (ngSubmit)="onSubmit()">
+            <h3 class="text-center text-adorsys">Adorsys TPP Sandbox</h3>
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              {{errorMessage}}
+            </div>
+            <div class="form-group">
+              <label for="login" class="form-group required">Login</label>
+              <input type="text" class="form-control" id="login" formControlName="login" autofocus
+                     [ngClass]="{'is-invalid': login.invalid && (submitted || login.dirty || login.touched)}">
+              <div *ngIf="login.errors?.required && (submitted || login.dirty || login.touched)" class="invalid-feedback d-block">
+                Required
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" class="form-control" id="email" formControlName="email"
+                     [ngClass]="{'is-invalid': email.invalid && (submitted || email.dirty || email.touched)}">
+              <div *ngIf="email.errors?.required && (submitted || email.dirty || email.touched)" class="invalid-feedback d-block">
+                Required
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="pin">PIN</label>
+              <input type="password" class="form-control" id="pin" formControlName="pin"
+                     [ngClass]="{'is-invalid': pin.invalid && (submitted || pin.dirty || pin.touched)}">
+              <div *ngIf="pin.errors?.required && (submitted || pin.dirty || pin.touched)" class="invalid-feedback d-block">
+                Required
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="role">Role</label>
+              <select class="form-control" id="role" formControlName="role">
+                <option value="CUSTOMER">CUSTOMER</option>
+                <option value="STAFF">STAFF</option>
+                <option value="TECHNICAL">TECHNICAL</option>
+                <option value="SYSTEM">SYSTEM</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <button type="submit"
+                      class="btn btn-info">Register</button>
+              <a routerLink="/login" class="btn btn-link">Login</a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
