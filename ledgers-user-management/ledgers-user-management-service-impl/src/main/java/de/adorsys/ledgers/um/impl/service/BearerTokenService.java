@@ -16,9 +16,14 @@ import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.util.Ids;
+import net.minidev.json.JSONStyle;
+import net.minidev.json.JSONValue;
+import net.minidev.json.reader.JsonWriterI;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +108,13 @@ public class BearerTokenService {
 
 	private String signJWT(JWTClaimsSet claimsSet) {
 		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).keyID(Ids.id()).build();
+		JSONValue.registerWriter(LocalDate.class, new JsonWriterI<LocalDate>() {
+			@Override
+			public void writeJSONString(LocalDate value, Appendable out, JSONStyle compression) throws IOException{
+				if (value == null) out.append("null");
+				else out.append(objectMapper.writeValueAsString(value));
+			}
+		});
 		SignedJWT signedJWT = new SignedJWT(header, claimsSet);
 		try {
 			signedJWT.sign(new MACSigner(secretSource.getHmacSecret()));
