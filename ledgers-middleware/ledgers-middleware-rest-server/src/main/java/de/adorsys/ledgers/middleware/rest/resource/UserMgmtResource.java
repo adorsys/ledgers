@@ -82,6 +82,8 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 		}
     }
 
+
+
 	/**
      * Authorize returns a bearer token that can be reused by the consuming application.
      * 
