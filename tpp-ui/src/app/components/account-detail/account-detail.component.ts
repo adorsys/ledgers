@@ -11,9 +11,9 @@ import {Router} from "@angular/router";
 })
 export class AccountDetailComponent implements OnInit {
   accountForm = new FormGroup({
-    'accountType': new FormControl(null, Validators.required),
-    'usageType': new FormControl(null, Validators.required),
-    'currency': new FormControl(null, Validators.required),
+    'accountType': new FormControl('CASH', Validators.required),
+    'usageType': new FormControl(UsageType.PRIV, Validators.required),
+    'currency': new FormControl({value: 'EUR', disabled: true}, Validators.required),
     'iban': new FormControl(null, Validators.required),
     'bban': new FormControl(null),
     'pan': new FormControl(null),

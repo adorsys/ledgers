@@ -4,8 +4,8 @@
     <div *ngIf="errorMessage" class="alert alert-danger">
       {{errorMessage}}
     </div>
-    <div class="form-group">
-      <label for="accountType">Account type</label>
+    <div class="form-group required">
+      <label for="accountType" class="control-label">Account type</label>
       <select id="accountType" class="form-control" formControlName="accountType" [ngClass]="{'is-invalid': accountType.invalid && (accountType.dirty || accountType.touched || submitted)}">
         <option *ngFor="let accountType of accountTypes" [value]="accountType">{{accountType}}</option>
       </select>
@@ -15,8 +15,8 @@
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="usageType">Usage type</label>
+    <div class="form-group required">
+      <label for="usageType" class="control-label">Usage type</label>
       <select id="usageType" class="form-control" formControlName="usageType" [ngClass]="{'is-invalid': usageType.invalid && (usageType.dirty || usageType.touched || submitted)}">
         <option *ngFor="let usageType of usageTypes" [value]="usageType">{{usageType}}</option>
       </select>
@@ -26,71 +26,34 @@
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="currency">Currency code</label>
-      <input id="currency" type="text" class="form-control" formControlName="currency" [ngClass]="{'is-invalid': currency.invalid && (currency.dirty || currency.touched || submitted)}">
+    <div class="form-group required">
+      <label for="currency" class="control-label">Currency code</label>
+      <input id="currency"
+             type="text"
+             class="form-control"
+             formControlName="currency"
+             [ngClass]="{'is-invalid': currency.invalid && (currency.dirty || currency.touched || submitted)}">
       <div class="invalid-feedback">
         <div *ngIf="currency.errors?.required">
           Required
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="iban">IBAN</label>
-      <input id="iban" type="text" class="form-control" formControlName="iban" [ngClass]="{'is-invalid': iban.invalid && (iban.dirty || iban.touched || submitted)}">
+    <div class="form-group required">
+      <label for="iban" class="control-label">IBAN</label>
+      <input id="iban"
+             type="text"
+             class="form-control"
+             formControlName="iban"
+             [ngClass]="{'is-invalid': iban.invalid && (iban.dirty || iban.touched || submitted)}">
       <div class="invalid-feedback">
         <div *ngIf="iban.errors?.required">
           Required
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label>BBAN
-        <input type="text" class="form-control" formControlName="bban">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>PAN
-        <input type="text" class="form-control" formControlName="pan">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Masked PAN
-        <input type="text" class="form-control" formControlName="maskedPan">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>BIC
-        <input type="text" class="form-control" formControlName="bic">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>MSISDN
-        <input type="text" class="form-control" formControlName="msisdn">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Name
-        <input type="text" class="form-control" formControlName="name">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Product
-        <input type="text" class="form-control" formControlName="product">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Details
-        <input type="text" class="form-control" formControlName="details">
-      </label>
-    </div>
-    <div class="form-group">
-      <label>Linked accounts
-        <input type="text" class="form-control" formControlName="linkedAccounts">
-      </label>
-    </div>
-    <div class="form-group">
-      <label for="accountStatus">Account status</label>
+    <div class="form-group required">
+      <label for="accountStatus" class="control-label">Account status</label>
       <select id="accountStatus" class="form-control" formControlName="accountStatus" [ngClass]="{'is-invalid': accountStatus.invalid && (accountStatus.dirty || accountStatus.touched || submitted)}">
         <option *ngFor="let accountStatus of accountStatuses" [value]="accountStatus">{{accountStatus}}</option>
       </select>
