@@ -10,8 +10,12 @@
               {{errorMessage}}
             </div>
             <div class="form-group">
-              <label for="login" class="form-group required">Login</label>
-              <input type="text" class="form-control" id="login" formControlName="login" autofocus
+              <label for="registerTTP" class="form-group required">Login</label>
+              <input type="text"
+                     class="form-control"
+                     id="registerTTP"
+                     placeholder="your login into TTP sandbox"
+                     formControlName="login" autofocus
                      [ngClass]="{'is-invalid': login.invalid && (submitted || login.dirty || login.touched)}">
               <div *ngIf="login.errors?.required && (submitted || login.dirty || login.touched)" class="invalid-feedback d-block">
                 Required
@@ -19,7 +23,11 @@
             </div>
             <div class="form-group">
               <label for="email">Email</label>
-              <input type="email" class="form-control" id="email" formControlName="email"
+              <input type="email"
+                     class="form-control"
+                     placeholder="Your contact email"
+                     id="email"
+                     formControlName="email"
                      [ngClass]="{'is-invalid': email.invalid && (submitted || email.dirty || email.touched)}">
               <div *ngIf="email.errors?.required && (submitted || email.dirty || email.touched)" class="invalid-feedback d-block">
                 Required
@@ -27,20 +35,15 @@
             </div>
             <div class="form-group">
               <label for="pin">PIN</label>
-              <input type="password" class="form-control" id="pin" formControlName="pin"
+              <input type="password"
+                     class="form-control"
+                     id="pin"
+                     placeholder="your pin for TPP dashboard access"
+                     formControlName="pin"
                      [ngClass]="{'is-invalid': pin.invalid && (submitted || pin.dirty || pin.touched)}">
               <div *ngIf="pin.errors?.required && (submitted || pin.dirty || pin.touched)" class="invalid-feedback d-block">
                 Required
               </div>
-            </div>
-            <div class="form-group">
-              <label for="role">Role</label>
-              <select class="form-control" id="role" formControlName="role">
-                <option value="CUSTOMER">CUSTOMER</option>
-                <option value="STAFF">STAFF</option>
-                <option value="TECHNICAL">TECHNICAL</option>
-                <option value="SYSTEM">SYSTEM</option>
-              </select>
             </div>
 
             <div class="form-group">
