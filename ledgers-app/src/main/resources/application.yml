@@ -90,7 +90,7 @@ spring:
     username: ${db.user}
     password: ${db.password}
   liquibase:
-    enabled: false
+    enabled: true
     change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
@@ -99,6 +99,7 @@ db:
   database: ledgers
   port: 5432
   url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+ledgers.mockbank.data.load: true
 ---
 # hibernate-ddl profile is used to fully initialize the database 
 # from ddl generation and rest based upload of test data.
@@ -117,9 +118,10 @@ spring:
     show-sql: true
     generate-ddl: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   liquibase:
-    enabled: false
+    enabled: true
+    change-log: classpath:liquibase-master-changelog.xml
 db:
   port: 5433
     
