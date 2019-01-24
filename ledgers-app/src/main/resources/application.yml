@@ -100,7 +100,7 @@ db:
   port: 5432
   url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
 ---
-# hibernate-ddl profile is used to fully initialize the database 
+# hibernate-ddl profile is used to fully initialize the database
 # from ddl generation and rest based upload of test data.
 # Result can be used by liquibase to produce a diff change log
 # instead of writing the change log manually.
@@ -122,13 +122,13 @@ spring:
     enabled: false
 db:
   port: 5433
-    
+
 # Load mock data. Turn this off after the first load for faster roundtrip development.
-# as JVM -Dledgers.mockbank.data.load=false or as spring application param: --ledgers.mockbank.data.load=false 
+# as JVM -Dledgers.mockbank.data.load=false or as spring application param: --ledgers.mockbank.data.load=false
 ledgers.mockbank.data.load: true
 
 # Default value set in application. de.adorsys.ledgers.middleware.client.rest.Ledgers#URL.LEDGERS_URL
-# ledgers.url: http://localhost:${server.port}    
+# ledgers.url: http://localhost:${server.port}
 ---
 spring:
   profiles: dev
