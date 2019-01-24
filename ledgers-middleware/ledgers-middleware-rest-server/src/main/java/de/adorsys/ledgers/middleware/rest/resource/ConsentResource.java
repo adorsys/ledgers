@@ -43,7 +43,7 @@ import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 
 @RestController
-@RequestMapping(AccountRestAPI.BASE_PATH)
+@RequestMapping(ConsentRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
 	private static final Logger logger = LoggerFactory.getLogger(ConsentResource.class);
