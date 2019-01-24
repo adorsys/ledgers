@@ -17,6 +17,9 @@ import {AccountListComponent} from "./components/account-list/account-list.compo
 import { AccountDetailComponent } from './components/account-detail/account-detail.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
 import { CashDepositComponent } from './components/cash-deposit/cash-deposit.component';
+import { UsersComponent } from './components/users/users.component';
+import { UserDetailsComponent } from './components/users/user-details/user-details.component';
+import { UserCreateComponent } from './components/users/user-create/user-create.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +33,10 @@ import { CashDepositComponent } from './components/cash-deposit/cash-deposit.com
     AccountListComponent,
     AccountDetailComponent,
     NotFoundComponent,
-    CashDepositComponent
+    CashDepositComponent,
+    UsersComponent,
+    UserDetailsComponent,
+    UserCreateComponent
   ],
   imports: [
     BrowserModule,
