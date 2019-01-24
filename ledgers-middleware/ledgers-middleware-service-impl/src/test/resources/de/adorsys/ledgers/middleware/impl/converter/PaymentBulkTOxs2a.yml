@@ -1,0 +1,98 @@
+paymentId: myPaymentId
+batchBookingPreferred: false
+debtorAccount:
+  {
+    iban: DE91100000000123456789,
+    bban: bban,
+    pan: pan,
+    maskedPan: maskedPan,
+    msisdn: msisdn,
+    currency: EUR
+  }
+requestedExecutionDate: 2018-12-12
+paymentStatus: RCVD
+
+payments:
+  - {
+      paymentId: myPaymentId1,
+      endToEndIdentification: 123456788,
+      debtorAccount:
+        {
+          iban: DE91100000000123456789,
+          bban: bban,
+          pan: pan,
+          maskedPan: maskedPan,
+          msisdn: msisdn,
+          currency: EUR
+        },
+      instructedAmount:
+        {
+          currency: EUR,
+          amount: 200
+        },
+      creditorAccount:
+        {
+          iban: DE91100000000123456787,
+          bban: bban,
+          pan: pan,
+          maskedPan: maskedPan,
+          msisdn: msisdn,
+          currency: EUR
+        },
+      creditorAgent: agent,
+      creditorName: Rozetka.ua,
+      creditorAddress:
+          {
+            street: SomeStreet,
+            buildingNumber: 666,
+            city: Kiev,
+            postalCode: 04210,
+            country: Ukraine
+          },
+      remittanceInformationUnstructured: remittance,
+      paymentStatus: RCVD,
+      requestedExecutionDate: 2018-12-12,
+      requestedExecutionTime: "12:00:00"
+      }
+  - {
+        paymentId: myPaymentId2,
+        endToEndIdentification: 123456789,
+        debtorAccount:
+          {
+            iban: DE91100000000123456789,
+            bban: bban,
+            pan: pan,
+            maskedPan: maskedPan,
+            msisdn: msisdn,
+            currency: EUR
+          },
+        instructedAmount:
+          {
+            currency: EUR,
+            amount: 100
+          },
+        creditorAccount:
+          {
+            iban: DE91100000000123456788,
+            bban: bban,
+            pan: pan,
+            maskedPan: maskedPan,
+            msisdn: msisdn,
+            currency: EUR
+          },
+        creditorAgent: agent,
+        creditorName: Sokol.ua,
+        creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
+        remittanceInformationUnstructured: remittance,
+        paymentStatus: RCVD,
+        requestedExecutionDate: 2018-12-12,
+        requestedExecutionTime: "12:00:00"
+    }
+paymentProduct: SEPA

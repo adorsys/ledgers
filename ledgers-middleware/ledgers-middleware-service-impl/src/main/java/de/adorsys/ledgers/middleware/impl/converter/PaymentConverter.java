@@ -16,29 +16,18 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
 
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTargetBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PeriodicPaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 @SuppressWarnings("PMD")
 @Mapper(componentModel = "spring")
 public abstract class PaymentConverter {
@@ -70,74 +59,81 @@ public abstract class PaymentConverter {
             return toBulkPaymentTO(payment, payment.getTargets().get(0));
         }
     }
-    
+
     @Mappings({
-    @Mapping(source = "payment.paymentId", target = "paymentId"),
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
+            @Mapping(source = "payment.paymentId", target = "paymentId"),
+            @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
     })
     public abstract SinglePaymentTO toSinglePaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
     @Mappings({
-    @Mapping(source = "payment.paymentId", target = "paymentId"),
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
+            @Mapping(source = "payment.paymentId", target = "paymentId"),
+            @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
     })
     public abstract PeriodicPaymentTO toPeriodicPaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
     @Mappings({
-    @Mapping(source = "payment.paymentId", target = "paymentId"),
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus"),
-    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(paymentTarget.getPaymentProduct()))"),
-    @Mapping(target = "payments", expression = "java(payment.getTargets().stream().map(t -> toSingleBulkPartTO(payment, t)).collect(java.util.stream.Collectors.toList()))")
+            @Mapping(source = "payment.paymentId", target = "paymentId"),
+            @Mapping(source = "payment.transactionStatus", target = "paymentStatus"),
+            @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(paymentTarget.getPaymentProduct()))"),
+            @Mapping(target = "payments", expression = "java(payment.getTargets().stream().map(t -> toSingleBulkPartTO(payment, t)).collect(java.util.stream.Collectors.toList()))")
     })
     public abstract BulkPaymentTO toBulkPaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
     @Mappings({
-    @Mapping(source = "paymentTarget.paymentId", target = "paymentId"),
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
+            @Mapping(source = "paymentTarget.paymentId", target = "paymentId"),
+            @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
     })
     public abstract SinglePaymentTO toSingleBulkPartTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
-//    @SuppressWarnings("unchecked")
-	public <T> PaymentBO toPaymentBO(Object payment, Class<T> tClass) {
-    	Object o = payment;
-    	if(o instanceof Map) {
-	    	Map<String, ?> map = (Map<String, ?>) o;
-	    	if(map.size()==1) {
-	    		map = (Map<String, ?>) map.values().iterator().next();
-	    	}
-	    	o = map;
-    	}
-    	
+    //    @SuppressWarnings("unchecked")
+    public <T> PaymentBO toPaymentBO(Object payment, Class<T> tClass) {
+        Object o = payment;
+        if (o instanceof Map) {
+            Map<String, ?> map = (Map<String, ?>) o;
+            if (map.size() == 1) {
+                map = (Map<String, ?>) map.values().iterator().next();
+            }
+            o = map;
+        }
+
         if (tClass.equals(SinglePaymentTO.class)) {
             return toPaymentBO((SinglePaymentTO) mapper.convertValue(o, tClass));
         } else if (tClass.equals(PeriodicPaymentTO.class)) {
             return toPaymentBO((PeriodicPaymentTO) mapper.convertValue(o, tClass));
         } else if (tClass.equals(BulkPaymentTO.class)) {
-        	return toPaymentBO((BulkPaymentTO) mapper.convertValue(o, tClass));
+            BulkPaymentTO paymentTO = (BulkPaymentTO) mapper.convertValue(o, tClass);
+            PaymentBO paymentBO = toPaymentBO(paymentTO);
+            paymentBO.getTargets()
+                    .forEach(t -> {
+                        if (t.getPaymentProduct() == null)
+                            t.setPaymentProduct(toPaymentProductBO(paymentTO.getPaymentProduct()));
+                    });
+            return paymentBO;
         } else {
-        	throw new IllegalStateException(String.format("Unknown payment type %s", tClass.getName()));
+            throw new IllegalStateException(String.format("Unknown payment type %s", tClass.getName()));
         }
     }
 
     @Mappings({
-    @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.SINGLE)"),
-    @Mapping(source = "paymentStatus", target = "transactionStatus"),
-    @Mapping(target = "targets", expression = "java(java.util.Collections.singletonList(toPaymentTarget(payment)))")
+            @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.SINGLE)"),
+            @Mapping(source = "paymentStatus", target = "transactionStatus"),
+            @Mapping(target = "targets", expression = "java(java.util.Collections.singletonList(toPaymentTarget(payment)))")
     })
     public abstract PaymentBO toPaymentBO(SinglePaymentTO payment);
 
     @Mappings({
-    @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.PERIODIC)"),
-    @Mapping(source = "paymentStatus", target = "transactionStatus"),
-    @Mapping(target = "targets", expression = "java(java.util.Collections.singletonList(toPaymentTarget(payment)))")
+            @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.PERIODIC)"),
+            @Mapping(source = "paymentStatus", target = "transactionStatus"),
+            @Mapping(target = "targets", expression = "java(java.util.Collections.singletonList(toPaymentTarget(payment)))")
     })
     public abstract PaymentBO toPaymentBO(PeriodicPaymentTO payment);
 
     @Mappings({
-    @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.BULK)"),
-    @Mapping(target = "requestedExecutionTime", expression = "java(java.util.Optional.ofNullable(payment.getPayments()).map(l -> l.get(0).getRequestedExecutionTime()).orElse(null))"),
-    @Mapping(source = "paymentStatus", target = "transactionStatus"),
-    @Mapping(target = "targets", source = "payment.payments")
+            @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.BULK)"),
+            @Mapping(target = "requestedExecutionTime", expression = "java(java.util.Optional.ofNullable(payment.getPayments()).map(l -> l.get(0).getRequestedExecutionTime()).orElse(null))"),
+            @Mapping(source = "paymentStatus", target = "transactionStatus"),
+            @Mapping(target = "targets", source = "payment.payments")
     })
     public abstract PaymentBO toPaymentBO(BulkPaymentTO payment);
 
