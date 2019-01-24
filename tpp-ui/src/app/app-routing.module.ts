@@ -25,13 +25,18 @@ const routes: Routes = [
         component: AccountListComponent
       },
       {
-        path: 'accounts/:id/cash',
-        component: CashDepositComponent
-      },
-      {
         path: 'accounts/:id',
         component: AccountDetailComponent
-      }
+      },
+      {
+        path: 'accounts/new',
+        component: AccountListComponent
+      },
+      {
+        path: 'accounts/deposit',
+        component: CashDepositComponent
+      },
+
     ]
   },
   {
