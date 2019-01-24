@@ -1,8 +1,34 @@
-<h1>Accounts</h1>
-<ul class="list-group list-group-flush">
-  <li class="list-group-item" *ngFor="let account of accounts">
-    {{account | json}}
-    <a [routerLink]="['/accounts/' + account.id + '/cash']" class="d-block">Make a cash deposit</a>
-  </li>
-</ul>
-<a routerLink="/accounts/new">Create new account</a>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Accounts</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+      <button class="btn btn-lg btn-outline-secondary" routerLink="/accounts/create">create new account</button>
+    </div>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">User Login</th>
+        <th scope="col">Account Type</th>
+        <th scope="col">Usage Type</th>
+        <th scope="col">Currency</th>
+        <th scope="col">IBAN</th>
+        <th scope="col">Account Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let account of accounts; index as i" [routerLink]="['/accounts/' + account.id]">
+      <th scope="row">{{i + 1}}</th>
+      <td>User Login</td>
+      <td>Account Type</td>
+      <td>Currency</td>
+      <td>IBAN</td>
+      <td>Account Status</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
