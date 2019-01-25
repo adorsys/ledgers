@@ -1,0 +1,19 @@
+#login .container #login-row #login-column #login-box {
+  margin-top: 120px;
+  max-width: 600px;
+  height: auto;
+  border: 1px solid #9C9C9C;
+  background-color: #EAEAEA;
+}
+
+#login .container #login-row #login-column #login-box #login-form {
+  padding: 20px;
+}
+
+.btn-info {
+  background-color: #054f72;
+}
+
+.text-adorsys {
+  color: #054f72;
+}

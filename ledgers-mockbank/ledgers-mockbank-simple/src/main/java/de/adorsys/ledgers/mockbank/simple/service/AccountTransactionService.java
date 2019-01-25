@@ -29,7 +29,7 @@ public class AccountTransactionService {
 	private DepositAccountService depositAccountService;
 
 	/**
-	 * Validate if all transactions listed in the upload file are in the databse.
+	 * Validate if all transactions listed in the upload file are in the database.
 	 * 
 	 * @param t : the data holder
 	 * @param strict : if there is more transaction in that time frame, return true.

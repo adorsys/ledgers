@@ -17,8 +17,9 @@
   border-radius: 0;
 }
 
-.nav-link {
+.nav-item {
   color: #ffffff;
+  cursor: pointer;
 }
 
 .navbar-adorsys {

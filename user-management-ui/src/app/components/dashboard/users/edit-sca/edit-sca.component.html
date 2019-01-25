@@ -1,8 +1,13 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
   <h1 class="h2">Edit Authentication methods</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="addScaDataItem()">add new authentication method</button>
+    </div>
+  </div>
 </div>
 
-<div class="container">
+<div class="container" *ngIf="user">
   <form autocomplete="off" [formGroup]="scaForm">
 
     <div class="form-group" formArrayName="scaUserData">
@@ -20,10 +25,8 @@
                      aria-describedby="scaDataHelp"
                      [ngClass]="{ 'is-invalid': scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors }"
                      placeholder="Please input SCA method for user">
-              <small id="scaDataHelp" class="form-text text-muted">Authentication Email or Phone number</small>
-              <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors" class="alert alert-danger">
-                <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors.required"
-                     class="alert-size">Email or Phone number is required</div>
+              <div *ngIf="scaDataItem.controls['methodValue'].touched && scaDataItem.controls['methodValue'].errors" class="invalid-feedback d-block">
+                Email or Phone number is required
               </div>
             </div>
             <div class="col-auto my-1" [formGroupName]="i">
@@ -31,7 +34,6 @@
                 <div class="form-check col">
                   <input class="form-check-input"
                          type="radio"
-                         name="scaMethod"
                          id="scaUserDataEmail"
                          formControlName="scaMethod"
                          value="EMAIL">
@@ -42,13 +44,13 @@
                 <div class="form-check col">
                   <input class="form-check-input"
                          type="radio"
-                         name="scaMethod"
                          id="scaUserDataPhone"
                          formControlName="scaMethod"
                          value="MOBILE">
                   <label class="form-check-label" for="scaUserDataPhone">
                     Mobile phone
                   </label>
+
                 </div>
               </div>
             </div>
@@ -65,14 +67,8 @@
         </div>
       </div>
     </div>
-    <div>
-      <a (click)="addScaDataItem()">
-        Add new customer authentication method
-      </a>
-    </div>
 
     <button type="submit"
-            [disabled]="scaForm.invalid"
             (click)="onSubmit()"
             class="btn btn-primary">Update</button>
   </form>

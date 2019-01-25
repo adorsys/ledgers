@@ -19,10 +19,13 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import java.net.URI;
 import java.util.List;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
@@ -202,10 +205,37 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         }
     }
 
-    // TODO: refactor for user collection pagination
+	@PutMapping("/{userId}/sca-data")
+	@ApiOperation(value="Updates user SCA", notes="Updates user authentication methods."
+			+ "<lu>"
+			+ "<li>User is implied from the provided access token.</li>"
+			+ "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
+			+ "</ul>",
+			authorizations =@Authorization(value="apiKey"))
+	@ApiResponses(value={
+			@ApiResponse(code=200, response=Void.class, message="The user data record without the user pin."),
+			@ApiResponse(code=401, message="Provided bearer token could not be verified."),
+			@ApiResponse(code=403, message="Provided bearer token not qualified for this operation."),
+	})
+	@PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+	public ResponseEntity<Void> updateScaDataByUserId(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) {
+		try {
+			UserTO userTO = middlewareUserService.findById(userId);
+			UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
+
+			URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
+					.build().toUri();
+
+			return ResponseEntity.created(uri).build();
+
+		} catch (UserNotFoundMiddlewareException e) {
+			throw new NotFoundRestException(e.getMessage());
+		}
+	}
+
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<List<UserTO>> getAllUsers() {
-        return ResponseEntity.ok(middlewareUserService.listUsers(1, 150));
+        return ResponseEntity.ok(middlewareUserService.listUsers(0, 150));
     }
 }

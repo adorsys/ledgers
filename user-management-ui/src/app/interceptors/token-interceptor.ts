@@ -23,14 +23,6 @@ export class TokenInterceptor implements HttpInterceptor {
    * @returns {Observable<A>}
    */
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
-    request = request.clone({
-      setHeaders: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      }
-    });
-
     if (localStorage.getItem('token')) {
       request = request.clone({
         setHeaders: {

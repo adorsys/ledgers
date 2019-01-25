@@ -21,9 +21,8 @@
                      [ngClass]="{ 'is-invalid': accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors }"
                      placeholder="Please input Account IBAN">
               <small id="scaDataHelp" class="form-text text-muted">User Account IBAN</small>
-              <div *ngIf="accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors" class="alert alert-danger">
-                <div *ngIf="accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors.required"
-                     class="alert-size">Account IBAN is required</div>
+              <div *ngIf="accountAccess.controls['iban'].touched && accountAccess.controls['iban'].errors" class="invalid-feedback d-block">
+                Account IBAN is required
               </div>
             </div>
             <div class="col-auto my-1" [formGroupName]="i">
@@ -83,7 +82,6 @@
     </div>
 
     <button type="submit"
-            [disabled]="accountAccessForm.invalid"
             (click)="onSubmit()"
             class="btn btn-primary">Update</button>
   </form>
