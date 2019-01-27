@@ -163,7 +163,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 	private SCAOperationEntity loadOrCreateScaOperation(AuthCodeDataBO data, ScaStatusBO scaStatus)
 			throws SCAOperationNotFoundException {
 		if(data.getAuthorisationId()==null) {
-			data.setAuthorisationId(Ids.id());
+			throw new ScaUncheckedException("Missing authorization id.");
 		}
 		return repository.findById(data.getAuthorisationId()).orElse(createAuthCodeInternal(data, scaStatus));
 	}
@@ -311,7 +311,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
 	private SCAOperationEntity createAuthCodeInternal(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus){
 		if(authCodeData.getAuthorisationId()==null) {
-			authCodeData.setAuthorisationId(Ids.id());
+			throw new ScaUncheckedException("Missing authorization id.");
 		}
 		SCAOperationEntity scaOp = new SCAOperationEntity();
 		scaOp.setId(authCodeData.getAuthorisationId());
