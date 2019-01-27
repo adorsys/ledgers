@@ -17,6 +17,7 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.Ids;
 
 @Service
 public class SCAUtils {
@@ -75,4 +76,15 @@ public class SCAUtils {
 	public UserRoleTO getCurrentRole() {
 		return accessTokenTO.getRole();
 	}
+	
+	public String authorisatioId() {
+		String scaId = accessTokenTO.getScaId();
+		String authorisationId = accessTokenTO.getAuthorisationId();
+		if(scaId.equals(authorisationId)) {// we are working with login token.
+			authorisationId = Ids.id(); 
+		}
+		return authorisationId;
+	}
+
+	
 }

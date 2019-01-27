@@ -433,7 +433,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
 	private SCAPaymentResponseTO prepareSCA(UserBO user, PaymentBO payment, PaymentCoreDataTO paymentKeyData, OpTypeBO opType) {
 		UserTO userTo = scaUtils.user(user);
-		String authorisationId = Ids.id();// Generate an authorization id.
+		String authorisationId = scaUtils.authorisatioId();
 		String paymentKeyDataTemplate = paymentKeyData.template();
 		String opData = paymentKeyDataTemplate;
 		String userMessage = paymentKeyDataTemplate;

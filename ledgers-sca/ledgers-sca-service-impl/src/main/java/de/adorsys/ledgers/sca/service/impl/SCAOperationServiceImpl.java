@@ -55,7 +55,6 @@ import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
-import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
@@ -163,7 +162,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 	private SCAOperationEntity loadOrCreateScaOperation(AuthCodeDataBO data, ScaStatusBO scaStatus)
 			throws SCAOperationNotFoundException {
 		if(data.getAuthorisationId()==null) {
-			data.setAuthorisationId(Ids.id());
+			throw new ScaUncheckedException("Missing authorization id.");
 		}
 		return repository.findById(data.getAuthorisationId()).orElse(createAuthCodeInternal(data, scaStatus));
 	}
@@ -311,7 +310,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
 	private SCAOperationEntity createAuthCodeInternal(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus){
 		if(authCodeData.getAuthorisationId()==null) {
-			authCodeData.setAuthorisationId(Ids.id());
+			throw new ScaUncheckedException("Missing authorization id.");
 		}
 		SCAOperationEntity scaOp = new SCAOperationEntity();
 		scaOp.setId(authCodeData.getAuthorisationId());

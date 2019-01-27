@@ -78,7 +78,6 @@ import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.util.Ids;
 
 @Service
 @Transactional
@@ -487,7 +486,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	private SCAConsentResponseTO prepareSCA(UserBO user, AisConsentTO aisConsent, ConsentKeyDataTO consentKeyData) {
 		String consentKeyDataTemplate = consentKeyData.template();
 		UserTO userTo =scaUtils.user(user);
-		String authorisationId = Ids.id();
+		String authorisationId = scaUtils.authorisatioId();
 		if (!scaRequired(aisConsent, user, OpTypeBO.CONSENT)) {
 			SCAConsentResponseTO response = new SCAConsentResponseTO();
 			response.setAuthorisationId(authorisationId);
