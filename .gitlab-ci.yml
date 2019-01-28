@@ -25,6 +25,8 @@ variables: &variables
   OPENSHIFT_REGISTRY: "openshift-registry.adorsys.de:443"
   OPENSHIFT_NAMESPACE: "ledgers-dev"
 
+  SONAR_HOST: "https://bg-sonarqube.cloud.adorsys.de"
+
   # Ledgers Service
 #  GITLAB_IMAGE_NAME_LEDGERS: "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}"
   DOCKER_IMAGE_NAME_LEDGERS: "${DOCKER_NAMESPACE}/ledgers"
@@ -195,6 +197,18 @@ unit_tests:
 
 
 # Develop
+
+sonar_code_coverage:
+  stage: "build:qa"
+  image: "adorsys/ci-build"
+  script:
+    - jabba use system@1.8
+    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+    - mvn --fail-at-end clean install
+    - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST
+  only:
+    - develop
 
 deploy_dockerhub_stage:
   stage: "build:image"
