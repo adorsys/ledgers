@@ -107,6 +107,14 @@ public class UserBO {
         this.userRoles = userRoles;
     }
 
+    public List<UserBO> getCreatedUsers() {
+        return createdUsers;
+    }
+
+    public void setCreatedUsers(List<UserBO> createdUsers) {
+        this.createdUsers = createdUsers;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -119,12 +127,12 @@ public class UserBO {
                 Objects.equals(getScaUserData(), userBO.getScaUserData()) &&
                 Objects.equals(getAccountAccesses(), userBO.getAccountAccesses()) &&
                 Objects.equals(getUserRoles(), userBO.getUserRoles()) &&
-                Objects.equals(createdUsers, userBO.createdUsers);
+                Objects.equals(getCreatedUsers(), userBO.getCreatedUsers());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), createdUsers);
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getCreatedUsers());
     }
 
     @Override

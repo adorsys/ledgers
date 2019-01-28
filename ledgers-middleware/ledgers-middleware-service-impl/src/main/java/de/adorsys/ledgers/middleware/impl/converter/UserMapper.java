@@ -34,7 +34,9 @@ public interface UserMapper {
 
     UserBO toUserBO(UserTO user);
     
-	List<UserTO> toUserTOList(List<UserBO> listUsers);    
+	List<UserTO> toUserTOList(List<UserBO> listUsers);
+
+	List<UserBO> toUserBOList(List<UserTO> listUsers);
 
     ScaUserDataBO toScaUserDataBO(ScaUserDataTO userData);
 

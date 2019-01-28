@@ -130,4 +130,18 @@ public class UserEntity {
     public void setCreatedUsers(List<UserEntity> createdUsers) {
         this.createdUsers = createdUsers;
     }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id='" + id + '\'' +
+                ", login='" + login + '\'' +
+                ", email='" + email + '\'' +
+                ", pin='" + pin + '\'' +
+                ", scaUserData=" + scaUserData +
+                ", accountAccesses=" + accountAccesses +
+                ", userRoles=" + userRoles +
+                ", createdUsers=" + createdUsers +
+                '}';
+    }
 }

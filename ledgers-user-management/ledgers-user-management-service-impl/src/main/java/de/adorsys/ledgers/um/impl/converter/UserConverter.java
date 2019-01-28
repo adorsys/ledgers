@@ -36,7 +36,7 @@ public interface UserConverter {
 
     List<UserBO> toUserBOList(List<UserEntity> user);
 
-    List<UserEntity> toUserPOList(List<UserBO> user);
+    List<UserEntity> toUserEntityList(List<UserBO> user);
  
     ScaUserDataBO toScaUserDataBO(ScaUserDataEntity entity);
 

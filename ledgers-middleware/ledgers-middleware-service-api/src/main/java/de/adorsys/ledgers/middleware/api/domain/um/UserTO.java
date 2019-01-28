@@ -24,6 +24,8 @@ public class UserTO {
     private List<AccountAccessTO> accountAccesses = new ArrayList<>();
 
     private Collection<UserRoleTO> userRoles =  new ArrayList<>();
+
+    private List<UserTO> createdUsers = new ArrayList<>();
     
     public UserTO() {
     }
@@ -91,5 +93,26 @@ public class UserTO {
 	public void setUserRoles(Collection<UserRoleTO> userRoles) {
 		this.userRoles = userRoles;
 	}
-    
+
+    public List<UserTO> getCreatedUsers() {
+        return createdUsers;
+    }
+
+    public void setCreatedUsers(List<UserTO> createdUsers) {
+        this.createdUsers = createdUsers;
+    }
+
+    @Override
+    public String toString() {
+        return "UserTO{" +
+                "id='" + id + '\'' +
+                ", login='" + login + '\'' +
+                ", email='" + email + '\'' +
+                ", pin='" + pin + '\'' +
+                ", scaUserData=" + scaUserData +
+                ", accountAccesses=" + accountAccesses +
+                ", userRoles=" + userRoles +
+                ", createdUsers=" + createdUsers +
+                '}';
+    }
 }
