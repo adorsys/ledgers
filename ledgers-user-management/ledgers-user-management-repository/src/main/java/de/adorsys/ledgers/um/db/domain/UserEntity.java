@@ -20,19 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -70,6 +58,13 @@ public class UserEntity {
     @Column(name="role")
     @Enumerated(EnumType.STRING)
     private Collection<UserRole> userRoles =  new ArrayList<>();
+
+//    @ManyToOne
+//    private UserEntity createdBy;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "parent_user_id")
+    private List<UserEntity> createdUsers = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -125,5 +120,14 @@ public class UserEntity {
 
     public void setUserRoles(Collection<UserRole> userRoles) {
         this.userRoles = userRoles;
+    }
+
+
+    public List<UserEntity> getCreatedUsers() {
+        return createdUsers;
+    }
+
+    public void setCreatedUsers(List<UserEntity> createdUsers) {
+        this.createdUsers = createdUsers;
     }
 }

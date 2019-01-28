@@ -38,6 +38,8 @@ public class UserBO {
 
     private Collection<UserRoleBO> userRoles =  new ArrayList<>();
 
+    private List<UserBO> createdUsers = new ArrayList<>();
+
     public UserBO() {
     }
 
@@ -107,26 +109,22 @@ public class UserBO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (!(o instanceof UserBO)) return false;
         UserBO userBO = (UserBO) o;
-        return Objects.equals(id, userBO.id) &&
-                Objects.equals(login, userBO.login) &&
-                Objects.equals(email, userBO.email) &&
-                Objects.equals(pin, userBO.pin) &&
-                Objects.equals(scaUserData, userBO.scaUserData) &&
-                Objects.equals(accountAccesses, userBO.accountAccesses);
+        return Objects.equals(getId(), userBO.getId()) &&
+                Objects.equals(getLogin(), userBO.getLogin()) &&
+                Objects.equals(getEmail(), userBO.getEmail()) &&
+                Objects.equals(getPin(), userBO.getPin()) &&
+                Objects.equals(getScaUserData(), userBO.getScaUserData()) &&
+                Objects.equals(getAccountAccesses(), userBO.getAccountAccesses()) &&
+                Objects.equals(getUserRoles(), userBO.getUserRoles()) &&
+                Objects.equals(createdUsers, userBO.createdUsers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, email, pin, scaUserData, accountAccesses);
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), createdUsers);
     }
 
     @Override
@@ -138,6 +136,8 @@ public class UserBO {
                 ", pin='" + pin + '\'' +
                 ", scaUserData=" + scaUserData +
                 ", accountAccesses=" + accountAccesses +
+                ", userRoles=" + userRoles +
+                ", createdUsers=" + createdUsers +
                 '}';
     }
 }
