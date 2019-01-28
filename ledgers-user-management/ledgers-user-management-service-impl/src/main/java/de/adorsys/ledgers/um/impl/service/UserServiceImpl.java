@@ -16,17 +16,22 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import de.adorsys.ledgers.um.api.domain.*;
+import de.adorsys.ledgers.um.api.exception.*;
+import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.um.db.domain.*;
+import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
+import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
+import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.PasswordEnc;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -37,39 +42,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
-import de.adorsys.ledgers.um.api.domain.AisConsentBO;
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
-import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
-import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.db.domain.AccountAccess;
-import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
-import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
-import de.adorsys.ledgers.um.db.domain.UserRole;
-import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
-import de.adorsys.ledgers.um.db.repository.UserRepository;
-import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
-import de.adorsys.ledgers.um.impl.converter.UserConverter;
-import de.adorsys.ledgers.util.Ids;
-import de.adorsys.ledgers.util.PasswordEnc;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -81,7 +58,7 @@ public class UserServiceImpl implements UserService {
 	private static final String CAN_NOT_LOAD_USER_WITH_ID = "Can not load user with id: ";
 	private static final String PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION = "Permission model changed for user with subject %s no sufficient permission on account %s.";
 	private static final String COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT = "Could not verify signature of token with subject : ";
-	private static final String TOKEN_WITH_SUBJECT_EXPIRED = "Token with subject %s is expired at %s and reference time is % : ";
+	private static final String TOKEN_WITH_SUBJECT_EXPIRED = "Token with subject %s is expired at %s and reference time is %s : ";
 	private static final String WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT = "Wrong jws algo for token with subject : ";
 	private static final String USER_DOES_NOT_HAVE_THE_ROLE_S = "User with id %s and login %s does not have the role %s";
 	private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
@@ -328,9 +305,11 @@ public class UserServiceImpl implements UserService {
 				                                  .collect(Collectors.toList());
 		
 		AisAccountAccessInfoBO access = aisConsent.getAccess();
-		checkAccountAccess(accessibleAccounts, access.getAccounts(), NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS ,user.getId());
-		checkAccountAccess(accessibleAccounts, access.getBalances(), NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS , user.getId());
-		checkAccountAccess(accessibleAccounts, access.getTransactions(), NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS , user.getId());
+		if(access!=null) {
+			checkAccountAccess(accessibleAccounts, access.getAccounts(), NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS ,user.getId());
+			checkAccountAccess(accessibleAccounts, access.getBalances(), NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS , user.getId());
+			checkAccountAccess(accessibleAccounts, access.getTransactions(), NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS , user.getId());
+		}
 	}
 	
 	private Date getExpirDate(AisConsentBO aisConsent, Date iat) {
@@ -368,7 +347,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public BearerTokenBO scaToken(AccessTokenBO loginToken) throws InsufficientPermissionException, UserNotFoundException {
+	public BearerTokenBO scaToken(AccessTokenBO loginToken) throws UserNotFoundException {
 		UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
 		Date issueTime = new Date();
 		Date expires = DateUtils.addSeconds(issueTime, defaultScaTokenExpireInSeconds);
@@ -379,7 +358,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws InsufficientPermissionException, UserNotFoundException {
+	public BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws UserNotFoundException {
 		UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
 		Date issueTime = new Date();
 		Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);

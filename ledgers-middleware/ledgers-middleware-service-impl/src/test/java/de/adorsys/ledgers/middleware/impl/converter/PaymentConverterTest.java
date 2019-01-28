@@ -1,40 +1,25 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.IOException;
 
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentResultBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.ResultStatusBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentResultTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PeriodicPaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.ResultStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentConverterTest {
@@ -43,7 +28,9 @@ public class PaymentConverterTest {
     private static final String PATH_PERIODIC_BO = "PaymentPeriodic.yml";
     private static final String PATH_PERIODIC_TO = "PaymentPeriodicTO.yml";
     private static final String PATH_BULK_BO = "PaymentBulk.yml";
+    private static final String PATH_BULK_BO_XS2A = "PaymentBulkXs2a.yml";
     private static final String PATH_BULK_TO = "PaymentBulkTO.yml";
+    private static final String PATH_BULK_TO_XS2A = "PaymentBulkTOxs2a.yml";
 
     @InjectMocks
     private PaymentConverterImpl converter;
@@ -51,7 +38,7 @@ public class PaymentConverterTest {
     private static ObjectMapper mapper = getObjectMapper();
 
     @Test
-    public void toPaymentResultTO() throws IOException {
+    public void toPaymentResultTO() {
         PaymentResultBO bo = readYml(PaymentResultBO.class, "payment-result.yml");
         PaymentResultTO to = converter.toPaymentResultTO(bo);
 
@@ -63,7 +50,7 @@ public class PaymentConverterTest {
     }
 
     @Test
-    public void toPaymentResultBO() throws IOException {
+    public void toPaymentResultBO() {
         PaymentResultTO to = readYml(PaymentResultTO.class, "payment-result.yml");
 
         PaymentResultBO bo = converter.toPaymentResultBO(to);
@@ -167,9 +154,9 @@ public class PaymentConverterTest {
     ObjectMapper om;
     @Test
     public void toPaymentBOFromGeneric() {
-        when(om.convertValue(any(), eq(SinglePaymentTO.class))).thenReturn(new SinglePaymentTO());
-        when(om.convertValue(any(), eq(PeriodicPaymentTO.class))).thenReturn(new PeriodicPaymentTO());
-        when(om.convertValue(any(), eq(BulkPaymentTO.class))).thenReturn(new BulkPaymentTO());
+        when(om.convertValue(any(), eq(SinglePaymentTO.class))).thenReturn(readYml(SinglePaymentTO.class, PATH_SINGLE_TO));
+        when(om.convertValue(any(), eq(PeriodicPaymentTO.class))).thenReturn(readYml(PeriodicPaymentTO.class, PATH_PERIODIC_TO));
+        when(om.convertValue(any(), eq(BulkPaymentTO.class))).thenReturn(readYml(BulkPaymentTO.class, PATH_BULK_TO));
         assertThat(converter.toPaymentBO(new SinglePaymentTO(), SinglePaymentTO.class).getPaymentType()).isEqualTo(PaymentTypeBO.SINGLE);
         assertThat(converter.toPaymentBO(new PeriodicPaymentTO(), PeriodicPaymentTO.class).getPaymentType()).isEqualTo(PaymentTypeBO.PERIODIC);
         assertThat(converter.toPaymentBO(new BulkPaymentTO(), BulkPaymentTO.class).getPaymentType()).isEqualTo(PaymentTypeBO.BULK);
@@ -189,6 +176,15 @@ public class PaymentConverterTest {
         //BulkPayment
         assertThat(converter.toPaymentBO(readYml(BulkPaymentTO.class, PATH_BULK_TO)))
                 .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_BULK_BO));
+    }
+
+    @Test
+    public void toPaymentBOBulkObjUnformatted(){
+        //BulkPaymentXs2aVariation
+        when(om.convertValue(any(), eq(BulkPaymentTO.class))).thenReturn(readYml(BulkPaymentTO.class, PATH_BULK_TO_XS2A));
+        assertThat(converter.toPaymentBO(readYml(Object.class, PATH_BULK_TO_XS2A),BulkPaymentTO.class))
+                .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_BULK_BO_XS2A));
+
     }
 
     @Test
@@ -218,5 +214,4 @@ public class PaymentConverterTest {
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return objectMapper;
     }
-    
 }

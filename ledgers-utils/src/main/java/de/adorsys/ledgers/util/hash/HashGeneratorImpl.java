@@ -16,18 +16,23 @@
 
 package de.adorsys.ledgers.util.hash;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import de.adorsys.ledgers.util.Base16;
-import de.adorsys.ledgers.util.SerializationUtils;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.adorsys.ledgers.util.Base16;
 
 public class HashGeneratorImpl implements HashGenerator {
     private static final Logger logger = LoggerFactory.getLogger(HashGeneratorImpl.class);
+	private static final ObjectMapper objectMapper = new ObjectMapper()
+			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Override
     public <T> String hash(HashItem<T> hashItem) throws HashGenerationException {
@@ -38,7 +43,7 @@ public class HashGeneratorImpl implements HashGenerator {
         try {
             String alg = StringUtils.isBlank(hashItem.getAlg()) ? DEFAULT_HASH_ALG : hashItem.getAlg();
             digest = MessageDigest.getInstance(alg);
-            valueAsBytes = SerializationUtils.writeValueAsBytes(hashItem.getItem());
+            valueAsBytes = objectMapper.writeValueAsBytes(hashItem.getItem());
         } catch (NoSuchAlgorithmException | JsonProcessingException e) {
             logger.error("Can't generate the hash", e);
             throw new HashGenerationException("Can't generate the hash", e);

@@ -1,6 +1,13 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
@@ -22,7 +29,6 @@ import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.util.SerializationUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
@@ -71,8 +77,21 @@ public class DepositAccountServiceImplTest {
     @Mock
     private AccountStmtService accountStmtService;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
+
+    private static final ObjectMapper STATIC_MAPPER = new ObjectMapper()
+                                                              .findAndRegisterModules()
+                                                              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                                                              .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                                                              .configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false)
+                                                              .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+                                                              .registerModule(new Jdk8Module())
+                                                              .registerModule(new JavaTimeModule())
+                                                              .registerModule(new ParameterNamesModule());
 
     @Test
     public void createDepositAccount() throws LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
@@ -179,7 +198,7 @@ public class DepositAccountServiceImplTest {
     private PostingLineBO newPostingLineBO() throws JsonProcessingException {
         PostingLineBO pl = new PostingLineBO();
         pl.setAccount(new LedgerAccountBO());
-        pl.setDetails(SerializationUtils.writeValueAsString(new TransactionDetailsBO()));
+        pl.setDetails(STATIC_MAPPER.writeValueAsString(new TransactionDetailsBO()));
         return pl;
     }
 
@@ -250,6 +269,7 @@ public class DepositAccountServiceImplTest {
         accountReferenceBO.setCurrency(EUR);
         when(depositAccountMapper.toAccountReferenceBO(any())).thenReturn(accountReferenceBO);
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+        when(objectMapper.writeValueAsString(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
 
         depositAccountService.depositCash(ACCOUNT_ID, amount, "recordUser");
@@ -260,13 +280,12 @@ public class DepositAccountServiceImplTest {
         assertThat(posting.getLines()).hasSize(2);
         for (PostingLineBO line : posting.getLines()) {
             assertThat(line.getId()).isNotBlank();
-            TransactionDetailsBO transactionDetails = SerializationUtils.readValueFromString(line.getDetails(), TransactionDetailsBO.class);
+            TransactionDetailsBO transactionDetails = STATIC_MAPPER.readValue(line.getDetails(), TransactionDetailsBO.class);
             assertThat(transactionDetails.getEndToEndId()).isEqualTo(line.getId());
             assertThat(transactionDetails.getTransactionId()).isNotBlank();
             assertThat(transactionDetails.getBookingDate()).isEqualTo(transactionDetails.getValueDate());
             assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(accountReferenceBO);
             assertThat(transactionDetails.getTransactionAmount()).isEqualToComparingFieldByField(amount);
         }
-
     }
 }
