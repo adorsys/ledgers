@@ -24,4 +24,7 @@
 	<include file="migration/0005-initial-data-v2.xml" relativeToChangelogFile="true" />
 	 -->
 
+	<include file="migration/0006-add-parent-user-id-to-users-table.xml" relativeToChangelogFile="true" />
+
+
 </databaseChangeLog>
