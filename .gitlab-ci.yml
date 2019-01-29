@@ -206,7 +206,7 @@ sonar_code_coverage:
     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
     - mvn --fail-at-end clean install
-    - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST
+    - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST -Dsonar.login=${SONAR_TOKEN}
   only:
     - develop
 
