@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserCredentialsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
@@ -52,7 +53,7 @@ public class TppResource implements TppRestAPI {
     }
 
     @Override
-    public ResponseEntity<SCALoginResponseTO> login(UserTO userCredentials) throws NotFoundRestException, ForbiddenRestException {
+    public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) throws NotFoundRestException, ForbiddenRestException {
         try {
             return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.TECHNICAL));
         } catch (UserNotFoundMiddlewareException e) {
@@ -80,11 +81,18 @@ public class TppResource implements TppRestAPI {
         }
     }
 
-//    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
-//    public ResponseEntity<List<UserTO>> getTppUsers() {
-//        return ResponseEntity.ok(middlewareUserService.listUsers(0, 150));
-//    }
-//
+    // TODO: pagination for users and limit users for TPP
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<List<UserTO>> getTppUsers() {
+        try {
+            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+
+            return ResponseEntity.ok(tpp.getCreatedUsers());
+        } catch (UserNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
 //    public ResponseEntity<UserTO> updateUserScaData(UserTO user) {
 //
 //    }

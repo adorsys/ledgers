@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserCredentialsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -11,9 +12,12 @@ import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Api(tags = "LDG007 - TPP Rest endpoint",
         description= "Provides endpoint for registering, authorizing and managing users for TPPs")
@@ -56,7 +60,7 @@ public interface TppRestAPI {
             @ApiResponse(code=401, message="Wrong authentication credential."),
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
-    ResponseEntity<SCALoginResponseTO> login(@RequestBody UserTO userCredential) throws NotFoundRestException, ForbiddenRestException;
+    ResponseEntity<SCALoginResponseTO> login(@RequestBody UserCredentialsTO userCredentials) throws NotFoundRestException, ForbiddenRestException;
 
     /**
      * Creates new user for TPP
@@ -65,7 +69,7 @@ public interface TppRestAPI {
      * @return created user
      */
     @PostMapping("/users")
-    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Login",
+    @ApiOperation(value="Create user",
             notes="Create new user for TPP.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={
@@ -74,4 +78,20 @@ public interface TppRestAPI {
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
     ResponseEntity<UserTO> createUser(@RequestBody UserTO user) throws UserNotFoundMiddlewareException, ConflictRestException;
+
+    /**
+     * Lists users for TPP
+     *
+     * @return created user
+     */
+    @GetMapping("/users")
+    @ApiOperation(value="List users",
+            notes="List users created by for TPP.",
+            authorizations =@Authorization(value="apiKey"))
+    @ApiResponses(value={
+            @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
+            @ApiResponse(code=401, message="Wrong authentication credential."),
+            @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
+    })
+    ResponseEntity<List<UserTO>> getTppUsers() throws UserNotFoundMiddlewareException;
 }
