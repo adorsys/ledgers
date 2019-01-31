@@ -91,7 +91,13 @@ public class UserServiceImpl implements UserService {
 	@Override
     public UserBO create(UserBO user) throws UserAlreadyExistsException {
         UserEntity userPO = userConverter.toUserPO(user);
-        userPO.setId(Ids.id());
+
+        // if user is TPP and has an ID than do not reset it
+		if (userPO.getId() == null) {
+			logger.info(userPO.getId());
+			userPO.setId(Ids.id());
+		}
+
         userPO.setPin(passwordEnc.encode(userPO.getId(),user.getPin()));
 
         try {
