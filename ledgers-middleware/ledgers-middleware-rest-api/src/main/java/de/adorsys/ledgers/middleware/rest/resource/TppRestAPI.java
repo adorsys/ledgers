@@ -12,10 +12,7 @@ import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -94,4 +91,21 @@ public interface TppRestAPI {
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
     ResponseEntity<List<UserTO>> getTppUsers() throws UserNotFoundMiddlewareException;
+
+
+    /**
+     * Get user by ID for TPP
+     * @param userId user object created by TPP
+     * @return created user
+     */
+    @GetMapping("/users/{userId}")
+    @ApiOperation(value="Get user by ID for TPP",
+            notes="Get user by ID for TPP.",
+            authorizations =@Authorization(value="apiKey"))
+    @ApiResponses(value={
+            @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
+            @ApiResponse(code=401, message="Wrong authentication credential."),
+            @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
+    })
+    ResponseEntity<UserTO> getTppUser(@PathVariable String userId) throws UserNotFoundMiddlewareException;
 }

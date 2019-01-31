@@ -69,6 +69,7 @@ public class TppResource implements TppRestAPI {
         try {
             UserTO tpp = middlewareUserService.findById(accessToken.getSub());
 
+            // TODO: add parent user to user entity
             UserTO newUser = middlewareUserService.create(user);
 
             tpp.getCreatedUsers().add(newUser);
@@ -82,12 +83,28 @@ public class TppResource implements TppRestAPI {
     }
 
     // TODO: pagination for users and limit users for TPP
+    @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<List<UserTO>> getTppUsers() {
         try {
             UserTO tpp = middlewareUserService.findById(accessToken.getSub());
 
             return ResponseEntity.ok(tpp.getCreatedUsers());
+        } catch (UserNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
+    @Override
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<UserTO> getTppUser(String userId) throws UserNotFoundMiddlewareException {
+        try {
+            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+
+            // TODO: check if tpp has this user
+            UserTO user = middlewareUserService.findById(userId);
+
+            return ResponseEntity.ok(user);
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
