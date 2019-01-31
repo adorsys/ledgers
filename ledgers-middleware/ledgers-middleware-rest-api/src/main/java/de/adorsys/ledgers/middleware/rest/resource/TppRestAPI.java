@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserCredentialsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -95,7 +96,7 @@ public interface TppRestAPI {
 
     /**
      * Get user by ID for TPP
-     * @param userId user object created by TPP
+     * @param userId user ID
      * @return created user
      */
     @GetMapping("/users/{userId}")
@@ -108,4 +109,21 @@ public interface TppRestAPI {
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
     ResponseEntity<UserTO> getTppUser(@PathVariable String userId) throws UserNotFoundMiddlewareException;
+
+    /**
+     * Update SCA Data for user, created by TPP
+     * @param userId user ID
+     * @param data user SCA data
+     * @return created user
+     */
+    @PostMapping("/users/{userId}/sca-data")
+    @ApiOperation(value="Update SCA Data for user, created by TPP.",
+            notes="Update SCA Data for user, created by TPP.",
+            authorizations =@Authorization(value="apiKey"))
+    @ApiResponses(value={
+            @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
+            @ApiResponse(code=401, message="Wrong authentication credential."),
+            @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
+    })
+    ResponseEntity<Void> updateUserScaData(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data);
 }

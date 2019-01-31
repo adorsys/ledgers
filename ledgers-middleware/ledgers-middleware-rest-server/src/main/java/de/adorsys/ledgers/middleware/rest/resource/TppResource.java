@@ -1,10 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserCredentialsTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -18,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 
@@ -65,7 +64,7 @@ public class TppResource implements TppRestAPI {
 
     @Override
     @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<UserTO> createUser(UserTO user) {
+    public ResponseEntity<UserTO> createUser(UserTO user) throws NotFoundRestException, ConflictRestException{
         try {
             UserTO tpp = middlewareUserService.findById(accessToken.getSub());
 
@@ -85,7 +84,7 @@ public class TppResource implements TppRestAPI {
     // TODO: pagination for users and limit users for TPP
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
-    public ResponseEntity<List<UserTO>> getTppUsers() {
+    public ResponseEntity<List<UserTO>> getTppUsers()throws NotFoundRestException{
         try {
             UserTO tpp = middlewareUserService.findById(accessToken.getSub());
 
@@ -97,7 +96,7 @@ public class TppResource implements TppRestAPI {
 
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
-    public ResponseEntity<UserTO> getTppUser(String userId) throws UserNotFoundMiddlewareException {
+    public ResponseEntity<UserTO> getTppUser(String userId) throws NotFoundRestException {
         try {
             UserTO tpp = middlewareUserService.findById(accessToken.getSub());
 
@@ -110,7 +109,22 @@ public class TppResource implements TppRestAPI {
         }
     }
 
-//    public ResponseEntity<UserTO> updateUserScaData(UserTO user) {
-//
-//    }
+    @Override
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
+        try {
+            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+
+            UserTO user = middlewareUserService.findById(userId);
+            UserTO userWithUpdatedSca = middlewareUserService.updateScaData(user.getLogin(), data);
+
+            URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + userWithUpdatedSca.getId())
+                    .build().toUri();
+
+            return ResponseEntity.created(uri).build();
+        } catch (UserNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
+
 }
