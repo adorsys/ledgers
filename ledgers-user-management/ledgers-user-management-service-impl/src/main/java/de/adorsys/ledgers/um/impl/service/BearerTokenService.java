@@ -9,6 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
 import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
@@ -52,7 +53,7 @@ public class BearerTokenService {
     }
 
     public BearerTokenBO bearerToken(String userId, String userLogin,
-                                     List<AccountAccess> accountAccesses, AisConsentEntity aisConsent,
+                                     List<AccountAccess> accountAccesses, AisConsentBO aisConsent,
                                      UserRole userRole, String scaId, String authorisationId,
                                      Date issueTime, Date expires, TokenUsageBO usage, Map<String, String> act) {
 
@@ -68,7 +69,7 @@ public class BearerTokenService {
     }
 
     private JWTClaimsSet genJWT(String userId, String userLogin,
-                                List<AccountAccess> accountAccesses, AisConsentEntity aisConsent,
+                                List<AccountAccess> accountAccesses, AisConsentBO aisConsent,
                                 UserRole userRole, String scaId, String authorisationId,
                                 Date issueTime, Date expires, TokenUsageBO usage, Map<String, String> act) {
         Builder builder = new JWTClaimsSet.Builder()
