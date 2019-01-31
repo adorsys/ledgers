@@ -47,6 +47,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             		"/users/loginForConsent",
             		"/data-test/upload-mockbank-data",
             		"/data-test/db-flush",
+            		"/tpps/register",
+            		"/tpps/login",
             		"/users/register").permitAll()
             .and()
             .authorizeRequests().antMatchers("/index.css", "/img/*", "/favicon.ico").permitAll()

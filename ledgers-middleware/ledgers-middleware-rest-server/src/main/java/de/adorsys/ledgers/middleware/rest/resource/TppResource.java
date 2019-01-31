@@ -29,7 +29,6 @@ public class TppResource implements TppRestAPI {
     @Override
     public ResponseEntity<UserTO> register(UserTO tpp) throws ConflictRestException {
         try {
-            // TODO: add activation of non customer members.
             UserTO user = onlineBankingService.register(tpp.getLogin(), tpp.getEmail(), tpp.getPin(), UserRoleTO.TECHNICAL);
             user.setPin(null);
             return ResponseEntity.ok(user);
@@ -42,6 +41,5 @@ public class TppResource implements TppRestAPI {
     public ResponseEntity<SCALoginResponseTO> login(UserTO userCredentials) throws NotFoundRestException, ForbiddenRestException {
         return null;
     }
-
 
 }

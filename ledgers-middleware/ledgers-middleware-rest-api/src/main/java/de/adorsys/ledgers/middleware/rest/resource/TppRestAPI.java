@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public interface TppRestAPI {
 
-    String BASE_PATH = "/third-party-providers";
+    String BASE_PATH = "/tpps";
 
     /**
      * Registers a new TPP as a user with technical role.
