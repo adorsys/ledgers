@@ -346,8 +346,7 @@ public interface UserMgmtRestAPI {
 		+ "</lu>",
 		authorizations =@Authorization(value="apiKey"))
     ResponseEntity<UserTO> getUserById(@PathVariable("userId") String userId) throws NotFoundRestException; 
-    
-    // TODO: refactor for user collection pagination
+
     @GetMapping
     @ApiOperation(value="Lists users collection", notes="Lists users collection."
     		+ "<lu>"
