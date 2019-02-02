@@ -197,7 +197,7 @@ public interface MiddlewareAccountManagementService {
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
-	BearerTokenTO grantAisConsent(AisConsentTO aisConsent)
+	SCAConsentResponseTO grantAisConsent(AisConsentTO aisConsent)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	/**

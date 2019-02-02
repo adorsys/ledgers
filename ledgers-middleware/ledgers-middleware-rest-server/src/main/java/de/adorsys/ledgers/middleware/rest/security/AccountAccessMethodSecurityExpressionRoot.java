@@ -1,11 +1,14 @@
 package de.adorsys.ledgers.middleware.rest.security;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 
+import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessInfoTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 
@@ -65,10 +68,27 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 	public boolean accountInfoById(String id) {
 		// Load iban
 		String iban = middlewareAccountService.iban(id);
-		if(iban==null) {
-			return false;
+		return iban!=null && accountInfoByIban(iban);
+	}
+	
+	public boolean accountInfoFor(AisConsentTO consent) {
+		AisAccountAccessInfoTO access = consent.getAccess();
+		return access!=null &&
+				accountInfoByIbanList(access.getAccounts()) &&
+				accountInfoByIbanList(access.getTransactions()) && 
+				accountInfoByIbanList(access.getBalances());
+	}
+	
+	private boolean accountInfoByIbanList(List<String> ibanList) {
+		if(ibanList==null || ibanList.isEmpty()) {
+			return true;
 		}
-		return accountInfoByIban(iban);
+		for (String iban : ibanList) {
+			if(!accountInfoByIban(iban)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	public boolean tokenUsage(String usageType) {
