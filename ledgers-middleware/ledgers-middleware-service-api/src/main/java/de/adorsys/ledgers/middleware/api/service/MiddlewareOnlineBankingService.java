@@ -122,5 +122,4 @@ public interface MiddlewareOnlineBankingService {
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
 			InsufficientPermissionMiddlewareException;
-
 }

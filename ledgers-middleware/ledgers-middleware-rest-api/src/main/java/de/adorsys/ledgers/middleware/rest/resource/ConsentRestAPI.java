@@ -49,6 +49,7 @@ public interface ConsentRestAPI {
      * @throws ForbiddenRestException : consent exists with id
      * 
      */
+	// TODO: valid login for customer.
     @PostMapping(value = "/{consentId}/authorisations")
 	@ApiOperation(value = "Start SCA", notes="Starts an authorisation process for establishing account information consent data on the server.", 
 		authorizations =@Authorization(value="apiKey"))
@@ -72,4 +73,10 @@ public interface ConsentRestAPI {
     ResponseEntity<SCAConsentResponseTO> authorizeConsent(@PathVariable("consentId") String consentId,
     		@PathVariable("authorisationId") String authorisationId, 
     		@RequestParam(name="authCode") String authCode) throws ValidationRestException,NotFoundRestException, ConflictRestException;
+
+
+    @PostMapping(value = "/piis")
+	@ApiOperation(value = "Generate a consent token for CiF", notes="Generate a consent token for CiF. There is no sca process need as we assume the caller is fully authenticated.", 
+		authorizations =@Authorization(value="apiKey"))
+	ResponseEntity<SCAConsentResponseTO> grantPIISConsent(@RequestBody AisConsentTO piisConsent) throws ForbiddenRestException;
 }
