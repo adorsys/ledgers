@@ -16,8 +16,11 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
+import java.util.Collection;
 import java.util.List;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
 import org.mapstruct.Mapper;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
@@ -53,5 +56,8 @@ public interface UserMapper {
     List<AccountAccessBO> toAccountAccessListBO(List<AccountAccessTO> list);
 
     List<AccountAccessTO> toAccountAccessListTO(List<AccountAccessBO> bos);
-    
+
+    List<UserRoleTO> toUserRoleTO(List<UserRoleBO> userRoles);
+
+    List<UserRoleBO> toUserRoleBO(List<UserRoleTO> userRoles);
 }

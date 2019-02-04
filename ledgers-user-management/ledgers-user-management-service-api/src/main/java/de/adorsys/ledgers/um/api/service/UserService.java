@@ -153,4 +153,13 @@ public interface UserService {
 	 * @throws ConsentNotFoundException
 	 */
 	AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
+
+	/**
+	 * Loads users collection by branch and the given roles
+	 *
+	 * @param branch branch ID
+	 * @param userRoles list of user roles
+	 * @return List of users filtered by branch and user roles
+	 */
+	List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles);
 }

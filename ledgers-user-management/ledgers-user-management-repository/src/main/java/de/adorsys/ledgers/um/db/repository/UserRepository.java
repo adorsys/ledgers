@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.um.db.repository;
 
 import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.domain.UserRole;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -30,4 +31,9 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     @NotNull
     @Override
     List<UserEntity> findAll();
+
+    /**
+     * Finds all users of the branch with the given roles
+     */
+    List<UserEntity> findByBranchAndUserRolesIn(String branch, List<UserRole> roles);
 }

@@ -19,6 +19,7 @@ package de.adorsys.ledgers.um.db.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.*;
 
@@ -59,12 +60,7 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private Collection<UserRole> userRoles =  new ArrayList<>();
 
-//    @ManyToOne
-//    private UserEntity createdBy;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "parent_user_id")
-    private List<UserEntity> createdUsers = new ArrayList<>();
+    private String branch;
 
     public String getId() {
         return id;
@@ -122,26 +118,31 @@ public class UserEntity {
         this.userRoles = userRoles;
     }
 
-
-    public List<UserEntity> getCreatedUsers() {
-        return createdUsers;
+    public String getBranch() {
+        return branch;
     }
 
-    public void setCreatedUsers(List<UserEntity> createdUsers) {
-        this.createdUsers = createdUsers;
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 
     @Override
-    public String toString() {
-        return "UserEntity{" +
-                "id='" + id + '\'' +
-                ", login='" + login + '\'' +
-                ", email='" + email + '\'' +
-                ", pin='" + pin + '\'' +
-                ", scaUserData=" + scaUserData +
-                ", accountAccesses=" + accountAccesses +
-                ", userRoles=" + userRoles +
-                ", createdUsers=" + createdUsers +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(getId(), that.getId()) &&
+                Objects.equals(getLogin(), that.getLogin()) &&
+                Objects.equals(getEmail(), that.getEmail()) &&
+                Objects.equals(getPin(), that.getPin()) &&
+                Objects.equals(getScaUserData(), that.getScaUserData()) &&
+                Objects.equals(getAccountAccesses(), that.getAccountAccesses()) &&
+                Objects.equals(getUserRoles(), that.getUserRoles()) &&
+                Objects.equals(getBranch(), that.getBranch());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch());
     }
 }

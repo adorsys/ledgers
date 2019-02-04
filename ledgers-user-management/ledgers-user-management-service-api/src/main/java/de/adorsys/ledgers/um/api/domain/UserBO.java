@@ -38,7 +38,7 @@ public class UserBO {
 
     private Collection<UserRoleBO> userRoles =  new ArrayList<>();
 
-    private List<UserBO> createdUsers = new ArrayList<>();
+    private String branch;
 
     public UserBO() {
     }
@@ -107,12 +107,12 @@ public class UserBO {
         this.userRoles = userRoles;
     }
 
-    public List<UserBO> getCreatedUsers() {
-        return createdUsers;
+    public String getBranch() {
+        return branch;
     }
 
-    public void setCreatedUsers(List<UserBO> createdUsers) {
-        this.createdUsers = createdUsers;
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 
     @Override
@@ -127,12 +127,12 @@ public class UserBO {
                 Objects.equals(getScaUserData(), userBO.getScaUserData()) &&
                 Objects.equals(getAccountAccesses(), userBO.getAccountAccesses()) &&
                 Objects.equals(getUserRoles(), userBO.getUserRoles()) &&
-                Objects.equals(getCreatedUsers(), userBO.getCreatedUsers());
+                Objects.equals(getBranch(), userBO.getBranch());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getCreatedUsers());
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class UserBO {
                 ", scaUserData=" + scaUserData +
                 ", accountAccesses=" + accountAccesses +
                 ", userRoles=" + userRoles +
-                ", createdUsers=" + createdUsers +
+                ", branch='" + branch + '\'' +
                 '}';
     }
 }

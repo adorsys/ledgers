@@ -387,4 +387,10 @@ public class UserServiceImpl implements UserService {
 		return aisConsentMapper.toAisConsentBO(aisConsentEntity);
 	}
 
+	@Override
+	public List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles) {
+		 List<UserEntity> userEntities = userRepository.findByBranchAndUserRolesIn(branch, userConverter.toUserRole(userRoles));
+		 return userConverter.toUserBOList(userEntities);
+	}
+
 }
