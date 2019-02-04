@@ -41,7 +41,6 @@ public class BranchResource implements BranchRestApi {
         this.accessToken = accessToken;
     }
 
-    // TODO:
     @Override
     public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) throws ConflictRestException {
         try {
@@ -51,9 +50,8 @@ public class BranchResource implements BranchRestApi {
             branchStaff.setBranch(branch);
             branchStaff.setUserRoles(Collections.singletonList(UserRoleTO.STAFF));
             UserTO user = middlewareUserService.create(branchStaff);
-
-//            UserTO user = onlineBankingService.register(branchStaff.getLogin(), branchStaff.getEmail(), branchStaff.getPin(), UserRoleTO.STAFF);''
             user.setPin(null);
+
             return ResponseEntity.ok(user);
         } catch (UserAlreadyExistsMiddlewareException e) {
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -75,19 +73,17 @@ public class BranchResource implements BranchRestApi {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<UserTO> createUser(UserTO user) throws NotFoundRestException, ConflictRestException{
         try {
-            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+            UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
 
-            user.setBranch(tpp.getBranch());
+            // set the same branch for the user the staff member that creates it
+            user.setBranch(branchStaff.getBranch());
 
-            // Make sure no system or technical
+            // Assert that role is not system or technical
             user.getUserRoles().remove(UserRoleTO.SYSTEM);
             user.getUserRoles().remove(UserRoleTO.TECHNICAL);
 
-            // TODO: add parent user to user entity
             UserTO newUser = middlewareUserService.create(user);
             newUser.setPin(null);
-
-//            tpp.getCreatedUsers().add(newUser);
 
             return ResponseEntity.ok(newUser);
         } catch (UserNotFoundMiddlewareException e) {
@@ -102,11 +98,9 @@ public class BranchResource implements BranchRestApi {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles) throws NotFoundRestException{
         try {
-            UserTO staffUser = middlewareUserService.findById(accessToken.getSub());
-//            middlewareUserService.findByBranchAndUserRoleIn(tpp.getBranch(), UserRoleTO.CUSTOMER);
-            return ResponseEntity.ok(null);
-
-
+            UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
+            List<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles);
+            return ResponseEntity.ok(users);
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
@@ -116,7 +110,7 @@ public class BranchResource implements BranchRestApi {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<UserTO> getBranchUserById(String userId) throws NotFoundRestException {
         try {
-            UserTO staffUser = middlewareUserService.findById(accessToken.getSub());
+            UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
 
             // TODO: check if tpp has this user
             UserTO user = middlewareUserService.findById(userId);
@@ -131,7 +125,7 @@ public class BranchResource implements BranchRestApi {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
         try {
-            UserTO staffUser = middlewareUserService.findById(accessToken.getSub());
+            UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
 
             UserTO user = middlewareUserService.findById(userId);
             UserTO userWithUpdatedSca = middlewareUserService.updateScaData(user.getLogin(), data);
