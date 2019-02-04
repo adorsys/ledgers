@@ -18,19 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 
 @RestController
-@RequestMapping(TppRestAPI.BASE_PATH)
+@RequestMapping(BranchRestApi.BASE_PATH)
 @MiddlewareUserResource
-public class TppResource implements TppRestAPI {
+public class BranchResource implements BranchRestApi {
 
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final AccessTokenTO accessToken;
 
-    public TppResource(
+    public BranchResource(
             MiddlewareOnlineBankingService onlineBankingService,
             MiddlewareUserManagementService middlewareUserService,
             AccessTokenTO accessToken) {
@@ -40,10 +41,18 @@ public class TppResource implements TppRestAPI {
         this.accessToken = accessToken;
     }
 
+    // TODO:
     @Override
-    public ResponseEntity<UserTO> register(UserTO tpp) throws ConflictRestException {
+    public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) throws ConflictRestException {
         try {
-            UserTO user = onlineBankingService.register(tpp.getLogin(), tpp.getEmail(), tpp.getPin(), UserRoleTO.TECHNICAL);
+//            if (middlewareUserService.countByBranch(branch)>0) {
+//                // error branch exist
+//            };
+            branchStaff.setBranch(branch);
+            branchStaff.setUserRoles(Collections.singletonList(UserRoleTO.STAFF));
+            UserTO user = middlewareUserService.create(branchStaff);
+
+//            UserTO user = onlineBankingService.register(branchStaff.getLogin(), branchStaff.getEmail(), branchStaff.getPin(), UserRoleTO.STAFF);''
             user.setPin(null);
             return ResponseEntity.ok(user);
         } catch (UserAlreadyExistsMiddlewareException e) {
@@ -63,17 +72,24 @@ public class TppResource implements TppRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('TECHNICAL')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<UserTO> createUser(UserTO user) throws NotFoundRestException, ConflictRestException{
         try {
             UserTO tpp = middlewareUserService.findById(accessToken.getSub());
 
+            user.setBranch(tpp.getBranch());
+
+            // Make sure no system or technical
+            user.getUserRoles().remove(UserRoleTO.SYSTEM);
+            user.getUserRoles().remove(UserRoleTO.TECHNICAL);
+
             // TODO: add parent user to user entity
             UserTO newUser = middlewareUserService.create(user);
+            newUser.setPin(null);
 
-            tpp.getCreatedUsers().add(newUser);
+//            tpp.getCreatedUsers().add(newUser);
 
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(newUser);
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         } catch (UserAlreadyExistsMiddlewareException e) {
@@ -83,22 +99,24 @@ public class TppResource implements TppRestAPI {
 
     // TODO: pagination for users and limit users for TPP
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
-    public ResponseEntity<List<UserTO>> getTppUsers()throws NotFoundRestException{
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<List<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles) throws NotFoundRestException{
         try {
-            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+            UserTO staffUser = middlewareUserService.findById(accessToken.getSub());
+//            middlewareUserService.findByBranchAndUserRoleIn(tpp.getBranch(), UserRoleTO.CUSTOMER);
+            return ResponseEntity.ok(null);
 
-            return ResponseEntity.ok(tpp.getCreatedUsers());
+
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
-    public ResponseEntity<UserTO> getTppUser(String userId) throws NotFoundRestException {
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<UserTO> getBranchUserById(String userId) throws NotFoundRestException {
         try {
-            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+            UserTO staffUser = middlewareUserService.findById(accessToken.getSub());
 
             // TODO: check if tpp has this user
             UserTO user = middlewareUserService.findById(userId);
@@ -110,10 +128,10 @@ public class TppResource implements TppRestAPI {
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
         try {
-            UserTO tpp = middlewareUserService.findById(accessToken.getSub());
+            UserTO staffUser = middlewareUserService.findById(accessToken.getSub());
 
             UserTO user = middlewareUserService.findById(userId);
             UserTO userWithUpdatedSca = middlewareUserService.updateScaData(user.getLogin(), data);

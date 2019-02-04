@@ -2,7 +2,6 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserCredentialsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -17,31 +16,26 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG007 - TPP Rest endpoint",
-        description= "Provides endpoint for registering, authorizing and managing users for TPPs")
+@Api(tags = "LDG007 - Branch Rest endpoint",
+        description= "Provides endpoint for registering, authorizing and managing users within their branches")
 
-public interface TppRestAPI {
+public interface BranchRestApi {
 
-    String BASE_PATH = "/tpps";
+    String BASE_PATH = "/branches";
 
     /**
-     * Registers a new TPP as a user with technical role.
-     * - TPP will be automatically activated.
+     * Registers a new user within a given branch.
      *
-     * @return
-     * @throws ConflictRestException
+     * @return user object without pin
+     * @throws ConflictRestException user with same login or email already exists
      */
     @PostMapping("/register")
-    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Register", notes="Registers a TPP."
-            + "<ul>"
-            + "<li>A TPP is always registered as a user with technical role. </li>"
-            + "<li>A TPP is activated by default. </li>"
-            + "</ul>")
+    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Register", notes="Registers a new user for a given branch.")
     @ApiResponses(value={
-            @ApiResponse(code=200, response= UserTO.class, message="The TPP data record without the user pin."),
+            @ApiResponse(code=200, response= UserTO.class, message="The user data record without the pin."),
             @ApiResponse(code=409, message="Conflict. A record with the given email or login already exists.")
     })
-    ResponseEntity<UserTO> register(@RequestBody UserTO tpp) throws ConflictRestException;
+    ResponseEntity<UserTO> register(@RequestParam String branch, @RequestBody UserTO user) throws ConflictRestException;
 
 
     /**
@@ -61,14 +55,14 @@ public interface TppRestAPI {
     ResponseEntity<SCALoginResponseTO> login(@RequestBody UserCredentialsTO userCredentials) throws NotFoundRestException, ForbiddenRestException;
 
     /**
-     * Creates new user for TPP
+     * Creates new user within the same branch
      *
-     * @param user user object created by TPP
+     * @param user user to be created
      * @return created user
      */
     @PostMapping("/users")
     @ApiOperation(value="Create user",
-            notes="Create new user for TPP.",
+            notes="Create new user with the same branch as creator.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={
             @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
@@ -78,47 +72,47 @@ public interface TppRestAPI {
     ResponseEntity<UserTO> createUser(@RequestBody UserTO user) throws UserNotFoundMiddlewareException, ConflictRestException;
 
     /**
-     * Lists users for TPP
+     * Lists users within the branch and roles
      *
-     * @return created user
+     * @return list of users for the branch with roles
      */
     @GetMapping("/users")
-    @ApiOperation(value="List users",
-            notes="List users created by for TPP.",
+    @ApiOperation(value="Lists users by branch and role",
+            notes="Lists users by branch and roles.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={
             @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
             @ApiResponse(code=401, message="Wrong authentication credential."),
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
-    ResponseEntity<List<UserTO>> getTppUsers() throws UserNotFoundMiddlewareException;
+    ResponseEntity<List<UserTO>> getBranchUsersByRoles(@RequestBody List<UserRoleTO> roles) throws UserNotFoundMiddlewareException;
 
 
     /**
-     * Get user by ID for TPP
+     * Gets user by ID if it's within the branch
      * @param userId user ID
-     * @return created user
+     * @return user
      */
     @GetMapping("/users/{userId}")
-    @ApiOperation(value="Get user by ID for TPP",
-            notes="Get user by ID for TPP.",
+    @ApiOperation(value="Gets user by ID if it's within the branch",
+            notes="Gets user by ID if it's within the branch.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={
             @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
             @ApiResponse(code=401, message="Wrong authentication credential."),
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
-    ResponseEntity<UserTO> getTppUser(@PathVariable String userId) throws UserNotFoundMiddlewareException;
+    ResponseEntity<UserTO> getBranchUserById(@PathVariable String userId) throws UserNotFoundMiddlewareException;
 
     /**
-     * Update SCA Data for user, created by TPP
+     * Updates SCA Data for user if it's within the branch
      * @param userId user ID
      * @param data user SCA data
-     * @return created user
+     * @return updated user
      */
     @PostMapping("/users/{userId}/sca-data")
-    @ApiOperation(value="Update SCA Data for user, created by TPP.",
-            notes="Update SCA Data for user, created by TPP.",
+    @ApiOperation(value="UUpdates SCA Data for user if it's within the branch.",
+            notes="Updates SCA Data for user if it's within the branch.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={
             @ApiResponse(code=200, response=UserTO.class, message="Success. Created user in provided in the response."),
