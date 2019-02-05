@@ -113,4 +113,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 		List<UserBO> users = userService.findByBranchAndUserRolesIn(branch, userTOMapper.toUserRoleBO(roles));
 		return userTOMapper.toUserTOList(users);
 	}
+
+    @Override
+    public int countUsersByBranch(String branch) {
+        return userService.countUsersByBranch(branch);
+    }
+
+
 }

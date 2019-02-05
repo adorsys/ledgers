@@ -26,14 +26,37 @@ import java.util.Optional;
 
 public interface UserRepository extends PagingAndSortingRepository<UserEntity, String> {
 
+    /**
+     * Finds user by its login if exists
+     *
+     * @param login user login
+     * @return user if exists
+     */
     Optional<UserEntity> findFirstByLogin(String login);
 
+    /**
+     * List all users
+     *
+     * @return list of users
+     */
     @NotNull
     @Override
     List<UserEntity> findAll();
 
     /**
      * Finds all users of the branch with the given roles
+     *
+     * @param branch branch
+     * @param roles user roles
+     * @return list pf users
      */
     List<UserEntity> findByBranchAndUserRolesIn(String branch, List<UserRole> roles);
+
+    /**
+     * Counts amount of users for a branch
+     *
+     * @param branch branch
+     * @return amount of users
+     */
+    int countByBranch(String branch);
 }

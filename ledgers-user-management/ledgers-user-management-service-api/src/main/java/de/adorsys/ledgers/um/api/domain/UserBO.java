@@ -117,8 +117,12 @@ public class UserBO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UserBO)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserBO)) {
+            return false;
+        }
         UserBO userBO = (UserBO) o;
         return Objects.equals(getId(), userBO.getId()) &&
                 Objects.equals(getLogin(), userBO.getLogin()) &&

@@ -393,4 +393,9 @@ public class UserServiceImpl implements UserService {
 		 return userConverter.toUserBOList(userEntities);
 	}
 
+	@Override
+	public int countUsersByBranch(String branch) {
+		return userRepository.countByBranch(branch);
+	}
+
 }

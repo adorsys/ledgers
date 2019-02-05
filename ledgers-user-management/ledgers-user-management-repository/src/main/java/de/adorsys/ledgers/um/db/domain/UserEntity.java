@@ -128,8 +128,12 @@ public class UserEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UserEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserEntity)) {
+            return false;
+        }
         UserEntity that = (UserEntity) o;
         return Objects.equals(getId(), that.getId()) &&
                 Objects.equals(getLogin(), that.getLogin()) &&

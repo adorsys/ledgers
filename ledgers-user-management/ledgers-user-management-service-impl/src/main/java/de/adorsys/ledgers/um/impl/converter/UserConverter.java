@@ -16,7 +16,6 @@
 
 package de.adorsys.ledgers.um.impl.converter;
 
-import java.util.Collection;
 import java.util.List;
 
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;

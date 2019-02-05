@@ -71,4 +71,12 @@ public interface MiddlewareUserManagementService {
      * @return list of users by branch and role
      */
     List<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles);
+
+    /**
+     * Counts users by branch
+     *
+     * @param branch branch
+     * @return amount of users
+     */
+    int countUsersByBranch(String branch);
 }

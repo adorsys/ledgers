@@ -162,4 +162,12 @@ public interface UserService {
 	 * @return List of users filtered by branch and user roles
 	 */
 	List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles);
+
+	/**
+	 * Counts amount of users for a branch
+	 *
+	 * @param branch branch
+	 * @return amount of users
+	 */
+	int countUsersByBranch(String branch);
 }

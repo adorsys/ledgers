@@ -31,6 +31,7 @@ public class BranchResource implements BranchRestApi {
     private final MiddlewareUserManagementService middlewareUserService;
     private final AccessTokenTO accessToken;
     private static final String USER_NOT_IN_BRANCH = "User is not your branch";
+    private static final String USER_CANNOT_REGISTER_IN_BRANCH = "User cannot register for this branch. The branch is occupied by other user";
 
     public BranchResource(
             MiddlewareOnlineBankingService onlineBankingService,
@@ -45,9 +46,12 @@ public class BranchResource implements BranchRestApi {
     @Override
     public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) throws ConflictRestException {
         try {
-//            if (middlewareUserService.countByBranch(branch)>0) {
-//                // error branch exist
-//            };
+
+            // staff user can not register for the branch is already taken
+            if (middlewareUserService.countUsersByBranch(branch) > 0) {
+                throw new ForbiddenRestException(USER_CANNOT_REGISTER_IN_BRANCH);
+            }
+
             branchStaff.setBranch(branch);
             branchStaff.setUserRoles(Collections.singletonList(UserRoleTO.STAFF));
             UserTO user = middlewareUserService.create(branchStaff);
