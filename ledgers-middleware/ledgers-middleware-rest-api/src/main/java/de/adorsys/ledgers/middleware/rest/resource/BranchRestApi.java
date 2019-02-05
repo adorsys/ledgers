@@ -85,7 +85,7 @@ public interface BranchRestApi {
             @ApiResponse(code=401, message="Wrong authentication credential."),
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
-    ResponseEntity<List<UserTO>> getBranchUsersByRoles(@RequestBody List<UserRoleTO> roles) throws UserNotFoundMiddlewareException;
+    ResponseEntity<List<UserTO>> getBranchUsersByRoles(@RequestParam List<UserRoleTO> roles) throws UserNotFoundMiddlewareException;
 
 
     /**
@@ -111,7 +111,7 @@ public interface BranchRestApi {
      * @return updated user
      */
     @PostMapping("/users/{userId}/sca-data")
-    @ApiOperation(value="UUpdates SCA Data for user if it's within the branch.",
+    @ApiOperation(value="Updates SCA Data for user if it's within the branch.",
             notes="Updates SCA Data for user if it's within the branch.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={

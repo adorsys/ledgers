@@ -30,6 +30,7 @@ public class BranchResource implements BranchRestApi {
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final AccessTokenTO accessToken;
+    private static final String USER_NOT_IN_BRANCH = "User is not your branch";
 
     public BranchResource(
             MiddlewareOnlineBankingService onlineBankingService,
@@ -61,7 +62,7 @@ public class BranchResource implements BranchRestApi {
     @Override
     public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) throws NotFoundRestException, ForbiddenRestException {
         try {
-            return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.TECHNICAL));
+            return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
@@ -78,7 +79,7 @@ public class BranchResource implements BranchRestApi {
             // set the same branch for the user the staff member that creates it
             user.setBranch(branchStaff.getBranch());
 
-            // Assert that role is not system or technical
+            // Assert that the role is neither system nor technical
             user.getUserRoles().remove(UserRoleTO.SYSTEM);
             user.getUserRoles().remove(UserRoleTO.TECHNICAL);
 
@@ -93,7 +94,7 @@ public class BranchResource implements BranchRestApi {
         }
     }
 
-    // TODO: pagination for users and limit users for TPP
+    // TODO: pagination for users and limit users for branch
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles) throws NotFoundRestException{
@@ -111,9 +112,11 @@ public class BranchResource implements BranchRestApi {
     public ResponseEntity<UserTO> getBranchUserById(String userId) throws NotFoundRestException {
         try {
             UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
-
-            // TODO: check if tpp has this user
             UserTO user = middlewareUserService.findById(userId);
+
+            if (!branchStaff.getBranch().equals(user.getBranch())) {
+                throw new ForbiddenRestException(USER_NOT_IN_BRANCH);
+            }
 
             return ResponseEntity.ok(user);
         } catch (UserNotFoundMiddlewareException e) {
@@ -126,13 +129,15 @@ public class BranchResource implements BranchRestApi {
     public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
         try {
             UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
-
             UserTO user = middlewareUserService.findById(userId);
-            UserTO userWithUpdatedSca = middlewareUserService.updateScaData(user.getLogin(), data);
 
+            if (!branchStaff.getBranch().equals(user.getBranch())) {
+                throw new ForbiddenRestException(USER_NOT_IN_BRANCH);
+            }
+
+            UserTO userWithUpdatedSca = middlewareUserService.updateScaData(user.getLogin(), data);
             URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + userWithUpdatedSca.getId())
                     .build().toUri();
-
             return ResponseEntity.created(uri).build();
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());

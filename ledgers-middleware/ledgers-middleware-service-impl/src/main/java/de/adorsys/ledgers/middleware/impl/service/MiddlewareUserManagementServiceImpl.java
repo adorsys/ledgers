@@ -104,7 +104,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	}
 
 	@Override
-	public List<UserTO> getUsersByBranchAndRoles(int page, int size) {
+	public List<UserTO> listUsers(int page, int size) {
 		return userTOMapper.toUserTOList(userService.listUsers(page, size));
 	}
 

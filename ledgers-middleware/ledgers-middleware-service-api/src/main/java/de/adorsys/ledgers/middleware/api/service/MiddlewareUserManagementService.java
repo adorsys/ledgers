@@ -54,6 +54,21 @@ public interface MiddlewareUserManagementService {
      */
     UserTO updateAccountAccess(String userLogin, List<AccountAccessTO> accounts) throws UserNotFoundMiddlewareException;
 
+    /**
+     * Loads paginated user collection
+     *
+     * @param page page number
+     * @param size size of the page
+     * @return list of users
+     */
     List<UserTO> listUsers(int page, int size);
 
+
+    /**
+     * Loads list of users by branch and role
+     *
+     * @param roles user roles
+     * @return list of users by branch and role
+     */
+    List<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles);
 }
