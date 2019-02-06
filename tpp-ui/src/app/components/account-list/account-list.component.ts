@@ -12,7 +12,7 @@ export class AccountListComponent implements OnInit {
   constructor(private service: AccountService) { }
 
   ngOnInit() {
-    this.service.getAccounts()
-      .subscribe(accounts => this.accounts = accounts);
+    // this.service.getAccounts()
+    //   .subscribe(accounts => this.accounts = accounts);
   }
 }

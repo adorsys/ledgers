@@ -10,7 +10,7 @@ import {AuthService} from "./auth.service";
 })
 export class AccountService {
 
-  private url = `${environment.onlineBankingEndPoint}`;
+  private url = `${environment.server}`;
 
   constructor(private http: HttpClient,
               private authService: AuthService) { }

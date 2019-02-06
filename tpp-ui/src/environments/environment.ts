@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  onlineBankingEndPoint: 'http://localhost:8088'
+  server: 'http://localhost:8088',
+  branchResourceEndPoint: 'http://localhost:8088/branches'
 };
 
 /*
