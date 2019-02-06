@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {catchError, finalize, flatMap, map} from "rxjs/operators";
 import {Observable, of} from "rxjs";
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Credentials} from "../models/credentials.model";
+import {User} from "../models/user.model";
 
 @Injectable({
   providedIn: 'root'
@@ -15,11 +16,15 @@ export class AuthService {
   private authTokenStorageKey = 'token';
   private jwtHelperService = new JwtHelperService();
   private overridingJwt: string;
+  private headers = new HttpHeaders({
+    'Content-Type':  'application/json',
+    'accept': '*/*'
+  });
 
   constructor(private http: HttpClient) { }
 
   authorize(credentials: Credentials): Observable<string> {
-    return this.http.post<any>(this.url + '/users/login', null, {params: credentials as any})
+    return this.http.post<any>(this.url + '/branches/login', credentials)
       .pipe(
         map(loginResponse => loginResponse.bearerToken.access_token)
       );
@@ -50,8 +55,11 @@ export class AuthService {
     return localStorage.getItem(this.authTokenStorageKey);
   }
 
-  register(user: any) {
-    return this.http.post(this.url + '/users/register', null, {params: user});
+  register(user: User, branch) {
+    console.log(user);
+    return this.http.post(this.url + '/branches/register', user, {
+      params: {branch: branch}
+    });
   }
 
   runAs(user: Credentials, x: () => Observable<Object>) {

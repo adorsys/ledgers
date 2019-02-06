@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.formBuilder.group({
       login: ['', Validators.required],
       pin: ['', Validators.required],
-      role: ['TECHNICAL']
+      role: ['STAFF']
     });
     this.authService.logout();
   }
