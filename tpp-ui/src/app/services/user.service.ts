@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {environment} from "../../environments/environment";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {User} from "../models/user.model";
 
 @Injectable({
@@ -14,7 +14,10 @@ export class UserService {
 
   listUsers() {
     let userRole = 'CUSTOMER'; // for now only users with CUSTOMER role
-    return this.http.get(this.url + '/users', {params: {roles: userRole}});
+    return this.http.get(this.url + '/users', {
+      params:
+        {roles: userRole}
+    });
   }
 
   getUser(userId: string) {

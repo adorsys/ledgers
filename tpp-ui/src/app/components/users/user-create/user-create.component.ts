@@ -37,7 +37,8 @@ export class UserCreateComponent implements OnInit {
       ]),
       email: ['', [Validators.required, Validators.email]],
       login: ['', Validators.required],
-      pin: ['', [Validators.required, Validators.minLength(5)]]
+      pin: ['', [Validators.required, Validators.minLength(5)]],
+      userRoles: this.formBuilder.array(['CUSTOMER']) // register users with customer role
     });
   }
 
@@ -47,23 +48,28 @@ export class UserCreateComponent implements OnInit {
 
   initScaData() {
     return this.formBuilder.group({
-      scaMethod: ['', Validators.required],
+      scaMethod: ['EMAIL', Validators.required],
       methodValue: ['', Validators.required]
     })
   }
 
   initAccountAccessData() {
     return this.formBuilder.group({
-      accessType: ['', Validators.required],
+      accessType: ['OWNER', Validators.required],
       iban: ['', Validators.required]
     })
   }
 
   onSubmit() {
-    // this.userService.createUser(this.userForm.value)
-    //   .subscribe(response => {
-    //     this.router.navigateByUrl('/users');
-    //   });
+
+    if (this.userForm.invalid) {
+      return;
+    }
+
+    this.userService.createUser(this.userForm.value)
+      .subscribe(response => {
+        this.router.navigateByUrl('/users');
+      });
   }
 
 }

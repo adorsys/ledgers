@@ -4,7 +4,7 @@
       <div id="register-column" class="col-md-6">
         <div id="register-box" class="col-md-12">
 
-          <form id="register-form" [formGroup]="userForm" (ngSubmit)="onSubmit(branch)">
+          <form id="register-form" [formGroup]="userForm" (ngSubmit)="onSubmit(branchInput)">
             <h3 class="text-center text-adorsys">Adorsys TPP Sandbox</h3>
             <div *ngIf="errorMessage" class="alert alert-danger">
               {{errorMessage}}
@@ -12,7 +12,7 @@
 
             <div class="form-group">
               <label for="branch" class="form-group required">Your TPP ID</label>
-              <input type="text" #branch
+              <input type="text" #branchInput
                      class="form-control"
                      id="branch"
                      placeholder="please input your TPP ID"
@@ -42,7 +42,7 @@
                      class="form-control"
                      id="registerTTP"
                      placeholder="your login into TTP sandbox"
-                     formControlName="login" autofocus
+                     formControlName="login"
                      [ngClass]="{'is-invalid': login.invalid && (submitted || login.dirty || login.touched)}">
               <div *ngIf="login.errors?.required && (submitted || login.dirty || login.touched)" class="invalid-feedback d-block">
                 Required
