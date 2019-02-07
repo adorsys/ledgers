@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {UserService} from "../../../services/user.service";
 import {User} from "../../../models/user.model";
@@ -58,6 +58,16 @@ export class UserCreateComponent implements OnInit {
       accessType: ['OWNER', Validators.required],
       iban: ['', Validators.required]
     })
+  }
+
+  addScaDataItem() {
+    const control = <FormArray>this.userForm.controls['scaUserData'];
+    control.push(this.initScaData());
+  }
+
+  removeScaDataItem(i: number) {
+    const control = <FormArray>this.userForm.controls['scaUserData'];
+    control.removeAt(i);
   }
 
   onSubmit() {
