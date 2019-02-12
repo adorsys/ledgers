@@ -27,5 +27,7 @@ public interface DepositAccountService {
 
     List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix);
 
+    List<DepositAccountBO> findByBranch(String branch);
+
     void depositCash(String accountId, AmountBO amount, String user) throws DepositAccountNotFoundException;
 }

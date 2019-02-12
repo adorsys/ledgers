@@ -55,6 +55,7 @@ public class AccountDetailsTO {
     private Currency currency;
     private String name;
     private String product;
+    private String branch;
     private AccountTypeTO accountType;
     private AccountStatusTO accountStatus;
 
@@ -221,6 +222,14 @@ public class AccountDetailsTO {
         this.balances = balances;
     }
 
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -241,12 +250,13 @@ public class AccountDetailsTO {
                        Objects.equals(linkedAccounts, that.linkedAccounts) &&
                        usageType == that.usageType &&
                        Objects.equals(details, that.details) &&
-                       Objects.equals(balances, that.balances);
+                       Objects.equals(balances, that.balances) &&
+                       Objects.equals(branch, that.branch);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, iban, bban, pan, maskedPan, msisdn, currency, name, product, accountType, accountStatus, bic, linkedAccounts, usageType, details, balances);
+        return Objects.hash(id, iban, bban, pan, maskedPan, msisdn, currency, name, product, accountType, accountStatus, bic, linkedAccounts, usageType, details, balances, branch);
     }
 
     @Override
@@ -268,6 +278,7 @@ public class AccountDetailsTO {
                        ", usageType=" + usageType +
                        ", details='" + details + '\'' +
                        ", balances=" + balances +
+                       ", branch=" + branch +
                        '}';
     }
 }

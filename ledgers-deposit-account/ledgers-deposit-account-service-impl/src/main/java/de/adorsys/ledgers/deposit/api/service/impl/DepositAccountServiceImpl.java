@@ -250,6 +250,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    public List<DepositAccountBO> findByBranch(String branch) {
+        List<DepositAccount> accounts = depositAccountRepository.findByBranch(branch);
+        return depositAccountMapper.toDepositAccountListBO(accounts);
+    }
+
+    @Override
     public void depositCash(String accountId, AmountBO amount, String recordUser) throws DepositAccountNotFoundException {
         if (amount.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new DepositAccountUncheckedException("Deposited amount must be greater than zero");
