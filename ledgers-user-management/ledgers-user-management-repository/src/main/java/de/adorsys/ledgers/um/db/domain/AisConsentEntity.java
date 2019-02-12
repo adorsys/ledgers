@@ -17,10 +17,15 @@
 package de.adorsys.ledgers.um.db.domain;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import javax.persistence.Embedded;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Entity
@@ -36,9 +41,26 @@ public class AisConsentEntity {
 
     private int frequencyPerDay;
 
-    @Embedded
-    private AisAccountAccessInfo access = new AisAccountAccessInfo();
+//    @Embedded
+//    @CollectionTable(name = "ais_account_access", joinColumns = @JoinColumn(name = "consent_id"))
+//    private AisAccountAccessInfo access = new AisAccountAccessInfo();
+	@ElementCollection
+	@CollectionTable(name ="sca_ais_consent_accounts", joinColumns=@JoinColumn(name="ais_consent_entity_id"))
+    private List<String> accounts;
 
+	@ElementCollection
+	@CollectionTable(name ="sca_ais_consent_balances", joinColumns=@JoinColumn(name="ais_consent_entity_id"))
+	private List<String> balances;
+
+	@ElementCollection
+	@CollectionTable(name ="sca_ais_consent_transactions", joinColumns=@JoinColumn(name="ais_consent_entity_id"))
+    private List<String> transactions;
+
+    @Enumerated(EnumType.STRING)
+    private AisAccountAccessType availableAccounts;
+
+    @Enumerated(EnumType.STRING)
+    private AisAccountAccessType allPsd2;
     private LocalDate validUntil;
 
     private boolean recurringIndicator;
@@ -67,13 +89,13 @@ public class AisConsentEntity {
 		this.frequencyPerDay = frequencyPerDay;
 	}
 
-	public AisAccountAccessInfo getAccess() {
-		return access;
-	}
-
-	public void setAccess(AisAccountAccessInfo access) {
-		this.access = access;
-	}
+//	public AisAccountAccessInfo getAccess() {
+//		return access;
+//	}
+//
+//	public void setAccess(AisAccountAccessInfo access) {
+//		this.access = access;
+//	}
 
 	public LocalDate getValidUntil() {
 		return validUntil;
@@ -99,4 +121,45 @@ public class AisConsentEntity {
 		this.id = id;
 	}
 	
+
+	public List<String> getAccounts() {
+		return accounts;
+	}
+
+	public void setAccounts(List<String> accounts) {
+		this.accounts = accounts;
+	}
+
+	public List<String> getBalances() {
+		return balances;
+	}
+
+	public void setBalances(List<String> balances) {
+		this.balances = balances;
+	}
+
+	public List<String> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(List<String> transactions) {
+		this.transactions = transactions;
+	}
+
+	public AisAccountAccessType getAvailableAccounts() {
+		return availableAccounts;
+	}
+
+	public void setAvailableAccounts(AisAccountAccessType availableAccounts) {
+		this.availableAccounts = availableAccounts;
+	}
+
+	public AisAccountAccessType getAllPsd2() {
+		return allPsd2;
+	}
+
+	public void setAllPsd2(AisAccountAccessType allPsd2) {
+		this.allPsd2 = allPsd2;
+	}
+
 }

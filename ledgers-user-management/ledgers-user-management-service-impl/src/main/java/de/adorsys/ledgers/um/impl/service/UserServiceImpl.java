@@ -16,22 +16,17 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.um.api.exception.*;
-import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.db.domain.*;
-import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
-import de.adorsys.ledgers.um.db.repository.UserRepository;
-import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
-import de.adorsys.ledgers.um.impl.converter.UserConverter;
-import de.adorsys.ledgers.util.Ids;
-import de.adorsys.ledgers.util.PasswordEnc;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -42,11 +37,39 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
+import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
+import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
+import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
+import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
+import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.domain.UserRole;
+import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
+import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
+import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.PasswordEnc;
 
 @Service
 @Transactional
@@ -287,7 +310,7 @@ public class UserServiceImpl implements UserService {
 
 		validateAisConsent(aisConsent, user);
 		
-		AisConsentEntity aisConsentPO = aisConsentMapper.toAisConsentPO(aisConsent);
+//		AisConsentEntity aisConsentPO = aisConsentMapper.toAisConsentPO(aisConsent);
 		
 		Date issueTime = new Date();
         Date expires = getExpirDate(aisConsent, issueTime);
@@ -297,7 +320,7 @@ public class UserServiceImpl implements UserService {
 		act.put("tppId", tppId);
 		UserRole userRole = UserRole.valueOf(loginToken.getRole().name());
 		return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null, 
-				aisConsentPO, userRole, 
+				aisConsent, userRole, 
 				loginToken.getScaId(), loginToken.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
 	}
 

@@ -19,11 +19,13 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
@@ -64,6 +66,7 @@ public class ConsentResource implements ConsentRestAPI {
 		}
 	}
 
+	// TODO: Bearer token must contain autorization id
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> getSCA(String consentId, String authorisationId)
 			throws ConflictRestException {
@@ -75,6 +78,7 @@ public class ConsentResource implements ConsentRestAPI {
 		}
 	}
 
+	// TODO: Bearer token must contain autorization id
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> selectMethod(String consentId, String authorisationId,
 			String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException {
@@ -92,6 +96,7 @@ public class ConsentResource implements ConsentRestAPI {
 		}
 	}
 
+	// TODO: Bearer token must contain autorization id
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode)
 			throws ValidationRestException, NotFoundRestException, GoneRestException {
@@ -112,4 +117,17 @@ public class ConsentResource implements ConsentRestAPI {
 		}
 	}
 
+    @Override
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#pisConsent)")
+    public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO pisConsent) {
+        try {
+			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(pisConsent));
+        } catch (InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+        } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+		}
+    }
 }

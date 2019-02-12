@@ -31,7 +31,6 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -449,13 +448,35 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	}
 
 	@Override
-	public BearerTokenTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+	public SCAConsentResponseTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
 		try {
-			BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), aisConsentMapper.toAisConsentBO(aisConsent));
-			return bearerTokenMapper.toBearerTokenTO(consentToken);
+			AisConsentTO piisConsentTO = cleanupForPIIS(aisConsent);
+			ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(piisConsentTO);
+			AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(piisConsentTO);
+
+			BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken),consentBO);
+			SCAConsentResponseTO response = new SCAConsentResponseTO();
+			response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
+			response.setAuthorisationId(scaUtils.authorisatioId());
+			response.setConsentId(aisConsent.getId());
+			response.setPsuMessage(consentKeyData.exemptedTemplate());
+			response.setScaStatus(ScaStatusTO.EXEMPTED);
+			response.setStatusDate(LocalDateTime.now());
+			return response;
 		} catch (InsufficientPermissionException e) {
 			throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
 		}
+	}
+	/*
+	 * We reuse an ais consent and trim everyhing we do not need.
+	 */
+	private AisConsentTO cleanupForPIIS(AisConsentTO aisConsentTo) {
+		// Cautiously empty all fields.
+		aisConsentTo.getAccess().setAllPsd2(null);
+		aisConsentTo.getAccess().setAvailableAccounts(null);
+		aisConsentTo.getAccess().setAccounts(Collections.emptyList());
+		aisConsentTo.getAccess().setTransactions(Collections.emptyList());
+		return aisConsentTo;
 	}
 
 
