@@ -145,6 +145,29 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
+
+	@Override
+	public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException {
+		try {
+			UserBO user = userService.findById(userID);
+
+			Map<String, UserBO> persistBuffer = new HashMap<>();
+
+			DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(
+					accountDetailsMapper.toDepositAccountBO(depositAccount), user.getId());
+
+			if (!user.getAccountAccesses().isEmpty()) {
+				List<AccountAccessTO> accountAccesses = userMapper.toAccountAccessListTO(user.getAccountAccesses());
+				accessService.addAccess(accountAccesses, depositAccountBO, persistBuffer);
+			}
+		} catch (DepositAccountNotFoundException e) {
+			logger.error(e.getMessage(), e);
+			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+		} catch (UserNotFoundException e) {
+			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
+		}
+	}
+
     @Override
     public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws
             AccountNotFoundMiddlewareException {
@@ -338,6 +361,19 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         return depositAccounts.stream()
                        .map(accountDetailsMapper::toAccountDetailsTO)
                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AccountDetailsTO> listOfDepositAccountsByBranch() {
+        UserBO user = accessService.loadCurrentUser();
+
+        List<DepositAccountDetailsBO> depositAccounts = depositAccountService.findByBranch(user.getBranch());
+
+
+        return depositAccounts.stream()
+                .map(accountDetailsMapper::toAccountDetailsTO)
+                .collect(Collectors.toList());
+
     }
 
     @Override

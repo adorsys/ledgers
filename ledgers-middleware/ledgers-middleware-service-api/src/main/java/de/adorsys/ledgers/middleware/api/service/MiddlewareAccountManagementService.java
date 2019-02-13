@@ -52,6 +52,18 @@ public interface MiddlewareAccountManagementService {
 			throws UserNotFoundMiddlewareException;
 
 	/**
+	 * Creates a new DepositAccount. This deposit account is then linked with the specified user.
+	 *
+	 * Call requires a bank staff access permission.
+	 *
+	 * @param UserID : user for who the account is being created
+	 * @param depositAccount : the deposit account to be crated.
+	 * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
+	 */
+	void createDepositAccount(String UserID, AccountDetailsTO depositAccount)
+			throws UserNotFoundMiddlewareException;
+
+	/**
 	 * Creates a new DepositAccount for the connected user.
 	 * 
 	 * @param accountNumberPrefix : the account number prefix : the account number prefix
@@ -83,6 +95,14 @@ public interface MiddlewareAccountManagementService {
 	 * @return an empty list if user not linked with any deposit accounted.
 	 */
 	List<AccountDetailsTO> listOfDepositAccounts();
+
+	/**
+	 * TODO: return account or account details ???
+	 * Retrieve the list of account registered for the branch.
+	 *
+	 * @return list of accounts registered for the branch, or an empty list otherwise
+	 */
+	List<AccountDetailsTO> listOfDepositAccountsByBranch();
 	
     /**
      * Retrieves AccountDetails with Balance on demand
