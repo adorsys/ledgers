@@ -138,6 +138,20 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
+    public void findDepositAccountsByBranch() {
+        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount()));
+        when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
+
+        List<DepositAccountDetailsBO> accounts = depositAccountService.findByBranch("Any branch");
+
+        // account detail collection is not null
+        assertThat(accounts).isNotNull();
+
+        // account detail collection is not empty
+        assertThat(accounts).isNotEmpty();
+    }
+
+    @Test
     public void getTransactionById() throws TransactionNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
