@@ -11,20 +11,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 
 public interface MiddlewareAccountManagementService {
 
@@ -40,15 +27,15 @@ public interface MiddlewareAccountManagementService {
 			throws UserNotFoundMiddlewareException;
 
     /**
-     * Creates a new DepositAccount. This deposit account is then linked with the specified user.
+     * Creates a new DepositAccount. This deposit account is then linked with the user account accesses.
      * 
      * Call requires a bank staff access permission.
      * 
      * @param depositAccount : the deposit account to be crated.
-     * @param accountAccesss : define who has access to the account.
+     * @param accountAccesses : define who has access to the account.
      * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
      */
-	void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss) 
+	void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
 			throws UserNotFoundMiddlewareException;
 
 	/**
@@ -59,9 +46,10 @@ public interface MiddlewareAccountManagementService {
 	 * @param UserID : user for who the account is being created
 	 * @param depositAccount : the deposit account to be crated.
 	 * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
+	 * @throws UserNotInBranchMiddlewareException : if the associated user is not in the same branch as staff member.
 	 */
 	void createDepositAccount(String UserID, AccountDetailsTO depositAccount)
-			throws UserNotFoundMiddlewareException;
+			throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException;
 
 	/**
 	 * Creates a new DepositAccount for the connected user.
