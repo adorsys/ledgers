@@ -11,6 +11,8 @@ public interface DepositAccountService {
 
     DepositAccountBO createDepositAccount(DepositAccountBO depositAccount, String userName) throws DepositAccountNotFoundException;
 
+    DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccount, String userName, String branch) throws DepositAccountNotFoundException;
+
     DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;
 
     List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;

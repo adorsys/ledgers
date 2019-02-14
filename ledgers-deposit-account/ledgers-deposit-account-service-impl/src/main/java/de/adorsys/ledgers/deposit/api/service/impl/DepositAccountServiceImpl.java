@@ -79,6 +79,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
 	@Override
     public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {
+
         DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
 
         LedgerBO ledgerBO = loadLedger();
@@ -95,6 +96,32 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         }
 
         DepositAccount da = depositAccountMapper.createDepositAccountObj(depositAccount);
+
+        DepositAccount saved = depositAccountRepository.save(da);
+        return depositAccountMapper.toDepositAccountBO(saved);
+    }
+
+
+    @Override
+    public DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccountBO, String userName, String branch) throws DepositAccountNotFoundException {
+
+        DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
+
+        LedgerBO ledgerBO = loadLedger();
+        String depositParentAccountNbr = depositAccountConfigService.getDepositParentAccount();
+        LedgerAccountBO depositParentAccount = new LedgerAccountBO(depositParentAccountNbr, ledgerBO);
+
+        LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), depositParentAccount);
+
+        try {
+            ledgerService.newLedgerAccount(ledgerAccount, userName);
+        } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new DepositAccountNotFoundException(e.getMessage(), e);
+        }
+
+        DepositAccount da = depositAccountMapper.createDepositAccountObj(depositAccount);
+        da.setBranch(branch);
 
         DepositAccount saved = depositAccountRepository.save(da);
         return depositAccountMapper.toDepositAccountBO(saved);
@@ -252,6 +279,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public List<DepositAccountDetailsBO> findByBranch(String branch) {
         List<DepositAccount> accounts = depositAccountRepository.findByBranch(branch);
+        String x = ((Integer) accounts.size()).toString();
+
+        logger.info("Deposit " + branch);
+        logger.info("Accounts size " + x);
+
+
         List<DepositAccountBO> accountsBO = depositAccountMapper.toDepositAccountListBO(accounts);
         List<DepositAccountDetailsBO> accountDetails = new ArrayList<>();
         for (DepositAccountBO accountBO: accountsBO) {
