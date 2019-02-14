@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import de.adorsys.ledgers.middleware.api.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,21 +35,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AccessTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
@@ -147,14 +133,19 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
 	@Override
-	public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException {
+	public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException {
 		try {
 			UserBO user = userService.findById(userID);
+			String branch = userService.findById(accessToken.getSub()).getBranch();
+
+			if (!user.getBranch().equals(branch)) {
+			   throw new UserNotInBranchMiddlewareException(userMapper.toUserTO(user));
+            }
 
 			Map<String, UserBO> persistBuffer = new HashMap<>();
 
-			DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(
-					accountDetailsMapper.toDepositAccountBO(depositAccount), user.getId());
+			DepositAccountBO depositAccountBO = depositAccountService.createDepositAccountForBranch(
+					accountDetailsMapper.toDepositAccountBO(depositAccount), user.getId(), branch);
 
 			if (!user.getAccountAccesses().isEmpty()) {
 				List<AccountAccessTO> accountAccesses = userMapper.toAccountAccessListTO(user.getAccountAccesses());

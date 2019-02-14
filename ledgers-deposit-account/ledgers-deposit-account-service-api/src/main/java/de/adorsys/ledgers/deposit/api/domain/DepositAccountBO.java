@@ -41,7 +41,6 @@ public class DepositAccountBO {
     private Currency currency;
     private String name;
     private String product;
-    private String branch;
 
     private AccountTypeBO accountType;
 
@@ -213,13 +212,5 @@ public class DepositAccountBO {
 
     public void setDetails(String details) {
         this.details = details;
-    }
-
-    public String getBranch() {
-        return branch;
-    }
-
-    public void setBranch(String branch) {
-        this.branch = branch;
     }
 }
