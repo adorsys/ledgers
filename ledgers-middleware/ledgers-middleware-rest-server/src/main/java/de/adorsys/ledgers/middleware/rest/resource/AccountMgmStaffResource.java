@@ -35,7 +35,7 @@ import java.util.List;
 
 @Api(tags = "LDG008 - Accounts (STAFF access)" , description= "Provides access to the deposit account resource for staff members.")
 @RestController
-@RequestMapping("/staff/" + AccountRestAPI.BASE_PATH)
+@RequestMapping("/staff-access/" + AccountRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class AccountMgmStaffResource {
 
