@@ -17,10 +17,13 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotInBranchMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
+import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,23 +53,14 @@ public class AccountMgmStaffResource {
      *
      * @param userID user for who account is created
      * @param accountDetailsTO account details
-     * @return response object with created account details
+     * @return Void
      */
     @ApiOperation(value="Registers a new Deposit Account for a user with specified ID",
-            notes="Registers a new deposit account and assigns account access OWNER to the current user."
-                    + "Following rules apply during and after registration of a new account:"
-                    + "<ul>"
-                    + "<li>Caller must have a role <b>CUSTOMER</b> this means STAFF and SYSTEM can not use this endpoint.</li>"
-                    + "<li>Caller must have a valid <b>DIRECT_ACCESS</b> token. Means this can not be called using a LOGIN or a DELEGATED_ACCESS (tpp) token.</li>"
-                    + "<li>The current access token of the user does not include the newly registered account. User must reauthenticate to obtain an updated access token.</li>"
-                    + "<li>Nevertheless the Endpoint '/accounts' returns all accounts of the user.</li>"
-                    + "<li>Endpoint for granting account access to another user is scheduled but not yet implemented.</li>"
-                    + "</ul>",
+            notes="Registers a new deposit account and assigns account access OWNER to the current user.",
             authorizations =@Authorization(value="apiKey"))
     @ApiResponses(value={
             @ApiResponse(code=200, message="Account creation successful"),
             @ApiResponse(code=404, message="User with this ID not found"),
-            @ApiResponse(code=403, message="User with this ID is not your branch"),
             @ApiResponse(code=409, message="Account with given IBAN already exists.")
     })
     @PostMapping
@@ -78,10 +72,8 @@ public class AccountMgmStaffResource {
             // TODO: change to created after Account Middleware service refactoring
             return ResponseEntity.ok().build();
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             return ResponseEntity.notFound().build();
         } catch (UserNotInBranchMiddlewareException e) {
-            logger.error(e.getMessage(), e);
             return ResponseEntity.status(403).build();
         }
     }
@@ -101,5 +93,29 @@ public class AccountMgmStaffResource {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listOfDepositAccountsByBranch());
+    }
+
+    /**
+     * Operation deposits cash to the deposit account
+     *
+     * @param accountId Account ID in Ledgers
+     * @param amount Amount to be deposited
+     * @return Void
+     */
+    @ApiOperation(value="Deposit Cash", authorizations=@Authorization(value="apiKey"),
+            notes = "Operation for staff member to register cash in the deposit account")
+    @ApiResponses(value={
+            @ApiResponse(code=202, message="Operation was successful")
+    })
+    @PostMapping("/{accountId}/cash")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<Void> depositCash(@PathVariable String accountId, @RequestBody AmountTO amount) {
+        try {
+            middlewareAccountService.depositCash(accountId, amount);
+            return ResponseEntity.accepted().build();
+        } catch (AccountNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
     }
 }

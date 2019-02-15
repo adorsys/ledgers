@@ -36,13 +36,13 @@ public class CreateDepositAccountService {
         this.accessService = accessService;
     }
 
-    public void createDepositAccount(String userId, AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
+    public void createDepositAccount(String userId, AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses, String branch)
             throws UserNotFoundMiddlewareException {
         try {
             Map<String, UserBO> persistBuffer = new HashMap<>();
 
-            DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(
-                    accountDetailsMapper.toDepositAccountBO(depositAccount), userId);
+            DepositAccountBO depositAccountBO = depositAccountService.createDepositAccountForBranch(
+                    accountDetailsMapper.toDepositAccountBO(depositAccount), userId, branch);
 
             if (accountAccesses != null) {
                 accessService.addAccess(accountAccesses, depositAccountBO, persistBuffer);

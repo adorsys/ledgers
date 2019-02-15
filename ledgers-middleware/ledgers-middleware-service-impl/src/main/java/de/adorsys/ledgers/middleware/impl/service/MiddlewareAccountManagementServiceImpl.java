@@ -107,7 +107,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
             throws UserNotFoundMiddlewareException {
-        createDepositAccountService.createDepositAccount(accessToken.getSub(), depositAccount, accountAccesses);
+
+		try {
+			UserBO user = userService.findById(accessToken.getSub());
+			createDepositAccountService.createDepositAccount(accessToken.getSub(), depositAccount, accountAccesses, user.getBranch());
+		} catch (UserNotFoundException e) {
+			logger.error(e.getMessage(), e);
+			throw new UserNotFoundMiddlewareException();
+		}
     }
 
 	@Override
@@ -120,9 +127,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			accountAccessTO.setUser(userMapper.toUserTO(user));
 			List<AccountAccessTO> accountAccesses = new ArrayList<>();
 			accountAccesses.add(accountAccessTO);
-			createDepositAccountService.createDepositAccount(userID, depositAccount, accountAccesses);
+			createDepositAccountService.createDepositAccount(userID, depositAccount, accountAccesses, user.getBranch());
 		} catch (UserNotFoundException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+			throw new UserNotFoundMiddlewareException();
 		}
 	}
 

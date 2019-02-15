@@ -279,12 +279,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public List<DepositAccountDetailsBO> findByBranch(String branch) {
         List<DepositAccount> accounts = depositAccountRepository.findByBranch(branch);
-        String x = ((Integer) accounts.size()).toString();
-
-        logger.info("Deposit " + branch);
-        logger.info("Accounts size " + x);
-
-
         List<DepositAccountBO> accountsBO = depositAccountMapper.toDepositAccountListBO(accounts);
         List<DepositAccountDetailsBO> accountDetails = new ArrayList<>();
         for (DepositAccountBO accountBO: accountsBO) {
