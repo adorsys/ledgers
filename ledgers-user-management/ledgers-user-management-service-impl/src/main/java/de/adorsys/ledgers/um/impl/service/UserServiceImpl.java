@@ -289,13 +289,8 @@ public class UserServiceImpl implements UserService {
     @NotNull
     private UserEntity getUser(String login) throws UserNotFoundException {
         Optional<UserEntity> userOptional = userRepository.findFirstByLogin(login);
-        userOptional.orElseThrow(() -> userNotFoundException(login));
+        userOptional.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login)));
         return userOptional.get();
-    }
-
-    @NotNull
-    private UserNotFoundException userNotFoundException(String login) {
-        return new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login));
     }
 
 	@Override
@@ -368,11 +363,6 @@ public class UserServiceImpl implements UserService {
 		if(!copy.isEmpty()) {
 			throw new InsufficientPermissionException(String.format(message, userId, copy.toString()));
 		}
-	}
-
-	@Override
-	public List<UserBO> getAll() {
-		return userConverter.toUserBOList(userRepository.findAll());
 	}
 
 	@Override
