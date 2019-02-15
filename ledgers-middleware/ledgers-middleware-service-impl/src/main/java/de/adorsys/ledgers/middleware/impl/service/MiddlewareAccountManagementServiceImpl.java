@@ -107,12 +107,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		this.amountMapper = amountMapper;
 	}
 
-	@Override
-    public void createDepositAccount(AccountDetailsTO depositAccount)
-            throws UserNotFoundMiddlewareException {
-        createDepositAccount(depositAccount, Collections.emptyList());
-    }
-
     @Override
     public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss)
             throws UserNotFoundMiddlewareException {
@@ -121,6 +115,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
             DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(
             		accountDetailsMapper.toDepositAccountBO(depositAccount), accessToken.getSub());
+
             if (accountAccesss != null) {
             	accessService.addAccess(accountAccesss, depositAccountBO, persistBuffer);
             }
@@ -143,6 +138,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             }
 
 			Map<String, UserBO> persistBuffer = new HashMap<>();
+            persistBuffer.put(userID, user);
 
 			DepositAccountBO depositAccountBO = depositAccountService.createDepositAccountForBranch(
 					accountDetailsMapper.toDepositAccountBO(depositAccount), user.getId(), branch);
@@ -331,35 +327,35 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         accessService.addAccess(userBo, userMapper.toAccountAccessBO(accountAccess), new HashMap<>());
     }
 
-    @Override
-    public List<AccountDetailsTO> listOfDepositAccounts() {
-    	UserBO user = accessService.loadCurrentUser();
-    	UserTO userTO = userMapper.toUserTO(user);
-    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
-//        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
-        if (accountAccesses == null || accountAccesses.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<String> ibans = accountAccesses.stream()
-                                     .map(AccountAccessTO::getIban)
-                                     .collect(Collectors.toList());
-        List<DepositAccountDetailsBO> depositAccounts;
-        try {
-            depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-        }
-        return depositAccounts.stream()
-                       .map(accountDetailsMapper::toAccountDetailsTO)
-                       .collect(Collectors.toList());
-    }
+//    @Override
+//	  @Deprecated
+//    public List<AccountDetailsTO> listOfDepositAccounts() {
+//    	UserBO user = accessService.loadCurrentUser();
+//    	UserTO userTO = userMapper.toUserTO(user);
+//    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
+////        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
+//        if (accountAccesses == null || accountAccesses.isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//        List<String> ibans = accountAccesses.stream()
+//                                     .map(AccountAccessTO::getIban)
+//                                     .collect(Collectors.toList());
+//        List<DepositAccountDetailsBO> depositAccounts;
+//        try {
+//            depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
+//        } catch (DepositAccountNotFoundException e) {
+//            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+//        }
+//        return depositAccounts.stream()
+//                       .map(accountDetailsMapper::toAccountDetailsTO)
+//                       .collect(Collectors.toList());
+//    }
 
     @Override
     public List<AccountDetailsTO> listOfDepositAccountsByBranch() {
         UserBO user = accessService.loadCurrentUser();
 
         List<DepositAccountDetailsBO> depositAccounts = depositAccountService.findByBranch(user.getBranch());
-
 
         return depositAccounts.stream()
                 .map(accountDetailsMapper::toAccountDetailsTO)

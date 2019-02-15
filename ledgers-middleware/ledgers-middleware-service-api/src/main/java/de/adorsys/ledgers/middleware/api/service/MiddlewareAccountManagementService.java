@@ -16,17 +16,6 @@ import de.adorsys.ledgers.middleware.api.exception.*;
 public interface MiddlewareAccountManagementService {
 
     /**
-     * Creates a new DepositAccount. This deposit account is then linked with the specified user.
-     * 
-     * Call requires a bank staff access permission.
-     * 
-     * @param depositAccount : the deposit account to be crated.
-     * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
-     */
-	void createDepositAccount(AccountDetailsTO depositAccount) 
-			throws UserNotFoundMiddlewareException;
-
-    /**
      * Creates a new DepositAccount. This deposit account is then linked with the user account accesses.
      * 
      * Call requires a bank staff access permission.
@@ -77,12 +66,12 @@ public interface MiddlewareAccountManagementService {
 	void grantAccessToDepositAccount(AccountAccessTO accountAccess)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
-	/**
-	 * Retrieve the list of account viewable by the connected user.
-	 * 
-	 * @return an empty list if user not linked with any deposit accounted.
-	 */
-	List<AccountDetailsTO> listOfDepositAccounts();
+//	/**
+//	 * Retrieve the list of account viewable by the connected user.
+//	 *
+//	 * @return an empty list if user not linked with any deposit accounted.
+//	 */
+//	List<AccountDetailsTO> listOfDepositAccounts();
 
 	/**
 	 * TODO: return account or account details ???

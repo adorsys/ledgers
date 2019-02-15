@@ -16,7 +16,6 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import java.util.Collection;
 import java.util.List;
 
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
