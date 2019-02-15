@@ -16,31 +16,19 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.UserNotInBranchMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
-import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.rest.exception.RestException;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Api(tags = "LDG008 - Accounts (STAFF access)" , description= "Provides access to the deposit account resource for staff members.")
 @RestController
@@ -90,8 +78,10 @@ public class AccountMgmStaffResource {
             // TODO: change to created after Account Middleware service refactoring
             return ResponseEntity.ok().build();
         } catch (UserNotFoundMiddlewareException e) {
+            logger.error(e.getMessage(), e);
             return ResponseEntity.notFound().build();
         } catch (UserNotInBranchMiddlewareException e) {
+            logger.error(e.getMessage(), e);
             return ResponseEntity.status(403).build();
         }
     }
