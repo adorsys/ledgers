@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AccessTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
@@ -84,13 +79,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	private final AccessService accessService;
 	private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
     private final AmountMapper amountMapper;
+    private final CreateDepositAccountService createDepositAccountService;
 
 
 	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
 			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
 			UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
 			AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService,
-			SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper) {
+			SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper, CreateDepositAccountService createDepositAccountService) {
 		super();
 		this.depositAccountService = depositAccountService;
 		this.accountDetailsMapper = accountDetailsMapper;
@@ -105,59 +101,33 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		this.scaUtils = scaUtils;
 		this.accessService = accessService;
 		this.amountMapper = amountMapper;
+		this.createDepositAccountService = createDepositAccountService;
 	}
 
     @Override
-    public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss)
+    public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
             throws UserNotFoundMiddlewareException {
-        try {
-            Map<String, UserBO> persistBuffer = new HashMap<>();
-
-            DepositAccountBO depositAccountBO = depositAccountService.createDepositAccount(
-            		accountDetailsMapper.toDepositAccountBO(depositAccount), accessToken.getSub());
-
-            if (accountAccesss != null) {
-            	accessService.addAccess(accountAccesss, depositAccountBO, persistBuffer);
-            }
-        } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-        }
+        createDepositAccountService.createDepositAccount(accessToken.getSub(), depositAccount, accountAccesses);
     }
 
 	@Override
-	public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException {
+	public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException {
 		try {
 			UserBO user = userService.findById(userID);
-			String branch = userService.findById(accessToken.getSub()).getBranch();
 
-			if (!user.getBranch().equals(branch)) {
-			   throw new UserNotInBranchMiddlewareException(userMapper.toUserTO(user));
-            }
-
-			Map<String, UserBO> persistBuffer = new HashMap<>();
-            persistBuffer.put(userID, user);
-
-			DepositAccountBO depositAccountBO = depositAccountService.createDepositAccountForBranch(
-					accountDetailsMapper.toDepositAccountBO(depositAccount), user.getId(), branch);
-
-			if (!user.getAccountAccesses().isEmpty()) {
-				List<AccountAccessTO> accountAccesses = userMapper.toAccountAccessListTO(user.getAccountAccesses());
-				accessService.addAccess(accountAccesses, depositAccountBO, persistBuffer);
-			}
-		} catch (DepositAccountNotFoundException e) {
-			logger.error(e.getMessage(), e);
-			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+			AccountAccessTO accountAccessTO = new AccountAccessTO();
+			accountAccessTO.setAccessType(AccessTypeTO.OWNER);
+			accountAccessTO.setUser(userMapper.toUserTO(user));
+			List<AccountAccessTO> accountAccesses = new ArrayList<>();
+			accountAccesses.add(accountAccessTO);
+			createDepositAccountService.createDepositAccount(userID, depositAccount, accountAccesses);
 		} catch (UserNotFoundException e) {
-			throw new UserNotFoundMiddlewareException(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 
     @Override
-    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws
-            AccountNotFoundMiddlewareException {
+    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
         try {
             DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
             return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
@@ -327,29 +297,28 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         accessService.addAccess(userBo, userMapper.toAccountAccessBO(accountAccess), new HashMap<>());
     }
 
-//    @Override
-//	  @Deprecated
-//    public List<AccountDetailsTO> listOfDepositAccounts() {
-//    	UserBO user = accessService.loadCurrentUser();
-//    	UserTO userTO = userMapper.toUserTO(user);
-//    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
-////        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
-//        if (accountAccesses == null || accountAccesses.isEmpty()) {
-//            return Collections.emptyList();
-//        }
-//        List<String> ibans = accountAccesses.stream()
-//                                     .map(AccountAccessTO::getIban)
-//                                     .collect(Collectors.toList());
-//        List<DepositAccountDetailsBO> depositAccounts;
-//        try {
-//            depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
-//        } catch (DepositAccountNotFoundException e) {
-//            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-//        }
-//        return depositAccounts.stream()
-//                       .map(accountDetailsMapper::toAccountDetailsTO)
-//                       .collect(Collectors.toList());
-//    }
+    @Override
+    public List<AccountDetailsTO> listOfDepositAccounts() {
+    	UserBO user = accessService.loadCurrentUser();
+    	UserTO userTO = userMapper.toUserTO(user);
+    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
+//        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
+        if (accountAccesses == null || accountAccesses.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> ibans = accountAccesses.stream()
+                                     .map(AccountAccessTO::getIban)
+                                     .collect(Collectors.toList());
+        List<DepositAccountDetailsBO> depositAccounts;
+        try {
+            depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
+        } catch (DepositAccountNotFoundException e) {
+            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+        }
+        return depositAccounts.stream()
+                       .map(accountDetailsMapper::toAccountDetailsTO)
+                       .collect(Collectors.toList());
+    }
 
     @Override
     public List<AccountDetailsTO> listOfDepositAccountsByBranch() {

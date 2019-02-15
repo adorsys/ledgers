@@ -66,12 +66,12 @@ public interface MiddlewareAccountManagementService {
 	void grantAccessToDepositAccount(AccountAccessTO accountAccess)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
-//	/**
-//	 * Retrieve the list of account viewable by the connected user.
-//	 *
-//	 * @return an empty list if user not linked with any deposit accounted.
-//	 */
-//	List<AccountDetailsTO> listOfDepositAccounts();
+	/**
+	 * Retrieve the list of account viewable by the connected user.
+	 *
+	 * @return an empty list if user not linked with any deposit accounted.
+	 */
+	List<AccountDetailsTO> listOfDepositAccounts();
 
 	/**
 	 * TODO: return account or account details ???
