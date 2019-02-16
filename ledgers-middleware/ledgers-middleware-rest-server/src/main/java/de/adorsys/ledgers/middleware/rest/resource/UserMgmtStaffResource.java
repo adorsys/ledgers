@@ -115,7 +115,7 @@ public class UserMgmtStaffResource {
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
     @PreAuthorize("hasRole('STAFF')")
-    @PostMapping("/users")
+    @PostMapping
     public ResponseEntity<UserTO> createUser(@RequestBody UserTO user) throws NotFoundRestException, ConflictRestException{
         try {
             UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
@@ -153,7 +153,7 @@ public class UserMgmtStaffResource {
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
     @PreAuthorize("hasRole('STAFF')")
-    @GetMapping("/users")
+    @GetMapping
     public ResponseEntity<List<UserTO>> getBranchUsersByRoles(@RequestParam List<UserRoleTO> roles) throws NotFoundRestException{
         try {
             UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
@@ -177,7 +177,7 @@ public class UserMgmtStaffResource {
             @ApiResponse(code=401, message="Wrong authentication credential."),
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<UserTO> getBranchUserById(@PathVariable String userId) throws NotFoundRestException {
         try {
@@ -208,7 +208,7 @@ public class UserMgmtStaffResource {
             @ApiResponse(code=401, message="Wrong authentication credential."),
             @ApiResponse(code=403, message="Authenticated but user does not have the requested role.")
     })
-    @PostMapping("/users/{userId}/sca-data")
+    @PostMapping("/{userId}/sca-data")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> updateUserScaData(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) {
         try {

@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotInBranchMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
@@ -31,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Api(tags = "LDG008 - Accounts (STAFF access)" , description= "Provides access to the deposit account resource for staff members.")
@@ -40,7 +42,7 @@ import java.util.List;
 public class AccountMgmStaffResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(AccountMgmStaffResource.class);
-
+    private static final String ACCOUNT_ID = "accountId";
     private final MiddlewareAccountManagementService middlewareAccountService;
 
     public AccountMgmStaffResource(MiddlewareAccountManagementService middlewareAccountService) {
@@ -93,6 +95,25 @@ public class AccountMgmStaffResource {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listOfDepositAccountsByBranch());
+    }
+
+
+    @ApiOperation(value="Load Account by AccountId",
+            notes="Returns account details information for the given account id. "
+                    + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)",
+            authorizations =@Authorization(value="apiKey"))
+    @ApiResponses(value={
+            @ApiResponse(code=200, response=AccountDetailsTO.class, message="Account details.")
+    })
+    @GetMapping("/{accountId}")
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(@ApiParam(ACCOUNT_ID) @PathVariable String accountId) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
+        } catch (AccountNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
+            logger.error(e.getMessage(), e);
+            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
     }
 
     /**

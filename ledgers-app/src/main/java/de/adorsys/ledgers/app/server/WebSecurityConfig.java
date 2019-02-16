@@ -44,12 +44,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             		"/management/app/admin",
             		"/management/app/ping", 
             		"/users/login",
+                    "/users/register",
             		"/users/loginForConsent",
             		"/data-test/upload-mockbank-data",
             		"/data-test/db-flush",
-            		"/branches/register",
-            		"/branches/login",
-            		"/users/register").permitAll()
+            		"/staff-access/users/register",
+            		"/staff-access/users/login").permitAll()
             .and()
             .authorizeRequests().antMatchers("/index.css", "/img/*", "/favicon.ico").permitAll()
             .and()

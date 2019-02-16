@@ -30,6 +30,7 @@ public class CreateDepositAccountService {
     private final AccountDetailsMapper accountDetailsMapper;
     private final AccessService accessService;
 
+    @SuppressWarnings("PMD.UnusedFormalParameter")
     public CreateDepositAccountService(DepositAccountService depositAccountService, AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService, UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper, AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService, SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper) {
         this.depositAccountService = depositAccountService;
         this.accountDetailsMapper = accountDetailsMapper;

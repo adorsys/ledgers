@@ -143,7 +143,7 @@ public class UserResourceTest {
     @Test
     public void getAllUsers() throws Exception {
         List<UserBO> userList = Collections.singletonList(getUserBO());
-        when(userService.getAll()).thenReturn(userList);
+        when(userService.listUsers(anyInt(),anyInt())).thenReturn(userList);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                                                       .get("/users/all"))
@@ -157,7 +157,7 @@ public class UserResourceTest {
         assertNotNull(users);
         assertEquals(users, userList);
 
-        verify(userService, times(1)).getAll();
+        verify(userService, times(1)).listUsers(anyInt(), anyInt());
     }
 
     private UserBO getUserBO() {

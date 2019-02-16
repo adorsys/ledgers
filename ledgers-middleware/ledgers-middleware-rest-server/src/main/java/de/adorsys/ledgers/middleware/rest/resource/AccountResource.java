@@ -68,7 +68,7 @@ public class AccountResource implements AccountRestAPI {
     @Override
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listOfDepositAccountsByBranch());
+        return ResponseEntity.ok(middlewareAccountService.listOfDepositAccounts());
     }
 
     @Override
