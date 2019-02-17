@@ -94,7 +94,7 @@ public class AccountMgmStaffResource {
     @GetMapping
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listOfDepositAccountsByBranch());
+        return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch());
     }
 
 

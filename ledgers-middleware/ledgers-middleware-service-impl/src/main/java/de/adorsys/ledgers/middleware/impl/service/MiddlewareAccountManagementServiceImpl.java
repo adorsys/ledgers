@@ -291,7 +291,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public List<AccountDetailsTO> listOfDepositAccounts() {
+    public List<AccountDetailsTO> listDepositAccounts() {
     	UserBO user = accessService.loadCurrentUser();
     	UserTO userTO = userMapper.toUserTO(user);
     	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
@@ -314,7 +314,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public List<AccountDetailsTO> listOfDepositAccountsByBranch() {
+    public List<AccountDetailsTO> listDepositAccountsByBranch() {
         UserBO user = accessService.loadCurrentUser();
 
         List<DepositAccountDetailsBO> depositAccounts = depositAccountService.findByBranch(user.getBranch());

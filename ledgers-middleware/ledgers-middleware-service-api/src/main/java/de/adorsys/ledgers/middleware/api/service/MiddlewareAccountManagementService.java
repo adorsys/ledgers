@@ -71,7 +71,7 @@ public interface MiddlewareAccountManagementService {
 	 *
 	 * @return an empty list if user not linked with any deposit accounted.
 	 */
-	List<AccountDetailsTO> listOfDepositAccounts();
+	List<AccountDetailsTO> listDepositAccounts();
 
 	/**
 	 * TODO: return account or account details ???
@@ -79,7 +79,7 @@ public interface MiddlewareAccountManagementService {
 	 *
 	 * @return list of accounts registered for the branch, or an empty list otherwise
 	 */
-	List<AccountDetailsTO> listOfDepositAccountsByBranch();
+	List<AccountDetailsTO> listDepositAccountsByBranch();
 	
     /**
      * Retrieves AccountDetails with Balance on demand

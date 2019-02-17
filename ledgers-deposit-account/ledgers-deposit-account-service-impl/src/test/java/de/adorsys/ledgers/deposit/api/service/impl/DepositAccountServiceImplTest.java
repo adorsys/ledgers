@@ -142,7 +142,7 @@ public class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount()));
         when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
 
-        List<DepositAccountDetailsBO> accounts = depositAccountService.findByBranch("Any branch");
+        List<DepositAccountDetailsBO> accounts = depositAccountService.findByBranch(anyString());
 
         // account detail collection is not null
         assertThat(accounts).isNotNull();
