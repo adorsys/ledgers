@@ -24,4 +24,11 @@
 	<include file="migration/0005-initial-data-v2.xml" relativeToChangelogFile="true" />
 	 -->
 
+	<!--add branch to users table-->
+	<include file="migration/0006-add-branch-to-users-table.xml" relativeToChangelogFile="true" />
+
+	<!--add branch to deposit account-->
+	<include file="migration/0007-add-branch-to-deposit-account-table.xml" relativeToChangelogFile="true" />
+
+
 </databaseChangeLog>

@@ -91,8 +91,6 @@ public interface UserService {
 
     List<UserBO> listUsers(int page, int size);
 
-	List<UserBO> getAll();
-
 	/**
 	 * Check if the provided token is valid at the given reference time and return the corresponding user.
 	 * 
@@ -153,4 +151,21 @@ public interface UserService {
 	 * @throws ConsentNotFoundException
 	 */
 	AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
+
+	/**
+	 * Loads users collection by branch and the given roles
+	 *
+	 * @param branch branch ID
+	 * @param userRoles list of user roles
+	 * @return List of users filtered by branch and user roles
+	 */
+	List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles);
+
+	/**
+	 * Counts amount of users for a branch
+	 *
+	 * @param branch branch
+	 * @return amount of users
+	 */
+	int countUsersByBranch(String branch);
 }

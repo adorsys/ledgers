@@ -68,7 +68,7 @@ public class AccountResource implements AccountRestAPI {
     @Override
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listOfDepositAccounts());
+        return ResponseEntity.ok(middlewareAccountService.listDepositAccounts());
     }
 
     @Override
@@ -170,6 +170,17 @@ public class AccountResource implements AccountRestAPI {
         }
     }
 
+    @Override
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
+        try {
+            middlewareAccountService.depositCash(accountId, amount);
+            return ResponseEntity.accepted().build();
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw notFoundRestException(e);
+        }
+    }
+
     private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
         if (!validDate(dateFrom).isEqual(validDate(dateTo))
                     && validDate(dateFrom).isAfter(validDate(dateTo))) {
@@ -191,15 +202,4 @@ public class AccountResource implements AccountRestAPI {
 		logger.error(e.getMessage(), e);
 		return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
 	}
-
-	@Override
-    @PreAuthorize("hasRole('TECHNICAL')")
-    public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
-        try {
-            middlewareAccountService.depositCash(accountId, amount);
-            return ResponseEntity.accepted().build();
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw notFoundRestException(e);
-        }
-    }
 }

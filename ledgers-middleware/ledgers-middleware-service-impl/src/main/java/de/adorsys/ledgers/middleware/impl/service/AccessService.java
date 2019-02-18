@@ -37,6 +37,7 @@ public class AccessService {
 	public void addAccess(List<AccountAccessTO> accountAccess, DepositAccountBO depositAccountBO,
                            final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
         for (AccountAccessTO accountAccessTO : accountAccess) {
+            // TODO: check if accountAccess User is not Null
             UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
             if (user == null) {
                 user = userService.findById(accountAccessTO.getUser().getId());

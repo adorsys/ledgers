@@ -11,45 +11,34 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 
 public interface MiddlewareAccountManagementService {
 
     /**
-     * Creates a new DepositAccount. This deposit account is then linked with the specified user.
+     * Creates a new DepositAccount. This deposit account is then linked with the user account accesses.
      * 
      * Call requires a bank staff access permission.
      * 
      * @param depositAccount : the deposit account to be crated.
+     * @param accountAccesses : define who has access to the account.
      * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
      */
-	void createDepositAccount(AccountDetailsTO depositAccount) 
+	void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
 			throws UserNotFoundMiddlewareException;
 
-    /**
-     * Creates a new DepositAccount. This deposit account is then linked with the specified user.
-     * 
-     * Call requires a bank staff access permission.
-     * 
-     * @param depositAccount : the deposit account to be crated.
-     * @param accountAccesss : define who has access to the account.
-     * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
-     */
-	void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesss) 
-			throws UserNotFoundMiddlewareException;
+	/**
+	 * Creates a new DepositAccount. This deposit account is then linked with the specified user.
+	 *
+	 * Call requires a bank staff access permission.
+	 *
+	 * @param UserID : user for who the account is being created
+	 * @param depositAccount : the deposit account to be crated.
+	 * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
+	 * @throws UserNotInBranchMiddlewareException : if the associated user is not in the same branch as staff member.
+	 */
+	void createDepositAccount(String UserID, AccountDetailsTO depositAccount)
+			throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException;
 
 	/**
 	 * Creates a new DepositAccount for the connected user.
@@ -79,10 +68,18 @@ public interface MiddlewareAccountManagementService {
 
 	/**
 	 * Retrieve the list of account viewable by the connected user.
-	 * 
+	 *
 	 * @return an empty list if user not linked with any deposit accounted.
 	 */
-	List<AccountDetailsTO> listOfDepositAccounts();
+	List<AccountDetailsTO> listDepositAccounts();
+
+	/**
+	 * TODO: return account or account details ???
+	 * Retrieve the list of account registered for the branch.
+	 *
+	 * @return list of accounts registered for the branch, or an empty list otherwise
+	 */
+	List<AccountDetailsTO> listDepositAccountsByBranch();
 	
     /**
      * Retrieves AccountDetails with Balance on demand

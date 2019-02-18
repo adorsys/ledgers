@@ -37,6 +37,7 @@ public class DepositAccount {
 
     private String name;
     private String product;
+	private String branch;
     
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
@@ -187,5 +188,13 @@ public class DepositAccount {
 
 	public void setDetails(String details) {
 		this.details = details;
+	}
+
+	public String getBranch() {
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
 	}
 }

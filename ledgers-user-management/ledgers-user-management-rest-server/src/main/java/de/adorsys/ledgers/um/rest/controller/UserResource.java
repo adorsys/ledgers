@@ -93,7 +93,7 @@ public class UserResource {
 
     @GetMapping("all")
     ResponseEntity<List<UserBO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAll());
+        return ResponseEntity.ok(userService.listUsers(0, 10));
     }
 
 }

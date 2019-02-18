@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,4 +107,17 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 	public List<UserTO> listUsers(int page, int size) {
 		return userTOMapper.toUserTOList(userService.listUsers(page, size));
 	}
+
+	@Override
+	public List<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles) {
+		List<UserBO> users = userService.findByBranchAndUserRolesIn(branch, userTOMapper.toUserRoleBO(roles));
+		return userTOMapper.toUserTOList(users);
+	}
+
+    @Override
+    public int countUsersByBranch(String branch) {
+        return userService.countUsersByBranch(branch);
+    }
+
+
 }

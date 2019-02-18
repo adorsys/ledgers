@@ -18,6 +18,8 @@ package de.adorsys.ledgers.um.impl.converter;
 
 import java.util.List;
 
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.db.domain.UserRole;
 import org.mapstruct.Mapper;
 
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -36,7 +38,7 @@ public interface UserConverter {
 
     List<UserBO> toUserBOList(List<UserEntity> user);
 
-    List<UserEntity> toUserPOList(List<UserBO> user);
+    List<UserEntity> toUserEntityList(List<UserBO> user);
  
     ScaUserDataBO toScaUserDataBO(ScaUserDataEntity entity);
 
@@ -53,5 +55,9 @@ public interface UserConverter {
     List<AccountAccessBO> toAccountAccessListBO(List<AccountAccess> list);
 
     List<AccountAccess> toAccountAccessListEntity(List<AccountAccessBO> bos);
-    
+
+    List<UserRoleBO> toUserRoleBO(List<UserRole> userRoles);
+
+    List<UserRole> toUserRole(List<UserRoleBO> userRoles);
+
 }

@@ -87,14 +87,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 		BearerTokenBO loginTokenBO = proceedToLogin(user, pin, role, scaId, authorisationId);
 		try {
 			if(!scaRequired(user, OpTypeBO.LOGIN)) {
-				SCALoginResponseTO response = new SCALoginResponseTO();
-				response.setScaStatus(ScaStatusTO.EXEMPTED);		
-				BearerTokenBO scaTokenBO = userService.scaToken(loginTokenBO.getAccessTokenObject());
-				response.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaTokenBO));
-				response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
-				response.setExpiresInSeconds(scaTokenBO.getExpires_in());
-				response.setStatusDate(LocalDateTime.now());
-				return response;
+				return authorizeResponse(loginTokenBO);
 			} else {
 				SCAOperationBO scaOperationBO;
 				UserTO userTo = scaUtils.user(user);
@@ -136,14 +129,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 		BearerTokenBO loginTokenBO = proceedToLogin(user, pin, UserRoleTO.CUSTOMER, consentId, authorisationId);
 		try {
 			if(!scaRequired(user, opTypeBO)) {
-				SCALoginResponseTO response = new SCALoginResponseTO();
-				response.setScaStatus(ScaStatusTO.EXEMPTED);		
-				BearerTokenBO scaTokenBO = userService.scaToken(loginTokenBO.getAccessTokenObject());
-				response.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaTokenBO));
-				response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
-				response.setExpiresInSeconds(scaTokenBO.getExpires_in());
-				response.setStatusDate(LocalDateTime.now());
-				return response;
+				return authorizeResponse(loginTokenBO);
 			} else {
 				String noUserMessage = "No user message";
 				AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, 
@@ -176,7 +162,9 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	@Override
 	public UserTO register(String login, String email, String pin, UserRoleTO role)
 			throws UserAlreadyExistsMiddlewareException {
+
 		UserTO user = new UserTO(login, email, pin);
+		logger.info(user.toString());
 		user.getUserRoles().add(role);
 		UserBO userBO = userTOMapper.toUserBO(user);
 		try {
@@ -274,7 +262,17 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 	private boolean scaRequired(UserBO user, OpTypeBO opType) {
 		return scaUtils.hasSCA(user);
 	}
-	
+
+	private SCALoginResponseTO authorizeResponse(BearerTokenBO loginTokenBO) throws UserNotFoundException, InsufficientPermissionException {
+		SCALoginResponseTO response = new SCALoginResponseTO();
+		response.setScaStatus(ScaStatusTO.EXEMPTED);
+		BearerTokenBO scaTokenBO = userService.scaToken(loginTokenBO.getAccessTokenObject());
+		response.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaTokenBO));
+		response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
+		response.setExpiresInSeconds(scaTokenBO.getExpires_in());
+		response.setStatusDate(LocalDateTime.now());
+		return response;
+	}
 
 	private UserBO user(String login) throws UserNotFoundMiddlewareException {
 		UserBO user;

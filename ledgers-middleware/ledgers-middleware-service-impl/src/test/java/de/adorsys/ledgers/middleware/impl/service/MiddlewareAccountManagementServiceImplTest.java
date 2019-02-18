@@ -1,35 +1,9 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
@@ -40,6 +14,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -49,11 +24,32 @@ import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareAccountManagementServiceImplTest {
@@ -77,6 +73,8 @@ public class MiddlewareAccountManagementServiceImplTest {
     private AccountDetailsMapper detailsMapper;
     @Mock
     private UserService userService;
+    @Mock
+    private AccessService accessService;
     @Mock
     AmountMapper amountMapper;
     @Mock
@@ -170,6 +168,57 @@ public class MiddlewareAccountManagementServiceImplTest {
 	}
 
     @Test
+    public void listDepositAccounts () throws DepositAccountNotFoundException {
+        // users
+        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {});
+        UserTO userTO = getDataFromFile("user.yml", new TypeReference<UserTO>() {});
+        // accounts
+        List<DepositAccountDetailsBO> accounts = new ArrayList<>();
+        accounts.add(getDepositAccountDetailsBO());
+        List<AccountDetailsTO> accountsTO = new ArrayList<>();
+        accountsTO.add(getAccountDetailsTO());
+
+        when(accessService.loadCurrentUser()).thenReturn(user);
+        when(userMapper.toUserTO(user)).thenReturn(userTO);
+        when(accountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
+        when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
+
+        List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccounts();
+
+        assertThat(accountsToBeTested).isNotNull();
+        assertThat(accountsToBeTested).isNotEmpty();
+
+        verify(accessService, times(1)).loadCurrentUser();
+        verify(userMapper, times(1)).toUserTO(user);
+        verify(accountService, times(1)).getDepositAccountsByIban(anyList(),any(LocalDateTime.class),anyBoolean());
+        verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
+    }
+
+    @Test
+    public void listDepositAccountsByBranch() {
+        // user
+        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {});
+        // accounts
+        List<DepositAccountDetailsBO> accounts = new ArrayList<>();
+        accounts.add(getDepositAccountDetailsBO());
+        List<AccountDetailsTO> accountsTO = new ArrayList<>();
+        accountsTO.add(getAccountDetailsTO());
+
+        when(accessService.loadCurrentUser()).thenReturn(user);
+        when(accountService.findByBranch(anyString())).thenReturn(accounts);
+        when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
+
+        List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccountsByBranch();
+
+        assertThat(accountsToBeTested).isNotNull();
+        assertThat(accountsToBeTested).isNotEmpty();
+
+        verify(accessService, times(1)).loadCurrentUser();
+        verify(accountService, times(1)).findByBranch(anyString());
+        verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
+    }
+
+	@Test
     public void getTransactionById() throws TransactionNotFoundMiddlewareException, AccountNotFoundMiddlewareException, DepositAccountNotFoundException, TransactionNotFoundException {
         when(accountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
         when(paymentConverter.toTransactionTO(any())).thenReturn(readYml(TransactionTO.class, "TransactionTO.yml"));

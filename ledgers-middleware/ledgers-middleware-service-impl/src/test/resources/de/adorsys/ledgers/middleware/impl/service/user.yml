@@ -1,6 +1,7 @@
 login: login
 email: email
 pin: pin
+branch: Nuremberg
 scaUserData:
   - id: 1
     scaMethod: EMAIL

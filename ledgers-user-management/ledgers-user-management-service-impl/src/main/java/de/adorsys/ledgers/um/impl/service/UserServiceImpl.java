@@ -114,7 +114,13 @@ public class UserServiceImpl implements UserService {
 	@Override
     public UserBO create(UserBO user) throws UserAlreadyExistsException {
         UserEntity userPO = userConverter.toUserPO(user);
-        userPO.setId(Ids.id());
+
+        // if user is TPP and has an ID than do not reset it
+		if (userPO.getId() == null) {
+			logger.info(userPO.getId());
+			userPO.setId(Ids.id());
+		}
+
         userPO.setPin(passwordEnc.encode(userPO.getId(),user.getPin()));
 
         try {
@@ -283,13 +289,8 @@ public class UserServiceImpl implements UserService {
     @NotNull
     private UserEntity getUser(String login) throws UserNotFoundException {
         Optional<UserEntity> userOptional = userRepository.findFirstByLogin(login);
-        userOptional.orElseThrow(() -> userNotFoundException(login));
+        userOptional.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login)));
         return userOptional.get();
-    }
-
-    @NotNull
-    private UserNotFoundException userNotFoundException(String login) {
-        return new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login));
     }
 
 	@Override
@@ -365,11 +366,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserBO> getAll() {
-		return userConverter.toUserBOList(userRepository.findAll());
-	}
-
-	@Override
 	public BearerTokenBO scaToken(AccessTokenBO loginToken) throws UserNotFoundException {
 		UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
 		Date issueTime = new Date();
@@ -402,6 +398,17 @@ public class UserServiceImpl implements UserService {
 		AisConsentEntity aisConsentEntity = consentRepository.findById(consentId)
 			.orElseThrow(() -> new ConsentNotFoundException(String.format(CONESENT_WITH_ID_NOT_FOUND, consentId)));
 		return aisConsentMapper.toAisConsentBO(aisConsentEntity);
+	}
+
+	@Override
+	public List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles) {
+		 List<UserEntity> userEntities = userRepository.findByBranchAndUserRolesIn(branch, userConverter.toUserRole(userRoles));
+		 return userConverter.toUserBOList(userEntities);
+	}
+
+	@Override
+	public int countUsersByBranch(String branch) {
+		return userRepository.countByBranch(branch);
 	}
 
 }
