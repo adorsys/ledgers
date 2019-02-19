@@ -1,0 +1,7 @@
+button:focus {outline: none;}
+button { cursor:pointer; }
+
+.btn-primary {
+  background-color: #054f72;
+  color: white;
+}
