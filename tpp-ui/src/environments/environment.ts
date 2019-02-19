@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   server: 'http://localhost:8088',
-  branchResourceEndPoint: 'http://localhost:8088/branches'
+  staffAccessResourceEndPoint: 'http://localhost:8088/staff-access'
 };
 
 /*

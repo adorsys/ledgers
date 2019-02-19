@@ -10,7 +10,7 @@ import {AuthService} from "./auth.service";
 })
 export class AccountService {
 
-  private url = `${environment.server}`;
+  private url = `${environment.staffAccessResourceEndPoint}`;
 
   constructor(private http: HttpClient,
               private authService: AuthService) { }

@@ -12,7 +12,7 @@ import {User} from "../models/user.model";
 })
 export class AuthService {
 
-  public url = `${environment.branchResourceEndPoint}`;
+  public url = `${environment.staffAccessResourceEndPoint}`;
   private authTokenStorageKey = 'token';
   private jwtHelperService = new JwtHelperService();
   private overridingJwt: string;
@@ -24,7 +24,7 @@ export class AuthService {
   constructor(private http: HttpClient) { }
 
   authorize(credentials: Credentials): Observable<string> {
-    return this.http.post<any>(this.url + '/login', credentials)
+    return this.http.post<any>(this.url + '/users/login', credentials)
       .pipe(
         map(loginResponse => loginResponse.bearerToken.access_token)
       );
@@ -57,7 +57,7 @@ export class AuthService {
 
   register(user: User, branch) {
     console.log(user);
-    return this.http.post(this.url + '/register', user, {
+    return this.http.post(this.url + '/users/register', user, {
       params: {branch: branch}
     });
   }
