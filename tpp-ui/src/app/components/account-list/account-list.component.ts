@@ -7,12 +7,22 @@ import {AccountService} from "../../services/account.service";
   styleUrls: ['./account-list.component.css']
 })
 export class AccountListComponent implements OnInit {
-  private accounts;
+  accounts: Account;
 
-  constructor(private service: AccountService) { }
+  constructor(private accountService: AccountService) { }
 
   ngOnInit() {
+    this.getUsers();
     // this.service.getAccounts()
     //   .subscribe(accounts => this.accounts = accounts);
   }
+
+
+  getUsers(): void {
+    this.accountService.getAccounts()
+      .subscribe((accounts: Account) => {
+        this.accounts = accounts;
+      })
+  }
+
 }
