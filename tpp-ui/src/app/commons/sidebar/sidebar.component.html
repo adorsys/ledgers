@@ -5,7 +5,13 @@
         <span>User management</span>
       </h6>
       <li class="nav-item">
-        <a class="nav-link" [routerLink]="['/users']" [routerLinkActive]="['active']">
+        <a class="nav-link" [routerLink]="['/users/create']" [routerLinkActive]="['active']">
+          <span data-feather="file"></span>
+          Create User
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/users/all']" [routerLinkActive]="['active']">
           <span data-feather="file"></span>
           My Users
         </a>

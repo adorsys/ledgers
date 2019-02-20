@@ -16,6 +16,7 @@
       <th scope="col">Email</th>
       <th scope="col">Accounts</th>
       <th scope="col">Authentication methods</th>
+      <th scope="col">Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -36,6 +37,9 @@
             {{scaItem.methodValue}}
           </li>
         </ul>
+      </td>
+      <td>
+        <a class="btn btn-primary" routerLink="/users/{{user.id}}/create-deposit-account">create deposit account</a>
       </td>
     </tr>
     </tbody>

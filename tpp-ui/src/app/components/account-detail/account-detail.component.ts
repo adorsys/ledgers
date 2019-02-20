@@ -2,7 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {AccountStatus, AccountType, UsageType} from "../../models/account.model";
 import {AccountService} from "../../services/account.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'app-account-detail',
@@ -26,6 +27,7 @@ export class AccountDetailComponent implements OnInit {
     'details': new FormControl(null),
     'accountStatus': new FormControl(AccountStatus.ENABLED, Validators.required),
   });
+  userID: string;
 
   accountTypes = Object.keys(AccountType);
   accountStatuses = Object.keys(AccountStatus);
@@ -34,26 +36,21 @@ export class AccountDetailComponent implements OnInit {
   submitted = false;
   errorMessage = null;
 
-  constructor(private accountService: AccountService,
-    private router: Router) { }
+  constructor(
+    private accountService: AccountService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
-  }
-
-  onSubmit() {
-    this.submitted = true;
-    this.errorMessage = null;
-    if (this.accountForm.invalid) {
-      return;
-    }
-    this.accountService.createAccount(this.accountForm.value)
-      .subscribe(() => this.router.navigate(['/accounts']), error => {
-        if (typeof error.error === 'object') {
-          this.errorMessage = error.error.status + ' ' + error.error.error + ': ' + error.error.message;
-        } else {
-          this.errorMessage = error.status + ' ' + error.error
-        }
-      });
+    this.activatedRoute.params
+      .pipe(
+        map(response => {
+          return response.id;
+        })
+      )
+      .subscribe((userID: string) => {
+        this.userID = userID;
+    });
   }
 
   get accountType() {
@@ -74,5 +71,21 @@ export class AccountDetailComponent implements OnInit {
 
   get currency() {
     return this.accountForm.get('currency');
+  }
+
+  onSubmit() {
+    this.submitted = true;
+    this.errorMessage = null;
+    if (this.accountForm.invalid) {
+      return;
+    }
+    this.accountService.createAccount(this.userID, this.accountForm.getRawValue())
+      .subscribe(() => this.router.navigate(['/accounts']), error => {
+        if (typeof error.error === 'object') {
+          this.errorMessage = error.error.status + ' ' + error.error.error + ': ' + error.error.message;
+        } else {
+          this.errorMessage = error.status + ' ' + error.error
+        }
+      });
   }
 }
