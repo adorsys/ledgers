@@ -1,5 +1,10 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <div>
+    <h1 class="h2">Create new account</h1>
+  </div>
+</div>
+
 <div class="container">
-  <h1>Create new account</h1>
   <form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
     <div *ngIf="errorMessage" class="alert alert-danger">
       {{errorMessage}}
@@ -20,8 +25,8 @@
       <select id="usageType" class="form-control" formControlName="usageType" [ngClass]="{'is-invalid': usageType.invalid && (usageType.dirty || usageType.touched || submitted)}">
         <option *ngFor="let usageType of usageTypes" [value]="usageType">{{usageType}}</option>
       </select>
-      <div class="invalid-feedback">
-        <div *ngIf="usageType.errors?.required">
+      <div class="invalid-feedback" *ngIf="usageType.errors?.required">
+        <div >
           Required
         </div>
       </div>
