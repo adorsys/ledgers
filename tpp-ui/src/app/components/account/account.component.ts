@@ -27,14 +27,15 @@ export class AccountComponent implements OnInit {
       )
       .subscribe((accountID: string) => {
         this.accountID = accountID;
-
-        console.log(this.accountID);
+        this.getAccount();
       });
   }
 
-
   getAccount() {
-
+    this.accountService.getAccount(this.accountID)
+      .subscribe((account: Account) => {
+        this.account = account;
+        console.log(this.account);
+      })
   }
-
 }

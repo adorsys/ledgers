@@ -16,6 +16,10 @@ export class AccountService {
     return this.http.get(this.url + '/accounts');
   }
 
+  getAccount(id: String) {
+    return this.http.get(this.url + '/accounts/' + id);
+  }
+
   createAccount(userId: string, account: Account) {
     return this.http.post(this.url + '/accounts', account,{
       params: {userID: userId}
