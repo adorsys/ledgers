@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Amount} from "../models/amount.model";
 import {Credentials} from "../models/credentials.model";
@@ -19,8 +19,10 @@ export class AccountService {
     return this.http.get(this.url + '/accounts');
   }
 
-  createAccount(account: Account) {
-    return this.http.post(this.url + '/accounts', account);
+  createAccount(userId: string, account: Account) {
+    let params = new HttpParams();
+    params.append("userID", userId);
+    return this.http.post(this.url + '/accounts', account,{params: {userID: userId}});
   }
 
   depositCash(accountId: string, amount: Amount, technicalUser: Credentials) {

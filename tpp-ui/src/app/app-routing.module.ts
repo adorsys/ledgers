@@ -40,7 +40,7 @@ const routes: Routes = [
         component: CashDepositComponent
       },
       {
-        path: 'users',
+        path: 'users/all',
         component: UsersComponent
       },
       {
@@ -50,6 +50,10 @@ const routes: Routes = [
       {
         path: 'users/:id',
         component: UserDetailsComponent
+      },
+      {
+        path: 'users/:id/create-deposit-account',
+        component: AccountDetailComponent
       },
       {
         path: 'users/:id/authentication-methods',
