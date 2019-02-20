@@ -11,7 +11,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class CashDepositComponent implements OnInit {
 
   form = new FormGroup({
-    'currency': new FormControl('EUR', Validators.required),
+    'currency': new FormControl({value: 'EUR', disabled: true}, Validators.required),
     'amount': new FormControl('', Validators.required),
   });
 
@@ -33,7 +33,7 @@ export class CashDepositComponent implements OnInit {
       return;
     }
 
-    this.accountService.depositCash(this.accountId, this.form.value)
+    this.accountService.depositCash(this.accountId, this.form.getRawValue())
       .subscribe(
         () => this.router.navigate(['/accounts']),
           error => {
