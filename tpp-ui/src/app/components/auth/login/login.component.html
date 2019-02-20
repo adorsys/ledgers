@@ -17,19 +17,19 @@
                      placeholder="Enter your login"
                      [ngClass]="{ 'is-invalid': loginForm.controls['login'].touched && loginForm.controls['login'].errors }"
                      class="form-control">
-              <p class="text-danger" *ngIf="loginForm.controls['login'].touched && loginForm.controls['login'].errors">Login is required</p>
+              <div class="invalid-feedback" *ngIf="loginForm.controls['login'].touched && loginForm.controls['login'].hasError('required')">Login is required</div>
             </div>
             <div class="form-group">
-              <label for="userPin" class="text-adorsys">Pin:</label><br>
+              <label for="pin" class="text-adorsys">Pin:</label><br>
               <input type="password"
-                     id="userPin"
+                     id="pin"
                      name="pin"
                      formControlName="pin"
                      placeholder="Enter you pin"
                      [ngClass]="{ 'is-invalid': loginForm.controls['pin'].touched && loginForm.controls['pin'].errors }"
                      class="form-control">
+              <div class="invalid-feedback" *ngIf="loginForm.controls['pin'].touched && loginForm.controls['pin'].hasError('required')">Pin is required</div>
             </div>
-            <p class="text-danger" *ngIf="loginForm.controls['pin'].touched && loginForm.controls['pin'].errors">Pin is required</p>
             <div class="form-group">
               <button type="submit"
                       (click)="onSubmit()"
