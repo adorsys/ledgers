@@ -76,8 +76,8 @@ export class UserCreateComponent implements OnInit {
     }
 
     this.userService.createUser(this.userForm.value)
-      .subscribe(response => {
-        this.router.navigateByUrl('/users');
+      .subscribe(() => {
+        this.router.navigateByUrl('staff-access/users');
       });
   }
 

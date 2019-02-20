@@ -32,11 +32,7 @@ const routes: Routes = [
         component: AccountDetailComponent
       },
       {
-        path: 'accounts/create',
-        component: AccountListComponent
-      },
-      {
-        path: 'accounts/:id/deposit',
+        path: 'accounts/:id/deposit-cash',
         component: CashDepositComponent
       },
       {

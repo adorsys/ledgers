@@ -1,10 +1,5 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
   <h1 class="h2">Accounts</h1>
-  <div class="btn-toolbar mb-2 mb-md-0">
-    <div class="btn-group mr-2">
-      <button class="btn btn-lg btn-outline-secondary" routerLink="/accounts/create">create new account</button>
-    </div>
-  </div>
 </div>
 
 <div class="table-responsive">
@@ -17,6 +12,7 @@
         <th scope="col">Account Type</th>
         <th scope="col">Usage Type</th>
         <th scope="col">Account Status</th>
+        <th scope="col">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -27,6 +23,9 @@
       <td>{{account.accountType}}</td>
       <td>{{account.usageType}}</td>
       <td>{{account.accountStatus}}</td>
+      <td>
+        <a class="btn btn-primary" routerLink="/accounts/{{account.id}}/deposit-cash">deposit cash</a>
+      </td>
     </tr>
     </tbody>
   </table>

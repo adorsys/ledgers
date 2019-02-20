@@ -11,16 +11,10 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class CashDepositComponent implements OnInit {
 
   form = new FormGroup({
-    'amount': new FormGroup({
-      'currency': new FormControl('', Validators.required),
-      'amount': new FormControl('', Validators.required),
-    }),
-    'technicalUser': new FormGroup({
-      'login': new FormControl('', Validators.required),
-      'pin': new FormControl('', Validators.required),
-      'role': new FormControl('TECHNICAL', Validators.required),
-    })
+    'currency': new FormControl('EUR', Validators.required),
+    'amount': new FormControl('', Validators.required),
   });
+
   submitted: boolean;
   accountId: string;
   errorMessage: string;
@@ -30,8 +24,7 @@ export class CashDepositComponent implements OnInit {
               private router: Router) { }
 
   ngOnInit() {
-    this.accountId = this.activatedRoute.snapshot.paramMap.get('id');
-    console.log(this.accountId);
+     this.accountId = this.activatedRoute.snapshot.paramMap.get('id');
   }
 
   onSubmit() {
@@ -39,29 +32,24 @@ export class CashDepositComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.accountService.depositCash(this.accountId, this.form.value.amount, this.form.value.technicalUser)
-      .subscribe(() => this.router.navigate(['/accounts']), error => {
-        if (typeof error.error === 'object') {
-          this.errorMessage = error.error.status + ' ' + error.error.error + ': ' + error.error.message;
-        } else {
-          this.errorMessage = error.status + ' ' + error.error
-        }
-      });
+
+    this.accountService.depositCash(this.accountId, this.form.value)
+      .subscribe(
+        () => this.router.navigate(['/accounts']),
+          error => {
+                  if (typeof error.error === 'object') {
+                    this.errorMessage = error.error.status + ' ' + error.error.error + ': ' + error.error.message;
+                  } else {
+                    this.errorMessage = error.status + ' ' + error.error
+                  }
+          });
   }
 
   get amount() {
-    return this.form.get('amount').get('amount');
+    return this.form.get('amount');
   }
 
   get currency() {
-    return this.form.get('amount').get('currency');
-  }
-
-  get login() {
-    return this.form.get('technicalUser').get('login');
-  }
-
-  get pin() {
-    return this.form.get('technicalUser').get('pin');
+    return this.form.get('currency');
   }
 }
