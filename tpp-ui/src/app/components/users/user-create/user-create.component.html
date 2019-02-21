@@ -78,7 +78,7 @@
           <button class="d-inline btn-sm btn-outline-secondary float-right" (click)="addScaDataItem()">add new authentication method</button>
         </div>
         <div class="card-body">
-          <div class="row" *ngFor="let scaDataItem of userForm.controls['scaUserData'].controls; let i=index">
+          <div class="row" *ngFor="let scaDataItem of formControl['scaUserData']['controls']; let i=index">
             <div class="col-lg-8 col-md-8 col-sm-6 my-1" [formGroupName]="i">
               <label for="scaData" class="control-label">SCA</label>
               <input type="text"
