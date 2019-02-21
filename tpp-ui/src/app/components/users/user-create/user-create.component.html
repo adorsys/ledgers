@@ -79,6 +79,7 @@
         </div>
         <div class="card-body">
           <div class="row" *ngFor="let scaDataItem of formControl['scaUserData']['controls']; let i=index">
+
             <div class="col-lg-8 col-md-8 col-sm-6 my-1" [formGroupName]="i">
               <label for="scaData" class="control-label">SCA</label>
               <input type="text"
@@ -93,8 +94,7 @@
               </div>
             </div>
 
-            <div class="col-auto my-1" [formGroupName]="i">
-
+            <div class="col-auto mt-auto mb-3" [formGroupName]="i">
               <div class="form-check form-check-inline">
                 <input class="form-check-input"
                        type="radio"
@@ -105,7 +105,6 @@
                   Email
                 </label>
               </div>
-
 
               <div class="form-check form-check-inline">
                 <input class="form-check-input"
@@ -118,15 +117,15 @@
                 </label>
               </div>
 
-              <button type="button"
+              <button class="close"
+                      type="button"
                       *ngIf="userForm.controls['scaUserData'].controls.length > 0"
                       (click)="removeScaDataItem(i)"
-                      class="close align-self-baseline"
                       aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
-
             </div>
+
           </div>
         </div>
       </div>
