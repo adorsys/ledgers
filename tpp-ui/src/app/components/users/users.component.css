@@ -20,3 +20,8 @@ li {
   margin: 0;
   padding: 0;
 }
+
+.btn-primary {
+  background-color: #054f72;
+  color: white;
+}

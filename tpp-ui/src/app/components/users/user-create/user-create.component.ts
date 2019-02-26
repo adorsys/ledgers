@@ -15,6 +15,7 @@ export class UserCreateComponent implements OnInit {
   user: User;
 
   userForm: FormGroup;
+  submitted: boolean;
 
   constructor(
     private userService: UserService,
@@ -31,9 +32,6 @@ export class UserCreateComponent implements OnInit {
     this.userForm = this.formBuilder.group({
       scaUserData: this.formBuilder.array([
         this.initScaData()
-      ]),
-      accountAccesses: this.formBuilder.array([
-        this.initAccountAccessData()
       ]),
       email: ['', [Validators.required, Validators.email]],
       login: ['', Validators.required],
@@ -71,14 +69,15 @@ export class UserCreateComponent implements OnInit {
   }
 
   onSubmit() {
+    this.submitted = true;
 
     if (this.userForm.invalid) {
       return;
     }
 
     this.userService.createUser(this.userForm.value)
-      .subscribe(response => {
-        this.router.navigateByUrl('/users');
+      .subscribe(() => {
+        this.router.navigateByUrl('/users/all');
       });
   }
 

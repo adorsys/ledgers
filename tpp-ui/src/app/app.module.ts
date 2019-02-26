@@ -20,6 +20,7 @@ import { CashDepositComponent } from './components/cash-deposit/cash-deposit.com
 import { UsersComponent } from './components/users/users.component';
 import { UserDetailsComponent } from './components/users/user-details/user-details.component';
 import { UserCreateComponent } from './components/users/user-create/user-create.component';
+import { AccountComponent } from './components/account/account.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { UserCreateComponent } from './components/users/user-create/user-create.
     CashDepositComponent,
     UsersComponent,
     UserDetailsComponent,
-    UserCreateComponent
+    UserCreateComponent,
+    AccountComponent
   ],
   imports: [
     BrowserModule,

@@ -8,7 +8,7 @@ import {User} from "../models/user.model";
 })
 export class UserService {
 
-  public url = `${environment.branchResourceEndPoint}`;
+  public url = `${environment.staffAccessResourceEndPoint}`;
 
   constructor(private http: HttpClient) { }
 

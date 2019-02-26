@@ -11,6 +11,7 @@ import {CashDepositComponent} from "./components/cash-deposit/cash-deposit.compo
 import {UsersComponent} from "./components/users/users.component";
 import {UserDetailsComponent} from "./components/users/user-details/user-details.component";
 import {UserCreateComponent} from "./components/users/user-create/user-create.component";
+import {AccountComponent} from "./components/account/account.component";
 
 const routes: Routes = [
   {
@@ -29,18 +30,14 @@ const routes: Routes = [
       },
       {
         path: 'accounts/:id',
-        component: AccountDetailComponent
+        component: AccountComponent
       },
       {
-        path: 'accounts/create',
-        component: AccountListComponent
-      },
-      {
-        path: 'accounts/:id/deposit',
+        path: 'accounts/:id/deposit-cash',
         component: CashDepositComponent
       },
       {
-        path: 'users',
+        path: 'users/all',
         component: UsersComponent
       },
       {
@@ -50,6 +47,10 @@ const routes: Routes = [
       {
         path: 'users/:id',
         component: UserDetailsComponent
+      },
+      {
+        path: 'users/:id/create-deposit-account',
+        component: AccountDetailComponent
       },
       {
         path: 'users/:id/authentication-methods',

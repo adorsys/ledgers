@@ -4,7 +4,7 @@
       <div id="register-column" class="col-md-6">
         <div id="register-box" class="col-md-12">
 
-          <form id="register-form" [formGroup]="userForm" (ngSubmit)="onSubmit(branchInput)">
+          <form id="register-form" [formGroup]="userForm" autocomplete="off" (ngSubmit)="onSubmit(branchInput)">
             <h3 class="text-center text-adorsys">Adorsys TPP Sandbox</h3>
             <div *ngIf="errorMessage" class="alert alert-danger">
               {{errorMessage}}
@@ -15,6 +15,7 @@
               <input type="text" #branchInput
                      class="form-control"
                      id="branch"
+                     autocomplete="off"
                      placeholder="please input your TPP ID"
                      formControlName="branch" autofocus
                      [ngClass]="{'is-invalid': branch.invalid && (submitted || branch.dirty || branch.touched)}">
@@ -26,6 +27,7 @@
             <div class="form-group">
               <label for="email">Email</label>
               <input type="email"
+                     autocomplete="off"
                      class="form-control"
                      placeholder="Your contact email"
                      id="email"
@@ -39,6 +41,7 @@
             <div class="form-group">
               <label for="registerTTP" class="form-group required">Login</label>
               <input type="text"
+                     autocomplete="off"
                      class="form-control"
                      id="registerTTP"
                      placeholder="your login into TTP sandbox"
@@ -52,6 +55,7 @@
             <div class="form-group">
               <label for="pin">PIN</label>
               <input type="password"
+                     autocomplete="new-password"
                      class="form-control"
                      id="pin"
                      placeholder="your pin for TPP dashboard access"
