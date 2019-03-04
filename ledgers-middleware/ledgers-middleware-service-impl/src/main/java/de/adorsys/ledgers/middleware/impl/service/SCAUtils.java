@@ -1,9 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -18,6 +14,9 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SCAUtils {
@@ -29,7 +28,6 @@ public class SCAUtils {
 
 	public SCAUtils(UserService userService, SCAOperationService scaOperationService, UserMapper userMapper,
 			AccessTokenTO accessTokenTO) {
-		super();
 		this.userService = userService;
 		this.scaOperationService = scaOperationService;
 		this.userMapper = userMapper;
@@ -40,7 +38,10 @@ public class SCAUtils {
 		if (scaMethodId == null || user.getScaUserData() == null) {
 			return null;
 		}
-		return user.getScaUserData().stream().filter(uda -> scaMethodId.equals(uda.getId())).findFirst().orElse(null);
+		return user.getScaUserData().stream()
+				       .filter(uda -> scaMethodId.equals(uda.getId()))
+				       .findFirst()
+				       .orElse(null);
 	}
 
 	public UserTO user() {
@@ -48,7 +49,7 @@ public class SCAUtils {
 	}
 	
 	public boolean hasSCA(UserBO userBO) {
-		return userBO.getScaUserData()!=null & !userBO.getScaUserData().isEmpty(); 
+		return userBO.getScaUserData() != null && !userBO.getScaUserData().isEmpty();
 	}
 
 	public UserTO user(UserBO userBO) {
@@ -77,7 +78,7 @@ public class SCAUtils {
 		return accessTokenTO.getRole();
 	}
 	
-	public String authorisatioId() {
+	public String authorisationId() {
 		String scaId = accessTokenTO.getScaId();
 		String authorisationId = accessTokenTO.getAuthorisationId();
 		if(scaId.equals(authorisationId)) {// we are working with login token.

@@ -1,11 +1,7 @@
 package de.adorsys.ledgers.rest.posting.controller;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.rest.exception.NotFoundRestException;
 import io.swagger.annotations.Api;
@@ -28,8 +24,8 @@ public class PostingController {
     }
 
     /**
-     * @param posting
-     * @return
+     * @param posting posting to create
+     * @return persisted posting
      */
     @ApiOperation(value = "Creates a new Posting.",
             notes = "- If there is another posting with the same operation id\n" +
@@ -47,12 +43,12 @@ public class PostingController {
     }
 
     /**
-     * @param oprId
-     * @return
+     * @param oprId operation identifier
+     * @return a list of postings
      */
     @ApiOperation(value = "Listing all postings associated with this operation id.")
     @GetMapping(path = "postings", params = {"oprId"})
-    public ResponseEntity<List<PostingBO>> findPostingsByOperationId(@RequestParam(required = true, name = "oprId") String oprId) {
+    public ResponseEntity<List<PostingBO>> findPostingsByOperationId(@RequestParam(name = "oprId") String oprId) {
         List<PostingBO> list = postingService.findPostingsByOperationId(oprId);
         return ResponseEntity.ok(list);
     }

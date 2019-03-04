@@ -1,14 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
@@ -20,6 +11,14 @@ import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AccessService {
@@ -28,14 +27,13 @@ public class AccessService {
     private final UserService userService;
     private final AccessTokenTO accessToken;
 
-	public AccessService(UserService userService, AccessTokenTO accessToken) {
-		super();
-		this.userService = userService;
-		this.accessToken = accessToken;
-	}
+    public AccessService(UserService userService, AccessTokenTO accessToken) {
+        this.userService = userService;
+        this.accessToken = accessToken;
+    }
 
-	public void addAccess(List<AccountAccessTO> accountAccess, DepositAccountBO depositAccountBO,
-                           final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
+    public void addAccess(List<AccountAccessTO> accountAccess, DepositAccountBO depositAccountBO,
+                          final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
         for (AccountAccessTO accountAccessTO : accountAccess) {
             // TODO: check if accountAccess User is not Null
             UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
@@ -67,7 +65,7 @@ public class AccessService {
             persistBuffer.put(user.getId(), user);
         }
     }
-    
+
     public UserBO loadCurrentUser() {
         // Load owner
         UserBO userBo;
@@ -83,12 +81,12 @@ public class AccessService {
     public List<String> filterOwnedAccounts(List<AccountAccessTO> accountAccesses) {
         // All iban owned by this user.
         //TODO should be moved to UM @dmiex
-        return accountAccesses==null
-        		? Collections.emptyList()
-        				: accountAccesses.stream()
-                       .filter(a -> a.getAccessType()!=null && AccessTypeBO.OWNER.name().equals(a.getAccessType().name()))
-                       .map(AccountAccessTO::getIban)
-                       .collect(Collectors.toList());
+        return accountAccesses == null
+                       ? Collections.emptyList()
+                       : accountAccesses.stream()
+                                 .filter(a -> a.getAccessType() != null && AccessTypeBO.OWNER.name().equals(a.getAccessType().name()))
+                                 .map(AccountAccessTO::getIban)
+                                 .collect(Collectors.toList());
     }
 
 

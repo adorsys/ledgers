@@ -30,5 +30,6 @@
 	<!--add branch to deposit account-->
 	<include file="migration/0007-add-branch-to-deposit-account-table.xml" relativeToChangelogFile="true" />
 
-
+    <!--add required numbers of scas for current user and sertain account-->
+    <include file="migration/0008-scas-required.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

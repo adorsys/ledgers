@@ -1,29 +1,8 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
-import de.adorsys.ledgers.deposit.api.domain.AmountBO;
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.domain.BalanceTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
@@ -33,23 +12,20 @@ import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
-import de.adorsys.ledgers.postings.api.domain.BalanceSideBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.domain.PostingTraceBO;
-import de.adorsys.ledgers.postings.api.domain.PostingTypeBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.domain.*;
+import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
@@ -187,7 +163,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         try {
             DepositAccountDetailsBO account = getDepositAccountByIban(requestBO.getPsuAccount().getIban(), LocalDateTime.now(), true);
             return account.getBalances().stream()
-                           .filter(b -> b.getBalanceType() == BalanceTypeBO.AVAILABLE)
+                           .filter(b -> b.getBalanceType() == BalanceTypeBO.INTERIM_AVAILABLE)
                            .findFirst()
                            .map(b -> isSufficientAmountAvailable(requestBO, b))
                            .orElse(Boolean.FALSE);
@@ -225,7 +201,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             } else {
                 amount.setAmount(stmt.creditBalance());
             }
-            balanceBO.setBalanceType(BalanceTypeBO.AVAILABLE);
+            balanceBO.setBalanceType(BalanceTypeBO.INTERIM_AVAILABLE);
             PostingTraceBO youngestPst = stmt.getYoungestPst();
             balanceBO.setReferenceDate(stmt.getPstTime().toLocalDate());
             if (youngestPst != null) {

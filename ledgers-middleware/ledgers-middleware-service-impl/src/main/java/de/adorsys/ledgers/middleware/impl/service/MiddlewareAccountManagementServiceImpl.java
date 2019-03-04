@@ -72,7 +72,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
 			AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService,
 			SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper, CreateDepositAccountService createDepositAccountService) {
-		super();
 		this.depositAccountService = depositAccountService;
 		this.accountDetailsMapper = accountDetailsMapper;
 		this.paymentConverter = paymentConverter;
@@ -92,33 +91,31 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
             throws UserNotFoundMiddlewareException {
-
-		try {
-			UserBO user = userService.findById(accessToken.getSub());
-			createDepositAccountService.createDepositAccount(accessToken.getSub(), depositAccount, accountAccesses, user.getBranch());
-		} catch (UserNotFoundException e) {
-			logger.error(e.getMessage(), e);
-			throw new UserNotFoundMiddlewareException();
-		}
+        try {
+            UserBO user = userService.findById(accessToken.getSub());
+            createDepositAccountService.createDepositAccount(accessToken.getSub(), depositAccount, accountAccesses, user.getBranch());
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException();
+        }
     }
 
-	@Override
-	public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException {
-		try {
-			UserBO user = userService.findById(userID);
+    @Override
+    public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException {
+        try {
+            UserBO user = userService.findById(userID);
 
-			AccountAccessTO accountAccessTO = new AccountAccessTO();
-			accountAccessTO.setAccessType(AccessTypeTO.OWNER);
-			accountAccessTO.setUser(userMapper.toUserTO(user));
-			List<AccountAccessTO> accountAccesses = new ArrayList<>();
-			accountAccesses.add(accountAccessTO);
-			createDepositAccountService.createDepositAccount(userID, depositAccount, accountAccesses, user.getBranch());
-		} catch (UserNotFoundException e) {
-			logger.error(e.getMessage(), e);
-			throw new UserNotFoundMiddlewareException();
-		}
-	}
-
+            AccountAccessTO accountAccessTO = new AccountAccessTO();
+            accountAccessTO.setAccessType(AccessTypeTO.OWNER);
+            accountAccessTO.setUser(userMapper.toUserTO(user));
+            List<AccountAccessTO> accountAccesses = new ArrayList<>();
+            accountAccesses.add(accountAccessTO);
+            createDepositAccountService.createDepositAccount(userID, depositAccount, accountAccesses, user.getBranch());
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserNotFoundMiddlewareException();
+        }
+    }
     @Override
     public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
         try {
@@ -238,7 +235,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		try {
 			createDepositAccount(accDetails, accountAccesses);
 		} catch (UserNotFoundMiddlewareException e) {
-			throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login", accessToken.getSub(), accessToken.getLogin()));
+			throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login %s", accessToken.getSub(), accessToken.getLogin()));
 		}
 
 	}
@@ -254,8 +251,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		// XOR The user is the owner of this prefix
 		List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
 
-		// EMpty if user is not owner of this prefix.
-		if(accountAccesses ==null || accountAccesses.isEmpty()) {
+		// Empty if user is not owner of this prefix.
+		if(accountAccesses == null || accountAccesses.isEmpty()) {
 			// User can not own any of those accounts.
 			throw new AccountWithPrefixGoneMiddlewareException(String.format("Account prefix %s is gone.", accountNumberPrefix));
 		}
@@ -263,7 +260,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
 
 		// user already has account with this prefix and suffix
-		String accNbr = accountNumberPrefix+accountNumberSuffix;
+		String accNbr = accountNumberPrefix + accountNumberSuffix;
 		if(ownedAccounts.contains(accNbr)) {
 			throw new AccountWithSuffixExistsMiddlewareException(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix));
 		}
@@ -277,8 +274,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	}
 
 	@Override
-	public void grantAccessToDepositAccount(AccountAccessTO accountAccess)
-			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException {
+	public void grantAccessToDepositAccount(AccountAccessTO accountAccess) throws InsufficientPermissionMiddlewareException {
         UserBO userBo = accessService.loadCurrentUser();
         // Check that current user owns the account.
         List<String> ownedAccounts = accessService.filterOwnedAccounts(accessToken.getAccountAccesses());
@@ -364,7 +360,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	@Override
 	@SuppressWarnings("PMD.IdenticalCatchBranches")
 	public SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId,
-			String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException,
+			String scaMethodId) throws SCAMethodNotSupportedMiddleException,
 			UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException {
 		UserBO userBO = scaUtils.userBO();
@@ -373,8 +369,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
 		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
 		String template = consentKeyData.template();
-		AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId, 
-				consentId, template, template, 
+		AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
+				consentId, template, template,
 				defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
 		try {
 			SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
@@ -442,7 +438,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken),consentBO);
 			SCAConsentResponseTO response = new SCAConsentResponseTO();
 			response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-			response.setAuthorisationId(scaUtils.authorisatioId());
+			response.setAuthorisationId(scaUtils.authorisationId());
 			response.setConsentId(aisConsent.getId());
 			response.setPsuMessage(consentKeyData.exemptedTemplate());
 			response.setScaStatus(ScaStatusTO.EXEMPTED);
@@ -492,7 +488,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 	private SCAConsentResponseTO prepareSCA(UserBO user, AisConsentTO aisConsent, ConsentKeyDataTO consentKeyData) {
 		String consentKeyDataTemplate = consentKeyData.template();
 		UserTO userTo =scaUtils.user(user);
-		String authorisationId = scaUtils.authorisatioId();
+		String authorisationId = scaUtils.authorisationId();
 		if (!scaRequired(aisConsent, user, OpTypeBO.CONSENT)) {
 			SCAConsentResponseTO response = new SCAConsentResponseTO();
 			response.setAuthorisationId(authorisationId);
@@ -502,9 +498,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 			response.setStatusDate(LocalDateTime.now());
 			return response;
 		} else {
-			AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), 
-					aisConsent.getId(), aisConsent.getId(), 
-					consentKeyDataTemplate, consentKeyDataTemplate, 
+			AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
+					aisConsent.getId(), aisConsent.getId(),
+					consentKeyDataTemplate, consentKeyDataTemplate,
 					defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
 			// start SCA
 			SCAOperationBO scaOperationBO;
@@ -526,9 +522,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		}
 	}
 
-	private SCAConsentResponseTO toScaConsentResponse(UserTO user,
-			AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
-		SCAConsentResponseTO response = new SCAConsentResponseTO();
+	private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
+		SCAConsentResponseTO response = new SCAConsentResponseTO(); //TODO - matter of refactoring
 		response.setAuthorisationId(operation.getId());
 		response.setChosenScaMethod(scaUtils.getScaMethod(user, operation.getScaMethodId()));
 		response.setChallengeData(null);
@@ -540,6 +535,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 		response.setScaStatus(ScaStatusTO.valueOf(operation.getScaStatus().name()));
 		return response;
 	}
+
 	private AisConsentBO consent(String consentId) throws AisConsentNotFoundMiddlewareException {
 		try {
 			return userService.loadConsent(consentId);

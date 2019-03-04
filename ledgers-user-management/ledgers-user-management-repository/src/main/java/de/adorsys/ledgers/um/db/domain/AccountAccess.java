@@ -1,16 +1,9 @@
 package de.adorsys.ledgers.um.db.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-
+import de.adorsys.ledgers.util.Ids;
 import org.jetbrains.annotations.NotNull;
 
-import de.adorsys.ledgers.util.Ids;
+import javax.persistence.*;
 
 /*
 *
@@ -34,6 +27,9 @@ public class AccountAccess {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AccessType accessType= AccessType.OWNER;
+
+    @Column
+    private int scaRequiredToAuthorise;
     
     @PrePersist
     public void prePersist() {
@@ -65,5 +61,12 @@ public class AccountAccess {
 	public void setId(String id) {
 		this.id = id;
 	}
-    
+
+    public int getScaRequiredToAuthorise() {
+        return scaRequiredToAuthorise;
+    }
+
+    public void setScaRequiredToAuthorise(int scaRequiredToAuthorise) {
+        this.scaRequiredToAuthorise = scaRequiredToAuthorise;
+    }
 }
