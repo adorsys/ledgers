@@ -74,6 +74,12 @@
 			<organization>adorsys GmbH &amp; Co KG</organization>
 			<organizationUrl>https://adorsys.de/</organizationUrl>
 		</developer>
+		<developer>
+			<name>Petro Rudenko</name>
+			<email>pru@adorsys.com.ua</email>
+			<organization>LLC Golden Dimension</organization>
+			<organizationUrl>https://adorsys.com.ua/</organizationUrl>
+		</developer>
 	</developers>
 
 	<properties>

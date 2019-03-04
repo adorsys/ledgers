@@ -16,6 +16,8 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
 	private String psuMessage;
     private LocalDateTime statusDate;
     private int expiresInSeconds;
+	private boolean multilevelScaRequired;
+
     /*
      * Might be returned as result of an exemption. Meaning that
      * the requested operation has been executed.
@@ -89,5 +91,12 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
 	public void setChallengeData(ChallengeDataTO challengeData) {
 		this.challengeData = challengeData;
 	}
-	
+
+	public boolean isMultilevelScaRequired() {
+		return multilevelScaRequired;
+	}
+
+	public void setMultilevelScaRequired(boolean multilevelScaRequired) {
+		this.multilevelScaRequired = multilevelScaRequired;
+	}
 }
