@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriBuilder;
 
-import javax.websocket.server.PathParam;
 import java.net.URI;
 import java.security.Principal;
 
@@ -28,8 +27,8 @@ public class LedgerController {
     /**
      * Creates a new Ledger.
      *
-     * @param ledger
-     * @return
+     * @param ledger Ledger object
+     * @return void response with HttpStatus 201 if successful
      */
     @PostMapping(path = "/ledgers")
     public ResponseEntity<Void> newLedger(LedgerBO ledger, UriBuilder uri) {
@@ -52,11 +51,11 @@ public class LedgerController {
     /**
      * Find the ledger with the given name.
      *
-     * @param ledgerName
-     * @return
+     * @param ledgerName name of corresponding Ledger
+     * @return Ledger object
      */
     @GetMapping(path = "/ledgers", params = {"ledgerName"})
-    public ResponseEntity<LedgerBO> findLedgerByName(@RequestParam(required = true, name = "ledgerName") String ledgerName) {
+    public ResponseEntity<LedgerBO> findLedgerByName(@RequestParam(name = "ledgerName") String ledgerName) {
         LedgerBO ledger = ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new NotFoundRestException(ledgerName));
         return ResponseEntity.ok(ledger);
     }
@@ -66,8 +65,8 @@ public class LedgerController {
      * <p>
      * While creating a ledger account, the parent hat to be specified.
      *
-     * @param ledgerAccount
-     * @return
+     * @param ledgerAccount Ledger account
+     * @return Void response with 201 HttpStatus if successful
      */
     @PostMapping(path = "/accounts")
     public ResponseEntity<Void> newLedgerAccount(@RequestBody LedgerAccountBO ledgerAccount, UriBuilder uri) {
@@ -90,15 +89,16 @@ public class LedgerController {
     /**
      * Find the ledger account with the given ledger name and account name and reference date.
      *
-     * @param ledgerName
-     * @param accountName
-     * @return
-     * @throws LedgerNotFoundException
+     * @param ledgerName  name of ledger
+     * @param accountName name of account
+     * @return Ledger Account
+     * @throws LedgerNotFoundException        exception
+     * @throws LedgerAccountNotFoundException exception
      */
     @GetMapping(path = "/accounts", params = {"ledgerName", "accountName"})
     public ResponseEntity<LedgerAccountBO> findLedgerAccountByName(
-            @RequestParam(required = true, name = "ledgerName") String ledgerName,
-            @RequestParam(required = true, name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+            @RequestParam(name = "ledgerName") String ledgerName,
+            @RequestParam(name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
         LedgerBO ledger = new LedgerBO();
         ledger.setName(ledgerName);
 
@@ -108,14 +108,14 @@ public class LedgerController {
     /**
      * Find the ledger account with the given name
      *
-     * @param accountName
-     * @return
-     * @throws LedgerNotFoundException
+     * @param accountName name of corresponding account
+     * @return Ledger account
+     * @throws LedgerNotFoundException exception
      */
     @GetMapping(path = "/ledgers/{ledgerId}/accounts", params = {"accountName"})
     public ResponseEntity<LedgerAccountBO> findLedgerAccount(
-            @PathParam("ledgerId") String ledgerId,
-            @RequestParam(required = true, name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+            @PathVariable("ledgerId") String ledgerId,
+            @RequestParam(name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
         LedgerBO ledger = new LedgerBO();
         ledger.setId(ledgerId);
         return ledgerAccount(ledger, accountName);

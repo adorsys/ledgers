@@ -25,7 +25,7 @@ spring:
     password: ${db.password}
     url: ${db.url}
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update

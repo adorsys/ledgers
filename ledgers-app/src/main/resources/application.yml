@@ -24,7 +24,7 @@ spring:
     password: ${db.password}
     url: ${db.url}
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: false
     hibernate:
       ddl-auto: validate
@@ -115,7 +115,7 @@ ledgers.mockbank.data.load: true
 spring:
   profiles: hibernate-ddl
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: none

@@ -62,13 +62,9 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     private static final String EXPIRATION_ERROR = "Operation is not valid because of expiration";
 
     private final SCAOperationRepository repository;
-
     private final AuthCodeGenerator authCodeGenerator;
-
     private final SCAOperationMapper scaOperationMapper;
-
     private HashGenerator hashGenerator;
-
     private Map<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
 
     @Value("${sca.authCode.validity.seconds:180}")
@@ -91,22 +87,6 @@ public class SCAOperationServiceImpl implements SCAOperationService {
                 this.senders.put(s.getType(), s);
             });
         }
-    }
-
-    void setHashGenerator(HashGenerator hashGenerator) {
-        this.hashGenerator = hashGenerator;
-    }
-
-    void setSenders(Map<ScaMethodTypeBO, SCASender> senders) {
-        this.senders = senders;
-    }
-
-    void setAuthCodeValiditySeconds(int authCodeValiditySeconds) {
-        this.authCodeValiditySeconds = authCodeValiditySeconds;
-    }
-
-    void setAuthCodeEmailBody(String authCodeEmailBody) {
-        this.authCodeEmailBody = authCodeEmailBody;
     }
 
     @Override
@@ -152,52 +132,6 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         return scaOperationMapper.toBO(scaOperation);
     }
 
-    private SCAOperationEntity loadOrCreateScaOperation(AuthCodeDataBO data, ScaStatusBO scaStatus) {
-        if (data.getAuthorisationId() == null) {
-            throw new ScaUncheckedException("Missing authorization id.");
-        }
-        return repository.findById(data.getAuthorisationId()).orElse(createAuthCodeInternal(data, scaStatus));
-    }
-
-    private void checkMethodSupported(ScaUserDataBO scaMethod) throws SCAMethodNotSupportedException {
-        if (!senders.containsKey(scaMethod.getScaMethod())) {
-            throw new SCAMethodNotSupportedException();
-        }
-    }
-
-    @NotNull
-    private ScaUserDataBO getScaUserData(@NotNull List<ScaUserDataBO> scaUserData, @NotNull String scaUserDataId) throws UserScaDataNotFoundException {
-        return scaUserData.stream().filter(s -> scaUserDataId.equals(s.getId())).findFirst().orElseThrow(() -> new UserScaDataNotFoundException(scaUserDataId));
-    }
-
-    @NotNull
-    private SCAOperationEntity buildSCAOperation(SCAOperationEntity scaOperation, BaseHashItem<OperationHashItem> hashItem) {
-
-        String authCodeHash = generateHashByOpData(hashItem);
-
-        scaOperation.setCreated(LocalDateTime.now());
-        int validitySeconds = scaOperation.getValiditySeconds() <= 0
-                                      ? authCodeValiditySeconds
-                                      : scaOperation.getValiditySeconds();
-        scaOperation.setValiditySeconds(validitySeconds);
-        scaOperation.setStatus(AuthCodeStatus.SENT);
-        scaOperation.setStatusTime(LocalDateTime.now());
-        scaOperation.setHashAlg(hashItem.getAlg());
-        scaOperation.setAuthCodeHash(authCodeHash);
-        return scaOperation;
-    }
-
-    private String generateHashByOpData(BaseHashItem<OperationHashItem> hashItem) {
-        String authCodeHash;
-        try {
-            authCodeHash = hashGenerator.hash(hashItem);
-        } catch (HashGenerationException e) {
-            logger.error(AUTH_CODE_GENERATION_ERROR, e);
-            throw new ScaUncheckedException(AUTH_CODE_GENERATION_ERROR, e);
-        }
-        return authCodeHash;
-    }
-
     @Override
     public boolean validateAuthCode(String authorisationId, String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
         Optional<SCAOperationEntity> operationOptional = repository.findById(authorisationId);
@@ -225,6 +159,55 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         }
 
         return isAuthCodeValid;
+    }
+
+    @Override
+    public void processExpiredOperations() {
+        List<SCAOperationEntity> operations = repository.findByStatus(AuthCodeStatus.SENT);
+
+        logger.info("{} operations with status NEW were found", operations.size());
+
+        List<SCAOperationEntity> expiredOperations = operations
+                                                             .stream()
+                                                             .filter(this::isOperationAlreadyExpired)
+                                                             .collect(Collectors.toList());
+
+        expiredOperations.forEach(o -> updateOperationStatus(o, AuthCodeStatus.EXPIRED, o.getScaStatus()));
+
+        logger.info("{} operations was detected as EXPIRED", expiredOperations.size());
+
+        repository.saveAll(expiredOperations);
+
+        logger.info("Expired operations were updated");
+    }
+
+    @Override
+    public SCAOperationBO createAuthCode(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus) {
+        return scaOperationMapper.toBO(createAuthCodeInternal(authCodeData, scaStatus));
+    }
+
+    @Override
+    public SCAOperationBO loadAuthCode(String authorizationId) throws SCAOperationNotFoundException {
+        SCAOperationEntity o = repository.findById(authorizationId).orElseThrow(() -> new SCAOperationNotFoundException(authorizationId));
+        return scaOperationMapper.toBO(o);
+    }
+
+    @Override
+    public boolean authenticationCompleted(String opId, OpTypeBO opType) {
+        List<SCAOperationEntity> found = repository.findByOpIdAndOpType(opId, OpType.valueOf(opType.name()));
+        // We return false here.
+        if (found.isEmpty()) {
+            return false;
+        }
+        return found.stream()
+                       .anyMatch(s -> s.getStatus()
+                                              .equals(AuthCodeStatus.VALIDATED));
+		/*for (SCAOperationEntity o : found) {
+			if(!AuthCodeStatus.VALIDATED.equals(o.getStatus())) {
+				return false;
+			}
+		}
+		return true;*/ //TODO Should be hanged for implementation of MultiLevel SCA
     }
 
     private void success(SCAOperationEntity operation) {
@@ -275,31 +258,6 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         }
     }
 
-    @Override
-    public void processExpiredOperations() {
-        List<SCAOperationEntity> operations = repository.findByStatus(AuthCodeStatus.SENT);
-
-        logger.info("{} operations with status NEW were found", operations.size());
-
-        List<SCAOperationEntity> expiredOperations = operations
-                                                             .stream()
-                                                             .filter(this::isOperationAlreadyExpired)
-                                                             .collect(Collectors.toList());
-
-        expiredOperations.forEach(o -> updateOperationStatus(o, AuthCodeStatus.EXPIRED, o.getScaStatus()));
-
-        logger.info("{} operations was detected as EXPIRED", expiredOperations.size());
-
-        repository.saveAll(expiredOperations);
-
-        logger.info("Expired operations were updated");
-    }
-
-    @Override
-    public SCAOperationBO createAuthCode(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus) {
-        return scaOperationMapper.toBO(createAuthCodeInternal(authCodeData, scaStatus));
-    }
-
     private SCAOperationEntity createAuthCodeInternal(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus) {
         if (authCodeData.getAuthorisationId() == null) {
             throw new ScaUncheckedException("Missing authorization id.");
@@ -319,28 +277,53 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         return repository.save(scaOp);
     }
 
-    @Override
-    public SCAOperationBO loadAuthCode(String authorizationId) throws SCAOperationNotFoundException {
-        SCAOperationEntity o = repository.findById(authorizationId).orElseThrow(() -> new SCAOperationNotFoundException(authorizationId));
-        return scaOperationMapper.toBO(o);
+    @NotNull
+    private ScaUserDataBO getScaUserData(@NotNull List<ScaUserDataBO> scaUserData, @NotNull String scaUserDataId) throws UserScaDataNotFoundException {
+        return scaUserData.stream()
+                       .filter(s -> scaUserDataId.equals(s.getId()))
+                       .findFirst()
+                       .orElseThrow(() -> new UserScaDataNotFoundException(scaUserDataId));
     }
 
-    @Override
-    public boolean authenticationCompleted(String opId, OpTypeBO opType) {
-        List<SCAOperationEntity> found = repository.findByOpIdAndOpType(opId, OpType.valueOf(opType.name()));
-        // We return false here.
-        if (found.isEmpty()) {
-            return false;
+    @NotNull
+    private SCAOperationEntity buildSCAOperation(SCAOperationEntity scaOperation, BaseHashItem<OperationHashItem> hashItem) {
+
+        String authCodeHash = generateHashByOpData(hashItem);
+
+        scaOperation.setCreated(LocalDateTime.now());
+        int validitySeconds = scaOperation.getValiditySeconds() <= 0
+                                      ? authCodeValiditySeconds
+                                      : scaOperation.getValiditySeconds();
+        scaOperation.setValiditySeconds(validitySeconds);
+        scaOperation.setStatus(AuthCodeStatus.SENT);
+        scaOperation.setStatusTime(LocalDateTime.now());
+        scaOperation.setHashAlg(hashItem.getAlg());
+        scaOperation.setAuthCodeHash(authCodeHash);
+        return scaOperation;
+    }
+
+    private String generateHashByOpData(BaseHashItem<OperationHashItem> hashItem) {
+        String authCodeHash;
+        try {
+            authCodeHash = hashGenerator.hash(hashItem);
+        } catch (HashGenerationException e) {
+            logger.error(AUTH_CODE_GENERATION_ERROR, e);
+            throw new ScaUncheckedException(AUTH_CODE_GENERATION_ERROR, e);
         }
-        return found.stream()
-                       .anyMatch(s -> s.getStatus()
-                                              .equals(AuthCodeStatus.VALIDATED));
-		/*for (SCAOperationEntity o : found) {
-			if(!AuthCodeStatus.VALIDATED.equals(o.getStatus())) {
-				return false;
-			}
-		}
-		return true;*/
+        return authCodeHash;
+    }
+
+    private SCAOperationEntity loadOrCreateScaOperation(AuthCodeDataBO data, ScaStatusBO scaStatus) {
+        if (data.getAuthorisationId() == null) {
+            throw new ScaUncheckedException("Missing authorization id.");
+        }
+        return repository.findById(data.getAuthorisationId()).orElse(createAuthCodeInternal(data, scaStatus));
+    }
+
+    private void checkMethodSupported(ScaUserDataBO scaMethod) throws SCAMethodNotSupportedException {
+        if (!senders.containsKey(scaMethod.getScaMethod())) {
+            throw new SCAMethodNotSupportedException();
+        }
     }
 
     private boolean isOperationAlreadyUsed(SCAOperationEntity operation) {
@@ -361,6 +344,22 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         operation.setStatus(status);
         operation.setScaStatus(scaStatus);
         operation.setStatusTime(LocalDateTime.now());
+    }
+
+    void setHashGenerator(HashGenerator hashGenerator) {
+        this.hashGenerator = hashGenerator;
+    }
+
+    void setSenders(Map<ScaMethodTypeBO, SCASender> senders) {
+        this.senders = senders;
+    }
+
+    void setAuthCodeValiditySeconds(int authCodeValiditySeconds) {
+        this.authCodeValiditySeconds = authCodeValiditySeconds;
+    }
+
+    void setAuthCodeEmailBody(String authCodeEmailBody) {
+        this.authCodeEmailBody = authCodeEmailBody;
     }
 
     private final static class OperationHashItem {
