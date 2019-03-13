@@ -1,0 +1,29 @@
+users:
+  - id: "12345"
+    login: "zig-zero"
+    email: "zig-zero@gmail.com"
+    pin: "12345"
+    scaUserData:
+      - scaMethod: "EMAIL"
+        methodValue: "zig-zero@gmail.com"
+    accountAccesses:
+      - id: "ACCOUNT1"
+        iban: "DE1234567890"
+        accessType: "OWNER"
+    userRoles:
+      - "CUSTOMER"
+
+accounts:
+  - iban: "DE1234567890"
+    currency: "EUR"
+    name: "zig-zero"
+    product: "Cash24"
+    accountType: "CASH"
+    accountStatus: "ENABLED"
+    usageType: "PRIV"
+    details: "Some details here if necessary"
+
+balancesList:
+  - iban: "DE1234567890"
+    currency: "EUR"
+    amount: "100"

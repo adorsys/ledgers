@@ -19,6 +19,10 @@ server:
 
 spring:
   application.name: ledgers
+  servlet.multipart.enabled: true
+  servlet.multipart.file-size-threshold: 2KB
+  servlet.multipart.max-file-size: 2MB
+  servlet.multipart.max-request-size: 2MB
   datasource:
     username: ${db.user}
     password: ${db.password}

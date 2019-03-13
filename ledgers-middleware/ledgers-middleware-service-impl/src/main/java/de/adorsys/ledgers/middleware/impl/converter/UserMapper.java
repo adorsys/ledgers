@@ -16,18 +16,18 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import java.util.List;
-
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
-import org.mapstruct.Mapper;
-
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -47,7 +47,8 @@ public interface UserMapper {
     List<ScaUserDataBO> toScaUserDataListBO(List<ScaUserDataTO> list);
 
     List<ScaUserDataTO> toScaUserDataListTO(List<ScaUserDataBO> bos);
-    
+
+    @Mapping(target = "scaRequiredToAuthorise", constant = "1")
     AccountAccessBO toAccountAccessBO(AccountAccessTO userData);
 
     AccountAccessTO toAccountAccessTO(AccountAccessBO bo);

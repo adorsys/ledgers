@@ -81,7 +81,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         try {
             return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
             logger.error(e.getMessage(), e);
