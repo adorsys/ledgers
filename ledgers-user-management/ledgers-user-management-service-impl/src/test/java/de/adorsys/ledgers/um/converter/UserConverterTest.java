@@ -1,14 +1,17 @@
 package de.adorsys.ledgers.um.converter;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-import org.mapstruct.factory.Mappers;
-
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import org.junit.Test;
+import org.mapstruct.factory.Mappers;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 
 public class UserConverterTest {
     public static final String USER_ID = "someID";
@@ -18,6 +21,81 @@ public class UserConverterTest {
 
     UserConverter converter = Mappers.getMapper(UserConverter.class);
 
+    @Test
+    public void toUserBOList() {
+        //empty list case
+        List<UserEntity> users = Collections.emptyList();
+        List<UserBO> result = converter.toUserBOList(users);
+        assertThat(result, is(Collections.emptyList()));
+
+        //user = null
+        users = Collections.singletonList(null);
+        result = converter.toUserBOList(users);
+        assertThat(result, is(Collections.singletonList(new UserBO())));
+    }
+
+    @Test
+    public void toUserEntityList() {
+        //empty list case
+        List<UserBO> users = Collections.emptyList();
+        List<UserEntity> result = converter.toUserEntityList(users);
+        assertThat(result, is(Collections.emptyList()));
+
+        //user = null
+        users = Collections.singletonList(null);
+        result = converter.toUserEntityList(users);
+        assertThat(result, is(Collections.singletonList(new UserEntity())));
+    }
+
+    @Test
+    public void toScaUserDataBO() {
+
+    }
+
+    @Test
+    public void toScaUserDataEntity() {
+
+    }
+
+    @Test
+    public void toScaUserDataListBO() {
+
+    }
+
+    @Test
+    public void toScaUserDataListEntity() {
+
+    }
+
+    @Test
+    public void toAccountAccessBO() {
+
+    }
+
+    @Test
+    public void toAccountAccessEntity() {
+
+    }
+
+    @Test
+    public void toAccountAccessListBO() {
+
+    }
+
+    @Test
+    public void toAccountAccessListEntity() {
+
+    }
+
+    @Test
+    public void toUserRoleBO() {
+
+    }
+
+    @Test
+    public void toUserRole() {
+
+    }
 
     @Test
     public void toUserBO() {

@@ -1,16 +1,5 @@
 package de.adorsys.ledgers.mockbank.simple.service;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.ProtocolException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -23,6 +12,17 @@ import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import feign.FeignException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.ProtocolException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserAccountService {
@@ -71,7 +71,7 @@ public class UserAccountService {
 			throw new NotFoundRestException(String.format("User with login %s not found", login));
 		} else {
 			throw new IOException(String.format("Error authorizing admin user responseCode %s message %s.",
-					res.getStatusCodeValue(), res.getStatusCode()));
+					statusCode.value(), Optional.ofNullable(res).map(ResponseEntity::getStatusCode).orElse(HttpStatus.INTERNAL_SERVER_ERROR)));
 		}
 	}
 	

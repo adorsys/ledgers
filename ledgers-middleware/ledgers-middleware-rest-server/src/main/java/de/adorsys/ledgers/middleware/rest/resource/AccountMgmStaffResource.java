@@ -25,49 +25,31 @@ import de.adorsys.ledgers.middleware.api.exception.UserNotInBranchMiddlewareExce
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Api(tags = "LDG008 - Accounts (STAFF access)" , description= "Provides access to the deposit account resource for staff members.")
 @RestController
-@RequestMapping("/staff-access/" + AccountRestAPI.BASE_PATH)
 @MiddlewareUserResource
-public class AccountMgmStaffResource {
+@RequestMapping("/staff-access" + AccountRestAPI.BASE_PATH)
+public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
 
-	private static final Logger logger = LoggerFactory.getLogger(AccountMgmStaffResource.class);
-    private static final String ACCOUNT_ID = "accountId";
+    private static final Logger logger = LoggerFactory.getLogger(AccountMgmStaffResource.class);
     private final MiddlewareAccountManagementService middlewareAccountService;
 
     public AccountMgmStaffResource(MiddlewareAccountManagementService middlewareAccountService) {
         this.middlewareAccountService = middlewareAccountService;
     }
 
-    /**
-     * Creates a new deposit account for a user specified by ID
-     * Account is created for the same branch as Staff user
-     *
-     * @param userID user for who account is created
-     * @param accountDetailsTO account details
-     * @return Void
-     */
-    @ApiOperation(value="Registers a new Deposit Account for a user with specified ID",
-            notes="Registers a new deposit account and assigns account access OWNER to the current user.",
-            authorizations =@Authorization(value="apiKey"))
-    @ApiResponses(value={
-            @ApiResponse(code=200, message="Account creation successful"),
-            @ApiResponse(code=404, message="User with this ID not found"),
-            @ApiResponse(code=409, message="Account with given IBAN already exists.")
-    })
-    @PostMapping
+    @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<Void> createDepositAccountForUser(@RequestParam String userID, @RequestBody AccountDetailsTO accountDetailsTO) {
+    public ResponseEntity<Void> createDepositAccountForUser(String userID, AccountDetailsTO accountDetailsTO) {
         try {
             middlewareAccountService.createDepositAccount(userID, accountDetailsTO);
 
@@ -77,37 +59,20 @@ public class AccountMgmStaffResource {
             return ResponseEntity.notFound().build();
         } catch (UserNotInBranchMiddlewareException e) {
             return ResponseEntity.status(403).build();
+        } catch (Throwable e){
+            return ResponseEntity.status(500).build();
         }
     }
 
-    /**
-     * Returns the list of accounts that belong to the same branch as STAFF user.
-     *
-     * @return list of accounts that belongs to the same branch as staff user.
-     */
-    @ApiOperation(value="List fo Accessible Accounts", authorizations =@Authorization(value="apiKey"),
-            notes="Returns the list of all accounts linked to the connected user. "
-                    + "Call only available to role CUSTOMER.")
-    @ApiResponses(value={
-            @ApiResponse(code=200, response=AccountDetailsTO[].class, message="List of accounts accessible to the user.")
-    })
-    @GetMapping
+    @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch());
     }
 
-
-    @ApiOperation(value="Load Account by AccountId",
-            notes="Returns account details information for the given account id. "
-                    + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)",
-            authorizations =@Authorization(value="apiKey"))
-    @ApiResponses(value={
-            @ApiResponse(code=200, response=AccountDetailsTO.class, message="Account details.")
-    })
-    @GetMapping("/{accountId}")
+    @Override
     @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(@ApiParam(ACCOUNT_ID) @PathVariable String accountId) {
+    public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
         } catch (AccountNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
@@ -116,21 +81,9 @@ public class AccountMgmStaffResource {
         }
     }
 
-    /**
-     * Operation deposits cash to the deposit account
-     *
-     * @param accountId Account ID in Ledgers
-     * @param amount Amount to be deposited
-     * @return Void
-     */
-    @ApiOperation(value="Deposit Cash", authorizations=@Authorization(value="apiKey"),
-            notes = "Operation for staff member to register cash in the deposit account")
-    @ApiResponses(value={
-            @ApiResponse(code=202, message="Operation was successful")
-    })
-    @PostMapping("/{accountId}/cash")
+    @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<Void> depositCash(@PathVariable String accountId, @RequestBody AmountTO amount) {
+    public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         try {
             middlewareAccountService.depositCash(accountId, amount);
             return ResponseEntity.accepted().build();

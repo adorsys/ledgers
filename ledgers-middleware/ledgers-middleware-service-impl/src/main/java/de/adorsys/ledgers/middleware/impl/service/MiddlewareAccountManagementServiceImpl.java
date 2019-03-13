@@ -59,34 +59,34 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final BearerTokenMapper bearerTokenMapper;
     private final AccessTokenMapper accessTokenMapper;
     private final AccessTokenTO accessToken;
-	private final SCAOperationService scaOperationService;
-	private final SCAUtils scaUtils;
-	private final AccessService accessService;
-	private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
+    private final SCAOperationService scaOperationService;
+    private final SCAUtils scaUtils;
+    private final AccessService accessService;
+    private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
     private final AmountMapper amountMapper;
     private final CreateDepositAccountService createDepositAccountService;
 
 
-	public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
-			AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
-			UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
-			AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService,
-			SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper, CreateDepositAccountService createDepositAccountService) {
-		this.depositAccountService = depositAccountService;
-		this.accountDetailsMapper = accountDetailsMapper;
-		this.paymentConverter = paymentConverter;
-		this.userService = userService;
-		this.userMapper = userMapper;
-		this.aisConsentMapper = aisConsentMapper;
-		this.bearerTokenMapper = bearerTokenMapper;
-		this.accessTokenMapper = accessTokenMapper;
-		this.accessToken = accessToken;
-		this.scaOperationService = scaOperationService;
-		this.scaUtils = scaUtils;
-		this.accessService = accessService;
-		this.amountMapper = amountMapper;
-		this.createDepositAccountService = createDepositAccountService;
-	}
+    public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
+                                                  AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
+                                                  UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
+                                                  AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService,
+                                                  SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper, CreateDepositAccountService createDepositAccountService) {
+        this.depositAccountService = depositAccountService;
+        this.accountDetailsMapper = accountDetailsMapper;
+        this.paymentConverter = paymentConverter;
+        this.userService = userService;
+        this.userMapper = userMapper;
+        this.aisConsentMapper = aisConsentMapper;
+        this.bearerTokenMapper = bearerTokenMapper;
+        this.accessTokenMapper = accessTokenMapper;
+        this.accessToken = accessToken;
+        this.scaOperationService = scaOperationService;
+        this.scaUtils = scaUtils;
+        this.accessService = accessService;
+        this.amountMapper = amountMapper;
+        this.createDepositAccountService = createDepositAccountService;
+    }
 
     @Override
     public void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
@@ -116,6 +116,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             throw new UserNotFoundMiddlewareException();
         }
     }
+
     @Override
     public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
         try {
@@ -210,71 +211,71 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         }
     }
 
-	@Override
-	public void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
-			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
+    @Override
+    public void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
+            throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
 
-		String accNbr = accountNumberPrefix+accountNumberSuffix;
+        String accNbr = accountNumberPrefix + accountNumberSuffix;
 
-		// if the list is not empty, we mus make sure that account belong to the current user.s
-		List<DepositAccountBO> accounts = depositAccountService.findByAccountNumberPrefix(accountNumberPrefix);
+        // if the list is not empty, we mus make sure that account belong to the current user.s
+        List<DepositAccountBO> accounts = depositAccountService.findByAccountNumberPrefix(accountNumberPrefix);
 
-		validateInput(accounts, accountNumberPrefix, accountNumberSuffix);
+        validateInput(accounts, accountNumberPrefix, accountNumberSuffix);
 
-		accDetails.setIban(accNbr);
+        accDetails.setIban(accNbr);
 
-		List<AccountAccessTO> accountAccesses = new ArrayList<>();
-		// if caller is a customer
-		if(accessToken.getRole()==UserRoleTO.CUSTOMER) {
-			// then make him owner of the account.
-			UserTO userTO = new UserTO();
-			userTO.setId(accessToken.getSub());
-			userTO.setLogin(accessToken.getLogin());
-	        accountAccesses.add(accessService.createAccountAccess(accNbr, userTO));
-		}
-		try {
-			createDepositAccount(accDetails, accountAccesses);
-		} catch (UserNotFoundMiddlewareException e) {
-			throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login %s", accessToken.getSub(), accessToken.getLogin()));
-		}
+        List<AccountAccessTO> accountAccesses = new ArrayList<>();
+        // if caller is a customer
+        if (accessToken.getRole() == UserRoleTO.CUSTOMER) {
+            // then make him owner of the account.
+            UserTO userTO = new UserTO();
+            userTO.setId(accessToken.getSub());
+            userTO.setLogin(accessToken.getLogin());
+            accountAccesses.add(accessService.createAccountAccess(accNbr, userTO));
+        }
+        try {
+            createDepositAccount(accDetails, accountAccesses);
+        } catch (UserNotFoundMiddlewareException e) {
+            throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login %s", accessToken.getSub(), accessToken.getLogin()));
+        }
 
-	}
+    }
 
-	// Validate that
-	@SuppressWarnings("PMD.CyclomaticComplexity")
-	private void validateInput(List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
-		// This prefix is still free
-		if(accounts.isEmpty()) {
-			return;
-		}
+    // Validate that
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private void validateInput(List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
+        // This prefix is still free
+        if (accounts.isEmpty()) {
+            return;
+        }
 
-		// XOR The user is the owner of this prefix
-		List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
+        // XOR The user is the owner of this prefix
+        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
 
-		// Empty if user is not owner of this prefix.
-		if(accountAccesses == null || accountAccesses.isEmpty()) {
-			// User can not own any of those accounts.
-			throw new AccountWithPrefixGoneMiddlewareException(String.format("Account prefix %s is gone.", accountNumberPrefix));
-		}
+        // Empty if user is not owner of this prefix.
+        if (accountAccesses == null || accountAccesses.isEmpty()) {
+            // User can not own any of those accounts.
+            throw new AccountWithPrefixGoneMiddlewareException(String.format("Account prefix %s is gone.", accountNumberPrefix));
+        }
 
-		List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
+        List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
 
-		// user already has account with this prefix and suffix
-		String accNbr = accountNumberPrefix + accountNumberSuffix;
-		if(ownedAccounts.contains(accNbr)) {
-			throw new AccountWithSuffixExistsMiddlewareException(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix));
-		}
+        // user already has account with this prefix and suffix
+        String accNbr = accountNumberPrefix + accountNumberSuffix;
+        if (ownedAccounts.contains(accNbr)) {
+            throw new AccountWithSuffixExistsMiddlewareException(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix));
+        }
 
-		// All accounts with this prefix must be owned by this user.
-		for (DepositAccountBO a : accounts) {
-			if(ownedAccounts.contains(a.getIban())) {
-				throw new AccountWithSuffixExistsMiddlewareException(String.format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(),accountNumberPrefix));
-			}
-		}
-	}
+        // All accounts with this prefix must be owned by this user.
+        for (DepositAccountBO a : accounts) {
+            if (ownedAccounts.contains(a.getIban())) {
+                throw new AccountWithSuffixExistsMiddlewareException(String.format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(), accountNumberPrefix));
+            }
+        }
+    }
 
-	@Override
-	public void grantAccessToDepositAccount(AccountAccessTO accountAccess) throws InsufficientPermissionMiddlewareException {
+    @Override
+    public void grantAccessToDepositAccount(AccountAccessTO accountAccess) throws InsufficientPermissionMiddlewareException {
         UserBO userBo = accessService.loadCurrentUser();
         // Check that current user owns the account.
         List<String> ownedAccounts = accessService.filterOwnedAccounts(accessToken.getAccountAccesses());
@@ -288,9 +289,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public List<AccountDetailsTO> listDepositAccounts() {
-    	UserBO user = accessService.loadCurrentUser();
-    	UserTO userTO = userMapper.toUserTO(user);
-    	List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
+        UserBO user = accessService.loadCurrentUser();
+        UserTO userTO = userMapper.toUserTO(user);
+        List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
 //        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
         if (accountAccesses == null || accountAccesses.isEmpty()) {
             return Collections.emptyList();
@@ -316,8 +317,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         List<DepositAccountDetailsBO> depositAccounts = depositAccountService.findByBranch(user.getBranch());
 
         return depositAccounts.stream()
-                .map(accountDetailsMapper::toAccountDetailsTO)
-                .collect(Collectors.toList());
+                       .map(accountDetailsMapper::toAccountDetailsTO)
+                       .collect(Collectors.toList());
 
     }
 
@@ -335,214 +336,119 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
      * (non-Javadoc)
      * @see de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService#startSCA(java.lang.String, de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO)
      */
-	@Override
-	public SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
-		BearerTokenBO bearerToken = checkAisConsent(aisConsent);
-		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
-		SCAConsentResponseTO response = prepareSCA(scaUtils.userBO(), aisConsent, consentKeyData);
-		if(ScaStatusTO.EXEMPTED.equals(response.getScaStatus())) {
-			response.setBearerToken(bearerTokenMapper.toBearerTokenTO(bearerToken));
-		}
-		return response;
-	}
+    @Override
+    public SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+        BearerTokenBO bearerToken = checkAisConsent(aisConsent);
+        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
+        SCAConsentResponseTO response = prepareSCA(scaUtils.userBO(), aisConsent, consentKeyData);
+        if (ScaStatusTO.EXEMPTED.equals(response.getScaStatus())) {
+            response.setBearerToken(bearerTokenMapper.toBearerTokenTO(bearerToken));
+        }
+        return response;
+    }
 
-	@Override
-	public SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId)
-			throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException {
-		UserTO user = scaUtils.user();
-		AisConsentBO consent = consent(consentId);
-		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
-		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-		SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
-		return toScaConsentResponse(user, consent, consentKeyData.template(), scaOperationBO);
-	}
+    @Override
+    public SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId)
+            throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException {
+        UserTO user = scaUtils.user();
+        AisConsentBO consent = consent(consentId);
+        AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
+        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
+        SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
+        return toScaConsentResponse(user, consent, consentKeyData.template(), scaOperationBO);
+    }
 
-	@Override
-	@SuppressWarnings("PMD.IdenticalCatchBranches")
-	public SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId,
-			String scaMethodId) throws SCAMethodNotSupportedMiddleException,
-			UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-			SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException {
-		UserBO userBO = scaUtils.userBO();
-		UserTO userTO = scaUtils.user(userBO);
-		AisConsentBO consent = consent(consentId);
-		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
-		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-		String template = consentKeyData.template();
-		AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
-				consentId, template, template,
-				defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
-		try {
-			SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
-			return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
-		} catch (SCAMethodNotSupportedException e) {
-			logger.error(e.getMessage(), e);
-			throw new SCAMethodNotSupportedMiddleException(e);
-		} catch (UserScaDataNotFoundException e) {
-			logger.error(e.getMessage(), e);
-			throw new UserScaDataNotFoundMiddlewareException(e);
-		} catch (SCAOperationValidationException e) {
-			throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
-		} catch (SCAOperationNotFoundException e) {
-			throw new SCAOperationNotFoundMiddlewareException(e.getMessage(), e);
-		}
-	}
+    @Override
+    @SuppressWarnings("PMD.IdenticalCatchBranches")
+    public SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId,
+                                                             String scaMethodId) throws SCAMethodNotSupportedMiddleException,
+                                                                                                UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
+                                                                                                SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException {
+        UserBO userBO = scaUtils.userBO();
+        UserTO userTO = scaUtils.user(userBO);
+        AisConsentBO consent = consent(consentId);
+        AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
+        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
+        String template = consentKeyData.template();
+        AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
+                consentId, template, template,
+                defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
+        try {
+            SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
+            return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+        } catch (SCAMethodNotSupportedException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAMethodNotSupportedMiddleException(e);
+        } catch (UserScaDataNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new UserScaDataNotFoundMiddlewareException(e);
+        } catch (SCAOperationValidationException e) {
+            throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
+        } catch (SCAOperationNotFoundException e) {
+            throw new SCAOperationNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	@SuppressWarnings("PMD.CyclomaticComplexity")
-	public SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
-			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, AisConsentNotFoundMiddlewareException {
-		AisConsentBO consent = consent(consentId);
-		AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
-		ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-		try {
-			boolean validAuthCode = scaOperationService.validateAuthCode(authorisationId, consentId,
-					consentKeyData.template(), authCode);
-			if (!validAuthCode) {
-				throw new SCAOperationValidationMiddlewareException("Wrong auth code");
-			}
-			UserBO userBO = scaUtils.userBO();
-			UserTO userTO = scaUtils.user(userBO);
-			SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
-			SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
-			if(scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
-				BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), consent);
-				response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-			}
-			return response;
-		} catch (SCAOperationNotFoundException e) {
-			logger.error(e.getMessage(), e);
-			throw new SCAOperationNotFoundMiddlewareException(e);
-		} catch (SCAOperationValidationException e) {
-			logger.error(e.getMessage(), e);
-			throw new SCAOperationValidationMiddlewareException(e);
-		} catch (SCAOperationExpiredException e) {
-			logger.error(e.getMessage(), e);
-			throw new SCAOperationExpiredMiddlewareException(e);
-		} catch (SCAOperationUsedOrStolenException e) {
-			logger.error(e.getMessage(), e);
-			throw new SCAOperationUsedOrStolenMiddlewareException(e);
-		} catch (InsufficientPermissionException e) {
-			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-		}
-	}
+    @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    public SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
+            throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
+                           SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, AisConsentNotFoundMiddlewareException {
+        AisConsentBO consent = consent(consentId);
+        AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
+        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
+        try {
+            boolean validAuthCode = scaOperationService.validateAuthCode(authorisationId, consentId,
+                    consentKeyData.template(), authCode);
+            if (!validAuthCode) {
+                throw new SCAOperationValidationMiddlewareException("Wrong auth code");
+            }
+            UserBO userBO = scaUtils.userBO();
+            UserTO userTO = scaUtils.user(userBO);
+            SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
+            SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+            if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
+                BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), consent);
+                response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
+            }
+            return response;
+        } catch (SCAOperationNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationNotFoundMiddlewareException(e);
+        } catch (SCAOperationValidationException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationValidationMiddlewareException(e);
+        } catch (SCAOperationExpiredException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationExpiredMiddlewareException(e);
+        } catch (SCAOperationUsedOrStolenException e) {
+            logger.error(e.getMessage(), e);
+            throw new SCAOperationUsedOrStolenMiddlewareException(e);
+        } catch (InsufficientPermissionException e) {
+            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	public SCAConsentResponseTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
-		try {
-			AisConsentTO piisConsentTO = cleanupForPIIS(aisConsent);
-			ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(piisConsentTO);
-			AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(piisConsentTO);
+    @Override
+    public SCAConsentResponseTO grantAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+        try {
+            AisConsentTO piisConsentTO = cleanupForPIIS(aisConsent);
+            ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(piisConsentTO);
+            AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(piisConsentTO);
 
-			BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken),consentBO);
-			SCAConsentResponseTO response = new SCAConsentResponseTO();
-			response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-			response.setAuthorisationId(scaUtils.authorisationId());
-			response.setConsentId(aisConsent.getId());
-			response.setPsuMessage(consentKeyData.exemptedTemplate());
-			response.setScaStatus(ScaStatusTO.EXEMPTED);
-			response.setStatusDate(LocalDateTime.now());
-			return response;
-		} catch (InsufficientPermissionException e) {
-			throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
-		}
-	}
-	/*
-	 * We reuse an ais consent and trim everyhing we do not need.
-	 */
-	private AisConsentTO cleanupForPIIS(AisConsentTO aisConsentTo) {
-		// Cautiously empty all fields.
-		aisConsentTo.getAccess().setAllPsd2(null);
-		aisConsentTo.getAccess().setAvailableAccounts(null);
-		aisConsentTo.getAccess().setAccounts(Collections.emptyList());
-		aisConsentTo.getAccess().setTransactions(Collections.emptyList());
-		return aisConsentTo;
-	}
-
-
-	/*
-	 * Returns a bearer token matching the consent if user has enougth permission
-	 * to execute the operation.
-	 */
-	private BearerTokenBO checkAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
-		AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
-		try {
-			return userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken),consentBO);
-		} catch (InsufficientPermissionException e) {
-			throw new InsufficientPermissionMiddlewareException("Not enougth permission for requested consent.", e);
-		}
-	}
-
-	/*
-	 * The SCA requirement shall be added as property of a deposit account permission.
-	 *
-	 * For now we will assume there is no sca requirement, when the user having access
-	 * to the account does not habe any sca data configured.
-	 */
-	@SuppressWarnings("PMD.UnusedFormalParameter")
-	private boolean scaRequired(AisConsentTO aisConsent, UserBO user, OpTypeBO opType) {
-		return scaUtils.hasSCA(user);
-	}
-
-	private SCAConsentResponseTO prepareSCA(UserBO user, AisConsentTO aisConsent, ConsentKeyDataTO consentKeyData) {
-		String consentKeyDataTemplate = consentKeyData.template();
-		UserTO userTo =scaUtils.user(user);
-		String authorisationId = scaUtils.authorisationId();
-		if (!scaRequired(aisConsent, user, OpTypeBO.CONSENT)) {
-			SCAConsentResponseTO response = new SCAConsentResponseTO();
-			response.setAuthorisationId(authorisationId);
-			response.setConsentId(aisConsent.getId());
-			response.setPsuMessage(consentKeyData.exemptedTemplate());
-			response.setScaStatus(ScaStatusTO.EXEMPTED);
-			response.setStatusDate(LocalDateTime.now());
-			return response;
-		} else {
-			AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
-					aisConsent.getId(), aisConsent.getId(),
-					consentKeyDataTemplate, consentKeyDataTemplate,
-					defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
-			// start SCA
-			SCAOperationBO scaOperationBO;
-			AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
-			consentBO = userService.storeConsent(consentBO);
-			if (userTo.getScaUserData().size() == 1) {
-				ScaUserDataTO chosenScaMethod = userTo.getScaUserData().iterator().next();
-				authCodeData.setScaUserDataId(chosenScaMethod.getId());
-				try {
-					scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
-				} catch (SCAMethodNotSupportedException | UserScaDataNotFoundException | SCAOperationValidationException
-						| SCAOperationNotFoundException e) {
-					throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-				}
-			} else {
-				scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
-			}
-			return toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
-		}
-	}
-
-	private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
-		SCAConsentResponseTO response = new SCAConsentResponseTO(); //TODO - matter of refactoring
-		response.setAuthorisationId(operation.getId());
-		response.setChosenScaMethod(scaUtils.getScaMethod(user, operation.getScaMethodId()));
-		response.setChallengeData(null);
-		response.setExpiresInSeconds(operation.getValiditySeconds());
-		response.setConsentId(consent.getId());
-		response.setPsuMessage(messageTemplate);
-		response.setScaMethods(user.getScaUserData());
-		response.setStatusDate(operation.getStatusTime());
-		response.setScaStatus(ScaStatusTO.valueOf(operation.getScaStatus().name()));
-		return response;
-	}
-
-	private AisConsentBO consent(String consentId) throws AisConsentNotFoundMiddlewareException {
-		try {
-			return userService.loadConsent(consentId);
-		} catch (ConsentNotFoundException e) {
-			throw new AisConsentNotFoundMiddlewareException(e.getMessage(), e);
-		}
-	}
+            BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), consentBO);
+            SCAConsentResponseTO response = new SCAConsentResponseTO();
+            response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
+            response.setAuthorisationId(scaUtils.authorisationId());
+            response.setConsentId(aisConsent.getId());
+            response.setPsuMessage(consentKeyData.exemptedTemplate());
+            response.setScaStatus(ScaStatusTO.EXEMPTED);
+            response.setStatusDate(LocalDateTime.now());
+            return response;
+        } catch (InsufficientPermissionException e) {
+            throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
+        }
+    }
 
     @Override
     public void depositCash(String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException {
@@ -550,6 +456,103 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), accessToken.getLogin());
         } catch (DepositAccountNotFoundException e) {
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
+        }
+    }
+
+    /*
+     * We reuse an ais consent and trim everything we do not need.
+     */
+
+    private AisConsentTO cleanupForPIIS(AisConsentTO aisConsentTo) {
+        // Cautiously empty all fields.
+        aisConsentTo.getAccess().setAllPsd2(null);
+        aisConsentTo.getAccess().setAvailableAccounts(null);
+        aisConsentTo.getAccess().setAccounts(Collections.emptyList());
+        aisConsentTo.getAccess().setTransactions(Collections.emptyList());
+        return aisConsentTo;
+    }
+
+    /*
+     * Returns a bearer token matching the consent if user has enougth permission
+     * to execute the operation.
+     */
+
+    private BearerTokenBO checkAisConsent(AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+        AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
+        try {
+            return userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), consentBO);
+        } catch (InsufficientPermissionException e) {
+            throw new InsufficientPermissionMiddlewareException("Not enougth permission for requested consent.", e);
+        }
+    }
+    /*
+     * The SCA requirement shall be added as property of a deposit account permission.
+     *
+     * For now we will assume there is no sca requirement, when the user having access
+     * to the account does not habe any sca data configured.
+     */
+
+    @SuppressWarnings("PMD.UnusedFormalParameter")
+    private boolean scaRequired(AisConsentTO aisConsent, UserBO user, OpTypeBO opType) {
+        return scaUtils.hasSCA(user);
+    }
+
+    private SCAConsentResponseTO prepareSCA(UserBO user, AisConsentTO aisConsent, ConsentKeyDataTO consentKeyData) {
+        String consentKeyDataTemplate = consentKeyData.template();
+        UserTO userTo = scaUtils.user(user);
+        String authorisationId = scaUtils.authorisationId();
+        if (!scaRequired(aisConsent, user, OpTypeBO.CONSENT)) {
+            SCAConsentResponseTO response = new SCAConsentResponseTO();
+            response.setAuthorisationId(authorisationId);
+            response.setConsentId(aisConsent.getId());
+            response.setPsuMessage(consentKeyData.exemptedTemplate());
+            response.setScaStatus(ScaStatusTO.EXEMPTED);
+            response.setStatusDate(LocalDateTime.now());
+            return response;
+        } else {
+            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
+                    aisConsent.getId(), aisConsent.getId(),
+                    consentKeyDataTemplate, consentKeyDataTemplate,
+                    defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
+            // start SCA
+            SCAOperationBO scaOperationBO;
+            AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
+            consentBO = userService.storeConsent(consentBO);
+            if (userTo.getScaUserData().size() == 1) {
+                ScaUserDataTO chosenScaMethod = userTo.getScaUserData().iterator().next();
+                authCodeData.setScaUserDataId(chosenScaMethod.getId());
+                try {
+                    scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
+                } catch (SCAMethodNotSupportedException | UserScaDataNotFoundException | SCAOperationValidationException
+                                 | SCAOperationNotFoundException e) {
+                    throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
+                }
+            } else {
+                scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
+            }
+            return toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
+        }
+    }
+
+    private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
+        SCAConsentResponseTO response = new SCAConsentResponseTO(); //TODO - matter of refactoring
+        response.setAuthorisationId(operation.getId());
+        response.setChosenScaMethod(scaUtils.getScaMethod(user, operation.getScaMethodId()));
+        response.setChallengeData(null);
+        response.setExpiresInSeconds(operation.getValiditySeconds());
+        response.setConsentId(consent.getId());
+        response.setPsuMessage(messageTemplate);
+        response.setScaMethods(user.getScaUserData());
+        response.setStatusDate(operation.getStatusTime());
+        response.setScaStatus(ScaStatusTO.valueOf(operation.getScaStatus().name()));
+        return response;
+    }
+
+    private AisConsentBO consent(String consentId) throws AisConsentNotFoundMiddlewareException {
+        try {
+            return userService.loadConsent(consentId);
+        } catch (ConsentNotFoundException e) {
+            throw new AisConsentNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
 }

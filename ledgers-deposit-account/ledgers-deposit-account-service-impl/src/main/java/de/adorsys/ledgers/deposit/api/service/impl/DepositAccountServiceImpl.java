@@ -40,65 +40,30 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private final ObjectMapper objectMapper;
 
     public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
-			LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
-			DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService,
-			PostingService postingService, TransactionDetailsMapper transactionDetailsMapper,
-			ObjectMapper objectMapper) {
-		super(depositAccountConfigService, ledgerService);
-		this.depositAccountRepository = depositAccountRepository;
-		this.depositAccountMapper = depositAccountMapper;
-		this.accountStmtService = accountStmtService;
-		this.postingService = postingService;
-		this.transactionDetailsMapper = transactionDetailsMapper;
-		this.objectMapper = objectMapper;
-	}
+                                     LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
+                                     DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService,
+                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper,
+                                     ObjectMapper objectMapper) {
+        super(depositAccountConfigService, ledgerService);
+        this.depositAccountRepository = depositAccountRepository;
+        this.depositAccountMapper = depositAccountMapper;
+        this.accountStmtService = accountStmtService;
+        this.postingService = postingService;
+        this.transactionDetailsMapper = transactionDetailsMapper;
+        this.objectMapper = objectMapper;
+    }
 
-	@Override
+    @Override
     public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {
-
-        DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
-
-        LedgerBO ledgerBO = loadLedger();
-        String depositParentAccountNbr = depositAccountConfigService.getDepositParentAccount();
-        LedgerAccountBO depositParentAccount = new LedgerAccountBO(depositParentAccountNbr, ledgerBO);
-
-        LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), depositParentAccount);
-
-        try {
-            ledgerService.newLedgerAccount(ledgerAccount, userName);
-        } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new DepositAccountNotFoundException(e.getMessage(), e);
-        }
-
-        DepositAccount da = depositAccountMapper.createDepositAccountObj(depositAccount);
-
+        DepositAccount da = createDepositAccountObj(depositAccountBO, userName);
         DepositAccount saved = depositAccountRepository.save(da);
         return depositAccountMapper.toDepositAccountBO(saved);
     }
 
-
     @Override
     public DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccountBO, String userName, String branch) throws DepositAccountNotFoundException {
-
-        DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
-
-        LedgerBO ledgerBO = loadLedger();
-        String depositParentAccountNbr = depositAccountConfigService.getDepositParentAccount();
-        LedgerAccountBO depositParentAccount = new LedgerAccountBO(depositParentAccountNbr, ledgerBO);
-
-        LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), depositParentAccount);
-
-        try {
-            ledgerService.newLedgerAccount(ledgerAccount, userName);
-        } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new DepositAccountNotFoundException(e.getMessage(), e);
-        }
-
-        DepositAccount da = depositAccountMapper.createDepositAccountObj(depositAccount);
+        DepositAccount da = createDepositAccountObj(depositAccountBO,userName);
         da.setBranch(branch);
-
         DepositAccount saved = depositAccountRepository.save(da);
         return depositAccountMapper.toDepositAccountBO(saved);
     }
@@ -173,6 +138,65 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         }
     }
 
+    @Override
+    public String readIbanById(String id) {
+        return depositAccountRepository.findById(id).map(DepositAccount::getIban).orElse(null);
+    }
+
+    @Override
+    public List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix) {
+        List<DepositAccount> accounts = depositAccountRepository.findByIbanStartingWith(accountNumberPrefix);
+        return depositAccountMapper.toDepositAccountListBO(accounts);
+    }
+
+    @Override
+    public List<DepositAccountDetailsBO> findByBranch(String branch) {
+        List<DepositAccount> accounts = depositAccountRepository.findByBranch(branch);
+        List<DepositAccountBO> accountsBO = depositAccountMapper.toDepositAccountListBO(accounts);
+        List<DepositAccountDetailsBO> accountDetails = new ArrayList<>();
+        for (DepositAccountBO accountBO : accountsBO) {
+            accountDetails.add(new DepositAccountDetailsBO(accountBO, Collections.emptyList()));
+        }
+        return accountDetails;
+    }
+
+    @Override
+    public void depositCash(String accountId, AmountBO amount, String recordUser) throws DepositAccountNotFoundException {
+        if (amount.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new DepositAccountUncheckedException("Deposited amount must be greater than zero");
+        }
+
+        DepositAccount depositAccount = depositAccountRepository.findById(accountId)
+                                                .orElseThrow(DepositAccountNotFoundException::new);
+        AccountReferenceBO accountReference = depositAccountMapper.toAccountReferenceBO(depositAccount);
+        if (!accountReference.getCurrency().equals(amount.getCurrency())) {
+            throw new DepositAccountUncheckedException("Deposited amount and account currencies are different");
+        }
+
+        LedgerBO ledger = loadLedger();
+        LocalDateTime postingDateTime = LocalDateTime.now();
+
+        depositCash(accountReference, amount, recordUser, ledger, postingDateTime);
+    }
+
+    private DepositAccount createDepositAccountObj(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {
+        DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
+
+        LedgerBO ledgerBO = loadLedger();
+        String depositParentAccountNbr = depositAccountConfigService.getDepositParentAccount();
+        LedgerAccountBO depositParentAccount = new LedgerAccountBO(depositParentAccountNbr, ledgerBO);
+
+        LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), depositParentAccount);
+
+        try {
+            ledgerService.newLedgerAccount(ledgerAccount, userName);
+        } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            throw new DepositAccountNotFoundException(e.getMessage(), e);
+        }
+        return depositAccountMapper.createDepositAccountObj(depositAccount);
+    }
+
     private List<BalanceBO> getBalancesList(DepositAccountBO d, boolean withBalances, LocalDateTime refTime) {
         return withBalances
                        ? getBalances(d.getIban(), d.getCurrency(), refTime)
@@ -239,47 +263,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         ledgerAccountBO.setName(iban);
         ledgerAccountBO.setLedger(ledger);
         return ledgerAccountBO;
-    }
-
-    @Override
-    public String readIbanById(String id) {
-        return depositAccountRepository.findById(id).map(DepositAccount::getIban).orElse(null);
-    }
-
-    @Override
-    public List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix) {
-        List<DepositAccount> accounts = depositAccountRepository.findByIbanStartingWith(accountNumberPrefix);
-        return depositAccountMapper.toDepositAccountListBO(accounts);
-    }
-
-    @Override
-    public List<DepositAccountDetailsBO> findByBranch(String branch) {
-        List<DepositAccount> accounts = depositAccountRepository.findByBranch(branch);
-        List<DepositAccountBO> accountsBO = depositAccountMapper.toDepositAccountListBO(accounts);
-        List<DepositAccountDetailsBO> accountDetails = new ArrayList<>();
-        for (DepositAccountBO accountBO: accountsBO) {
-            accountDetails.add(new DepositAccountDetailsBO(accountBO, Collections.emptyList()));
-        }
-        return accountDetails;
-    }
-
-    @Override
-    public void depositCash(String accountId, AmountBO amount, String recordUser) throws DepositAccountNotFoundException {
-        if (amount.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new DepositAccountUncheckedException("Deposited amount must be greater than zero");
-        }
-
-        DepositAccount depositAccount = depositAccountRepository.findById(accountId)
-                .orElseThrow(DepositAccountNotFoundException::new);
-        AccountReferenceBO accountReference = depositAccountMapper.toAccountReferenceBO(depositAccount);
-        if (!accountReference.getCurrency().equals(amount.getCurrency())) {
-            throw new DepositAccountUncheckedException("Deposited amount and account currencies are different");
-        }
-
-        LedgerBO ledger = loadLedger();
-        LocalDateTime postingDateTime = LocalDateTime.now();
-
-        depositCash(accountReference, amount, recordUser, ledger, postingDateTime);
     }
 
     private void depositCash(AccountReferenceBO accountReference, AmountBO amount, String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {
