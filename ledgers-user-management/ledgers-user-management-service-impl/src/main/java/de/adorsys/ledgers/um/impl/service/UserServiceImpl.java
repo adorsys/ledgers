@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
         // if user is TPP and has an ID than do not reset it
         if (userPO.getId() == null) {
-            logger.info("User with login %s has no id, generating one", userPO.getLogin());
+            logger.info("User with login {} has no id, generating one", userPO.getLogin());
             userPO.setId(Ids.id());
         }
 

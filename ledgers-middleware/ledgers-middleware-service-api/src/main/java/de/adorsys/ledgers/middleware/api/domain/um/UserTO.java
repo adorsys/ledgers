@@ -1,11 +1,13 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
-import org.jetbrains.annotations.NotNull;
 
 public class UserTO {
 
@@ -24,11 +26,11 @@ public class UserTO {
 
     private List<AccountAccessTO> accountAccesses = new ArrayList<>();
 
-    private Collection<UserRoleTO> userRoles =  new ArrayList<>();
+    private Collection<UserRoleTO> userRoles = new ArrayList<>();
 
 
     private String branch;
-    
+
     public UserTO() {
     }
 
@@ -88,13 +90,13 @@ public class UserTO {
         this.accountAccesses = accountAccesses;
     }
 
-	public Collection<UserRoleTO> getUserRoles() {
-		return userRoles;
-	}
+    public Collection<UserRoleTO> getUserRoles() {
+        return userRoles;
+    }
 
-	public void setUserRoles(Collection<UserRoleTO> userRoles) {
-		this.userRoles = userRoles;
-	}
+    public void setUserRoles(Collection<UserRoleTO> userRoles) {
+        this.userRoles = userRoles;
+    }
 
     public String getBranch() {
         return branch;
@@ -104,33 +106,42 @@ public class UserTO {
         this.branch = branch;
     }
 
+    @JsonIgnore
+    public boolean userHasRoles() {
+        return CollectionUtils.isEmpty(userRoles);
+    }
+
     @Override
     public String toString() {
         return "UserTO{" +
-                "id='" + id + '\'' +
-                ", login='" + login + '\'' +
-                ", email='" + email + '\'' +
-                ", pin='" + pin + '\'' +
-                ", scaUserData=" + scaUserData +
-                ", accountAccesses=" + accountAccesses +
-                ", userRoles=" + userRoles +
-                ", branch=" + branch +
-                '}';
+                       "id='" + id + '\'' +
+                       ", login='" + login + '\'' +
+                       ", email='" + email + '\'' +
+                       ", pin='" + pin + '\'' +
+                       ", scaUserData=" + scaUserData +
+                       ", accountAccesses=" + accountAccesses +
+                       ", userRoles=" + userRoles +
+                       ", branch=" + branch +
+                       '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof UserTO)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserTO)) {
+            return false;
+        }
         UserTO userTO = (UserTO) o;
         return Objects.equals(getId(), userTO.getId()) &&
-                Objects.equals(getLogin(), userTO.getLogin()) &&
-                Objects.equals(getEmail(), userTO.getEmail()) &&
-                Objects.equals(getPin(), userTO.getPin()) &&
-                Objects.equals(getScaUserData(), userTO.getScaUserData()) &&
-                Objects.equals(getAccountAccesses(), userTO.getAccountAccesses()) &&
-                Objects.equals(getUserRoles(), userTO.getUserRoles()) &&
-                Objects.equals(getBranch(), userTO.getBranch());
+                       Objects.equals(getLogin(), userTO.getLogin()) &&
+                       Objects.equals(getEmail(), userTO.getEmail()) &&
+                       Objects.equals(getPin(), userTO.getPin()) &&
+                       Objects.equals(getScaUserData(), userTO.getScaUserData()) &&
+                       Objects.equals(getAccountAccesses(), userTO.getAccountAccesses()) &&
+                       Objects.equals(getUserRoles(), userTO.getUserRoles()) &&
+                       Objects.equals(getBranch(), userTO.getBranch());
     }
 
     @Override

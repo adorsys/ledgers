@@ -16,18 +16,6 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -41,6 +29,17 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.RestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping(AppMgmtRestAPI.BASE_PATH)
@@ -102,7 +101,7 @@ public class AppMgmtResource implements AppMgmtRestAPI {
             logger.error(USER_NOT_FOUND_SHALL_NOT_HAPPEN, e);
 			throw new IllegalStateException(USER_NOT_FOUND_SHALL_NOT_HAPPEN, e);
 		} catch (InsufficientPermissionMiddlewareException e) {
-			String ISSUFICIENT_PERM_SHALL_NOT_HAPPEN = "Unknownd exception, shall not happen.";
+			String ISSUFICIENT_PERM_SHALL_NOT_HAPPEN = "Unknown exception, shall not happen.";
             logger.error(ISSUFICIENT_PERM_SHALL_NOT_HAPPEN, e);
 			throw new IllegalStateException(ISSUFICIENT_PERM_SHALL_NOT_HAPPEN, e);
 		} 
