@@ -42,8 +42,13 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${apache.commons.collections}</version>
+        </dependency>
 
-		<!-- test dependencies -->
+        <!-- test dependencies -->
 
 	</dependencies>
 

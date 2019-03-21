@@ -6,7 +6,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ControllerTest {
-    /*private static final Logger logger = LoggerFactory.getLogger(ControllerTest.class);
+   /* private static final Logger logger = LoggerFactory.getLogger(ControllerTest.class);
     private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
     private RestTemplate tmpl = new RestTemplate();
     private final String testDataFile = "TestData.yml";
@@ -16,8 +16,52 @@ public class ControllerTest {
     private List<AccountDetailsTO> accountsAtLedgers;*/
 
     @Test
-    public void emptyTest() {
+    public void none(){}
+    /*public void generateTestData() throws IOException {
+        ResponseEntity<UserTO> register = register();
+        ResponseEntity<SCALoginResponseTO> login = login();
+        ResponseEntity<Resource> generateData = generateData(login.getBody().getBearerToken().getAccess_token());
+        assertThat(generateData.getStatusCode(), is(HttpStatus.OK));
+        DataPayload dataPayload = objectMapper.readValue(generateData.getBody().getInputStream(), DataPayload.class);
+        assertThat(dataPayload.getAccounts().size(),is(51));
+        assertThat(dataPayload.getUsers().size(),is(35));
     }
+
+    private ResponseEntity<UserTO> register() {
+        String url = "http://localhost:8088/staff-access/users/register";
+        Map<String, String> uriParams = new HashMap<>();
+        uriParams.put("branch", "111");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url)
+                                               .queryParam("branch", "00000000");
+        URI uri = builder.buildAndExpand(uriParams).toUri();
+        UserTO user = new UserTO("111", "email", "111");
+        user.setId("111");
+        user.setUserRoles(Collections.singletonList(UserRoleTO.STAFF));
+        try {
+            return tmpl.postForEntity(uri, user, UserTO.class);
+        } catch (RestClientException e){
+            return ResponseEntity.ok(user);
+        }
+    }
+
+    private ResponseEntity<SCALoginResponseTO> login() {
+        String url = "http://localhost:8088/staff-access/users/login";
+        UserCredentialsTO credentials = new UserCredentialsTO("111", "111", UserRoleTO.STAFF);
+        return tmpl.postForEntity(url, credentials, SCALoginResponseTO.class);
+    }
+
+    private ResponseEntity<Resource> generateData(String token) {
+        MultiValueMap<String, String> headers = getHeaders(token);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        return tmpl.exchange("http://localhost:8088/staff-access/generate", HttpMethod.GET, request, Resource.class);
+    }
+
+    private MultiValueMap<String, String> getHeaders(String token) {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Authorization", "Bearer " + token);
+        headers.add("Content-Type", "application/json");
+        return headers;
+    }*/
 
     /*@Test
     public void test() {
@@ -140,7 +184,7 @@ public class ControllerTest {
             UserCredentialsTO credentials = new UserCredentialsTO(user.getLogin(), user.getPin(), user.getUserRoles().stream().findFirst().get());
             return tmpl.postForEntity("http://localhost:8088/staff-access/users/login", credentials, SCALoginResponseTO.class).getBody().getBearerToken().getAccess_token();
         } catch (RestClientException e) {
-            logger.error("An error occurred during login: %s", e.getLocalizedMessage());
+            logger.error("An error occurred during login: {}", user.getLogin(), e.getLocalizedMessage());
             return null;
         }
     }
@@ -152,7 +196,7 @@ public class ControllerTest {
          return new CommonsMultipartFile(new DiskFileItem("name", "yml",false, testDataFile,100000000,new InputStreamResource(resource).getFile()));
             //IOUtils.toByteArray(resource);
         } catch (IOException e) {
-            logger.error("Could not read file, message is: \n", e.getLocalizedMessage());
+            logger.error("Could not read file, message is: \n ", e.getLocalizedMessage());
             return null;
         }
     }
