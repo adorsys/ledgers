@@ -51,12 +51,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableBatchDataUploadForTpp
 @EnableFeignClients(basePackageClasses = AccountRestClient.class)
 public class LedgersApplication implements ApplicationListener<ApplicationReadyEvent> {
-
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
 
     @Value("${ledgers.mockbank.data.load:false}")
     private boolean loadMockData;
+
+    @Autowired
+    public LedgersApplication(ApplicationContext context) {
+        this.context = context;
+    }
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(LedgersApplication.class).run(args);
