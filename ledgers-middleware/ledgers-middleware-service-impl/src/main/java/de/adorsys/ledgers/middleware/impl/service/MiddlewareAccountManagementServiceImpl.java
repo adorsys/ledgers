@@ -95,7 +95,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             UserBO user = userService.findById(accessToken.getSub());
             createDepositAccountService.createDepositAccount(accessToken.getSub(), depositAccount, accountAccesses, user.getBranch());
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException();
         }
     }
@@ -112,7 +112,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             accountAccesses.add(accountAccessTO);
             createDepositAccountService.createDepositAccount(userID, depositAccount, accountAccesses, user.getBranch());
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException();
         }
     }
@@ -123,7 +123,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
             return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -135,7 +135,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
             return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -162,10 +162,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                            .map(accountDetailsMapper::toAccountDetailsTO)
                            .collect(Collectors.toList());
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage());
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -377,10 +377,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
             return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
         } catch (SCAMethodNotSupportedException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new SCAMethodNotSupportedMiddleException(e);
         } catch (UserScaDataNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserScaDataNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
             throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
@@ -413,16 +413,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             }
             return response;
         } catch (SCAOperationNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new SCAOperationNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new SCAOperationValidationMiddlewareException(e);
         } catch (SCAOperationExpiredException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new SCAOperationExpiredMiddlewareException(e);
         } catch (SCAOperationUsedOrStolenException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new SCAOperationUsedOrStolenMiddlewareException(e);
         } catch (InsufficientPermissionException e) {
             throw new AccountMiddlewareUncheckedException(e.getMessage(), e);

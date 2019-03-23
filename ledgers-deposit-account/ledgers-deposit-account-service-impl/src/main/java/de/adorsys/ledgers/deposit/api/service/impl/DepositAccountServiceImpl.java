@@ -133,7 +133,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                            .map(b -> isSufficientAmountAvailable(requestBO, b))
                            .orElse(Boolean.FALSE);
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new DepositAccountNotFoundException(e.getMessage(), e);
         }
     }

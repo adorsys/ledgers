@@ -49,7 +49,7 @@ public class CreateDepositAccountService {
                 accessService.addAccess(accountAccesses, depositAccountBO, persistBuffer);
             }
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
         } catch (UserNotFoundException e) {
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);

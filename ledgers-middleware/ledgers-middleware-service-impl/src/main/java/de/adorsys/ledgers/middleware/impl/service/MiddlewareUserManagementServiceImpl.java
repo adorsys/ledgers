@@ -45,7 +45,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         try {
             return userTOMapper.toUserTO(userService.create(userBO));
         } catch (UserAlreadyExistsException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserAlreadyExistsMiddlewareException(user, e);
         }
     }
@@ -55,7 +55,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         try {
             return userTOMapper.toUserTO(userService.findById(id));
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -65,7 +65,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         try {
             return userTOMapper.toUserTO(userService.findByLogin(userLogin));
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -77,7 +77,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
             UserBO userBO = userService.updateScaData(userTOMapper.toScaUserDataListBO(scaDataList), userLogin);
             return userTOMapper.toUserTO(userBO);
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -94,7 +94,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
             UserBO userBO = userService.updateAccountAccess(userLogin, userTOMapper.toAccountAccessListBO(accounts));
             return userTOMapper.toUserTO(userBO);
         } catch (UserNotFoundException | DepositAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }

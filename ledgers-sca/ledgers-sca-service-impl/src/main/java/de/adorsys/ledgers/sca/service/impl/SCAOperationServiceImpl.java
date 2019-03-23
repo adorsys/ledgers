@@ -236,7 +236,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         try {
             hash = hashGenerator.hash(new BaseHashItem<>(new OperationHashItem(id, opId, opData, authCode)));
         } catch (HashGenerationException e) {
-            logger.error(TAN_VALIDATION_ERROR, e);
+            logger.error(TAN_VALIDATION_ERROR);
             throw new SCAOperationValidationException(TAN_VALIDATION_ERROR, e);
         }
         return hash;
@@ -307,7 +307,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         try {
             authCodeHash = hashGenerator.hash(hashItem);
         } catch (HashGenerationException e) {
-            logger.error(AUTH_CODE_GENERATION_ERROR, e);
+            logger.error(AUTH_CODE_GENERATION_ERROR);
             throw new ScaUncheckedException(AUTH_CODE_GENERATION_ERROR, e);
         }
         return authCodeHash;
