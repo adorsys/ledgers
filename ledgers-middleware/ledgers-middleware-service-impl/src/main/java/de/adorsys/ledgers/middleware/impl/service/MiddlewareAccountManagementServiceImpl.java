@@ -518,18 +518,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             SCAOperationBO scaOperationBO;
             AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
             consentBO = userService.storeConsent(consentBO);
-            if (userTo.getScaUserData().size() == 1) {
-                ScaUserDataTO chosenScaMethod = userTo.getScaUserData().iterator().next();
-                authCodeData.setScaUserDataId(chosenScaMethod.getId());
-                try {
-                    scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
-                } catch (SCAMethodNotSupportedException | UserScaDataNotFoundException | SCAOperationValidationException
-                                 | SCAOperationNotFoundException e) {
-                    throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-                }
-            } else {
-                scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
-            }
+            // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside 
+            // The system. Even if a user ha only one sca method.
+            scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
             return toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
         }
     }
