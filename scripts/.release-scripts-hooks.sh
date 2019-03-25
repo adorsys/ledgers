@@ -58,15 +58,15 @@ function format_hotfix_branch_name {
 # Hook to build the snapshot modules before release
 # You can build and run your tests here to avoid releasing an unstable build
 function build_snapshot_modules {
-	mvn -DskipITs=true clean install
-	mvn -DskipITs=true pmd:check
+	mvn -DskipITs=false clean install
+	mvn -DskipITs=false pmd:check
 }
 
 # Hook to build the released modules after release
 # You can deploy your artifacts here
 function build_release_modules {
-	mvn -DskipITs=true clean install
-	mvn -DskipITs=true pmd:check
+	mvn -DskipITs=false clean install
+	mvn -DskipITs=false pmd:check
 }
 
 # Should set version numbers in your modules
