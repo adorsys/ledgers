@@ -65,8 +65,8 @@ function build_snapshot_modules {
 # Hook to build the released modules after release
 # You can deploy your artifacts here
 function build_release_modules {
-	mvn clean install
-	mvn pmd:check
+	mvn -DskipITs=true clean install
+	mvn -DskipITs=true pmd:check
 }
 
 # Should set version numbers in your modules
