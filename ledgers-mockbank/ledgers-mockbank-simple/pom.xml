@@ -142,5 +142,79 @@
 
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<!-- https://mvnrepository.com/artifact/com.github.tntim96/fakesmtp -->
+							<groupId>com.github.tntim96</groupId>
+							<artifactId>fakesmtp</artifactId>
+							<version>2.0</version>
+							<type>jar</type>
+							<overWrite>false</overWrite>
+							<outputDirectory>${project.build.directory}/fakesmtp</outputDirectory>
+							<destFileName>fakesmtp.jar</destFileName>
+						</artifactItem>
+					</artifactItems>
+					<overWriteReleases>false</overWriteReleases>
+					<overWriteSnapshots>true</overWriteSnapshots>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.bazaarvoice.maven.plugins</groupId>
+				<artifactId>process-exec-maven-plugin</artifactId>
+				<version>0.7</version>
+				<executions>
+					<!-- MAIL SERVER -->
+					<execution>
+						<id>faksmtp-process</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+						<configuration>
+							<name>FAKE SMTP</name>
+							<workingDir>${project.build.directory}/fakesmtp</workingDir>
+							<!-- java -jar target/fakesmtp/fakesmtp.jar -s -b -p 2500 -o target/fakesmtp/mails -->
+							<waitAfterLaunch>2</waitAfterLaunch><!-- 2 seconds -->
+							<arguments>
+								<argument>java</argument>
+								<argument>-jar</argument>
+								<argument>${project.build.directory}/fakesmtp/fakesmtp.jar</argument>
+								<argument>-s</argument>
+								<argument>-b</argument>
+								<argument>-p</argument>
+								<argument>2500</argument>
+								<argument>-o</argument>
+								<argument>${project.build.directory}/fakesmtp/mails</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<!--STOP ALL -->
+					<execution>
+						<id>stop-all</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop-all</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
 
