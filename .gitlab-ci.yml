@@ -26,7 +26,7 @@ variables: &variables
   XS2A_DEMO_NAMESPACE: "adorsys-psd2-demo"
   XS2A_INTEG_NAMESPACE: "adorsys-psd2-integ"
 
-  SONAR_HOST: "https://bg-sonarqube.cloud.adorsys.de"
+  SONAR_HOST: "https://psd2-quality.cloud.adorsys.de"
 
   ###########################
   # Build variables         #
