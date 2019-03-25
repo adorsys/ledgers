@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-mockbank</artifactId>
-		<version>0.3.6.1-SNAPSHOT</version>
+		<version>0.3.6.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 
