@@ -189,17 +189,17 @@ Deploy to Openshift (XS2A Projects):
     - >-
       skopeo copy
       --dest-creds=openshift:${OPENSHIFT_TOKEN}
-      "docker://docker.io/adorsys/xs2a-connector-examples:${DOCKER_TAG}"
+      "docker://docker.io/adorsys/ledgers:${DOCKER_TAG}"
       "docker://${OPENSHIFT_REGISTRY}/${XS2A_DEV_NAMESPACE}/ledgers:latest"
     - >-
       skopeo copy
       --dest-creds=openshift:${OPENSHIFT_TOKEN}
-      "docker://docker.io/adorsys/xs2a-connector-examples:${DOCKER_TAG}"
+      "docker://docker.io/adorsys/ledgers:${DOCKER_TAG}"
       "docker://${OPENSHIFT_REGISTRY}/${XS2A_DEMO_NAMESPACE}/ledgers:latest"
     - >-
       skopeo copy
       --dest-creds=openshift:${OPENSHIFT_TOKEN}
-      "docker://docker.io/adorsys/xs2a-connector-examples:${DOCKER_TAG}"
+      "docker://docker.io/adorsys/ledgers:${DOCKER_TAG}"
       "docker://${OPENSHIFT_REGISTRY}/${XS2A_INTEG_NAMESPACE}/ledgers:latest"
   variables:
     <<: *variables

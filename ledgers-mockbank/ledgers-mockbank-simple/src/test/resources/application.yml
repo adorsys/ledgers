@@ -35,16 +35,17 @@ spring:
       write_dates_as_timestamps: false
   mail:
     default-encoding: UTF-8
-    host: smtp.gmail.com
-    port: 587
-    username: #add your email here
-    password: #add your password here
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+    host: localhost
+    port: 2500
+# These properties must be explicite set in a productive aplication    
+#    username: #add your email here
+#    password: #add your password here
+#    properties:
+#      mail:
+#        smtp:
+#         auth: true
+#          starttls:
+#            enable: true
 
 paymentScheduler:
   initialDelay: 3000

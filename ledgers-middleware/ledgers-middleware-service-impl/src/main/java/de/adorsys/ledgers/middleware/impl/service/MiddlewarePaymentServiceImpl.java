@@ -108,7 +108,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			TransactionStatusBO paymentStatus = paymentService.getPaymentStatusById(paymentId);
 			return TransactionStatusTO.valueOf(paymentStatus.name());
 		} catch (PaymentNotFoundException e) {
-			logger.error("Payment with id=" + paymentId + " not found", e);
+			logger.error("Payment with id=" + paymentId + " not found");
 			throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}
@@ -208,7 +208,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			accountService.getDepositAccountByIban(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
 
 		} catch (DepositAccountNotFoundException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new AccountNotFoundMiddlewareException(e.getMessage());
 		}
 	}
@@ -219,7 +219,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			PaymentBO paymentResult = paymentService.getPaymentById(paymentId);
 			return paymentConverter.toPaymentTO(paymentResult);
 		} catch (PaymentNotFoundException e) {
-			logger.error(String.format("Payment with id= %s, not found", paymentId), e);
+			logger.error(String.format("Payment with id= %s, not found", paymentId));
 			throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
 		}
 	}
@@ -251,7 +251,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			BearerTokenTO bearerToken = paymentAccountAccessToken(payment);
 			return toScaPaymentResponse(scaUtils.user(), paymentId, tx, paymentKeyData, scaUtils.loadAuthCode(authorisationId), bearerToken);
 		} catch (PaymentNotFoundException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
 		}
 	}
@@ -312,10 +312,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			BearerTokenTO bearerToken = paymentAccountAccessToken(payment);
 			return toScaPaymentResponse(userTO, paymentId, payment.getTransactionStatus(), paymentKeyData, scaOperationBO, bearerToken);
 		} catch (SCAMethodNotSupportedException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new SCAMethodNotSupportedMiddleException(e);
 		} catch (UserScaDataNotFoundException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new UserScaDataNotFoundMiddlewareException(e);
 		} catch (SCAOperationValidationException e) {
 			throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
@@ -364,10 +364,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			BearerTokenTO bearerToken = paymentAccountAccessToken(payment);
 			return toScaPaymentResponse(userTO, paymentId, payment.getTransactionStatus(), paymentKeyData, scaOperationBO, bearerToken);
 		} catch (SCAMethodNotSupportedException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new SCAMethodNotSupportedMiddleException(e);
 		} catch (UserScaDataNotFoundException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new UserScaDataNotFoundMiddlewareException(e);
 		} catch (SCAOperationValidationException e) {
 			throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
@@ -392,7 +392,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			return toScaPaymentResponse(scaUtils.user(), paymentId, tx, 
 					paymentKeyData, scaUtils.loadAuthCode(cancellationId), bearerToken);
 		} catch (PaymentNotFoundException e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
 			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
 		}
 	}
@@ -421,7 +421,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 			return paymentService.getPaymentById(paymentId);
 		} catch (PaymentNotFoundException e) {
 			String message = String.format(PAYMENT_WITH_ID_S_NOT_FOUND, paymentId);
-			logger.error(message, e);
+			logger.error(message);
 			throw new PaymentNotFoundMiddlewareException(message, e);
 		}
 	}
