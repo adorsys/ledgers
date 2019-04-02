@@ -105,6 +105,9 @@ public class SCAOperationEntity {
 	@Column(name = "sca_status")
 	@Enumerated(EnumType.STRING)
 	private ScaStatus scaStatus;
+
+	@Column(nullable = false)
+	private int scaWeight;
 	
 	@PrePersist
 	public void prePersist() {
@@ -207,5 +210,13 @@ public class SCAOperationEntity {
 
 	public void setScaStatus(ScaStatus scaStatus) {
 		this.scaStatus = scaStatus;
+	}
+
+	public int getScaWeight() {
+		return scaWeight;
+	}
+
+	public void setScaWeight(int scaWeight) {
+		this.scaWeight = scaWeight;
 	}
 }

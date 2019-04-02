@@ -32,4 +32,7 @@
 
     <!--add required numbers of scas for current user and sertain account-->
     <include file="migration/0008-scas-required.xml" relativeToChangelogFile="true" />
+
+	<!-- add sca weights for multi-level sca support -->
+    <include file="migration/0009-add-sca-weights.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -68,6 +68,7 @@ sca:
       from: noreply@adorsys.de
     phone:
       subject: "Your TAN from MockBank"
+  multilevel.enabled: true
 
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
