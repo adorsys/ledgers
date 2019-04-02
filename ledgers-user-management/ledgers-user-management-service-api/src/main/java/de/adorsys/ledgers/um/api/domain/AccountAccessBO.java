@@ -12,7 +12,8 @@ public class AccountAccessBO {
     @NotNull
     private AccessTypeBO accessType;
 
-    private int scaRequiredToAuthorise;
+    @NotNull
+    private int scaWeight;
 
     public AccountAccessBO(@NotNull String iban, AccessTypeBO accessType) {
         this.iban = iban;
@@ -46,11 +47,11 @@ public class AccountAccessBO {
         this.accessType = accessType;
     }
 
-    public int getScaRequiredToAuthorise() {
-        return scaRequiredToAuthorise;
+    public int getScaWeight() {
+        return scaWeight;
     }
 
-    public void setScaRequiredToAuthorise(int scaRequiredToAuthorise) {
-        this.scaRequiredToAuthorise = scaRequiredToAuthorise;
+    public void setScaWeight(int scaWeight) {
+        this.scaWeight = scaWeight;
     }
 }

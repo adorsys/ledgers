@@ -25,7 +25,6 @@ import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -35,10 +34,10 @@ public interface UserMapper {
     UserTO toUserTO(UserBO user);
 
     UserBO toUserBO(UserTO user);
-    
-	List<UserTO> toUserTOList(List<UserBO> listUsers);
 
-	List<UserBO> toUserBOList(List<UserTO> listUsers);
+    List<UserTO> toUserTOList(List<UserBO> listUsers);
+
+    List<UserBO> toUserBOList(List<UserTO> listUsers);
 
     ScaUserDataBO toScaUserDataBO(ScaUserDataTO userData);
 
@@ -48,7 +47,6 @@ public interface UserMapper {
 
     List<ScaUserDataTO> toScaUserDataListTO(List<ScaUserDataBO> bos);
 
-    @Mapping(target = "scaRequiredToAuthorise", constant = "1")
     AccountAccessBO toAccountAccessBO(AccountAccessTO userData);
 
     AccountAccessTO toAccountAccessTO(AccountAccessBO bo);

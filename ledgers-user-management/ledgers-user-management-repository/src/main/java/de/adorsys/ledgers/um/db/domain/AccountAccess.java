@@ -28,8 +28,8 @@ public class AccountAccess {
     @Enumerated(EnumType.STRING)
     private AccessType accessType= AccessType.OWNER;
 
-    @Column
-    private int scaRequiredToAuthorise;
+    @Column(nullable = false)
+    private int scaWeight;
     
     @PrePersist
     public void prePersist() {
@@ -62,11 +62,11 @@ public class AccountAccess {
 		this.id = id;
 	}
 
-    public int getScaRequiredToAuthorise() {
-        return scaRequiredToAuthorise;
+    public int getScaWeight() {
+        return scaWeight;
     }
 
-    public void setScaRequiredToAuthorise(int scaRequiredToAuthorise) {
-        this.scaRequiredToAuthorise = scaRequiredToAuthorise;
+    public void setScaWeight(int scaWeight) {
+        this.scaWeight = scaWeight;
     }
 }
