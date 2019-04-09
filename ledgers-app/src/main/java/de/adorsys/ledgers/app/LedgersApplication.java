@@ -28,7 +28,6 @@ import de.adorsys.ledgers.sca.mock.MockSmtpServer;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
 import de.adorsys.ledgers.um.impl.EnableUserManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -37,7 +36,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.util.Arrays;
 
 @EnableScheduling
 @SpringBootApplication
@@ -52,13 +54,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients(basePackageClasses = AccountRestClient.class)
 public class LedgersApplication implements ApplicationListener<ApplicationReadyEvent> {
     private final ApplicationContext context;
-
-    @Value("${ledgers.mockbank.data.load:false}")
-    private boolean loadMockData;
+    private final Environment env;
 
     @Autowired
-    public LedgersApplication(ApplicationContext context) {
+    public LedgersApplication(ApplicationContext context, Environment env) {
         this.context = context;
+        this.env = env;
     }
 
     public static void main(String[] args) {
@@ -67,7 +68,7 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        if (loadMockData) {
+        if (Arrays.asList(env.getActiveProfiles()).contains("develop")) {
             context.getBean(MockBankSimpleInitService.class).runInit();
         }
     }

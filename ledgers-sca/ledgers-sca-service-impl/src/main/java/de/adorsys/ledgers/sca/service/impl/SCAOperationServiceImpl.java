@@ -115,6 +115,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         checkMethodSupported(scaUserData);
 
         String tan = authCodeGenerator.generate();
+        logger.info("Generated TAN is: {}", tan);
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(scaOperation.getId(), scaOperation.getOpId(), data.getOpData(), tan));
 

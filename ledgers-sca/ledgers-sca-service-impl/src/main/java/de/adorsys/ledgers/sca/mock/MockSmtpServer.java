@@ -20,7 +20,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class MockSmtpServer implements ApplicationRunner {
 
-    private final static Logger log = LoggerFactory.getLogger(MockSmtpServer.class);
+    private static final Logger log = LoggerFactory.getLogger(MockSmtpServer.class);
 
     @Value("${spring.mail.port}")
     private int port;
