@@ -1,18 +1,16 @@
 package de.adorsys.ledgers.app.mock;
 
-import org.springframework.context.annotation.Primary;
+import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
-
 @Service
-@Primary
+@Profile("develop")
 public class MockAuthCodeGenerator implements AuthCodeGenerator {
-	String testAuthCode = System.getProperty("de.adorsys.ledgers.sca.service.AuthCodeGenerator.testAuthCode", "123456");
-	@Override
-	public String generate() {
-		return testAuthCode;
-	}
-	
+    private String testAuthCode = System.getProperty("de.adorsys.ledgers.sca.service.AuthCodeGenerator.testAuthCode", "123456");
 
+    @Override
+    public String generate() {
+        return testAuthCode;
+    }
 }

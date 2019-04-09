@@ -191,7 +191,6 @@
         </dependency>
 
         <!-- other dependencies -->
-
     </dependencies>
 
     <build>
@@ -230,18 +229,4 @@
             </plugin>
         </plugins>
     </build>
-
-
-    <profiles>
-        <profile>
-            <id>mock-smtp</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.subethamail</groupId>
-                    <artifactId>subethasmtp</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
 </project>
