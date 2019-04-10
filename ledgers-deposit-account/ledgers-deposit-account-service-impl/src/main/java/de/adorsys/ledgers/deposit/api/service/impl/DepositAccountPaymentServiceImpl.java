@@ -124,10 +124,12 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public TransactionStatusBO updatePaymentStatusToAuthorised(String paymentId) throws PaymentNotFoundException {
+    public TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status) throws PaymentNotFoundException {
     	Payment payment = paymentRepository.findByPaymentId(paymentId)
     		.orElseThrow(() -> new PaymentNotFoundException(paymentId));
-        Payment p = updatePaymentStatus(payment, TransactionStatus.ACTC);
+
+        payment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
+        Payment p = updatePaymentStatus(payment, TransactionStatus.valueOf(status.name()));
         return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
     }
 

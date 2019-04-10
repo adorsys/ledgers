@@ -36,5 +36,5 @@ public interface DepositAccountPaymentService {
 
     String readIbanByPaymentId(String paymentId);
 
-    TransactionStatusBO updatePaymentStatusToAuthorised(String paymentId) throws PaymentNotFoundException;
+    TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status) throws PaymentNotFoundException;
 }

@@ -14,5 +14,5 @@ public enum ScaStatusBO {
 	STARTED, 
 	FINALISED, 
 	FAILED,
-	EXEMPTED;
+	EXEMPTED
 }

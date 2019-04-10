@@ -25,13 +25,13 @@ public class AuthCodeDataBO {
     private int validitySeconds;
     private OpTypeBO opType;
     private String authorisationId;
+    private int scaWeight;
 
     public AuthCodeDataBO() {
 	}
 
 	public AuthCodeDataBO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
-			int validitySeconds, OpTypeBO opType, String authorisationId) {
-		super();
+			int validitySeconds, OpTypeBO opType, String authorisationId, int scaWeight) {
 		this.userLogin = userLogin;
 		this.scaUserDataId = scaUserDataId;
 		this.opId = opId;
@@ -40,6 +40,7 @@ public class AuthCodeDataBO {
 		this.validitySeconds = validitySeconds;
 		this.opType = opType;
 		this.authorisationId = authorisationId;
+		this.scaWeight = scaWeight;
 	}
 
 	public String getUserLogin() {
@@ -104,5 +105,13 @@ public class AuthCodeDataBO {
 
 	public void setAuthorisationId(String authorisationId) {
 		this.authorisationId = authorisationId;
+	}
+
+	public int getScaWeight() {
+		return scaWeight;
+	}
+
+	public void setScaWeight(int scaWeight) {
+		this.scaWeight = scaWeight;
 	}
 }

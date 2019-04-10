@@ -97,7 +97,7 @@ public class ConsentKeyDataTO {
 
 	private String accountList(List<String> accounts) {
 		StringBuilder sb = new StringBuilder();
-		accounts.stream().forEach(a -> sb.append(a).append(" "));
+		accounts.forEach(a -> sb.append(a).append(" "));
 		return sb.toString();
 	}
 }
