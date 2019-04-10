@@ -11,8 +11,7 @@ public enum ScaStatusTO {
 	STARTED("started"), 
 	FINALISED("finalised"), 
 	FAILED("failed"),
-	EXEMPTED("exempted"),
-	PARTIALLY_AUTHORISED("partiallyAuthorised");
+	EXEMPTED("exempted");
 
 	private String value;
 

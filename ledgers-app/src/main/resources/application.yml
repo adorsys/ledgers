@@ -69,6 +69,7 @@ sca:
     phone:
       subject: "Your TAN from MockBank"
   multilevel.enabled: true
+  final.weight: 100
 
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4

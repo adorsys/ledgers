@@ -25,6 +25,7 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
     private BearerTokenTO bearerToken;
     
     private String objectType;
+	private boolean partiallyAuthorised;
 
 	public SCAResponseTO(String objectType) {
 		this.objectType = objectType;
@@ -98,5 +99,13 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
 
 	public void setMultilevelScaRequired(boolean multilevelScaRequired) {
 		this.multilevelScaRequired = multilevelScaRequired;
+	}
+
+	public boolean isPartiallyAuthorised() {
+		return partiallyAuthorised;
+	}
+
+	public void setPartiallyAuthorised(boolean partiallyAuthorised) {
+		this.partiallyAuthorised = partiallyAuthorised;
 	}
 }

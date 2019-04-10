@@ -32,6 +32,7 @@ import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +66,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
     private final AmountMapper amountMapper;
     private final CreateDepositAccountService createDepositAccountService;
+
+    @Value("${sca.multilevel.enabled:false}")
+    private boolean multilevelScaEnable;
 
 
     public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
@@ -370,9 +374,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
         String template = consentKeyData.template();
+        int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
+
         AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
                 consentId, template, template,
-                defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
+                defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
         try {
             SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
             return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
@@ -398,18 +404,21 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
         try {
+            UserBO userBO = scaUtils.userBO();
+            int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
             boolean validAuthCode = scaOperationService.validateAuthCode(authorisationId, consentId,
-                    consentKeyData.template(), authCode);
+                    consentKeyData.template(), authCode, scaWeight);
             if (!validAuthCode) {
                 throw new SCAOperationValidationMiddlewareException("Wrong auth code");
             }
-            UserBO userBO = scaUtils.userBO();
             UserTO userTO = scaUtils.user(userBO);
             SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
             SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
             if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
                 BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), consent);
                 response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
+            } else if(multilevelScaEnable) {
+                response.setPartiallyAuthorised(true);
             }
             return response;
         } catch (SCAOperationNotFoundException e) {
@@ -510,15 +519,18 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             response.setStatusDate(LocalDateTime.now());
             return response;
         } else {
-            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
-                    aisConsent.getId(), aisConsent.getId(),
-                    consentKeyDataTemplate, consentKeyDataTemplate,
-                    defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId);
             // start SCA
             SCAOperationBO scaOperationBO;
             AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
             consentBO = userService.storeConsent(consentBO);
-            // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside 
+
+            int scaWeight = accessService.resolveMinimalScaWeightForConsent(consentBO.getAccess(), user.getAccountAccesses());
+
+            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
+                                                             aisConsent.getId(), aisConsent.getId(),
+                                                             consentKeyDataTemplate, consentKeyDataTemplate,
+                                                             defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+            // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside
             // The system. Even if a user ha only one sca method.
             scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
             return toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);

@@ -115,6 +115,8 @@ public class MiddlewarePaymentServiceImplTest {
     private PaymentCancelPolicy cancelPolicy;
     @Mock
     private AccessTokenMapper accessTokenMapper;
+    @Mock
+    private AccessService accessService;
 
     @Test
     public void getPaymentStatusById() throws PaymentNotFoundMiddlewareException, PaymentNotFoundException {
@@ -186,7 +188,7 @@ public class MiddlewarePaymentServiceImplTest {
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
         when(accessToken.getLogin()).thenReturn("login");
-        when(paymentService.updatePaymentStatusToAuthorised(PAYMENT_ID)).thenReturn(TransactionStatusBO.ACSP);
+        when(paymentService.updatePaymentStatus(PAYMENT_ID, TransactionStatusBO.ACTC)).thenReturn(TransactionStatusBO.ACSP);
         when(accessTokenMapper.toAccessTokenBO(any())).thenReturn(new AccessTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
         when(scaUtils.userBO()).thenReturn(userBO);
@@ -197,7 +199,7 @@ public class MiddlewarePaymentServiceImplTest {
     }
 
     @Test
-    public void executePayment_Success() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, InsufficientPermissionException {
+    public void executePayment_Success() throws PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, InsufficientPermissionException {
 
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
     	UserTO userTo = new UserTO("userId", email, "123456");
@@ -205,13 +207,15 @@ public class MiddlewarePaymentServiceImplTest {
         when(accessToken.getLogin()).thenReturn(SYSTEM);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
-        when(operationService.validateAuthCode(authorisationId, PAYMENT_ID,template, authCode)).thenReturn(Boolean.TRUE);
+        when(operationService.validateAuthCode(authorisationId, PAYMENT_ID,template, authCode, 0)).thenReturn(Boolean.TRUE);
         when(userService.consentToken(any(), any())).thenReturn(bearerTokenBO);
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.FALSE);
         when(bearerTokenMapper.toBearerTokenTO(bearerTokenBO)).thenReturn(new BearerTokenTO());
 		when(scaUtils.user()).thenReturn(userTo);
         SCAOperationBO scaOperation = scaOperation();
 		when(scaUtils.loadAuthCode(authorisationId)).thenReturn(scaOperation);
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        when(scaUtils.userBO()).thenReturn(userBO);
 		SCAPaymentResponseTO scaPaymentResponseTO = middlewareService.authorizePayment(PAYMENT_ID, authorisationId, authCode);
         assertNotNull(scaPaymentResponseTO);
     }
@@ -225,6 +229,8 @@ public class MiddlewarePaymentServiceImplTest {
     @Test(expected = SCAOperationValidationMiddlewareException.class)
     public void executePayment_Failure() throws PaymentProcessingMiddlewareException, PaymentNotFoundException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
     	PaymentBO payment = readYml(PaymentBO.class, SINGLE_BO);
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        when(scaUtils.userBO()).thenReturn(userBO);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(payment);
 		when(coreDataPolicy.getPaymentCoreData(payment)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(payment));
         String authorisationId = "authId";

@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.sca.service;
 
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
 import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
@@ -42,7 +39,7 @@ public interface SCAOperationService {
 	 * @throws SCAOperationUsedOrStolenException
 	 * @throws SCAOperationExpiredException
 	 */
-	boolean validateAuthCode(String authorisationId, String opId, String opData, String authCode) throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException;
+	boolean validateAuthCode(String authorisationId, String opId, String opData, String authCode, int scaWeight) throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException;
 
 
     /**

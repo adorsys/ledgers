@@ -119,6 +119,7 @@ public class SCAOperationServiceImplTest {
         codeDataBO.setScaUserDataId(SCA_USER_DATA_ID);
         codeDataBO.setUserLogin(USER_LOGIN);
         codeDataBO.setOpType(OpTypeBO.PAYMENT);
+        codeDataBO.setScaWeight(100);
 
         HashMap<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
         emailSender = mock(SCASender.class);
@@ -221,7 +222,7 @@ public class SCAOperationServiceImplTest {
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
-        boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN);
+        boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
 
         assertThat(valid, is(Boolean.TRUE));
 
@@ -240,7 +241,7 @@ public class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
 
-        boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN);
+        boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
 
         assertThat(valid, is(Boolean.FALSE));
 
@@ -255,7 +256,7 @@ public class SCAOperationServiceImplTest {
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.empty());
 
-        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN);
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
     }
 
     @Test(expected = SCAOperationValidationException.class)
@@ -264,7 +265,7 @@ public class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
-        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN);
+        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN, 0);
     }
 
     @Test(expected = SCAOperationUsedOrStolenException.class)
@@ -277,7 +278,7 @@ public class SCAOperationServiceImplTest {
         scaOperationEntity.setStatus(AuthCodeStatus.VALIDATED);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
 
-        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN);
+        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN, 0);
     }
 
     @Test(expected = SCAOperationExpiredException.class)
@@ -289,7 +290,7 @@ public class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(repository.save(any())).thenReturn(scaOperationEntity);
 
-        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN);
+        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN, 0);
     }
 
     @SuppressWarnings("unchecked")
