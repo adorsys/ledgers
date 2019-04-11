@@ -103,6 +103,9 @@ public class AccessService {
         return date.atTime(23, 59, 59, 99);
     }
 
+    /**
+     * Calculates sca weight using debtor iban and users account accesses for payment
+    */
     public int resolveScaWeightByDebtorAccount(List<AccountAccessBO> accountAccesses, String debtorAccount) {
         return accountAccesses.stream()
                        .filter(ac -> StringUtils.equalsIgnoreCase(ac.getIban(), debtorAccount))
@@ -111,6 +114,9 @@ public class AccessService {
                        .orElse(0);
     }
 
+    /**
+     * Calculates minimal sca weight for consent using list of account accesses from consent and user account accesses
+     */
     public int resolveMinimalScaWeightForConsent(AisAccountAccessInfoBO access, List<AccountAccessBO> accountAccesses) {
         Set<String> combinedAccounts = Stream.of(access.getAccounts(), access.getBalances(), access.getTransactions())
                                                .flatMap(Collection::stream)
