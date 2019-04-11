@@ -165,7 +165,7 @@ Please read [CONTRIBUTING](doc/CONTRIBUTING.md) for details on our code of condu
 
 ## Release notes
   
-  * [Release notes](doc/releasenotes.md) 
+  * [Release notes](doc/architecture/release-notes/releasenotes.md) 
  
 ## Roadmap
  
@@ -180,4 +180,3 @@ See also the list of [contributors](doc/contributors.md) who participated in thi
 ## License
 
 This project is licensed under the Apache License version 2.0 - see the [LICENSE.md](LICENSE.md) file for details
-    
