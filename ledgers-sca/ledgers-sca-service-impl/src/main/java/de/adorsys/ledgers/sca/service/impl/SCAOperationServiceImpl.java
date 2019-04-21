@@ -22,7 +22,10 @@ import de.adorsys.ledgers.sca.db.domain.OpType;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.domain.ScaStatus;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
-import de.adorsys.ledgers.sca.domain.*;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.sca.domain.OpTypeBO;
+import de.adorsys.ledgers.sca.domain.SCAOperationBO;
+import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
@@ -118,7 +121,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         checkMethodSupported(scaUserData);
 
         String tan = authCodeGenerator.generate();
-        logger.info("Generated TAN is: {}", tan);
+        logger.trace("Generated TAN is: {}", tan);
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(scaOperation.getId(), scaOperation.getOpId(), data.getOpData(), tan));
 
