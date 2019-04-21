@@ -81,7 +81,7 @@ public class SCAUtils {
 	public String authorisationId() {
 		String scaId = accessTokenTO.getScaId();
 		String authorisationId = accessTokenTO.getAuthorisationId();
-		if(scaId.equals(authorisationId)) {// we are working with login token.
+		if(authorisationId.equals(scaId)) {// we are working with login token.
 			authorisationId = Ids.id(); 
 		}
 		return authorisationId;
