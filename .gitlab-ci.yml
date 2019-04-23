@@ -22,7 +22,6 @@ variables: &variables
 
   OPENSHIFT_NAMESPACE: "ledgers-dev"
 
-  XS2A_DEV_NAMESPACE: "adorsys-psd2-develop"
   XS2A_DEMO_NAMESPACE: "adorsys-psd2-demo"
   XS2A_INTEG_NAMESPACE: "adorsys-psd2-integ"
 
@@ -186,11 +185,6 @@ Deploy to Openshift (XS2A Projects):
   only:
     - tags
   script:
-    - >-
-      skopeo copy
-      --dest-creds=openshift:${OPENSHIFT_TOKEN}
-      "docker://docker.io/adorsys/ledgers:${DOCKER_TAG}"
-      "docker://${OPENSHIFT_REGISTRY}/${XS2A_DEV_NAMESPACE}/ledgers:latest"
     - >-
       skopeo copy
       --dest-creds=openshift:${OPENSHIFT_TOKEN}
