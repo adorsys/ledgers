@@ -30,7 +30,10 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.impl.converter.AccessTokenMapper;
@@ -44,7 +47,10 @@ import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.*;
+import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
+import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -164,9 +170,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             response = prepareSCA(userBO, paymentBO, paymentKeyData, OpTypeBO.PAYMENT);
             if (ScaStatusTO.EXEMPTED.equals(response.getScaStatus())) {
                 try {
-                    // TODO dmi do we need. As we are scheduling execution right away.
-                    status = paymentService.updatePaymentStatus(paymentBO.getPaymentId(), TransactionStatusBO.ACTC);
-                    response.setTransactionStatus(TransactionStatusTO.valueOf(status.name()));
                     status = paymentService.executePayment(paymentBO.getPaymentId(), userBO.getLogin());
                     response.setTransactionStatus(TransactionStatusTO.valueOf(status.name()));
                 } catch (PaymentNotFoundException e) {

@@ -216,15 +216,10 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         try { //TODO @DMIEX to be refactored, mostly moved to mapper
             AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccountBO, refTime);
             BalanceBO balanceBO = new BalanceBO();
-            BalanceSideBO balanceSide = stmt.getAccount().getBalanceSide();
             AmountBO amount = new AmountBO();
             amount.setCurrency(currency);
             balanceBO.setAmount(amount);
-            if (BalanceSideBO.Cr.equals(balanceSide)) {
-                amount.setAmount(stmt.creditBalance());
-            } else {
-                amount.setAmount(stmt.creditBalance());
-            }
+            amount.setAmount(stmt.creditBalance());
             balanceBO.setBalanceType(BalanceTypeBO.INTERIM_AVAILABLE);
             PostingTraceBO youngestPst = stmt.getYoungestPst();
             balanceBO.setReferenceDate(stmt.getPstTime().toLocalDate());

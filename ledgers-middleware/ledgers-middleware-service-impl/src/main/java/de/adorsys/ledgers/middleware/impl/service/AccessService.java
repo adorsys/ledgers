@@ -1,11 +1,8 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
@@ -24,7 +21,6 @@ import java.util.stream.Stream;
 @Service
 public class AccessService {
     private static final String ERROR_MESSAGE_USER_NF = "Can not find user with id %s. But this user is supposed to exist.";
-
     private final UserService userService;
     private final AccessTokenTO accessToken;
 
@@ -33,38 +29,16 @@ public class AccessService {
         this.accessToken = accessToken;
     }
 
-    public void addAccess(List<AccountAccessTO> accountAccess, DepositAccountBO depositAccountBO,
-                          final Map<String, UserBO> persistBuffer) throws UserNotFoundException {
-        for (AccountAccessTO accountAccessTO : accountAccess) {
-            // TODO: check if accountAccess User is not Null
-            UserBO user = persistBuffer.get(accountAccessTO.getUser().getId());
-            if (user == null) {
-                user = userService.findById(accountAccessTO.getUser().getId());
-            }
-            AccountAccessBO accountAccessBO = new AccountAccessBO(depositAccountBO.getIban(),
-                                                                  AccessTypeBO.valueOf(accountAccessTO.getAccessType().name()));
-            addAccess(user, accountAccessBO, persistBuffer);
+    public void updateAccountAccess(UserBO user, AccountAccessBO access) throws UserNotFoundException {
+        if (!containsAccess(user.getAccountAccesses(), access.getIban())) {
+            user.getAccountAccesses().add(access);
         }
-        for (UserBO u : persistBuffer.values()) {
-            userService.updateAccountAccess(u.getLogin(), u.getAccountAccesses());
-        }
+        userService.updateAccountAccess(user.getLogin(),user.getAccountAccesses());
     }
 
-    public void addAccess(final UserBO user, AccountAccessBO accountAccessBO, final Map<String, UserBO> persistBuffer) {
-        AccountAccessBO existingAac = user.getAccountAccesses().stream().filter(a -> a.getIban().equals(accountAccessBO.getIban()))
-                                              .findFirst()
-                                              .orElseGet(() -> {
-                                                  AccountAccessBO aac = new AccountAccessBO();
-                                                  aac.setAccessType(accountAccessBO.getAccessType());
-                                                  aac.setIban(accountAccessBO.getIban());
-                                                  user.getAccountAccesses().add(aac);
-                                                  persistBuffer.put(user.getId(), user);
-                                                  return aac;
-                                              });
-        if (existingAac.getId() == null && existingAac.getAccessType().equals(accountAccessBO.getAccessType())) {
-            existingAac.setAccessType(accountAccessBO.getAccessType());
-            persistBuffer.put(user.getId(), user);
-        }
+    private boolean containsAccess(List<AccountAccessBO> accesses, String iban) {
+        return accesses.stream()
+                       .anyMatch(a -> a.getIban().equals(iban));
     }
 
     public UserBO loadCurrentUser() {
@@ -78,7 +52,6 @@ public class AccessService {
         return userBo;
     }
 
-
     public List<String> filterOwnedAccounts(List<AccountAccessTO> accountAccesses) {
         // All iban owned by this user.
         //TODO should be moved to UM @dmiex
@@ -90,12 +63,10 @@ public class AccessService {
                                  .collect(Collectors.toList());
     }
 
-
-    public AccountAccessTO createAccountAccess(String accNbr, UserTO userTO) {
-        AccountAccessTO accountAccess = new AccountAccessTO();
-        accountAccess.setAccessType(AccessTypeTO.OWNER);
+    public AccountAccessBO createAccountAccess(String accNbr, AccessTypeBO accessType) {
+        AccountAccessBO accountAccess = new AccountAccessBO();
+        accountAccess.setAccessType(accessType);
         accountAccess.setIban(accNbr);
-        accountAccess.setUser(userTO);
         return accountAccess;
     }
 

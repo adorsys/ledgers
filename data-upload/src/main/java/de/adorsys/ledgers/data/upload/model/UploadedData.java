@@ -12,14 +12,26 @@ public class UploadedData {
     private List<UserTO> users = new ArrayList<>();
     private Map<String, AccountDetailsTO> details = new HashMap<>(); // k-> IBAN, v->Details
     private Map<String, AccountBalance> balances = new HashMap<>();  // k-> IBAN, v->Balance
+    private boolean generatePayments;
+    private String branch;
 
     public UploadedData() {
     }
 
-    public UploadedData(List<UserTO> users, Map<String, AccountDetailsTO> details, Map<String, AccountBalance> balances) {
+    public UploadedData(List<UserTO> users, Map<String, AccountDetailsTO> details, Map<String, AccountBalance> balances, boolean generatePayments, String branch) {
         this.users = users;
         this.details = details;
         this.balances = balances;
+        this.generatePayments = generatePayments;
+        this.branch = branch;
+    }
+
+    public boolean isGeneratePayments() {
+        return generatePayments;
+    }
+
+    public void setGeneratePayments(boolean generatePayments) {
+        this.generatePayments = generatePayments;
     }
 
     public List<UserTO> getUsers() {
@@ -44,5 +56,13 @@ public class UploadedData {
 
     public void setBalances(Map<String, AccountBalance> balances) {
         this.balances = balances;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranchId(String branch) {
+        this.branch = branch;
     }
 }

@@ -1,31 +1,18 @@
 package de.adorsys.ledgers.middleware.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 
-public interface MiddlewareAccountManagementService {
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
-    /**
-     * Creates a new DepositAccount. This deposit account is then linked with the user account accesses.
-     * 
-     * Call requires a bank staff access permission.
-     * 
-     * @param depositAccount : the deposit account to be crated.
-     * @param accountAccesses : define who has access to the account.
-     * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
-     */
-	void createDepositAccount(AccountDetailsTO depositAccount, List<AccountAccessTO> accountAccesses)
-			throws UserNotFoundMiddlewareException;
+public interface MiddlewareAccountManagementService {
 
 	/**
 	 * Creates a new DepositAccount. This deposit account is then linked with the specified user.
@@ -38,7 +25,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws UserNotInBranchMiddlewareException : if the associated user is not in the same branch as staff member.
 	 */
 	void createDepositAccount(String UserID, AccountDetailsTO depositAccount)
-			throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException;
+            throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException, AccountNotFoundMiddlewareException;
 
 	/**
 	 * Creates a new DepositAccount for the connected user.
@@ -51,20 +38,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws UserNotFoundMiddlewareException : no user
 	 */
 	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
-			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException;
-	
-
-	/**
-	 * Provide account access to another user of the system. In order to execute
-	 * this operation, the connected user has to be the owner of the corresponding
-	 * account.
-	 * 
-     * @param accountAccess : define who it being given access to the account.
-     * @throws AccountNotFoundMiddlewareException : target account not found.
-	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
-	 */
-	void grantAccessToDepositAccount(AccountAccessTO accountAccess)
-			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
+			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException;
 
 	/**
 	 * Retrieve the list of account viewable by the connected user.
