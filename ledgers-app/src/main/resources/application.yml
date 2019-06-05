@@ -111,11 +111,11 @@ spring:
     change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
-  user: ledgers
-  password: ledgers
-  database: ledgers
+  user: cms
+  password: cms
+  database: consent
   port: 5432
-  url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+  url: jdbc:postgresql://${db.host}:${db.port}/${db.database}?currentSchem=ledgers
 ---
 # hibernate-ddl profile is used to fully initialize the database
 # from ddl generation and rest based upload of test data.

@@ -1,10 +1,7 @@
 package de.adorsys.ledgers.data.upload.resource;
 
-import de.adorsys.ledgers.data.upload.model.DataPayload;
-import de.adorsys.ledgers.data.upload.service.ParseService;
-import de.adorsys.ledgers.data.upload.service.RestExecutionService;
-import de.adorsys.ledgers.data.upload.service.TestsDataGenerationService;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.data.upload.model.ServiceResponse;
+import de.adorsys.ledgers.data.upload.service.TppDataGenAndUploadService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -35,50 +32,45 @@ import java.io.FileNotFoundException;
 public class TppDataUploadResource {
     private static final Logger logger = LoggerFactory.getLogger(TppDataUploadResource.class);
 
-    private final RestExecutionService restExecutionService;
-    private final ParseService parseService;
-    private final TestsDataGenerationService generationService;
+    private final TppDataGenAndUploadService tppDataService;
 
-    public TppDataUploadResource(RestExecutionService restExecutionService, ParseService parseService, TestsDataGenerationService generationService) {
-        this.restExecutionService = restExecutionService;
-        this.parseService = parseService;
-        this.generationService = generationService;
+    public TppDataUploadResource(TppDataGenAndUploadService tppDataService) {
+        this.tppDataService = tppDataService;
     }
 
     @ApiOperation(value = "Upload YAML file with basic test data", authorizations = @Authorization(value = "apiKey"))
     @PutMapping("/upload")
     public ResponseEntity<String> uploadYamlData(HttpServletRequest request, @RequestBody MultipartFile file) {
-        logger.info("Update file received");
-        DataPayload parsed = parseService.getDataFromFile(file);
-        if (parsed == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not parse data");
-        }
-        logger.info("Read data is successful");
-        return restExecutionService.updateLedgers(request.getHeader("Authorization"), parsed)
-                       ? ResponseEntity.status(HttpStatus.OK).body("Data successfully updated")
-                       : ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Could not update data.");
+        ServiceResponse<Void> response = tppDataService.uploadTestData(file, request.getHeader("Authorization"));
+        return response.isSuccess()
+                       ? ResponseEntity.status(HttpStatus.OK).body(response.getMessage())
+                       : ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response.getMessage());
     }
 
     @ApiOperation(value = "Generate YAML test data and upload it to Ledgers", authorizations = @Authorization(value = "apiKey"))
+    @ApiParam(name = "generatePayments", defaultValue = "false")
     @GetMapping(value = "/generate")
-    public ResponseEntity<Resource> generateFile(HttpServletRequest request) {
+    public ResponseEntity<Resource> generateFile(HttpServletRequest request, @RequestParam boolean generatePayments) {
         logger.info("request to create test data received");
         try {
-            byte[] bytes = generationService.generate(request.getHeader("Authorization"));
-            InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(bytes));
-            HttpHeaders headers = getExportFileHttpHeaders();
-            return ResponseEntity.ok()
-                           .headers(headers)
-                           .contentLength(bytes.length)
-                           .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                           .body(resource);
-        } catch (UserNotFoundMiddlewareException e) {
-            logger.error("User could not be found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            ServiceResponse<byte[]> response = tppDataService.generate(request.getHeader("Authorization"), generatePayments);
+            return createResponseForFileOutput(response.getBody(), response.isSuccess());
         } catch (FileNotFoundException e) {
             logger.error("Default file template could not be found.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+    }
+
+    private ResponseEntity<Resource> createResponseForFileOutput(byte[] payload, boolean isSuccess) {
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(payload));
+        HttpHeaders headers = getExportFileHttpHeaders();
+        ResponseEntity.BodyBuilder builder = isSuccess
+                                                     ? ResponseEntity.ok()
+                                                     : ResponseEntity.badRequest();
+        return builder.headers(headers)
+                       .contentLength(payload.length)
+                       .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                       .body(resource);
     }
 
     private HttpHeaders getExportFileHttpHeaders() {
