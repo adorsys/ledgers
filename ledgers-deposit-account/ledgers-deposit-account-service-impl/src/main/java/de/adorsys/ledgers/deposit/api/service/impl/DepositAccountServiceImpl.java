@@ -3,6 +3,7 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountAlreadyExistsException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
@@ -55,6 +56,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     @Override
     public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {
+        checkDepositAccountAlreadyExist(depositAccountBO);
         DepositAccount da = createDepositAccountObj(depositAccountBO, userName);
         DepositAccount saved = depositAccountRepository.save(da);
         return depositAccountMapper.toDepositAccountBO(saved);
@@ -62,6 +64,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     @Override
     public DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccountBO, String userName, String branch) throws DepositAccountNotFoundException {
+        checkDepositAccountAlreadyExist(depositAccountBO);
         DepositAccount da = createDepositAccountObj(depositAccountBO,userName);
         da.setBranch(branch);
         DepositAccount saved = depositAccountRepository.save(da);
@@ -177,6 +180,16 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         LocalDateTime postingDateTime = LocalDateTime.now();
 
         depositCash(accountReference, amount, recordUser, ledger, postingDateTime);
+    }
+
+    private void checkDepositAccountAlreadyExist(DepositAccountBO depositAccountBO) {
+        Optional<DepositAccount> depositAccount = depositAccountRepository.findByIbanAndCurrency(depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
+        if(depositAccount.isPresent()) {
+            String message = String.format("Deposit account already exists. IBAN %s. Currency %s",
+                                           depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
+            logger.error(message);
+            throw new DepositAccountAlreadyExistsException(message);
+        }
     }
 
     private DepositAccount createDepositAccountObj(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {

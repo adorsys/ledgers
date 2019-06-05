@@ -18,12 +18,10 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotInBranchMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
+import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +53,14 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
 
             // TODO: change to created after Account Middleware service refactoring
             return ResponseEntity.ok().build();
+        } catch (DepositAccountAlreadyExistsMiddlewareException e) {
+            throw new ConflictRestException(e.getMessage());
         } catch (UserNotFoundMiddlewareException e) {
             return ResponseEntity.notFound().build();
         } catch (UserNotInBranchMiddlewareException e) {
             return ResponseEntity.status(403).build();
-        } catch (Throwable e){
-            return ResponseEntity.status(500).build();
+        } catch (AccountNotFoundMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
         }
     }
 
