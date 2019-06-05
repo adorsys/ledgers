@@ -36,6 +36,7 @@ spring:
       hibrenate.globally_quoted_identifiers: true
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    open-in-view: false
   jackson:
     serialization:
       write_dates_as_timestamps: false
@@ -135,6 +136,7 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: none
+    open-in-view: false
   liquibase:
     enabled: true
     change-log: classpath:liquibase-master-changelog.xml
