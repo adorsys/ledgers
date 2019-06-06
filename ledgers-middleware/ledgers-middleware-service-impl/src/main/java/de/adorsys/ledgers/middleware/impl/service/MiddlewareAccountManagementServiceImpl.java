@@ -4,6 +4,7 @@ import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountAlreadyExistsException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
@@ -111,6 +112,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             throw new UserNotFoundMiddlewareException();
         } catch (DepositAccountNotFoundException e) {
             throw new AccountNotFoundMiddlewareException();
+        } catch (DepositAccountAlreadyExistsException e) {
+            throw new DepositAccountAlreadyExistsMiddlewareException(e.getMessage());
         }
     }
 
