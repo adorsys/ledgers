@@ -23,7 +23,7 @@ import java.util.Objects;
 
 public class AccountDetailsTO {
 
-    private String id; // TODO shouldn't this be resourceId?
+    private String id;
     /**
      * International Bank Account Number
      * 2 letters CountryCode + 2 digits checksum + BBAN

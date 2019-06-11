@@ -53,7 +53,7 @@ public class MailSCASender implements SCASender {
             message.setFrom(from);
             sender.send(message);
         } catch (MailException e) {
-            logger.error("Error happens at sending email", e);
+            logger.error("Error sending email, No SMTP service configured");
             return false;
         }
         logger.info("Auth code was successfully sent via email");

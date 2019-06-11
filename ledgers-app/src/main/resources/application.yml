@@ -69,7 +69,7 @@ sca:
       from: noreply@adorsys.de
     phone:
       subject: "Your TAN from MockBank"
-  multilevel.enabled: true
+  multilevel.enabled: false
   final.weight: 100
 
 user-service:

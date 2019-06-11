@@ -57,9 +57,9 @@ public class UserServiceImpl implements UserService {
     private static final String NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS = "No account access. User with id %s does not have access to accounts %s";
     private static final String CAN_NOT_LOAD_USER_WITH_ID = "Can not load user with id: ";
     private static final String PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION = "Permission model changed for user with subject %s no sufficient permission on account %s.";
-    private static final String COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT = "Could not verify signature of token with subject : ";
-    private static final String TOKEN_WITH_SUBJECT_EXPIRED = "Token with subject %s is expired at %s and reference time is %s : ";
-    private static final String WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT = "Wrong jws algo for token with subject : ";
+    private static final String COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT = "Could not verify signature of token with subject : {}";
+    private static final String TOKEN_WITH_SUBJECT_EXPIRED = "Token with subject {} is expired at {} and reference time is {}";
+    private static final String WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT = "Wrong jws algo for token with subject : {}";
     private static final String USER_DOES_NOT_HAVE_THE_ROLE_S = "User with id %s and login %s does not have the role %s";
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
@@ -145,21 +145,21 @@ public class UserServiceImpl implements UserService {
 
             // CHeck algorithm
             if (!JWSAlgorithm.HS256.equals(header.getAlgorithm())) {
-                logger.warn(WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT + jwtClaimsSet.getSubject());
+                logger.warn(WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
                 return null;
             }
 
-            int expires_in = bearerTokenService.expiresIn(refTime, jwtClaimsSet);
+            int expiresIn = bearerTokenService.expiresIn(refTime, jwtClaimsSet);
 
-            if (expires_in <= 0) {
-                logger.warn(String.format(TOKEN_WITH_SUBJECT_EXPIRED, jwtClaimsSet.getSubject(), "" + jwtClaimsSet.getExpirationTime(), "" + refTime));
+            if (expiresIn <= 0) {
+                logger.warn(TOKEN_WITH_SUBJECT_EXPIRED, jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime);
                 return null;
             }
 
             // check signature.
             boolean verified = jwt.verify(new MACVerifier(secretSource.getHmacSecret()));
             if (!verified) {
-                logger.warn(COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT + jwtClaimsSet.getSubject());
+                logger.warn(COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
                 return null;
             }
 
@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
             AisConsentBO aisConsent = accessTokenJWT.getConsent();
             validateAisConsent(aisConsent, user);
 
-            return bearerTokenService.bearerToken(accessToken, expires_in, accessTokenJWT);
+            return bearerTokenService.bearerToken(accessToken, expiresIn, accessTokenJWT);
 
         } catch (ParseException e) {
             // If we can not parse the token, we log the error and return false.

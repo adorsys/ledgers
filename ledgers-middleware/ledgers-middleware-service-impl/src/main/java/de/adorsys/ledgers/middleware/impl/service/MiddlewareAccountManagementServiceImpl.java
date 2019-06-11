@@ -468,8 +468,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
      * to the account does not habe any sca data configured.
      */
 
-    @SuppressWarnings("PMD.UnusedFormalParameter")
-    private boolean scaRequired(AisConsentTO aisConsent, UserBO user, OpTypeBO opType) {
+    private boolean scaRequired(UserBO user) {
         return scaUtils.hasSCA(user);
     }
 
@@ -477,7 +476,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         String consentKeyDataTemplate = consentKeyData.template();
         UserTO userTo = scaUtils.user(user);
         String authorisationId = scaUtils.authorisationId();
-        if (!scaRequired(aisConsent, user, OpTypeBO.CONSENT)) {
+        if (!scaRequired(user)) {
             SCAConsentResponseTO response = new SCAConsentResponseTO();
             response.setAuthorisationId(authorisationId);
             response.setConsentId(aisConsent.getId());

@@ -1,12 +1,11 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import java.io.IOException;
-
+import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
-import de.adorsys.ledgers.middleware.api.service.AppManagementService;
+import java.io.IOException;
 
 @Service
 @Transactional

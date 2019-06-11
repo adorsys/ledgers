@@ -79,17 +79,16 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
         return accStmt;
     }
 
-    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private AccountStmt computeBalance(AccountStmt stmt, List<PostingLine> lines) {
         if (!lines.isEmpty()) {
             for (PostingLine line : lines) {
-                stmt = refreshStatement(stmt, line);
+                refreshStatement(stmt, line);
             }
         }
         return stmt;
     }
 
-    private AccountStmt refreshStatement(AccountStmt stmt, PostingLine line) {
+    private void refreshStatement(AccountStmt stmt, PostingLine line) {
         PostingTrace p = createPostingTrace(stmt, line);// Match statement and corresponding posting.
 
         if (stmt.getYoungestPst() == null
@@ -99,7 +98,6 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
         stmt.setLatestPst(p);
         stmt.setTotalDebit(stmt.getTotalDebit().add(line.getDebitAmount()));
         stmt.setTotalCredit(stmt.getTotalCredit().add(line.getCreditAmount()));
-        return stmt;
     }
 
     private PostingTrace createPostingTrace(AccountStmt stmt, PostingLine line) {

@@ -1,23 +1,21 @@
 package de.adorsys.ledgers.middleware.impl.policies;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import javax.xml.bind.DatatypeConverter;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTargetBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
 
+import javax.xml.bind.DatatypeConverter;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 public class PaymentCoreDataPolicyHelper {
-	private static final String UTF_8 = "UTF-8";
 	private static final DecimalFormat decimalFormat = new DecimalFormat("###,###.##");
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -56,7 +54,7 @@ public class PaymentCoreDataPolicyHelper {
 								String.format("Currency mismatched in bulk payment with id %s", r.getPaymentId()));
 					}
 					p.setCurrency(t.getInstructedAmount().getCurrency().getCurrencyCode());
-					md.update(t.getCreditorAccount().getIban().getBytes(UTF_8));
+					md.update(t.getCreditorAccount().getIban().getBytes(StandardCharsets.UTF_8));
 					amt = amt.add(t.getInstructedAmount().getAmount());
 				}
 				p.setAmount(formatAmount(amt));
@@ -72,7 +70,7 @@ public class PaymentCoreDataPolicyHelper {
 				p.setFrequency("" + r.getFrequency());
 			}
 			return p;
-		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+		} catch (NoSuchAlgorithmException e) {
 			throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
 		}
 	}

@@ -14,6 +14,7 @@ import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -56,6 +57,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo) throws LedgerAccountNotFoundException, LedgerNotFoundException {
         LedgerAccount account = loadLedgerAccount(ledgerAccount);
         return postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(account, timeFrom, timeTo)

@@ -16,13 +16,12 @@
 
 package de.adorsys.ledgers.app;
 
+import de.adorsys.ledgers.app.initiation.BankInitService;
 import de.adorsys.ledgers.data.upload.service.EnableBatchDataUploadForTpp;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
-import de.adorsys.ledgers.mockbank.simple.service.EnableMockBankSimple;
-import de.adorsys.ledgers.mockbank.simple.service.MockBankSimpleInitService;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 import de.adorsys.ledgers.sca.mock.MockSmtpServer;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
@@ -33,7 +32,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -49,16 +47,15 @@ import java.util.Arrays;
 @EnableDepositAccountService
 @EnableLedgersMiddlewareService
 @EnableLedgersMiddlewareRest
-@EnableMockBankSimple
 @EnableBatchDataUploadForTpp
 @EnableFeignClients(basePackageClasses = AccountRestClient.class)
 public class LedgersApplication implements ApplicationListener<ApplicationReadyEvent> {
-    private final ApplicationContext context;
+    private final BankInitService bankInitService;
     private final Environment env;
 
     @Autowired
-    public LedgersApplication(ApplicationContext context, Environment env) {
-        this.context = context;
+    public LedgersApplication(BankInitService bankInitService, Environment env) {
+        this.bankInitService = bankInitService;
         this.env = env;
     }
 
@@ -68,8 +65,9 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        if (Arrays.asList(env.getActiveProfiles()).contains("develop")) {
-            context.getBean(MockBankSimpleInitService.class).runInit();
+        bankInitService.init();
+        if (Arrays.asList(this.env.getActiveProfiles()).contains("develop")) {
+            bankInitService.uploadTestData();
         }
     }
 

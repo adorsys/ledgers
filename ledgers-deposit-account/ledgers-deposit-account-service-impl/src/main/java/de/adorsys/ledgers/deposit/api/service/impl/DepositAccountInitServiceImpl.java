@@ -15,7 +15,6 @@ import de.adorsys.ledgers.util.Ids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +28,14 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
     private final ASPSPConfigSource configSource;
 
     @Autowired
-    public DepositAccountInitServiceImpl(ChartOfAccountService coaService, LedgerService ledgerService,
-                                         ASPSPConfigSource configSource) {
+    public DepositAccountInitServiceImpl(ChartOfAccountService coaService, LedgerService ledgerService, ASPSPConfigSource configSource) {
         this.coaService = coaService;
         this.ledgerService = ledgerService;
         this.configSource = configSource;
     }
 
     @Override
-    public void initConfigData() throws IOException {
+    public void initConfigData() {
         ASPSPConfigData aspspConfigData = configSource.aspspConfigData();
 
         // Only process if update is required.
@@ -50,9 +48,8 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         }
     }
 
-    private void processASPSPConfigData(ASPSPConfigData aspspConfigData) throws LedgerNotFoundException,
-                                                                                        LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
-        LedgerBO ledger = loadASPSPAccounts(aspspConfigData.getLedger(), aspspConfigData.getCoaFile(), SYSTEM);
+    private void processASPSPConfigData(ASPSPConfigData aspspConfigData) throws LedgerNotFoundException, ChartOfAccountNotFoundException, LedgerAccountNotFoundException {
+        LedgerBO ledger = loadASPSPAccounts(aspspConfigData.getLedger(), aspspConfigData.getCoaFile());
 
         List<LedgerAccountModel> coaExtensions = aspspConfigData.getCoaExtensions();
         for (LedgerAccountModel ledgerAccountModel : coaExtensions) {
@@ -60,10 +57,8 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         }
     }
 
-    private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile, String userName) throws LedgerNotFoundException,
-                                                                                                          LedgerAccountNotFoundException, ChartOfAccountNotFoundException {
-
-        ChartOfAccountBO coa = getOrCreateCoa(ledgerName, userName);
+    private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws LedgerNotFoundException, ChartOfAccountNotFoundException, LedgerAccountNotFoundException {
+        ChartOfAccountBO coa = getOrCreateCoa(ledgerName);
         LedgerBO ledger = getOrCreateLedger(ledgerName, coa);
 
         List<LedgerAccountModel> ledgerAccounts = configSource.chartOfAccount(coaFile);
@@ -74,11 +69,12 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         return ledger;
     }
 
-    private ChartOfAccountBO getOrCreateCoa(final String ledgerName, String userName) {
-        return coaService.findChartOfAccountsByName(ledgerName).orElseGet(() -> {
-            ChartOfAccountBO coa = createCoa(ledgerName, userName);
-            return coaService.newChartOfAccount(coa);
-        });
+    private ChartOfAccountBO getOrCreateCoa(final String ledgerName) {
+        return coaService.findChartOfAccountsByName(ledgerName)
+                       .orElseGet(() -> {
+                           ChartOfAccountBO coa = buildCoa(ledgerName);
+                           return coaService.newChartOfAccount(coa);
+                       });
     }
 
     private LedgerBO getOrCreateLedger(final String ledgerName, final ChartOfAccountBO coa) throws LedgerNotFoundException, ChartOfAccountNotFoundException {
@@ -88,59 +84,51 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
             return ledger.get();
         }
 
-        LedgerBO rawLedger = createLedger(ledgerName, coa);
+        LedgerBO rawLedger = buildLedger(ledgerName, coa);
         return ledgerService.newLedger(rawLedger);
     }
 
-
-    // todo: @fpo do we really need to return results by this method? because it
-    // never used
-    private LedgerAccountBO newLedgerAccount(LedgerBO ledger, LedgerAccountModel model)
-            throws LedgerNotFoundException, LedgerAccountNotFoundException {
+    private void newLedgerAccount(LedgerBO ledger, LedgerAccountModel model) throws LedgerNotFoundException, LedgerAccountNotFoundException {
         try {
-            return ledgerService.findLedgerAccount(ledger, model.getName());
+            ledgerService.findLedgerAccount(ledger, model.getName());
         } catch (LedgerAccountNotFoundException ex) {
             // NoOp. Create ledger account below.
-            LedgerAccountBO parent = null;
-            if (model.getParent() != null) {
-                try {
-                    parent = ledgerService.findLedgerAccount(ledger, model.getParent());
-                } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-                    throw new IllegalStateException(
-                            String.format("Missing ledger account with id %s", model.getParent()));
-                }
-            }
-
+            LedgerAccountBO parent = getParentLedgerAccount(ledger, model);
             LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
-            return ledgerService.newLedgerAccount(la, SYSTEM);
+            ledgerService.newLedgerAccount(la, SYSTEM);
         }
+    }
+
+    private LedgerAccountBO getParentLedgerAccount(LedgerBO ledger, LedgerAccountModel model) {
+        LedgerAccountBO parent = null;
+        if (model.getParent() != null) {
+            try {
+                parent = ledgerService.findLedgerAccount(ledger, model.getParent());
+            } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
+                throw new IllegalStateException(
+                        String.format("Missing ledger account with id %s", model.getParent()));
+            }
+        }
+        return parent;
     }
 
     private LedgerAccountBO newLedgerAccountObj(LedgerBO ledger, LedgerAccountModel model, LedgerAccountBO parent) {
         String shortDesc = model.getShortDesc();
         String name = model.getName();
-        BalanceSideBO balanceSide = model.getBalanceSide() != null ? model.getBalanceSide() : parent.getBalanceSide();
-        AccountCategoryBO category = model.getCategory() != null ? model.getCategory() : parent.getCategory();
-        String longDesc = null;
-        LocalDateTime created = LocalDateTime.now();
+        BalanceSideBO balanceSide = model.getBalanceSide() != null
+                                            ? model.getBalanceSide()
+                                            : parent.getBalanceSide();
+        AccountCategoryBO category = model.getCategory() != null
+                                             ? model.getCategory()
+                                             : parent.getCategory();
 
-        LedgerAccountBO la = new LedgerAccountBO();
-        la.setId(Ids.id());
-        la.setCreated(created);
-        la.setShortDesc(shortDesc);
-        la.setLongDesc(longDesc);
-        la.setName(name);
-        la.setLedger(ledger);
-        la.setParent(parent);
-        la.setCoa(ledger.getCoa());
-        la.setBalanceSide(balanceSide);
-        la.setCategory(category);
-        return la;
+        return buildNewLedgerAccount(ledger, parent, shortDesc, name, balanceSide, category);
     }
 
     /*
      * Check if update required. If then process the config file.
      */
+
     private boolean updateRequired(ASPSPConfigData aspspConfigData) {
         return aspspConfigData.getUpdateMarkerAccountNbr() == null ||
                        ledgerService.findLedgerByName(aspspConfigData.getLedger())
@@ -161,7 +149,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         }
     }
 
-    private LedgerBO createLedger(String ledgerName, ChartOfAccountBO coa) {
+    private LedgerBO buildLedger(String ledgerName, ChartOfAccountBO coa) {
         LedgerBO ledger = new LedgerBO();
         ledger.setName(ledgerName);
         ledger.setShortDesc(ledgerName);
@@ -169,12 +157,25 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         return ledger;
     }
 
-    private ChartOfAccountBO createCoa(String ledgerName, String userName) {
+    private ChartOfAccountBO buildCoa(String ledgerName) {
         ChartOfAccountBO coa = new ChartOfAccountBO();
-        coa.setUserDetails(userName);
+        coa.setUserDetails(SYSTEM);
         coa.setName(ledgerName);
         coa.setShortDesc("COA: " + ledgerName);
         return coa;
     }
 
+    private LedgerAccountBO buildNewLedgerAccount(LedgerBO ledger, LedgerAccountBO parent, String shortDesc, String name, BalanceSideBO balanceSide, AccountCategoryBO category) {
+        LedgerAccountBO la = new LedgerAccountBO();
+        la.setId(Ids.id());
+        la.setCreated(LocalDateTime.now());
+        la.setShortDesc(shortDesc);
+        la.setName(name);
+        la.setLedger(ledger);
+        la.setParent(parent);
+        la.setCoa(ledger.getCoa());
+        la.setBalanceSide(balanceSide);
+        la.setCategory(category);
+        return la;
+    }
 }

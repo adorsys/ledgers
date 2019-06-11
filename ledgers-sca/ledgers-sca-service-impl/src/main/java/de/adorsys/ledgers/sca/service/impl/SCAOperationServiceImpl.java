@@ -111,17 +111,13 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         if (user.getScaUserData() == null) {
             throw new SCAOperationValidationException(String.format("User with login %s has no sca data", user.getLogin()));
         }
-
-        if (scaStatus != null) {
             scaOperation.setScaStatus(ScaStatus.valueOf(scaStatus.name()));
-        }
 
         ScaUserDataBO scaUserData = getScaUserData(user.getScaUserData(), scaOperation.getScaMethodId());
 
         checkMethodSupported(scaUserData);
 
         String tan = authCodeGenerator.generate();
-        logger.trace("Generated TAN is: {}", tan);
 
         BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(scaOperation.getId(), scaOperation.getOpId(), data.getOpData(), tan));
 
@@ -133,7 +129,6 @@ public class SCAOperationServiceImpl implements SCAOperationService {
                                               ? authCodeEmailBody
                                               : data.getUserMessage();
         String message = String.format(usderMessageTemplate, tan);
-
         senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
 
         return scaOperationMapper.toBO(scaOperation);
