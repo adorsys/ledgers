@@ -65,7 +65,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccountBO, String userName, String branch) throws DepositAccountNotFoundException {
         checkDepositAccountAlreadyExist(depositAccountBO);
-        DepositAccount da = createDepositAccountObj(depositAccountBO,userName);
+        DepositAccount da = createDepositAccountObj(depositAccountBO, userName);
         da.setBranch(branch);
         DepositAccount saved = depositAccountRepository.save(da);
         return depositAccountMapper.toDepositAccountBO(saved);
@@ -184,9 +184,9 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     private void checkDepositAccountAlreadyExist(DepositAccountBO depositAccountBO) {
         Optional<DepositAccount> depositAccount = depositAccountRepository.findByIbanAndCurrency(depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
-        if(depositAccount.isPresent()) {
+        if (depositAccount.isPresent()) {
             String message = String.format("Deposit account already exists. IBAN %s. Currency %s",
-                                           depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
+                    depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
             logger.error(message);
             throw new DepositAccountAlreadyExistsException(message);
         }
@@ -225,29 +225,47 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private List<BalanceBO> getBalances(String iban, Currency currency, LocalDateTime refTime) {
         LedgerBO ledger = loadLedger();
         LedgerAccountBO ledgerAccountBO = newLedgerAccountBOObj(ledger, iban);
+        return getBalances(currency, refTime, ledgerAccountBO);
+    }
+
+    private List<BalanceBO> getBalances(Currency currency, LocalDateTime refTime, LedgerAccountBO ledgerAccountBO) {
         List<BalanceBO> result = new ArrayList<>();
-        try { //TODO @DMIEX to be refactored, mostly moved to mapper
+        try {
             AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccountBO, refTime);
-            BalanceBO balanceBO = new BalanceBO();
-            AmountBO amount = new AmountBO();
-            amount.setCurrency(currency);
-            balanceBO.setAmount(amount);
-            amount.setAmount(stmt.creditBalance());
-            balanceBO.setBalanceType(BalanceTypeBO.INTERIM_AVAILABLE);
-            PostingTraceBO youngestPst = stmt.getYoungestPst();
-            balanceBO.setReferenceDate(stmt.getPstTime().toLocalDate());
-            if (youngestPst != null) {
-                balanceBO.setLastChangeDateTime(youngestPst.getSrcPstTime());
-                balanceBO.setLastCommittedTransaction(youngestPst.getSrcPstId());
-            } else {
-                balanceBO.setLastChangeDateTime(stmt.getPstTime());
-            }
+            BalanceBO balanceBO = composeBalance(currency, stmt);
             result.add(balanceBO);
         } catch (LedgerNotFoundException | BaseLineException | LedgerAccountNotFoundException e) {
             logger.error(e.getMessage(), e);
             throw new DepositAccountUncheckedException(e.getMessage(), e);
         }
         return result;
+    }
+
+    private BalanceBO composeBalance(Currency currency, AccountStmtBO stmt) {
+        BalanceBO balanceBO = new BalanceBO();
+        AmountBO amount = composeAmount(currency, stmt);
+        balanceBO.setAmount(amount);
+        balanceBO.setBalanceType(BalanceTypeBO.INTERIM_AVAILABLE);
+        balanceBO.setReferenceDate(stmt.getPstTime().toLocalDate());
+        return composeFinalBalance(balanceBO, stmt);
+    }
+
+    private BalanceBO composeFinalBalance(BalanceBO balance, AccountStmtBO stmt) {
+        PostingTraceBO youngestPst = stmt.getYoungestPst();
+        if (youngestPst != null) {
+            balance.setLastChangeDateTime(youngestPst.getSrcPstTime());
+            balance.setLastCommittedTransaction(youngestPst.getSrcPstId());
+        } else {
+            balance.setLastChangeDateTime(stmt.getPstTime());
+        }
+        return balance;
+    }
+
+    private AmountBO composeAmount(Currency currency, AccountStmtBO stmt) {
+        AmountBO amount = new AmountBO();
+        amount.setCurrency(currency);
+        amount.setAmount(stmt.creditBalance());
+        return amount;
     }
 
     private List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans) {
@@ -274,37 +292,14 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     private void depositCash(AccountReferenceBO accountReference, AmountBO amount, String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {
-        PostingBO posting = new PostingBO();
-        posting.setLedger(ledger);
-        posting.setPstTime(postingDateTime);
-        posting.setOprDetails("Cash Deposit");
-        posting.setOprId(Ids.id());
-        posting.setPstType(PostingTypeBO.BUSI_TX);
-        posting.setRecordUser(recordUser);
+        PostingBO posting = composePosting(recordUser, ledger, postingDateTime);
 
-        // debit line
-        String cashAccountName = depositAccountConfigService.getCashAccount();
-        LedgerAccountBO debitAccount;
-        try {
-            debitAccount = ledgerService.findLedgerAccount(ledger, cashAccountName);
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        }
-        String debitLineId = Ids.id();
-        String debitTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, debitLineId);
-        PostingLineBO debitLine = newPostingLine(debitLineId, debitAccount, amount.getAmount(), BigDecimal.ZERO, debitTransactionDetails);
+        //Debit line
+        PostingLineBO debitLine = composeLine(accountReference, amount, ledger, postingDateTime, true);
         posting.getLines().add(debitLine);
 
-        // credit line
-        LedgerAccountBO creditAccount;
-        try {
-            creditAccount = ledgerService.findLedgerAccount(ledger, accountReference.getIban());
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        }
-        String creditLineId = Ids.id();
-        String creditTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, creditLineId);
-        PostingLineBO creditLine = newPostingLine(creditLineId, creditAccount, BigDecimal.ZERO, amount.getAmount(), creditTransactionDetails);
+        //Credit line
+        PostingLineBO creditLine = composeLine(accountReference, amount, ledger, postingDateTime, false);
         posting.getLines().add(creditLine);
 
         try {
@@ -312,6 +307,41 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
             throw new DepositAccountUncheckedException(e.getMessage(), e);
         }
+    }
+
+    private PostingLineBO composeLine(AccountReferenceBO accountReference, AmountBO amount, LedgerBO ledger, LocalDateTime postingDateTime, boolean debit) {
+        String cashAccountName = debit
+                                         ? depositAccountConfigService.getCashAccount()
+                                         : accountReference.getIban();
+        LedgerAccountBO account;
+        try {
+            account = ledgerService.findLedgerAccount(ledger, cashAccountName);
+        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
+            throw new DepositAccountUncheckedException(e.getMessage(), e);
+        }
+
+        BigDecimal debitAmount = debit
+                                         ? amount.getAmount()
+                                         : BigDecimal.ZERO;
+
+        BigDecimal creditAmout = debit
+                                         ? BigDecimal.ZERO
+                                         : amount.getAmount();
+
+        String lineId = Ids.id();
+        String debitTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, lineId);
+        return newPostingLine(lineId, account, debitAmount, creditAmout, debitTransactionDetails);
+    }
+
+    private PostingBO composePosting(String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {
+        PostingBO posting = new PostingBO();
+        posting.setLedger(ledger);
+        posting.setPstTime(postingDateTime);
+        posting.setOprDetails("Cash Deposit");
+        posting.setOprId(Ids.id());
+        posting.setPstType(PostingTypeBO.BUSI_TX);
+        posting.setRecordUser(recordUser);
+        return posting;
     }
 
     private PostingLineBO newPostingLine(String id, LedgerAccountBO account, BigDecimal debitAmount, BigDecimal creditAmount, String details) {

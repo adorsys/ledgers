@@ -47,7 +47,7 @@ import java.util.List;
 public class AppMgmtResource implements AppMgmtRestAPI {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppMgmtResource.class);
-	
+
 	@Autowired
     private AppManagementService appManagementService;
 	

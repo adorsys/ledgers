@@ -1,15 +1,12 @@
 package de.adorsys.ledgers.app.mock;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.mockbank.simple.data.MockbankInitData;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class MockBankInitDataConfiguration {
