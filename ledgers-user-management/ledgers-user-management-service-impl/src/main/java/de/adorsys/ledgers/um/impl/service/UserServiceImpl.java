@@ -34,7 +34,6 @@ import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.exception.ConstraintViolationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +49,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@SuppressWarnings("PMD.TooManyMethods") // TODO: refactor class: issue #228
 public class UserServiceImpl implements UserService {
 
     private static final String NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS = "No transaction access. User with id %s does not have access to accounts %s";
@@ -88,7 +88,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserBO create(UserBO user) throws UserAlreadyExistsException {
+    public UserBO create(UserBO user) {
+        checkUserAlreadyExists(user);
+
         UserEntity userPO = userConverter.toUserPO(user);
 
         // if user is TPP and has an ID than do not reset it
@@ -97,18 +99,9 @@ public class UserServiceImpl implements UserService {
             userPO.setId(Ids.id());
         }
 
-        userPO.setPin(passwordEnc.encode(userPO.getId(), user.getPin()));
 
-        try {
-            return userConverter.toUserBO(userRepository.save(userPO));
-        } catch (ConstraintViolationException c) {
-            if (UserEntity.USER_EMAIL_UNIQUE.equals(c.getConstraintName()) ||   //TODO by @speex Let's UserAlreadyExistsException will decide what to do, just pass user and exception args to it
-                        UserEntity.USER_LOGIN_UNIQUE.equals(c.getConstraintName())) {
-                throw new UserAlreadyExistsException(user, c);
-            } else {
-                throw new UserAlreadyExistsException(c.getMessage(), c);
-            }
-        }
+        userPO.setPin(passwordEnc.encode(userPO.getId(), user.getPin()));
+        return userConverter.toUserBO(userRepository.save(userPO));
     }
 
     @Override
@@ -345,6 +338,16 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity> userOptional = userRepository.findFirstByLogin(login);
         userOptional.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login)));
         return userOptional.get();
+    }
+
+    private void checkUserAlreadyExists(UserBO userBO) {
+        Optional<UserEntity> user = userRepository.findByEmailOrLogin(userBO.getEmail(), userBO.getLogin());
+        if (user.isPresent()) {
+            String message = String.format("User with this email or login already exists. Email %s. Login %s.",
+                                           userBO.getEmail(), userBO.getLogin());
+            logger.error(message);
+            throw new UserAlreadyExistsException(message);
+        }
     }
 
     private void validateAccountAcesses(UserEntity userEntity, AccessTokenBO accessTokenJWT) throws InsufficientPermissionException {

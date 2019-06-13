@@ -21,6 +21,7 @@ public interface UserMgmtStaffResourceAPI {
     String USER_ID = "userId";
     String USER_NOT_IN_BRANCH = "User is not your branch";
     String USER_CANNOT_REGISTER_IN_BRANCH = "User cannot register for this branch. The branch is occupied by other user";
+    String USER_EMAIL_OR_LOGIN_TAKEN = "Provided email or login are already taken";
 
     /**
      * Registers a new user within a given branch.

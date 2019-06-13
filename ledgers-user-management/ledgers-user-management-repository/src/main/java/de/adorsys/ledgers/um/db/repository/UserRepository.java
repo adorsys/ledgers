@@ -35,6 +35,14 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     Optional<UserEntity> findFirstByLogin(String login);
 
     /**
+     * Finds user by its email or login if exists
+     *
+     * @param email user email
+     * @return user if exists
+     */
+    Optional<UserEntity> findByEmailOrLogin(String email, String login);
+
+    /**
      * List all users
      *
      * @return list of users
