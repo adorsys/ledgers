@@ -18,7 +18,7 @@ package de.adorsys.ledgers.um.api.exception;
 
 import de.adorsys.ledgers.um.api.domain.UserBO;
 
-public class UserAlreadyExistsException extends Exception {
+public class UserAlreadyExistsException extends RuntimeException {
 
     public static final String ERROR_MESSAGE = "User with such login=%s or email=%s already exists";
 

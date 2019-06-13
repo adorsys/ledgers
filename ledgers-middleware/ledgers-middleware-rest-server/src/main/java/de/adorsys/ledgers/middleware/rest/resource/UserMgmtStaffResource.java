@@ -54,7 +54,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
             return ResponseEntity.ok(user);
         } catch (UserAlreadyExistsMiddlewareException e) {
-            throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
+            throw new ConflictRestException(USER_EMAIL_OR_LOGIN_TAKEN).withDevMessage(e.getMessage());
         }
     }
 

@@ -40,12 +40,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
-    public UserTO create(UserTO user) throws UserAlreadyExistsMiddlewareException {
+    public UserTO create(UserTO user) {
         UserBO userBO = userTOMapper.toUserBO(user);
         try {
             return userTOMapper.toUserTO(userService.create(userBO));
         } catch (UserAlreadyExistsException e) {
-            logger.error(e.getMessage());
             throw new UserAlreadyExistsMiddlewareException(user, e);
         }
     }
