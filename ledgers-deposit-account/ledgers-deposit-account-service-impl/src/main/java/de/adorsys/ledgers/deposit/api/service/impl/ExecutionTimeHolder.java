@@ -36,18 +36,18 @@ public class ExecutionTimeHolder {
     }
 
     private static LocalDate getDateForWeeks(Payment payment, int weeksToAdd) {
-        return payment.getRequestedExecutionDate().plusWeeks(getWeeksDifference(payment) + weeksToAdd);
+        return payment.getStartDate().plusWeeks(getWeeksDifference(payment) + weeksToAdd);
     }
 
     private static LocalDate getDateForMonths(Payment payment, int monthsToAdd) {
-        return payment.getRequestedExecutionDate().plusMonths(getMonthDifference(payment) + monthsToAdd);
+        return payment.getStartDate().plusMonths(getMonthDifference(payment) + monthsToAdd);
     }
 
     private static long getMonthDifference(Payment payment) {
-        return ChronoUnit.MONTHS.between(payment.getExecutedDate().toLocalDate(), payment.getRequestedExecutionDate());
+        return ChronoUnit.MONTHS.between(payment.getExecutedDate().toLocalDate(), payment.getStartDate());
     }
 
     private static long getWeeksDifference(Payment payment) {
-        return ChronoUnit.WEEKS.between(payment.getExecutedDate().toLocalDate(), payment.getRequestedExecutionDate());
+        return ChronoUnit.WEEKS.between(payment.getExecutedDate().toLocalDate(), payment.getStartDate());
     }
 }
