@@ -16,6 +16,9 @@
 
 package de.adorsys.ledgers.middleware.rest.exception;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,6 +34,14 @@ public class ExceptionAdvisor {
     private static final String DEV_MESSAGE = "devMessage";
     private static final String CODE = "code";
     private static final String DATE_TIME = "dateTime";
+
+    @ExceptionHandler(InsufficientFundsMiddlewareException.class)
+    public ResponseEntity<SCAPaymentResponseTO> handleInsufficientFundsException(InsufficientFundsMiddlewareException e) {
+        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
+        response.setTransactionStatus(TransactionStatusTO.RJCT);
+        response.setPsuMessage(e.getMessage());
+        return ResponseEntity.ok(response);
+    }
 
     @ExceptionHandler(RestException.class)
     public ResponseEntity<Map> handleRestException(RestException ex) {

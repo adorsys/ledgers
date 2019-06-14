@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountInsufficientFundsException;
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
@@ -113,7 +114,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             TransactionStatusBO paymentStatus = paymentService.getPaymentStatusById(paymentId);
             return TransactionStatusTO.valueOf(paymentStatus.name());
         } catch (PaymentNotFoundException e) {
-            logger.error("Payment with id=" + paymentId + " not found");
+            logger.error("Payment with id: {} not found", paymentId);
             throw new PaymentNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -195,8 +196,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         }
         try {
             return paymentService.initiatePayment(paymentBO, status);
-        } catch (PaymentWithIdExistsException e) {
+        } catch (PaymentWithIdExistsException | DepositAccountNotFoundException e) {
             throw new PaymentWithIdMiddlewareException(e.getMessage(), e);
+        } catch (DepositAccountInsufficientFundsException e) {
+            throw new InsufficientFundsMiddlewareException(e.getCause(), e.getMessage());
         }
     }
 
@@ -309,7 +312,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             String opData = paymentKeyData.template();
             String userMessage = opData;
             AuthCodeDataBO authCodeDataBO = new AuthCodeDataBO(userBO.getLogin(), scaMethodId, paymentId, opData, userMessage,
-                                                               defaultLoginTokenExpireInSeconds, OpTypeBO.PAYMENT, authorisationId, scaWeight);
+                    defaultLoginTokenExpireInSeconds, OpTypeBO.PAYMENT, authorisationId, scaWeight);
 
             SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(authCodeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
             BearerTokenTO bearerToken = paymentAccountAccessToken(payment);
@@ -360,9 +363,9 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             String opData = template;
             String userMessage = template;
             AuthCodeDataBO authCodeDataBO = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
-                                                               paymentId, opData, userMessage,
-                                                               defaultLoginTokenExpireInSeconds,
-                                                               OpTypeBO.CANCEL_PAYMENT, cancellationId, scaWeight);
+                    paymentId, opData, userMessage,
+                    defaultLoginTokenExpireInSeconds,
+                    OpTypeBO.CANCEL_PAYMENT, cancellationId, scaWeight);
 
             SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(authCodeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
             BearerTokenTO bearerToken = paymentAccountAccessToken(payment);
@@ -396,7 +399,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             }
             BearerTokenTO bearerToken = paymentAccountAccessToken(payment);
             return toScaPaymentResponse(scaUtils.user(), paymentId, tx,
-                                        paymentKeyData, scaUtils.loadAuthCode(cancellationId), bearerToken);
+                    paymentKeyData, scaUtils.loadAuthCode(cancellationId), bearerToken);
         } catch (PaymentNotFoundException e) {
             logger.error(e.getMessage());
             throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
@@ -468,8 +471,8 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         } else {
             int scaWeight = accessService.resolveScaWeightByDebtorAccount(user.getAccountAccesses(), payment.getDebtorAccount().getIban());
             AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null,
-                                                             payment.getPaymentId(), opData, userMessage,
-                                                             defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
+                    payment.getPaymentId(), opData, userMessage,
+                    defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
             // start SCA
             TokenUsageTO tokenUsage = accessTokenTO.getTokenUsage();
             ScaStatusBO scaStatus = ScaStatusBO.PSUIDENTIFIED;

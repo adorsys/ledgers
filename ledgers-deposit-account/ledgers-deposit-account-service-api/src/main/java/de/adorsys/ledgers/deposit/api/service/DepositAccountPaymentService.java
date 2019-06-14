@@ -18,6 +18,7 @@ package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
 import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
@@ -28,7 +29,7 @@ public interface DepositAccountPaymentService {
 
     PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException;
 
-    PaymentBO initiatePayment(PaymentBO paymentBO, TransactionStatusBO status) throws PaymentWithIdExistsException;
+    PaymentBO initiatePayment(PaymentBO paymentBO, TransactionStatusBO status) throws PaymentWithIdExistsException, DepositAccountNotFoundException;
 
     TransactionStatusBO executePayment(String paymentId, String userName) throws PaymentNotFoundException, PaymentProcessingException;
 
