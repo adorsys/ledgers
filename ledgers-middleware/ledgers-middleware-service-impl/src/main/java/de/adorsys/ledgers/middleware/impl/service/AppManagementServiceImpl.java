@@ -5,8 +5,6 @@ import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-
 @Service
 @Transactional
 public class AppManagementServiceImpl implements AppManagementService {
@@ -18,7 +16,7 @@ public class AppManagementServiceImpl implements AppManagementService {
 	}
 
 	@Override
-	public void initApp() throws IOException {
+	public void initApp() {
 		// Init deposit account config  data.
 		depositAccountInitService.initConfigData();
 	}

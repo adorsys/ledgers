@@ -16,23 +16,21 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
+import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.exception.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
+import org.springframework.stereotype.Service;
+
+import java.util.Currency;
+import java.util.Optional;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
@@ -42,14 +40,16 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final PaymentExecutionService executionService;
+    private final DepositAccountService accountService;
 
     public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService,
                                             LedgerService ledgerService, PaymentRepository paymentRepository,
-                                            PaymentMapper paymentMapper, PaymentExecutionService executionService) {
+                                            PaymentMapper paymentMapper, PaymentExecutionService executionService, DepositAccountService accountService) {
         super(depositAccountConfigService, ledgerService);
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.executionService = executionService;
+        this.accountService = accountService;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) throws PaymentWithIdExistsException {
+    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) throws PaymentWithIdExistsException, DepositAccountNotFoundException {
     	if(paymentRepository.existsById(payment.getPaymentId())) {
     		throw new PaymentWithIdExistsException(payment.getPaymentId());
     	}
@@ -79,8 +79,24 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         	t.setPaymentId(Ids.id());
         });
         persistedPayment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
-        Payment savedPayment = paymentRepository.save(persistedPayment);
-        return paymentMapper.toPaymentBO(savedPayment);
+
+        AmountBO amountToVerify = calculateTotalPaymentAmount(payment);
+
+        boolean confirmationOfFunds = accountService.confirmationOfFunds(new FundsConfirmationRequestBO(null, payment.getDebtorAccount(), amountToVerify, null, null));
+        if (confirmationOfFunds) {
+            Payment savedPayment = paymentRepository.save(persistedPayment);
+            return paymentMapper.toPaymentBO(savedPayment);
+        } else {
+            persistedPayment.setTransactionStatus(TransactionStatus.RJCT);
+           throw new DepositAccountInsufficientFundsException(persistedPayment.getPaymentId());
+        }
+    }
+
+    private AmountBO calculateTotalPaymentAmount(PaymentBO payment) {
+        return payment.getTargets().stream()
+                       .map(PaymentTargetBO::getInstructedAmount)
+                       .reduce((left, right) -> new AmountBO(Currency.getInstance("EUR"), left.getAmount().add(right.getAmount())))
+                       .orElseThrow(() -> new RuntimeException("Could not calculate total amount for payment"));
     }
 
     /**
@@ -112,9 +128,9 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
             throw new PaymentProcessingException(String.format(PAYMENT_CANCELLATION_FAILED, paymentId));
         }
         Payment p = updatePaymentStatus(storedPayment, TransactionStatus.CANC);
-        
+
         return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
-        
+
     }
 
     @Override
@@ -125,8 +141,8 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
 
     @Override
     public TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status) throws PaymentNotFoundException {
-    	Payment payment = paymentRepository.findByPaymentId(paymentId)
-    		.orElseThrow(() -> new PaymentNotFoundException(paymentId));
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+                                  .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
         payment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
         Payment p = updatePaymentStatus(payment, TransactionStatus.valueOf(status.name()));

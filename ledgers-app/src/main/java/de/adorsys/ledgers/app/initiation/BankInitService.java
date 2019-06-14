@@ -1,8 +1,10 @@
 package de.adorsys.ledgers.app.initiation;
 
+import de.adorsys.ledgers.app.mock.AccountBalance;
 import de.adorsys.ledgers.app.mock.BulkPaymentsData;
 import de.adorsys.ledgers.app.mock.MockbankInitData;
 import de.adorsys.ledgers.app.mock.SinglePaymentsData;
+import de.adorsys.ledgers.deposit.api.domain.AmountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
@@ -22,6 +24,7 @@ import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +33,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BankInitService {
@@ -75,11 +80,11 @@ public class BankInitService {
     private void createAdmin() {
         try {
             userService.findByLogin("admin");
-            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123");
+            logger.error("Admin user is already present. Skipping creation");
+        } catch (UserNotFoundException e) {
+            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123"); //TODO Matter of refactoring
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
-        } catch (UserNotFoundException e) {
-            logger.error("Admin user is already present. Skipping creation");
         }
     }
 
@@ -158,18 +163,41 @@ public class BankInitService {
             try {
                 depositAccountService.getDepositAccountByIban(details.getIban(), LocalDateTime.now(), false);
             } catch (DepositAccountNotFoundException e) {
-                createAccount(details);
+                createAccount(details)      //TODO Matter of refactoring
+                        .ifPresent(a -> updateBalanceIfRequired(details, a));
             }
         }
     }
 
-    private void createAccount(AccountDetailsTO details) {
+    private void updateBalanceIfRequired(AccountDetailsTO details, DepositAccountBO a) {
+        getBalanceFromInitData(details)
+                .ifPresent(b -> updateBalance(details, a, b));
+    }
+
+    private void updateBalance(AccountDetailsTO details, DepositAccountBO a, BigDecimal b) {
+        AmountBO amount = new AmountBO(Currency.getInstance("EUR"), b);
+        try {
+            depositAccountService.depositCash(a.getId(), amount, "SYSTEM");
+        } catch (DepositAccountNotFoundException e) {
+            logger.error("Unable to deposit cash to account: {}", details.getIban());
+        }
+    }
+
+    private Optional<BigDecimal> getBalanceFromInitData(AccountDetailsTO details) {
+        return mockbankInitData.getBalances().stream()
+                       .filter(b -> StringUtils.equals(b.getAccNbr(), details.getIban()))
+                       .findFirst()
+                       .map(AccountBalance::getBalance);
+    }
+
+    private Optional<DepositAccountBO> createAccount(AccountDetailsTO details) {
         try {
             String userName = getUserNameByIban(details.getIban());
             DepositAccountBO accountBO = accountDetailsMapper.toDepositAccountBO(details);
-            depositAccountService.createDepositAccount(accountBO, userName);
+            return Optional.of(depositAccountService.createDepositAccount(accountBO, userName));
         } catch (UserNotFoundException | DepositAccountNotFoundException e) {
             logger.error("Error creating Account For Mocked User");
+            return Optional.empty();
         }
     }
 

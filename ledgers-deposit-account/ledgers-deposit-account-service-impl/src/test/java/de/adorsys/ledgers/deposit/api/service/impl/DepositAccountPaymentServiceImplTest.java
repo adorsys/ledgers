@@ -4,9 +4,8 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
+import de.adorsys.ledgers.deposit.api.exception.*;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
@@ -45,6 +44,9 @@ public class DepositAccountPaymentServiceImplTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @Mock
+    private DepositAccountService accountService;
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void getPaymentStatus() throws PaymentNotFoundException {
@@ -79,13 +81,22 @@ public class DepositAccountPaymentServiceImplTest {
     }
 
     @Test
-    public void initiatePayment() throws PaymentWithIdExistsException {
+    public void initiatePayment() throws PaymentWithIdExistsException, DepositAccountNotFoundException {
         when(paymentMapper.toPayment(any())).thenReturn(getSinglePayment());
         when(paymentRepository.save(any())).thenReturn(getSinglePayment());
         when(paymentMapper.toPaymentBO(any())).thenReturn(getSinglePaymentBO());
+        when(accountService.confirmationOfFunds(any())).thenReturn(true);
 
         PaymentBO result = paymentService.initiatePayment(getSinglePaymentBO(), TransactionStatusBO.ACTC);
         assertThat(result).isNotNull();
+    }
+
+    @Test(expected = DepositAccountInsufficientFundsException.class)
+    public void initiatePayment_insufficientFunds() throws PaymentWithIdExistsException, DepositAccountNotFoundException {
+        when(paymentMapper.toPayment(any())).thenReturn(getSinglePayment());
+        when(accountService.confirmationOfFunds(any())).thenReturn(false);
+
+        paymentService.initiatePayment(getSinglePaymentBO(), TransactionStatusBO.ACTC);
     }
 
     private <T> void testGetPaymentById(String paymentId, Payment persistedPayment, PaymentBO expectedPayment) throws PaymentNotFoundException {

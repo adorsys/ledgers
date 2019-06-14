@@ -18,6 +18,7 @@ public class MockbankInitData extends BalancesData {
     private List<SinglePaymentsData> singlePayments = new ArrayList<>();
     private List<BulkPaymentsData> bulkPayments = new ArrayList<>();
     private List<TransactionData> transactions = new ArrayList<>();
+    private List<AccountBalance> balances = new ArrayList<>();
 
     public List<AccountDetailsTO> getAccounts() {
         return accounts;
@@ -57,5 +58,13 @@ public class MockbankInitData extends BalancesData {
 
     public void setBulkPayments(List<BulkPaymentsData> bulkPayments) {
         this.bulkPayments = bulkPayments;
+    }
+
+    public List<AccountBalance> getBalances() {
+        return balances;
+    }
+
+    public void setBalances(List<AccountBalance> balances) {
+        this.balances = balances;
     }
 }
