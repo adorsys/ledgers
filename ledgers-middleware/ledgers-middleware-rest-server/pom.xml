@@ -180,7 +180,12 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${commons-validator.version}</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

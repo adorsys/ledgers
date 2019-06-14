@@ -104,6 +104,7 @@
 		<hamcrest-library.version>1.3</hamcrest-library.version>
 		<javatar-commons.version>0.6</javatar-commons.version>
 		<mockito.version>1.10.19</mockito.version>
+		<commons-validator.version>1.6</commons-validator.version>
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<slf4j.version>1.7.25</slf4j.version>
@@ -193,6 +194,12 @@
 			</dependency>
 
 			<!-- other dependencies -->
+
+			<dependency>
+				<groupId>commons-validator</groupId>
+				<artifactId>commons-validator</artifactId>
+				<version>${commons-validator.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.mapstruct</groupId>
