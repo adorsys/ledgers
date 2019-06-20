@@ -185,9 +185,14 @@
             <artifactId>commons-validator</artifactId>
             <version>${commons-validator.version}</version>
         </dependency>
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-middleware-service-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
-	<build>
+	<!--build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -214,7 +219,7 @@
 				</executions>
 			</plugin>
 		</plugins>
-	</build>
+	</build--> <!--//TODO restore after refactoring of AuthTOKEN-->
 
 </project>
 

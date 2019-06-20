@@ -7,6 +7,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.um.api.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,11 @@ public class TokenAuthenticationService {
     private static final String HEADER_KEY = "Authorization";
 
     private final MiddlewareOnlineBankingService onlineBankingService;
+    private final UserService userService;
 
-    public TokenAuthenticationService(MiddlewareOnlineBankingService onlineBankingService) {
+    public TokenAuthenticationService(MiddlewareOnlineBankingService onlineBankingService, UserService userService) {
         this.onlineBankingService = onlineBankingService;
+        this.userService = userService;
     }
 
     public Authentication getAuthentication(HttpServletRequest request) {
@@ -49,15 +52,15 @@ public class TokenAuthenticationService {
         String accessToken = StringUtils.substringAfterLast(headerValue, " ");
 
         BearerTokenTO bearerToken;
-		try {
-			bearerToken = onlineBankingService.validate(accessToken);
-		} catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
+        try {
+            bearerToken = onlineBankingService.validate(accessToken);
+        } catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
             debug("User with token not found.", e);
             return null;
-		}
+        }
 
-        if (bearerToken==null) {
-        	debug("Token is not valid.");
+        if (bearerToken == null) {
+            debug("Token is not valid.");
             return null;
         }
 
@@ -66,11 +69,11 @@ public class TokenAuthenticationService {
 
         AccessTokenTO accessTokenTO = bearerToken.getAccessTokenObject();
         UserRoleTO role = accessTokenTO.getRole();
-        if(role!=null) {
-        	authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        if (role != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
         }
 
-        return new MiddlewareAuthentication(accessTokenTO.getSub(), bearerToken, authorities);
+        return new MiddlewareAuthentication(accessTokenTO.getSub(), bearerToken, authorities, userService);
     }
 
     private void debug(String s) {
@@ -78,6 +81,7 @@ public class TokenAuthenticationService {
             logger.debug(s);
         }
     }
+
     private void debug(String s, Throwable e) {
         if (logger.isDebugEnabled()) {
             logger.debug(s, e);

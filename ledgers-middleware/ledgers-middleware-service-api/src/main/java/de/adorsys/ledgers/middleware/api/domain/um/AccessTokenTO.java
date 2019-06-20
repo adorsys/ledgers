@@ -1,15 +1,12 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @ApiModel(description="The access token object.")
 public class AccessTokenTO {
@@ -42,9 +39,9 @@ public class AccessTokenTO {
 	/*
 	 * List of accounts that can be accessed by this token.
 	 */
-	@ApiModelProperty(value="List of accounts that can be accessed using this token.")
+	/*@ApiModelProperty(value="List of accounts that can be accessed using this token.")
 	@JsonProperty("account_accesses")
-    private List<AccountAccessTO> accountAccesses = new ArrayList<>();
+    private List<AccountAccessTO> accountAccesses = new ArrayList<>();*/
     
     /*
      * The associated with the token.
@@ -127,13 +124,13 @@ public class AccessTokenTO {
 		this.consent = consent;
 	}
 
-	public List<AccountAccessTO> getAccountAccesses() {
+	/*public List<AccountAccessTO> getAccountAccesses() {
 		return accountAccesses;
 	}
 
 	public void setAccountAccesses(List<AccountAccessTO> accountAccesses) {
 		this.accountAccesses = accountAccesses;
-	}
+	}*/
 
 	public UserRoleTO getRole() {
 		return role;

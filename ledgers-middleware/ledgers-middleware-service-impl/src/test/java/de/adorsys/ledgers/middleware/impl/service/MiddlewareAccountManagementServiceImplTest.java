@@ -44,11 +44,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -179,7 +175,6 @@ public class MiddlewareAccountManagementServiceImplTest {
         accountsTO.add(getAccountDetailsTO());
 
         when(accessService.loadCurrentUser()).thenReturn(user);
-        when(userMapper.toUserTO(user)).thenReturn(userTO);
         when(accountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
         when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
@@ -189,7 +184,6 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(accountsToBeTested).isNotEmpty();
 
         verify(accessService, times(1)).loadCurrentUser();
-        verify(userMapper, times(1)).toUserTO(user);
         verify(accountService, times(1)).getDepositAccountsByIban(anyList(),any(LocalDateTime.class),anyBoolean());
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
