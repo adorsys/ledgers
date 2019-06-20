@@ -34,6 +34,7 @@ import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +58,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final AccountDetailsMapper accountDetailsMapper;
     private final PaymentConverter paymentConverter;
     private final UserService userService;
-    private final UserMapper userMapper;
+    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private final AisConsentBOMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
     private final AccessTokenMapper accessTokenMapper;
@@ -74,14 +75,13 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
                                                   AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
-                                                  UserMapper userMapper, AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
+                                                  AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
                                                   AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService,
                                                   SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper) {
         this.depositAccountService = depositAccountService;
         this.accountDetailsMapper = accountDetailsMapper;
         this.paymentConverter = paymentConverter;
         this.userService = userService;
-        this.userMapper = userMapper;
         this.aisConsentMapper = aisConsentMapper;
         this.bearerTokenMapper = bearerTokenMapper;
         this.accessTokenMapper = accessTokenMapper;
@@ -235,7 +235,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         }
 
         // XOR The user is the owner of this prefix
-        List<AccountAccessTO> accountAccesses = accessToken.getAccountAccesses();
+        List<AccountAccessTO> accountAccesses = null;
+        try {
+            accountAccesses = userMapper.toAccountAccessListTO(userService.findById(accessToken.getSub()).getAccountAccesses());
+        } catch (UserNotFoundException e) {
+            logger.error("Could not get User by id: {}", accessToken.getSub());
+        }
 
         // Empty if user is not owner of this prefix.
         if (accountAccesses == null || accountAccesses.isEmpty()) {
@@ -384,7 +389,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
                 BearerTokenBO consentToken = userService.consentToken(accessTokenMapper.toAccessTokenBO(accessToken), consent);
                 response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-            } else if(multilevelScaEnable) {
+            } else if (multilevelScaEnable) {
                 response.setPartiallyAuthorised(true);
             }
             return response;
@@ -493,9 +498,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             int scaWeight = accessService.resolveMinimalScaWeightForConsent(consentBO.getAccess(), user.getAccountAccesses());
 
             AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
-                                                             aisConsent.getId(), aisConsent.getId(),
-                                                             consentKeyDataTemplate, consentKeyDataTemplate,
-                                                             defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+                    aisConsent.getId(), aisConsent.getId(),
+                    consentKeyDataTemplate, consentKeyDataTemplate,
+                    defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
             // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside
             // The system. Even if a user ha only one sca method.
             scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
