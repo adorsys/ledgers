@@ -43,6 +43,11 @@ public class ExceptionAdvisor {
         return ResponseEntity.ok(response);
     }
 
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity handleUnsupportedOperationException(UnsupportedOperationException e) {
+        return ResponseEntity.status(501).body(e.getMessage());
+    }
+
     @ExceptionHandler(RestException.class)
     public ResponseEntity<Map> handleRestException(RestException ex) {
         Map<String, String> body = getHandlerContent(ex.getCode(), ex.getMessage(), ex.devMessage);

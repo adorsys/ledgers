@@ -96,7 +96,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     }
 
     @Override
-    public SCAOperationBO generateAuthCode(AuthCodeDataBO data, UserBO user, ScaStatusBO scaStatus) throws SCAOperationValidationException, SCAMethodNotSupportedException, UserScaDataNotFoundException, SCAOperationNotFoundException {
+    public SCAOperationBO generateAuthCode(AuthCodeDataBO data, UserBO user, ScaStatusBO scaStatus) throws SCAOperationValidationException, SCAMethodNotSupportedException, UserScaDataNotFoundException {
 
         SCAOperationEntity scaOperation = loadOrCreateScaOperation(data, scaStatus);
 
