@@ -380,11 +380,11 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-        List<AccountAccess> accesses = usageType == TokenUsageBO.DIRECT_ACCESS
+        /*List<AccountAccess> accesses = usageType == TokenUsageBO.DIRECT_ACCESS
                                                ? user.getAccountAccesses()
-                                               : null;
+                                               : null;*/
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                accesses, null, UserRole.valueOf(loginToken.getRole().name()),
+                null, null, UserRole.valueOf(loginToken.getRole().name()),
                 loginToken.getScaId(), authorisationId,
                 issueTime, expires, usageType, null);
     }
