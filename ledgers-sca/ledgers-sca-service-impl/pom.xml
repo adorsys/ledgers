@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-sca</artifactId>
-		<version>0.4-SNAPSHOT</version>
+		<version>0.4</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ledgers-sca-service-impl</artifactId>
