@@ -9,6 +9,7 @@ import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +20,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class AccessService {
     private static final String ERROR_MESSAGE_USER_NF = "Can not find user with id %s. But this user is supposed to exist.";
+
     private final UserService userService;
     private final AccessTokenTO accessToken;
-
-    public AccessService(UserService userService, AccessTokenTO accessToken) {
-        this.userService = userService;
-        this.accessToken = accessToken;
-    }
 
     public void updateAccountAccess(UserBO user, AccountAccessBO access) throws UserNotFoundException {
         if (!containsAccess(user.getAccountAccesses(), access.getIban())) {

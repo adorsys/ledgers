@@ -74,6 +74,11 @@
             <version>${javatar-commons.version}</version>
         </dependency>
 
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+
         <!-- test dependencies -->
 
 		<dependency>

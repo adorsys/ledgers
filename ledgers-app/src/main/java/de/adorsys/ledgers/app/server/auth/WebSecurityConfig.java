@@ -1,10 +1,10 @@
-package de.adorsys.ledgers.app.server;
+package de.adorsys.ledgers.app.server.auth;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
 import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
 import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,47 +14,29 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.context.annotation.RequestScope;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.security.Principal;
 import java.util.Optional;
 
+import static de.adorsys.ledgers.app.server.auth.PermittedResources.*;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
     private final TokenAuthenticationService tokenAuthenticationService;
-
-    private final CorsConfigProperties corsConfigProperties;
-
-    @Autowired
-    public WebSecurityConfig(TokenAuthenticationService tokenAuthenticationService, CorsConfigProperties corsConfigProperties) {
-        this.tokenAuthenticationService = tokenAuthenticationService;
-        this.corsConfigProperties = corsConfigProperties;
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests().antMatchers(
-                "/",
-                "/management/app/admin",
-                "/management/app/ping",
-                "/users/login",
-                "/users/register",
-                "/users/loginForConsent",
-                "/data-test/upload-mockbank-data",
-                "/data-test/db-flush",
-                "/staff-access/users/register",
-                "/staff-access/users/login").permitAll()
+                APP_WHITELIST).permitAll()
                 .and()
-                .authorizeRequests().antMatchers("/index.css", "/img/*", "/favicon.ico").permitAll()
+                .authorizeRequests().antMatchers(INDEX_WHITELIST).permitAll()
                 .and()
-                .authorizeRequests().antMatchers("/v2/api-docs", "/swagger-resources", "/swagger-ui.html", "/webjars/**").permitAll()
+                .authorizeRequests().antMatchers(SWAGGER_WHITELIST).permitAll()
                 .and()
-                .authorizeRequests().antMatchers("/console/**").permitAll()
+                .authorizeRequests().antMatchers(CONSOLE_WHITELIST).permitAll()
                 .and()
                 .cors()
                 .and()
@@ -89,19 +71,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AccessTokenTO extractToken(MiddlewareAuthentication authentication) {
         return authentication.getBearerToken().getAccessTokenObject();
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
-        configuration.setAllowedOrigins(corsConfigProperties.getAllowedOrigins());
-        configuration.setAllowedMethods(corsConfigProperties.getAllowedMethods());
-        configuration.setAllowedHeaders(corsConfigProperties.getAllowedHeaders());
-        configuration.setAllowCredentials(corsConfigProperties.getAllowCredentials());
-        configuration.setMaxAge(corsConfigProperties.getMaxAge());
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }

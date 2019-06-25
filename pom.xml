@@ -114,6 +114,7 @@
 		<spring-cloud-dependencies.version>Greenwich.M3</spring-cloud-dependencies.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
 		<jackson.version>2.9.8</jackson.version>
+		<lombok.version>1.18.8</lombok.version>
 		<!--Sonar -->
 		<sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -194,6 +195,11 @@
 			</dependency>
 
 			<!-- other dependencies -->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>commons-validator</groupId>
