@@ -8,9 +8,9 @@ import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlew
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.um.api.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,20 +20,15 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class TokenAuthenticationService {
-    private final Logger logger = LoggerFactory.getLogger(TokenAuthenticationService.class);
-
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String HEADER_KEY = "Authorization";
 
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final UserService userService;
-
-    public TokenAuthenticationService(MiddlewareOnlineBankingService onlineBankingService, UserService userService) {
-        this.onlineBankingService = onlineBankingService;
-        this.userService = userService;
-    }
 
     public Authentication getAuthentication(HttpServletRequest request) {
         String headerValue = request.getHeader(HEADER_KEY);
@@ -77,14 +72,14 @@ public class TokenAuthenticationService {
     }
 
     private void debug(String s) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(s);
+        if (log.isDebugEnabled()) {
+            log.debug(s);
         }
     }
 
     private void debug(String s, Throwable e) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(s, e);
+        if (log.isDebugEnabled()) {
+            log.debug(s, e);
         }
     }
 }
