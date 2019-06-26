@@ -13,8 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
 public class JWTAuthenticationFilter extends GenericFilterBean {
-
-    private TokenAuthenticationService tokenAuthenticationService;
+    private final TokenAuthenticationService tokenAuthenticationService;
 
     public JWTAuthenticationFilter(TokenAuthenticationService tokenAuthenticationService) {
         this.tokenAuthenticationService = tokenAuthenticationService;

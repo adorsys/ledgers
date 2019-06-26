@@ -16,52 +16,33 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
+import de.adorsys.ledgers.middleware.rest.exception.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AisConsentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.PaymentNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAMethodNotSupportedMiddleException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationUsedOrStolenMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserScaDataNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
-import de.adorsys.ledgers.middleware.rest.exception.GoneRestException;
-import de.adorsys.ledgers.middleware.rest.exception.NotAcceptableRestException;
-import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
-
+@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(ConsentRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
-	private static final Logger logger = LoggerFactory.getLogger(ConsentResource.class);
-
     private final MiddlewareAccountManagementService middlewareAccountService;
-
-    public ConsentResource(MiddlewareAccountManagementService middlewareAccountService) {
-        this.middlewareAccountService = middlewareAccountService;
-    }
 
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent){
 		try {
 			return ResponseEntity.ok(middlewareAccountService.startSCA(consentId, aisConsent));
 		} catch (InsufficientPermissionMiddlewareException e) {
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
 		}
 	}
@@ -73,7 +54,7 @@ public class ConsentResource implements ConsentRestAPI {
 		try {
 			return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(consentId, authorisationId));
 		} catch (SCAOperationExpiredMiddlewareException | AisConsentNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
 		}
 	}
@@ -85,13 +66,13 @@ public class ConsentResource implements ConsentRestAPI {
 		try {
 			return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(consentId, authorisationId, scaMethodId));
 		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
 			throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
 			throw new ValidationRestException(e.getMessage());
 		} catch (SCAMethodNotSupportedMiddleException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
 			throw new NotAcceptableRestException(e.getMessage());
 		}
 	}
@@ -103,30 +84,30 @@ public class ConsentResource implements ConsentRestAPI {
 		try {
 			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(consentId, authorisationId, authCode));
 		} catch (SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
 			throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
 			throw new ValidationRestException(e.getMessage());
 		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
 			throw new NotAcceptableRestException(e.getMessage());
 		} catch (SCAOperationExpiredMiddlewareException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
 			throw new GoneRestException(e.getMessage());
 		}
 	}
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#pisConsent)")
-    public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO pisConsent) {
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#aisConsent)")
+    public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO aisConsent) {
         try {
-			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(pisConsent));
+			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(aisConsent));
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
 		}
     }

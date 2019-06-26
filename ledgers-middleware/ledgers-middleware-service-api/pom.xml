@@ -48,6 +48,11 @@
             <version>${apache.commons.collections}</version>
         </dependency>
 
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+
         <!-- test dependencies -->
 
 	</dependencies>

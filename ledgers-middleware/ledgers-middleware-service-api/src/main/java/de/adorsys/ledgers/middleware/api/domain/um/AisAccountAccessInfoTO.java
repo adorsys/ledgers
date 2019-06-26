@@ -22,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(description = "Ais account access information", value = "AisAccountAccessInfo")
 public class AisAccountAccessInfoTO {
@@ -41,46 +43,4 @@ public class AisAccountAccessInfoTO {
 
     @ApiModelProperty(value = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO allPsd2;
-
-	public List<String> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(List<String> accounts) {
-		this.accounts = accounts;
-	}
-
-	public List<String> getBalances() {
-		return balances;
-	}
-
-	public void setBalances(List<String> balances) {
-		this.balances = balances;
-	}
-
-	public List<String> getTransactions() {
-		return transactions;
-	}
-
-	public void setTransactions(List<String> transactions) {
-		this.transactions = transactions;
-	}
-
-	public AisAccountAccessTypeTO getAvailableAccounts() {
-		return availableAccounts;
-	}
-
-	public void setAvailableAccounts(AisAccountAccessTypeTO availableAccounts) {
-		this.availableAccounts = availableAccounts;
-	}
-
-	public AisAccountAccessTypeTO getAllPsd2() {
-		return allPsd2;
-	}
-
-	public void setAllPsd2(AisAccountAccessTypeTO allPsd2) {
-		this.allPsd2 = allPsd2;
-	}
-    
-    
 }
