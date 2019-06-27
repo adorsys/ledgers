@@ -13,19 +13,14 @@ import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
-import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -46,6 +41,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
+import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.POSTING_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,7 +52,6 @@ public class DepositAccountServiceImplTest {
     private final static String ACCOUNT_ID = "ACCOUNT_ID";
     private final static String POSTING_ID = "posting_ID";
     private static final String SYSTEM = "System";
-    private static final String IBAN = "iban";
     private static final Currency EUR = Currency.getInstance("EUR");
     @Mock
     private DepositAccountRepository depositAccountRepository;
@@ -64,19 +59,14 @@ public class DepositAccountServiceImplTest {
     private LedgerService ledgerService;
     @Mock
     private DepositAccountConfigService depositAccountConfigService;
-    @Mock
+
     private DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
     @Mock
     private PostingService postingService;
     @Mock
-    private PaymentMapper paymentMapper;
-    @Mock
     private TransactionDetailsMapper transactionDetailsMapper;
     @Mock
-    private PaymentTargetRepository paymentTargetRepository;
-    @Mock
     private AccountStmtService accountStmtService;
-
     @Mock
     private ObjectMapper objectMapper;
 
@@ -94,12 +84,10 @@ public class DepositAccountServiceImplTest {
                                                               .registerModule(new ParameterNamesModule());
 
     @Test
-    public void createDepositAccount() throws LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
+    public void createDepositAccount() {
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(getLedgerAccountBO().getName());
         when(ledgerService.newLedgerAccount(any(), anyString())).thenReturn(getLedgerAccountBO());
         when(depositAccountRepository.save(any())).thenReturn(getDepositAccount());
-        when(depositAccountMapper.toDepositAccount(any())).thenReturn(getDepositAccount());
-        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
         DepositAccountBO depositAccount = depositAccountService.createDepositAccount(getDepositAccountBO(), SYSTEM);
@@ -111,7 +99,6 @@ public class DepositAccountServiceImplTest {
     @Test
     public void getDepositAccountById() throws DepositAccountNotFoundException {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount()));
-        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
         //When
         DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getDepositAccountById("id", LocalDateTime.now(), false);
         //Then
@@ -129,7 +116,6 @@ public class DepositAccountServiceImplTest {
     @Test
     public void getDepositAccountByIBAN() throws DepositAccountNotFoundException {
         when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
-        when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
         //When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIban("iban", LocalDateTime.now(), false);
         //Then
@@ -140,7 +126,6 @@ public class DepositAccountServiceImplTest {
     @Test
     public void findDepositAccountsByBranch() {
         when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount()));
-        when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
 
         List<DepositAccountDetailsBO> accounts = depositAccountService.findByBranch(anyString());
 
@@ -152,9 +137,8 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getTransactionById() throws TransactionNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException {
+    public void getTransactionById() throws TransactionNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
-        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(new LedgerBO()));
         when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
@@ -166,21 +150,22 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test(expected = TransactionNotFoundException.class)
-    public void getTransactionById_Failure() throws TransactionNotFoundException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException {
+    public void getTransactionById_Failure() throws TransactionNotFoundException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountConfigService.getLedger()).thenReturn("name");
         when(ledgerService.findLedgerByName("name")).thenReturn(Optional.of(new LedgerBO()));
         when(ledgerService.findLedgerAccount(any(), any())).thenReturn(new LedgerAccountBO());
-        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(readFile(DepositAccountBO.class, "DepositAccount.yml"));
-        when(postingService.findPostingLineById(any(), any())).thenThrow(new PostingNotFoundException(ACCOUNT_ID, POSTING_ID));
+        when(postingService.findPostingLineById(any(), any())).thenThrow(PostingModuleException.builder()
+                                                                                 .postingModuleErrorCode(POSTING_NOT_FOUND)
+                                                                                 .devMsg(String.format("Could not find posting by ac id: %s and posting id: %s", ACCOUNT_ID, POSTING_ID))
+                                                                                 .build());
 
         depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
     }
 
     @Test
-    public void getTransactionsByDates() throws DepositAccountNotFoundException, LedgerAccountNotFoundException, LedgerNotFoundException, JsonProcessingException {
+    public void getTransactionsByDates() throws DepositAccountNotFoundException, JsonProcessingException {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(new DepositAccount()));
-        when(depositAccountMapper.toDepositAccountBO(any())).thenReturn(new DepositAccountBO());
         when(postingService.findPostingsByDates(any(), any(), any())).thenReturn(Collections.singletonList(newPostingLineBO()));
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
@@ -189,14 +174,13 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void confirmationOfFunds_more_than_necessary_available() throws BaseLineException, LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
+    public void confirmationOfFunds_more_than_necessary_available() throws DepositAccountNotFoundException {
         confirmationOfFunds_more_than_necessary_available(100);
         confirmationOfFunds_more_than_necessary_available(101);
     }
 
-    private void confirmationOfFunds_more_than_necessary_available(long amount) throws BaseLineException, LedgerAccountNotFoundException, LedgerNotFoundException, DepositAccountNotFoundException {
+    private void confirmationOfFunds_more_than_necessary_available(long amount) throws DepositAccountNotFoundException {
         when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
-        when(depositAccountMapper.toDepositAccountListBO(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
@@ -277,11 +261,7 @@ public class DepositAccountServiceImplTest {
 
     @Test
     public void depositCashCreatesPostingWithTransactionAsDetails() throws Exception {
-        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(new DepositAccount()));
-        AccountReferenceBO accountReferenceBO = new AccountReferenceBO();
-        accountReferenceBO.setIban(IBAN);
-        accountReferenceBO.setCurrency(EUR);
-        when(depositAccountMapper.toAccountReferenceBO(any())).thenReturn(accountReferenceBO);
+        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(getDepositAccount()));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         when(objectMapper.writeValueAsString(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
@@ -298,7 +278,7 @@ public class DepositAccountServiceImplTest {
             assertThat(transactionDetails.getEndToEndId()).isEqualTo(line.getId());
             assertThat(transactionDetails.getTransactionId()).isNotBlank();
             assertThat(transactionDetails.getBookingDate()).isEqualTo(transactionDetails.getValueDate());
-            assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(accountReferenceBO);
+            assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(depositAccountMapper.toAccountReferenceBO(getDepositAccount()));
             assertThat(transactionDetails.getTransactionAmount()).isEqualToComparingFieldByField(amount);
         }
     }

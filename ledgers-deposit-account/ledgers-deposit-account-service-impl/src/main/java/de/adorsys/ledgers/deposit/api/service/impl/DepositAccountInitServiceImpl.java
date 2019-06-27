@@ -1,14 +1,11 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.ChartOfAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.ChartOfAccountService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
@@ -18,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.LEDGER_ACCOUNT_NOT_FOUND;
 
 @Service
 public class DepositAccountInitServiceImpl implements DepositAccountInitService {
@@ -40,15 +39,11 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
 
         // Only process if update is required.
         if (updateRequired(aspspConfigData)) {
-            try {
-                processASPSPConfigData(aspspConfigData);
-            } catch (LedgerNotFoundException | LedgerAccountNotFoundException | ChartOfAccountNotFoundException e) {
-                throw new DepositAccountUncheckedException(e.getMessage(), e);
-            }
+            processASPSPConfigData(aspspConfigData);
         }
     }
 
-    private void processASPSPConfigData(ASPSPConfigData aspspConfigData) throws LedgerNotFoundException, ChartOfAccountNotFoundException, LedgerAccountNotFoundException {
+    private void processASPSPConfigData(ASPSPConfigData aspspConfigData) {
         LedgerBO ledger = loadASPSPAccounts(aspspConfigData.getLedger(), aspspConfigData.getCoaFile());
 
         List<LedgerAccountModel> coaExtensions = aspspConfigData.getCoaExtensions();
@@ -57,7 +52,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         }
     }
 
-    private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) throws LedgerNotFoundException, ChartOfAccountNotFoundException, LedgerAccountNotFoundException {
+    private LedgerBO loadASPSPAccounts(String ledgerName, String coaFile) {
         ChartOfAccountBO coa = getOrCreateCoa(ledgerName);
         LedgerBO ledger = getOrCreateLedger(ledgerName, coa);
 
@@ -77,7 +72,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
                        });
     }
 
-    private LedgerBO getOrCreateLedger(final String ledgerName, final ChartOfAccountBO coa) throws LedgerNotFoundException, ChartOfAccountNotFoundException {
+    private LedgerBO getOrCreateLedger(final String ledgerName, final ChartOfAccountBO coa) {
         Optional<LedgerBO> ledger = ledgerService.findLedgerByName(ledgerName);
 
         if (ledger.isPresent()) {
@@ -88,28 +83,25 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         return ledgerService.newLedger(rawLedger);
     }
 
-    private void newLedgerAccount(LedgerBO ledger, LedgerAccountModel model) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+    private void newLedgerAccount(LedgerBO ledger, LedgerAccountModel model) {
         try {
             ledgerService.findLedgerAccount(ledger, model.getName());
-        } catch (LedgerAccountNotFoundException ex) {
+        } catch (PostingModuleException ex) {
             // NoOp. Create ledger account below.
-            LedgerAccountBO parent = getParentLedgerAccount(ledger, model);
-            LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
-            ledgerService.newLedgerAccount(la, SYSTEM);
+            if (ex.getPostingModuleErrorCode() == LEDGER_ACCOUNT_NOT_FOUND) {
+                LedgerAccountBO parent = getParentLedgerAccount(ledger, model);
+                LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
+                ledgerService.newLedgerAccount(la, SYSTEM);
+            } else {
+                throw ex;
+            }
         }
     }
 
     private LedgerAccountBO getParentLedgerAccount(LedgerBO ledger, LedgerAccountModel model) {
-        LedgerAccountBO parent = null;
-        if (model.getParent() != null) {
-            try {
-                parent = ledgerService.findLedgerAccount(ledger, model.getParent());
-            } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-                throw new IllegalStateException(
-                        String.format("Missing ledger account with id %s", model.getParent()));
-            }
-        }
-        return parent;
+        return (model.getParent() != null)
+                       ? ledgerService.findLedgerAccount(ledger, model.getParent())
+                       : null;
     }
 
     private LedgerAccountBO newLedgerAccountObj(LedgerBO ledger, LedgerAccountModel model, LedgerAccountBO parent) {
@@ -132,21 +124,8 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
     private boolean updateRequired(ASPSPConfigData aspspConfigData) {
         return aspspConfigData.getUpdateMarkerAccountNbr() == null ||
                        ledgerService.findLedgerByName(aspspConfigData.getLedger())
-                               .map(l -> checkLedgerAccountAbsent(aspspConfigData.getUpdateMarkerAccountNbr(), l))
+                               .map(l -> !ledgerService.checkIfLedgerAccountExist(l,aspspConfigData.getUpdateMarkerAccountNbr()))
                                .orElse(true);
-    }
-
-    private boolean checkLedgerAccountAbsent(String updateMarkerAccountNbr, LedgerBO ledger) {
-        try {
-            ledgerService.findLedgerAccount(ledger, updateMarkerAccountNbr);
-            // Ledger account present.
-            return false;
-        } catch (LedgerNotFoundException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        } catch (LedgerAccountNotFoundException e) {
-            // ledger account non existent.
-            return true;
-        }
     }
 
     private LedgerBO buildLedger(String ledgerName, ChartOfAccountBO coa) {
@@ -165,7 +144,8 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         return coa;
     }
 
-    private LedgerAccountBO buildNewLedgerAccount(LedgerBO ledger, LedgerAccountBO parent, String shortDesc, String name, BalanceSideBO balanceSide, AccountCategoryBO category) {
+    private LedgerAccountBO buildNewLedgerAccount(LedgerBO ledger, LedgerAccountBO parent, String shortDesc, String
+                                                                                                                     name, BalanceSideBO balanceSide, AccountCategoryBO category) {
         LedgerAccountBO la = new LedgerAccountBO();
         la.setId(Ids.id());
         la.setCreated(LocalDateTime.now());

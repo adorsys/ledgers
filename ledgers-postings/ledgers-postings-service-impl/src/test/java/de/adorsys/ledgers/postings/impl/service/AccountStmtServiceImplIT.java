@@ -7,12 +7,10 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.*;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
-import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
 import de.adorsys.ledgers.util.Ids;
 import org.junit.Assert;
@@ -33,6 +31,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
+
+import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.LEDGER_NOT_FOUND;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = PostingsApplication.class)
@@ -60,7 +60,7 @@ public class AccountStmtServiceImplIT {
     }
 
     @Test
-    public void test_load_coa_ok() throws IOException, LedgerNotFoundException, LedgerAccountNotFoundException {
+    public void test_load_coa_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         Assume.assumeNotNull(ledger);
@@ -69,7 +69,7 @@ public class AccountStmtServiceImplIT {
     }
 
     @Test
-    public void test_load_posting_ok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
+    public void test_load_posting_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("sample_posting.yml");
     }
@@ -78,16 +78,9 @@ public class AccountStmtServiceImplIT {
      * Testing the test. Negative case, if comparison with wrong balance works.
      *
      * @throws IOException
-     * @throws DoubleEntryAccountingException
-     * @throws PostingRepositoryException
-     * @throws BaseLineException
-     * @throws LedgerAccountNotFoundException
-     * @throws PostingNotFoundException
-     * @throws LedgerNotFoundException
-     * @throws LedgerWithIdNotFoundException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_newbank_no_overriden_tx_nok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -101,16 +94,9 @@ public class AccountStmtServiceImplIT {
      * Classical case, no overriden transaction. Test balance computation.
      *
      * @throws IOException
-     * @throws DoubleEntryAccountingException
-     * @throws PostingRepositoryException
-     * @throws BaseLineException
-     * @throws LedgerAccountNotFoundException
-     * @throws PostingNotFoundException
-     * @throws LedgerNotFoundException
-     * @throws LedgerWithIdNotFoundException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_newbank_no_overriden_tx_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -144,7 +130,7 @@ public class AccountStmtServiceImplIT {
 
 
     @Test
-    public void use_case_newbank_overriden_amount_ok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException {
+    public void use_case_newbank_overriden_amount_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_overriden_amount.yml");
 
@@ -177,7 +163,7 @@ public class AccountStmtServiceImplIT {
     }
 
     @Test
-    public void use_case_newbank_overriden_account_number_ok() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException, PostingNotFoundException {
+    public void use_case_newbank_overriden_account_number_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_overriden_account_number.yml");
 
@@ -209,14 +195,14 @@ public class AccountStmtServiceImplIT {
         checkBalance("2332003", dateTime, new BigDecimal(-5000.00));
     }
 
-    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException {
+    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
         Assert.assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
-    private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+    private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
@@ -251,7 +237,7 @@ public class AccountStmtServiceImplIT {
         }
     }
 
-    private void loadPosting(String s) throws LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, BaseLineException, DoubleEntryAccountingException, IOException {
+    private void loadPosting(String s) throws IOException {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");//.orElseThrow(() -> new IllegalStateException());
         Assume.assumeNotNull(ledger);
         InputStream inputStream = AccountStmtServiceImplIT.class.getResourceAsStream(s);
@@ -265,15 +251,18 @@ public class AccountStmtServiceImplIT {
         }
     }
 
-    public LedgerBO loadLedger(String id) throws LedgerNotFoundException {
-        return ledgerService.findLedgerById(id).orElseThrow(() -> new LedgerNotFoundException(id));
+    public LedgerBO loadLedger(String id) {
+        return ledgerService.findLedgerById(id).orElseThrow(() -> PostingModuleException.builder()
+                                                                          .postingModuleErrorCode(LEDGER_NOT_FOUND)
+                                                                          .devMsg(String.format("Ledger with id: %s not found", id))
+                                                                          .build());
     }
 
-    public LedgerAccountBO loadLedgerAccount(LedgerBO ledger, String accountNumber) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+    public LedgerAccountBO loadLedgerAccount(LedgerBO ledger, String accountNumber) {
         return ledgerService.findLedgerAccount(ledger, accountNumber);
     }
 
-    private void loadCoa(String s) throws IOException, LedgerNotFoundException, LedgerAccountNotFoundException {
+    private void loadCoa(String s) throws IOException {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         Assume.assumeNotNull(ledger);
 

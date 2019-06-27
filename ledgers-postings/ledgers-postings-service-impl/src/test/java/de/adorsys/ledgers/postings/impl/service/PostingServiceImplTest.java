@@ -1,14 +1,11 @@
 package de.adorsys.ledgers.postings.impl.service;
 
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.db.domain.*;
-import de.adorsys.ledgers.postings.db.repository.*;
-import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
-import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
+import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
+import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
+import de.adorsys.ledgers.postings.db.repository.PostingRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +15,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -38,26 +34,16 @@ public class PostingServiceImplTest {
     @InjectMocks
     private PostingServiceImpl postingService;
     @Mock
-    private PostingMapper postingMapper;
-    @Mock
     private LedgerRepository ledgerRepository;
     @Mock
     private PostingRepository postingRepository;
     @Mock
-    private Principal principal;
-    @Mock
     private PostingLineRepository postingLineRepository;
     @Mock
     private LedgerAccountRepository ledgerAccountRepository;
-    @Mock
-    private AccountStmtServiceImpl postingRepositoryAdapter;
-    @Mock
-    private AccountStmtRepository accountStmtRepository;
-    @Mock
-    private PostingLineMapper postingLineMapper;
 
     @Test
-    public void newPosting() throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException, DoubleEntryAccountingException {
+    public void newPosting() {
         when(postingRepository.findFirstByLedgerOrderByRecordTimeDesc(any()))
                 .thenReturn(Optional.of(new Posting()));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
@@ -78,11 +64,10 @@ public class PostingServiceImplTest {
     }
 
     @Test
-    public void findPostingsByDates() throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    public void findPostingsByDates() {
         when(postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(any(), any(), any()))
                 .thenReturn(Collections.singletonList(readYml(PostingLine.class, "PostingLine.yml")));
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(new LedgerAccount()));
-        when(postingLineMapper.toPostingLineBO(any())).thenReturn(readYml(PostingLineBO.class, "PostingLine.yml"));
         LedgerAccountBO readYml = readYml(LedgerAccountBO.class, "LedgerAccount.yml");
         List<PostingLineBO> result = postingService.findPostingsByDates(readYml, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 20, 0, 0));
         assertThat(CollectionUtils.isNotEmpty(result)).isTrue();

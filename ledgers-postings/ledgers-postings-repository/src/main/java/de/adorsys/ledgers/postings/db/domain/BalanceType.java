@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.postings.impl.service;
+package de.adorsys.ledgers.postings.db.domain;
 
 /**
  * Describes the type of balances a deposit account can carry.

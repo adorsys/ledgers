@@ -2,9 +2,6 @@ package de.adorsys.ledgers.rest.posting.controller;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.ChartOfAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.rest.exception.NotFoundRestException;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +29,8 @@ public class LedgerController {
      */
     @PostMapping(path = "/ledgers")
     public ResponseEntity<Void> newLedger(LedgerBO ledger, UriBuilder uri) {
-        LedgerBO newLedger;
-        try {
-            newLedger = ledgerService.newLedger(ledger);
-        } catch (LedgerNotFoundException | ChartOfAccountNotFoundException e) {
-            throw new NotFoundRestException(e.getMessage());
-        }
+        LedgerBO newLedger = ledgerService.newLedger(ledger);
+
         URI location = uri.path(newLedger.getId()).build();
         return ResponseEntity.created(location).build();
     }
@@ -70,12 +63,7 @@ public class LedgerController {
      */
     @PostMapping(path = "/accounts")
     public ResponseEntity<Void> newLedgerAccount(@RequestBody LedgerAccountBO ledgerAccount, UriBuilder uri) {
-        LedgerAccountBO newLedgerAccount;
-        try {
-            newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount, principal.getName());
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new NotFoundRestException(e.getMessage());
-        }
+        LedgerAccountBO newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount, principal.getName());
         URI location = uri.path(newLedgerAccount.getId()).build();
         return ResponseEntity.created(location).build();
     }
@@ -92,13 +80,11 @@ public class LedgerController {
      * @param ledgerName  name of ledger
      * @param accountName name of account
      * @return Ledger Account
-     * @throws LedgerNotFoundException        exception
-     * @throws LedgerAccountNotFoundException exception
      */
     @GetMapping(path = "/accounts", params = {"ledgerName", "accountName"})
     public ResponseEntity<LedgerAccountBO> findLedgerAccountByName(
             @RequestParam(name = "ledgerName") String ledgerName,
-            @RequestParam(name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+            @RequestParam(name = "accountName") String accountName) {
         LedgerBO ledger = new LedgerBO();
         ledger.setName(ledgerName);
 
@@ -110,18 +96,17 @@ public class LedgerController {
      *
      * @param accountName name of corresponding account
      * @return Ledger account
-     * @throws LedgerNotFoundException exception
      */
     @GetMapping(path = "/ledgers/{ledgerId}/accounts", params = {"accountName"})
     public ResponseEntity<LedgerAccountBO> findLedgerAccount(
             @PathVariable("ledgerId") String ledgerId,
-            @RequestParam(name = "accountName") String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+            @RequestParam(name = "accountName") String accountName) {
         LedgerBO ledger = new LedgerBO();
         ledger.setId(ledgerId);
         return ledgerAccount(ledger, accountName);
     }
 
-    private ResponseEntity<LedgerAccountBO> ledgerAccount(LedgerBO ledger, String accountName) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+    private ResponseEntity<LedgerAccountBO> ledgerAccount(LedgerBO ledger, String accountName) {
         LedgerAccountBO ledgerAccount = ledgerService.findLedgerAccount(ledger, accountName);
 
         return ResponseEntity.ok(ledgerAccount);

@@ -10,22 +10,21 @@ import java.math.BigDecimal;
  */
 public class AccountStmtBO extends FinancialStmtBO {
 
-	/*The associated ledger account*/
+	/**The associated ledger account*/
 	private LedgerAccountBO account;
 
-	/*
+	/**
 	 * Identifier of the younges posting by posting time.
-	 * 
 	 */
 	private PostingTraceBO youngestPst;
 
-	/*
+	/**
 	 * The debit amount cummulated so far.
 	 * 
 	 */
 	private BigDecimal totalDebit;
 
-	/*
+	/**
 	 * The credit amount cummulated so far.
 	 */
 	private BigDecimal totalCredit;

@@ -16,63 +16,35 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.adorsys.ledgers.deposit.api.domain.AmountBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTargetBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
-import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
+import de.adorsys.ledgers.deposit.api.service.mappers.SerializeService;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.domain.PostingStatusBO;
-import de.adorsys.ledgers.postings.api.domain.PostingTypeBO;
-import de.adorsys.ledgers.postings.api.exception.BaseLineException;
-import de.adorsys.ledgers.postings.api.exception.DoubleEntryAccountingException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.PostingNotFoundException;
+import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
+import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl implements DepositAccountTransactionService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
-
-    private final PaymentMapper paymentMapper;
+    private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
     private final PostingService postingService;
-    private final ObjectMapper objectMapper;
+    private final SerializeService serializeService;
 
-    public DepositAccountTransactionServiceImpl(PaymentMapper paymentMapper,
-                                                PostingService postingService, LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService, ObjectMapper objectMapper) {
+    public DepositAccountTransactionServiceImpl(PostingService postingService, LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService, SerializeService serializeService) {
         super(depositAccountConfigService, ledgerService);
-        this.paymentMapper = paymentMapper;
         this.postingService = postingService;
-        this.objectMapper = objectMapper;
+        this.serializeService = serializeService;
     }
 
     /**
@@ -90,7 +62,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         PaymentBO paymentObj = paymentMapper.toPaymentBO(payment);
 
         // We do not need to store the whole payment in the details. We will keep a Map<String, String> here for simplicity.
-        String oprDetails = serializeOprDetails(paymentMapper.toPaymentOrder(paymentObj));
+        String oprDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentOrder(paymentObj));
         LedgerBO ledger = loadLedger();
 
         // Validation debtor account number
@@ -100,7 +72,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
                                           ? createBatchPostings(pstTime, oprDetails, ledger, debtorLedgerAccount, paymentObj, userName)
                                           : createRegularPostings(pstTime, oprDetails, ledger, debtorLedgerAccount, paymentObj, userName);
 
-        postings.forEach(this::executeTransactions);
+        postings.forEach(postingService::newPosting);
     }
 
     private Set<PostingBO> createRegularPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount, PaymentBO payment, String userName) {
@@ -123,7 +95,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         AmountBO amount = calculateDebitAmountBatch(payment, creditLines);
         String id = Ids.id();
-        String debitLineDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate()));
+        String debitLineDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate()));
         PostingLineBO debitLine = buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, payment.getPaymentId(), id);
         posting.getLines().add(debitLine);
         posting.getLines().addAll(creditLines);
@@ -134,7 +106,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     private PostingBO buildDCPosting(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, LedgerAccountBO debtorLedgerAccount, PaymentTargetBO target, String userName) {
         PostingBO posting = buildPosting(pstTime, target.getPayment().getPaymentId(), oprDetails, ledger, userName);
         String id = Ids.id();
-        String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime.toLocalDate()));
+        String targetDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime.toLocalDate()));
         PostingLineBO debitLine = buildPostingLine(targetDetails, debtorLedgerAccount, target.getInstructedAmount().getAmount(), BigDecimal.ZERO, posting.getOprId(), id);
         PostingLineBO creditLine = buildCreditLine(target, ledger, pstTime.toLocalDate());
         posting.getLines().addAll(Arrays.asList(debitLine, creditLine));
@@ -152,35 +124,18 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     private PostingLineBO buildCreditLine(PaymentTargetBO target, LedgerBO ledger, LocalDate pstTime) {
         LedgerAccountBO creditorAccount = getCreditorAccount(ledger, target.getCreditorAccount().getIban(), target.getPaymentProduct());
         String id = Ids.id();
-        String targetDetails = serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime));
+        String targetDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime));
         return buildPostingLine(targetDetails, creditorAccount, BigDecimal.ZERO, target.getInstructedAmount().getAmount(), target.getPaymentId(), id);
     }
 
     private LedgerAccountBO getDebtorAccount(LedgerBO ledger, String iban) {
-        try {
-            return ledgerService.findLedgerAccount(ledger, iban);
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new PaymentProcessingException(e.getMessage(), e);
-        }
+        return ledgerService.findLedgerAccount(ledger, iban);
     }
 
     private LedgerAccountBO getCreditorAccount(LedgerBO ledger, String iban, PaymentProductBO paymentProduct) {
-        try {
-            return ledgerService.findLedgerAccount(ledger, iban);
-        } catch (LedgerNotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new PaymentProcessingException(e.getMessage(), e);
-        } catch (LedgerAccountNotFoundException ex) {
-            return loadClearingAccount(ledger, paymentProduct);
-        }
-    }
-
-    private void executeTransactions(PostingBO posting) throws PaymentProcessingException {
-        try {
-            postingService.newPosting(posting);
-        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
-            throw new PaymentProcessingException(e.getMessage());
-        }
+        return ledgerService.checkIfLedgerAccountExist(ledger, iban)
+                       ? ledgerService.findLedgerAccount(ledger, iban)
+                       : loadClearingAccount(ledger, paymentProduct);
     }
 
     private PostingLineBO buildPostingLine(String lineDetails, LedgerAccountBO ledgerAccount, BigDecimal debitAmount, BigDecimal creditAmount, String subOprSrcId, String lineId) {
@@ -207,13 +162,5 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         p.setLedger(ledger);
         p.setValTime(pstTime);
         return p;
-    }
-
-    private <T> String serializeOprDetails(T orderDetails) throws PaymentProcessingException {
-        try {
-            return objectMapper.writeValueAsString(orderDetails);
-        } catch (JsonProcessingException e) {
-            throw new PaymentProcessingException("Payment object can't be serialized", e);
-        }
     }
 }

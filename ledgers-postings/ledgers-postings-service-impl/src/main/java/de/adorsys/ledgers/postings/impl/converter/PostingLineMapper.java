@@ -6,7 +6,7 @@ import de.adorsys.ledgers.postings.db.domain.PostingLine;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = LedgerAccountMapper.class)
+@Mapper( uses = LedgerAccountMapper.class)
 public interface PostingLineMapper {
 
     @Mapping(source = "details.opDetails", target = "details")

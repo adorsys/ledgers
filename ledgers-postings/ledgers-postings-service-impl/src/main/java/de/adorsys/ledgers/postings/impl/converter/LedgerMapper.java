@@ -1,18 +1,12 @@
 package de.adorsys.ledgers.postings.impl.converter;
 
-import org.springframework.stereotype.Component;
-
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.util.CloneUtils;
+import org.mapstruct.Mapper;
 
-@Component
-public class LedgerMapper {
-    public LedgerBO toLedgerBO(Ledger ledger){
-    	return CloneUtils.cloneObject(ledger, LedgerBO.class);
-    }
+@Mapper
+public interface LedgerMapper {
+    LedgerBO toLedgerBO(Ledger ledger);
 
-    public Ledger toLedger(LedgerBO ledger) {
-    	return CloneUtils.cloneObject(ledger, Ledger.class);
-    }
+    Ledger toLedger(LedgerBO ledger);
 }

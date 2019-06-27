@@ -2,13 +2,12 @@ package de.adorsys.ledgers.postings.impl.service;
 
 import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.repository.*;
 import de.adorsys.ledgers.postings.impl.converter.AccountStmtMapper;
 import de.adorsys.ledgers.util.Ids;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,29 +17,25 @@ import java.util.List;
 
 @Service
 public class AccountStmtServiceImpl extends AbstractServiceImpl implements AccountStmtService {
-
     private AccountStmtRepository accountStmtRepository;
-
     private PostingLineRepository postingLineRepository;
+    private AccountStmtMapper accountStmtMapper = Mappers.getMapper(AccountStmtMapper.class);
 
-    private AccountStmtMapper accountStmtMapper;
-
-    public AccountStmtServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, AccountStmtRepository accountStmtRepository, PostingLineRepository postingLineRepository, AccountStmtMapper accountStmtMapper) {
+    public AccountStmtServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, AccountStmtRepository accountStmtRepository, PostingLineRepository postingLineRepository) {
         super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
         this.accountStmtRepository = accountStmtRepository;
         this.postingLineRepository = postingLineRepository;
-        this.accountStmtMapper = accountStmtMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public AccountStmtBO readStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    public AccountStmtBO readStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) {
         AccountStmt stmt = stmt(ledgerAccount, refTime);
         return accountStmtMapper.toAccountStmtBO(stmt);
     }
 
     @Override
-    public AccountStmtBO createStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
+    public AccountStmtBO createStmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) {
         AccountStmt stmt = stmt(ledgerAccount, refTime);
         stmt = accountStmtRepository.save(stmt);
         return accountStmtMapper.toAccountStmtBO(stmt);
@@ -52,8 +47,8 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
         return null;
     }
 
-    private AccountStmt stmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        LedgerAccount account = loadLedgerAccount(ledgerAccount);
+    private AccountStmt stmt(LedgerAccountBO ledgerAccount, LocalDateTime refTime) {
+        LedgerAccount account = loadLedgerAccountBO(ledgerAccount);
         AccountStmt accStmt = accountStmtRepository
                                       .findFirstByAccountAndStmtStatusAndPstTimeLessThanOrderByPstTimeDescStmtSeqNbrDesc(account, StmtStatus.CLOSED, refTime)
                                       .orElseGet(() -> newStmtObj(refTime, account));

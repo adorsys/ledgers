@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -16,15 +15,11 @@ import java.time.LocalDate;
 import java.util.Currency;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class PaymentMapperTest {
     private static final String SINGLE_PATH = "PaymentSingle.yml";
     private static final String BULK_PATH = "PaymentBulk.yml";
-    private static final Currency CURRENCY = Currency.getInstance("EUR");
     private static final String TRANSACTION_ID = "TR_1";
     private final Payment SINGLE_PMT = readYml(Payment.class, SINGLE_PATH);
     private final PaymentBO SINGLE_PMT_BO = readYml(PaymentBO.class, SINGLE_PATH);
@@ -32,12 +27,9 @@ public class PaymentMapperTest {
     private final PaymentBO BULK_PMT_BO = readYml(PaymentBO.class, BULK_PATH);
     @InjectMocks
     private PaymentMapper mapper = Mappers.getMapper(PaymentMapper.class);
-    @Mock
-    private CurrencyMapper currencyMapper;
 
     @Test
     public void toPayment_Single() {
-        when(currencyMapper.toCurrency(anyString())).thenReturn(CURRENCY);
         PaymentBO result = mapper.toPaymentBO(SINGLE_PMT);
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(SINGLE_PMT_BO);
@@ -45,7 +37,6 @@ public class PaymentMapperTest {
 
     @Test
     public void toPayment_Bulk() {
-        when(currencyMapper.toCurrency(anyString())).thenReturn(CURRENCY);
         PaymentBO result = mapper.toPaymentBO(BULK_PMT);
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(BULK_PMT_BO);
@@ -53,7 +44,6 @@ public class PaymentMapperTest {
 
     @Test
     public void toPaymentBO_Single() {
-        when(currencyMapper.currencyToString(any())).thenReturn(CURRENCY.getCurrencyCode());
         Payment result = mapper.toPayment(SINGLE_PMT_BO);
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(SINGLE_PMT);
@@ -61,7 +51,6 @@ public class PaymentMapperTest {
 
     @Test
     public void toPaymentBO_Bulk() {
-        when(currencyMapper.currencyToString(any())).thenReturn(CURRENCY.getCurrencyCode());
         Payment result = mapper.toPayment(BULK_PMT_BO);
         assertThat(result).isNotNull();
         assertThat(result).isEqualToComparingFieldByFieldRecursively(BULK_PMT);
