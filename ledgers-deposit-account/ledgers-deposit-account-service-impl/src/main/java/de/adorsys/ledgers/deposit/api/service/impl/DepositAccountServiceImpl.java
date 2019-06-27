@@ -14,11 +14,12 @@ import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.*;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
+import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,10 +32,10 @@ import java.util.stream.Collectors;
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
-    private static final String msgIbanNF = "Accounts with iban %s not found";
+    private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s not found";
 
     private final DepositAccountRepository depositAccountRepository;
-    private final DepositAccountMapper depositAccountMapper;
+    private final DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
     private final AccountStmtService accountStmtService;
     private final PostingService postingService;
     private final TransactionDetailsMapper transactionDetailsMapper;
@@ -42,12 +43,11 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
                                      LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
-                                     DepositAccountMapper depositAccountMapper, AccountStmtService accountStmtService,
+                                     AccountStmtService accountStmtService,
                                      PostingService postingService, TransactionDetailsMapper transactionDetailsMapper,
                                      ObjectMapper objectMapper) {
         super(depositAccountConfigService, ledgerService);
         this.depositAccountRepository = depositAccountRepository;
-        this.depositAccountMapper = depositAccountMapper;
         this.accountStmtService = accountStmtService;
         this.postingService = postingService;
         this.transactionDetailsMapper = transactionDetailsMapper;
@@ -55,7 +55,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {
+    public DepositAccountBO createDepositAccount(DepositAccountBO depositAccountBO, String userName) {
         checkDepositAccountAlreadyExist(depositAccountBO);
         DepositAccount da = createDepositAccountObj(depositAccountBO, userName);
         DepositAccount saved = depositAccountRepository.save(da);
@@ -63,7 +63,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccountBO, String userName, String branch) throws DepositAccountNotFoundException {
+    public DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccountBO, String userName, String branch) {
         checkDepositAccountAlreadyExist(depositAccountBO);
         DepositAccount da = createDepositAccountObj(depositAccountBO, userName);
         da.setBranch(branch);
@@ -76,7 +76,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         List<DepositAccountBO> accounts = getDepositAccountsByIban(Collections.singletonList(iban));
 
         if (accounts.isEmpty()) {
-            throw new DepositAccountNotFoundException(String.format(msgIbanNF, iban));
+            throw new DepositAccountNotFoundException(String.format(MSG_IBAN_NOT_FOUND, iban));
         }
         DepositAccountBO account = accounts.iterator().next();
         return new DepositAccountDetailsBO(account, getBalancesList(account, withBalances, refTime));
@@ -105,7 +105,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
             PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
             return transactionDetailsMapper.toTransactionSigned(line);
-        } catch (DepositAccountNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | PostingNotFoundException e) {
+        } catch (DepositAccountNotFoundException| PostingModuleException e) {
             throw new TransactionNotFoundException(e.getMessage());
         }
     }
@@ -114,16 +114,11 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     public List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException {
         DepositAccountBO account = getDepositAccountById(accountId);
         LedgerBO ledgerBO = loadLedger();
-        LedgerAccountBO ledgerAccountBO;
-        try {
-            ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
-            return postingService.findPostingsByDates(ledgerAccountBO, dateFrom, dateTo)
-                           .stream()
-                           .map(transactionDetailsMapper::toTransactionSigned)
-                           .collect(Collectors.toList());
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        }
+        LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
+        return postingService.findPostingsByDates(ledgerAccountBO, dateFrom, dateTo)
+                       .stream()
+                       .map(transactionDetailsMapper::toTransactionSigned)
+                       .collect(Collectors.toList());
     }
 
     @Override
@@ -192,7 +187,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         }
     }
 
-    private DepositAccount createDepositAccountObj(DepositAccountBO depositAccountBO, String userName) throws DepositAccountNotFoundException {
+    private DepositAccount createDepositAccountObj(DepositAccountBO depositAccountBO, String userName) {
         DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
 
         LedgerBO ledgerBO = loadLedger();
@@ -201,12 +196,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
         LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), depositParentAccount);
 
-        try {
-            ledgerService.newLedgerAccount(ledgerAccount, userName);
-        } catch (LedgerAccountNotFoundException | LedgerNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new DepositAccountNotFoundException(e.getMessage(), e);
-        }
+        ledgerService.newLedgerAccount(ledgerAccount, userName);
+
         return depositAccountMapper.createDepositAccountObj(depositAccount);
     }
 
@@ -230,14 +221,9 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     private List<BalanceBO> getBalances(Currency currency, LocalDateTime refTime, LedgerAccountBO ledgerAccountBO) {
         List<BalanceBO> result = new ArrayList<>();
-        try {
-            AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccountBO, refTime);
-            BalanceBO balanceBO = composeBalance(currency, stmt);
-            result.add(balanceBO);
-        } catch (LedgerNotFoundException | BaseLineException | LedgerAccountNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        }
+        AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccountBO, refTime);
+        BalanceBO balanceBO = composeBalance(currency, stmt);
+        result.add(balanceBO);
         return result;
     }
 
@@ -302,35 +288,27 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         PostingLineBO creditLine = composeLine(accountReference, amount, ledger, postingDateTime, false);
         posting.getLines().add(creditLine);
 
-        try {
-            postingService.newPosting(posting);
-        } catch (PostingNotFoundException | LedgerNotFoundException | LedgerAccountNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        }
+        postingService.newPosting(posting);
     }
 
     private PostingLineBO composeLine(AccountReferenceBO accountReference, AmountBO amount, LedgerBO ledger, LocalDateTime postingDateTime, boolean debit) {
         String cashAccountName = debit
                                          ? depositAccountConfigService.getCashAccount()
                                          : accountReference.getIban();
-        LedgerAccountBO account;
-        try {
-            account = ledgerService.findLedgerAccount(ledger, cashAccountName);
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
-        }
+
+        LedgerAccountBO account = ledgerService.findLedgerAccount(ledger, cashAccountName);
 
         BigDecimal debitAmount = debit
                                          ? amount.getAmount()
                                          : BigDecimal.ZERO;
 
-        BigDecimal creditAmout = debit
+        BigDecimal creditAmount = debit
                                          ? BigDecimal.ZERO
                                          : amount.getAmount();
 
         String lineId = Ids.id();
         String debitTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, lineId);
-        return newPostingLine(lineId, account, debitAmount, creditAmout, debitTransactionDetails);
+        return newPostingLine(lineId, account, debitAmount, creditAmount, debitTransactionDetails);
     }
 
     private PostingBO composePosting(String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {

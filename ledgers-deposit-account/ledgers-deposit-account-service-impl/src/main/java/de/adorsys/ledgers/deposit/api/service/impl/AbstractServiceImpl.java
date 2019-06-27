@@ -4,8 +4,6 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 
 public abstract class AbstractServiceImpl {
@@ -25,14 +23,7 @@ public abstract class AbstractServiceImpl {
     }
 
     protected LedgerAccountBO loadClearingAccount(LedgerBO ledgerBO, PaymentProductBO paymentProductBO) {
-        return loadClearing(ledgerBO, depositAccountConfigService.getClearingAccount(paymentProductBO));
-    }
-
-    protected LedgerAccountBO loadClearing(LedgerBO ledgerBO, String accountName) {
-        try {
-            return ledgerService.findLedgerAccount(ledgerBO, accountName);
-        } catch (LedgerNotFoundException | LedgerAccountNotFoundException e) {
-            throw new IllegalStateException(String.format("LedgerAccount with name %s not found from ledger with name %s", accountName, depositAccountConfigService.getLedger()));
-        }
+        String clearingAccount = depositAccountConfigService.getClearingAccount(paymentProductBO);
+        return ledgerService.findLedgerAccount(ledgerBO, clearingAccount);
     }
 }

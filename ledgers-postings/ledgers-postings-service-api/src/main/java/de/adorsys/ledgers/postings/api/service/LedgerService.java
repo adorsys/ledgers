@@ -2,9 +2,6 @@ package de.adorsys.ledgers.postings.api.service;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.ChartOfAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 
 import java.util.Optional;
 
@@ -20,9 +17,8 @@ public interface LedgerService {
      *
      * @param ledger
      * @return
-     * @throws LedgerNotFoundException
      */
-    LedgerBO newLedger(LedgerBO ledger) throws LedgerNotFoundException, ChartOfAccountNotFoundException;
+    LedgerBO newLedger(LedgerBO ledger);
 
     Optional<LedgerBO> findLedgerById(String id);
 
@@ -41,9 +37,8 @@ public interface LedgerService {
      *
      * @param ledgerAccount
      * @return
-     * @throws LedgerAccountNotFoundException
      */
-    LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccount, String userName) throws LedgerAccountNotFoundException, LedgerNotFoundException;
+    LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccount, String userName);
 
     Optional<LedgerAccountBO> findLedgerAccountById(String id);
 
@@ -53,5 +48,13 @@ public interface LedgerService {
      * @param name
      * @return
      */
-    LedgerAccountBO findLedgerAccount(LedgerBO ledger, String name) throws LedgerNotFoundException, LedgerAccountNotFoundException;
+    LedgerAccountBO findLedgerAccount(LedgerBO ledger, String name);
+
+    /**
+     *
+     * @param ledger ledger
+     * @param name ledger account name
+     * @return boolean representation of presence of requested ledger account
+     */
+    boolean checkIfLedgerAccountExist(LedgerBO ledger, String name);
 }

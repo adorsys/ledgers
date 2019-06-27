@@ -1,9 +1,7 @@
-package de.adorsys.ledgers.postings.impl.service;
+package de.adorsys.ledgers.postings.db.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import de.adorsys.ledgers.postings.db.domain.BalanceSide;
 
 public class Balance {
 	private BalanceSide balanceSide;

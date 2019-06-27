@@ -3,43 +3,52 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.ChartOfAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
+import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
+import lombok.RequiredArgsConstructor;
+import org.mapstruct.factory.Mappers;
 
+import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.*;
+
+@RequiredArgsConstructor
 public class AbstractServiceImpl {
+    private static final String COA_NF_BY_ID_MSG = "Chart of Account with id: %s not found!";
+    private static final String COA_NF_BY_NAME_MSG = "Chart of Account with name: %s not found!";
+    private static final String LA_NF_BY_ID_MSG = "Ledger Account with id: %s not found!";
+    protected static final String LA_NF_BY_NAME_MSG = "Ledger Account with Ledger name : %s not found!";
+    private static final String LEDGER_NF_BY_ID_MSG = "Ledger with id: %s not found!";
+    private static final String LEDGER_NF_BY_NAME_MSG = "Ledger with Ledger name : %s not found!";
 
     protected final LedgerAccountRepository ledgerAccountRepository;
-
     protected final ChartOfAccountRepository chartOfAccountRepo;
-
     protected final LedgerRepository ledgerRepository;
+    protected final LedgerAccountMapper ledgerAccountMapper = Mappers.getMapper(LedgerAccountMapper.class);
 
-    public AbstractServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository) {
-        this.ledgerAccountRepository = ledgerAccountRepository;
-        this.chartOfAccountRepo = chartOfAccountRepo;
-        this.ledgerRepository = ledgerRepository;
-    }
-
-    protected ChartOfAccount loadCoa(ChartOfAccountBO model) throws ChartOfAccountNotFoundException {
-        if (model == null) {
+    protected ChartOfAccount loadCoa(ChartOfAccountBO chartOfAccountBO) {
+        if (chartOfAccountBO == null) {
             throw nullInfo();
         }
-        if (model.getId() != null) {
-            return chartOfAccountRepo.findById(model.getId())
-                           .orElseThrow(() -> new ChartOfAccountNotFoundException(model));
+        if (chartOfAccountBO.getId() != null) {
+            return chartOfAccountRepo.findById(chartOfAccountBO.getId())
+                           .orElseThrow(() -> PostingModuleException.builder()
+                                                      .postingModuleErrorCode(CHART_OF_ACCOUNT_NOT_FOUND)
+                                                      .devMsg(String.format(COA_NF_BY_ID_MSG, chartOfAccountBO.getId()))
+                                                      .build());
         }
-        if (model.getName() != null) {
-            return chartOfAccountRepo.findOptionalByName(model.getName())
-                           .orElseThrow(() -> new ChartOfAccountNotFoundException(model));
+        if (chartOfAccountBO.getName() != null) {
+            return chartOfAccountRepo.findOptionalByName(chartOfAccountBO.getName())
+                           .orElseThrow(() -> PostingModuleException.builder()
+                                                      .postingModuleErrorCode(CHART_OF_ACCOUNT_NOT_FOUND)
+                                                      .devMsg(String.format(COA_NF_BY_NAME_MSG, chartOfAccountBO.getName()))
+                                                      .build());
         }
-        throw insufficientInfo(model);
+        throw insufficientInfo(chartOfAccountBO);
     }
 
     /*
@@ -47,72 +56,76 @@ public class AbstractServiceImpl {
      * If the Id is provided, we use find by id. 2- If the ledger and the name
      * is provided, we use them to load the account.
      */
-    protected LedgerAccount loadLedgerAccount(LedgerAccountBO model) throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        if (model == null) {
-            throw nullInfo();
-        }
-        if (model.getId() != null) {
-            return ledgerAccountRepository.findById(model.getId())
-                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getId()));
-        }
-        if (model.getLedger() != null && model.getName() != null) {
-            Ledger loadedLedger = loadLedger(model.getLedger());
-            return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, model.getName())
-                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getId()));
-        }
-        throw insufficientInfo(model);
+    protected LedgerAccount loadLedgerAccountBO(LedgerAccountBO ledgerAccountBO) {
+        LedgerAccount ledgerAccount = ledgerAccountMapper.toLedgerAccount(ledgerAccountBO);
+        return loadLedgerAccount(ledgerAccount);
     }
 
-    protected LedgerAccount loadLedgerAccount(LedgerAccount model) throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        if (model == null) {
+    protected LedgerAccount loadLedgerAccount(LedgerAccount ledgerAccount) {
+        if (ledgerAccount == null) {
             throw nullInfo();
         }
-        if (model.getId() != null) {
-            return ledgerAccountRepository.findById(model.getId())
-                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getId()));
+        if (ledgerAccount.getId() != null) {
+            return ledgerAccountRepository.findById(ledgerAccount.getId())
+                           .orElseThrow(() -> PostingModuleException.builder()
+                                                      .postingModuleErrorCode(LEDGER_ACCOUNT_NOT_FOUND)
+                                                      .devMsg(String.format(LA_NF_BY_ID_MSG, ledgerAccount.getId()))
+                                                      .build());
         }
-        if (model.getLedger() != null && model.getName() != null) {
-            Ledger loadedLedger = loadLedger(model.getLedger());
-            return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, model.getName())
-                           .orElseThrow(() -> new LedgerAccountNotFoundException(model.getName(), model.getId()));
+        if (ledgerAccount.getLedger() != null && ledgerAccount.getName() != null) {
+            Ledger loadedLedger = loadLedger(ledgerAccount.getLedger());
+            return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, ledgerAccount.getName())
+                           .orElseThrow(() -> PostingModuleException.builder()
+                                                      .postingModuleErrorCode(LEDGER_ACCOUNT_NOT_FOUND)
+                                                      .devMsg(String.format(LA_NF_BY_NAME_MSG, ledgerAccount.getName()))
+                                                      .build());
         }
-        throw insufficientInfo(model);
+        throw insufficientInfo(ledgerAccount);
     }
 
-    protected Ledger loadLedger(LedgerBO model) throws LedgerNotFoundException {
-        if (model == null) {
+    protected Ledger loadLedger(LedgerBO ledgerBO) {
+        if (ledgerBO == null) {
             throw nullInfo();
         }
-        return loadLedgerByIdOrName(model.getId(), model.getName());
+        return loadLedgerByIdOrName(ledgerBO.getId(), ledgerBO.getName());
     }
 
-    protected Ledger loadLedger(Ledger model) throws LedgerNotFoundException {
-        if (model == null) {
+    protected Ledger loadLedger(Ledger ledger) {
+        if (ledger == null) {
             throw nullInfo();
         }
-        return loadLedgerByIdOrName(model.getId(), model.getName());
+        return loadLedgerByIdOrName(ledger.getId(), ledger.getName());
     }
 
-    private Ledger loadLedgerByIdOrName(String id, String name) throws LedgerNotFoundException {
+    private Ledger loadLedgerByIdOrName(String id, String name) {
         if (id != null) {
             return ledgerRepository.findById(id)
-                           .orElseThrow(() -> new LedgerNotFoundException(id));
+                           .orElseThrow(() -> PostingModuleException.builder()
+                                                      .postingModuleErrorCode(LEDGER_NOT_FOUND)
+                                                      .devMsg(String.format(LEDGER_NF_BY_ID_MSG, id))
+                                                      .build());
         }
         if (name != null) {
             return ledgerRepository.findOptionalByName(name)
-                           .orElseThrow(() -> new LedgerNotFoundException(name));
+                           .orElseThrow(() -> PostingModuleException.builder()
+                                                      .postingModuleErrorCode(LEDGER_NOT_FOUND)
+                                                      .devMsg(String.format(LEDGER_NF_BY_NAME_MSG, name))
+                                                      .build());
         }
         throw insufficientInfo("Both id and name fields are NULL!");
     }
 
-    //TODO consider creating of exception builder with all necessary classes
-    protected IllegalArgumentException insufficientInfo(Object modelObject) { //TODO Unchecked Exception here! Consider swap for Checked Exception!
-        return new IllegalArgumentException(
-                String.format("Model Object does not provide sufficient information for loading original instance. %s",
-                        modelObject.toString()));
+    private PostingModuleException insufficientInfo(Object modelObject) {
+        return PostingModuleException.builder()
+                       .postingModuleErrorCode(NOT_ENOUGH_INFO)
+                       .devMsg(String.format("Model Object does not provide sufficient information for loading original instance. %s", modelObject.toString()))
+                       .build();
     }
 
-    private IllegalArgumentException nullInfo() {
-        return new IllegalArgumentException("Model object can not be null"); //TODO Unchecked Exception here! Consider swap for Checked Exception!
+    private PostingModuleException nullInfo() {
+        return PostingModuleException.builder()
+                       .postingModuleErrorCode(NOT_ENOUGH_INFO)
+                       .devMsg("Model object can not be null")
+                       .build();
     }
 }

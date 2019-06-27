@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package de.adorsys.ledgers.postings.impl.service;
-
-import java.math.BigDecimal;
+package de.adorsys.ledgers.postings.db.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.math.BigDecimal;
 
 @Embeddable
 public class Amount {

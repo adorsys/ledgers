@@ -1,18 +1,12 @@
 package de.adorsys.ledgers.postings.impl.converter;
 
-import org.springframework.stereotype.Component;
-
 import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
 import de.adorsys.ledgers.postings.db.domain.AccountStmt;
-import de.adorsys.ledgers.util.CloneUtils;
+import org.mapstruct.Mapper;
 
-@Component
-public class AccountStmtMapper {
-    public AccountStmtBO toAccountStmtBO(AccountStmt AccountStmt) {
-    	return CloneUtils.cloneObject(AccountStmt, AccountStmtBO.class);
-    }
+@Mapper(uses = PostingMapper.class)
+public interface AccountStmtMapper {
+    AccountStmtBO toAccountStmtBO(AccountStmt accountStmt);
 
-    public AccountStmt toAccountStmt(AccountStmtBO AccountStmt) {
-    	return CloneUtils.cloneObject(AccountStmt, AccountStmt.class);
-    }
+    AccountStmt toAccountStmt(AccountStmtBO accountStmt);
 }

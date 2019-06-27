@@ -2,21 +2,15 @@ package de.adorsys.ledgers.deposit.api.service.impl.mockbank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
-import de.adorsys.ledgers.deposit.api.service.impl.PaymentExecutionService;
 import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.postings.db.exception.LedgerWithIdNotFoundException;
-import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -24,8 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -34,7 +26,6 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
@@ -54,13 +45,11 @@ public class DepositAccountServiceImplIT {
     private DepositAccountConfigService depositAccountConfigService;
     @Autowired
     private DepositAccountInitService depositAccountInitService;
-    @Autowired
-    private PaymentExecutionService paymentExecutionService;
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     
     @Before
-    public void initDepositAccount() throws IOException {
+    public void initDepositAccount() {
     	depositAccountInitService.initConfigData();
     }
 
@@ -68,14 +57,9 @@ public class DepositAccountServiceImplIT {
      * Testing the test. Negative case, if comparison with wrong balance works.
      *
      * @throws IOException
-     * @throws PostingRepositoryException
-     * @throws BaseLineException
-     * @throws LedgerAccountNotFoundException
-     * @throws LedgerNotFoundException
-     * @throws LedgerWithIdNotFoundException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok() throws IOException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_newbank_no_overriden_tx_nok() throws IOException{
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
         LocalDateTime dateTime = LocalDateTime.of(2018, Month.JANUARY, 01, 23, 59);
@@ -88,14 +72,9 @@ public class DepositAccountServiceImplIT {
      * Classical case, no overriden transaction. Test balance computation.
      *
      * @throws IOException
-     * @throws PostingRepositoryException
-     * @throws BaseLineException
-     * @throws LedgerAccountNotFoundException
-     * @throws LedgerNotFoundException
-     * @throws LedgerWithIdNotFoundException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok() throws IOException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
+    public void use_case_newbank_no_overriden_tx_ok() throws IOException{
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
         LocalDateTime dateTime = LocalDateTime.of(2018, Month.JANUARY, 01, 8, 30);
@@ -128,19 +107,19 @@ public class DepositAccountServiceImplIT {
     }
     
     @Test
-    public void use_case_check_account_balance() throws IOException, DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, PostingNotFoundException, LedgerAccountNotFoundException, DepositAccountNotFoundException {
+    public void use_case_check_account_balance() throws IOException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
         checkBalance("DE38760700240320465700", LocalDateTime.now(), new BigDecimal(-5000.00));
     }
 
-    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException, LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException {
+    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException {
         LedgerBO ledger = loadLedger();
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
         Assert.assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
-    private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+    private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
         LedgerBO ledger = loadLedger();
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
@@ -170,7 +149,7 @@ public class DepositAccountServiceImplIT {
         return ledgerService.findLedgerByName(ledgerName).orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
     }
 
-    public LedgerAccountBO loadLedgerAccount(LedgerBO ledger, String accountNumber) throws LedgerNotFoundException, LedgerAccountNotFoundException {
+    public LedgerAccountBO loadLedgerAccount(LedgerBO ledger, String accountNumber) {
         return ledgerService.findLedgerAccount(ledger, accountNumber);
     }
 

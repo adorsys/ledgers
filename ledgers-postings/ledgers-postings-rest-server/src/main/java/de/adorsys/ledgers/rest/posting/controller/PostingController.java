@@ -1,9 +1,7 @@
 package de.adorsys.ledgers.rest.posting.controller;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.*;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.rest.exception.NotFoundRestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
@@ -33,12 +31,7 @@ public class PostingController {
                             "- A posting time can not be older than a closed accounting period. ")
     @PostMapping(path = "/postings")
     public ResponseEntity<PostingBO> newPosting(PostingBO posting) {
-        PostingBO newPosting;
-        try {
-            newPosting = postingService.newPosting(posting);
-        } catch (LedgerAccountNotFoundException | PostingNotFoundException | LedgerNotFoundException | BaseLineException | DoubleEntryAccountingException e) {
-            throw new NotFoundRestException(e.getMessage());
-        }
+        PostingBO newPosting = postingService.newPosting(posting);
         return ResponseEntity.ok(newPosting);
     }
 

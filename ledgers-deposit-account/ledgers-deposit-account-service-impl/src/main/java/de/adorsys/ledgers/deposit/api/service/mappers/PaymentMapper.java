@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import java.time.LocalDate;
 
-@Mapper(componentModel = "spring", uses = CurrencyMapper.class)
+@Mapper(componentModel = "spring")
 public interface PaymentMapper {
     Payment toPayment(PaymentBO payment);
 

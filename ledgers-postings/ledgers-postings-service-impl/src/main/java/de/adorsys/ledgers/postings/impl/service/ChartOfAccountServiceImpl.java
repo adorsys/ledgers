@@ -8,6 +8,7 @@ import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.impl.converter.ChartOfAccountMapper;
 import de.adorsys.ledgers.util.Ids;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +18,10 @@ import java.util.Optional;
 @Service
 @Transactional
 public class ChartOfAccountServiceImpl extends AbstractServiceImpl implements ChartOfAccountService {
-    private final ChartOfAccountMapper chartOfAccountMapper;
+    private final ChartOfAccountMapper chartOfAccountMapper = Mappers.getMapper(ChartOfAccountMapper.class);
 
-    public ChartOfAccountServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, ChartOfAccountMapper chartOfAccountMapper) {
+    public ChartOfAccountServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository) {
         super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
-        this.chartOfAccountMapper = chartOfAccountMapper;
     }
 
     /**

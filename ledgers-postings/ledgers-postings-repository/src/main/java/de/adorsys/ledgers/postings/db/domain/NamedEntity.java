@@ -1,9 +1,8 @@
 package de.adorsys.ledgers.postings.db.domain;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import java.time.LocalDateTime;
 
 /**
  * The existence or value of a ledger entity is always considered relative to
@@ -39,5 +38,8 @@ public abstract class NamedEntity extends BaseEntity {
 	public String toString() {
 		return "NamedEntity [name=" + name + "] [super: " + super.toString() + "]";
 	}
-	
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

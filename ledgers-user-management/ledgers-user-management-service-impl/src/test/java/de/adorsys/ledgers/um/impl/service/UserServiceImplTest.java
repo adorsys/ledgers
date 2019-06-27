@@ -1,25 +1,5 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -31,8 +11,25 @@ import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.PasswordEnc;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
@@ -45,7 +42,7 @@ public class UserServiceImplTest {
 
     @Mock
     private UserConverter converter;
-    
+
     @Mock
     private PasswordEnc passwordEnc;
     
@@ -78,13 +75,11 @@ public class UserServiceImplTest {
         List<ScaUserDataEntity> scaUserDataEntities = getScaUserData(ScaUserDataEntity.class);
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
-        when(converter.toScaUserDataListEntity(scaUserDataBOS)).thenReturn(scaUserDataEntities);
         when(repository.save(userEntity)).thenReturn(userEntity);
 
         userService.updateScaData(scaUserDataBOS, USER_LOGIN);
 
         verify(repository, times(1)).findFirstByLogin(USER_LOGIN);
-        verify(converter, times(1)).toScaUserDataListEntity(scaUserDataBOS);
         verify(repository, times(1)).save(userEntity);
     }
 
@@ -107,7 +102,7 @@ public class UserServiceImplTest {
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
         BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER, null, null);
 
-        assertTrue(bearerTokenBO==null);
+        assertNull(bearerTokenBO);
     }
 
     @Test
@@ -126,7 +121,6 @@ public class UserServiceImplTest {
         assertTrue(passwordEnc.verify(user.getId(), user.getPin(), passwordEnc.encode(USER_ID, USER_PIN)));
 
         verify(repository, times(1)).findById(USER_ID);
-        verify(converter, times(1)).toUserBO(userEntity);
     }
 
     @Test(expected = UserNotFoundException.class)

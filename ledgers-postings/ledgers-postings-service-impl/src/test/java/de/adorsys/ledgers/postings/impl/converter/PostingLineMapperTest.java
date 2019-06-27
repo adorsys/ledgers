@@ -8,25 +8,19 @@ import de.adorsys.ledgers.postings.db.domain.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostingLineMapperTest {
 
-    @InjectMocks
-    PostingLineMapper postingLineMapper = Mappers.getMapper(PostingLineMapper.class);
+    private PostingLineMapper postingLineMapper = Mappers.getMapper(PostingLineMapper.class);
 
-    @Mock
-    LedgerAccountMapper ledgerAccountMapper;
+    private LedgerAccountMapper ledgerAccountMapper = Mappers.getMapper(LedgerAccountMapper.class);
 
     @Test
     public void toPostingLineBO() {
@@ -68,7 +62,6 @@ public class PostingLineMapperTest {
         assertEquals(postingLine.getRecordTime(), postingLineBO.getRecordTime());
         assertEquals(postingLine.getSrcAccount(), postingLineBO.getSrcAccount());
         assertEquals(postingLine.getSubOprSrcId(), postingLineBO.getSubOprSrcId());
-        verify(ledgerAccountMapper, times(1)).toLedgerAccountBO(account);
     }
 
     @Test
@@ -109,6 +102,5 @@ public class PostingLineMapperTest {
         assertEquals(postingLineBO.getRecordTime(), postingLine.getRecordTime());
         assertEquals(postingLineBO.getSrcAccount(), postingLine.getSrcAccount());
         assertEquals(postingLineBO.getSubOprSrcId(), postingLine.getSubOprSrcId());
-        verify(ledgerAccountMapper, times(1)).toLedgerAccount(account);
     }
 }

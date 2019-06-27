@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = CurrencyMapper.class)
+@Mapper
 public interface DepositAccountMapper {
 
     DepositAccountBO toDepositAccountBO(DepositAccount depositAccount);
@@ -21,5 +21,5 @@ public interface DepositAccountMapper {
     DepositAccount createDepositAccountObj(DepositAccount depositAccount);
 
     AccountReferenceBO toAccountReferenceBO(DepositAccount depositAccount);
-    
+
 }

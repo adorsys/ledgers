@@ -1,14 +1,7 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 /**
  * An account is used to group related posting lines.
@@ -101,5 +94,24 @@ public class LedgerAccount extends NamedEntity {
 		return "LedgerAccount [ledger=" + ledger + ", parent=" + parent + ", coa=" + coa + ", balanceSide="
 				+ balanceSide + ", category=" + category + "] [super: " + super.toString() + "]";
 	}
-	
+
+	public void setLedger(Ledger ledger) {
+		this.ledger = ledger;
+	}
+
+	public void setParent(LedgerAccount parent) {
+		this.parent = parent;
+	}
+
+	public void setCoa(ChartOfAccount coa) {
+		this.coa = coa;
+	}
+
+	public void setBalanceSide(BalanceSide balanceSide) {
+		this.balanceSide = balanceSide;
+	}
+
+	public void setCategory(AccountCategory category) {
+		this.category = category;
+	}
 }

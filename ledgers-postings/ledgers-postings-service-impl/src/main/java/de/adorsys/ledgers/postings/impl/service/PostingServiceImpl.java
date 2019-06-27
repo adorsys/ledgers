@@ -3,10 +3,9 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.exception.*;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.postings.db.domain.*;
-import de.adorsys.ledgers.postings.db.exception.PostingRepositoryException;
 import de.adorsys.ledgers.postings.db.repository.*;
 import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
@@ -22,30 +21,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.*;
+
 @Service
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
     private static final String DOBLE_ENTRY_ERROR_MSG = "Debit sums up to %s while credit sums up to %s";
+    private static final String POSTING_NF_MSG = "Posting with account id %s  and transaction id %s could not be found";
+    private static final String BASE_LINE_TIME_ERROR_MSG = "posting time %s is before the last ledger closing %s";
+
     private final PostingRepository postingRepository;
     private final AccountStmtRepository accountStmtRepository;
-    private final PostingMapper postingMapper = Mappers.getMapper(PostingMapper.class);
     private final PostingLineRepository postingLineRepository;
-    private final PostingLineMapper postingLineMapper;
+    private final PostingMapper postingMapper = Mappers.getMapper(PostingMapper.class);
+    private final PostingLineMapper postingLineMapper = Mappers.getMapper(PostingLineMapper.class);
 
     public PostingServiceImpl(LedgerAccountRepository ledgerAccountRepository,
                               ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository,
                               PostingRepository postingRepository, AccountStmtRepository accountStmtRepository,
-                              PostingLineRepository postingLineRepository,
-                              PostingLineMapper postingLineMapper) {
+                              PostingLineRepository postingLineRepository) {
         super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
         this.postingRepository = postingRepository;
         this.accountStmtRepository = accountStmtRepository;
         this.postingLineRepository = postingLineRepository;
-        this.postingLineMapper = postingLineMapper;
     }
 
     @Override
-    public PostingBO newPosting(PostingBO postingBO) throws LedgerNotFoundException, LedgerAccountNotFoundException, BaseLineException, DoubleEntryAccountingException {
+    public PostingBO newPosting(PostingBO postingBO) {
         Posting posting = postingMapper.toPosting(postingBO);
         posting = newPosting(posting);
         return postingMapper.toPostingBO(posting);
@@ -58,8 +60,8 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
     @Override
     @Transactional(readOnly = true)
-    public List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo) throws LedgerAccountNotFoundException, LedgerNotFoundException {
-        LedgerAccount account = loadLedgerAccount(ledgerAccount);
+    public List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime timeFrom, LocalDateTime timeTo) {
+        LedgerAccount account = loadLedgerAccountBO(ledgerAccount);
         return postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(account, timeFrom, timeTo)
                        .stream()
                        .map(postingLineMapper::toPostingLineBO)
@@ -67,14 +69,17 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     }
 
     @Override
-    public PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String transactionId) throws LedgerAccountNotFoundException, LedgerNotFoundException, PostingNotFoundException {
-        LedgerAccount account = loadLedgerAccount(ledgerAccount);
+    public PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String transactionId) {
+        LedgerAccount account = loadLedgerAccountBO(ledgerAccount);
         return postingLineRepository.findFirstByIdAndAccount(transactionId, account)
                        .map(postingLineMapper::toPostingLineBO)
-                       .orElseThrow(() -> new PostingNotFoundException(account.getId(), transactionId));
+                       .orElseThrow(() -> PostingModuleException.builder()
+                                                  .postingModuleErrorCode(POSTING_NOT_FOUND)
+                                                  .devMsg(String.format(POSTING_NF_MSG, account.getId(), transactionId))
+                                                  .build());
     }
 
-    private Posting newPosting(Posting posting) throws DoubleEntryAccountingException, BaseLineException, LedgerNotFoundException, LedgerAccountNotFoundException {
+    private Posting newPosting(Posting posting) {
         LocalDateTime now = LocalDateTime.now();
         // check posting time is not before a closing.
         //		validatePostingTime(posting);
@@ -136,18 +141,18 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     /*
      * Process Posting lines without sting the posting.
      */
-    private void processPostingLine(Posting p, PostingLine model) throws LedgerAccountNotFoundException, LedgerNotFoundException, BaseLineException {
+    private void processPostingLine(Posting p, PostingLine postingLine) {
         PostingLine l = new PostingLine();
-        l.setId(model.getId());
-        LedgerAccount account = loadLedgerAccount(model.getAccount());
+        l.setId(postingLine.getId());
+        LedgerAccount account = loadLedgerAccount(postingLine.getAccount());
         l.setAccount(account);
         String baseLine = validatePostingTime(p, account).orElse(new AccountStmt()).getId();
         l.setBaseLine(baseLine);
-        l.setCreditAmount(model.getCreditAmount());
-        l.setDebitAmount(model.getDebitAmount());
-        l.setDetails(model.getDetails());
-        l.setSrcAccount(model.getSrcAccount());
-        l.setSubOprSrcId(model.getSubOprSrcId());
+        l.setCreditAmount(postingLine.getCreditAmount());
+        l.setDebitAmount(postingLine.getDebitAmount());
+        l.setDetails(postingLine.getDetails());
+        l.setSrcAccount(postingLine.getSrcAccount());
+        l.setSubOprSrcId(postingLine.getSubOprSrcId());
         p.getLines().add(l);
     }
 
@@ -156,9 +161,8 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
      * given posting lines are equal.
      *
      * @param posting
-     * @throws DoubleEntryAccountingException
      */
-    private void validateDoubleEntryAccounting(Posting posting) throws DoubleEntryAccountingException {
+    private void validateDoubleEntryAccounting(Posting posting) {
         List<PostingLine> lines = posting.getLines();
         BigDecimal sumDebit = BigDecimal.ZERO;
         BigDecimal sumCredit = BigDecimal.ZERO;
@@ -168,7 +172,10 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         }
 
         if (!sumDebit.equals(sumCredit)) {
-            throw new DoubleEntryAccountingException(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit));
+            throw PostingModuleException.builder()
+                          .postingModuleErrorCode(DOBLE_ENTRY_ERROR)
+                          .devMsg(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit))
+                          .build();
         }
     }
 
@@ -178,10 +185,8 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
      * @param posting
      * @param ledgerAccount
      * @return
-     * @throws BaseLineException
-     * @throws PostingRepositoryException
      */
-    private Optional<AccountStmt> validatePostingTime(Posting posting, LedgerAccount ledgerAccount) throws BaseLineException, PostingRepositoryException {
+    private Optional<AccountStmt> validatePostingTime(Posting posting, LedgerAccount ledgerAccount) {
         // check posting time not null
         postingTimeNotNull(posting);
 
@@ -191,7 +196,10 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
                                                         ledgerAccount, StmtStatus.CLOSED, posting.getPstTime());
 
         if (stmtOpt.isPresent()) {
-            throw new BaseLineException(String.format("posting time %s is before the last ledger closing %s", posting.getPstTime(), stmtOpt.get().getPstTime()));
+            throw PostingModuleException.builder()
+                          .postingModuleErrorCode(BASE_LINE_TIME_ERROR)
+                          .devMsg(String.format(BASE_LINE_TIME_ERROR_MSG, posting.getPstTime(), stmtOpt.get().getPstTime()))
+                          .build();
         }
 
         return accountStmtRepository
@@ -201,13 +209,14 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
     private void postingTimeNotNull(Posting posting) {
         if (posting.getPstTime() == null) {
-            throw new IllegalArgumentException("Missing posting time");
+            throw PostingModuleException.builder()
+                          .postingModuleErrorCode(POSTING_TIME_MISSING)
+                          .devMsg("Missing posting time")
+                          .build();
         }
     }
 
     private Optional<Posting> loadPredecessor(Posting current) {
         return postingRepository.findByOprIdAndDiscardingIdIsNull(current.getOprId());
     }
-
-
 }

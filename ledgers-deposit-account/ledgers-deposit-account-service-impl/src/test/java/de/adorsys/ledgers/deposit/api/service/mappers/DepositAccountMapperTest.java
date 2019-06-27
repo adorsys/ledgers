@@ -11,25 +11,19 @@ import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.util.Currency;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class DepositAccountMapperTest {
 
     @InjectMocks
     private DepositAccountMapperImpl depositAccountMapper;
-    @Mock
-    private CurrencyMapper currencyMapper;
 
     @Test
     public void toDepositAccountBO() {
-        when(currencyMapper.toCurrency(any())).thenReturn(Currency.getInstance("EUR"));
         DepositAccountBO account = depositAccountMapper.toDepositAccountBO(getDepositAccount());
 
         //Then
@@ -38,7 +32,6 @@ public class DepositAccountMapperTest {
 
     @Test
     public void toDepositAccount() {
-        when(currencyMapper.currencyToString(any())).thenReturn("EUR");
         DepositAccount account = depositAccountMapper.toDepositAccount(getDepositAccountBO());
 
         //Then
