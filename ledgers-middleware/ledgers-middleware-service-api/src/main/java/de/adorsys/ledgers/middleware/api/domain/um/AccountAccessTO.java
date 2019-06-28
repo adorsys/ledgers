@@ -1,7 +1,14 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumSet;
+
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+
+@Data
 public class AccountAccessTO {
 
     private String id;
@@ -15,46 +22,14 @@ public class AccountAccessTO {
     @NotNull
     private UserTO user;
 
-    public AccountAccessTO(@NotNull String iban, AccessTypeTO accessType, @NotNull UserTO user) {
-        this.iban = iban;
-        this.accessType = accessType;
-        this.user = user;
+    @JsonIgnore
+    public boolean hasPaymentAccess(String requestedIban) {
+        return hasIban(requestedIban) &&
+                       EnumSet.of(AccessTypeTO.OWNER, AccessTypeTO.DISPOSE).contains(accessType);
     }
 
-    public AccountAccessTO() {
-	}
-
-
-	public void setUser(UserTO user) {
-        this.user = user;
+    @JsonIgnore
+    public boolean hasIban(String requestedIban) {
+        return equalsIgnoreCase(requestedIban, iban);
     }
-
-    public UserTO getUser() {
-        return user;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getIban() {
-        return iban;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setIban(String iban) {
-        this.iban = iban;
-    }
-
-    public AccessTypeTO getAccessType() {
-        return accessType;
-    }
-
-    public void setAccessType(AccessTypeTO accessType) {
-        this.accessType = accessType;
-    }
-
 }

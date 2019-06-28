@@ -440,6 +440,13 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         }
     }
 
+    @Override
+    public List<AccountAccessTO> getAccountAccesses(String userId) {
+        UserBO user = userService.findById(userId);
+        UserTO userTO = userMapper.toUserTO(user);
+        return userTO.getAccountAccesses();
+    }
+
     /*
      * We reuse an ais consent and trim everything we do not need.
      */

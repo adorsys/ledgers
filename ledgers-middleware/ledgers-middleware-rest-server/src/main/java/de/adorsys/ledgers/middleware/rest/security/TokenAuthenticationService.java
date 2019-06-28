@@ -7,7 +7,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
-import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +27,6 @@ public class TokenAuthenticationService {
     private static final String HEADER_KEY = "Authorization";
 
     private final MiddlewareOnlineBankingService onlineBankingService;
-    private final UserService userService;
 
     public Authentication getAuthentication(HttpServletRequest request) {
         String headerValue = request.getHeader(HEADER_KEY);
@@ -68,7 +66,7 @@ public class TokenAuthenticationService {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
         }
 
-        return new MiddlewareAuthentication(accessTokenTO.getSub(), bearerToken, authorities, userService);
+        return new MiddlewareAuthentication(accessTokenTO.getSub(), bearerToken, authorities);
     }
 
     private void debug(String s) {
