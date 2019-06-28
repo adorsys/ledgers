@@ -5,6 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequest
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 
@@ -179,4 +180,10 @@ public interface MiddlewareAccountManagementService {
 	 * @throws AccountNotFoundMiddlewareException target account not found
 	 */
 	void depositCash(String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException;
+
+	/**
+	 * Retrieves a List of AccountAccessTO by userId
+	 * @param userId id of the user
+	 */
+	List<AccountAccessTO> getAccountAccesses(String userId);
 }

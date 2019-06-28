@@ -14,6 +14,8 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
@@ -24,6 +26,7 @@ import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
@@ -42,7 +45,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -50,11 +55,12 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareAccountManagementServiceImplTest {
     private static final String WRONG_ID = "wrong id";
-	private static final String ACCOUNT_ID = "id";
+    private static final String ACCOUNT_ID = "id";
     private static final String IBAN = "DE91100000000123456789";
+    private static final String CORRECT_USER_ID = "kjk345knkj45";
 
     private static final LocalDateTime TIME = LocalDateTime.MIN;
-    
+
     @InjectMocks
     private MiddlewareAccountManagementServiceImpl middlewareService;
     @Mock
@@ -77,9 +83,9 @@ public class MiddlewareAccountManagementServiceImplTest {
     private UserMapper userMapper;
     @Mock
     private AccessTokenTO accessToken;
-    
+
     static ObjectMapper mapper = getObjectMapper();
-    
+
     @Test
     public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException, LedgerAccountNotFoundException {
         when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(getDepositAccountDetailsBO());
@@ -91,21 +97,21 @@ public class MiddlewareAccountManagementServiceImplTest {
         verify(accountService, times(1)).getDepositAccountById(ACCOUNT_ID, TIME, true);
     }
 
-	@Test(expected = AccountNotFoundMiddlewareException.class)
+    @Test(expected = AccountNotFoundMiddlewareException.class)
     public void getAccountDetailsByAccountId_wrong_id() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-    	when(accountService.getDepositAccountById(WRONG_ID, TIME, true)).thenThrow(new DepositAccountNotFoundException());
+        when(accountService.getDepositAccountById(WRONG_ID, TIME, true)).thenThrow(new DepositAccountNotFoundException());
 
-        middlewareService.getDepositAccountById(WRONG_ID, TIME,false);
+        middlewareService.getDepositAccountById(WRONG_ID, TIME, false);
         verify(accountService, times(1)).getDepositAccountById(WRONG_ID, TIME, true);
     }
 
     @Test
     public void getAccountDetailsByAccountId_Success() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
-    	DepositAccountDetailsBO depositAccountDetailsBO = getDepositAccountDetailsBO();
+        DepositAccountDetailsBO depositAccountDetailsBO = getDepositAccountDetailsBO();
         when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(depositAccountDetailsBO);
         when(detailsMapper.toAccountDetailsTO(depositAccountDetailsBO)).thenReturn(getAccountDetailsTO());
-        
-        AccountDetailsTO accountDetails = middlewareService.getDepositAccountById(ACCOUNT_ID, TIME,false);
+
+        AccountDetailsTO accountDetails = middlewareService.getDepositAccountById(ACCOUNT_ID, TIME, false);
         assertThat(accountDetails).isNotNull();
         assertThat(accountDetails.getBalances()).isNotNull();
         assertThat(accountDetails.getBalances().size()).isEqualTo(2);
@@ -114,7 +120,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     @Test(expected = AccountNotFoundMiddlewareException.class)
     public void getAccountDetailsByAccountId_Failure_depositAccount_Not_Found() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
         when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenThrow(new DepositAccountNotFoundException());
-        middlewareService.getDepositAccountById(ACCOUNT_ID, TIME,false);
+        middlewareService.getDepositAccountById(ACCOUNT_ID, TIME, false);
     }
 
     @Test
@@ -132,7 +138,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         UserBO userBO = new UserBO();
         userBO.getAccountAccesses().addAll(accessBOList);
         when(userService.findByLogin(userLogin)).thenReturn(userBO);
-        
+
         when(accountService.getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false)).thenReturn(Collections.singletonList(accountBO));
         when(detailsMapper.toAccountDetailsTO(accountBO)).thenReturn(account);
 
@@ -148,26 +154,28 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     private static <T> T getAccount(Class<T> aClass) {
         try {
-        	return mapper.readValue(PaymentConverter.class.getResourceAsStream("AccountDetails.yml"), aClass);
+            return mapper.readValue(PaymentConverter.class.getResourceAsStream("AccountDetails.yml"), aClass);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
     }
-    
+
     private DepositAccountDetailsBO getDepositAccountDetailsBO() {
-    	return readYml(DepositAccountDetailsBO.class, "DepositAccountDetailsBO.yml");
-	}
-    
+        return readYml(DepositAccountDetailsBO.class, "DepositAccountDetailsBO.yml");
+    }
+
     private AccountDetailsTO getAccountDetailsTO() {
-    	return readYml(AccountDetailsTO.class, "AccountDetailsTO.yml");
-	}
+        return readYml(AccountDetailsTO.class, "AccountDetailsTO.yml");
+    }
 
     @Test
-    public void listDepositAccounts () throws DepositAccountNotFoundException {
+    public void listDepositAccounts() throws DepositAccountNotFoundException {
         // users
-        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {});
-        UserTO userTO = getDataFromFile("user.yml", new TypeReference<UserTO>() {});
+        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {
+        });
+        UserTO userTO = getDataFromFile("user.yml", new TypeReference<UserTO>() {
+        });
         // accounts
         List<DepositAccountDetailsBO> accounts = new ArrayList<>();
         accounts.add(getDepositAccountDetailsBO());
@@ -184,14 +192,15 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(accountsToBeTested).isNotEmpty();
 
         verify(accessService, times(1)).loadCurrentUser();
-        verify(accountService, times(1)).getDepositAccountsByIban(anyList(),any(LocalDateTime.class),anyBoolean());
+        verify(accountService, times(1)).getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean());
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
 
     @Test
     public void listDepositAccountsByBranch() {
         // user
-        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {});
+        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {
+        });
         // accounts
         List<DepositAccountDetailsBO> accounts = new ArrayList<>();
         accounts.add(getDepositAccountDetailsBO());
@@ -212,7 +221,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
 
-	@Test
+    @Test
     public void getTransactionById() throws TransactionNotFoundMiddlewareException, AccountNotFoundMiddlewareException, DepositAccountNotFoundException, TransactionNotFoundException {
         when(accountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
         when(paymentConverter.toTransactionTO(any())).thenReturn(readYml(TransactionTO.class, "TransactionTO.yml"));
@@ -253,6 +262,25 @@ public class MiddlewareAccountManagementServiceImplTest {
         verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
     }
 
+    @Test
+    public void shouldReturnUserAccountAccess() {
+        when(userService.findById(CORRECT_USER_ID)).thenReturn(buildUserBO());
+
+        List<AccountAccessTO> accountAccesses = middlewareService.getAccountAccesses(CORRECT_USER_ID);
+
+        assertThat(accountAccesses).isNotEmpty();
+        assertThat(accountAccesses, hasSize(1));
+
+        AccountAccessTO accountAccess = getFirstAccountAccess(accountAccesses);
+
+        assertEquals(IBAN, accountAccess.getIban());
+        assertEquals(AccessTypeTO.OWNER, accountAccess.getAccessType());
+    }
+
+    private AccountAccessTO getFirstAccountAccess(List<AccountAccessTO> accountAccesses) {
+        return accountAccesses.get(0);
+    }
+
     //    todo: replace by javatar-commons version 0.7
     private <T> T getDataFromFile(String fileName, TypeReference<T> typeReference) {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
@@ -267,13 +295,13 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     private static <T> T readYml(Class<T> aClass, String fileName) {
         try {
-        	return mapper.readValue(PaymentConverter.class.getResourceAsStream(fileName), aClass);
+            return mapper.readValue(PaymentConverter.class.getResourceAsStream(fileName), aClass);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
-    
+
     private static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         objectMapper.findAndRegisterModules();
@@ -292,5 +320,16 @@ public class MiddlewareAccountManagementServiceImplTest {
     public void depositCashWrapsNotFoundException() throws Exception {
         doThrow(DepositAccountNotFoundException.class).when(accountService).depositCash(any(), any(), any());
         middlewareService.depositCash(ACCOUNT_ID, new AmountTO());
+    }
+
+    private UserBO buildUserBO() {
+        UserBO user = new UserBO();
+        user.setId(CORRECT_USER_ID);
+        user.setAccountAccesses(buildAccountAccesses());
+        return user;
+    }
+
+    private List<AccountAccessBO> buildAccountAccesses() {
+        return Collections.singletonList(new AccountAccessBO(IBAN, AccessTypeBO.OWNER));
     }
 }

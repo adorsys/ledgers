@@ -16,11 +16,14 @@
 
 package de.adorsys.ledgers.middleware.api.domain.um;
 
-import java.time.LocalDate;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
+import java.time.LocalDate;
+
+@Data
 @ApiModel(description = "Ais consent request", value = "AisConsentRequest")
 public class AisConsentTO {
 
@@ -45,61 +48,8 @@ public class AisConsentTO {
     @ApiModelProperty(value = "'true', if the consent is for recurring access to the account data , 'false', if the consent is for one access to the account data", required = true, example = "false")
     private boolean recurringIndicator;
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getTppId() {
-		return tppId;
-	}
-
-	public void setTppId(String tppId) {
-		this.tppId = tppId;
-	}
-
-	public int getFrequencyPerDay() {
-		return frequencyPerDay;
-	}
-
-	public void setFrequencyPerDay(int frequencyPerDay) {
-		this.frequencyPerDay = frequencyPerDay;
-	}
-
-	public AisAccountAccessInfoTO getAccess() {
-		return access;
-	}
-
-	public void setAccess(AisAccountAccessInfoTO access) {
-		this.access = access;
-	}
-
-	public LocalDate getValidUntil() {
-		return validUntil;
-	}
-
-	public void setValidUntil(LocalDate validUntil) {
-		this.validUntil = validUntil;
-	}
-
-	public boolean isRecurringIndicator() {
-		return recurringIndicator;
-	}
-
-	public void setRecurringIndicator(boolean recurringIndicator) {
-		this.recurringIndicator = recurringIndicator;
-	}
-    
-    
+    @JsonIgnore
+    public boolean isValidConsent() {
+        return validUntil == null || validUntil.isAfter(LocalDate.now());
+    }
 }

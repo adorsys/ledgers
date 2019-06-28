@@ -16,13 +16,12 @@
 
 package de.adorsys.ledgers.middleware.api.domain.um;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -43,4 +42,12 @@ public class AisAccountAccessInfoTO {
 
     @ApiModelProperty(value = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO allPsd2;
+
+    public boolean hasIbanInAccess(String iban) {
+        return availableAccounts != null ||
+                       allPsd2 != null ||
+                       accounts != null && accounts.contains(iban) ||
+                       balances != null && balances.contains(iban) ||
+                       transactions != null && transactions.contains(iban);
+    }
 }
