@@ -28,9 +28,10 @@ import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.exception.RestException;
+import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,18 +42,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RestController
-@RequestMapping(AccountRestAPI.BASE_PATH)
 @MiddlewareUserResource
+@RequiredArgsConstructor
+@RequestMapping(AccountRestAPI.BASE_PATH)
 public class AccountResource implements AccountRestAPI {
-
-	private static final Logger logger = LoggerFactory.getLogger(AccountResource.class);
-
+    private final AuthenticationFacade authenticationFacade;
     private final MiddlewareAccountManagementService middlewareAccountService;
 
-    public AccountResource(MiddlewareAccountManagementService middlewareAccountService) {
-        this.middlewareAccountService = middlewareAccountService;
-    }
 
     /**
      * Return the list of accounts linked with the current customer.
@@ -62,26 +60,26 @@ public class AccountResource implements AccountRestAPI {
     @Override
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listDepositAccounts());
+        return ResponseEntity.ok(middlewareAccountService.listDepositAccounts(authenticationFacade.getUserId()));
     }
 
     @Override
     @PreAuthorize("hasRole('CUSTOMER') and tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> createDepositAccount(AccountDetailsTO accountDetailsTO) {
-		// create account. It does not exist.
-		String iban = accountDetailsTO.getIban();
-		// Splitt in prefix and suffix
-		String accountNumberPrefix = StringUtils.substring(iban, 0, iban.length()-2);
-		String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
+        // create account. It does not exist.
+        String iban = accountDetailsTO.getIban();
+        // Splitt in prefix and suffix
+        String accountNumberPrefix = StringUtils.substring(iban, 0, iban.length() - 2);
+        String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
 
-    	try {
-			middlewareAccountService.createDepositAccount(accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
-			// TODO: return 201 and link to account.
+        try {
+            middlewareAccountService.createDepositAccount(accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
+            // TODO: return 201 and link to account.
             return ResponseEntity.ok().build();
         } catch (AccountWithPrefixGoneMiddlewareException | AccountWithSuffixExistsMiddlewareException | UserNotFoundMiddlewareException | AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
-		}
+        }
     }
 
     @Override
@@ -93,7 +91,7 @@ public class AccountResource implements AccountRestAPI {
             throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
             throw forbiddenRestException(e);
-		}
+        }
     }
 
     @Override
@@ -106,12 +104,12 @@ public class AccountResource implements AccountRestAPI {
             throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
             throw forbiddenRestException(e);
-		}
+        }
     }
 
     @Override
     @PreAuthorize("accountInfoById(#accountId)")
-    public ResponseEntity<List<TransactionTO>> getTransactionByDates(String accountId,LocalDate dateFrom,LocalDate dateTo) {
+    public ResponseEntity<List<TransactionTO>> getTransactionByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) {
         dateChecker(dateFrom, dateTo);
         try {
             List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
@@ -120,7 +118,7 @@ public class AccountResource implements AccountRestAPI {
             throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
             throw forbiddenRestException(e);
-		}
+        }
     }
 
     @Override
@@ -129,11 +127,11 @@ public class AccountResource implements AccountRestAPI {
         try {
             return ResponseEntity.ok(middlewareAccountService.getTransactionById(accountId, transactionId));
         } catch (AccountNotFoundMiddlewareException | TransactionNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
             throw forbiddenRestException(e);
-		}
+        }
     }
 
     /**
@@ -150,12 +148,12 @@ public class AccountResource implements AccountRestAPI {
             throw notFoundRestException(e);
         } catch (InsufficientPermissionMiddlewareException e) {
             throw forbiddenRestException(e);
-		}
+        }
     }
 
     @Override
     @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
-    public ResponseEntity<Boolean> fundsConfirmation( FundsConfirmationRequestTO request) {
+    public ResponseEntity<Boolean> fundsConfirmation(FundsConfirmationRequestTO request) {
         try {
             boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
             return ResponseEntity.ok(fundsAvailable);
@@ -187,13 +185,13 @@ public class AccountResource implements AccountRestAPI {
                        .orElseGet(LocalDate::now);
     }
 
-	private RestException forbiddenRestException(InsufficientPermissionMiddlewareException e) {
-		logger.error(e.getMessage(), e);
-		return new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
-	}
+    private RestException forbiddenRestException(InsufficientPermissionMiddlewareException e) {
+        log.error(e.getMessage(), e);
+        return new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+    }
 
-	private RestException notFoundRestException(AccountNotFoundMiddlewareException e) {
-		logger.error(e.getMessage(), e);
-		return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-	}
+    private RestException notFoundRestException(AccountNotFoundMiddlewareException e) {
+        log.error(e.getMessage(), e);
+        return new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
+    }
 }

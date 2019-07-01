@@ -43,18 +43,18 @@ public interface MiddlewareAccountManagementService {
 
 	/**
 	 * Retrieve the list of account viewable by the connected user.
-	 *
+	 * @param userId : user identifier
 	 * @return an empty list if user not linked with any deposit accounted.
 	 */
-	List<AccountDetailsTO> listDepositAccounts();
+	List<AccountDetailsTO> listDepositAccounts(String userId);
 
 	/**
 	 * TODO: return account or account details ???
 	 * Retrieve the list of account registered for the branch.
-	 *
+	 * @param userId : user identifier
 	 * @return list of accounts registered for the branch, or an empty list otherwise
 	 */
-	List<AccountDetailsTO> listDepositAccountsByBranch();
+	List<AccountDetailsTO> listDepositAccountsByBranch(String userId);
 	
     /**
      * Retrieves AccountDetails with Balance on demand
@@ -127,22 +127,24 @@ public interface MiddlewareAccountManagementService {
 	/**
 	 * Start an account consent process.
 	 *
+	 * @param userId : the user id.
 	 * @param consentId : the cosent id.
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
 	 *
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
-	SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent)
+	SCAConsentResponseTO startSCA(String userId, String consentId, AisConsentTO aisConsent)
 			throws InsufficientPermissionMiddlewareException;
 
-	SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId) throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException;
+	SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId) throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException;
 
-	SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId, String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException;
+	SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId, String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException;
 
 	/**
 	 * Authorizes a consent request. If the authentication is completed, the returned response will contain a valid bearer token.
 	 *
+	 * @param userId : the user id
 	 * @param consentId : the cosent id
 	 * @param authorisationId : the authorization id.
 	 * @param authCode : SCAConsentResponseTO
@@ -153,7 +155,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws SCAOperationUsedOrStolenMiddlewareException : user sca method not supported.
 	 * @throws AisConsentNotFoundMiddlewareException : consent not found.
 	 */
-	SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
+	SCAConsentResponseTO authorizeConsent(String userId, String consentId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException,
 			AisConsentNotFoundMiddlewareException;

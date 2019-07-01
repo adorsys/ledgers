@@ -104,8 +104,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
             //Check if the account is created by Branch and if so add access to this account to Branch
             if (!user.getLogin().equals(accessToken.getLogin())) {
-                UserBO branch = userService.findByLogin(accessToken.getLogin());
-                accessService.updateAccountAccess(branch, accountAccess);
+                UserBO userBO = userService.findByLogin(accessToken.getLogin());
+                accessService.updateAccountAccess(userBO, accountAccess);
             }
         } catch (UserNotFoundException e) {
             logger.error(e.getMessage());
@@ -265,8 +265,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public List<AccountDetailsTO> listDepositAccounts() {
-        UserBO user = accessService.loadCurrentUser();
+    public List<AccountDetailsTO> listDepositAccounts(String userId) {
+        UserBO user = accessService.loadCurrentUser(userId);
         UserTO userTO = userMapper.toUserTO(user);
         List<AccountAccessTO> accountAccesses = userTO.getAccountAccesses();
         if (accountAccesses == null || accountAccesses.isEmpty()) {
@@ -287,8 +287,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public List<AccountDetailsTO> listDepositAccountsByBranch() {
-        UserBO user = accessService.loadCurrentUser();
+    public List<AccountDetailsTO> listDepositAccountsByBranch(String userId) {
+        UserBO user = accessService.loadCurrentUser(userId);
 
         List<DepositAccountDetailsBO> depositAccounts = depositAccountService.findByBranch(user.getBranch());
 
@@ -313,10 +313,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
      * @see de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService#startSCA(java.lang.String, de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO)
      */
     @Override
-    public SCAConsentResponseTO startSCA(String consentId, AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
+    public SCAConsentResponseTO startSCA(String userId, String consentId, AisConsentTO aisConsent) throws InsufficientPermissionMiddlewareException {
         BearerTokenBO bearerToken = checkAisConsent(aisConsent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
-        SCAConsentResponseTO response = prepareSCA(scaUtils.userBO(), aisConsent, consentKeyData);
+        SCAConsentResponseTO response = prepareSCA(scaUtils.userBO(userId), aisConsent, consentKeyData);
         if (ScaStatusTO.EXEMPTED.equals(response.getScaStatus())) {
             response.setBearerToken(bearerTokenMapper.toBearerTokenTO(bearerToken));
         }
@@ -324,9 +324,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public SCAConsentResponseTO loadSCAForAisConsent(String consentId, String authorisationId)
+    public SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId)
             throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException {
-        UserTO user = scaUtils.user();
+        UserTO user = userMapper.toUserTO(scaUtils.userBO(userId));
         AisConsentBO consent = consent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
@@ -336,11 +336,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public SCAConsentResponseTO selectSCAMethodForAisConsent(String consentId, String authorisationId,
+    public SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId,
                                                              String scaMethodId) throws SCAMethodNotSupportedMiddleException,
                                                                                                 UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
                                                                                                 SCAOperationNotFoundMiddlewareException, AisConsentNotFoundMiddlewareException {
-        UserBO userBO = scaUtils.userBO();
+        UserBO userBO = scaUtils.userBO(userId);
         UserTO userTO = scaUtils.user(userBO);
         AisConsentBO consent = consent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
@@ -369,14 +369,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    public SCAConsentResponseTO authorizeConsent(String consentId, String authorisationId, String authCode)
+    public SCAConsentResponseTO authorizeConsent(String userId, String consentId, String authorisationId, String authCode)
             throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
                            SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, AisConsentNotFoundMiddlewareException {
         AisConsentBO consent = consent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
         try {
-            UserBO userBO = scaUtils.userBO();
+            UserBO userBO = scaUtils.userBO(userId);
             int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
             boolean validAuthCode = scaOperationService.validateAuthCode(authorisationId, consentId,
                     consentKeyData.template(), authCode, scaWeight);

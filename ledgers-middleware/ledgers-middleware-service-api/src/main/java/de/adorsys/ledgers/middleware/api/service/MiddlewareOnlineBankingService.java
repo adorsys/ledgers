@@ -79,6 +79,7 @@ public interface MiddlewareOnlineBankingService {
      * <p>
      * After the PSU selects the SCA method, this is called to generate and send the login auth code.
      *
+     * @param userId user id
      * @param scaUserDataId scaMethod
      * @param authorisationId the id of the auth process
      * @param userMessage message to user
@@ -91,7 +92,7 @@ public interface MiddlewareOnlineBankingService {
      * @throws UserScaDataNotFoundMiddlewareException if sca user data not found by id
      * @throws SCAOperationValidationMiddlewareException : inputs not valid
      */
-	SCALoginResponseTO generateLoginAuthCode(String scaUserDataId, String authorisationId, String userMessage,
+	SCALoginResponseTO generateLoginAuthCode(String userId, String scaUserDataId, String authorisationId, String userMessage,
 			int validitySeconds) throws SCAOperationNotFoundMiddlewareException, 
     		InsufficientPermissionMiddlewareException, SCAMethodNotSupportedMiddleException, 
     		UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException;
@@ -101,6 +102,7 @@ public interface MiddlewareOnlineBankingService {
      * <p>
      * This is called when the user enters the received code.
      * 
+     * @param userId : the user id
      * @param authorisationId : the operation id
      * @param authCode the auth code.
      * @return the login response.
@@ -110,7 +112,7 @@ public interface MiddlewareOnlineBankingService {
      * @throws SCAOperationUsedOrStolenMiddlewareException : malicious input
      * @throws InsufficientPermissionMiddlewareException  : not enough permissions.
      */
-	SCALoginResponseTO authenticateForLogin(String authorisationId, String authCode)
+	SCALoginResponseTO authenticateForLogin(String userId, String authorisationId, String authCode)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
 			InsufficientPermissionMiddlewareException;
