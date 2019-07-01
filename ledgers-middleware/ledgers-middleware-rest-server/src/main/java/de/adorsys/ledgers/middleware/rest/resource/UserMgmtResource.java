@@ -18,18 +18,22 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.*;
+import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,23 +42,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class UserMgmtResource implements UserMgmtRestAPI {
-    private static final Logger logger = LoggerFactory.getLogger(UserMgmtResource.class);
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
-    private final AccessTokenTO accessToken;
-
-
-    public UserMgmtResource(MiddlewareOnlineBankingService onlineBankingService,
-                            MiddlewareUserManagementService middlewareUserService, AccessTokenTO accessToken) {
-        super();
-        this.onlineBankingService = onlineBankingService;
-        this.middlewareUserService = middlewareUserService;
-        this.accessToken = accessToken;
-    }
+    private final AuthenticationFacade authenticationFacade;
 
     @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
@@ -64,7 +60,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
             user.setPin(null);
             return ResponseEntity.ok(user);
         } catch (UserAlreadyExistsMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
@@ -81,10 +77,10 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         try {
             return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
@@ -95,10 +91,10 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         try {
             return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
@@ -109,18 +105,18 @@ public class UserMgmtResource implements UserMgmtRestAPI {
             throws NotFoundRestException, ForbiddenRestException,
                            NotAcceptableRestException, ValidationRestException {
         try {
-            return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaMethodId, authorisationId, null, 1800));
+            return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(authenticationFacade.getUserId(), scaMethodId, authorisationId, null, 1800));
         } catch (SCAOperationNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage());
         } catch (SCAMethodNotSupportedMiddleException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotAcceptableRestException(e.getMessage());
         } catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ValidationRestException(e.getMessage());
         }
     }
@@ -132,21 +128,21 @@ public class UserMgmtResource implements UserMgmtRestAPI {
             throws GoneRestException, NotFoundRestException, ExpectationFailedRestException,
                            NotAcceptableRestException, ForbiddenRestException {
         try {
-            return ResponseEntity.ok(onlineBankingService.authenticateForLogin(authorisationId, authCode));
+            return ResponseEntity.ok(onlineBankingService.authenticateForLogin(authenticationFacade.getUserId(), authorisationId, authCode));
         } catch (SCAOperationNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         } catch (SCAOperationValidationMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ExpectationFailedRestException(e.getMessage());
         } catch (SCAOperationExpiredMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new GoneRestException(e.getMessage());
         } catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotAcceptableRestException(e.getMessage());
         } catch (InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage());
         }
     }
@@ -158,11 +154,11 @@ public class UserMgmtResource implements UserMgmtRestAPI {
             if (tokenTO != null) {
                 return ResponseEntity.ok(tokenTO);
             } else {
-                logger.error("Token is null !!!");
+                log.error("Token is null !!!");
                 throw new ForbiddenRestException("Token invalid");
             }
         } catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
 
@@ -174,7 +170,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         try {
             return ResponseEntity.ok(middlewareUserService.findById(userId));
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         }
     }
@@ -183,9 +179,9 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<UserTO> getUser() {
         try {
-            return ResponseEntity.ok(middlewareUserService.findById(accessToken.getSub()));
+            return ResponseEntity.ok(middlewareUserService.findById(authenticationFacade.getUserId()));
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         }
     }
@@ -194,7 +190,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
         try {
-            UserTO userTO = middlewareUserService.findById(accessToken.getSub());
+            UserTO userTO = middlewareUserService.findById(authenticationFacade.getUserId());
             UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
             URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
@@ -202,7 +198,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 
             return ResponseEntity.created(uri).build();
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         }
     }
@@ -231,7 +227,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
             return ResponseEntity.created(uri).build();
 
         } catch (UserNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
         }
     }

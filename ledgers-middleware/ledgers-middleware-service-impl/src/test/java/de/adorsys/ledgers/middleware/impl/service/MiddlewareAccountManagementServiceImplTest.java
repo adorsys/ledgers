@@ -182,16 +182,16 @@ public class MiddlewareAccountManagementServiceImplTest {
         List<AccountDetailsTO> accountsTO = new ArrayList<>();
         accountsTO.add(getAccountDetailsTO());
 
-        when(accessService.loadCurrentUser()).thenReturn(user);
+        when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
         when(accountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
         when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
-        List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccounts();
+        List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccounts(CORRECT_USER_ID);
 
         assertThat(accountsToBeTested).isNotNull();
         assertThat(accountsToBeTested).isNotEmpty();
 
-        verify(accessService, times(1)).loadCurrentUser();
+        verify(accessService, times(1)).loadCurrentUser(CORRECT_USER_ID);
         verify(accountService, times(1)).getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean());
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
@@ -207,16 +207,16 @@ public class MiddlewareAccountManagementServiceImplTest {
         List<AccountDetailsTO> accountsTO = new ArrayList<>();
         accountsTO.add(getAccountDetailsTO());
 
-        when(accessService.loadCurrentUser()).thenReturn(user);
+        when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
         when(accountService.findByBranch(anyString())).thenReturn(accounts);
         when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
-        List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccountsByBranch();
+        List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccountsByBranch(CORRECT_USER_ID);
 
         assertThat(accountsToBeTested).isNotNull();
         assertThat(accountsToBeTested).isNotEmpty();
 
-        verify(accessService, times(1)).loadCurrentUser();
+        verify(accessService, times(1)).loadCurrentUser(CORRECT_USER_ID);
         verify(accountService, times(1)).findByBranch(anyString());
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }

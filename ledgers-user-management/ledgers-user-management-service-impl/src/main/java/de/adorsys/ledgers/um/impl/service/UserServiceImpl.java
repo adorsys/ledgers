@@ -240,8 +240,6 @@ public class UserServiceImpl implements UserService {
 
         validateAisConsent(aisConsent, user);
 
-//		AisConsentEntity aisConsentPO = aisConsentMapper.toAisConsentPO(aisConsent);
-
         Date issueTime = new Date();
         Date expires = getExpirationDate(aisConsent, issueTime);
         // Produce the token

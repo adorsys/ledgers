@@ -14,30 +14,22 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
-    private static final Logger logger = LoggerFactory.getLogger(MiddlewareUserManagementServiceImpl.class);
     private final UserService userService;
     private final DepositAccountService depositAccountService;
     private final UserMapper userTOMapper;
-
-    @Autowired
-    public MiddlewareUserManagementServiceImpl(UserService userService, UserMapper userTOMapper, DepositAccountService depositAccountService) {
-        super();
-        this.userService = userService;
-        this.userTOMapper = userTOMapper;
-        this.depositAccountService = depositAccountService;
-    }
 
     @Override
     public UserTO create(UserTO user) {
@@ -54,7 +46,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         try {
             return userTOMapper.toUserTO(userService.findById(id));
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -64,7 +56,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         try {
             return userTOMapper.toUserTO(userService.findByLogin(userLogin));
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -76,7 +68,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
             UserBO userBO = userService.updateScaData(userTOMapper.toScaUserDataListBO(scaDataList), userLogin);
             return userTOMapper.toUserTO(userBO);
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -93,7 +85,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
             UserBO userBO = userService.updateAccountAccess(userLogin, userTOMapper.toAccountAccessListBO(accounts));
             return userTOMapper.toUserTO(userBO);
         } catch (UserNotFoundException | DepositAccountNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage(), e);
         }
     }

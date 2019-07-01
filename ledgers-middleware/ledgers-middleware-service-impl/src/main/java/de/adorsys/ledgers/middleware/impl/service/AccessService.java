@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -25,7 +24,6 @@ public class AccessService {
     private static final String ERROR_MESSAGE_USER_NF = "Can not find user with id %s. But this user is supposed to exist.";
 
     private final UserService userService;
-    private final AccessTokenTO accessToken;
 
     public void updateAccountAccess(UserBO user, AccountAccessBO access) throws UserNotFoundException {
         if (!containsAccess(user.getAccountAccesses(), access.getIban())) {
@@ -39,13 +37,13 @@ public class AccessService {
                        .anyMatch(a -> a.getIban().equals(iban));
     }
 
-    public UserBO loadCurrentUser() {
+    public UserBO loadCurrentUser(String userId) {
         // Load owner
         UserBO userBo;
         try {
-            userBo = userService.findById(accessToken.getSub());
+            userBo = userService.findById(userId);
         } catch (UserNotFoundException e) {
-            throw new DepositAccountUncheckedException(String.format(ERROR_MESSAGE_USER_NF, accessToken.getSub()), e);
+            throw new DepositAccountUncheckedException(String.format(ERROR_MESSAGE_USER_NF, userId), e);
         }
         return userBo;
     }

@@ -23,18 +23,19 @@ import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
+@Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBankingService {
-    private static final Logger logger = LoggerFactory.getLogger(MiddlewarePaymentServiceImpl.class);
     private static final String NO_USER_MESSAGE = "No user message";
 
     private final UserService userService;
@@ -45,18 +46,6 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     private final SCAUtils scaUtils;
     private final AccessTokenTO accessTokenTO;
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
-
-    public MiddlewareOnlineBankingServiceImpl(UserService userService, UserMapper userTOMapper,
-                                              BearerTokenMapper bearerTokenMapper, AccessTokenMapper accessTokenMapper,
-                                              SCAOperationService scaOperationService, SCAUtils scaUtils, AccessTokenTO accessTokenTO) {
-        this.userService = userService;
-        this.userTOMapper = userTOMapper;
-        this.bearerTokenMapper = bearerTokenMapper;
-        this.accessTokenMapper = accessTokenMapper;
-        this.scaOperationService = scaOperationService;
-        this.scaUtils = scaUtils;
-        this.accessTokenTO = accessTokenTO;
-    }
 
     @Override
     public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role)
@@ -145,7 +134,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
             throws UserAlreadyExistsMiddlewareException {
 
         UserTO user = new UserTO(login, email, pin);
-        logger.info(user.toString());
+        log.info(user.toString());
         user.getUserRoles().add(role);
         UserBO userBO = userTOMapper.toUserBO(user);
         try {
@@ -157,11 +146,11 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 
     @Override
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    public SCALoginResponseTO generateLoginAuthCode(String scaUserDataId, String authorisationId, String userMessage,
+    public SCALoginResponseTO generateLoginAuthCode(String userId, String scaUserDataId, String authorisationId, String userMessage,
                                                     int validitySeconds) throws SCAOperationNotFoundMiddlewareException, InsufficientPermissionMiddlewareException,
                                                                                         SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException {
         try {
-            UserBO user = scaUtils.userBO();
+            UserBO user = scaUtils.userBO(userId);
             SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(authorisationId);
             LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
             String opId = scaOperationBO.getOpId();
@@ -179,10 +168,10 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         } catch (UserScaDataNotFoundException e) {
             throw new UserScaDataNotFoundMiddlewareException(e);
         } catch (SCAOperationNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new SCAOperationNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new SCAOperationValidationMiddlewareException(e);
         } catch (InsufficientPermissionException e) {
             throw new InsufficientPermissionMiddlewareException(e.getMessage(), e);
@@ -193,12 +182,12 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 
     @Override
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    public SCALoginResponseTO authenticateForLogin(String authorisationId, String authCode)
+    public SCALoginResponseTO authenticateForLogin(String userId, String authorisationId, String authCode)
             throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
                            SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException,
                            InsufficientPermissionMiddlewareException {
         try {
-            UserBO user = scaUtils.userBO();
+            UserBO user = scaUtils.userBO(userId);
             SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(authorisationId);
             LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
             boolean valid = scaOperationService.validateAuthCode(authorisationId, authorisationId, authorisationId, authCode, 0);

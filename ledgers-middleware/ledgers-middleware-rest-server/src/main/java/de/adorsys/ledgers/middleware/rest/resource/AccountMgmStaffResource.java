@@ -23,8 +23,9 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementServ
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,17 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RestController
 @MiddlewareUserResource
+@RequiredArgsConstructor
 @RequestMapping("/staff-access" + AccountRestAPI.BASE_PATH)
 public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
-
-    private static final Logger logger = LoggerFactory.getLogger(AccountMgmStaffResource.class);
     private final MiddlewareAccountManagementService middlewareAccountService;
-
-    public AccountMgmStaffResource(MiddlewareAccountManagementService middlewareAccountService) {
-        this.middlewareAccountService = middlewareAccountService;
-    }
+    private final AuthenticationFacade authenticationFacade;
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
@@ -67,7 +65,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch());
+        return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch(authenticationFacade.getUserId()));
     }
 
     @Override
@@ -76,7 +74,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
         try {
             return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
         } catch (AccountNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
@@ -88,7 +86,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
             middlewareAccountService.depositCash(accountId, amount);
             return ResponseEntity.accepted().build();
         } catch (AccountNotFoundMiddlewareException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
         }
     }
