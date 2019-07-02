@@ -39,10 +39,9 @@ import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -52,9 +51,9 @@ import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.*;
 
+@Slf4j
 @Service
 public class SCAOperationServiceImpl implements SCAOperationService {
-    private static final Logger logger = LoggerFactory.getLogger(SCAOperationServiceImpl.class);
     private static final String TAN_VALIDATION_ERROR = "Can't validate client TAN";
     private static final String AUTH_CODE_GENERATION_ERROR = "TAN can't be generated";
     private static final String STOLEN_ERROR = "Seems auth code was stolen because it already used in the system";
@@ -63,9 +62,8 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     private final SCAOperationRepository repository;
     private final AuthCodeGenerator authCodeGenerator;
     private final SCAOperationMapper scaOperationMapper;
-    private HashGenerator hashGenerator;
+    private HashGenerator hashGenerator = new HashGeneratorImpl();
     private Map<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
-
 
     //Use property config instead
 
@@ -89,7 +87,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         this.repository = repository;
         this.scaOperationMapper = scaOperationMapper;
         this.authCodeGenerator = authCodeGenerator;
-        hashGenerator = new HashGeneratorImpl();
+        //TODO refactor this piece and add @RequiredArgsConstructor https://git.adorsys.de/adorsys/xs2a/ledgers/issues/229
         if (senders != null) {
             senders.forEach(s -> this.senders.put(s.getType(), s));
         }
@@ -167,7 +165,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     public void processExpiredOperations() {
         List<SCAOperationEntity> operations = repository.findByStatus(AuthCodeStatus.SENT);
 
-        logger.info("{} operations with status NEW were found", operations.size());
+        log.info("{} operations with status NEW were found", operations.size());
 
         List<SCAOperationEntity> expiredOperations = operations
                                                              .stream()
@@ -176,11 +174,11 @@ public class SCAOperationServiceImpl implements SCAOperationService {
 
         expiredOperations.forEach(o -> updateOperationStatus(o, AuthCodeStatus.EXPIRED, o.getScaStatus(), 0));
 
-        logger.info("{} operations was detected as EXPIRED", expiredOperations.size());
+        log.info("{} operations was detected as EXPIRED", expiredOperations.size());
 
         repository.saveAll(expiredOperations);
 
-        logger.info("Expired operations were updated");
+        log.info("Expired operations were updated");
     }
 
     @Override
@@ -245,7 +243,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         try {
             hash = hashGenerator.hash(new BaseHashItem<>(new OperationHashItem(id, opId, opData, authCode)));
         } catch (HashGenerationException e) {
-            logger.error(TAN_VALIDATION_ERROR);
+            log.error(TAN_VALIDATION_ERROR);
             throw new SCAOperationValidationException(TAN_VALIDATION_ERROR, e);
         }
         return hash;
@@ -255,14 +253,14 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         if (isOperationAlreadyExpired(operation)) {
             updateOperationStatus(operation, AuthCodeStatus.EXPIRED, operation.getScaStatus(), 0);
             repository.save(operation);
-            logger.error(EXPIRATION_ERROR);
+            log.error(EXPIRATION_ERROR);
             throw new SCAOperationExpiredException(EXPIRATION_ERROR);
         }
     }
 
     private void checkOperationNotUsed(SCAOperationEntity operation) throws SCAOperationUsedOrStolenException {
         if (isOperationAlreadyUsed(operation)) {
-            logger.error(STOLEN_ERROR);
+            log.error(STOLEN_ERROR);
             throw new SCAOperationUsedOrStolenException(STOLEN_ERROR);
         }
     }
@@ -317,7 +315,7 @@ public class SCAOperationServiceImpl implements SCAOperationService {
         try {
             authCodeHash = hashGenerator.hash(hashItem);
         } catch (HashGenerationException e) {
-            logger.error(AUTH_CODE_GENERATION_ERROR);
+            log.error(AUTH_CODE_GENERATION_ERROR);
             throw new ScaUncheckedException(AUTH_CODE_GENERATION_ERROR, e);
         }
         return authCodeHash;

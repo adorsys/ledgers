@@ -27,6 +27,7 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
+import lombok.Data;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 /**
@@ -45,6 +46,7 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
  *
  */
 @Entity
+@Data
 @Table(name = "sca_operation")
 public class SCAOperationEntity {
 
@@ -114,109 +116,5 @@ public class SCAOperationEntity {
 		if(created==null) {
 			created = LocalDateTime.now();
 		}
-	}
-	
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getOpId() {
-		return opId;
-	}
-
-	public void setOpId(String opId) {
-		this.opId = opId;
-	}
-
-	public int getValiditySeconds() {
-		return validitySeconds;
-	}
-
-	public void setValiditySeconds(int validitySeconds) {
-		this.validitySeconds = validitySeconds;
-	}
-
-	public String getAuthCodeHash() {
-		return authCodeHash;
-	}
-
-	public void setAuthCodeHash(String authCodeHash) {
-		this.authCodeHash = authCodeHash;
-	}
-
-	public AuthCodeStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(AuthCodeStatus status) {
-		this.status = status;
-	}
-
-	public String getHashAlg() {
-		return hashAlg;
-	}
-
-	public void setHashAlg(String hashAlg) {
-		this.hashAlg = hashAlg;
-	}
-
-	public LocalDateTime getCreated() {
-		return created;
-	}
-
-	public void setCreated(LocalDateTime created) {
-		this.created = created;
-	}
-
-	public LocalDateTime getStatusTime() {
-		return statusTime;
-	}
-
-	public void setStatusTime(LocalDateTime statusTime) {
-		this.statusTime = statusTime;
-	}
-
-	public OpType getOpType() {
-		return opType;
-	}
-
-	public void setOpType(OpType opType) {
-		this.opType = opType;
-	}
-
-	public String getScaMethodId() {
-		return scaMethodId;
-	}
-
-	public void setScaMethodId(String scaMethodId) {
-		this.scaMethodId = scaMethodId;
-	}
-
-	public int getFailledCount() {
-		return failledCount;
-	}
-
-	public void setFailledCount(int failledCount) {
-		this.failledCount = failledCount;
-	}
-
-	public ScaStatus getScaStatus() {
-		return scaStatus;
-	}
-
-	public void setScaStatus(ScaStatus scaStatus) {
-		this.scaStatus = scaStatus;
-	}
-
-	public int getScaWeight() {
-		return scaWeight;
-	}
-
-	public void setScaWeight(int scaWeight) {
-		this.scaWeight = scaWeight;
 	}
 }

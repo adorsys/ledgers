@@ -17,15 +17,14 @@
 package de.adorsys.ledgers.sca.service.job;
 
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class SCAOperationExpirationJob {
-    private static final Logger logger = LoggerFactory.getLogger(SCAOperationExpirationJob.class);
-
     private final SCAOperationService scaOperationService;
 
     public SCAOperationExpirationJob(SCAOperationService scaOperationService) {
@@ -35,8 +34,8 @@ public class SCAOperationExpirationJob {
 
     @Scheduled(cron = "${sca.authCode.expiration.cron}")
     public void checkOperationExpiration(){
-        logger.info("Start job of processing expired operations");
+        log.info("Start job of processing expired operations");
         scaOperationService.processExpiredOperations();
-        logger.info("End job of processing expired operations");
+        log.info("End job of processing expired operations");
     }
 }

@@ -16,6 +16,13 @@
 
 package de.adorsys.ledgers.sca.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AuthCodeDataBO {
     private String userLogin;
     private String scaUserDataId;
@@ -26,92 +33,4 @@ public class AuthCodeDataBO {
     private OpTypeBO opType;
     private String authorisationId;
     private int scaWeight;
-
-    public AuthCodeDataBO() {
-	}
-
-	public AuthCodeDataBO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
-			int validitySeconds, OpTypeBO opType, String authorisationId, int scaWeight) {
-		this.userLogin = userLogin;
-		this.scaUserDataId = scaUserDataId;
-		this.opId = opId;
-		this.opData = opData;
-		this.userMessage = userMessage;
-		this.validitySeconds = validitySeconds;
-		this.opType = opType;
-		this.authorisationId = authorisationId;
-		this.scaWeight = scaWeight;
-	}
-
-	public String getUserLogin() {
-        return userLogin;
-    }
-
-    public void setUserLogin(String userLogin) {
-        this.userLogin = userLogin;
-    }
-
-    public String getScaUserDataId() {
-        return scaUserDataId;
-    }
-
-    public void setScaUserDataId(String scaUserDataId) {
-        this.scaUserDataId = scaUserDataId;
-    }
-
-    public String getOpId() {
-        return opId;
-    }
-
-    public void setOpId(String opId) {
-        this.opId = opId;
-    }
-
-    public String getOpData() {
-        return opData;
-    }
-
-    public void setOpData(String opData) {
-        this.opData = opData;
-    }
-
-	public String getUserMessage() {
-		return userMessage;
-	}
-
-	public void setUserMessage(String userMessage) {
-		this.userMessage = userMessage;
-	}
-
-	public int getValiditySeconds() {
-		return validitySeconds;
-	}
-
-	public void setValiditySeconds(int validitySeconds) {
-		this.validitySeconds = validitySeconds;
-	}
-
-	public OpTypeBO getOpType() {
-		return opType;
-	}
-
-	public void setOpType(OpTypeBO opType) {
-		this.opType = opType;
-	}
-
-	public String getAuthorisationId() {
-		return authorisationId;
-	}
-
-	public void setAuthorisationId(String authorisationId) {
-		this.authorisationId = authorisationId;
-	}
-
-	public int getScaWeight() {
-		return scaWeight;
-	}
-
-	public void setScaWeight(int scaWeight) {
-		this.scaWeight = scaWeight;
-	}
 }
