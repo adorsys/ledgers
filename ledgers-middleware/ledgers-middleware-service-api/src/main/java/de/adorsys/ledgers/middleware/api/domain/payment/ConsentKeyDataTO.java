@@ -1,25 +1,20 @@
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
 import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+@Data
+@AllArgsConstructor
 public class ConsentKeyDataTO {
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
 
     private final AisConsentTO consent;
-
-	public ConsentKeyDataTO(AisConsentTO consent) {
-		super();
-		this.consent = consent;
-	}
-
-	public AisConsentTO getConsent() {
-		return consent;
-	}
 
 	public String template() {
 		checkNullConsent();
@@ -50,7 +45,7 @@ public class ConsentKeyDataTO {
 	}
 
 	private StringBuilder prepareTemplate(AisAccountAccessInfoTO access) {
-		StringBuilder b = new StringBuilder(String.format("Account access for TPP with id %s:\n", consent.getTppId()));
+		StringBuilder b = new StringBuilder(String.format("Account access for TPP with id %s:%n", consent.getTppId()));
 		if(consent.getFrequencyPerDay()<=1) {
 			if(consent.isRecurringIndicator()) {
 				b.append("- Up to to 1 access per day.\n");
@@ -58,10 +53,10 @@ public class ConsentKeyDataTO {
 				b.append("- For one time access.\n");
 			}
 		} else {
-			b.append(String.format("- Up to %s accesses per day.\n", consent.getFrequencyPerDay()));
+			b.append(String.format("- Up to %s accesses per day.%n", consent.getFrequencyPerDay()));
 		}
 		if(consent.getValidUntil()!=null) {
-			b.append(String.format("- Access valid until %s.\n", formatter.format(consent.getValidUntil())));
+			b.append(String.format("- Access valid until %s.%n", formatter.format(consent.getValidUntil())));
 		}
 		b.append("Access to following accounts:.\n");
 		if(AisAccountAccessTypeTO.ALL_ACCOUNTS.equals(access.getAllPsd2())) {

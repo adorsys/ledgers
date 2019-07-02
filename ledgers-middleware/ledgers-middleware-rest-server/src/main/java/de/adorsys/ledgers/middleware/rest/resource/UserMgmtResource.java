@@ -102,8 +102,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @Override
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId)
-            throws NotFoundRestException, ForbiddenRestException,
-                           NotAcceptableRestException, ValidationRestException {
+            throws NotFoundRestException, ForbiddenRestException, NotAcceptableRestException, ValidationRestException {
         try {
             return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(authenticationFacade.getUserId(), scaMethodId, authorisationId, null, 1800));
         } catch (SCAOperationNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {

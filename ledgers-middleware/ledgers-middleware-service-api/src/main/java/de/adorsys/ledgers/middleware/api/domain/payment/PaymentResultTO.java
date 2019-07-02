@@ -16,10 +16,13 @@
 
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
-import static de.adorsys.ledgers.middleware.api.domain.payment.ResultStatusTO.SUCCESS;
+import lombok.Data;
 
 import java.util.List;
 
+import static de.adorsys.ledgers.middleware.api.domain.payment.ResultStatusTO.SUCCESS;
+
+@Data
 public class PaymentResultTO<T> {
 
     /**
@@ -51,27 +54,4 @@ public class PaymentResultTO<T> {
         return responseStatus == SUCCESS;
     }
 
-    public ResultStatusTO getResponseStatus() {
-        return responseStatus;
-    }
-
-    public void setResponseStatus(ResultStatusTO responseStatus) {
-        this.responseStatus = responseStatus;
-    }
-
-    public List<String> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(List<String> messages) {
-        this.messages = messages;
-    }
-
-    public T getPaymentResult() {
-        return paymentResult;
-    }
-
-    public void setPaymentResult(T paymentResult) {
-        this.paymentResult = paymentResult;
-    }
 }

@@ -16,19 +16,20 @@
 
 package de.adorsys.ledgers.middleware.api.domain.account;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
+@Data
 public class AccountBalanceTO {
     private AmountTO amount;
     private BalanceTypeTO balanceType;
@@ -40,43 +41,4 @@ public class AccountBalanceTO {
     private LocalDate referenceDate;
     private String lastCommittedTransaction;
 
-    public AmountTO getAmount() {
-        return amount;
-    }
-
-    public void setAmount(AmountTO amount) {
-        this.amount = amount;
-    }
-
-    public BalanceTypeTO getBalanceType() {
-        return balanceType;
-    }
-
-    public void setBalanceType(BalanceTypeTO balanceType) {
-        this.balanceType = balanceType;
-    }
-
-    public LocalDateTime getLastChangeDateTime() {
-        return lastChangeDateTime;
-    }
-
-    public void setLastChangeDateTime(LocalDateTime lastChangeDateTime) {
-        this.lastChangeDateTime = lastChangeDateTime;
-    }
-
-    public LocalDate getReferenceDate() {
-        return referenceDate;
-    }
-
-    public void setReferenceDate(LocalDate referenceDate) {
-        this.referenceDate = referenceDate;
-    }
-
-    public String getLastCommittedTransaction() {
-        return lastCommittedTransaction;
-    }
-
-    public void setLastCommittedTransaction(String lastCommittedTransaction) {
-        this.lastCommittedTransaction = lastCommittedTransaction;
-    }
 }

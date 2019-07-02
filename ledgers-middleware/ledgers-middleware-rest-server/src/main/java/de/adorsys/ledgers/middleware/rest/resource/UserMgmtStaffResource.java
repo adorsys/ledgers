@@ -11,6 +11,7 @@ import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,20 +25,12 @@ import java.util.List;
 
 @RestController
 @MiddlewareUserResource
+@RequiredArgsConstructor
 @RequestMapping("/staff-access" + UserMgmtRestAPI.BASE_PATH)
 public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final AccessTokenTO accessToken;
-
-    public UserMgmtStaffResource(
-            MiddlewareOnlineBankingService onlineBankingService,
-            MiddlewareUserManagementService middlewareUserService,
-            AccessTokenTO accessToken) {
-        this.onlineBankingService = onlineBankingService;
-        this.middlewareUserService = middlewareUserService;
-        this.accessToken = accessToken;
-    }
 
     @Override
     public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) throws ConflictRestException {
@@ -141,5 +134,4 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
         }
         return user;
     }
-
 }

@@ -10,15 +10,11 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 @Data
 public class AccountAccessTO {
-
     private String id;
-
     @NotNull
     private String iban;
-
     @NotNull
     private AccessTypeTO accessType;
-
     @NotNull
     private UserTO user;
 

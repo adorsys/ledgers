@@ -16,18 +16,18 @@
 
 package de.adorsys.ledgers.middleware.api.domain.account;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import lombok.Data;
 
+import java.time.LocalDate;
+import java.util.List;
+
+@Data
 public class TransactionTO {
-
     private String transactionId;
     private String entryReference;
     private String endToEndId;
@@ -53,174 +53,4 @@ public class TransactionTO {
     private String purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;
-
-    //Getters-Setters
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getEntryReference() {
-        return entryReference;
-    }
-
-    public void setEntryReference(String entryReference) {
-        this.entryReference = entryReference;
-    }
-
-    public String getEndToEndId() {
-        return endToEndId;
-    }
-
-    public void setEndToEndId(String endToEndId) {
-        this.endToEndId = endToEndId;
-    }
-
-    public String getMandateId() {
-        return mandateId;
-    }
-
-    public void setMandateId(String mandateId) {
-        this.mandateId = mandateId;
-    }
-
-    public String getCheckId() {
-        return checkId;
-    }
-
-    public void setCheckId(String checkId) {
-        this.checkId = checkId;
-    }
-
-    public String getCreditorId() {
-        return creditorId;
-    }
-
-    public void setCreditorId(String creditorId) {
-        this.creditorId = creditorId;
-    }
-
-    public LocalDate getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public LocalDate getValueDate() {
-        return valueDate;
-    }
-
-    public void setValueDate(LocalDate valueDate) {
-        this.valueDate = valueDate;
-    }
-
-    public AmountTO getAmount() {
-        return amount;
-    }
-
-    public void setAmount(AmountTO amount) {
-        this.amount = amount;
-    }
-
-    public List<ExchangeRateTO> getExchangeRate() {
-        return exchangeRate;
-    }
-
-    public void setExchangeRate(List<ExchangeRateTO> exchangeRate) {
-        this.exchangeRate = exchangeRate;
-    }
-
-    public String getCreditorName() {
-        return creditorName;
-    }
-
-    public void setCreditorName(String creditorName) {
-        this.creditorName = creditorName;
-    }
-
-    public AccountReferenceTO getCreditorAccount() {
-        return creditorAccount;
-    }
-
-    public void setCreditorAccount(AccountReferenceTO creditorAccount) {
-        this.creditorAccount = creditorAccount;
-    }
-
-    public String getUltimateCreditor() {
-        return ultimateCreditor;
-    }
-
-    public void setUltimateCreditor(String ultimateCreditor) {
-        this.ultimateCreditor = ultimateCreditor;
-    }
-
-    public String getDebtorName() {
-        return debtorName;
-    }
-
-    public void setDebtorName(String debtorName) {
-        this.debtorName = debtorName;
-    }
-
-    public AccountReferenceTO getDebtorAccount() {
-        return debtorAccount;
-    }
-
-    public void setDebtorAccount(AccountReferenceTO debtorAccount) {
-        this.debtorAccount = debtorAccount;
-    }
-
-    public String getUltimateDebtor() {
-        return ultimateDebtor;
-    }
-
-    public void setUltimateDebtor(String ultimateDebtor) {
-        this.ultimateDebtor = ultimateDebtor;
-    }
-
-    public String getRemittanceInformationUnstructured() {
-        return remittanceInformationUnstructured;
-    }
-
-    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
-        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
-    }
-
-    public String getRemittanceInformationStructured() {
-        return remittanceInformationStructured;
-    }
-
-    public void setRemittanceInformationStructured(String remittanceInformationStructured) {
-        this.remittanceInformationStructured = remittanceInformationStructured;
-    }
-
-    public String getPurposeCode() {
-        return purposeCode;
-    }
-
-    public void setPurposeCode(String purposeCode) {
-        this.purposeCode = purposeCode;
-    }
-
-    public String getBankTransactionCode() {
-        return bankTransactionCode;
-    }
-
-    public void setBankTransactionCode(String bankTransactionCode) {
-        this.bankTransactionCode = bankTransactionCode;
-    }
-
-    public String getProprietaryBankTransactionCode() {
-        return proprietaryBankTransactionCode;
-    }
-
-    public void setProprietaryBankTransactionCode(String proprietaryBankTransactionCode) {
-        this.proprietaryBankTransactionCode = proprietaryBankTransactionCode;
-    }
 }

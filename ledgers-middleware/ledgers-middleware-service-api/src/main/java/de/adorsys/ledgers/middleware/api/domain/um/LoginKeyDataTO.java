@@ -1,11 +1,12 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
+import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class composes a login process id out of the time and the userid.
@@ -17,8 +18,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author fpo
  *
  */
+@Data
 public class LoginKeyDataTO {
-	
 	private static final String V_00 = "V00";
 	private static final int VERSION_STRING_LENGTH = 3;
 	private static final String FORMAT_V00="yyyyMMddHHmmss";
@@ -37,13 +38,8 @@ public class LoginKeyDataTO {
     private final LocalDateTime loginTime;
 
 	public LoginKeyDataTO(String userId, LocalDateTime time) {
-		super();
 		this.userId = userId;
 		this.loginTime = time;
-	}
-
-	public String getUserId() {
-		return userId;
 	}
 
 	public String messageTemplate() {
@@ -51,7 +47,7 @@ public class LoginKeyDataTO {
 			throw new IllegalStateException("Not expecting userId to be null.");
 		}
 
-		StringBuilder b = new StringBuilder(String.format("Login process started at %s for %s:\n", loginTime.format(display_formatter), userId));
+		StringBuilder b = new StringBuilder(String.format("Login process started at %s for %s:%n", loginTime.format(display_formatter), userId));
 
 		b.append("TAN: %s");
 		return b.toString();

@@ -16,29 +16,14 @@
 
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Currency;
 
 
+@Data
 public class AmountTO {
     private Currency currency;
     private BigDecimal amount;
-
-    //Getters-Setters
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
 }

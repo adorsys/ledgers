@@ -179,7 +179,7 @@ public class MiddlewarePaymentServiceImplTest {
     public void executePayment_Success() throws PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, InsufficientPermissionException {
 
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
-    	UserTO userTo = new UserTO("userId", email, "123456");
+    	UserTO userTo = new UserTO("userId",email,"123456");
     	BearerTokenBO bearerTokenBO = new BearerTokenBO();
         when(accessToken.getLogin()).thenReturn(SYSTEM);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);

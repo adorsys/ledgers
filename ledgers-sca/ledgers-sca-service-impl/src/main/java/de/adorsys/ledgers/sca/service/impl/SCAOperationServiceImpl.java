@@ -39,9 +39,11 @@ import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +55,8 @@ import static de.adorsys.ledgers.sca.domain.OpTypeBO.*;
 
 @Slf4j
 @Service
-public class SCAOperationServiceImpl implements SCAOperationService {
+@RequiredArgsConstructor
+public class SCAOperationServiceImpl implements SCAOperationService, InitializingBean {
     private static final String TAN_VALIDATION_ERROR = "Can't validate client TAN";
     private static final String AUTH_CODE_GENERATION_ERROR = "TAN can't be generated";
     private static final String STOLEN_ERROR = "Seems auth code was stolen because it already used in the system";
@@ -62,8 +65,9 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     private final SCAOperationRepository repository;
     private final AuthCodeGenerator authCodeGenerator;
     private final SCAOperationMapper scaOperationMapper;
-    private HashGenerator hashGenerator = new HashGeneratorImpl();
+    private final List<SCASender> sendersList;
     private Map<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
+    private HashGenerator hashGenerator = new HashGeneratorImpl();
 
     //Use property config instead
 
@@ -82,14 +86,10 @@ public class SCAOperationServiceImpl implements SCAOperationService {
     @Value("${sca.final.weight:100}")
     private int finalWeight;
 
-    public SCAOperationServiceImpl(List<SCASender> senders, SCAOperationRepository repository,
-                                   AuthCodeGenerator authCodeGenerator, SCAOperationMapper scaOperationMapper) {
-        this.repository = repository;
-        this.scaOperationMapper = scaOperationMapper;
-        this.authCodeGenerator = authCodeGenerator;
-        //TODO refactor this piece and add @RequiredArgsConstructor https://git.adorsys.de/adorsys/xs2a/ledgers/issues/229
-        if (senders != null) {
-            senders.forEach(s -> this.senders.put(s.getType(), s));
+    @Override
+    public void afterPropertiesSet() {
+        if (sendersList != null) {
+            sendersList.forEach(s -> this.senders.put(s.getType(), s));
         }
     }
 
