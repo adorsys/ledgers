@@ -16,11 +16,10 @@
 
 package de.adorsys.ledgers.util.hash;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class HashGenerationException extends Exception {
-
-    public HashGenerationException() {}
-
-    public HashGenerationException(String message) {super(message);}
 
     public HashGenerationException(String message, Throwable cause) {
         super(message, cause);

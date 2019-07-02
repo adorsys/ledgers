@@ -20,17 +20,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class PasswordEnc {
-	private PasswordEncoder pe = new BCryptPasswordEncoder();
-	
+    private PasswordEncoder pe = new BCryptPasswordEncoder();
+
     public String encode(String userId, String password) {
-    	return pe.encode(concatenate(userId, password));
+        return pe.encode(concatenate(userId, password));
     }
 
     private String concatenate(String userId, String password) {
-    	return userId+password;
-	}
-    
-	public boolean verify(String userId, String rawPassword, String encodedPassword) {
+        return userId + password;
+    }
+
+    public boolean verify(String userId, String rawPassword, String encodedPassword) {
         return pe.matches(concatenate(userId, rawPassword), encodedPassword);
     }
 }

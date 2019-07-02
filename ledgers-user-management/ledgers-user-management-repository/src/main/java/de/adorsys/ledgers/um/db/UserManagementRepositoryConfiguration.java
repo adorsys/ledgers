@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 
 @Configuration
-@ComponentScan(basePackageClasses= {UserManangmentBasePackage.class})
+@ComponentScan(basePackageClasses = {UserManagementBasePackage.class})
 @EnableJpaRepositories
-@EntityScan(basePackageClasses= {UserEntity.class, Jsr310JpaConverters.class})
+@EntityScan(basePackageClasses = {UserEntity.class, Jsr310JpaConverters.class})
 public class UserManagementRepositoryConfiguration {
 }

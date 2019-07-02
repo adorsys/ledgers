@@ -1,17 +1,14 @@
 package de.adorsys.ledgers.um.db.domain;
 
 import de.adorsys.ledgers.util.Ids;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 
-/*
-*
-*
-* */
-
 //Todo clarify unique constrains iban & access_type
 @Entity
+@Data
 @Table(name = "account_accesses")
 public class AccountAccess {
 
@@ -36,37 +33,5 @@ public class AccountAccess {
     	if(id==null) {
     		id = Ids.id();
     	}
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getIban() {
-        return iban;
-    }
-
-    public void setIban(String iban) {
-        this.iban = iban;
-    }
-
-    public AccessType getAccessType() {
-        return accessType;
-    }
-
-    public void setAccessType(AccessType accessType) {
-        this.accessType = accessType;
-    }
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-    public int getScaWeight() {
-        return scaWeight;
-    }
-
-    public void setScaWeight(int scaWeight) {
-        this.scaWeight = scaWeight;
     }
 }

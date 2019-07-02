@@ -16,6 +16,9 @@
 
 package de.adorsys.ledgers.um.db.domain;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +27,8 @@ import java.util.Objects;
 import javax.persistence.*;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "login", name = UserEntity.USER_LOGIN_UNIQUE),
         @UniqueConstraint(columnNames = "email", name = UserEntity.USER_EMAIL_UNIQUE)
@@ -61,70 +66,6 @@ public class UserEntity {
     private Collection<UserRole> userRoles =  new ArrayList<>();
 
     private String branch;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPin() {
-        return pin;
-    }
-
-    public void setPin(String pin) {
-        this.pin = pin;
-    }
-
-    public List<ScaUserDataEntity> getScaUserData() {
-        return scaUserData;
-    }
-
-    public void setScaUserData(List<ScaUserDataEntity> scaUserData) {
-        this.scaUserData = scaUserData;
-    }
-
-    public List<AccountAccess> getAccountAccesses() {
-        return accountAccesses;
-    }
-
-    public void setAccountAccesses(List<AccountAccess> accountAccesses) {
-        this.accountAccesses = accountAccesses;
-    }
-
-    public Collection<UserRole> getUserRoles() {
-        return userRoles;
-    }
-
-    public void setUserRoles(Collection<UserRole> userRoles) {
-        this.userRoles = userRoles;
-    }
-
-    public String getBranch() {
-        return branch;
-    }
-
-    public void setBranch(String branch) {
-        this.branch = branch;
-    }
 
     @Override
     public boolean equals(Object o) {

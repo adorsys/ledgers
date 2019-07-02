@@ -16,6 +16,8 @@
 
 package de.adorsys.ledgers.um.db.domain;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Entity
+@Data
 @Table(name = "sca_ais_consent")
 public class AisConsentEntity {
 
@@ -41,9 +44,6 @@ public class AisConsentEntity {
 
     private int frequencyPerDay;
 
-//    @Embedded
-//    @CollectionTable(name = "ais_account_access", joinColumns = @JoinColumn(name = "consent_id"))
-//    private AisAccountAccessInfo access = new AisAccountAccessInfo();
 	@ElementCollection
 	@CollectionTable(name ="sca_ais_consent_accounts", joinColumns=@JoinColumn(name="ais_consent_entity_id"))
     private List<String> accounts;
@@ -64,102 +64,4 @@ public class AisConsentEntity {
     private LocalDate validUntil;
 
     private boolean recurringIndicator;
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getTppId() {
-		return tppId;
-	}
-
-	public void setTppId(String tppId) {
-		this.tppId = tppId;
-	}
-
-	public int getFrequencyPerDay() {
-		return frequencyPerDay;
-	}
-
-	public void setFrequencyPerDay(int frequencyPerDay) {
-		this.frequencyPerDay = frequencyPerDay;
-	}
-
-//	public AisAccountAccessInfo getAccess() {
-//		return access;
-//	}
-//
-//	public void setAccess(AisAccountAccessInfo access) {
-//		this.access = access;
-//	}
-
-	public LocalDate getValidUntil() {
-		return validUntil;
-	}
-
-	public void setValidUntil(LocalDate validUntil) {
-		this.validUntil = validUntil;
-	}
-
-	public boolean isRecurringIndicator() {
-		return recurringIndicator;
-	}
-
-	public void setRecurringIndicator(boolean recurringIndicator) {
-		this.recurringIndicator = recurringIndicator;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-	
-
-	public List<String> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(List<String> accounts) {
-		this.accounts = accounts;
-	}
-
-	public List<String> getBalances() {
-		return balances;
-	}
-
-	public void setBalances(List<String> balances) {
-		this.balances = balances;
-	}
-
-	public List<String> getTransactions() {
-		return transactions;
-	}
-
-	public void setTransactions(List<String> transactions) {
-		this.transactions = transactions;
-	}
-
-	public AisAccountAccessType getAvailableAccounts() {
-		return availableAccounts;
-	}
-
-	public void setAvailableAccounts(AisAccountAccessType availableAccounts) {
-		this.availableAccounts = availableAccounts;
-	}
-
-	public AisAccountAccessType getAllPsd2() {
-		return allPsd2;
-	}
-
-	public void setAllPsd2(AisAccountAccessType allPsd2) {
-		this.allPsd2 = allPsd2;
-	}
-
 }

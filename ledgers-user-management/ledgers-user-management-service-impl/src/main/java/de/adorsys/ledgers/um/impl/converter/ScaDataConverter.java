@@ -1,13 +1,13 @@
 package de.adorsys.ledgers.um.impl.converter;
 
-import org.mapstruct.Mapper;
-
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.db.domain.AccessType;
-import de.adorsys.ledgers.um.db.domain.ScaMethodTypeEntity;
+import de.adorsys.ledgers.um.db.domain.ScaMethodType;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
+import org.mapstruct.Mapper;
+
+import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 
 @Mapper(componentModel = "spring")
 public interface ScaDataConverter {
@@ -16,12 +16,12 @@ public interface ScaDataConverter {
 
     ScaUserDataEntity toScaDataPO(ScaUserDataBO user);
 
-    default ScaMethodTypeBO toScanMethodTypeBo(ScaMethodTypeEntity entity){
+    default ScaMethodTypeBO toScanMethodTypeBo(ScaMethodType entity) {
         return ScaMethodTypeBO.valueOf(entity.name());
     }
 
-    default ScaMethodTypeEntity toScanMethodTypeEntity(ScaMethodTypeBO bo){
-        return ScaMethodTypeEntity.valueOf(bo.name());
+    default ScaMethodType toScanMethodTypeEntity(ScaMethodTypeBO bo) {
+        return ScaMethodType.valueOf(bo.name());
     }
 
     default AccessType toAccessType(AccessTypeBO bo) {

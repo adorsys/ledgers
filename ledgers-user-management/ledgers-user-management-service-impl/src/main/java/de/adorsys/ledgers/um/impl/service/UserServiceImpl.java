@@ -65,8 +65,9 @@ public class UserServiceImpl implements UserService {
     private static final String USER_DOES_NOT_HAVE_THE_ROLE_S = "User with id %s and login %s does not have the role %s";
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
-    private static final String CONESENT_WITH_ID_NOT_FOUND = "Consent with id=%s not found";
-    
+    private static final String CONSENT_WITH_ID_S_NOT_FOUND = "Consent with id=%s not found";
+    private static final int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
+
     private final UserRepository userRepository;
     private final AisConsentRepository consentRepository;
     private final UserConverter userConverter;
@@ -74,7 +75,6 @@ public class UserServiceImpl implements UserService {
     private final HashMacSecretSource secretSource;
     private final AisConsentMapper aisConsentMapper;
     private final BearerTokenService bearerTokenService;
-    private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
 
     @Override
     public UserBO create(UserBO user) {
@@ -87,7 +87,6 @@ public class UserServiceImpl implements UserService {
             log.info("User with login {} has no id, generating one", userPO.getLogin());
             userPO.setId(Ids.id());
         }
-
 
         userPO.setPin(passwordEnc.encode(userPO.getId(), user.getPin()));
         return userConverter.toUserBO(userRepository.save(userPO));
@@ -115,7 +114,7 @@ public class UserServiceImpl implements UserService {
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, userRole, scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
+                                              null, null, userRole, scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
     }
 
     @Override
@@ -158,12 +157,9 @@ public class UserServiceImpl implements UserService {
 
             return bearerTokenService.bearerToken(accessToken, expiresIn, accessTokenJWT);
 
-        } catch (ParseException e) {
+        } catch (ParseException | JOSEException e) {
             // If we can not parse the token, we log the error and return false.
-            log.warn(e.getMessage());
-            return null;
-        } catch (JOSEException e) {
-            log.error(e.getMessage(), e);
+            log.warn(e.getMessage(), e);
             return null;
         }
     }
@@ -236,8 +232,8 @@ public class UserServiceImpl implements UserService {
         act.put("tppId", tppId);
         UserRole userRole = UserRole.valueOf(loginToken.getRole().name());
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null,
-                aisConsent, userRole,
-                loginToken.getScaId(), loginToken.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
+                                              aisConsent, userRole,
+                                              loginToken.getScaId(), loginToken.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
     }
 
     @Override
@@ -259,7 +255,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException {
         AisConsentEntity aisConsentEntity = consentRepository.findById(consentId)
-                                                    .orElseThrow(() -> new ConsentNotFoundException(String.format(CONESENT_WITH_ID_NOT_FOUND, consentId)));
+                                                    .orElseThrow(() -> new ConsentNotFoundException(String.format(CONSENT_WITH_ID_S_NOT_FOUND, consentId)));
         return aisConsentMapper.toAisConsentBO(aisConsentEntity);
     }
 
@@ -365,12 +361,10 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-        /*List<AccountAccess> accesses = usageType == TokenUsageBO.DIRECT_ACCESS
-                                               ? user.getAccountAccesses()
-                                               : null;*/
+
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.valueOf(loginToken.getRole().name()),
-                loginToken.getScaId(), authorisationId,
-                issueTime, expires, usageType, null);
+                                              null, null, UserRole.valueOf(loginToken.getRole().name()),
+                                              loginToken.getScaId(), authorisationId,
+                                              issueTime, expires, usageType, null);
     }
 }

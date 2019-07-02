@@ -44,17 +44,16 @@ public interface UserService {
 
     /**
      * Verify user credential and produces a corresponding login token.
-     * 
+     * <p>
      * The granted access token can no be used to access account information.
      *
-     * @param login User login
-     * @param pin   User PIN
-     * @param role the role of this user 
-     * @param scaId the scaId
+     * @param login           User login
+     * @param pin             User PIN
+     * @param role            the role of this user
+     * @param scaId           the scaId
      * @param authorisationId the authorization id
-     * 
      * @return BearerTokenBO representation of authorization status true for success, false for failure or throws a UserNotFoundException
-     * @throws UserNotFoundException is thrown if user can`t be found
+     * @throws UserNotFoundException           is thrown if user can`t be found
      * @throws InsufficientPermissionException usder does not have requested role
      */
     BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws UserNotFoundException, InsufficientPermissionException;
@@ -91,81 +90,80 @@ public interface UserService {
 
     List<UserBO> listUsers(int page, int size);
 
-	/**
-	 * Check if the provided token is valid at the given reference time and return the corresponding user.
-	 * 
-	 * 
-	 * @param accessToken the access token to validate
-	 * @param refTime the reference time
-	 * @return the bearer token
-	 * @throws UserNotFoundException : user is no longer in the database.
-	 * @throws InsufficientPermissionException access permissions contained in the token are no longer supported by the user.
-	 */
-	BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException, InsufficientPermissionException;
+    /**
+     * Check if the provided token is valid at the given reference time and return the corresponding user.
+     *
+     * @param accessToken the access token to validate
+     * @param refTime     the reference time
+     * @return the bearer token
+     * @throws UserNotFoundException           : user is no longer in the database.
+     * @throws InsufficientPermissionException access permissions contained in the token are no longer supported by the user.
+     */
+    BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException, InsufficientPermissionException;
 
-	/**
-	 * Provides a token used to gain read access to an account.
-	 * 
-	 * @param accessToken the token used by the user currently granting permission
-	 * @param aisConsent the ais consent.
-	 * @return the bearer token
-	 * @throws InsufficientPermissionException the current user does not have sufficient permission.
-	 */
-	BearerTokenBO consentToken(AccessTokenBO accessToken, AisConsentBO aisConsent) throws InsufficientPermissionException;
+    /**
+     * Provides a token used to gain read access to an account.
+     *
+     * @param accessToken the token used by the user currently granting permission
+     * @param aisConsent  the ais consent.
+     * @return the bearer token
+     * @throws InsufficientPermissionException the current user does not have sufficient permission.
+     */
+    BearerTokenBO consentToken(AccessTokenBO accessToken, AisConsentBO aisConsent) throws InsufficientPermissionException;
 
-	/**
-	 * Create a new token for the current user, after a successfull auth code proces..
-	 * 
-	 * @param loginToken : the token obtained in the preceeding request.
-	 * @return the bearer token
-	 * @throws InsufficientPermissionException : user does not have the required role.
-	 * @throws UserNotFoundException : underlying user non longer existent. 
-	 */
-	BearerTokenBO scaToken(AccessTokenBO loginToken) throws InsufficientPermissionException, UserNotFoundException;
+    /**
+     * Create a new token for the current user, after a successfull auth code proces..
+     *
+     * @param loginToken : the token obtained in the preceeding request.
+     * @return the bearer token
+     * @throws InsufficientPermissionException : user does not have the required role.
+     * @throws UserNotFoundException           : underlying user non longer existent.
+     */
+    BearerTokenBO scaToken(AccessTokenBO loginToken) throws InsufficientPermissionException, UserNotFoundException;
 
-	/**
-	 * Create a new token for the current user, with a new authorization id
-	 * 
-	 * @param loginToken : the token to clone
-	 * @param authorisationId : the authorization id to exchange
-	 * @return the bearer token
-	 * @throws InsufficientPermissionException : user does not have the required role.
-	 * @throws UserNotFoundException : underlying user non longer existent. 
-	 */
-	BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws InsufficientPermissionException, UserNotFoundException;
-	
-	/**
-	 * Stores a consent in the consent database and returns the original consent
-	 * if already existing there.
-	 * 
-	 * @param consentBO the consent object
-	 * @return the ais consent stored
-	 */
-	AisConsentBO storeConsent(AisConsentBO consentBO);
+    /**
+     * Create a new token for the current user, with a new authorization id
+     *
+     * @param loginToken      : the token to clone
+     * @param authorisationId : the authorization id to exchange
+     * @return the bearer token
+     * @throws InsufficientPermissionException : user does not have the required role.
+     * @throws UserNotFoundException           : underlying user non longer existent.
+     */
+    BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws InsufficientPermissionException, UserNotFoundException;
 
-	/**
-	 * Loads a consent given the consent id. Throws a consent not found exception.
-	 * 
-	 * @param consentId the consent id
-	 * @return the corresponding ais consent.
-	 * @throws ConsentNotFoundException
-	 */
-	AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
+    /**
+     * Stores a consent in the consent database and returns the original consent
+     * if already existing there.
+     *
+     * @param consentBO the consent object
+     * @return the ais consent stored
+     */
+    AisConsentBO storeConsent(AisConsentBO consentBO);
 
-	/**
-	 * Loads users collection by branch and the given roles
-	 *
-	 * @param branch branch ID
-	 * @param userRoles list of user roles
-	 * @return List of users filtered by branch and user roles
-	 */
-	List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles);
+    /**
+     * Loads a consent given the consent id. Throws a consent not found exception.
+     *
+     * @param consentId the consent id
+     * @return the corresponding ais consent.
+     * @throws ConsentNotFoundException
+     */
+    AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
 
-	/**
-	 * Counts amount of users for a branch
-	 *
-	 * @param branch branch
-	 * @return amount of users
-	 */
-	int countUsersByBranch(String branch);
+    /**
+     * Loads users collection by branch and the given roles
+     *
+     * @param branch    branch ID
+     * @param userRoles list of user roles
+     * @return List of users filtered by branch and user roles
+     */
+    List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles);
+
+    /**
+     * Counts amount of users for a branch
+     *
+     * @param branch branch
+     * @return amount of users
+     */
+    int countUsersByBranch(String branch);
 }

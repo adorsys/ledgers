@@ -20,6 +20,7 @@ package de.adorsys.ledgers.um.rest.controller;
 import java.net.URI;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,20 +41,16 @@ import de.adorsys.ledgers.um.rest.exception.NotFoundRestException;
 
 @RestController
 @RequestMapping(UserResource.USERS)
+@RequiredArgsConstructor
 public class UserResource {
 
     static final String USERS = "/users/";
     private static final String SCA_DATA = "sca-data";
     private final UserService userService;
 
-    public UserResource(UserService userService) {
-        this.userService = userService;
-    }
-
-    @PostMapping()
+    @PostMapping
     ResponseEntity<Void> createUser(@RequestBody UserBO user) throws UserAlreadyExistsException {
-        UserBO userBO;
-        userBO = userService.create(user);
+        UserBO userBO = userService.create(user);
         URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getLogin()).build().toUri();
         return ResponseEntity.created(uri).build();
     }
