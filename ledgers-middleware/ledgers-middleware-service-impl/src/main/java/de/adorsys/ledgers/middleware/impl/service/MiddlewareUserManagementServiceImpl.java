@@ -16,6 +16,7 @@ import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ import java.util.List;
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
     private final UserService userService;
     private final DepositAccountService depositAccountService;
-    private final UserMapper userTOMapper;
+    private final UserMapper userTOMapper = Mappers.getMapper(UserMapper.class);
 
     @Override
     public UserTO create(UserTO user) {

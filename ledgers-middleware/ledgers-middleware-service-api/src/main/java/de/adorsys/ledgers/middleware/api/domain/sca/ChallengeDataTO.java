@@ -1,22 +1,19 @@
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+@Data
+@AllArgsConstructor
 public class ChallengeDataTO {
-
     private byte[] image;
-
     private String data;
-
     private String imageLink;
-
     private Integer otpMaxLength;
-
     private OtpFormatTO otpFormat;
-
     private String additionalInformation;
 
     @JsonIgnore
@@ -27,6 +24,5 @@ public class ChallengeDataTO {
                    && otpMaxLength == null
                    && otpFormat == null
                    && StringUtils.isBlank(additionalInformation);
-
     }
 }

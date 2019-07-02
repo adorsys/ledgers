@@ -34,9 +34,9 @@ import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,18 +47,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods")
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
-    private static final Logger logger = LoggerFactory.getLogger(MiddlewareAccountManagementServiceImpl.class);
     private static final LocalDateTime BASE_TIME = LocalDateTime.MIN;
+    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     private final DepositAccountService depositAccountService;
     private final AccountDetailsMapper accountDetailsMapper;
     private final PaymentConverter paymentConverter;
     private final UserService userService;
-    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private final AisConsentBOMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
     private final AccessTokenMapper accessTokenMapper;
@@ -71,26 +72,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
-
-
-    public MiddlewareAccountManagementServiceImpl(DepositAccountService depositAccountService,
-                                                  AccountDetailsMapper accountDetailsMapper, PaymentConverter paymentConverter, UserService userService,
-                                                  AisConsentBOMapper aisConsentMapper, BearerTokenMapper bearerTokenMapper,
-                                                  AccessTokenMapper accessTokenMapper, AccessTokenTO accessToken, SCAOperationService scaOperationService,
-                                                  SCAUtils scaUtils, AccessService accessService, AmountMapper amountMapper) {
-        this.depositAccountService = depositAccountService;
-        this.accountDetailsMapper = accountDetailsMapper;
-        this.paymentConverter = paymentConverter;
-        this.userService = userService;
-        this.aisConsentMapper = aisConsentMapper;
-        this.bearerTokenMapper = bearerTokenMapper;
-        this.accessTokenMapper = accessTokenMapper;
-        this.accessToken = accessToken;
-        this.scaOperationService = scaOperationService;
-        this.scaUtils = scaUtils;
-        this.accessService = accessService;
-        this.amountMapper = amountMapper;
-    }
 
     @Override
     public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
@@ -108,7 +89,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                 accessService.updateAccountAccess(userBO, accountAccess);
             }
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserNotFoundMiddlewareException();
         } catch (DepositAccountNotFoundException e) {
             throw new AccountNotFoundMiddlewareException();
@@ -123,7 +104,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
             return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -135,7 +116,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
             return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -143,29 +124,29 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws
             UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
-        logger.info("Retrieving accounts by user login {}", userLogin);
+        log.info("Retrieving accounts by user login {}", userLogin);
         try {
             UserBO userBO = userService.findByLogin(userLogin);
             List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
-            logger.info("{} accounts were retrieved", accountAccess.size());
+            log.info("{} accounts were retrieved", accountAccess.size());
 
             List<String> ibans = accountAccess.stream()
                                          .filter(a -> a.getAccessType() == AccessTypeBO.OWNER)
                                          .map(AccountAccessBO::getIban)
                                          .collect(Collectors.toList());
-            logger.info("{} were accounts were filtered as OWN", ibans.size());
+            log.info("{} were accounts were filtered as OWN", ibans.size());
 
             List<DepositAccountDetailsBO> depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, BASE_TIME, false);
-            logger.info("{} deposit accounts were found", depositAccounts.size());
+            log.info("{} deposit accounts were found", depositAccounts.size());
 
             return depositAccounts.stream()
                            .map(accountDetailsMapper::toAccountDetailsTO)
                            .collect(Collectors.toList());
         } catch (UserNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserNotFoundMiddlewareException(e.getMessage());
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }
     }
@@ -239,7 +220,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         try {
             accountAccesses = userMapper.toAccountAccessListTO(userService.findById(accessToken.getSub()).getAccountAccesses());
         } catch (UserNotFoundException e) {
-            logger.error("Could not get User by id: {}", accessToken.getSub());
+            log.error("Could not get User by id: {}", accessToken.getSub());
         }
 
         // Empty if user is not owner of this prefix.
@@ -355,10 +336,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
             return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
         } catch (SCAMethodNotSupportedException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new SCAMethodNotSupportedMiddleException(e);
         } catch (UserScaDataNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new UserScaDataNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
             throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
@@ -394,16 +375,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             }
             return response;
         } catch (SCAOperationNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new SCAOperationNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new SCAOperationValidationMiddlewareException(e);
         } catch (SCAOperationExpiredException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new SCAOperationExpiredMiddlewareException(e);
         } catch (SCAOperationUsedOrStolenException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new SCAOperationUsedOrStolenMiddlewareException(e);
         } catch (InsufficientPermissionException e) {
             throw new AccountMiddlewareUncheckedException(e.getMessage(), e);

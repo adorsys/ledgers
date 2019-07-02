@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.validation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -16,9 +15,9 @@ import static java.lang.System.lineSeparator;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 
+@Slf4j
 public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
     private String requestBody;
-    private static final Logger logger = LoggerFactory.getLogger(MultiReadHttpServletRequest.class);
 
     public MultiReadHttpServletRequest(HttpServletRequest request) {
         super(request);
@@ -27,7 +26,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
                                   .lines()
                                   .collect(joining(lineSeparator()));
         } catch (IOException e) {
-            logger.error("MultiReadHttpServletRequest exception: {}", e.getMessage());
+            log.error("MultiReadHttpServletRequest exception: {}", e.getMessage());
         }
     }
 
@@ -47,6 +46,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
 
             @Override
             public void setReadListener(ReadListener readListener) {
+                //Stub
             }
 
             @Override

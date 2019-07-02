@@ -15,6 +15,7 @@ import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class SCAUtils {
 	private final UserService userService;
 	private final SCAOperationService scaOperationService;
-	private final UserMapper userMapper;
+	private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 	private final AccessTokenTO accessTokenTO;
 
 	public ScaUserDataTO getScaMethod(UserTO user, String scaMethodId) {
@@ -56,7 +57,7 @@ public class SCAUtils {
 			log.error(message, e);
 			throw new AccountMiddlewareUncheckedException(message, e);
 		}
-	}	
+	}
 
 	public SCAOperationBO loadAuthCode(String authorisationId) throws SCAOperationExpiredMiddlewareException {
 		try {

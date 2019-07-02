@@ -1,28 +1,24 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
+import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
 import pro.javatar.commons.reader.YamlReader;
+
+import java.io.IOException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareUserManagementServiceImplTest {
@@ -35,9 +31,6 @@ public class MiddlewareUserManagementServiceImplTest {
 
 	@Mock
 	private UserService userService;
-
-	@Mock
-	private UserMapper userMapper;
 
 	private static UserBO userBO = null;
 	private static UserTO userTO = null;
@@ -52,7 +45,6 @@ public class MiddlewareUserManagementServiceImplTest {
 	public void getSCAMethods() throws UserNotFoundException, UserNotFoundMiddlewareException {
 		String userLogin = "spe@adorsys.com.ua";
 		when(userService.findByLogin(userLogin)).thenReturn(userBO);
-		when(userMapper.toUserTO(userBO)).thenReturn(userTO);
 
 		UserTO user = middlewareUserService.findByUserLogin(userLogin);
 
@@ -65,7 +57,6 @@ public class MiddlewareUserManagementServiceImplTest {
 		assertThat(user.getScaUserData().get(1).getMethodValue(), is("+380933686868"));
 
 		verify(userService, times(1)).findByLogin(userLogin);
-		verify(userMapper, times(1)).toUserTO(userBO);
 	}
 
 	@Test(expected = UserNotFoundMiddlewareException.class)
@@ -81,13 +72,10 @@ public class MiddlewareUserManagementServiceImplTest {
 	public void updateScaMethods() throws UserNotFoundException, UserNotFoundMiddlewareException {
 		String userLogin = "userLogin";
 		when(userService.updateScaData(userBO.getScaUserData(), userLogin)).thenReturn(userBO);
-		when(userMapper.toScaUserDataListBO(userTO.getScaUserData())).thenReturn(userBO.getScaUserData());
 
 		middlewareUserService.updateScaData(userLogin, userTO.getScaUserData());
 
-		verify(userMapper, times(1)).toScaUserDataListBO(userTO.getScaUserData());
 		verify(userService, times(1)).updateScaData(userBO.getScaUserData(), userLogin);
-		verify(userMapper, times(1)).toUserTO(userBO);
 	}
 
     private static <T> T readYml(Class<T> aClass, String fileName) {

@@ -1,19 +1,21 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import java.io.IOException;
-import java.util.Base64;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAResponseTO;
 import de.adorsys.ledgers.middleware.api.service.TokenStorageService;
+import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
+import java.util.Base64;
+
+//TODO clarify and REMOVE
+@RequiredArgsConstructor
 public class TokenStorageServiceImpl implements TokenStorageService {
-	ObjectMapper mapper = new ObjectMapper();
+	ObjectMapper mapper;
 	
 	@Override
 	public SCAResponseTO fromBytes(byte[] tokenBytes) throws IOException {

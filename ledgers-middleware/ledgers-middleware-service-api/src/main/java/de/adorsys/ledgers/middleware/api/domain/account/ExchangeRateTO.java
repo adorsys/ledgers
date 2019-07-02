@@ -16,9 +16,12 @@
 
 package de.adorsys.ledgers.middleware.api.domain.account;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.Currency;
 
+@Data
 public class ExchangeRateTO {
     private Currency currencyFrom;
     private String rateFrom;
@@ -26,53 +29,4 @@ public class ExchangeRateTO {
     private String rateTo;
     private LocalDate rateDate;
     private String rateContract;
-
-    //Getters-Setters
-    public Currency getCurrencyFrom() {
-        return currencyFrom;
-    }
-
-    public void setCurrencyFrom(Currency currencyFrom) {
-        this.currencyFrom = currencyFrom;
-    }
-
-    public String getRateFrom() {
-        return rateFrom;
-    }
-
-    public void setRateFrom(String rateFrom) {
-        this.rateFrom = rateFrom;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public String getRateTo() {
-        return rateTo;
-    }
-
-    public void setRateTo(String rateTo) {
-        this.rateTo = rateTo;
-    }
-
-    public LocalDate getRateDate() {
-        return rateDate;
-    }
-
-    public void setRateDate(LocalDate rateDate) {
-        this.rateDate = rateDate;
-    }
-
-    public String getRateContract() {
-        return rateContract;
-    }
-
-    public void setRateContract(String rateContract) {
-        this.rateContract = rateContract;
-    }
 }

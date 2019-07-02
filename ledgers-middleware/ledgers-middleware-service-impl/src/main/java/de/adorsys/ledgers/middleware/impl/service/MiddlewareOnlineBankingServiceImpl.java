@@ -25,6 +25,7 @@ import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,9 +38,9 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBankingService {
     private static final String NO_USER_MESSAGE = "No user message";
+    private final UserMapper userTOMapper = Mappers.getMapper(UserMapper.class);
 
     private final UserService userService;
-    private final UserMapper userTOMapper;
     private final BearerTokenMapper bearerTokenMapper;
     private final AccessTokenMapper accessTokenMapper;
     private final SCAOperationService scaOperationService;

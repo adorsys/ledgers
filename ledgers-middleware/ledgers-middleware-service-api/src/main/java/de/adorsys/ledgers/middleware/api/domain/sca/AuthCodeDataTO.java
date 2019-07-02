@@ -16,8 +16,13 @@
 
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthCodeDataTO {
     private String userLogin;
     private String scaUserDataId;
@@ -27,102 +32,4 @@ public class AuthCodeDataTO {
     private int validitySeconds;
     private OpTypeTO opType;
     private String authorisationId;
-
-    public AuthCodeDataTO() {
-    }
-
-	public AuthCodeDataTO(String userLogin, String scaUserDataId, String opId, String opData, String userMessage,
-			int validitySeconds, OpTypeTO opType, String authorisationId) {
-		super();
-		this.userLogin = userLogin;
-		this.scaUserDataId = scaUserDataId;
-		this.opId = opId;
-		this.opData = opData;
-		this.userMessage = userMessage;
-		this.validitySeconds = validitySeconds;
-		this.opType = opType;
-		this.authorisationId = authorisationId;
-	}
-
-	public String getUserLogin() {
-		return userLogin;
-	}
-
-	public void setUserLogin(String userLogin) {
-		this.userLogin = userLogin;
-	}
-
-	public String getScaUserDataId() {
-		return scaUserDataId;
-	}
-
-	public void setScaUserDataId(String scaUserDataId) {
-		this.scaUserDataId = scaUserDataId;
-	}
-
-	public String getOpData() {
-		return opData;
-	}
-
-	public void setOpData(String opData) {
-		this.opData = opData;
-	}
-
-	public String getOpId() {
-		return opId;
-	}
-
-	public void setOpId(String opId) {
-		this.opId = opId;
-	}
-
-	public String getUserMessage() {
-		return userMessage;
-	}
-
-	public void setUserMessage(String userMessage) {
-		this.userMessage = userMessage;
-	}
-
-	public int getValiditySeconds() {
-		return validitySeconds;
-	}
-
-	public void setValiditySeconds(int validitySeconds) {
-		this.validitySeconds = validitySeconds;
-	}
-
-    public OpTypeTO getOpType() {
-		return opType;
-	}
-
-	public void setOpType(OpTypeTO opType) {
-		this.opType = opType;
-	}
-
-	public String getAuthorisationId() {
-		return authorisationId;
-	}
-
-	public void setAuthorisationId(String authorisationId) {
-		this.authorisationId = authorisationId;
-	}
-
-	@Override
-    public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
-        AuthCodeDataTO that = (AuthCodeDataTO) o;
-        return validitySeconds == that.validitySeconds &&
-                       Objects.equals(userLogin, that.userLogin) &&
-                       Objects.equals(scaUserDataId, that.scaUserDataId) &&
-                       Objects.equals(opData, that.opData) &&
-                       Objects.equals(opId, that.opId) &&
-                       Objects.equals(userMessage, that.userMessage);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(userLogin, scaUserDataId, opData, opId, userMessage, validitySeconds);
-    }
 }
