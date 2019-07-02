@@ -18,8 +18,8 @@ package de.adorsys.ledgers.sca.service.impl.sender;
 
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -27,9 +27,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class MailSCASender implements SCASender {
-    private final static Logger logger = LoggerFactory.getLogger(MailSCASender.class);
-
     private final JavaMailSender sender;
 
     @Value("${sca.authCode.email.subject}")
@@ -38,13 +38,9 @@ public class MailSCASender implements SCASender {
     @Value("${sca.authCode.email.from}")
     private String from;
 
-    public MailSCASender(JavaMailSender sender) {
-        this.sender = sender;
-    }
-
     @Override
     public boolean send(String value, String authCode) {
-        logger.info("Preparing an email to send auth code");
+        log.info("Preparing an email to send auth code");
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(value);
@@ -53,10 +49,10 @@ public class MailSCASender implements SCASender {
             message.setFrom(from);
             sender.send(message);
         } catch (MailException e) {
-            logger.error("Error sending email, No SMTP service configured");
+            log.error("Error sending email, No SMTP service configured");
             return false;
         }
-        logger.info("Auth code was successfully sent via email");
+        log.info("Auth code was successfully sent via email");
         return true;
     }
 

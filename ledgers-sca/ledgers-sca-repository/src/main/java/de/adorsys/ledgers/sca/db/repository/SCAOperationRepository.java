@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.sca.db.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -28,10 +27,6 @@ import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 public interface SCAOperationRepository extends CrudRepository<SCAOperationEntity, String> {
 
     List<SCAOperationEntity> findByStatus(AuthCodeStatus status);
-
-    Optional<SCAOperationEntity> findOneByOpIdOrderByCreatedDesc(String opId);
-
-    List<SCAOperationEntity> findByOpIdOrderByCreatedDesc(String opId);
 
     List<SCAOperationEntity> findByOpIdAndOpType(String opId, OpType opType);
 }

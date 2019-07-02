@@ -14,8 +14,6 @@ public interface SCAOperationMapper {
 
     SCAOperationBO toBO(SCAOperationEntity entity);
 
-    SCAOperationEntity toPO(SCAOperationBO bo);
-
     default AuthCodeStatusBO toBO(AuthCodeStatus entity){
         return AuthCodeStatusBO.valueOf(entity.name());
     }
