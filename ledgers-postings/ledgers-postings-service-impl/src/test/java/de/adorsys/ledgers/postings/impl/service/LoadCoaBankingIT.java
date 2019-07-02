@@ -10,8 +10,6 @@ import de.adorsys.ledgers.postings.api.domain.AccountCategoryBO;
 import de.adorsys.ledgers.postings.api.domain.BalanceSideBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
-import de.adorsys.ledgers.postings.api.exception.LedgerNotFoundException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
 import org.junit.Assert;
@@ -50,7 +48,7 @@ public class LoadCoaBankingIT {
     }
 
     @Test
-    public void test_load_coa_ok() throws IOException, LedgerAccountNotFoundException, LedgerNotFoundException {
+    public void test_load_coa_ok() throws IOException {
         LedgerBO ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
         Assume.assumeNotNull(ledger);
 

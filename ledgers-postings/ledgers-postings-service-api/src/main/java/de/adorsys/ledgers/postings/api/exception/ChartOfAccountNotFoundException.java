@@ -2,6 +2,7 @@ package de.adorsys.ledgers.postings.api.exception;
 
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
 
+//TODO unused EXCEPTION to be removed https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/195
 public class ChartOfAccountNotFoundException extends Exception {
 	private static final long serialVersionUID = -1713219984198663520L;
 

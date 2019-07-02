@@ -1,5 +1,9 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -9,7 +13,10 @@ import java.time.LocalDateTime;
  * @author fpo
  *
  */
+@Getter
+@Setter
 @Entity
+@EqualsAndHashCode
 @Table(uniqueConstraints = {
 		@UniqueConstraint(columnNames = { "ledger_id", "name" }, name = "LedgerAccount_ledger_id_name_unique") })
 public class LedgerAccount extends NamedEntity {
@@ -69,49 +76,4 @@ public class LedgerAccount extends NamedEntity {
 		super();
 	}
 
-	public Ledger getLedger() {
-		return ledger;
-	}
-
-	public LedgerAccount getParent() {
-		return parent;
-	}
-
-	public ChartOfAccount getCoa() {
-		return coa;
-	}
-
-	public BalanceSide getBalanceSide() {
-		return balanceSide;
-	}
-
-	public AccountCategory getCategory() {
-		return category;
-	}
-
-	@Override
-	public String toString() {
-		return "LedgerAccount [ledger=" + ledger + ", parent=" + parent + ", coa=" + coa + ", balanceSide="
-				+ balanceSide + ", category=" + category + "] [super: " + super.toString() + "]";
-	}
-
-	public void setLedger(Ledger ledger) {
-		this.ledger = ledger;
-	}
-
-	public void setParent(LedgerAccount parent) {
-		this.parent = parent;
-	}
-
-	public void setCoa(ChartOfAccount coa) {
-		this.coa = coa;
-	}
-
-	public void setBalanceSide(BalanceSide balanceSide) {
-		this.balanceSide = balanceSide;
-	}
-
-	public void setCategory(AccountCategory category) {
-		this.category = category;
-	}
 }

@@ -1,11 +1,12 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 /**
  * The word posting is associated with the moment at which the recorded
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
  * - The recording time: the moment at which this operation is recorded in the
  * journal.
  */
+@Data
 public class PostingBO extends HashRecordBO {
 
     /**
@@ -129,141 +131,4 @@ public class PostingBO extends HashRecordBO {
      * The id of the discarding posting/
      */
     private String discardingId;
-    
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getRecordUser() {
-        return recordUser;
-    }
-
-    public void setRecordUser(String recordUser) {
-        this.recordUser = recordUser;
-    }
-
-    public LocalDateTime getRecordTime() {
-        return recordTime;
-    }
-
-    public void setRecordTime(LocalDateTime recordTime) {
-        this.recordTime = recordTime;
-    }
-
-    public String getOprId() {
-        return oprId;
-    }
-
-    public void setOprId(String oprId) {
-        this.oprId = oprId;
-    }
-
-    public LocalDateTime getOprTime() {
-        return oprTime;
-    }
-
-    public void setOprTime(LocalDateTime oprTime) {
-        this.oprTime = oprTime;
-    }
-
-    public String getOprType() {
-        return oprType;
-    }
-
-    public void setOprType(String oprType) {
-        this.oprType = oprType;
-    }
-
-    public String getOprDetails() {
-        return oprDetails;
-    }
-
-    public void setOprDetails(String oprDetails) {
-        this.oprDetails = oprDetails;
-    }
-
-    public LocalDateTime getPstTime() {
-        return pstTime;
-    }
-
-    public void setPstTime(LocalDateTime pstTime) {
-        this.pstTime = pstTime;
-    }
-
-    public PostingTypeBO getPstType() {
-        return pstType;
-    }
-
-    public void setPstType(PostingTypeBO pstType) {
-        this.pstType = pstType;
-    }
-
-    public PostingStatusBO getPstStatus() {
-        return pstStatus;
-    }
-
-    public void setPstStatus(PostingStatusBO pstStatus) {
-        this.pstStatus = pstStatus;
-    }
-
-    public LedgerBO getLedger() {
-        return ledger;
-    }
-
-    public void setLedger(LedgerBO ledger) {
-        this.ledger = ledger;
-    }
-
-    public LocalDateTime getValTime() {
-        return valTime;
-    }
-
-    public void setValTime(LocalDateTime valTime) {
-        this.valTime = valTime;
-    }
-
-    public List<PostingLineBO> getLines() {
-        return lines;
-    }
-
-    public void setLines(List<PostingLineBO> lines) {
-        this.lines = lines;
-    }
-
-	public String getOprSrc() {
-		return oprSrc;
-	}
-
-	public void setOprSrc(String oprSrc) {
-		this.oprSrc = oprSrc;
-	}
-
-	public String getDiscardedId() {
-		return discardedId;
-	}
-
-	public void setDiscardedId(String discardedId) {
-		this.discardedId = discardedId;
-	}
-
-	public LocalDateTime getDiscardedTime() {
-		return discardedTime;
-	}
-
-	public void setDiscardedTime(LocalDateTime discardedTime) {
-		this.discardedTime = discardedTime;
-	}
-
-	public String getDiscardingId() {
-		return discardingId;
-	}
-
-	public void setDiscardingId(String discardingId) {
-		this.discardingId = discardingId;
-	}
-    
 }

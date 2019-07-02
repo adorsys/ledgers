@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 
 /**
@@ -8,6 +10,7 @@ import java.math.BigDecimal;
  * @author fpo
  *
  */
+@Data
 public class AccountStmtBO extends FinancialStmtBO {
 
 	/**The associated ledger account*/
@@ -29,38 +32,6 @@ public class AccountStmtBO extends FinancialStmtBO {
 	 */
 	private BigDecimal totalCredit;
 
-	public LedgerAccountBO getAccount() {
-		return account;
-	}
-
-	public void setAccount(LedgerAccountBO account) {
-		this.account = account;
-	}
-
-	public PostingTraceBO getYoungestPst() {
-		return youngestPst;
-	}
-
-	public void setYoungestPst(PostingTraceBO youngestPst) {
-		this.youngestPst = youngestPst;
-	}
-
-	public BigDecimal getTotalDebit() {
-		return totalDebit;
-	}
-
-	public void setTotalDebit(BigDecimal totalDebit) {
-		this.totalDebit = totalDebit;
-	}
-
-	public BigDecimal getTotalCredit() {
-		return totalCredit;
-	}
-
-	public void setTotalCredit(BigDecimal totalCredit) {
-		this.totalCredit = totalCredit;
-	}
-	
 	public BigDecimal debitBalance() {
 		return BigDecimal.ZERO.add(readAmt(totalDebit)).subtract(readAmt(totalCredit));
 	}

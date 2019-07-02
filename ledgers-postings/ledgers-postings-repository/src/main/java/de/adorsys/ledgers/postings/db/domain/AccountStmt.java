@@ -1,5 +1,10 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,6 +16,10 @@ import java.util.Optional;
  *
  * @author fpo
  */
+@Getter
+@Setter
+@EqualsAndHashCode
+@NoArgsConstructor
 @Entity
 public class AccountStmt extends FinancialStmt {
 
@@ -58,35 +67,4 @@ public class AccountStmt extends FinancialStmt {
         return account.getId() + "_" + pstTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
-    public LedgerAccount getAccount() {
-        return account;
-    }
-
-    public void setAccount(LedgerAccount account) {
-        this.account = account;
-    }
-
-    public PostingTrace getYoungestPst() {
-        return youngestPst;
-    }
-
-    public void setYoungestPst(PostingTrace youngestPst) {
-        this.youngestPst = youngestPst;
-    }
-
-    public BigDecimal getTotalDebit() {
-        return totalDebit;
-    }
-
-    public void setTotalDebit(BigDecimal totalDebit) {
-        this.totalDebit = totalDebit;
-    }
-
-    public BigDecimal getTotalCredit() {
-        return totalCredit;
-    }
-
-    public void setTotalCredit(BigDecimal totalCredit) {
-        this.totalCredit = totalCredit;
-    }
 }

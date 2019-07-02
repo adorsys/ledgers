@@ -1,18 +1,19 @@
 package de.adorsys.ledgers.postings.db.domain;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.Id;
-
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import javax.persistence.*;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 @Entity
+@EqualsAndHashCode
 @EntityListeners(AuditingEntityListener.class)
 public class OpNote {
 	
@@ -48,42 +49,6 @@ public class OpNote {
 	
 	/*Document the status of execution of this note.*/
 	private String execStatus;
-
-	public String getId() {
-		return id;
-	}
-
-	public String getRecId() {
-		return recId;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public LocalDateTime getRecTime() {
-		return recTime;
-	}
-
-	public LocalDateTime getExecTime() {
-		return execTime;
-	}
-
-	public Boolean getPrematureExc() {
-		return prematureExc;
-	}
-
-	public Boolean getRepeatedExec() {
-		return repeatedExec;
-	}
-
-	public String getExecStatus() {
-		return execStatus;
-	}
 
 	public OpNote() {
 		super();

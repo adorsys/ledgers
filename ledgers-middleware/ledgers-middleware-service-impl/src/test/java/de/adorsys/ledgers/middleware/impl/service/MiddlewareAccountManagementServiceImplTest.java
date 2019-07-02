@@ -16,7 +16,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -24,7 +23,6 @@ import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AmountMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.postings.api.exception.LedgerAccountNotFoundException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -84,10 +82,10 @@ public class MiddlewareAccountManagementServiceImplTest {
     @Mock
     private AccessTokenTO accessToken;
 
-    static ObjectMapper mapper = getObjectMapper();
+    private static ObjectMapper mapper = getObjectMapper();
 
     @Test
-    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException, IOException, LedgerAccountNotFoundException {
+    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
         when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(getDepositAccountDetailsBO());
 
         when(detailsMapper.toAccountDetailsTO(any())).thenReturn(getAccount(AccountDetailsTO.class));
@@ -174,13 +172,10 @@ public class MiddlewareAccountManagementServiceImplTest {
         // users
         UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {
         });
-        UserTO userTO = getDataFromFile("user.yml", new TypeReference<UserTO>() {
-        });
+
         // accounts
         List<DepositAccountDetailsBO> accounts = new ArrayList<>();
         accounts.add(getDepositAccountDetailsBO());
-        List<AccountDetailsTO> accountsTO = new ArrayList<>();
-        accountsTO.add(getAccountDetailsTO());
 
         when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
         when(accountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
@@ -204,8 +199,6 @@ public class MiddlewareAccountManagementServiceImplTest {
         // accounts
         List<DepositAccountDetailsBO> accounts = new ArrayList<>();
         accounts.add(getDepositAccountDetailsBO());
-        List<AccountDetailsTO> accountsTO = new ArrayList<>();
-        accountsTO.add(getAccountDetailsTO());
 
         when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
         when(accountService.findByBranch(anyString())).thenReturn(accounts);
@@ -222,7 +215,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    public void getTransactionById() throws TransactionNotFoundMiddlewareException, AccountNotFoundMiddlewareException, DepositAccountNotFoundException, TransactionNotFoundException {
+    public void getTransactionById() throws TransactionNotFoundMiddlewareException, TransactionNotFoundException {
         when(accountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
         when(paymentConverter.toTransactionTO(any())).thenReturn(readYml(TransactionTO.class, "TransactionTO.yml"));
 
