@@ -16,9 +16,12 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
+import lombok.Data;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+@Data
 @Embeddable
 public class AccountReference {
 
@@ -31,42 +34,5 @@ public class AccountReference {
 
     @Column(nullable = false)
     private String currency;
-	
-    public String getIban() {
-		return iban;
-	}
-	public void setIban(String iban) {
-		this.iban = iban;
-	}
-	public String getBban() {
-		return bban;
-	}
-	public void setBban(String bban) {
-		this.bban = bban;
-	}
-	public String getPan() {
-		return pan;
-	}
-	public void setPan(String pan) {
-		this.pan = pan;
-	}
-	public String getMaskedPan() {
-		return maskedPan;
-	}
-	public void setMaskedPan(String maskedPan) {
-		this.maskedPan = maskedPan;
-	}
-	public String getMsisdn() {
-		return msisdn;
-	}
-	public void setMsisdn(String msisdn) {
-		this.msisdn = msisdn;
-	}
-	public String getCurrency() {
-		return currency;
-	}
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
-	
+
 }

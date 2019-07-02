@@ -16,18 +16,15 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import lombok.Data;
+import lombok.ToString;
+
+import javax.persistence.*;
 
 
+@Data
 @Entity
+@ToString(exclude = {"payment"})
 public class PaymentTarget {
     @Id
     private String paymentId;
@@ -75,84 +72,4 @@ public class PaymentTarget {
 
     @ManyToOne(optional = false)
     private Payment payment;
-
-    public String getPaymentId() {
-        return paymentId;
-    }
-
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
-    }
-
-    public String getEndToEndIdentification() {
-        return endToEndIdentification;
-    }
-
-    public void setEndToEndIdentification(String endToEndIdentification) {
-        this.endToEndIdentification = endToEndIdentification;
-    }
-
-    public Amount getInstructedAmount() {
-        return instructedAmount;
-    }
-
-    public void setInstructedAmount(Amount instructedAmount) {
-        this.instructedAmount = instructedAmount;
-    }
-
-    public AccountReference getCreditorAccount() {
-        return creditorAccount;
-    }
-
-    public void setCreditorAccount(AccountReference creditorAccount) {
-        this.creditorAccount = creditorAccount;
-    }
-
-    public String getCreditorAgent() {
-        return creditorAgent;
-    }
-
-    public void setCreditorAgent(String creditorAgent) {
-        this.creditorAgent = creditorAgent;
-    }
-
-    public String getCreditorName() {
-        return creditorName;
-    }
-
-    public void setCreditorName(String creditorName) {
-        this.creditorName = creditorName;
-    }
-
-    public Address getCreditorAddress() {
-        return creditorAddress;
-    }
-
-    public void setCreditorAddress(Address creditorAddress) {
-        this.creditorAddress = creditorAddress;
-    }
-
-    public String getRemittanceInformationUnstructured() {
-        return remittanceInformationUnstructured;
-    }
-
-    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
-        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
-    }
-
-    public PaymentProduct getPaymentProduct() {
-        return paymentProduct;
-    }
-
-    public void setPaymentProduct(PaymentProduct paymentProduct) {
-        this.paymentProduct = paymentProduct;
-    }
-
-    public Payment getPayment() {
-        return payment;
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
 }

@@ -1,19 +1,18 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
-import java.util.Currency;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
+@Data
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames = { "iban", "currency" }, name = "DepositAccount_iban_currency_unique")
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"iban", "currency"}, name = "DepositAccount_iban_currency_unique")
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class DepositAccount {
     @Id
     private String id;
@@ -31,14 +30,14 @@ public class DepositAccount {
      * 00499113606980 (Adorsys tel nr)
      */
     private String msisdn;
-    
+
     @Column(nullable = false)
     private String currency;
 
     private String name;
     private String product;
-	private String branch;
-    
+    private String branch;
+
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
@@ -71,130 +70,4 @@ public class DepositAccount {
      * - characteristics of the relevant card
      */
     private String details;
-
-    
-    public DepositAccount(String id, String iban, String msisdn, Currency currency, String name, String product,
-                          AccountType accountType, AccountStatus accountStatus, String bic, String linkedAccounts,
-                          AccountUsage usageType, String details) {
-        super();
-        this.id = id;
-        this.iban = iban;
-        this.msisdn = msisdn;
-        this.currency = currency.getCurrencyCode();
-        this.name = name;
-        this.product = product;
-        this.accountType = accountType;
-        this.accountStatus = accountStatus;
-        this.bic = bic;
-        this.linkedAccounts = linkedAccounts;
-        this.usageType = usageType;
-        this.details = details;
-    }
-
-	public DepositAccount() {
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getIban() {
-		return iban;
-	}
-
-	public void setIban(String iban) {
-		this.iban = iban;
-	}
-
-	public String getMsisdn() {
-		return msisdn;
-	}
-
-	public void setMsisdn(String msisdn) {
-		this.msisdn = msisdn;
-	}
-
-	public String getCurrency() {
-		return currency;
-	}
-
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getProduct() {
-		return product;
-	}
-
-	public void setProduct(String product) {
-		this.product = product;
-	}
-
-	public AccountType getAccountType() {
-		return accountType;
-	}
-
-	public void setAccountType(AccountType accountType) {
-		this.accountType = accountType;
-	}
-
-	public AccountStatus getAccountStatus() {
-		return accountStatus;
-	}
-
-	public void setAccountStatus(AccountStatus accountStatus) {
-		this.accountStatus = accountStatus;
-	}
-
-	public String getBic() {
-		return bic;
-	}
-
-	public void setBic(String bic) {
-		this.bic = bic;
-	}
-
-	public String getLinkedAccounts() {
-		return linkedAccounts;
-	}
-
-	public void setLinkedAccounts(String linkedAccounts) {
-		this.linkedAccounts = linkedAccounts;
-	}
-
-	public AccountUsage getUsageType() {
-		return usageType;
-	}
-
-	public void setUsageType(AccountUsage usageType) {
-		this.usageType = usageType;
-	}
-
-	public String getDetails() {
-		return details;
-	}
-
-	public void setDetails(String details) {
-		this.details = details;
-	}
-
-	public String getBranch() {
-		return branch;
-	}
-
-	public void setBranch(String branch) {
-		this.branch = branch;
-	}
 }

@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.deposit.api.service.domain;
 
+//TODO unused ENUM -> REMOVE
 public enum ResultStatus {
     SUCCESS,
     TECHNICAL_FAILURE,

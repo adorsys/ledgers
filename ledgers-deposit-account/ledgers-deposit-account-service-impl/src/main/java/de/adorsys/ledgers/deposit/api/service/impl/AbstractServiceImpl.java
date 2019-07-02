@@ -5,16 +5,12 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public abstract class AbstractServiceImpl {
-    protected DepositAccountConfigService depositAccountConfigService;
-    protected LedgerService ledgerService;
-
-    public AbstractServiceImpl(DepositAccountConfigService depositAccountConfigService, LedgerService ledgerService) {
-        super();
-        this.depositAccountConfigService = depositAccountConfigService;
-        this.ledgerService = ledgerService;
-    }
+    protected final DepositAccountConfigService depositAccountConfigService;
+    protected final LedgerService ledgerService;
 
     protected LedgerBO loadLedger() {
         String ledgerName = depositAccountConfigService.getLedger();

@@ -6,6 +6,7 @@ package de.adorsys.ledgers.deposit.db.domain;
  * @author fpo
  *
  */
+//TODO unused ENUM matter to removal
 public enum BalanceType {
     CLOSING_BOOKED,
     EXPECTED,
