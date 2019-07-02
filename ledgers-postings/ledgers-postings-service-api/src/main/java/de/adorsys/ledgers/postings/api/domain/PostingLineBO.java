@@ -1,8 +1,11 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
 public class PostingLineBO {
 	
 	/* The record id */
@@ -91,134 +94,4 @@ public class PostingLineBO {
      * The record time of the discarding posting 
      */
     private LocalDateTime discardedTime;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public LedgerAccountBO getAccount() {
-		return account;
-	}
-
-	public void setAccount(LedgerAccountBO account) {
-		this.account = account;
-	}
-
-	public BigDecimal getDebitAmount() {
-		return debitAmount;
-	}
-
-	public void setDebitAmount(BigDecimal debitAmount) {
-		this.debitAmount = debitAmount;
-	}
-
-	public BigDecimal getCreditAmount() {
-		return creditAmount;
-	}
-
-	public void setCreditAmount(BigDecimal creditAmount) {
-		this.creditAmount = creditAmount;
-	}
-
-	public String getDetails() {
-		return details;
-	}
-
-	public void setDetails(String details) {
-		this.details = details;
-	}
-
-	public String getSrcAccount() {
-		return srcAccount;
-	}
-
-	public void setSrcAccount(String srcAccount) {
-		this.srcAccount = srcAccount;
-	}
-
-	public LocalDateTime getRecordTime() {
-		return recordTime;
-	}
-
-	public void setRecordTime(LocalDateTime recordTime) {
-		this.recordTime = recordTime;
-	}
-
-	public String getOprId() {
-		return oprId;
-	}
-
-	public void setOprId(String oprId) {
-		this.oprId = oprId;
-	}
-
-	public LocalDateTime getPstTime() {
-		return pstTime;
-	}
-
-	public void setPstTime(LocalDateTime pstTime) {
-		this.pstTime = pstTime;
-	}
-
-	public PostingTypeBO getPstType() {
-		return pstType;
-	}
-
-	public void setPstType(PostingTypeBO pstType) {
-		this.pstType = pstType;
-	}
-
-	public PostingStatusBO getPstStatus() {
-		return pstStatus;
-	}
-
-	public void setPstStatus(PostingStatusBO pstStatus) {
-		this.pstStatus = pstStatus;
-	}
-
-	public String getBaseLine() {
-		return baseLine;
-	}
-
-	public void setBaseLine(String baseLine) {
-		this.baseLine = baseLine;
-	}
-
-	public String getHash() {
-		return hash;
-	}
-
-	public void setHash(String hash) {
-		this.hash = hash;
-	}
-
-	public LocalDateTime getDiscardedTime() {
-		return discardedTime;
-	}
-
-	public void setDiscardedTime(LocalDateTime discardedTime) {
-		this.discardedTime = discardedTime;
-	}
-
-	public String getSubOprSrcId() {
-		return subOprSrcId;
-	}
-
-	public void setSubOprSrcId(String subOprSrcId) {
-		this.subOprSrcId = subOprSrcId;
-	}
-
-	public String getOprSrc() {
-		return oprSrc;
-	}
-
-	public void setOprSrc(String oprSrc) {
-		this.oprSrc = oprSrc;
-	}
-	
-	
 }

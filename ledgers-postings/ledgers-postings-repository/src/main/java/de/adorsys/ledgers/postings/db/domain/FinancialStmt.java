@@ -1,5 +1,9 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import javax.persistence.*;
@@ -19,6 +23,10 @@ import java.time.LocalDateTime;
  *
  * @author fpo
  */
+@Getter
+@Setter
+@EqualsAndHashCode
+@NoArgsConstructor
 @MappedSuperclass
 public abstract class FinancialStmt {
 
@@ -62,53 +70,4 @@ public abstract class FinancialStmt {
      */
     @Column(nullable = false, updatable = false)
     private int stmtSeqNbr = 0;
-
-    public LocalDateTime getPstTime() {
-        return pstTime;
-    }
-
-    public int getStmtSeqNbr() {
-        return stmtSeqNbr;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public StmtStatus getStmtStatus() {
-        return stmtStatus;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setPstTime(LocalDateTime pstTime) {
-        this.pstTime = pstTime;
-    }
-
-    public void setStmtStatus(StmtStatus stmtStatus) {
-        this.stmtStatus = stmtStatus;
-    }
-
-    public void setStmtSeqNbr(int stmtSeqNbr) {
-        this.stmtSeqNbr = stmtSeqNbr;
-    }
-
-    public PostingTrace getLatestPst() {
-        return latestPst;
-    }
-
-    public void setLatestPst(PostingTrace latestPst) {
-        this.latestPst = latestPst;
-    }
-
-    public Posting getPosting() {
-        return posting;
-    }
-
-    public void setPosting(Posting posting) {
-        this.posting = posting;
-    }
-
 }

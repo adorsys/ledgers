@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
  * @author fpo
  *
  */
+@Data
 public abstract class FinancialStmtBO {
 
     private String id;
@@ -50,52 +53,4 @@ public abstract class FinancialStmtBO {
 	 */
 	private int stmtSeqNbr = 0;
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public LocalDateTime getPstTime() {
-		return pstTime;
-	}
-
-	public void setPstTime(LocalDateTime pstTime) {
-		this.pstTime = pstTime;
-	}
-
-	public StmtStatusBO getStmtStatus() {
-		return stmtStatus;
-	}
-
-	public void setStmtStatus(StmtStatusBO stmtStatus) {
-		this.stmtStatus = stmtStatus;
-	}
-
-	public PostingTraceBO getLatestPst() {
-		return latestPst;
-	}
-
-	public void setLatestPst(PostingTraceBO latestPst) {
-		this.latestPst = latestPst;
-	}
-
-	public int getStmtSeqNbr() {
-		return stmtSeqNbr;
-	}
-
-	public void setStmtSeqNbr(int stmtSeqNbr) {
-		this.stmtSeqNbr = stmtSeqNbr;
-	}
-
-	public PostingBO getPosting() {
-		return posting;
-	}
-
-	public void setPosting(PostingBO posting) {
-		this.posting = posting;
-	}
-	
 }

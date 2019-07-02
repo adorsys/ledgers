@@ -1,16 +1,14 @@
 package de.adorsys.ledgers.postings.db.domain;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.EntityListeners;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * The existence or value of a ledger entity is always considered relative to
@@ -22,6 +20,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * @author fpo
  *
  */
+@Getter
+@Setter
+@EqualsAndHashCode
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
@@ -60,49 +61,4 @@ public abstract class BaseEntity {
 		this.longDesc = longDesc;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public LocalDateTime getCreated() {
-		return created;
-	}
-
-	public void setCreated(LocalDateTime created) {
-		this.created = created;
-	}
-
-	public String getUserDetails() {
-		return userDetails;
-	}
-
-	public void setUserDetails(String userDetails) {
-		this.userDetails = userDetails;
-	}
-
-	public String getShortDesc() {
-		return shortDesc;
-	}
-
-	public void setShortDesc(String shortDesc) {
-		this.shortDesc = shortDesc;
-	}
-
-	public String getLongDesc() {
-		return longDesc;
-	}
-
-	public void setLongDesc(String longDesc) {
-		this.longDesc = longDesc;
-	}
-
-	@Override
-	public String toString() {
-		return "BaseEntity [id=" + id + ", created=" + created + ", userDetails=" + userDetails + ", shortDesc=" + shortDesc
-				+ ", longDesc=" + longDesc + "]";
-	}
 }

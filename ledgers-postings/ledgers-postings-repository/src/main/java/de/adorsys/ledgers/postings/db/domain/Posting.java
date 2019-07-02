@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import javax.persistence.*;
@@ -23,7 +26,10 @@ import java.util.List;
  * - The recording time: the moment at which this operation is recorded in the
  * journal.
  */
+@Setter
+@Getter
 @Entity
+@EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"opr_id", "discarding_id"}, name = "Posting_opr_id_discarding_id_unique")})
@@ -169,141 +175,5 @@ public class Posting extends HashRecord {
 
     public void synchLines() {
         lines.forEach(l -> l.synchPosting(this));
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getRecordUser() {
-        return recordUser;
-    }
-
-    public LocalDateTime getRecordTime() {
-        return recordTime;
-    }
-
-    public String getOprId() {
-        return oprId;
-    }
-
-    public LocalDateTime getOprTime() {
-        return oprTime;
-    }
-
-    public String getOprType() {
-        return oprType;
-    }
-
-    public OperationDetails getOprDetails() {
-        return oprDetails;
-    }
-
-    public LocalDateTime getPstTime() {
-        return pstTime;
-    }
-
-    public PostingType getPstType() {
-        return pstType;
-    }
-
-    public PostingStatus getPstStatus() {
-        return pstStatus;
-    }
-
-    public Ledger getLedger() {
-        return ledger;
-    }
-
-    public LocalDateTime getValTime() {
-        return valTime;
-    }
-
-    public List<PostingLine> getLines() {
-        return lines;
-    }
-
-    public String getOprSrc() {
-        return oprSrc;
-    }
-
-    public String getDiscardedId() {
-        return discardedId;
-    }
-
-    public void setDiscardedId(String discardedId) {
-        this.discardedId = discardedId;
-    }
-
-    public LocalDateTime getDiscardedTime() {
-        return discardedTime;
-    }
-
-    public void setDiscardedTime(LocalDateTime discardedTime) {
-        this.discardedTime = discardedTime;
-    }
-
-    public String getDiscardingId() {
-        return discardingId;
-    }
-
-    public void setDiscardingId(String discardingId) {
-        this.discardingId = discardingId;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setRecordUser(String recordUser) {
-        this.recordUser = recordUser;
-    }
-
-    public void setRecordTime(LocalDateTime recordTime) {
-        this.recordTime = recordTime;
-    }
-
-    public void setOprId(String oprId) {
-        this.oprId = oprId;
-    }
-
-    public void setOprTime(LocalDateTime oprTime) {
-        this.oprTime = oprTime;
-    }
-
-    public void setOprType(String oprType) {
-        this.oprType = oprType;
-    }
-
-    public void setOprDetails(OperationDetails oprDetails) {
-        this.oprDetails = oprDetails;
-    }
-
-    public void setOprSrc(String oprSrc) {
-        this.oprSrc = oprSrc;
-    }
-
-    public void setPstTime(LocalDateTime pstTime) {
-        this.pstTime = pstTime;
-    }
-
-    public void setPstType(PostingType pstType) {
-        this.pstType = pstType;
-    }
-
-    public void setPstStatus(PostingStatus pstStatus) {
-        this.pstStatus = pstStatus;
-    }
-
-    public void setLedger(Ledger ledger) {
-        this.ledger = ledger;
-    }
-
-    public void setValTime(LocalDateTime valTime) {
-        this.valTime = valTime;
-    }
-
-    public void setLines(List<PostingLine> lines) {
-        this.lines = lines;
     }
 }

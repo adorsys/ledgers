@@ -18,9 +18,17 @@ package de.adorsys.ledgers.postings.db.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.adorsys.ledgers.util.hash.HashItem;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.MappedSuperclass;
 
+@Getter
+@Setter
+@EqualsAndHashCode
+@NoArgsConstructor
 @MappedSuperclass
 public abstract class HashRecord  implements HashItem<HashRecord> {
 
@@ -40,9 +48,6 @@ public abstract class HashRecord  implements HashItem<HashRecord> {
 
     private String hashAlg;
 
-	public HashRecord() {
-	}
-
     @Override
     @JsonIgnore
     public String getAlg() {
@@ -54,42 +59,4 @@ public abstract class HashRecord  implements HashItem<HashRecord> {
     public HashRecord getItem() {
         return this;
     }
-
-    public String getHash() {
-		return hash;
-	}
-
-	public void setHash(String hash) {
-		this.hash = hash;
-	}
-
-	public String getHashAlg() {
-		return hashAlg;
-	}
-
-	public void setHashAlg(String hashAlg) {
-		this.hashAlg = hashAlg;
-	}
-
-	public String getAntecedentId() {
-		return antecedentId;
-	}
-
-	public String getAntecedentHash() {
-		return antecedentHash;
-	}
-
-	public void setAntecedentId(String antecedentId) {
-		this.antecedentId = antecedentId;
-	}
-
-	public void setAntecedentHash(String antecedentHash) {
-		this.antecedentHash = antecedentHash;
-	}
-
-	@Override
-	public String toString() {
-		return "HashRecord [antecedentId=" + antecedentId + ", antecedentHash=" + antecedentHash + ", hash=" + hash
-				+ ", hashAlg=" + hashAlg + "]";
-	}
 }

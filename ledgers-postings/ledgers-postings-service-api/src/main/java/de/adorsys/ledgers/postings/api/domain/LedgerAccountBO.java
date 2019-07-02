@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
@@ -7,6 +9,7 @@ import java.time.LocalDateTime;
  *
  * @author fpo
  */
+@Data
 public class LedgerAccountBO extends NamedBO {
 
     /* Name of the containing ledger */
@@ -62,45 +65,4 @@ public class LedgerAccountBO extends NamedBO {
         this.category = category;
     }
 
-    //Getters - Setters
-
-    public LedgerBO getLedger() {
-        return ledger;
-    }
-
-    public void setLedger(LedgerBO ledger) {
-        this.ledger = ledger;
-    }
-
-    public LedgerAccountBO getParent() {
-        return parent;
-    }
-
-    public void setParent(LedgerAccountBO parent) {
-        this.parent = parent;
-    }
-
-    public ChartOfAccountBO getCoa() {
-        return coa;
-    }
-
-    public void setCoa(ChartOfAccountBO coa) {
-        this.coa = coa;
-    }
-
-    public BalanceSideBO getBalanceSide() {
-        return balanceSide;
-    }
-
-    public void setBalanceSide(BalanceSideBO balanceSide) {
-        this.balanceSide = balanceSide;
-    }
-
-    public AccountCategoryBO getCategory() {
-        return category;
-    }
-
-    public void setCategory(AccountCategoryBO category) {
-        this.category = category;
-    }
 }

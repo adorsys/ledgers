@@ -1,8 +1,8 @@
 package de.adorsys.ledgers.postings.api.service;
 
-import java.util.Optional;
-
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
+
+import java.util.Optional;
 
 /**
  * Service implementing all chart of account functionalities.

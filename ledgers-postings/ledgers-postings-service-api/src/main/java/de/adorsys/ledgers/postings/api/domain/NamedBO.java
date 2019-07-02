@@ -1,5 +1,8 @@
 package de.adorsys.ledgers.postings.api.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
@@ -11,6 +14,8 @@ import java.time.LocalDateTime;
  *
  * @author fpo
  */
+@Data
+@AllArgsConstructor
 public abstract class NamedBO {
 
     /*Business identifier.  Always unique in a certain scope. Generally in the scope of it's container.*/
@@ -37,63 +42,6 @@ public abstract class NamedBO {
 
     public NamedBO(String name) {
         this.name = name;
-    }
-
-    public NamedBO(String name, String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
-        this.name = name;
-        this.id = id;
-        this.created = created;
-        this.userDetails = userDetails;
-        this.shortDesc = shortDesc;
-        this.longDesc = longDesc;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getCreated() {
-        return created;
-    }
-
-    public void setCreated(LocalDateTime created) {
-        this.created = created;
-    }
-
-    public String getUserDetails() {
-        return userDetails;
-    }
-
-    public void setUserDetails(String userDetails) {
-        this.userDetails = userDetails;
-    }
-
-    public String getShortDesc() {
-        return shortDesc;
-    }
-
-    public void setShortDesc(String shortDesc) {
-        this.shortDesc = shortDesc;
-    }
-
-    public String getLongDesc() {
-        return longDesc;
-    }
-
-    public void setLongDesc(String longDesc) {
-        this.longDesc = longDesc;
     }
 
 }

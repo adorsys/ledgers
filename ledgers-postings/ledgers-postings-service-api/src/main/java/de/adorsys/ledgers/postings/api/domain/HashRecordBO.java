@@ -16,6 +16,9 @@
 
 package de.adorsys.ledgers.postings.api.domain;
 
+import lombok.Data;
+
+@Data
 public abstract class HashRecordBO {
 
     /* The antecedent identifier. Use for hash chaining */
@@ -34,36 +37,4 @@ public abstract class HashRecordBO {
 
     private String hashAlg;
 
-	public String getAntecedentId() {
-		return antecedentId;
-	}
-
-	public void setAntecedentId(String antecedentId) {
-		this.antecedentId = antecedentId;
-	}
-
-	public String getAntecedentHash() {
-		return antecedentHash;
-	}
-
-	public void setAntecedentHash(String antecedentHash) {
-		this.antecedentHash = antecedentHash;
-	}
-
-	public String getHash() {
-		return hash;
-	}
-
-	public void setHash(String hash) {
-		this.hash = hash;
-	}
-
-	public String getHashAlg() {
-		return hashAlg;
-	}
-
-	public void setHashAlg(String hashAlg) {
-		this.hashAlg = hashAlg;
-	}
-    
 }
