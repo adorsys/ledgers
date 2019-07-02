@@ -5,28 +5,16 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementServ
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.access.expression.SecurityExpressionRoot;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
-public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
-    private final MiddlewareAccountManagementService middlewareAccountService;
-    private final MiddlewarePaymentService middlewarePaymentService;
+public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionAdapter {
 
-    private Object filterObject;
-    private Object returnObject;
-    private Object target;
-
-
-    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication,
-                                                     MiddlewareAccountManagementService middlewareAccountService, MiddlewarePaymentService middlewarePaymentService) {
-        super(authentication);
-        this.middlewareAccountService = middlewareAccountService;
-        this.middlewarePaymentService = middlewarePaymentService;
+    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService) {
+        super(authentication, accountService, paymentService);
     }
 
     public boolean paymentInit(Object payment) {
@@ -42,7 +30,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 
     public boolean accountInfoById(String id) {
         // Load iban
-        String iban = middlewareAccountService.iban(id);
+        String iban = accountService.iban(id);
         return checkAccountInfoAccess(iban);
     }
 
@@ -67,13 +55,13 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 
     public boolean paymentInitById(String paymentId) {
         // load iban
-        String iban = middlewarePaymentService.iban(paymentId);
+        String iban = paymentService.iban(paymentId);
         return checkPaymentInitAccess(iban);
     }
 
     public boolean paymentInfoById(String paymentId) {
         // load iban
-        String iban = middlewarePaymentService.iban(paymentId);
+        String iban = paymentService.iban(paymentId);
         return checkAccountInfoAccess(iban) || checkPaymentInitAccess(iban);
     }
 
@@ -88,7 +76,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     private List<AccountAccessTO> getAccountAccesses(String userId) {
-        return middlewareAccountService.getAccountAccesses(userId);
+        return accountService.getAccountAccesses(userId);
     }
 
     private boolean checkAccountInfoAccess(String iban) {
@@ -140,41 +128,5 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         MiddlewareAuthentication authentication = (MiddlewareAuthentication) getAuthentication();
         return authentication.getBearerToken()
                        .getAccessTokenObject();
-    }
-
-    @Override
-    public void setFilterObject(Object filterObject) {
-        this.filterObject = filterObject;
-    }
-
-    @Override
-    public Object getFilterObject() {
-        return filterObject;
-    }
-
-    @Override
-    public void setReturnObject(Object returnObject) {
-        this.returnObject = returnObject;
-    }
-
-    @Override
-    public Object getReturnObject() {
-        return returnObject;
-    }
-
-    /**
-     * Sets the "this" property for use in expressions. Typically this will be the "this"
-     * property of the {@code JoinPoint} representing the method invocation which is being
-     * protected.
-     *
-     * @param target the target object on which the method in is being invoked.
-     */
-    void setThis(Object target) {
-        this.target = target;
-    }
-
-    @Override
-    public Object getThis() {
-        return target;
     }
 }
