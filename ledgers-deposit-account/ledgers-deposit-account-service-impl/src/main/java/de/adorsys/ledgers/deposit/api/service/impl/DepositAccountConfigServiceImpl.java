@@ -16,40 +16,34 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DepositAccountConfigServiceImpl implements DepositAccountConfigService {
-	
-	private final ASPSPConfigData configData;
+    private final ASPSPConfigData configData;
 
-    @Autowired
-    public DepositAccountConfigServiceImpl(ASPSPConfigData configData) {
-        this.configData = configData;
+    @Override
+    public String getDepositParentAccount() {
+        return configData.getDepositParentAccount();
     }
-	
-	@Override
-	public String getDepositParentAccount() {
-    	return configData.getDepositParentAccount();
-	}
 
-	@Override
-	public String getLedger() {
-    	return configData.getLedger();
-	}
+    @Override
+    public String getLedger() {
+        return configData.getLedger();
+    }
 
-	@Override
-	public String getClearingAccount(PaymentProductBO paymentProduct) {
-		return configData.getClearingAccount(paymentProduct.name());
-	}
+    @Override
+    public String getClearingAccount(PaymentProductBO paymentProduct) {
+        return configData.getClearingAccount(paymentProduct.name());
+    }
 
-	@Override
-	public String getCashAccount() {
-		return configData.getCashAccount();
-	}
+    @Override
+    public String getCashAccount() {
+        return configData.getCashAccount();
+    }
 }

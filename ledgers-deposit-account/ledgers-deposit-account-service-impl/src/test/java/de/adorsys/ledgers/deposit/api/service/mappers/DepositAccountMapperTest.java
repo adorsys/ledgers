@@ -57,8 +57,8 @@ public class DepositAccountMapperTest {
     }
 
     private DepositAccount getDepositAccount() {
-        return new DepositAccount("id", "iban", "msisdn", Currency.getInstance("EUR"),
-                "name", "product", AccountType.CASH, AccountStatus.ENABLED, "bic",
+        return new DepositAccount("id", "iban", "msisdn", "EUR",
+                "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic",
                 "Some linked account", AccountUsage.PRIV, "details");
     }
 

@@ -16,17 +16,11 @@
 
 package de.adorsys.ledgers.deposit.api.exception;
 
-import de.adorsys.ledgers.deposit.api.domain.SinglePaymentBO;
-
 public class PaymentNotFoundException extends Exception {
 
     private static final String MESSAGE = "Payment with id=%s not found";
 
     public PaymentNotFoundException() {
-    }
-
-    public PaymentNotFoundException(SinglePaymentBO payment) {
-        this(String.format(MESSAGE, payment.getPaymentId()));
     }
 
     public PaymentNotFoundException(String paymentId) {

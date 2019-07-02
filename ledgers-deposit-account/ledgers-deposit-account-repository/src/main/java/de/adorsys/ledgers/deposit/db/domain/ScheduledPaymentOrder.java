@@ -1,14 +1,16 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
-import java.time.LocalDateTime;
+import lombok.Data;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
-
+@Data
 @Entity
+//TODO REMOVE unused class
 public class ScheduledPaymentOrder {
 
 	/*
@@ -57,84 +59,4 @@ public class ScheduledPaymentOrder {
 	 * schedule when done.
 	 */
 	private String currentExecutor;
-
-
-	public String getPaymentOrderId() {
-		return paymentOrderId;
-	}
-
-
-	public void setPaymentOrderId(String paymentOrderId) {
-		this.paymentOrderId = paymentOrderId;
-	}
-
-	public LocalDateTime getExecStatusTime() {
-		return execStatusTime;
-	}
-
-
-	public void setExecStatusTime(LocalDateTime execStatusTime) {
-		this.execStatusTime = execStatusTime;
-	}
-
-
-	public LocalDateTime getLeaseExpiration() {
-		return leaseExpiration;
-	}
-
-
-	public void setLeaseExpiration(LocalDateTime leaseExpiration) {
-		this.leaseExpiration = leaseExpiration;
-	}
-
-
-	public String getCurrentExecutor() {
-		return currentExecutor;
-	}
-
-
-	public void setCurrentExecutor(String currentExecutor) {
-		this.currentExecutor = currentExecutor;
-	}
-
-
-	public LocalDateTime getLastExecTime() {
-		return lastExecTime;
-	}
-
-
-	public void setLastExecTime(LocalDateTime lastExecTime) {
-		this.lastExecTime = lastExecTime;
-	}
-
-
-	public LocalDateTime getLastPostingTime() {
-		return lastPostingTime;
-	}
-
-
-	public void setLastPostingTime(LocalDateTime lastPostingTime) {
-		this.lastPostingTime = lastPostingTime;
-	}
-
-
-	public LocalDateTime getNextExecTime() {
-		return nextExecTime;
-	}
-
-
-	public void setNextExecTime(LocalDateTime nextExecTime) {
-		this.nextExecTime = nextExecTime;
-	}
-
-
-	public LocalDateTime getNextPostingTime() {
-		return nextPostingTime;
-	}
-
-
-	public void setNextPostingTime(LocalDateTime nextPostingTime) {
-		this.nextPostingTime = nextPostingTime;
-	}
-
 }

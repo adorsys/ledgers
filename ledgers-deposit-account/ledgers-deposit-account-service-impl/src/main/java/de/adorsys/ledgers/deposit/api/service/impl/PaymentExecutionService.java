@@ -6,10 +6,12 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
+import lombok.RequiredArgsConstructor;
 import net.objectlab.kit.datecalc.common.DateCalculator;
 import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar;
 import net.objectlab.kit.datecalc.common.HolidayCalendar;
 import net.objectlab.kit.datecalc.jdk8.LocalDateKitCalculatorsFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -21,15 +23,15 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
-public class PaymentExecutionService {
-    private final static String CALENDAR_NAME = "LEDGERS";
-    private final static String PRECEDING = "preceeding";
+@RequiredArgsConstructor
+public class PaymentExecutionService implements InitializingBean {
+    private static final String CALENDAR_NAME = "LEDGERS";
+    private static final String PRECEDING = "preceeding";
     private final PaymentRepository paymentRepository;
     private final DepositAccountTransactionService txService;
 
-    public PaymentExecutionService(PaymentRepository paymentRepository, DepositAccountTransactionService txService) {
-        this.paymentRepository = paymentRepository;
-        this.txService = txService;
+    @Override
+    public void afterPropertiesSet() {
         HolidayCalendar<LocalDate> calendar = new DefaultHolidayCalendar<>(new HashSet<>(readHolidays()));
         LocalDateKitCalculatorsFactory.getDefaultInstance().registerHolidays("DE", calendar);
     }

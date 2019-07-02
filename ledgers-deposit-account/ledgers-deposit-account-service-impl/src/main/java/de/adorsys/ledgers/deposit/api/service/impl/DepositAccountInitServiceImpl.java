@@ -9,7 +9,7 @@ import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.ChartOfAccountService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,19 +19,13 @@ import java.util.Optional;
 import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.LEDGER_ACCOUNT_NOT_FOUND;
 
 @Service
+@RequiredArgsConstructor
 public class DepositAccountInitServiceImpl implements DepositAccountInitService {
 
     private static final String SYSTEM = "System";
     private final ChartOfAccountService coaService;
     private final LedgerService ledgerService;
     private final ASPSPConfigSource configSource;
-
-    @Autowired
-    public DepositAccountInitServiceImpl(ChartOfAccountService coaService, LedgerService ledgerService, ASPSPConfigSource configSource) {
-        this.coaService = coaService;
-        this.ledgerService = ledgerService;
-        this.configSource = configSource;
-    }
 
     @Override
     public void initConfigData() {
@@ -124,7 +118,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
     private boolean updateRequired(ASPSPConfigData aspspConfigData) {
         return aspspConfigData.getUpdateMarkerAccountNbr() == null ||
                        ledgerService.findLedgerByName(aspspConfigData.getLedger())
-                               .map(l -> !ledgerService.checkIfLedgerAccountExist(l,aspspConfigData.getUpdateMarkerAccountNbr()))
+                               .map(l -> !ledgerService.checkIfLedgerAccountExist(l, aspspConfigData.getUpdateMarkerAccountNbr()))
                                .orElse(true);
     }
 

@@ -19,9 +19,8 @@ import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,9 +28,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
-    private static final Logger logger = LoggerFactory.getLogger(DepositAccountServiceImpl.class);
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s not found";
 
     private final DepositAccountRepository depositAccountRepository;
@@ -105,7 +104,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
             PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
             return transactionDetailsMapper.toTransactionSigned(line);
-        } catch (DepositAccountNotFoundException| PostingModuleException e) {
+        } catch (DepositAccountNotFoundException | PostingModuleException e) {
             throw new TransactionNotFoundException(e.getMessage());
         }
     }
@@ -131,7 +130,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                            .map(b -> isSufficientAmountAvailable(requestBO, b))
                            .orElse(Boolean.FALSE);
         } catch (DepositAccountNotFoundException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new DepositAccountNotFoundException(e.getMessage(), e);
         }
     }
@@ -182,7 +181,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         if (depositAccount.isPresent()) {
             String message = String.format("Deposit account already exists. IBAN %s. Currency %s",
                     depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
-            logger.error(message);
+            log.error(message);
             throw new DepositAccountAlreadyExistsException(message);
         }
     }
@@ -255,10 +254,10 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     private List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans) {
-        logger.info("Retrieving deposit accounts by list of IBANs");
+        log.info("Retrieving deposit accounts by list of IBANs");
 
         List<DepositAccount> accounts = depositAccountRepository.findByIbanIn(ibans);
-        logger.info("{} IBANs were found", accounts.size());
+        log.info("{} IBANs were found", accounts.size());
 
         return depositAccountMapper.toDepositAccountListBO(accounts);
     }
@@ -303,8 +302,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                                          : BigDecimal.ZERO;
 
         BigDecimal creditAmount = debit
-                                         ? BigDecimal.ZERO
-                                         : amount.getAmount();
+                                          ? BigDecimal.ZERO
+                                          : amount.getAmount();
 
         String lineId = Ids.id();
         String debitTransactionDetails = newTransactionDetails(amount, accountReference, postingDateTime, lineId);

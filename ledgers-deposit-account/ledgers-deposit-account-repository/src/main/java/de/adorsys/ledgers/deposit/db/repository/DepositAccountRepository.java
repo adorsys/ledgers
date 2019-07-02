@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DepositAccountRepository extends PagingAndSortingRepository<DepositAccount, String> {
-//	Optional<DepositAccount> findByIban(String iban);
-
 	List<DepositAccount> findByIbanIn(List<String> ibans);
 	
 	List<DepositAccount> findByIbanStartingWith(String iban);  //TODO fix this!

@@ -16,35 +16,17 @@
 
 package de.adorsys.ledgers.deposit.api.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.Currency;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AmountBO {
     private Currency currency;
     private BigDecimal amount;
-
-    public AmountBO() {
-    }
-
-    public AmountBO(Currency currency, BigDecimal amount) {
-        this.currency = currency;
-        this.amount = amount;
-    }
-
-    //Getters - Setters
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
 }

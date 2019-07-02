@@ -16,54 +16,17 @@
 
 package de.adorsys.ledgers.deposit.api.domain;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@Data
 public class BalanceBO {
     private AmountBO amount;
     private BalanceTypeBO balanceType;
     private LocalDateTime lastChangeDateTime;
     private LocalDate referenceDate;
     private String lastCommittedTransaction;
-
-    public AmountBO getAmount() {
-        return amount;
-    }
-
-    public void setAmount(AmountBO amount) {
-        this.amount = amount;
-    }
-
-    public BalanceTypeBO getBalanceType() {
-        return balanceType;
-    }
-
-    public void setBalanceType(BalanceTypeBO balanceType) {
-        this.balanceType = balanceType;
-    }
-
-    public LocalDateTime getLastChangeDateTime() {
-        return lastChangeDateTime;
-    }
-
-    public void setLastChangeDateTime(LocalDateTime lastChangeDateTime) {
-        this.lastChangeDateTime = lastChangeDateTime;
-    }
-
-    public LocalDate getReferenceDate() {
-        return referenceDate;
-    }
-
-    public void setReferenceDate(LocalDate referenceDate) {
-        this.referenceDate = referenceDate;
-    }
-
-    public String getLastCommittedTransaction() {
-        return lastCommittedTransaction;
-    }
-
-    public void setLastCommittedTransaction(String lastCommittedTransaction) {
-        this.lastCommittedTransaction = lastCommittedTransaction;
-    }
 }

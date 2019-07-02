@@ -1,30 +1,19 @@
 package de.adorsys.ledgers.deposit.db.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import lombok.Data;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateConverter;
+
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateConverter;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-
+@Data
 @Entity
 public class Payment {
     /*
@@ -132,126 +121,5 @@ public class Payment {
 
     public boolean isLastExecuted(LocalDate nextPossibleExecutionDate){
         return endDate != null && nextPossibleExecutionDate.isAfter(endDate);
-    }
-
-    // Getters - Setters
-    public String getPaymentId() {
-        return paymentId;
-    }
-
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
-    }
-
-    public Boolean getBatchBookingPreferred() {
-        return batchBookingPreferred;
-    }
-
-    public void setBatchBookingPreferred(Boolean batchBookingPreferred) {
-        this.batchBookingPreferred = batchBookingPreferred;
-    }
-
-    public LocalDate getRequestedExecutionDate() {
-        return requestedExecutionDate;
-    }
-
-    public void setRequestedExecutionDate(LocalDate requestedExecutionDate) {
-        this.requestedExecutionDate = requestedExecutionDate;
-    }
-
-    public LocalTime getRequestedExecutionTime() {
-        return requestedExecutionTime;
-    }
-
-    public void setRequestedExecutionTime(LocalTime requestedExecutionTime) {
-        this.requestedExecutionTime = requestedExecutionTime;
-    }
-
-    public PaymentType getPaymentType() {
-        return paymentType;
-    }
-
-    public void setPaymentType(PaymentType paymentType) {
-        this.paymentType = paymentType;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getExecutionRule() {
-        return executionRule;
-    }
-
-    public void setExecutionRule(String executionRule) {
-        this.executionRule = executionRule;
-    }
-
-    public FrequencyCode getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(FrequencyCode frequency) {
-        this.frequency = frequency;
-    }
-
-    public Integer getDayOfExecution() {
-        return dayOfExecution;
-    }
-
-    public void setDayOfExecution(Integer dayOfExecution) {
-        this.dayOfExecution = dayOfExecution;
-    }
-
-    public LocalDateTime getExecutedDate() {
-        return executedDate;
-    }
-
-    public void setExecutedDate(LocalDateTime executedDate) {
-        this.executedDate = executedDate;
-    }
-
-    public LocalDateTime getNextScheduledExecution() {
-        return nextScheduledExecution;
-    }
-
-    public void setNextScheduledExecution(LocalDateTime nextScheduledExecution) {
-        this.nextScheduledExecution = nextScheduledExecution;
-    }
-
-    public AccountReference getDebtorAccount() {
-        return debtorAccount;
-    }
-
-    public void setDebtorAccount(AccountReference debtorAccount) {
-        this.debtorAccount = debtorAccount;
-    }
-
-    public TransactionStatus getTransactionStatus() {
-        return transactionStatus;
-    }
-
-    public void setTransactionStatus(TransactionStatus transactionStatus) {
-        this.transactionStatus = transactionStatus;
-    }
-
-    public List<PaymentTarget> getTargets() {
-        return targets;
-    }
-
-    public void setTargets(List<PaymentTarget> targets) {
-        this.targets = targets;
     }
 }

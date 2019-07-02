@@ -12,7 +12,6 @@ import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,7 +38,7 @@ public class DepositAccountPaymentServiceImplTest {
     @InjectMocks
     private DepositAccountPaymentServiceImpl paymentService;
     @Mock
-    private PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
+    private PaymentMapper paymentMapper;
 
     @Mock
     private PaymentRepository paymentRepository;
@@ -102,7 +101,7 @@ public class DepositAccountPaymentServiceImplTest {
     private <T> void testGetPaymentById(String paymentId, Payment persistedPayment, PaymentBO expectedPayment) throws PaymentNotFoundException {
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(persistedPayment));
         when(paymentRepository.findById(WRONG_PAYMENT_ID)).thenReturn(Optional.empty());
-        when(paymentMapper.toPaymentBO(persistedPayment)).thenReturn(expectedPayment);
+        when(paymentMapper.toPaymentBO(any())).thenReturn(expectedPayment);
 
         PaymentBO result = paymentService.getPaymentById(paymentId);
         assertThat(result).isNotNull();

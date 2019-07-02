@@ -1,8 +1,8 @@
 package de.adorsys.ledgers.deposit.db.repository;
 
+import de.adorsys.ledgers.deposit.db.domain.ScheduledPaymentOrder;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import de.adorsys.ledgers.deposit.db.domain.ScheduledPaymentOrder;
-
+//TODO REMOVE unused REPO
 public interface ScheduledPaymentOrderRepository extends PagingAndSortingRepository<ScheduledPaymentOrder, String> {
 }

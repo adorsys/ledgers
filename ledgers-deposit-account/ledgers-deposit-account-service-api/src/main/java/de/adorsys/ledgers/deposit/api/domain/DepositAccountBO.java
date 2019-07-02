@@ -1,8 +1,14 @@
 package de.adorsys.ledgers.deposit.api.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Currency;
 
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DepositAccountBO {
 
     private String id;
@@ -71,146 +77,4 @@ public class DepositAccountBO {
      * - characteristics of the relevant card
      */
     private String details;
-
-    public DepositAccountBO() {
-    }
-
-    public DepositAccountBO(String id, String iban, String bban, String pan, String maskedPan, String msisdn, Currency currency, String name, String product, AccountTypeBO accountType, AccountStatusBO accountStatus, String bic, String linkedAccounts, AccountUsageBO usageType, String details) {
-        this.id = id;
-        this.iban = iban;
-        this.bban = bban;
-        this.pan = pan;
-        this.maskedPan = maskedPan;
-        this.msisdn = msisdn;
-        this.currency = currency;
-        this.name = name;
-        this.product = product;
-        this.accountType = accountType;
-        this.accountStatus = accountStatus;
-        this.bic = bic;
-        this.linkedAccounts = linkedAccounts;
-        this.usageType = usageType;
-        this.details = details;
-    }
-
-    //Getters-Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getIban() {
-        return iban;
-    }
-
-    public void setIban(String iban) {
-        this.iban = iban;
-    }
-
-    public String getBban() {
-        return bban;
-    }
-
-    public void setBban(String bban) {
-        this.bban = bban;
-    }
-
-    public String getPan() {
-        return pan;
-    }
-
-    public void setPan(String pan) {
-        this.pan = pan;
-    }
-
-    public String getMaskedPan() {
-        return maskedPan;
-    }
-
-    public void setMaskedPan(String maskedPan) {
-        this.maskedPan = maskedPan;
-    }
-
-    public String getMsisdn() {
-        return msisdn;
-    }
-
-    public void setMsisdn(String msisdn) {
-        this.msisdn = msisdn;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getProduct() {
-        return product;
-    }
-
-    public void setProduct(String product) {
-        this.product = product;
-    }
-
-    public AccountTypeBO getAccountType() {
-        return accountType;
-    }
-
-    public void setAccountType(AccountTypeBO accountType) {
-        this.accountType = accountType;
-    }
-
-    public AccountStatusBO getAccountStatus() {
-        return accountStatus;
-    }
-
-    public void setAccountStatus(AccountStatusBO accountStatus) {
-        this.accountStatus = accountStatus;
-    }
-
-    public String getBic() {
-        return bic;
-    }
-
-    public void setBic(String bic) {
-        this.bic = bic;
-    }
-
-    public String getLinkedAccounts() {
-        return linkedAccounts;
-    }
-
-    public void setLinkedAccounts(String linkedAccounts) {
-        this.linkedAccounts = linkedAccounts;
-    }
-
-    public AccountUsageBO getUsageType() {
-        return usageType;
-    }
-
-    public void setUsageType(AccountUsageBO usageType) {
-        this.usageType = usageType;
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
 }

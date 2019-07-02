@@ -16,30 +16,18 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
-import java.math.BigDecimal;
+import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.math.BigDecimal;
 
+@Data
 @Embeddable
 public class Amount {
-	
     @Column(nullable = false)
     private String currency;
 
     @Column(nullable = false)
     private BigDecimal amount;
-
-	public BigDecimal getAmount() {
-		return amount;
-	}
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
-	public String getCurrency() {
-		return currency;
-	}
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
 }
