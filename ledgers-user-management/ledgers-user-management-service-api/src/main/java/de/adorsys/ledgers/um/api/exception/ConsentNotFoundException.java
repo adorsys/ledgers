@@ -17,10 +17,6 @@
 package de.adorsys.ledgers.um.api.exception;
 
 public class ConsentNotFoundException extends Exception {
-
-    public ConsentNotFoundException() {
-    }
-
     public ConsentNotFoundException(String message) {
         super(message);
     }

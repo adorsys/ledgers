@@ -19,6 +19,5 @@ package de.adorsys.ledgers.util.hash;
 public interface HashItem<T> {
 
     String getAlg();
-
     T getItem();
 }

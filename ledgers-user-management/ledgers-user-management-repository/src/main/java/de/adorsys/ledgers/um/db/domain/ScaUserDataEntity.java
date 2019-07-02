@@ -9,9 +9,11 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import de.adorsys.ledgers.util.Ids;
+import lombok.Data;
 
 @Entity
 @Table(name = "sca_data")
+@Data
 public class ScaUserDataEntity {
 
     @Id
@@ -20,7 +22,7 @@ public class ScaUserDataEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ScaMethodTypeEntity scaMethod;
+    private ScaMethodType scaMethod;
 
     @Column(nullable = false)
     private String methodValue;
@@ -31,29 +33,4 @@ public class ScaUserDataEntity {
     		id = Ids.id();
     	}
     }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getMethodValue() {
-        return methodValue;
-    }
-
-    public void setMethodValue(String methodValue) {
-        this.methodValue = methodValue;
-    }
-
-    public ScaMethodTypeEntity getScaMethod() {
-        return scaMethod;
-    }
-
-    public void setScaMethod(ScaMethodTypeEntity scaMethod) {
-        this.scaMethod = scaMethod;
-    }
-
-	public void setId(String id) {
-		this.id = id;
-	}
-    
 }

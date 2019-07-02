@@ -20,8 +20,6 @@ import org.springframework.http.HttpStatus;
 
 public class NotFoundRestException extends RestException {
 
-    public NotFoundRestException() { }
-
     public NotFoundRestException(String message) {
         super(message);
     }

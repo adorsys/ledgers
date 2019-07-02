@@ -6,3 +6,4 @@ Here is a list of contributors to this project:
 * [Denys Golubiev](https://github.com/DG0lden) ([adorsys GmbH & Co KG](http://www.adorsys.de))
 * [Dmytro Storozhyk](https://github.com/DmytroStorozhyk), LLC Golden Dimension
 * [Petro Rudenko](https://github.com/jfractalus), LLC Golden Dimension
+* [Mariia Polikarpova](https://github.com/maypolikarpova), LLC Golden Dimension

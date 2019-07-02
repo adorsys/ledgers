@@ -31,8 +31,8 @@ import de.adorsys.ledgers.util.Base16;
 
 public class HashGeneratorImpl implements HashGenerator {
     private static final Logger logger = LoggerFactory.getLogger(HashGeneratorImpl.class);
-	private static final ObjectMapper objectMapper = new ObjectMapper()
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+                                                             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Override
     public <T> String hash(HashItem<T> hashItem) throws HashGenerationException {
@@ -48,6 +48,7 @@ public class HashGeneratorImpl implements HashGenerator {
             logger.error("Can't generate the hash", e);
             throw new HashGenerationException("Can't generate the hash", e);
         }
+
         return Base16.encode(digest.digest(valueAsBytes));
     }
 }

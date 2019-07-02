@@ -55,7 +55,7 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
      * Finds all users of the branch with the given roles
      *
      * @param branch branch
-     * @param roles user roles
+     * @param roles  user roles
      * @return list pf users
      */
     List<UserEntity> findByBranchAndUserRolesIn(String branch, List<UserRole> roles);

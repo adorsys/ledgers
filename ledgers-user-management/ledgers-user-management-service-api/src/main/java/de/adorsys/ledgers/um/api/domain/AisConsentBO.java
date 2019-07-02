@@ -16,77 +16,18 @@
 
 package de.adorsys.ledgers.um.api.domain;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 
+@Data
 public class AisConsentBO {
 	
 	private String id;
-
     private String userId;
-
     private String tppId;
-
     private int frequencyPerDay;
-
     private AisAccountAccessInfoBO access;
-
     private LocalDate validUntil;
-
     private boolean recurringIndicator;
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getTppId() {
-		return tppId;
-	}
-
-	public void setTppId(String tppId) {
-		this.tppId = tppId;
-	}
-
-	public int getFrequencyPerDay() {
-		return frequencyPerDay;
-	}
-
-	public void setFrequencyPerDay(int frequencyPerDay) {
-		this.frequencyPerDay = frequencyPerDay;
-	}
-
-	public AisAccountAccessInfoBO getAccess() {
-		return access;
-	}
-
-	public void setAccess(AisAccountAccessInfoBO access) {
-		this.access = access;
-	}
-
-	public LocalDate getValidUntil() {
-		return validUntil;
-	}
-
-	public void setValidUntil(LocalDate validUntil) {
-		this.validUntil = validUntil;
-	}
-
-	public boolean isRecurringIndicator() {
-		return recurringIndicator;
-	}
-
-	public void setRecurringIndicator(boolean recurringIndicator) {
-		this.recurringIndicator = recurringIndicator;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 }

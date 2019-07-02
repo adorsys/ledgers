@@ -19,59 +19,15 @@ package de.adorsys.ledgers.um.api.domain;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Data
 public class AisAccountAccessInfoBO {
 
     private List<String> accounts;
-
     private List<String> balances;
-
     private List<String> transactions;
-
     private AisAccountAccessTypeBO availableAccounts;
-
     private AisAccountAccessTypeBO allPsd2;
-
-	public List<String> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(List<String> accounts) {
-		this.accounts = accounts;
-	}
-
-	public List<String> getBalances() {
-		return balances;
-	}
-
-	public void setBalances(List<String> balances) {
-		this.balances = balances;
-	}
-
-	public List<String> getTransactions() {
-		return transactions;
-	}
-
-	public void setTransactions(List<String> transactions) {
-		this.transactions = transactions;
-	}
-
-	public AisAccountAccessTypeBO getAvailableAccounts() {
-		return availableAccounts;
-	}
-
-	public void setAvailableAccounts(AisAccountAccessTypeBO availableAccounts) {
-		this.availableAccounts = availableAccounts;
-	}
-
-	public AisAccountAccessTypeBO getAllPsd2() {
-		return allPsd2;
-	}
-
-	public void setAllPsd2(AisAccountAccessTypeBO allPsd2) {
-		this.allPsd2 = allPsd2;
-	}
-    
-    
 }

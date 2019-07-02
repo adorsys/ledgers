@@ -56,8 +56,6 @@ public interface UserConverter {
 
     List<AccountAccess> toAccountAccessListEntity(List<AccountAccessBO> bos);
 
-    List<UserRoleBO> toUserRoleBO(List<UserRole> userRoles);
-
     List<UserRole> toUserRole(List<UserRoleBO> userRoles);
 
 }

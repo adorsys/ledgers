@@ -16,10 +16,10 @@
 
 package de.adorsys.ledgers.um.api.exception;
 
-public class UserNotFoundException extends RuntimeException {
+import lombok.NoArgsConstructor;
 
-    public UserNotFoundException() {
-    }
+@NoArgsConstructor
+public class UserNotFoundException extends RuntimeException {
 
     public UserNotFoundException(String message) {
         super(message);

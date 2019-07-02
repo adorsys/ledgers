@@ -19,24 +19,9 @@ package de.adorsys.ledgers.um.api.exception;
 public class UserManagementUnexpectedException extends RuntimeException {
 
 	private static final long serialVersionUID = 4921783159911280304L;
-
-	public UserManagementUnexpectedException() {
-		super();
-	}
-
-	public UserManagementUnexpectedException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
 	public UserManagementUnexpectedException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
-	public UserManagementUnexpectedException(String message) {
-		super(message);
-	}
-
 	public UserManagementUnexpectedException(Throwable cause) {
 		super(cause);
 	}

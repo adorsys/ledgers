@@ -95,11 +95,9 @@ public class BearerTokenService {
             builder = builder.claim(CONSENT, aisConsent);
         }
 
-
         if (act != null) {
             builder = builder.claim(ACT, act);
         }
-
 
         return builder.build();
     }
@@ -135,7 +133,7 @@ public class BearerTokenService {
     }
 
     public int expiresIn(Date refTime, JWTClaimsSet jwtClaimsSet) {
-        // CHeck expiration
+        // Check expiration
         Long expireLong = jwtClaimsSet.getExpirationTime() == null
                                   ? -1
                                   : (jwtClaimsSet.getExpirationTime().getTime() - refTime.getTime()) / 1000;
