@@ -32,11 +32,11 @@ import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +47,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods") // TODO: refactor class: issue #228
 public class UserServiceImpl implements UserService {
 
@@ -64,7 +66,7 @@ public class UserServiceImpl implements UserService {
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
     private static final String CONESENT_WITH_ID_NOT_FOUND = "Consent with id=%s not found";
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    
     private final UserRepository userRepository;
     private final AisConsentRepository consentRepository;
     private final UserConverter userConverter;
@@ -73,19 +75,6 @@ public class UserServiceImpl implements UserService {
     private final AisConsentMapper aisConsentMapper;
     private final BearerTokenService bearerTokenService;
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
-    //private int defaultScaTokenExpireInSeconds = 1800;
-
-    public UserServiceImpl(UserRepository userRepository, AisConsentRepository consentRepository,
-                           UserConverter userConverter, PasswordEnc passwordEnc, HashMacSecretSource secretSource,
-                           AisConsentMapper aisConsentMapper, BearerTokenService bearerTokenService) {
-        this.userRepository = userRepository;
-        this.consentRepository = consentRepository;
-        this.userConverter = userConverter;
-        this.passwordEnc = passwordEnc;
-        this.secretSource = secretSource;
-        this.aisConsentMapper = aisConsentMapper;
-        this.bearerTokenService = bearerTokenService;
-    }
 
     @Override
     public UserBO create(UserBO user) {
@@ -95,7 +84,7 @@ public class UserServiceImpl implements UserService {
 
         // if user is TPP and has an ID than do not reset it
         if (userPO.getId() == null) {
-            logger.info("User with login {} has no id, generating one", userPO.getLogin());
+            log.info("User with login {} has no id, generating one", userPO.getLogin());
             userPO.setId(Ids.id());
         }
 
@@ -105,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws UserNotFoundException, InsufficientPermissionException {
+    public BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws InsufficientPermissionException {
         UserEntity user = getUser(login);
         boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
         if (!success) {
@@ -130,7 +119,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException, InsufficientPermissionException {
+    public BearerTokenBO validate(String accessToken, Date refTime) throws InsufficientPermissionException {
         try {
             SignedJWT jwt = SignedJWT.parse(accessToken);
             JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
@@ -138,21 +127,21 @@ public class UserServiceImpl implements UserService {
 
             // CHeck algorithm
             if (!JWSAlgorithm.HS256.equals(header.getAlgorithm())) {
-                logger.warn(WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
+                log.warn(WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
                 return null;
             }
 
             int expiresIn = bearerTokenService.expiresIn(refTime, jwtClaimsSet);
 
             if (expiresIn <= 0) {
-                logger.warn(TOKEN_WITH_SUBJECT_EXPIRED, jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime);
+                log.warn(TOKEN_WITH_SUBJECT_EXPIRED, jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime);
                 return null;
             }
 
             // check signature.
             boolean verified = jwt.verify(new MACVerifier(secretSource.getHmacSecret()));
             if (!verified) {
-                logger.warn(COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
+                log.warn(COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
                 return null;
             }
 
@@ -171,10 +160,10 @@ public class UserServiceImpl implements UserService {
 
         } catch (ParseException e) {
             // If we can not parse the token, we log the error and return false.
-            logger.warn(e.getMessage());
+            log.warn(e.getMessage());
             return null;
         } catch (JOSEException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -186,20 +175,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserBO findById(String id) throws UserNotFoundException {
-        Optional<UserEntity> userPO = userRepository.findById(id);
-        userPO.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, id)));
-        return userConverter.toUserBO(userPO.get());
+    public UserBO findById(String id) {
+        UserEntity userPO = userRepository.findById(id)
+                                    .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, id)));
+        return userConverter.toUserBO(userPO);
     }
 
     @Override
-    public UserBO findByLogin(String login) throws UserNotFoundException {
+    public UserBO findByLogin(String login) {
         return userConverter.toUserBO(getUser(login));
     }
 
     @Override
-    public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException {
-        logger.info("Retrieving user by login={}", userLogin);
+    public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) {
+        log.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
                                   .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
 
@@ -207,15 +196,14 @@ public class UserServiceImpl implements UserService {
         user.getScaUserData().clear();
         user.getScaUserData().addAll(scaMethods);
 
-        logger.info("{} sca methods would be updated", scaMethods.size());
+        log.info("{} sca methods would be updated", scaMethods.size());
         UserEntity save = userRepository.save(user);
         return userConverter.toUserBO(save);
     }
 
     @Override
-    public UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO)
-            throws UserNotFoundException {
-        logger.info("Retrieving user by login={}", userLogin);
+    public UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO) {
+        log.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
                                   .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
 
@@ -223,7 +211,7 @@ public class UserServiceImpl implements UserService {
         user.getAccountAccesses().clear();
         user.getAccountAccesses().addAll(accountAccesses);
 
-        logger.info("{} account accesses would be updated", accountAccesses.size());
+        log.info("{} account accesses would be updated", accountAccesses.size());
         UserEntity save = userRepository.save(user);
         return userConverter.toUserBO(save);
     }
@@ -253,12 +241,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO scaToken(AccessTokenBO loginToken) throws UserNotFoundException {
+    public BearerTokenBO scaToken(AccessTokenBO loginToken) {
         return getToken(loginToken, loginToken.getAuthorisationId(), TokenUsageBO.DIRECT_ACCESS);
     }
 
     @Override
-    public BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws UserNotFoundException {
+    public BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) {
         return getToken(loginToken, authorisationId, TokenUsageBO.LOGIN);
     }
 
@@ -332,10 +320,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @NotNull
-    private UserEntity getUser(String login) throws UserNotFoundException {
-        Optional<UserEntity> userOptional = userRepository.findFirstByLogin(login);
-        userOptional.orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login)));
-        return userOptional.get();
+    private UserEntity getUser(String login) {
+        return userRepository.findFirstByLogin(login)
+                       .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login)));
     }
 
     private void checkUserAlreadyExists(UserBO userBO) {
@@ -343,7 +330,7 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             String message = String.format("User with this email or login already exists. Email %s. Login %s.",
                                            userBO.getEmail(), userBO.getLogin());
-            logger.error(message);
+            log.error(message);
             throw new UserAlreadyExistsException(message);
         }
     }
@@ -360,7 +347,7 @@ public class UserServiceImpl implements UserService {
                 .filter(a -> matchAccess(accountAccessFT, a))
                 .findFirst().orElseThrow(() -> {
             String message = String.format(PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION, subject, accountAccessFT.getIban());
-            logger.warn(message);
+            log.warn(message);
             return new InsufficientPermissionException(message);
         });
     }
@@ -374,7 +361,7 @@ public class UserServiceImpl implements UserService {
                         requested.getAccessType().compareTo(existent.getAccessType()) <= 0;
     }
 
-    private BearerTokenBO getToken(AccessTokenBO loginToken, String authorisationId, TokenUsageBO usageType) throws UserNotFoundException {
+    private BearerTokenBO getToken( AccessTokenBO loginToken, String authorisationId, TokenUsageBO usageType) throws UserNotFoundException {
         UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);

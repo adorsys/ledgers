@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ import net.minidev.json.JSONValue;
 import net.minidev.json.reader.JsonWriterI;
 
 @Service
+@RequiredArgsConstructor
 public class BearerTokenService {
     private static final String SCA_ID = "sca_id";
     private static final String AUTHORISATION_ID = "authorisation_id";
@@ -47,11 +49,6 @@ public class BearerTokenService {
 
     private final HashMacSecretSource secretSource;
     private final ObjectMapper objectMapper;
-
-    public BearerTokenService(HashMacSecretSource secretSource, ObjectMapper objectMapper) {
-        this.secretSource = secretSource;
-        this.objectMapper = objectMapper;
-    }
 
     public BearerTokenBO bearerToken(String userId, String userLogin,
                                      List<AccountAccess> accountAccesses, AisConsentBO aisConsent,
