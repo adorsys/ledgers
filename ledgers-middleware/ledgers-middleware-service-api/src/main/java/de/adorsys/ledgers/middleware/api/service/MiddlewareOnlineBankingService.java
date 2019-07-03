@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.api.service;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -26,7 +27,7 @@ public interface MiddlewareOnlineBankingService {
 	 * @return : user
 	 * @throws UserAlreadyExistsMiddlewareException : user with login exists.
 	 */
-	UserTO register(String login, String email, String pin, UserRoleTO role) throws UserAlreadyExistsMiddlewareException;
+	UserTO register(String login, String email, String pin, UserRoleTO role);
 	
 	/**
 	 * Performs user authorization.
@@ -79,9 +80,7 @@ public interface MiddlewareOnlineBankingService {
      * <p>
      * After the PSU selects the SCA method, this is called to generate and send the login auth code.
      *
-     * @param userId user id
-     * @param scaUserDataId scaMethod
-     * @param authorisationId the id of the auth process
+     * @param scaInfoTO SCA information
      * @param userMessage message to user
      * @param validitySeconds validity in secondn.
      * @return SCALoginResponseTO the response object.
@@ -92,8 +91,8 @@ public interface MiddlewareOnlineBankingService {
      * @throws UserScaDataNotFoundMiddlewareException if sca user data not found by id
      * @throws SCAOperationValidationMiddlewareException : inputs not valid
      */
-	SCALoginResponseTO generateLoginAuthCode(String userId, String scaUserDataId, String authorisationId, String userMessage,
-			int validitySeconds) throws SCAOperationNotFoundMiddlewareException, 
+	SCALoginResponseTO generateLoginAuthCode(ScaInfoTO scaInfoTO, String userMessage,
+	                                         int validitySeconds) throws SCAOperationNotFoundMiddlewareException,
     		InsufficientPermissionMiddlewareException, SCAMethodNotSupportedMiddleException, 
     		UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException;
 
@@ -102,9 +101,7 @@ public interface MiddlewareOnlineBankingService {
      * <p>
      * This is called when the user enters the received code.
      * 
-     * @param userId : the user id
-     * @param authorisationId : the operation id
-     * @param authCode the auth code.
+     * @param scaInfoTO : SCA information
      * @return the login response.
      * @throws SCAOperationNotFoundMiddlewareException : operation not found.
      * @throws SCAOperationValidationMiddlewareException : input data not valid.
@@ -112,7 +109,7 @@ public interface MiddlewareOnlineBankingService {
      * @throws SCAOperationUsedOrStolenMiddlewareException : malicious input
      * @throws InsufficientPermissionMiddlewareException  : not enough permissions.
      */
-	SCALoginResponseTO authenticateForLogin(String userId, String authorisationId, String authCode)
+	SCALoginResponseTO authenticateForLogin(ScaInfoTO scaInfoTO)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
 			InsufficientPermissionMiddlewareException;

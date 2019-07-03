@@ -237,13 +237,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO scaToken(AccessTokenBO loginToken) {
-        return getToken(loginToken, loginToken.getAuthorisationId(), TokenUsageBO.DIRECT_ACCESS);
+    public BearerTokenBO scaToken(ScaInfoBO scaInfoBO) {
+        return getToken(scaInfoBO, TokenUsageBO.DIRECT_ACCESS);
     }
 
     @Override
-    public BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) {
-        return getToken(loginToken, authorisationId, TokenUsageBO.LOGIN);
+    public BearerTokenBO loginToken(ScaInfoBO scaInfoBO) {
+        return getToken(scaInfoBO, TokenUsageBO.LOGIN);
     }
 
     @Override
@@ -357,14 +357,14 @@ public class UserServiceImpl implements UserService {
                         requested.getAccessType().compareTo(existent.getAccessType()) <= 0;
     }
 
-    private BearerTokenBO getToken( AccessTokenBO loginToken, String authorisationId, TokenUsageBO usageType) throws UserNotFoundException {
-        UserEntity user = userRepository.findById(loginToken.getSub()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + loginToken.getSub()));
+    private BearerTokenBO getToken(ScaInfoBO scaInfoBO, TokenUsageBO usageType) {
+        UserEntity user = userRepository.findById(scaInfoBO.getUserId()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + scaInfoBO.getUserId()));
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
 
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                                              null, null, UserRole.valueOf(loginToken.getRole().name()),
-                                              loginToken.getScaId(), authorisationId,
+                                              null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
+                                              scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),
                                               issueTime, expires, usageType, null);
     }
 }

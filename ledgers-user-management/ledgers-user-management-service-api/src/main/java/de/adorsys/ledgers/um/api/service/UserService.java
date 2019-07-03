@@ -16,20 +16,13 @@
 
 package de.adorsys.ledgers.um.api.service;
 
-import java.util.Date;
-import java.util.List;
-
-import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AisConsentBO;
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
 import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
 import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+
+import java.util.Date;
+import java.util.List;
 
 public interface UserService {
 
@@ -38,9 +31,8 @@ public interface UserService {
      *
      * @param user User business object
      * @return A persisted user or trows a UserAlreadyExistsException
-     * @throws UserAlreadyExistsException is thrown if user already exists
      */
-    UserBO create(UserBO user) throws UserAlreadyExistsException;
+    UserBO create(UserBO user);
 
     /**
      * Verify user credential and produces a corresponding login token.
@@ -53,28 +45,25 @@ public interface UserService {
      * @param scaId           the scaId
      * @param authorisationId the authorization id
      * @return BearerTokenBO representation of authorization status true for success, false for failure or throws a UserNotFoundException
-     * @throws UserNotFoundException           is thrown if user can`t be found
      * @throws InsufficientPermissionException usder does not have requested role
      */
-    BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws UserNotFoundException, InsufficientPermissionException;
+    BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws InsufficientPermissionException;
 
     /**
      * Finds a User by its identifier
      *
      * @param id User identifier
      * @return a User or throws a UserNotFoundException
-     * @throws UserNotFoundException is thrown if user can`t be found
      */
-    UserBO findById(String id) throws UserNotFoundException;
+    UserBO findById(String id);
 
     /**
      * Finds a User by its login
      *
      * @param login User identifier
      * @return a User or throws a UserNotFoundException
-     * @throws UserNotFoundException is thrown if user can`t be found
      */
-    UserBO findByLogin(String login) throws UserNotFoundException;
+    UserBO findByLogin(String login);
 
     /**
      * Update SCA methods by user login
@@ -82,11 +71,10 @@ public interface UserService {
      * @param scaDataList user methods
      * @param userLogin   user login
      * @return The user object.
-     * @throws UserNotFoundException no user with given login.
      */
-    UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) throws UserNotFoundException;
+    UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin);
 
-    UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO) throws UserNotFoundException;
+    UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO);
 
     List<UserBO> listUsers(int page, int size);
 
@@ -96,10 +84,9 @@ public interface UserService {
      * @param accessToken the access token to validate
      * @param refTime     the reference time
      * @return the bearer token
-     * @throws UserNotFoundException           : user is no longer in the database.
      * @throws InsufficientPermissionException access permissions contained in the token are no longer supported by the user.
      */
-    BearerTokenBO validate(String accessToken, Date refTime) throws UserNotFoundException, InsufficientPermissionException;
+    BearerTokenBO validate(String accessToken, Date refTime) throws InsufficientPermissionException;
 
     /**
      * Provides a token used to gain read access to an account.
@@ -114,23 +101,22 @@ public interface UserService {
     /**
      * Create a new token for the current user, after a successfull auth code proces..
      *
-     * @param loginToken : the token obtained in the preceeding request.
+     * @param scaInfoBO      : SCA information
      * @return the bearer token
      * @throws InsufficientPermissionException : user does not have the required role.
      * @throws UserNotFoundException           : underlying user non longer existent.
      */
-    BearerTokenBO scaToken(AccessTokenBO loginToken) throws InsufficientPermissionException, UserNotFoundException;
+    BearerTokenBO scaToken(ScaInfoBO scaInfoBO) throws InsufficientPermissionException;
 
     /**
      * Create a new token for the current user, with a new authorization id
      *
-     * @param loginToken      : the token to clone
-     * @param authorisationId : the authorization id to exchange
+     * @param scaInfoBO      : SCA information
      * @return the bearer token
      * @throws InsufficientPermissionException : user does not have the required role.
      * @throws UserNotFoundException           : underlying user non longer existent.
      */
-    BearerTokenBO loginToken(AccessTokenBO loginToken, String authorisationId) throws InsufficientPermissionException, UserNotFoundException;
+    BearerTokenBO loginToken(ScaInfoBO scaInfoBO) throws InsufficientPermissionException;
 
     /**
      * Stores a consent in the consent database and returns the original consent
