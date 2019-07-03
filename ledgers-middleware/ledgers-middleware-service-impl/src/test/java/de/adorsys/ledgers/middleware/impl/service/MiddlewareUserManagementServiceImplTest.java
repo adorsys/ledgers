@@ -22,9 +22,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareUserManagementServiceImplTest {
-	private static final String ANY_TOKEN = "anyToken";
-	private static final String LOGIN = "login";
-	private static final String PIN = "pin";
 
 	@InjectMocks
 	private MiddlewareUserManagementServiceImpl middlewareUserService;

@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
+import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,4 +17,5 @@ public class ScaInfoTO {
     private UserRoleTO userRole;
     private String scaMethodId;
     private String authCode;
+    private TokenUsageTO tokenUsage;
 }

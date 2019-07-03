@@ -68,7 +68,7 @@ public class PaymentResource implements PaymentRestAPI {
     public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, Object payment)
     	throws NotFoundRestException, ForbiddenRestException, ConflictRestException{
     	try {
-			return new ResponseEntity<>(paymentService.initiatePayment(authenticationFacade.getUserId(), payment, paymentType), HttpStatus.CREATED);
+			return new ResponseEntity<>(paymentService.initiatePayment(authenticationFacade.getScaInfo(), payment, paymentType), HttpStatus.CREATED);
 		} catch (AccountNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
 		} catch (NoAccessMiddlewareException e) {
@@ -82,7 +82,7 @@ public class PaymentResource implements PaymentRestAPI {
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> getSCA(String paymentId, String authorisationId) {
         try {
-        	return ResponseEntity.ok(paymentService.loadSCAForPaymentData(authenticationFacade.getUserId(), paymentId, authorisationId));
+        	return ResponseEntity.ok(paymentService.loadSCAForPaymentData(authenticationFacade.getScaInfo(), paymentId));
         } catch (PaymentNotFoundMiddlewareException | SCAOperationExpiredMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -91,12 +91,9 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, 
-    		String authorisationId,
-    		String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException
-    {
+    public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, String authorisationId, String scaMethodId) {
     	try {
-			return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(authenticationFacade.getUserId(), paymentId, authorisationId, scaMethodId));
+			return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(authenticationFacade.getScaInfoWithScaMethodId(scaMethodId), paymentId));
 		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException e) {
             log.error(e.getMessage());
 			throw new NotFoundRestException(e.getMessage());
@@ -111,12 +108,9 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> authorizePayment(String paymentId,
-    		String authorisationId, 
-    		String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException
-    {
+    public ResponseEntity<SCAPaymentResponseTO> authorizePayment(String paymentId, String authorisationId, String authCode) {
         try {
-        	return ResponseEntity.ok(paymentService.authorizePayment(authenticationFacade.getUserId(), paymentId, authorisationId, authCode));
+        	return ResponseEntity.ok(paymentService.authorizePayment(authenticationFacade.getScaInfoWithAuthCode(authCode), paymentId));
         } catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException e) {
 			throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {
@@ -132,7 +126,7 @@ public class PaymentResource implements PaymentRestAPI {
     @PreAuthorize("paymentInitById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> initiatePmtCancellation(String paymentId) {
         try {
-        	return ResponseEntity.ok(paymentService.initiatePaymentCancellation(authenticationFacade.getUserId(), paymentId));
+        	return ResponseEntity.ok(paymentService.initiatePaymentCancellation(authenticationFacade.getScaInfo(), paymentId));
         } catch (PaymentNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         } catch (PaymentProcessingMiddlewareException e) {
@@ -145,7 +139,7 @@ public class PaymentResource implements PaymentRestAPI {
     public ResponseEntity<SCAPaymentResponseTO> getCancelSCA(String paymentId, 
     		String cancellationId) throws ConflictRestException{
         try {
-        	return ResponseEntity.ok(paymentService.loadSCAForCancelPaymentData(authenticationFacade.getUserId(), paymentId, cancellationId));
+        	return ResponseEntity.ok(paymentService.loadSCAForCancelPaymentData(authenticationFacade.getScaInfo(), paymentId, cancellationId));
         } catch (PaymentNotFoundMiddlewareException | SCAOperationExpiredMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -155,10 +149,9 @@ public class PaymentResource implements PaymentRestAPI {
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> selecCancelPaymentSCAtMethod(String paymentId, 
-    	    String cancellationId, String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException
-    {
+    	    String cancellationId, String scaMethodId) {
     	try {
-			return ResponseEntity.ok(paymentService.selectSCAMethodForCancelPayment(authenticationFacade.getUserId(), paymentId, cancellationId, scaMethodId));
+			return ResponseEntity.ok(paymentService.selectSCAMethodForCancelPayment(authenticationFacade.getScaInfoWithScaMethodId(scaMethodId), paymentId, cancellationId));
 		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
 		} catch (SCAMethodNotSupportedMiddleException e) {
@@ -170,10 +163,9 @@ public class PaymentResource implements PaymentRestAPI {
     
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> authorizeCancelPayment(String paymentId,String cancellationId, String authCode) throws GoneRestException,NotFoundRestException, ConflictRestException, ExpectationFailedRestException, NotAcceptableRestException
-    {
+    public ResponseEntity<SCAPaymentResponseTO> authorizeCancelPayment(String paymentId,String cancellationId, String authCode) {
         try {
-        	return ResponseEntity.ok(paymentService.authorizeCancelPayment(authenticationFacade.getUserId(), paymentId, cancellationId, authCode));
+        	return ResponseEntity.ok(paymentService.authorizeCancelPayment(authenticationFacade.getScaInfoWithAuthCode(authCode), paymentId, cancellationId));
 		} catch (SCAOperationNotFoundMiddlewareException | PaymentNotFoundMiddlewareException | SCAOperationExpiredMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
 		} catch (SCAOperationValidationMiddlewareException e) {

@@ -107,7 +107,7 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
      * each single payment will be individually sent to this method.
      */
     @Override
-    public TransactionStatusBO executePayment(String paymentId, String userName) throws PaymentProcessingException {
+    public TransactionStatusBO executePayment(String paymentId, String userName) {
         Optional<Payment> payment = paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACTC);
         if (payment.isPresent()) {
             Payment pmt = payment.get();

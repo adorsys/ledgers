@@ -91,12 +91,12 @@ public interface UserService {
     /**
      * Provides a token used to gain read access to an account.
      *
-     * @param accessToken the token used by the user currently granting permission
+     * @param scaInfoBO SCA information
      * @param aisConsent  the ais consent.
      * @return the bearer token
      * @throws InsufficientPermissionException the current user does not have sufficient permission.
      */
-    BearerTokenBO consentToken(AccessTokenBO accessToken, AisConsentBO aisConsent) throws InsufficientPermissionException;
+    BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent) throws InsufficientPermissionException;
 
     /**
      * Create a new token for the current user, after a successfull auth code proces..
