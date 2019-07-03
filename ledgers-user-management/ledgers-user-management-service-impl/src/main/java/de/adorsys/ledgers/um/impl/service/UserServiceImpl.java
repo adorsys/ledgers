@@ -213,10 +213,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO consentToken(AccessTokenBO loginToken, AisConsentBO aisConsent) throws InsufficientPermissionException {
+    public BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent) throws InsufficientPermissionException {
         UserBO user;
         try {
-            user = findById(loginToken.getSub());
+            user = findById(scaInfoBO.getUserId());
         } catch (UserNotFoundException e) {
             throw new UserManagementUnexpectedException(e);
         }
@@ -230,10 +230,10 @@ public class UserServiceImpl implements UserService {
         Map<String, String> act = new HashMap<>();
         String tppId = aisConsent.getTppId();
         act.put("tppId", tppId);
-        UserRole userRole = UserRole.valueOf(loginToken.getRole().name());
+        UserRole userRole = UserRole.valueOf(scaInfoBO.getUserRole().name());
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null,
                                               aisConsent, userRole,
-                                              loginToken.getScaId(), loginToken.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
+                                              scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
     }
 
     @Override

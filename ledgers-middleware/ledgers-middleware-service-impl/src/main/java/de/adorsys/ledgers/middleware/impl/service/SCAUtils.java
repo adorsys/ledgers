@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
@@ -15,7 +15,6 @@ import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -24,8 +23,7 @@ import org.springframework.stereotype.Service;
 public class SCAUtils {
 	private final UserService userService;
 	private final SCAOperationService scaOperationService;
-	private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
-	private final AccessTokenTO accessTokenTO;
+	private final UserMapper userMapper;
 
 	public ScaUserDataTO getScaMethod(UserTO user, String scaMethodId) {
 		if (scaMethodId == null || user.getScaUserData() == null) {
@@ -67,9 +65,9 @@ public class SCAUtils {
 		}
 	}
 
-	public String authorisationId() {
-		String scaId = accessTokenTO.getScaId();
-		String authorisationId = accessTokenTO.getAuthorisationId();
+	public String authorisationId(ScaInfoTO scaInfoTO) {
+		String scaId = scaInfoTO.getScaId();
+		String authorisationId = scaInfoTO.getAuthorisationId();
 		if(authorisationId.equals(scaId)) {// we are working with login token.
 			authorisationId = Ids.id();
 		}

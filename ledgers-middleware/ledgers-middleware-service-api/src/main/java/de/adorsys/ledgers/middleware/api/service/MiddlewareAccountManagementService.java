@@ -5,6 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequest
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
@@ -127,14 +128,14 @@ public interface MiddlewareAccountManagementService {
 	/**
 	 * Start an account consent process.
 	 *
-	 * @param userId : the user id.
+	 * @param scaInfoTO SCA information
 	 * @param consentId : the cosent id.
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
 	 *
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
-	SCAConsentResponseTO startSCA(String userId, String consentId, AisConsentTO aisConsent)
+	SCAConsentResponseTO startSCA(ScaInfoTO scaInfoTO, String consentId, AisConsentTO aisConsent)
 			throws InsufficientPermissionMiddlewareException;
 
 	SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId) throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException;
@@ -144,10 +145,8 @@ public interface MiddlewareAccountManagementService {
 	/**
 	 * Authorizes a consent request. If the authentication is completed, the returned response will contain a valid bearer token.
 	 *
-	 * @param userId : the user id
+	 * @param scaInfoTO : SCA information
 	 * @param consentId : the cosent id
-	 * @param authorisationId : the authorization id.
-	 * @param authCode : SCAConsentResponseTO
 	 * @return SCAConsentResponseTO : the consent response.
 	 * @throws SCAOperationNotFoundMiddlewareException : operation no logger in db
 	 * @throws SCAOperationValidationMiddlewareException : operation data not valid.
@@ -155,7 +154,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws SCAOperationUsedOrStolenMiddlewareException : user sca method not supported.
 	 * @throws AisConsentNotFoundMiddlewareException : consent not found.
 	 */
-	SCAConsentResponseTO authorizeConsent(String userId, String consentId, String authorisationId, String authCode)
+	SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException,
 			AisConsentNotFoundMiddlewareException;
@@ -164,13 +163,14 @@ public interface MiddlewareAccountManagementService {
 	 * Provide a third party provider with necessary permission to read accounts and
 	 * transaction informations for the specified account.
 	 *
+     * @param scaInfoTO : SCA information
      * @param aisConsent : the consent details
 	 * @return the corresponding access token describing the account access
 	 *
      * @throws AccountNotFoundMiddlewareException : target account not found.
 	 * @throws InsufficientPermissionMiddlewareException : if the connected user is not linked ot the account.
 	 */
-	SCAConsentResponseTO grantAisConsent(AisConsentTO aisConsent)
+	SCAConsentResponseTO grantAisConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent)
 			throws AccountNotFoundMiddlewareException, InsufficientPermissionMiddlewareException;
 
 	/**

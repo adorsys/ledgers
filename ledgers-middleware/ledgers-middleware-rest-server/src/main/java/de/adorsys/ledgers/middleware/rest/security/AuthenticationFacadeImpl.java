@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.rest.security;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,16 @@ public class AuthenticationFacadeImpl implements AuthenticationFacade {
     @Override
     public String getUserId() {
         return accessTokenTO.getSub();
+    }
+
+    @Override
+    public TokenUsageTO getTokenUsageTO() {
+        return accessTokenTO.getTokenUsage();
+    }
+
+    @Override
+    public ScaInfoTO getScaInfo() {
+        return buildScaInfo();
     }
 
     @Override

@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.api.service;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 
 public interface MiddlewarePaymentService {
@@ -30,7 +31,7 @@ public interface MiddlewarePaymentService {
      * <p>
      * This call sets the status RCVD
      *
-     * @param userId : the user id
+     * @param scaInfoTO : SCA information
      * @param payment : the payment object
      * @param paymentType : the payment type
      * @return : the sca response object.
@@ -38,7 +39,7 @@ public interface MiddlewarePaymentService {
 	 * @throws NoAccessMiddlewareException : missing permissions
      * @throws PaymentWithIdMiddlewareException : payment with given id exist. 
 	 */
-    <T> SCAPaymentResponseTO initiatePayment(String userId, T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, PaymentWithIdMiddlewareException;
+    <T> SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, PaymentWithIdMiddlewareException;
 
 
     // ================= SCA =======================================//
@@ -47,10 +48,8 @@ public interface MiddlewarePaymentService {
      * <p>
      * This is called when the user enters the received code.
      * 
-     * @param userId : the user id
+     * @param scaInfoTO : SCA information
      * @param paymentId : the payment id
-     * @param authorisationId : the authorization id
-     * @param authCode : the auth code.
      * @return : auth response.
      * @throws SCAOperationNotFoundMiddlewareException : not found
      * @throws SCAOperationValidationMiddlewareException : not valid
@@ -58,7 +57,7 @@ public interface MiddlewarePaymentService {
      * @throws SCAOperationUsedOrStolenMiddlewareException : malicious
      * @throws PaymentNotFoundMiddlewareException  : payment not found.
      */
-	SCAPaymentResponseTO authorizePayment(String userId, String paymentId, String authorisationId, String authCode)
+	SCAPaymentResponseTO authorizePayment(ScaInfoTO scaInfoTO, String paymentId)
 			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
 			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
 			PaymentNotFoundMiddlewareException;
@@ -93,25 +92,25 @@ public interface MiddlewarePaymentService {
     /**
      * Checks the possibility of payment cancellation
      *
-     * @param userId : the user id
+     * @param scaInfoTO : SCA information
      * @param paymentId : the payment id
      * @return : the auth response object.
      * @throws PaymentNotFoundMiddlewareException : not found
      * @throws PaymentProcessingMiddlewareException : processing
      */
-    SCAPaymentResponseTO initiatePaymentCancellation(String userId, String paymentId) throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
+    SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId) throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
 
 	String iban(String paymentId);
 
 
-	SCAPaymentResponseTO loadSCAForPaymentData(String userId, String paymentId, String authorisationId) throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException;
+	SCAPaymentResponseTO loadSCAForPaymentData(ScaInfoTO scaInfoTO, String paymentId) throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException;
 
-	SCAPaymentResponseTO selectSCAMethodForPayment(String userId, String paymentId, String authorisationId, String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException;
+	SCAPaymentResponseTO selectSCAMethodForPayment(ScaInfoTO scaInfoTO, String paymentId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException;
 
-	SCAPaymentResponseTO loadSCAForCancelPaymentData(String userId, String paymentId, String cancellationId) throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException;
+	SCAPaymentResponseTO loadSCAForCancelPaymentData(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException;
 
-	SCAPaymentResponseTO selectSCAMethodForCancelPayment(String userId, String paymentId, String cancellationId, String scaMethodId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException;
+	SCAPaymentResponseTO selectSCAMethodForCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException;
 
-	SCAPaymentResponseTO authorizeCancelPayment(String userId, String paymentId, String cancellationId, String authCode) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException;
+	SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException;
 	
 }

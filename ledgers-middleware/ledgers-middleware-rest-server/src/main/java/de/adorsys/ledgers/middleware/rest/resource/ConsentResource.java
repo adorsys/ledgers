@@ -42,7 +42,7 @@ public class ConsentResource implements ConsentRestAPI {
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent){
 		try {
-			return ResponseEntity.ok(middlewareAccountService.startSCA(authenticationFacade.getUserId(), consentId, aisConsent));
+			return ResponseEntity.ok(middlewareAccountService.startSCA(authenticationFacade.getScaInfo(), consentId, aisConsent));
 		} catch (InsufficientPermissionMiddlewareException e) {
 			log.error(e.getMessage(), e);
 			throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -81,10 +81,9 @@ public class ConsentResource implements ConsentRestAPI {
 
 	// TODO: Bearer token must contain autorization id
 	@Override
-	public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode)
-			throws ValidationRestException, NotFoundRestException, GoneRestException {
+	public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode) {
 		try {
-			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(authenticationFacade.getUserId(), consentId, authorisationId, authCode));
+			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(authenticationFacade.getScaInfoWithAuthCode(authCode), consentId));
 		} catch (SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
 			throw new NotFoundRestException(e.getMessage());
@@ -104,7 +103,7 @@ public class ConsentResource implements ConsentRestAPI {
     @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#aisConsent)")
     public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO aisConsent) {
         try {
-			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(aisConsent));
+			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(authenticationFacade.getScaInfo(), aisConsent));
         } catch (InsufficientPermissionMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());

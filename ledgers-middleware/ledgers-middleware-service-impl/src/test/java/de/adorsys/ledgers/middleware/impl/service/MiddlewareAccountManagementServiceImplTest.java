@@ -16,6 +16,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -169,15 +170,12 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     public void listDepositAccounts() throws DepositAccountNotFoundException {
-        // users
-        UserBO user = getDataFromFile("user.yml", new TypeReference<UserBO>() {
-        });
-
         // accounts
         List<DepositAccountDetailsBO> accounts = new ArrayList<>();
         accounts.add(getDepositAccountDetailsBO());
 
-        when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
+        when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(buildUserBO());
+        when(userMapper.toUserTO(buildUserBO())).thenReturn(buildUserTO());
         when(accountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
         when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
@@ -258,6 +256,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     @Test
     public void shouldReturnUserAccountAccess() {
         when(userService.findById(CORRECT_USER_ID)).thenReturn(buildUserBO());
+        when(userMapper.toUserTO(buildUserBO())).thenReturn(buildUserTO());
 
         List<AccountAccessTO> accountAccesses = middlewareService.getAccountAccesses(CORRECT_USER_ID);
 
@@ -315,14 +314,28 @@ public class MiddlewareAccountManagementServiceImplTest {
         middlewareService.depositCash(ACCOUNT_ID, new AmountTO());
     }
 
-    private UserBO buildUserBO() {
+    private static UserBO buildUserBO() {
         UserBO user = new UserBO();
         user.setId(CORRECT_USER_ID);
-        user.setAccountAccesses(buildAccountAccesses());
+        user.setAccountAccesses(buildAccountAccessesBO());
         return user;
     }
 
-    private List<AccountAccessBO> buildAccountAccesses() {
+    private static List<AccountAccessBO> buildAccountAccessesBO() {
         return Collections.singletonList(new AccountAccessBO(IBAN, AccessTypeBO.OWNER));
+    }
+
+    private static UserTO buildUserTO() {
+        UserTO user = new UserTO();
+        user.setId(CORRECT_USER_ID);
+        user.setAccountAccesses(buildAccountAccessesTO());
+        return user;
+    }
+
+    private static List<AccountAccessTO> buildAccountAccessesTO() {
+        AccountAccessTO access = new AccountAccessTO();
+        access.setIban(IBAN);
+        access.setAccessType(AccessTypeTO.OWNER);
+        return Collections.singletonList(access);
     }
 }
