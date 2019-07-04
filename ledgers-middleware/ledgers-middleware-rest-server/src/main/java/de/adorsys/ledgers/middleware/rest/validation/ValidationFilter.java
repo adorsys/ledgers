@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 
 @Slf4j
 @Component
@@ -26,20 +28,25 @@ public class ValidationFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        MultiReadHttpServletRequest servletRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
-        if (servletRequest.getContentLength() > 0) {
-            List<JsonNode> values = objectMapper.readTree(servletRequest.getInputStream())
-                                            .findValues("iban");
-            for (JsonNode node : values) {
-                boolean valid = IBANValidator.getInstance().isValid(node.asText());
-                if (!valid) {
-                    log.error("Invalid IBAN: {}", node.asText());
-                    ((HttpServletResponse) response).sendError(400, String.format("Invalid IBAN %s", node.asText()));
-                    return;
+        HttpServletRequest httpServletRequest = (HttpServletRequest)request;
+        if (APPLICATION_JSON_VALUE.equals(httpServletRequest.getHeader("Content-Type"))) {
+            MultiReadHttpServletRequest servletRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
+            if (servletRequest.getContentLength() > 0) {
+                List<JsonNode> values = objectMapper.readTree(servletRequest.getInputStream())
+                                                .findValues("iban");
+                for (JsonNode node : values) {
+                    boolean valid = IBANValidator.getInstance().isValid(node.asText());
+                    if (!valid) {
+                        log.error("Invalid IBAN: {}", node.asText());
+                        ((HttpServletResponse) response).sendError(400, String.format("Invalid IBAN %s", node.asText()));
+                        return;
+                    }
                 }
             }
+            chain.doFilter(servletRequest, response);
+            return;
         }
-        chain.doFilter(servletRequest, response);
+        chain.doFilter(httpServletRequest, response);
     }
 }
 
