@@ -14,6 +14,4 @@
     <PAYMENT />
     <PAYMENT_TARGET />
     <PAYMENT_TARGETS />
-    <SCHEDULED_PAYMENT_ORDER />
-    
 </dataset>
