@@ -35,4 +35,5 @@
 
 	<!-- add sca weights for multi-level sca support -->
     <include file="migration/0009-add-sca-weights.xml" relativeToChangelogFile="true" />
+	<include file="migration/0010-remove-table-scheduled_payment_order.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
