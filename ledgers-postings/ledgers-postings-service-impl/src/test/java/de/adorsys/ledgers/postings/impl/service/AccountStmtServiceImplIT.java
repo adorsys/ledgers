@@ -32,7 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.LEDGER_NOT_FOUND;
+import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.LEDGER_NOT_FOUND;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = PostingsApplication.class)
@@ -253,7 +253,7 @@ public class AccountStmtServiceImplIT {
 
     public LedgerBO loadLedger(String id) {
         return ledgerService.findLedgerById(id).orElseThrow(() -> PostingModuleException.builder()
-                                                                          .postingModuleErrorCode(LEDGER_NOT_FOUND)
+                                                                          .errorCode(LEDGER_NOT_FOUND)
                                                                           .devMsg(String.format("Ledger with id: %s not found", id))
                                                                           .build());
     }

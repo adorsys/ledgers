@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.LEDGER_ACCOUNT_NOT_FOUND;
+import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.LEDGER_ACCOUNT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +82,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
             ledgerService.findLedgerAccount(ledger, model.getName());
         } catch (PostingModuleException ex) {
             // NoOp. Create ledger account below.
-            if (ex.getPostingModuleErrorCode() == LEDGER_ACCOUNT_NOT_FOUND) {
+            if (ex.getErrorCode() == LEDGER_ACCOUNT_NOT_FOUND) {
                 LedgerAccountBO parent = getParentLedgerAccount(ledger, model);
                 LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
                 ledgerService.newLedgerAccount(la, SYSTEM);

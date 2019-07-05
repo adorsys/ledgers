@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.postings.api.exception;
 
-public enum PostingModuleErrorCode {
+public enum PostingErrorCode {
     LEDGER_ACCOUNT_NOT_FOUND,
     LEDGER_NOT_FOUND,
     POSTING_NOT_FOUND,

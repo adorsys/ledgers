@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class PostingModuleException extends RuntimeException {
-    private final PostingModuleErrorCode postingModuleErrorCode;
+    private final PostingErrorCode errorCode;
     private final String devMsg;
 }

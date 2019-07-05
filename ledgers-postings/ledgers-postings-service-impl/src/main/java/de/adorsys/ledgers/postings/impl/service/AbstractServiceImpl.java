@@ -14,7 +14,7 @@ import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.*;
+import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.*;
 
 @RequiredArgsConstructor
 public class AbstractServiceImpl {
@@ -37,14 +37,14 @@ public class AbstractServiceImpl {
         if (chartOfAccountBO.getId() != null) {
             return chartOfAccountRepo.findById(chartOfAccountBO.getId())
                            .orElseThrow(() -> PostingModuleException.builder()
-                                                      .postingModuleErrorCode(CHART_OF_ACCOUNT_NOT_FOUND)
+                                                      .errorCode(CHART_OF_ACCOUNT_NOT_FOUND)
                                                       .devMsg(String.format(COA_NF_BY_ID_MSG, chartOfAccountBO.getId()))
                                                       .build());
         }
         if (chartOfAccountBO.getName() != null) {
             return chartOfAccountRepo.findOptionalByName(chartOfAccountBO.getName())
                            .orElseThrow(() -> PostingModuleException.builder()
-                                                      .postingModuleErrorCode(CHART_OF_ACCOUNT_NOT_FOUND)
+                                                      .errorCode(CHART_OF_ACCOUNT_NOT_FOUND)
                                                       .devMsg(String.format(COA_NF_BY_NAME_MSG, chartOfAccountBO.getName()))
                                                       .build());
         }
@@ -68,7 +68,7 @@ public class AbstractServiceImpl {
         if (ledgerAccount.getId() != null) {
             return ledgerAccountRepository.findById(ledgerAccount.getId())
                            .orElseThrow(() -> PostingModuleException.builder()
-                                                      .postingModuleErrorCode(LEDGER_ACCOUNT_NOT_FOUND)
+                                                      .errorCode(LEDGER_ACCOUNT_NOT_FOUND)
                                                       .devMsg(String.format(LA_NF_BY_ID_MSG, ledgerAccount.getId()))
                                                       .build());
         }
@@ -76,7 +76,7 @@ public class AbstractServiceImpl {
             Ledger loadedLedger = loadLedger(ledgerAccount.getLedger());
             return ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, ledgerAccount.getName())
                            .orElseThrow(() -> PostingModuleException.builder()
-                                                      .postingModuleErrorCode(LEDGER_ACCOUNT_NOT_FOUND)
+                                                      .errorCode(LEDGER_ACCOUNT_NOT_FOUND)
                                                       .devMsg(String.format(LA_NF_BY_NAME_MSG, ledgerAccount.getName()))
                                                       .build());
         }
@@ -101,14 +101,14 @@ public class AbstractServiceImpl {
         if (id != null) {
             return ledgerRepository.findById(id)
                            .orElseThrow(() -> PostingModuleException.builder()
-                                                      .postingModuleErrorCode(LEDGER_NOT_FOUND)
+                                                      .errorCode(LEDGER_NOT_FOUND)
                                                       .devMsg(String.format(LEDGER_NF_BY_ID_MSG, id))
                                                       .build());
         }
         if (name != null) {
             return ledgerRepository.findOptionalByName(name)
                            .orElseThrow(() -> PostingModuleException.builder()
-                                                      .postingModuleErrorCode(LEDGER_NOT_FOUND)
+                                                      .errorCode(LEDGER_NOT_FOUND)
                                                       .devMsg(String.format(LEDGER_NF_BY_NAME_MSG, name))
                                                       .build());
         }
@@ -117,14 +117,14 @@ public class AbstractServiceImpl {
 
     private PostingModuleException insufficientInfo(Object modelObject) {
         return PostingModuleException.builder()
-                       .postingModuleErrorCode(NOT_ENOUGH_INFO)
+                       .errorCode(NOT_ENOUGH_INFO)
                        .devMsg(String.format("Model Object does not provide sufficient information for loading original instance. %s", modelObject.toString()))
                        .build();
     }
 
     private PostingModuleException nullInfo() {
         return PostingModuleException.builder()
-                       .postingModuleErrorCode(NOT_ENOUGH_INFO)
+                       .errorCode(NOT_ENOUGH_INFO)
                        .devMsg("Model object can not be null")
                        .build();
     }

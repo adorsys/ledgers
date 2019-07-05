@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.*;
+import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.*;
 
 @Service
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
@@ -74,7 +74,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         return postingLineRepository.findFirstByIdAndAccount(transactionId, account)
                        .map(postingLineMapper::toPostingLineBO)
                        .orElseThrow(() -> PostingModuleException.builder()
-                                                  .postingModuleErrorCode(POSTING_NOT_FOUND)
+                                                  .errorCode(POSTING_NOT_FOUND)
                                                   .devMsg(String.format(POSTING_NF_MSG, account.getId(), transactionId))
                                                   .build());
     }
@@ -173,7 +173,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
         if (!sumDebit.equals(sumCredit)) {
             throw PostingModuleException.builder()
-                          .postingModuleErrorCode(DOBLE_ENTRY_ERROR)
+                          .errorCode(DOBLE_ENTRY_ERROR)
                           .devMsg(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit))
                           .build();
         }
@@ -197,7 +197,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
         if (stmtOpt.isPresent()) {
             throw PostingModuleException.builder()
-                          .postingModuleErrorCode(BASE_LINE_TIME_ERROR)
+                          .errorCode(BASE_LINE_TIME_ERROR)
                           .devMsg(String.format(BASE_LINE_TIME_ERROR_MSG, posting.getPstTime(), stmtOpt.get().getPstTime()))
                           .build();
         }
@@ -210,7 +210,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     private void postingTimeNotNull(Posting posting) {
         if (posting.getPstTime() == null) {
             throw PostingModuleException.builder()
-                          .postingModuleErrorCode(POSTING_TIME_MISSING)
+                          .errorCode(POSTING_TIME_MISSING)
                           .devMsg("Missing posting time")
                           .build();
         }

@@ -2,7 +2,7 @@ package de.adorsys.ledgers.postings.impl.service;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode;
+import de.adorsys.ledgers.postings.api.exception.PostingErrorCode;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.db.domain.*;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.NO_CATEGORY;
+import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.NO_CATEGORY;
 
 @Service
 public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerService {
@@ -60,7 +60,7 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
         // Validations
         if (StringUtils.isBlank(ledgerAccount.getName())) {
             throw PostingModuleException.builder()
-                          .postingModuleErrorCode(PostingModuleErrorCode.NOT_ENOUGH_INFO)
+                          .errorCode(PostingErrorCode.NOT_ENOUGH_INFO)
                           .devMsg("Missing model name.")
                           .build();
         }
@@ -102,7 +102,7 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
                        .findOptionalByLedgerAndName(loadLedger(ledger), name)
                        .map(ledgerAccountMapper::toLedgerAccountBO)
                        .orElseThrow(() -> PostingModuleException.builder()
-                                                  .postingModuleErrorCode(PostingModuleErrorCode.LEDGER_ACCOUNT_NOT_FOUND)
+                                                  .errorCode(PostingErrorCode.LEDGER_ACCOUNT_NOT_FOUND)
                                                   .devMsg(String.format(LA_NF_BY_NAME_MSG, name))
                                                   .build());
     }
@@ -145,7 +145,7 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
 
     private PostingModuleException getNoCategoryException(String variable) {
         return PostingModuleException.builder()
-                       .postingModuleErrorCode(NO_CATEGORY)
+                       .errorCode(NO_CATEGORY)
                        .devMsg(String.format("Missing category for: %s", variable))
                        .build();
     }
