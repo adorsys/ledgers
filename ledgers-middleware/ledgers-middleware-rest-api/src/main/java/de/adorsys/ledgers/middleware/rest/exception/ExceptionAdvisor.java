@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.rest.exception;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
+import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -54,6 +55,14 @@ public class ExceptionAdvisor {
         return new ResponseEntity<>(body, ex.getStatus());
     }
 
+    @ExceptionHandler(PostingModuleException.class)
+    public ResponseEntity<Map> handlePostingModuleException(PostingModuleException ex) {
+        HttpStatus status = PostingHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
+        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        return new ResponseEntity<>(body, status);
+    }
+
+    //TODO Consider a separate Class for this with a builder?
     private Map<String, String> getHandlerContent(HttpStatus status, String message, String devMessage) {
         Map<String, String> error = new HashMap<>();
         error.put(CODE, String.valueOf(status.value()));

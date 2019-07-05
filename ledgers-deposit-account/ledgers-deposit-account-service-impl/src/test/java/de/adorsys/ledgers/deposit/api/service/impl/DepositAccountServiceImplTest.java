@@ -41,7 +41,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingModuleErrorCode.POSTING_NOT_FOUND;
+import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.POSTING_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -156,7 +156,7 @@ public class DepositAccountServiceImplTest {
         when(ledgerService.findLedgerByName("name")).thenReturn(Optional.of(new LedgerBO()));
         when(ledgerService.findLedgerAccount(any(), any())).thenReturn(new LedgerAccountBO());
         when(postingService.findPostingLineById(any(), any())).thenThrow(PostingModuleException.builder()
-                                                                                 .postingModuleErrorCode(POSTING_NOT_FOUND)
+                                                                                 .errorCode(POSTING_NOT_FOUND)
                                                                                  .devMsg(String.format("Could not find posting by ac id: %s and posting id: %s", ACCOUNT_ID, POSTING_ID))
                                                                                  .build());
 
