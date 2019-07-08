@@ -23,7 +23,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementServ
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
+import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -41,13 +41,13 @@ import java.util.List;
 @RequestMapping("/staff-access" + AccountRestAPI.BASE_PATH)
 public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     private final MiddlewareAccountManagementService middlewareAccountService;
-    private final AuthenticationFacade authenticationFacade;
+    private final ScaInfoHolder scaInfoHolder;
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> createDepositAccountForUser(String userID, AccountDetailsTO accountDetailsTO) {
         try {
-            middlewareAccountService.createDepositAccount(userID, accountDetailsTO);
+            middlewareAccountService.createDepositAccount(scaInfoHolder.getScaInfo(), accountDetailsTO);
 
             // TODO: change to created after Account Middleware service refactoring
             return ResponseEntity.ok().build();
@@ -65,7 +65,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch(authenticationFacade.getUserId()));
+        return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch(scaInfoHolder.getUserId()));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         try {
-            middlewareAccountService.depositCash(accountId, amount);
+            middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
             return ResponseEntity.accepted().build();
         } catch (AccountNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);

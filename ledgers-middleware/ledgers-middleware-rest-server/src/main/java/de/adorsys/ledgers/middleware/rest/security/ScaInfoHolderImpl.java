@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AuthenticationFacadeImpl implements AuthenticationFacade {
+public class ScaInfoHolderImpl implements ScaInfoHolder {
     private final AccessTokenTO accessTokenTO;
 
     @Override
@@ -46,6 +46,7 @@ public class AuthenticationFacadeImpl implements AuthenticationFacade {
         info.setAuthorisationId(accessTokenTO.getAuthorisationId());
         info.setScaId(accessTokenTO.getScaId());
         info.setUserRole(accessTokenTO.getRole());
+        info.setUserLogin(accessTokenTO.getLogin());
         return info;
     }
 

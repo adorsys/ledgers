@@ -16,7 +16,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -62,7 +61,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final UserService userService;
     private final AisConsentBOMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
-    private final AccessTokenTO accessToken;
     private final SCAOperationService scaOperationService;
     private final SCAUtils scaUtils;
     private final AccessService accessService;
@@ -74,18 +72,18 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private boolean multilevelScaEnable;
 
     @Override
-    public void createDepositAccount(String userID, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
+    public void createDepositAccount(ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
         try {
-            UserBO user = userService.findById(userID);
+            UserBO user = userService.findById(scaInfoTO.getUserId());
             DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
-            DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, userID, user.getBranch());
+            DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, scaInfoTO.getUserId(), user.getBranch());
 
             AccountAccessBO accountAccess = accessService.createAccountAccess(createdAccount.getIban(), AccessTypeBO.OWNER);
             accessService.updateAccountAccess(user, accountAccess);
 
             //Check if the account is created by Branch and if so add access to this account to Branch
-            if (!user.getLogin().equals(accessToken.getLogin())) {
-                UserBO userBO = userService.findByLogin(accessToken.getLogin());
+            if (!user.getLogin().equals(scaInfoTO.getUserLogin())) {
+                UserBO userBO = userService.findByLogin(scaInfoTO.getUserLogin());
                 accessService.updateAccountAccess(userBO, accountAccess);
             }
         } catch (UserNotFoundException e) {
@@ -193,23 +191,23 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
+    public void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
             throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, AccountNotFoundMiddlewareException {
         String accNbr = accountNumberPrefix + accountNumberSuffix;
         // if the list is not empty, we mus make sure that account belong to the current user.s
         List<DepositAccountBO> accounts = depositAccountService.findByAccountNumberPrefix(accountNumberPrefix);
-        validateInput(accounts, accountNumberPrefix, accountNumberSuffix);
+        validateInput(scaInfoTO.getUserId(), accounts, accountNumberPrefix, accountNumberSuffix);
         accDetails.setIban(accNbr);
         try {
-            createDepositAccount(accessToken.getSub(), accDetails);
+            createDepositAccount(scaInfoTO, accDetails);
         } catch (UserNotFoundMiddlewareException e) {
-            throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login %s", accessToken.getSub(), accessToken.getLogin()));
+            throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login %s", scaInfoTO.getUserId(), scaInfoTO.getUserLogin()));
         }
     }
 
     // Validate that
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    private void validateInput(List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
+    private void validateInput(String userId, List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
         // This prefix is still free
         if (accounts.isEmpty()) {
             return;
@@ -218,9 +216,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         // XOR The user is the owner of this prefix
         List<AccountAccessTO> accountAccesses = null;
         try {
-            accountAccesses = userMapper.toAccountAccessListTO(userService.findById(accessToken.getSub()).getAccountAccesses());
+            accountAccesses = userMapper.toAccountAccessListTO(userService.findById(userId).getAccountAccesses());
         } catch (UserNotFoundException e) {
-            log.error("Could not get User by id: {}", accessToken.getSub());
+            log.error("Could not get User by id: {}", userId);
         }
 
         // Empty if user is not owner of this prefix.
@@ -413,9 +411,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void depositCash(String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException {
+    public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException {
         try {
-            depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), accessToken.getLogin());
+            depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
         } catch (DepositAccountNotFoundException e) {
             throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
         }

@@ -27,7 +27,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.*;
-import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
+import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -50,7 +50,7 @@ import java.util.List;
 public class UserMgmtResource implements UserMgmtRestAPI {
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
-    private final AuthenticationFacade authenticationFacade;
+    private final ScaInfoHolder scaInfoHolder;
 
     @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
@@ -103,7 +103,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId) {
         try {
-            return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(authenticationFacade.getScaInfoWithScaMethodId(scaMethodId), null, 1800));
+            return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaInfoHolder.getScaInfoWithScaMethodId(scaMethodId), null, 1800));
         } catch (SCAOperationNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -124,7 +124,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode) {
         try {
-            return ResponseEntity.ok(onlineBankingService.authenticateForLogin(authenticationFacade.getScaInfoWithAuthCode(authCode)));
+            return ResponseEntity.ok(onlineBankingService.authenticateForLogin(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
         } catch (SCAOperationNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -175,7 +175,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<UserTO> getUser() {
         try {
-            return ResponseEntity.ok(middlewareUserService.findById(authenticationFacade.getUserId()));
+            return ResponseEntity.ok(middlewareUserService.findById(scaInfoHolder.getUserId()));
         } catch (UserNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -186,7 +186,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
         try {
-            UserTO userTO = middlewareUserService.findById(authenticationFacade.getUserId());
+            UserTO userTO = middlewareUserService.findById(scaInfoHolder.getUserId());
             UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
             URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
