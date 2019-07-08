@@ -12,6 +12,7 @@ import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -123,6 +124,12 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
         } catch (UserNotFoundMiddlewareException e) {
             throw new NotFoundRestException(e.getMessage());
         }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<Void> updateAccountAccessForUser(AccountAccessTO access) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED); //TODO temporal stub matter of implementation
     }
 
     private UserTO findUserForBranch(String userId) throws UserNotFoundMiddlewareException {
