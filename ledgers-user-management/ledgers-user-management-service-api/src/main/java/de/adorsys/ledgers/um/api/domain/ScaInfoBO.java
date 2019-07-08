@@ -14,8 +14,9 @@ public class ScaInfoBO {
     private String scaMethodId;
     private String authCode;
     private TokenUsageBO tokenUsage;
+    private String userLogin;
 
     public ScaInfoBO(String userId, String scaId, String authorisationId, UserRoleBO userRole) {
-        this(userId, scaId, authorisationId, userRole, null, null, null);
+        this(userId, scaId, authorisationId, userRole, null, null, null, null);
     }
 }

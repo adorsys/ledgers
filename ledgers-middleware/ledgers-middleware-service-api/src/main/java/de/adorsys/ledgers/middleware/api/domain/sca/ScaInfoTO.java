@@ -18,4 +18,5 @@ public class ScaInfoTO {
     private String scaMethodId;
     private String authCode;
     private TokenUsageTO tokenUsage;
+    private String userLogin;
 }

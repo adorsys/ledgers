@@ -18,7 +18,7 @@ package de.adorsys.ledgers.middleware.api.exception;
 
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 
-public class UserNotInBranchMiddlewareException extends Exception {
+public class UserNotInBranchMiddlewareException extends RuntimeException {
 
     public static final String ERROR_MESSAGE = "User with such login=%s or email=%s is not in your branch";
 

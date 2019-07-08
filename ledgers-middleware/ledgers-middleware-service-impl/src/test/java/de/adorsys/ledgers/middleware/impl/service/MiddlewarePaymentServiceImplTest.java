@@ -61,7 +61,8 @@ public class MiddlewarePaymentServiceImplTest {
     private static final String AUTH_CODE = "123456";
     private static final String AUTHORISATION_ID = "authorisationId";
     private static final String EMAIL_TEMPLATE = "The TAN for your one time sepa-credit-transfers order to Rozetka.ua at date 12-12-2018; account DE91100000000123456789; EUR 100 is: %s";
-    
+    private static final String USER_LOGIN = "userLogin";
+
     @InjectMocks
     private MiddlewarePaymentServiceImpl middlewareService;
 
@@ -267,6 +268,7 @@ public class MiddlewarePaymentServiceImplTest {
         info.setUserRole(UserRoleTO.CUSTOMER);
         info.setAuthCode(AUTH_CODE);
         info.setScaMethodId(SCA_METHOD_ID);
+        info.setUserLogin(USER_LOGIN);
         return info;
     }
 }

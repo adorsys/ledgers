@@ -21,17 +21,17 @@ public interface MiddlewareAccountManagementService {
 	 *
 	 * Call requires a bank staff access permission.
 	 *
-	 * @param UserID : user for who the account is being created
+	 * @param scaInfoTO : SCA information
 	 * @param depositAccount : the deposit account to be crated.
 	 * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
 	 * @throws UserNotInBranchMiddlewareException : if the associated user is not in the same branch as staff member.
 	 */
-	void createDepositAccount(String UserID, AccountDetailsTO depositAccount)
+	void createDepositAccount(ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount)
             throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException, AccountNotFoundMiddlewareException;
 
 	/**
 	 * Creates a new DepositAccount for the connected user.
-	 * 
+	 * @param scaInfoTO : SCA information
 	 * @param accountNumberPrefix : the account number prefix : the account number prefix
 	 * @param accountNumberSuffix : th eaccount number suffix
 	 * @param accDetails : account to create.
@@ -39,7 +39,7 @@ public interface MiddlewareAccountManagementService {
 	 * @throws AccountWithSuffixExistsMiddlewareException : user has account with same prefix and this suffix
 	 * @throws UserNotFoundMiddlewareException : no user
 	 */
-	void createDepositAccount(String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
+	void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
 			throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException;
 
 	/**
@@ -177,11 +177,12 @@ public interface MiddlewareAccountManagementService {
 	 * Deposits given amount in cash into specified account.
 	 * On the bank's books, the bank debits its cash account for the given amount in cash,
 	 * and credits a "deposits" liability account for an equal amount.
+	 * @param scaInfoTO SCA information
 	 * @param accountId id of the account deposited into
 	 * @param amount amount of cash deposited
 	 * @throws AccountNotFoundMiddlewareException target account not found
 	 */
-	void depositCash(String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException;
+	void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException;
 
 	/**
 	 * Retrieves a List of AccountAccessTO by userId

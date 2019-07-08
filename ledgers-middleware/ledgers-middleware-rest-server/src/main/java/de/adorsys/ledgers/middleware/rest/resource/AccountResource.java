@@ -28,7 +28,7 @@ import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.exception.RestException;
-import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
+import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +48,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping(AccountRestAPI.BASE_PATH)
 public class AccountResource implements AccountRestAPI {
-    private final AuthenticationFacade authenticationFacade;
+    private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService middlewareAccountService;
 
 
@@ -60,7 +60,7 @@ public class AccountResource implements AccountRestAPI {
     @Override
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
-        return ResponseEntity.ok(middlewareAccountService.listDepositAccounts(authenticationFacade.getUserId()));
+        return ResponseEntity.ok(middlewareAccountService.listDepositAccounts(scaInfoHolder.getUserId()));
     }
 
     @Override
@@ -73,7 +73,7 @@ public class AccountResource implements AccountRestAPI {
         String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
 
         try {
-            middlewareAccountService.createDepositAccount(accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
+            middlewareAccountService.createDepositAccount(scaInfoHolder.getScaInfo(), accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
             // TODO: return 201 and link to account.
             return ResponseEntity.ok().build();
         } catch (AccountWithPrefixGoneMiddlewareException | AccountWithSuffixExistsMiddlewareException | UserNotFoundMiddlewareException | AccountNotFoundMiddlewareException e) {
@@ -166,7 +166,7 @@ public class AccountResource implements AccountRestAPI {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         try {
-            middlewareAccountService.depositCash(accountId, amount);
+            middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
             return ResponseEntity.accepted().build();
         } catch (AccountNotFoundMiddlewareException e) {
             throw notFoundRestException(e);

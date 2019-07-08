@@ -22,7 +22,7 @@ import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.*;
-import de.adorsys.ledgers.middleware.rest.security.AuthenticationFacade;
+import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +36,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ConsentRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
-	private final AuthenticationFacade authenticationFacade;
+	private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService middlewareAccountService;
 
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent){
 		try {
-			return ResponseEntity.ok(middlewareAccountService.startSCA(authenticationFacade.getScaInfo(), consentId, aisConsent));
+			return ResponseEntity.ok(middlewareAccountService.startSCA(scaInfoHolder.getScaInfo(), consentId, aisConsent));
 		} catch (InsufficientPermissionMiddlewareException e) {
 			log.error(e.getMessage(), e);
 			throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
@@ -54,7 +54,7 @@ public class ConsentResource implements ConsentRestAPI {
 	public ResponseEntity<SCAConsentResponseTO> getSCA(String consentId, String authorisationId)
 			throws ConflictRestException {
 		try {
-			return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(authenticationFacade.getUserId(), consentId, authorisationId));
+			return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId));
 		} catch (SCAOperationExpiredMiddlewareException | AisConsentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
@@ -66,7 +66,7 @@ public class ConsentResource implements ConsentRestAPI {
 	public ResponseEntity<SCAConsentResponseTO> selectMethod(String consentId, String authorisationId,
 			String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException {
 		try {
-			return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(authenticationFacade.getUserId(), consentId, authorisationId, scaMethodId));
+			return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId, scaMethodId));
 		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
 			throw new NotFoundRestException(e.getMessage());
@@ -83,7 +83,7 @@ public class ConsentResource implements ConsentRestAPI {
 	@Override
 	public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode) {
 		try {
-			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(authenticationFacade.getScaInfoWithAuthCode(authCode), consentId));
+			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(scaInfoHolder.getScaInfoWithAuthCode(authCode), consentId));
 		} catch (SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
 			throw new NotFoundRestException(e.getMessage());
@@ -103,7 +103,7 @@ public class ConsentResource implements ConsentRestAPI {
     @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#aisConsent)")
     public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO aisConsent) {
         try {
-			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(authenticationFacade.getScaInfo(), aisConsent));
+			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(scaInfoHolder.getScaInfo(), aisConsent));
         } catch (InsufficientPermissionMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());

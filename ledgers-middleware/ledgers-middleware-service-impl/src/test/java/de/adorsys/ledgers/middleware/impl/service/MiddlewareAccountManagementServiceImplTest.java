@@ -13,10 +13,8 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
@@ -59,6 +57,12 @@ public class MiddlewareAccountManagementServiceImplTest {
     private static final String CORRECT_USER_ID = "kjk345knkj45";
 
     private static final LocalDateTime TIME = LocalDateTime.MIN;
+    private static final String USER_LOGIN = "userLogin";
+    private static final String USER_ID = "kjk345knkj45";
+    private static final String SCA_ID = "scaId";
+    private static final String SCA_METHOD_ID = "scaMethodId";
+    private static final String AUTH_CODE = "123456";
+    private static final String AUTHORISATION_ID = "authorisationId";
 
     @InjectMocks
     private MiddlewareAccountManagementServiceImpl middlewareService;
@@ -304,14 +308,14 @@ public class MiddlewareAccountManagementServiceImplTest {
     @Test
     public void depositCashDelegatesToDepositAccountService() throws Exception {
         doNothing().when(accountService).depositCash(eq(ACCOUNT_ID), any(), any());
-        middlewareService.depositCash(ACCOUNT_ID, new AmountTO());
+        middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO());
         verify(accountService, times(1)).depositCash(eq(ACCOUNT_ID), any(), any());
     }
 
     @Test(expected = AccountNotFoundMiddlewareException.class)
     public void depositCashWrapsNotFoundException() throws Exception {
         doThrow(DepositAccountNotFoundException.class).when(accountService).depositCash(any(), any(), any());
-        middlewareService.depositCash(ACCOUNT_ID, new AmountTO());
+        middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO());
     }
 
     private static UserBO buildUserBO() {
@@ -337,5 +341,17 @@ public class MiddlewareAccountManagementServiceImplTest {
         access.setIban(IBAN);
         access.setAccessType(AccessTypeTO.OWNER);
         return Collections.singletonList(access);
+    }
+
+    private static ScaInfoTO buildScaInfoTO() {
+        ScaInfoTO info = new ScaInfoTO();
+        info.setUserId(USER_ID);
+        info.setAuthorisationId(AUTHORISATION_ID);
+        info.setScaId(SCA_ID);
+        info.setUserRole(UserRoleTO.CUSTOMER);
+        info.setAuthCode(AUTH_CODE);
+        info.setScaMethodId(SCA_METHOD_ID);
+        info.setUserLogin(USER_LOGIN);
+        return info;
     }
 }
