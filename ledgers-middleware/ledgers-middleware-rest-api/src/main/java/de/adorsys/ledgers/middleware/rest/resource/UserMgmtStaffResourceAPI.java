@@ -1,10 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserCredentialsTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +13,7 @@ import java.util.List;
         description = "Provides endpoint for registering, authorizing and managing users by staff management")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
-    String BRANCH ="branch";
+    String BRANCH = "branch";
     String ROLES = "roles";
     String USER_ID = "userId";
     String USER_NOT_IN_BRANCH = "User is not your branch";
@@ -124,4 +121,20 @@ public interface UserMgmtStaffResourceAPI {
     })
     @PostMapping("/{userId}/sca-data")
     ResponseEntity<Void> updateUserScaData(@PathVariable(USER_ID) String userId, @RequestBody List<ScaUserDataTO> data);
+
+    /**
+     * Grants/Updates AccountAccess for a User for a Certain account within the branch
+     *
+     * @return updated user
+     */
+    @ApiOperation(value = "Updates SCA Data for user if it's within the branch.",
+            notes = "Updates SCA Data for user if it's within the branch.",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Created user in provided in the response."),
+            @ApiResponse(code = 401, message = "Wrong authentication credential."),
+            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+    })
+    @PutMapping("/access")
+    ResponseEntity<Void> updateAccountAccessForUser(@RequestBody AccountAccessTO access);
 }

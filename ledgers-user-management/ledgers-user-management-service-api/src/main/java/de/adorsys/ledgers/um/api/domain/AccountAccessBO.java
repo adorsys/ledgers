@@ -5,14 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 @Data
 public class AccountAccessBO {
-
     private String id;
-
     @NotNull
     private String iban;
     @NotNull
     private AccessTypeBO accessType;
-
     @NotNull
     private int scaWeight;
 
