@@ -72,11 +72,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private boolean multilevelScaEnable;
 
     @Override
-    public void createDepositAccount(ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) throws UserNotFoundMiddlewareException, AccountNotFoundMiddlewareException {
+    public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) throws AccountNotFoundMiddlewareException {
         try {
-            UserBO user = userService.findById(scaInfoTO.getUserId());
+            UserBO user = userService.findById(userId);
             DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
-            DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, scaInfoTO.getUserId(), user.getBranch());
+            DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, user.getId(), user.getBranch());
 
             AccountAccessBO accountAccess = accessService.createAccountAccess(createdAccount.getIban(), AccessTypeBO.OWNER);
             accessService.updateAccountAccess(user, accountAccess);
@@ -199,7 +199,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         validateInput(scaInfoTO.getUserId(), accounts, accountNumberPrefix, accountNumberSuffix);
         accDetails.setIban(accNbr);
         try {
-            createDepositAccount(scaInfoTO, accDetails);
+            createDepositAccount(scaInfoTO.getUserId(), scaInfoTO, accDetails);
         } catch (UserNotFoundMiddlewareException e) {
             throw new AccountMiddlewareUncheckedException(String.format("Can not find user with id %s and login %s", scaInfoTO.getUserId(), scaInfoTO.getUserLogin()));
         }

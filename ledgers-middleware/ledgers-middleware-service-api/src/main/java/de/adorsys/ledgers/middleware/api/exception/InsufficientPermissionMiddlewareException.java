@@ -22,7 +22,7 @@ package de.adorsys.ledgers.middleware.api.exception;
  *
  * @author fpo
  */
-public class InsufficientPermissionMiddlewareException extends Exception {
+public class InsufficientPermissionMiddlewareException extends RuntimeException{
 
     public InsufficientPermissionMiddlewareException() {
     }

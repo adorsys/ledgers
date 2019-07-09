@@ -125,16 +125,16 @@ public interface UserMgmtStaffResourceAPI {
     /**
      * Grants/Updates AccountAccess for a User for a Certain account within the branch
      *
-     * @return updated user
+     * @return nothing
      */
-    @ApiOperation(value = "Updates SCA Data for user if it's within the branch.",
-            notes = "Updates SCA Data for user if it's within the branch.",
+    @ApiOperation(value = "Grants/Updates Account Access for user.",
+            notes = "Grants/Updates Account Access for user.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Created user in provided in the response."),
+            @ApiResponse(code = 200, message = "Success. Account Access Successfully updated."),
             @ApiResponse(code = 401, message = "Wrong authentication credential."),
             @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
     })
-    @PutMapping("/access")
-    ResponseEntity<Void> updateAccountAccessForUser(@RequestBody AccountAccessTO access);
+    @PutMapping("/access/{userId}")
+    ResponseEntity<Void> updateAccountAccessForUser(@PathVariable(USER_ID) String userId, @RequestBody AccountAccessTO access);
 }

@@ -16,10 +16,13 @@
 
 package de.adorsys.ledgers.middleware.rest.exception;
 
+import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -35,6 +38,25 @@ public class ExceptionAdvisor {
     private static final String DEV_MESSAGE = "devMessage";
     private static final String CODE = "code";
     private static final String DATE_TIME = "dateTime";
+
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity handleUserNotFoundException(UserNotFoundException e) {
+        Map<String, String> body = getHandlerContent(HttpStatus.NOT_FOUND, null, e.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InsufficientPermissionMiddlewareException.class)
+    public ResponseEntity handleInsufficientPermission(InsufficientPermissionMiddlewareException e) {
+        Map<String, String> body = getHandlerContent(HttpStatus.FORBIDDEN, null, e.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(DepositAccountNotFoundException.class)
+    public ResponseEntity handleDepositAccountNotFoundException(DepositAccountNotFoundException e) {
+        Map<String, String> body = getHandlerContent(HttpStatus.NOT_FOUND, null, e.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(InsufficientFundsMiddlewareException.class)
     public ResponseEntity<SCAPaymentResponseTO> handleInsufficientFundsException(InsufficientFundsMiddlewareException e) {

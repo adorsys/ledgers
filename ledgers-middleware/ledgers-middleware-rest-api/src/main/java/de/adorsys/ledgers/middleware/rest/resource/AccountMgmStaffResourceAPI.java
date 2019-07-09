@@ -28,13 +28,13 @@ import java.util.List;
 public interface AccountMgmStaffResourceAPI {
     String BASE_PATH = "/staff-access" + AccountRestAPI.BASE_PATH;
     String ACCOUNT_ID = "accountId";
-    String USER_ID = "userID";
+    String USER_ID = "userId";
 
     /**
      * Creates a new deposit account for a user specified by ID
      * Account is created for the same branch as Staff user
      *
-     * @param userID           user for who account is created
+     * @param userId           user for who account is created
      * @param accountDetailsTO account details
      * @return Void
      */
@@ -47,7 +47,7 @@ public interface AccountMgmStaffResourceAPI {
             @ApiResponse(code = 409, message = "Account with given IBAN already exists.")
     })
     @PostMapping
-    ResponseEntity<Void> createDepositAccountForUser(@RequestParam(name = USER_ID) String userID, @RequestBody AccountDetailsTO accountDetailsTO);
+    ResponseEntity<Void> createDepositAccountForUser(@RequestParam(name = USER_ID) String userId, @RequestBody AccountDetailsTO accountDetailsTO);
 
     /**
      * Returns the list of accounts that belong to the same branch as STAFF user.

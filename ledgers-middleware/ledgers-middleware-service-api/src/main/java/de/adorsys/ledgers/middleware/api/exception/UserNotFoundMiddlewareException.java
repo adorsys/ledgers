@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.middleware.api.exception;
 
-public class UserNotFoundMiddlewareException extends Exception {
+public class UserNotFoundMiddlewareException extends RuntimeException {
 
     public UserNotFoundMiddlewareException() {
     }

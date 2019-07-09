@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.deposit.api.exception;
 
-public class TransactionNotFoundException extends Exception {
+public class TransactionNotFoundException extends RuntimeException {
 
     private static final String MESSAGE = "Transaction with id=%s for account %s not found";
 

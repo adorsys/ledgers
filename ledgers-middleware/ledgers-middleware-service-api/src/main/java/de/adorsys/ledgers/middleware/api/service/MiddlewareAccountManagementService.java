@@ -21,12 +21,13 @@ public interface MiddlewareAccountManagementService {
 	 *
 	 * Call requires a bank staff access permission.
 	 *
+	 * @param userId: the identifier of the user for whom the account is created
 	 * @param scaInfoTO : SCA information
 	 * @param depositAccount : the deposit account to be crated.
 	 * @throws UserNotFoundMiddlewareException : if the associated user does not exist.
 	 * @throws UserNotInBranchMiddlewareException : if the associated user is not in the same branch as staff member.
 	 */
-	void createDepositAccount(ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount)
+	void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount)
             throws UserNotFoundMiddlewareException, UserNotInBranchMiddlewareException, AccountNotFoundMiddlewareException;
 
 	/**

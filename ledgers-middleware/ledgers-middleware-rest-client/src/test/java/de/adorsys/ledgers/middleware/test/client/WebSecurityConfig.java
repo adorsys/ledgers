@@ -1,7 +1,10 @@
 package de.adorsys.ledgers.middleware.test.client;
 
-import java.security.Principal;
-
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.client.rest.AuthRequestInterceptor;
+import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
+import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
+import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.context.WebApplicationContext;
 
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
-import de.adorsys.ledgers.middleware.client.rest.AuthRequestInterceptor;
-import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
-import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
-import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
+import java.security.Principal;
 
 @Configuration
 @EnableWebSecurity
@@ -34,7 +33,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests().antMatchers("/management/app/admin",
             		"/management/app/ping", 
             		"/users/login",
-            		"/users/register").permitAll()
+            		"/users/register",
+                "/staff-access/users/register",
+                "/staff-access/users/login")
+                .permitAll()
             .and()
             .authorizeRequests().antMatchers("/v2/api-docs", "/swagger-resources", "/swagger-ui.html", "/webjars/**").permitAll()
             .and()
@@ -58,7 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST,proxyMode = ScopedProxyMode.TARGET_CLASS)
     public AccessTokenTO getAccessTokenTO() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication==null || !(authentication instanceof MiddlewareAuthentication)){
+        if(!(authentication instanceof MiddlewareAuthentication)){
         	return null;
         }
         MiddlewareAuthentication ma = (MiddlewareAuthentication) authentication;
