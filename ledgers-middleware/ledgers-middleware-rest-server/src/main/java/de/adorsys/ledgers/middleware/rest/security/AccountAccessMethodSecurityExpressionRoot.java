@@ -34,6 +34,10 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return checkAccountInfoAccess(iban);
     }
 
+    public boolean accountInfoByIban(String iban) {
+        return checkAccountInfoAccess(iban);
+    }
+
     public boolean accountInfoFor(AisConsentTO consent) {
         AisAccountAccessInfoTO access = consent.getAccess();
         return access != null &&
