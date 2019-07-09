@@ -1,29 +1,27 @@
 package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DepositAccountService {
 
-    DepositAccountBO createDepositAccount(DepositAccountBO depositAccount, String userName) throws DepositAccountNotFoundException;
+    DepositAccountBO createDepositAccount(DepositAccountBO depositAccount, String userName);
 
-    DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccount, String userName, String branch) throws DepositAccountNotFoundException;
+    DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccount, String userName, String branch);
 
-    DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;
+    DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances);
 
-    List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;
+    List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances);
 
-    DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances) throws DepositAccountNotFoundException;
+    DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances);
 
-    TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundException;
+    TransactionDetailsBO getTransactionById(String accountId, String transactionId);
 
-    List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) throws DepositAccountNotFoundException;
+    List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo);
 
-    boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) throws DepositAccountNotFoundException;
+    boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO);
 
     String readIbanById(String id);
 
@@ -31,5 +29,5 @@ public interface DepositAccountService {
 
     List<DepositAccountDetailsBO> findByBranch(String branch);
 
-    void depositCash(String accountId, AmountBO amount, String user) throws DepositAccountNotFoundException;
+    void depositCash(String accountId, AmountBO amount, String user);
 }

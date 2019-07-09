@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.deposit.api.exception;
 
-public class DepositAccountNotFoundException extends Exception {
+public class DepositAccountNotFoundException extends RuntimeException {
     public DepositAccountNotFoundException() {
     }
 

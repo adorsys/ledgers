@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.api.service;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -48,11 +49,11 @@ public interface MiddlewareUserManagementService {
     /**
      * Adds new account for a specific User
      *
-     * @param userLogin user login
-     * @param accounts  List of Accounts to be added for the user or throws UserNotFoundMiddlewareException
-     * @throws UserNotFoundMiddlewareException is thrown if user can`t be found
+     * @param scaInfo container for TPP data from access token
+     * @param userId user id
+     * @param access Access to an account
      */
-    UserTO updateAccountAccess(String userLogin, List<AccountAccessTO> accounts) throws UserNotFoundMiddlewareException;
+    void updateAccountAccess(ScaInfoTO scaInfo,String userId, AccountAccessTO access);
 
     /**
      * Loads paginated user collection

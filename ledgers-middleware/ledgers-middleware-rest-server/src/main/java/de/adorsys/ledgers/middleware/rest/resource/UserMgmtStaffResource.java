@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
@@ -11,6 +12,7 @@ import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
 import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +33,10 @@ import java.util.List;
 public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
-    private final AccessTokenTO accessToken;
+    private final ScaInfoHolder scaInfoHolder;
 
     @Override
-    public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) throws ConflictRestException {
+    public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) {
         try {
             // staff user can not register for the branch is already taken
             if (middlewareUserService.countUsersByBranch(branch) > 0) {
@@ -53,7 +55,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) throws NotFoundRestException, ForbiddenRestException {
+    public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) {
         try {
             return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
         } catch (UserNotFoundMiddlewareException e) {
@@ -65,9 +67,9 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<UserTO> createUser(UserTO user) throws NotFoundRestException, ConflictRestException {
+    public ResponseEntity<UserTO> createUser(UserTO user) {
         try {
-            UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
+            UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
 
             // set the same branch for the user the staff member that creates it
             user.setBranch(branchStaff.getBranch());
@@ -90,9 +92,9 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     // TODO: pagination for users and limit users for branch
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles) throws NotFoundRestException {
+    public ResponseEntity<List<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles) {
         try {
-            UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
+            UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
             List<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles);
             return ResponseEntity.ok(users);
         } catch (UserNotFoundMiddlewareException e) {
@@ -102,7 +104,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<UserTO> getBranchUserById(String userId) throws NotFoundRestException {
+    public ResponseEntity<UserTO> getBranchUserById(String userId) {
         try {
             UserTO user = findUserForBranch(userId);
             return ResponseEntity.ok(user);
@@ -128,12 +130,14 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<Void> updateAccountAccessForUser(AccountAccessTO access) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED); //TODO temporal stub matter of implementation
+    public ResponseEntity<Void> updateAccountAccessForUser(String userId, AccountAccessTO access) {
+        ScaInfoTO scaInfo = scaInfoHolder.getScaInfo();
+        middlewareUserService.updateAccountAccess(scaInfo, userId, access);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private UserTO findUserForBranch(String userId) throws UserNotFoundMiddlewareException {
-        UserTO branchStaff = middlewareUserService.findById(accessToken.getSub());
+        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
         UserTO user = middlewareUserService.findById(userId);
 
         if (!branchStaff.getBranch().equals(user.getBranch())) {

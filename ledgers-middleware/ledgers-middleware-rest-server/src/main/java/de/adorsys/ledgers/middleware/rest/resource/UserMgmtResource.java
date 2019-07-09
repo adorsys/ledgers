@@ -207,7 +207,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
                                                               + "</ul>",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = Void.class, message = "The user data record without the user pin."),
+            @ApiResponse(code = 200, message = "The user data record without the user pin."),
             @ApiResponse(code = 401, message = "Provided bearer token could not be verified."),
             @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
     })
