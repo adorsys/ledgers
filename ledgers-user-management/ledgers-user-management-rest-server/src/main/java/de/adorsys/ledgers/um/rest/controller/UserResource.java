@@ -17,27 +17,18 @@
 package de.adorsys.ledgers.um.rest.controller;
 
 
-import java.net.URI;
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.rest.exception.NotFoundRestException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(UserResource.USERS)
@@ -49,7 +40,7 @@ public class UserResource {
     private final UserService userService;
 
     @PostMapping
-    ResponseEntity<Void> createUser(@RequestBody UserBO user) throws UserAlreadyExistsException {
+    ResponseEntity<Void> createUser(@RequestBody UserBO user) {
         UserBO userBO = userService.create(user);
         URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getLogin()).build().toUri();
         return ResponseEntity.created(uri).build();
@@ -59,7 +50,7 @@ public class UserResource {
     ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
         try {
             return ResponseEntity.ok(userService.findById(id));
-        } catch (UserNotFoundException e) {
+        } catch (UserManagementModuleException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
@@ -68,7 +59,7 @@ public class UserResource {
     ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
         try {
             return ResponseEntity.ok(userService.findByLogin(login));
-        } catch (UserNotFoundException e) {
+        } catch (UserManagementModuleException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }
@@ -83,7 +74,7 @@ public class UserResource {
                               .build().toUri();
 
             return ResponseEntity.created(uri).build();
-        } catch (UserNotFoundException e) {
+        } catch (UserManagementModuleException e) {
             throw new NotFoundRestException(e.getMessage());
         }
     }

@@ -23,7 +23,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.um.api.exception.*;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.*;
 import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
@@ -46,6 +46,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.*;
 
 @Slf4j
 @Service
@@ -93,7 +95,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws InsufficientPermissionException {
+    public BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) {
         UserEntity user = getUser(login);
         boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
         if (!success) {
@@ -102,7 +104,10 @@ public class UserServiceImpl implements UserService {
 
         // Check user has defined role.
         UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
-                                    .findFirst().orElseThrow(() -> new InsufficientPermissionException(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), role)));
+                                    .findFirst().orElseThrow(() -> UserManagementModuleException.builder()
+                                                                           .errorCode(INSUFFICIENT_PERMISSION)
+                                                                           .devMsg(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), role))
+                                                                           .build());
 
         String scaIdParam = scaId != null
                                     ? scaId
@@ -114,11 +119,11 @@ public class UserServiceImpl implements UserService {
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                                              null, null, userRole, scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
+                null, null, userRole, scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
     }
 
     @Override
-    public BearerTokenBO validate(String accessToken, Date refTime) throws InsufficientPermissionException {
+    public BearerTokenBO validate(String accessToken, Date refTime) {
         try {
             SignedJWT jwt = SignedJWT.parse(accessToken);
             JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
@@ -146,7 +151,10 @@ public class UserServiceImpl implements UserService {
 
             // Retrieve user.
             UserEntity userEntity = userRepository.findById(jwtClaimsSet.getSubject())
-                                            .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, jwtClaimsSet.getSubject())));
+                                            .orElseThrow(() -> UserManagementModuleException.builder()
+                                                                       .errorCode(USER_NOT_FOUND)
+                                                                       .devMsg(String.format(USER_WITH_ID_NOT_FOUND, jwtClaimsSet.getSubject()))
+                                                                       .build());
 
             AccessTokenBO accessTokenJWT = bearerTokenService.toAccessTokenObject(jwtClaimsSet);
 
@@ -173,7 +181,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserBO findById(String id) {
         UserEntity userPO = userRepository.findById(id)
-                                    .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_ID_NOT_FOUND, id)));
+                                    .orElseThrow(() -> UserManagementModuleException.builder()
+                                                               .errorCode(USER_NOT_FOUND)
+                                                               .devMsg(String.format(USER_WITH_ID_NOT_FOUND, id))
+                                                               .build());
         return userConverter.toUserBO(userPO);
     }
 
@@ -186,7 +197,10 @@ public class UserServiceImpl implements UserService {
     public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) {
         log.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
-                                  .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
+                                  .orElseThrow(() -> UserManagementModuleException.builder()
+                                                             .errorCode(USER_NOT_FOUND)
+                                                             .devMsg(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin))
+                                                             .build());
 
         List<ScaUserDataEntity> scaMethods = userConverter.toScaUserDataListEntity(scaDataList);
         user.getScaUserData().clear();
@@ -201,7 +215,10 @@ public class UserServiceImpl implements UserService {
     public UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO) {
         log.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
-                                  .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin)));
+                                  .orElseThrow(() -> UserManagementModuleException.builder()
+                                                             .errorCode(USER_NOT_FOUND)
+                                                             .devMsg(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin))
+                                                             .build());
 
         List<AccountAccess> accountAccesses = userConverter.toAccountAccessListEntity(accountAccessListBO);
         user.getAccountAccesses().clear();
@@ -213,17 +230,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent) throws InsufficientPermissionException {
-        UserBO user;
-        try {
-            user = findById(scaInfoBO.getUserId());
-        } catch (UserNotFoundException e) {
-            throw new UserManagementUnexpectedException(e);
-        }
+    public BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent) {
+        UserBO user = findById(scaInfoBO.getUserId());
         aisConsent.setUserId(user.getId());
-
         validateAisConsent(aisConsent, user);
-
         Date issueTime = new Date();
         Date expires = getExpirationDate(aisConsent, issueTime);
         // Produce the token
@@ -232,8 +242,8 @@ public class UserServiceImpl implements UserService {
         act.put("tppId", tppId);
         UserRole userRole = UserRole.valueOf(scaInfoBO.getUserRole().name());
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null,
-                                              aisConsent, userRole,
-                                              scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
+                aisConsent, userRole,
+                scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
     }
 
     @Override
@@ -253,9 +263,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException {
+    public AisConsentBO loadConsent(String consentId) {
         AisConsentEntity aisConsentEntity = consentRepository.findById(consentId)
-                                                    .orElseThrow(() -> new ConsentNotFoundException(String.format(CONSENT_WITH_ID_S_NOT_FOUND, consentId)));
+                                                    .orElseThrow(() -> UserManagementModuleException.builder()
+                                                                               .errorCode(CONSENT_NOT_FOUND)
+                                                                               .devMsg(String.format(CONSENT_WITH_ID_S_NOT_FOUND, consentId))
+                                                                               .build());
         return aisConsentMapper.toAisConsentBO(aisConsentEntity);
     }
 
@@ -276,9 +289,8 @@ public class UserServiceImpl implements UserService {
      * @param accessibleAccounts accessible account
      * @param requestedAccounts  requested accounts
      * @param message            message
-     * @throws InsufficientPermissionException exception thrown
      */
-    private void checkAccountAccess(List<String> accessibleAccounts, List<String> requestedAccounts, String message, String userId) throws InsufficientPermissionException {
+    private void checkAccountAccess(List<String> accessibleAccounts, List<String> requestedAccounts, String message, String userId) {
         ArrayList<String> copy = new ArrayList<>();
         if (requestedAccounts != null) {
             copy.addAll(requestedAccounts);
@@ -287,11 +299,14 @@ public class UserServiceImpl implements UserService {
         copy.removeAll(accessibleAccounts);
 
         if (!copy.isEmpty()) {
-            throw new InsufficientPermissionException(String.format(message, userId, copy.toString()));
+            throw UserManagementModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(String.format(message, userId, copy.toString()))
+                          .build();
         }
     }
 
-    private void validateAisConsent(AisConsentBO aisConsent, UserBO user) throws InsufficientPermissionException {
+    private void validateAisConsent(AisConsentBO aisConsent, UserBO user) {
         if (aisConsent == null) {
             return;
         }
@@ -318,34 +333,44 @@ public class UserServiceImpl implements UserService {
     @NotNull
     private UserEntity getUser(String login) {
         return userRepository.findFirstByLogin(login)
-                       .orElseThrow(() -> new UserNotFoundException(String.format(USER_WITH_LOGIN_NOT_FOUND, login)));
+                       .orElseThrow(() -> UserManagementModuleException.builder()
+                                                  .errorCode(USER_NOT_FOUND)
+                                                  .devMsg(String.format(USER_WITH_LOGIN_NOT_FOUND, login))
+                                                  .build());
     }
 
     private void checkUserAlreadyExists(UserBO userBO) {
         Optional<UserEntity> user = userRepository.findByEmailOrLogin(userBO.getEmail(), userBO.getLogin());
         if (user.isPresent()) {
             String message = String.format("User with this email or login already exists. Email %s. Login %s.",
-                                           userBO.getEmail(), userBO.getLogin());
+                    userBO.getEmail(), userBO.getLogin());
             log.error(message);
-            throw new UserAlreadyExistsException(message);
+            throw UserManagementModuleException.builder()
+                          .errorCode(USER_ALREADY_EXISTS)
+                          .devMsg(message)
+                          .build();
         }
     }
 
-    private void validateAccountAcesses(UserEntity userEntity, AccessTokenBO accessTokenJWT) throws InsufficientPermissionException {
+    private void validateAccountAcesses(UserEntity userEntity, AccessTokenBO accessTokenJWT) {
         List<AccountAccess> accountAccessesFromToken = userConverter.toAccountAccessListEntity(accessTokenJWT.getAccountAccesses());
         for (AccountAccess accountAccessFT : accountAccessesFromToken) {
             confirmAndReturnAccess(userEntity.getId(), accountAccessFT, userEntity.getAccountAccesses());
         }
     }
 
-    private void confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) throws InsufficientPermissionException {
+    private void confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
         accountAccesses.stream()
                 .filter(a -> matchAccess(accountAccessFT, a))
-                .findFirst().orElseThrow(() -> {
-            String message = String.format(PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION, subject, accountAccessFT.getIban());
-            log.warn(message);
-            return new InsufficientPermissionException(message);
-        });
+                .findFirst()
+                .orElseThrow(() -> {
+                    String message = String.format(PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION, subject, accountAccessFT.getIban());
+                    log.warn(message);
+                    return UserManagementModuleException.builder()
+                                   .errorCode(INSUFFICIENT_PERMISSION)
+                                   .devMsg(message)
+                                   .build();
+                });
     }
 
     private boolean matchAccess(AccountAccess requested, AccountAccess existent) {
@@ -358,13 +383,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private BearerTokenBO getToken(ScaInfoBO scaInfoBO, TokenUsageBO usageType) {
-        UserEntity user = userRepository.findById(scaInfoBO.getUserId()).orElseThrow(() -> new UserNotFoundException(CAN_NOT_LOAD_USER_WITH_ID + scaInfoBO.getUserId()));
+        UserEntity user = userRepository.findById(scaInfoBO.getUserId()).orElseThrow(() -> UserManagementModuleException.builder()
+                                                                                                   .errorCode(USER_NOT_FOUND)
+                                                                                                   .devMsg(CAN_NOT_LOAD_USER_WITH_ID + scaInfoBO.getUserId())
+                                                                                                   .build());
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
 
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                                              null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
-                                              scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),
-                                              issueTime, expires, usageType, null);
+                null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
+                scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),
+                issueTime, expires, usageType, null);
     }
 }

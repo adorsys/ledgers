@@ -1,13 +1,11 @@
 package de.adorsys.ledgers.sca.service;
 
-import de.adorsys.ledgers.sca.domain.*;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.sca.domain.OpTypeBO;
+import de.adorsys.ledgers.sca.domain.SCAOperationBO;
+import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 
 public interface SCAOperationService {
 
@@ -20,11 +18,10 @@ public interface SCAOperationService {
 	 * @param scaStatus : the actual scaStatus to be set if auth code is generated and sent.
 	 * @return the generated AuthCode in clear text.
 	 * @throws SCAMethodNotSupportedException
-	 * @throws UserScaDataNotFoundException
-	 * @throws SCAOperationNotFoundException 
+	 * @throws SCAOperationNotFoundException
 	 * @throws SCAOperationValidationException 
 	 */
-	SCAOperationBO generateAuthCode(AuthCodeDataBO authCodeData, UserBO user, ScaStatusBO scaStatus) throws SCAMethodNotSupportedException, UserScaDataNotFoundException, SCAOperationValidationException, SCAOperationNotFoundException;
+	SCAOperationBO generateAuthCode(AuthCodeDataBO authCodeData, UserBO user, ScaStatusBO scaStatus) throws SCAMethodNotSupportedException, SCAOperationValidationException, SCAOperationNotFoundException;
 
 	/**
 	 * Verify that the auth code, recomputing and verifying the hash of (Auth Code and opData).

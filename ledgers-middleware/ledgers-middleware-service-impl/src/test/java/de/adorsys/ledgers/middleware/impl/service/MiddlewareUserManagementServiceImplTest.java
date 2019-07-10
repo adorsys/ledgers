@@ -2,9 +2,8 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class MiddlewareUserManagementServiceImplTest {
 	}
 
 	@Test
-	public void getSCAMethods() throws UserNotFoundException, UserNotFoundMiddlewareException {
+	public void getSCAMethods() {
 		String userLogin = "spe@adorsys.com.ua";
 		when(userService.findByLogin(userLogin)).thenReturn(userBO);
 
@@ -56,17 +55,17 @@ public class MiddlewareUserManagementServiceImplTest {
 		verify(userService, times(1)).findByLogin(userLogin);
 	}
 
-	@Test(expected = UserNotFoundMiddlewareException.class)
-	public void findByUserLoginUserNotFound() throws UserNotFoundException, UserNotFoundMiddlewareException {
+	@Test(expected = UserManagementModuleException.class)
+	public void findByUserLoginUserNotFound() {
 		String login = "spe@adorsys.com.ua";
 
-		when(userService.findByLogin(login)).thenThrow(new UserNotFoundException());
+		when(userService.findByLogin(login)).thenThrow(UserManagementModuleException.builder().build());
 
 		middlewareUserService.findByUserLogin(login);
 	}
 
 	@Test
-	public void updateScaMethods() throws UserNotFoundException, UserNotFoundMiddlewareException {
+	public void updateScaMethods() {
 		String userLogin = "userLogin";
 		when(userService.updateScaData(userBO.getScaUserData(), userLogin)).thenReturn(userBO);
 

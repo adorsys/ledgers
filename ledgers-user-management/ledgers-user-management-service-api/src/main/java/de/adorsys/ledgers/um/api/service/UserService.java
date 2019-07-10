@@ -17,9 +17,6 @@
 package de.adorsys.ledgers.um.api.service;
 
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.um.api.exception.ConsentNotFoundException;
-import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 
 import java.util.Date;
 import java.util.List;
@@ -30,7 +27,7 @@ public interface UserService {
      * Creates a new user
      *
      * @param user User business object
-     * @return A persisted user or trows a UserAlreadyExistsException
+     * @return A persisted user
      */
     UserBO create(UserBO user);
 
@@ -44,16 +41,15 @@ public interface UserService {
      * @param role            the role of this user
      * @param scaId           the scaId
      * @param authorisationId the authorization id
-     * @return BearerTokenBO representation of authorization status true for success, false for failure or throws a UserNotFoundException
-     * @throws InsufficientPermissionException usder does not have requested role
+     * @return BearerTokenBO representation of authorization status true for success
      */
-    BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) throws InsufficientPermissionException;
+    BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId);
 
     /**
      * Finds a User by its identifier
      *
      * @param id User identifier
-     * @return a User or throws a UserNotFoundException
+     * @return a User
      */
     UserBO findById(String id);
 
@@ -61,7 +57,7 @@ public interface UserService {
      * Finds a User by its login
      *
      * @param login User identifier
-     * @return a User or throws a UserNotFoundException
+     * @return a User
      */
     UserBO findByLogin(String login);
 
@@ -84,9 +80,8 @@ public interface UserService {
      * @param accessToken the access token to validate
      * @param refTime     the reference time
      * @return the bearer token
-     * @throws InsufficientPermissionException access permissions contained in the token are no longer supported by the user.
      */
-    BearerTokenBO validate(String accessToken, Date refTime) throws InsufficientPermissionException;
+    BearerTokenBO validate(String accessToken, Date refTime);
 
     /**
      * Provides a token used to gain read access to an account.
@@ -94,29 +89,24 @@ public interface UserService {
      * @param scaInfoBO SCA information
      * @param aisConsent  the ais consent.
      * @return the bearer token
-     * @throws InsufficientPermissionException the current user does not have sufficient permission.
      */
-    BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent) throws InsufficientPermissionException;
+    BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent);
 
     /**
-     * Create a new token for the current user, after a successfull auth code proces..
+     * Create a new token for the current user, after a successful auth code process..
      *
      * @param scaInfoBO      : SCA information
      * @return the bearer token
-     * @throws InsufficientPermissionException : user does not have the required role.
-     * @throws UserNotFoundException           : underlying user non longer existent.
      */
-    BearerTokenBO scaToken(ScaInfoBO scaInfoBO) throws InsufficientPermissionException;
+    BearerTokenBO scaToken(ScaInfoBO scaInfoBO);
 
     /**
      * Create a new token for the current user, with a new authorization id
      *
      * @param scaInfoBO      : SCA information
      * @return the bearer token
-     * @throws InsufficientPermissionException : user does not have the required role.
-     * @throws UserNotFoundException           : underlying user non longer existent.
      */
-    BearerTokenBO loginToken(ScaInfoBO scaInfoBO) throws InsufficientPermissionException;
+    BearerTokenBO loginToken(ScaInfoBO scaInfoBO);
 
     /**
      * Stores a consent in the consent database and returns the original consent
@@ -132,9 +122,8 @@ public interface UserService {
      *
      * @param consentId the consent id
      * @return the corresponding ais consent.
-     * @throws ConsentNotFoundException
      */
-    AisConsentBO loadConsent(String consentId) throws ConsentNotFoundException;
+    AisConsentBO loadConsent(String consentId);
 
     /**
      * Loads users collection by branch and the given roles

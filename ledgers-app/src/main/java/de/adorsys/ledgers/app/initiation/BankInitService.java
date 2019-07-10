@@ -21,8 +21,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -81,7 +80,7 @@ public class BankInitService {
         try {
             userService.findByLogin("admin");
             logger.error("Admin user is already present. Skipping creation");
-        } catch (UserNotFoundException e) {
+        } catch (UserManagementModuleException e) { //TODO GET RID of Exception Driven Logic https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/211
             UserTO admin = new UserTO("admin", "admin@mail.de", "admin123"); //TODO Matter of refactoring
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
@@ -104,7 +103,7 @@ public class BankInitService {
                 }
             } catch (DepositAccountNotFoundException e) {
                 logger.error(ACCOUNT_NOT_FOUND_MSG);
-            } catch (UserNotFoundException e) {
+            } catch (UserManagementModuleException e) {
                 logger.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
             }
         }
@@ -126,13 +125,13 @@ public class BankInitService {
                 }
             } catch (DepositAccountNotFoundException e) {
                 logger.error(ACCOUNT_NOT_FOUND_MSG);
-            } catch (UserNotFoundException e) {
+            } catch (UserManagementModuleException e) {
                 logger.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
             }
         }
     }
 
-    private boolean isAbsentTransactionBatch(BulkPaymentTO payment) throws DepositAccountNotFoundException {
+    private boolean isAbsentTransactionBatch(BulkPaymentTO payment) {
         boolean isAbsentTransaction;
         DepositAccountDetailsBO account = depositAccountService.getDepositAccountByIban(payment.getDebtorAccount().getIban(), LocalDateTime.now(), false);
         List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(account.getAccount().getId(), START_DATE, LocalDateTime.now());
@@ -144,18 +143,18 @@ public class BankInitService {
         return isAbsentTransaction;
     }
 
-    private boolean isAbsentTransactionRegular(String iban, String entToEndId) throws DepositAccountNotFoundException {
+    private boolean isAbsentTransactionRegular(String iban, String entToEndId) {
         DepositAccountDetailsBO account = depositAccountService.getDepositAccountByIban(iban, LocalDateTime.now(), false);
         List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(account.getAccount().getId(), START_DATE, LocalDateTime.now());
         return transactions.stream()
                        .noneMatch(t -> entToEndId.equals(t.getEndToEndId()));
     }
 
-    private UserTO getUserByIban(List<UserTO> users, String iban) throws UserNotFoundException {
+    private UserTO getUserByIban(List<UserTO> users, String iban) {
         return users.stream()
                        .filter(user -> isAccountContainedInAccess(user.getAccountAccesses(), iban))
                        .findFirst()
-                       .orElseThrow(UserNotFoundException::new);
+                       .orElseThrow(() -> UserManagementModuleException.builder().build());
     }
 
     private void createAccounts() {
@@ -195,18 +194,18 @@ public class BankInitService {
             String userName = getUserNameByIban(details.getIban());
             DepositAccountBO accountBO = accountDetailsMapper.toDepositAccountBO(details);
             return Optional.of(depositAccountService.createDepositAccount(accountBO, userName));
-        } catch (UserNotFoundException | DepositAccountNotFoundException e) {
+        } catch (DepositAccountNotFoundException e) {
             logger.error("Error creating Account For Mocked User");
             return Optional.empty();
         }
     }
 
-    private String getUserNameByIban(String iban) throws UserNotFoundException {
+    private String getUserNameByIban(String iban) {
         return mockbankInitData.getUsers().stream()
                        .filter(u -> isAccountContainedInAccess(u.getAccountAccesses(), iban))
                        .findFirst()
                        .map(UserTO::getLogin)
-                       .orElseThrow(UserNotFoundException::new);
+                       .orElseThrow(() -> UserManagementModuleException.builder().build());
     }
 
     private boolean isAccountContainedInAccess(List<AccountAccessTO> access, String iban) {
@@ -218,7 +217,7 @@ public class BankInitService {
         for (UserTO user : mockbankInitData.getUsers()) {
             try {
                 userService.findByLogin(user.getLogin());
-            } catch (UserNotFoundException e) {
+            } catch (UserManagementModuleException e) {
                 user.getUserRoles().add(UserRoleTO.CUSTOMER);
                 createUser(user);
             }
@@ -228,7 +227,7 @@ public class BankInitService {
     private void createUser(UserTO user) {
         try {
             userService.create(userMapper.toUserBO(user));
-        } catch (UserAlreadyExistsException e1) {
+        } catch (UserManagementModuleException e1) {
             logger.error("User already exists! Should never happen while initiating mock data!");
         }
     }

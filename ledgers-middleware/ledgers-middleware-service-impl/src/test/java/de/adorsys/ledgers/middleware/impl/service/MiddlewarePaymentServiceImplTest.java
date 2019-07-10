@@ -29,8 +29,6 @@ import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -121,7 +119,7 @@ public class MiddlewarePaymentServiceImplTest {
 
 
     @Test
-    public void generateAuthCode() throws SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationException, SCAOperationNotFoundException, PaymentNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, PaymentNotFoundException {
+    public void generateAuthCode() throws SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, SCAOperationValidationException, SCAOperationNotFoundException, PaymentNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, PaymentNotFoundException {
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         UserTO userTO = readYml(UserTO.class, "user1.yml");
         SCAOperationBO scaOperationBO = readYml(SCAOperationBO.class, "scaOperationEntity.yml");
@@ -172,7 +170,7 @@ public class MiddlewarePaymentServiceImplTest {
     }
 
     @Test
-    public void executePayment_Success() throws PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, InsufficientPermissionException {
+    public void executePayment_Success() throws PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
     	BearerTokenBO bearerTokenBO = new BearerTokenBO();
@@ -204,8 +202,6 @@ public class MiddlewarePaymentServiceImplTest {
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(payment);
 		when(coreDataPolicy.getPaymentCoreData(payment)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(payment));
-        String authorisationId = "authId";
-		String authCode = "123456";
 		middlewareService.authorizePayment(buildScaInfoTO(), PAYMENT_ID);
     }
 
