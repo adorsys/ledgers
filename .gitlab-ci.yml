@@ -8,7 +8,7 @@ stages:
   - "Package"      # dockerize jar and push to docker registry
   - "Deployment"   # push to openshift registry (snapshot Deployment) or release registry
 
-image: "adorsys/ci-build"
+image: "adorsys/ci-build:201907"
 
 # ------------------------------------------------------------------
 # variables
