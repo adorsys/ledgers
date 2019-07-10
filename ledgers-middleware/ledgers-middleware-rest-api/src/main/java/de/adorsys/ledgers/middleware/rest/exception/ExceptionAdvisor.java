@@ -22,7 +22,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,13 +38,6 @@ public class ExceptionAdvisor {
     private static final String DEV_MESSAGE = "devMessage";
     private static final String CODE = "code";
     private static final String DATE_TIME = "dateTime";
-
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity handleUserNotFoundException(UserNotFoundException e) {
-        Map<String, String> body = getHandlerContent(HttpStatus.NOT_FOUND, null, e.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
 
     @ExceptionHandler(InsufficientPermissionMiddlewareException.class)
     public ResponseEntity handleInsufficientPermission(InsufficientPermissionMiddlewareException e) {
@@ -80,6 +73,13 @@ public class ExceptionAdvisor {
     @ExceptionHandler(PostingModuleException.class)
     public ResponseEntity<Map> handlePostingModuleException(PostingModuleException ex) {
         HttpStatus status = PostingHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
+        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(UserManagementModuleException.class)
+    public ResponseEntity<Map> handleUserManagementModuleException(UserManagementModuleException ex) {
+        HttpStatus status = UserManagementHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }

@@ -34,7 +34,6 @@ import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.util.hash.BaseHashItem;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
@@ -52,6 +51,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.*;
+import static de.adorsys.ledgers.sca.exception.SCAErrorCode.USER_SCA_DATA_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -94,7 +94,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     @Override
-    public SCAOperationBO generateAuthCode(AuthCodeDataBO data, UserBO user, ScaStatusBO scaStatus) throws SCAOperationValidationException, SCAMethodNotSupportedException, UserScaDataNotFoundException {
+    public SCAOperationBO generateAuthCode(AuthCodeDataBO data, UserBO user, ScaStatusBO scaStatus) throws SCAOperationValidationException, SCAMethodNotSupportedException {
 
         SCAOperationEntity scaOperation = loadOrCreateScaOperation(data, scaStatus);
 
@@ -286,11 +286,15 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     @NotNull
-    private ScaUserDataBO getScaUserData(@NotNull List<ScaUserDataBO> scaUserData, @NotNull String scaUserDataId) throws UserScaDataNotFoundException {
+    private ScaUserDataBO getScaUserData(@NotNull List<ScaUserDataBO> scaUserData, @NotNull String scaUserDataId) {
         return scaUserData.stream()
                        .filter(s -> scaUserDataId.equals(s.getId()))
                        .findFirst()
-                       .orElseThrow(() -> new UserScaDataNotFoundException(scaUserDataId));
+                       .orElseThrow(() -> ScaModuleException
+                               .builder()
+                               .errorCode(USER_SCA_DATA_NOT_FOUND)
+                               .devMsg(String.format("Sca data not found for: %s", scaUserDataId))
+                               .build());
     }
 
     @NotNull

@@ -1,13 +1,34 @@
 package de.adorsys.ledgers.sca.service.impl;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
+import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
+import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
+import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
+import de.adorsys.ledgers.sca.domain.OpTypeBO;
+import de.adorsys.ledgers.sca.domain.SCAOperationBO;
+import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
+import de.adorsys.ledgers.sca.service.SCASender;
+import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
+import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
+import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.hash.HashGenerationException;
+import de.adorsys.ledgers.util.hash.HashGenerator;
+import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,45 +38,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
-import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
-import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.AuthCodeGenerationException;
-import de.adorsys.ledgers.sca.exception.SCAMethodNotSupportedException;
-import de.adorsys.ledgers.sca.exception.SCAOperationExpiredException;
-import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
-import de.adorsys.ledgers.sca.exception.SCAOperationUsedOrStolenException;
-import de.adorsys.ledgers.sca.exception.SCAOperationValidationException;
-import de.adorsys.ledgers.sca.exception.ScaUncheckedException;
-import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
-import de.adorsys.ledgers.sca.service.SCASender;
-import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
-import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
-import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.util.hash.HashGenerationException;
-import de.adorsys.ledgers.util.hash.HashGenerator;
-import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
-import pro.javatar.commons.reader.YamlReader;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SCAOperationServiceImplTest {
@@ -143,7 +130,7 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
-    public void generateAuthCode() throws AuthCodeGenerationException, HashGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException, SCAOperationValidationException, SCAOperationNotFoundException {
+    public void generateAuthCode() throws HashGenerationException, SCAMethodNotSupportedException, SCAOperationValidationException {
         String email = "spe@adorsys.com.ua";
 
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
@@ -181,7 +168,7 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test(expected = ScaUncheckedException.class)
-    public void generateAuthCodeWithException() throws AuthCodeGenerationException, HashGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException, SCAOperationValidationException, SCAOperationNotFoundException {
+    public void generateAuthCodeWithException() throws HashGenerationException, SCAMethodNotSupportedException, SCAOperationValidationException {
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
@@ -197,8 +184,8 @@ public class SCAOperationServiceImplTest {
         scaOperationService.generateAuthCode(codeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
     }
 
-    @Test(expected = UserScaDataNotFoundException.class)
-    public void generateUserScaDataNotFoundException() throws AuthCodeGenerationException, SCAMethodNotSupportedException, UserNotFoundException, UserScaDataNotFoundException, SCAOperationValidationException, SCAOperationNotFoundException {
+    @Test(expected = ScaModuleException.class)
+    public void scaDataNotFound() throws SCAMethodNotSupportedException, SCAOperationValidationException {
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
@@ -269,7 +256,7 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test(expected = SCAOperationUsedOrStolenException.class)
-    public void validateAuthCodeOperationStolenException() throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException, HashGenerationException {
+    public void validateAuthCodeOperationStolenException() throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
 
         // operation was used
         scaOperationEntity.setStatus(AuthCodeStatus.SENT);

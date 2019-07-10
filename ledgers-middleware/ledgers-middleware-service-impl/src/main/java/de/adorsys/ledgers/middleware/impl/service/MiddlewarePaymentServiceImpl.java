@@ -51,8 +51,6 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
-import de.adorsys.ledgers.um.api.exception.UserScaDataNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
@@ -243,7 +241,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private BearerTokenTO paymentAccountAccessToken(ScaInfoTO scaInfoTO, PaymentBO payment, String userName) {
         String iban = payment.getDebtorAccount().getIban();
         // Returned token can be used to access status.
-        try {
             AisConsentBO aisConsent = new AisConsentBO();
             AisAccountAccessInfoBO access = new AisAccountAccessInfoBO();
             aisConsent.setAccess(access);
@@ -256,9 +253,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             // This is the user login for psd2 and not the technical id.
             aisConsent.setUserId(userName);
             return bearerTokenMapper.toBearerTokenTO(userService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), aisConsent));
-        } catch (InsufficientPermissionException e) {
-            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-        }
     }
 
     @Override
@@ -280,8 +274,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @Override
     public SCAPaymentResponseTO selectSCAMethodForPayment(ScaInfoTO scaInfoTO, String paymentId)
             throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException,
-                           UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-                           SCAOperationNotFoundMiddlewareException {
+                           SCAOperationValidationMiddlewareException,                           SCAOperationNotFoundMiddlewareException {
 
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         UserTO userTO = scaUtils.user(userBO);
@@ -301,9 +294,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         } catch (SCAMethodNotSupportedException e) {
             log.error(e.getMessage());
             throw new SCAMethodNotSupportedMiddleException(e);
-        } catch (UserScaDataNotFoundException e) {
-            log.error(e.getMessage());
-            throw new UserScaDataNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
             throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
         } catch (SCAOperationNotFoundException e) {
@@ -330,8 +320,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @Override
     public SCAPaymentResponseTO selectSCAMethodForCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId)
             throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException,
-                           UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-                           SCAOperationNotFoundMiddlewareException {
+                           SCAOperationValidationMiddlewareException,                           SCAOperationNotFoundMiddlewareException {
         try {
             UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
             UserTO userTO = scaUtils.user(userBO);
@@ -353,9 +342,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         } catch (SCAMethodNotSupportedException e) {
             log.error(e.getMessage());
             throw new SCAMethodNotSupportedMiddleException(e);
-        } catch (UserScaDataNotFoundException e) {
-            log.error(e.getMessage());
-            throw new UserScaDataNotFoundMiddlewareException(e);
         } catch (SCAOperationValidationException e) {
             throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
         } catch (SCAOperationNotFoundException e) {
@@ -483,5 +469,4 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         response.setBearerToken(paymentAccountAccessToken);
         return response;
     }
-
 }

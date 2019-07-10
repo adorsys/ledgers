@@ -4,8 +4,7 @@ import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
-import de.adorsys.ledgers.um.api.exception.InsufficientPermissionException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
 
-	@InjectMocks
+    @InjectMocks
     public UserServiceImpl userService;
 
     @Mock
@@ -45,10 +44,10 @@ public class UserServiceImplTest {
 
     @Mock
     private PasswordEnc passwordEnc;
-    
+
     @Mock
     private HashMacSecretSource secretSource;
-    
+
     @Mock
     private BearerTokenService bearerTokenService;
 
@@ -70,7 +69,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void updateScaData() throws UserNotFoundException, IOException {
+    public void updateScaData() throws IOException {
         List<ScaUserDataBO> scaUserDataBOS = getScaUserData(ScaUserDataBO.class);
         List<ScaUserDataEntity> scaUserDataEntities = getScaUserData(ScaUserDataEntity.class);
 
@@ -83,8 +82,8 @@ public class UserServiceImplTest {
         verify(repository, times(1)).save(userEntity);
     }
 
-    @Test(expected = UserNotFoundException.class)
-    public void updateScaDataUserNotFound() throws UserNotFoundException, IOException {
+    @Test(expected = UserManagementModuleException.class)
+    public void updateScaDataUserNotFound() throws IOException {
         List<ScaUserDataBO> scaUserDataBOS = getScaUserData(ScaUserDataBO.class);
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
@@ -96,8 +95,8 @@ public class UserServiceImplTest {
         return reader.getListFromInputStream(getClass().getResourceAsStream("sca-user-methods.yml"), clazz);
     }
 
-    @Test(expected=UserNotFoundException.class)
-    public void authorizeWithLoginAndPin() throws UserNotFoundException, InsufficientPermissionException {
+    @Test(expected = UserManagementModuleException.class)
+    public void authorizeWithLoginAndPin() {
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
         BearerTokenBO bearerTokenBO = userService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER, null, null);
@@ -106,7 +105,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void findById() throws UserNotFoundException {
+    public void findById() {
 
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
         when(converter.toUserBO(any())).thenReturn(userBO);
@@ -123,8 +122,8 @@ public class UserServiceImplTest {
         verify(repository, times(1)).findById(USER_ID);
     }
 
-    @Test(expected = UserNotFoundException.class)
-    public void authorizeWithException() throws UserNotFoundException, InsufficientPermissionException {
+    @Test(expected = UserManagementModuleException.class)
+    public void authorizeWithException() {
 
         when(repository.findFirstByLogin(USER_NON_EXISTING_LOGIN)).thenReturn(Optional.empty());
 

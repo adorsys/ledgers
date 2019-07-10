@@ -1,16 +1,5 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -19,18 +8,29 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
-
 import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
-import de.adorsys.ledgers.um.api.exception.UserManagementUnexpectedException;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.util.Ids;
+import lombok.RequiredArgsConstructor;
 import net.minidev.json.JSONStyle;
 import net.minidev.json.JSONValue;
 import net.minidev.json.reader.JsonWriterI;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.TOKEN_CREATION_ERROR;
 
 @Service
 @RequiredArgsConstructor
@@ -118,7 +118,10 @@ public class BearerTokenService {
         try {
             signedJWT.sign(new MACSigner(secretSource.getHmacSecret()));
         } catch (JOSEException e) {
-            throw new UserManagementUnexpectedException("Error signing user token", e);
+            throw UserManagementModuleException.builder()
+                    .errorCode(TOKEN_CREATION_ERROR)
+                    .devMsg(String.format("Error signing user token %s", e))
+                    .build();
         }
         return signedJWT.serialize();
     }

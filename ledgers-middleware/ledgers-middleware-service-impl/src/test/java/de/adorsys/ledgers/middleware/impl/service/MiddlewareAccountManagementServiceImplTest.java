@@ -14,10 +14,12 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AmountMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
@@ -26,7 +28,6 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,8 +85,6 @@ public class MiddlewareAccountManagementServiceImplTest {
     AmountMapper amountMapper;
     @Mock
     private UserMapper userMapper;
-    @Mock
-    private AccessTokenTO accessToken;
 
     private static ObjectMapper mapper = getObjectMapper();
 
@@ -127,7 +126,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    public void getAllAccountDetailsByUserLogin() throws UserNotFoundMiddlewareException, UserNotFoundException, DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+    public void getAllAccountDetailsByUserLogin() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
 
         String userLogin = "spe";
 

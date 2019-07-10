@@ -7,13 +7,9 @@ import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserAlreadyExistsException;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,43 +33,23 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     @Override
     public UserTO create(UserTO user) {
         UserBO userBO = userTOMapper.toUserBO(user);
-        try {
             return userTOMapper.toUserTO(userService.create(userBO));
-        } catch (UserAlreadyExistsException e) {
-            throw new UserAlreadyExistsMiddlewareException(user, e);
-        }
     }
 
     @Override
     public UserTO findById(String id) {
-        try {
             return userTOMapper.toUserTO(userService.findById(id));
-        } catch (UserNotFoundException e) {
-            log.error(e.getMessage());
-            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override
     public UserTO findByUserLogin(String userLogin) {
-        try {
             return userTOMapper.toUserTO(userService.findByLogin(userLogin));
-        } catch (UserNotFoundException e) {
-            log.error(e.getMessage());
-            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override
-    public UserTO updateScaData(String userLogin, List<ScaUserDataTO> scaDataList)
-            throws UserNotFoundMiddlewareException {
-        try {
+    public UserTO updateScaData(String userLogin, List<ScaUserDataTO> scaDataList){
             UserBO userBO = userService.updateScaData(userTOMapper.toScaUserDataListBO(scaDataList), userLogin);
             return userTOMapper.toUserTO(userBO);
-        } catch (UserNotFoundException e) {
-            log.error(e.getMessage());
-            throw new UserNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override

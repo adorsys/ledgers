@@ -3,14 +3,12 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountMiddlewareUncheckedException;
 import de.adorsys.ledgers.middleware.api.exception.SCAOperationExpiredMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.exception.SCAOperationNotFoundException;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserNotFoundException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
@@ -48,13 +46,7 @@ public class SCAUtils {
 	}
 
 	public UserBO userBO(String userId) {
-		try {
 			return userService.findById(userId);
-		} catch (UserNotFoundException e) {
-			String message = String.format("Can not find user  with id (sub) %s from token", userId);
-			log.error(message, e);
-			throw new AccountMiddlewareUncheckedException(message, e);
-		}
 	}
 
 	public SCAOperationBO loadAuthCode(String authorisationId) throws SCAOperationExpiredMiddlewareException {
