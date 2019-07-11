@@ -9,8 +9,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
@@ -97,7 +96,7 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getDepositAccountById() throws DepositAccountNotFoundException {
+    public void getDepositAccountById() {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount()));
         //When
         DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getDepositAccountById("id", LocalDateTime.now(), false);
@@ -106,15 +105,15 @@ public class DepositAccountServiceImplTest {
         assertThat(depositAccountDetailsBO.getAccount()).isNotNull();
     }
 
-    @Test(expected = DepositAccountNotFoundException.class)
-    public void getDepositAccountById_wrong_id() throws DepositAccountNotFoundException {
+    @Test(expected = DepositModuleException.class)
+    public void getDepositAccountById_wrong_id() {
         when(depositAccountRepository.findById("wrong_id")).thenReturn(Optional.empty());
         //When
         depositAccountService.getDepositAccountById("wrong_id", LocalDateTime.now(), false);
     }
 
     @Test
-    public void getDepositAccountByIBAN() throws DepositAccountNotFoundException {
+    public void getDepositAccountByIBAN() {
         when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
         //When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIban("iban", LocalDateTime.now(), false);
@@ -137,7 +136,7 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getTransactionById() throws TransactionNotFoundException {
+    public void getTransactionById() {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(new LedgerBO()));
         when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
@@ -149,8 +148,8 @@ public class DepositAccountServiceImplTest {
 
     }
 
-    @Test(expected = TransactionNotFoundException.class)
-    public void getTransactionById_Failure() throws TransactionNotFoundException {
+    @Test(expected = PostingModuleException.class)
+    public void getTransactionById_Failure() {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(depositAccountConfigService.getLedger()).thenReturn("name");
         when(ledgerService.findLedgerByName("name")).thenReturn(Optional.of(new LedgerBO()));
@@ -164,7 +163,7 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getTransactionsByDates() throws DepositAccountNotFoundException, JsonProcessingException {
+    public void getTransactionsByDates() throws JsonProcessingException {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(new DepositAccount()));
         when(postingService.findPostingsByDates(any(), any(), any())).thenReturn(Collections.singletonList(newPostingLineBO()));
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
@@ -174,12 +173,12 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void confirmationOfFunds_more_than_necessary_available() throws DepositAccountNotFoundException {
+    public void confirmationOfFunds_more_than_necessary_available() {
         confirmationOfFunds_more_than_necessary_available(100);
         confirmationOfFunds_more_than_necessary_available(101);
     }
 
-    private void confirmationOfFunds_more_than_necessary_available(long amount) throws DepositAccountNotFoundException {
+    private void confirmationOfFunds_more_than_necessary_available(long amount) {
         when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
@@ -187,8 +186,8 @@ public class DepositAccountServiceImplTest {
         assertThat(response).isTrue();
     }
 
-    @Test(expected = DepositAccountNotFoundException.class)
-    public void confirmationOfFunds_Failure() throws DepositAccountNotFoundException {
+    @Test(expected = DepositModuleException.class)
+    public void confirmationOfFunds_Failure() {
         when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.emptyList());
         depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
     }
@@ -202,7 +201,7 @@ public class DepositAccountServiceImplTest {
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                "name", "product",null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
+                "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
                 AccountUsage.PRIV, "details");
     }
 
@@ -254,13 +253,13 @@ public class DepositAccountServiceImplTest {
         }
     }
 
-    @Test(expected = DepositAccountNotFoundException.class)
-    public void depositCash_accountNotFound() throws Exception {
+    @Test(expected = DepositModuleException.class)
+    public void depositCash_accountNotFound() {
         depositAccountService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.TEN), "recordUser");
     }
 
     @Test
-    public void depositCashCreatesPostingWithTransactionAsDetails() throws Exception {
+    public void depositCashCreatesPostingWithTransactionAsDetails() throws IOException {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(getDepositAccount()));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         when(objectMapper.writeValueAsString(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));

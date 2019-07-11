@@ -16,7 +16,7 @@
 
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
@@ -44,12 +44,6 @@ public class ExceptionAdvisor {
     public ResponseEntity handleInsufficientPermission(InsufficientPermissionMiddlewareException e) {
         Map<String, String> body = getHandlerContent(HttpStatus.FORBIDDEN, null, e.getMessage());
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(DepositAccountNotFoundException.class)
-    public ResponseEntity handleDepositAccountNotFoundException(DepositAccountNotFoundException e) {
-        Map<String, String> body = getHandlerContent(HttpStatus.NOT_FOUND, null, e.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InsufficientFundsMiddlewareException.class)
@@ -92,6 +86,12 @@ public class ExceptionAdvisor {
         return new ResponseEntity<>(body, status);
     }
 
+    @ExceptionHandler(DepositModuleException.class)
+    public ResponseEntity<Map> handleDepositModuleException(DepositModuleException ex) {
+        HttpStatus status = DepositHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
+        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        return new ResponseEntity<>(body, status);
+    }
     //TODO Consider a separate Class for this with a builder?
     private Map<String, String> getHandlerContent(HttpStatus status, String message, String devMessage) {
         Map<String, String> error = new HashMap<>();

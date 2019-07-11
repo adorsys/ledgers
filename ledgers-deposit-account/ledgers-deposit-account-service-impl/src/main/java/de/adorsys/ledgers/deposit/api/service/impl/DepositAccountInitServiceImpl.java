@@ -138,8 +138,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
         return coa;
     }
 
-    private LedgerAccountBO buildNewLedgerAccount(LedgerBO ledger, LedgerAccountBO parent, String shortDesc, String
-                                                                                                                     name, BalanceSideBO balanceSide, AccountCategoryBO category) {
+    private LedgerAccountBO buildNewLedgerAccount(LedgerBO ledger, LedgerAccountBO parent, String shortDesc, String name, BalanceSideBO balanceSide, AccountCategoryBO category) {
         LedgerAccountBO la = new LedgerAccountBO();
         la.setId(Ids.id());
         la.setCreated(LocalDateTime.now());

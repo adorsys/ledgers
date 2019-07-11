@@ -8,7 +8,7 @@ import de.adorsys.ledgers.deposit.api.domain.AmountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
@@ -101,7 +101,7 @@ public class BankInitService {
                     UserTO user = getUserByIban(users, payment.getDebtorAccount().getIban());
                     restInitiationService.executePayment(user, PaymentTypeTO.SINGLE, payment);
                 }
-            } catch (DepositAccountNotFoundException e) {
+            } catch (DepositModuleException e) {
                 logger.error(ACCOUNT_NOT_FOUND_MSG);
             } catch (UserManagementModuleException e) {
                 logger.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
@@ -123,7 +123,7 @@ public class BankInitService {
                     UserTO user = getUserByIban(users, payment.getDebtorAccount().getIban());
                     restInitiationService.executePayment(user, PaymentTypeTO.BULK, payment);
                 }
-            } catch (DepositAccountNotFoundException e) {
+            } catch (DepositModuleException e) {
                 logger.error(ACCOUNT_NOT_FOUND_MSG);
             } catch (UserManagementModuleException e) {
                 logger.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
@@ -161,7 +161,7 @@ public class BankInitService {
         for (AccountDetailsTO details : mockbankInitData.getAccounts()) {
             try {
                 depositAccountService.getDepositAccountByIban(details.getIban(), LocalDateTime.now(), false);
-            } catch (DepositAccountNotFoundException e) {
+            } catch (DepositModuleException e) {
                 createAccount(details)      //TODO Matter of refactoring
                         .ifPresent(a -> updateBalanceIfRequired(details, a));
             }
@@ -177,7 +177,7 @@ public class BankInitService {
         AmountBO amount = new AmountBO(Currency.getInstance("EUR"), b);
         try {
             depositAccountService.depositCash(a.getId(), amount, "SYSTEM");
-        } catch (DepositAccountNotFoundException e) {
+        } catch (DepositModuleException e) {
             logger.error("Unable to deposit cash to account: {}", details.getIban());
         }
     }
@@ -194,7 +194,7 @@ public class BankInitService {
             String userName = getUserNameByIban(details.getIban());
             DepositAccountBO accountBO = accountDetailsMapper.toDepositAccountBO(details);
             return Optional.of(depositAccountService.createDepositAccount(accountBO, userName));
-        } catch (DepositAccountNotFoundException e) {
+        } catch (DepositModuleException e) {
             logger.error("Error creating Account For Mocked User");
             return Optional.empty();
         }

@@ -18,24 +18,20 @@ package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentProcessingException;
-import de.adorsys.ledgers.deposit.api.exception.PaymentWithIdExistsException;
 
 public interface DepositAccountPaymentService {
 
-    TransactionStatusBO getPaymentStatusById(String paymentId) throws PaymentNotFoundException;
+    TransactionStatusBO getPaymentStatusById(String paymentId);
 
-    PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException;
+    PaymentBO getPaymentById(String paymentId);
 
-    PaymentBO initiatePayment(PaymentBO paymentBO, TransactionStatusBO status) throws PaymentWithIdExistsException, DepositAccountNotFoundException;
+    PaymentBO initiatePayment(PaymentBO paymentBO, TransactionStatusBO status);
 
-    TransactionStatusBO executePayment(String paymentId, String userName) throws PaymentNotFoundException, PaymentProcessingException;
+    TransactionStatusBO executePayment(String paymentId, String userName);
 
-    TransactionStatusBO cancelPayment(String paymentId) throws PaymentNotFoundException;
+    TransactionStatusBO cancelPayment(String paymentId);
 
     String readIbanByPaymentId(String paymentId);
 
-    TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status) throws PaymentNotFoundException;
+    TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status);
 }
