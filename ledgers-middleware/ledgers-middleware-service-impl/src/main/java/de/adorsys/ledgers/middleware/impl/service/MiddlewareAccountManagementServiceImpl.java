@@ -4,9 +4,6 @@ import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountAlreadyExistsException;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
@@ -19,7 +16,9 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
@@ -67,8 +66,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private boolean multilevelScaEnable;
 
     @Override
-    public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) throws AccountNotFoundMiddlewareException {
-        try {
+    public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
             UserBO user = userService.findById(userId);
             DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
             DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, user.getId(), user.getBranch());
@@ -81,40 +79,23 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                 UserBO userBO = userService.findByLogin(scaInfoTO.getUserLogin());
                 accessService.updateAccountAccess(userBO, accountAccess);
             }
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountNotFoundMiddlewareException();
-        } catch (DepositAccountAlreadyExistsException e) {
-            throw new DepositAccountAlreadyExistsMiddlewareException(e.getMessage());
-        }
     }
 
     @Override
-    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException {
-        try {
+    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance)  {
             DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
             return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
-        } catch (DepositAccountNotFoundException e) {
-            log.error(e.getMessage());
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override
-    public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) throws
-            AccountNotFoundMiddlewareException {
-        try {
+    public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) {
             DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
             return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
-        } catch (DepositAccountNotFoundException e) {
-            log.error(e.getMessage());
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override
-    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws AccountNotFoundMiddlewareException {
+    public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) {
         log.info("Retrieving accounts by user login {}", userLogin);
-        try {
             UserBO userBO = userService.findByLogin(userLogin);
             List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
             log.info("{} accounts were retrieved", accountAccess.size());
@@ -131,27 +112,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             return depositAccounts.stream()
                            .map(accountDetailsMapper::toAccountDetailsTO)
                            .collect(Collectors.toList());
-        } catch (DepositAccountNotFoundException e) {
-            log.error(e.getMessage());
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override
-    public TransactionTO getTransactionById(String accountId, String transactionId) throws
-            TransactionNotFoundMiddlewareException {
-        try {
+    public TransactionTO getTransactionById(String accountId, String transactionId){
             TransactionDetailsBO transaction = depositAccountService.getTransactionById(accountId, transactionId);
             return paymentConverter.toTransactionTO(transaction);
-        } catch (TransactionNotFoundException e) {
-            throw new TransactionNotFoundMiddlewareException(e.getMessage(), e);
-        }
-
     }
 
     @Override
-    public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws
-            AccountNotFoundMiddlewareException {
+    public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) {
         LocalDate today = LocalDate.now();
         LocalDateTime dateTimeFrom = dateFrom == null
                                              ? today.atStartOfDay()
@@ -159,28 +129,20 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         LocalDateTime dateTimeTo = dateTo == null
                                            ? accessService.getTimeAtEndOfTheDay(today)
                                            : accessService.getTimeAtEndOfTheDay(dateTo);
-        try {
+
             List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
             return paymentConverter.toTransactionTOList(transactions);
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
     }
 
     @Override
-    public boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws
-            AccountNotFoundMiddlewareException {
-        try {
-            FundsConfirmationRequestBO requestBO = accountDetailsMapper.toFundsConfirmationRequestBO(request);
-            return depositAccountService.confirmationOfFunds(requestBO);
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
+    public boolean confirmFundsAvailability(FundsConfirmationRequestTO request) {
+        FundsConfirmationRequestBO requestBO = accountDetailsMapper.toFundsConfirmationRequestBO(request);
+        return depositAccountService.confirmationOfFunds(requestBO);
     }
 
     @Override
     public void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
-            throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, AccountNotFoundMiddlewareException {
+            throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
         String accNbr = accountNumberPrefix + accountNumberSuffix;
         // if the list is not empty, we mus make sure that account belong to the current user.s
         List<DepositAccountBO> accounts = depositAccountService.findByAccountNumberPrefix(accountNumberPrefix);
@@ -233,12 +195,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         List<String> ibans = accountAccesses.stream()
                                      .map(AccountAccessTO::getIban)
                                      .collect(Collectors.toList());
-        List<DepositAccountDetailsBO> depositAccounts;
-        try {
-            depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-        }
+
+        List<DepositAccountDetailsBO> depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, LocalDateTime.now(), true);
+
         return depositAccounts.stream()
                        .map(accountDetailsMapper::toAccountDetailsTO)
                        .collect(Collectors.toList());
@@ -353,12 +312,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException {
-        try {
-            depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
-        } catch (DepositAccountNotFoundException e) {
-            throw new AccountNotFoundMiddlewareException(e.getMessage(), e);
-        }
+    public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) {
+        depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
     }
 
     @Override

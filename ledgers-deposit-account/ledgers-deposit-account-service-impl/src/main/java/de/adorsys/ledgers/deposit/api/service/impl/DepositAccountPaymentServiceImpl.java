@@ -17,7 +17,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.*;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Currency;
 import java.util.Optional;
+
+import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
@@ -53,30 +55,28 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public TransactionStatusBO getPaymentStatusById(String paymentId) throws PaymentNotFoundException {
-        Optional<Payment> payment = paymentRepository.findById(paymentId);
-        TransactionStatus transactionStatus = payment.map(Payment::getTransactionStatus)
-                                                      .orElseThrow(() -> new PaymentNotFoundException(paymentId));
-
-        return TransactionStatusBO.valueOf(transactionStatus.name());
+    public TransactionStatusBO getPaymentStatusById(String paymentId) {
+        return getPaymentById(paymentId).getTransactionStatus();
     }
 
     @Override
-    public PaymentBO getPaymentById(String paymentId) throws PaymentNotFoundException {
-        return paymentRepository.findById(paymentId).map(paymentMapper::toPaymentBO)
-                       .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+    public PaymentBO getPaymentById(String paymentId) {
+        return paymentMapper.toPaymentBO(getPaymentEntityById(paymentId));
     }
 
     @Override
-    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) throws PaymentWithIdExistsException, DepositAccountNotFoundException {
-    	if(paymentRepository.existsById(payment.getPaymentId())) {
-    		throw new PaymentWithIdExistsException(payment.getPaymentId());
-    	}
-    	
+    public PaymentBO initiatePayment(PaymentBO payment, TransactionStatusBO status) {
+        if (paymentRepository.existsById(payment.getPaymentId())) {
+            throw DepositModuleException.builder()
+                          .errorCode(PAYMENT_WITH_ID_EXISTS)
+                          .devMsg(String.format("Payment with id: %s already exists!", payment.getPaymentId()))
+                          .build();
+        }
+
         Payment persistedPayment = paymentMapper.toPayment(payment);
         persistedPayment.getTargets().forEach(t -> {
-        	t.setPayment(persistedPayment);
-        	t.setPaymentId(Ids.id());
+            t.setPayment(persistedPayment);
+            t.setPaymentId(Ids.id());
         });
         persistedPayment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
 
@@ -88,7 +88,10 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
             return paymentMapper.toPaymentBO(savedPayment);
         } else {
             persistedPayment.setTransactionStatus(TransactionStatus.RJCT);
-           throw new DepositAccountInsufficientFundsException(persistedPayment.getPaymentId());
+            throw DepositModuleException.builder()
+                          .errorCode(INSUFFICIENT_FUNDS)
+                          .devMsg(String.format("Payment with id: %s failed due to Insufficient Funds Available", persistedPayment.getPaymentId()))
+                          .build();
         }
     }
 
@@ -96,7 +99,10 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         return payment.getTargets().stream()
                        .map(PaymentTargetBO::getInstructedAmount)
                        .reduce((left, right) -> new AmountBO(Currency.getInstance("EUR"), left.getAmount().add(right.getAmount())))
-                       .orElseThrow(() -> new RuntimeException("Could not calculate total amount for payment"));
+                       .orElseThrow(() -> DepositModuleException.builder()
+                                                  .errorCode(PAYMENT_PROCESSING_FAILURE)
+                                                  .devMsg(String.format("Could not calculate total amount for payment: %s.", payment.getPaymentId()))
+                                                  .build());
     }
 
     /**
@@ -115,20 +121,22 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
                            ? executionService.executePayment(pmt, userName)
                            : executionService.schedulePayment(pmt);
         }
-        throw new PaymentProcessingException(String.format(PAYMENT_EXECUTION_FAILED, "Payment not found", paymentId));
-
+        throw DepositModuleException.builder()
+                      .errorCode(PAYMENT_PROCESSING_FAILURE)
+                      .devMsg(String.format(PAYMENT_EXECUTION_FAILED, "Payment not found", paymentId))
+                      .build();
     }
 
     @Override
-    public TransactionStatusBO cancelPayment(String paymentId) throws PaymentNotFoundException {
-        Payment storedPayment = paymentRepository.findById(paymentId)
-                                        .orElseThrow(() -> new PaymentNotFoundException(paymentId));
-
+    public TransactionStatusBO cancelPayment(String paymentId) {
+        Payment storedPayment = getPaymentEntityById(paymentId);
         if (storedPayment.getTransactionStatus() == TransactionStatus.ACSC) {
-            throw new PaymentProcessingException(String.format(PAYMENT_CANCELLATION_FAILED, paymentId));
+            throw DepositModuleException.builder()
+                          .errorCode(PAYMENT_PROCESSING_FAILURE)
+                          .devMsg(String.format(PAYMENT_CANCELLATION_FAILED, paymentId))
+                          .build();
         }
         Payment p = updatePaymentStatus(storedPayment, TransactionStatus.CANC);
-
         return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
 
     }
@@ -140,10 +148,8 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status) throws PaymentNotFoundException {
-        Payment payment = paymentRepository.findByPaymentId(paymentId)
-                                  .orElseThrow(() -> new PaymentNotFoundException(paymentId));
-
+    public TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status) {
+        Payment payment = getPaymentEntityById(paymentId);
         payment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
         Payment p = updatePaymentStatus(payment, TransactionStatus.valueOf(status.name()));
         return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
@@ -152,5 +158,13 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     private Payment updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {
         payment.setTransactionStatus(updatedStatus);
         return paymentRepository.save(payment);
+    }
+
+    private Payment getPaymentEntityById(String paymentId) {
+        return paymentRepository.findById(paymentId)
+                       .orElseThrow(() -> DepositModuleException.builder()
+                                                  .errorCode(PAYMENT_NOT_FOUND)
+                                                  .devMsg(String.format("Payment with id: %s not found!", paymentId))
+                                                  .build());
     }
 }

@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
@@ -18,8 +17,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountNotFoundMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.TransactionNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AmountMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
@@ -89,7 +86,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     private static ObjectMapper mapper = getObjectMapper();
 
     @Test
-    public void getAccountDetailsByAccountId() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+    public void getAccountDetailsByAccountId() {
         when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(getDepositAccountDetailsBO());
 
         when(detailsMapper.toAccountDetailsTO(any())).thenReturn(getAccount(AccountDetailsTO.class));
@@ -99,16 +96,16 @@ public class MiddlewareAccountManagementServiceImplTest {
         verify(accountService, times(1)).getDepositAccountById(ACCOUNT_ID, TIME, true);
     }
 
-    @Test(expected = AccountNotFoundMiddlewareException.class)
-    public void getAccountDetailsByAccountId_wrong_id() throws AccountNotFoundMiddlewareException, DepositAccountNotFoundException {
-        when(accountService.getDepositAccountById(WRONG_ID, TIME, true)).thenThrow(new DepositAccountNotFoundException());
+    @Test(expected = DepositModuleException.class)
+    public void getAccountDetailsByAccountId_wrong_id() {
+        when(accountService.getDepositAccountById(WRONG_ID, TIME, true)).thenThrow(DepositModuleException.class);
 
         middlewareService.getDepositAccountById(WRONG_ID, TIME, false);
         verify(accountService, times(1)).getDepositAccountById(WRONG_ID, TIME, true);
     }
 
     @Test
-    public void getAccountDetailsByAccountId_Success() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+    public void getAccountDetailsByAccountId_Success() {
         DepositAccountDetailsBO depositAccountDetailsBO = getDepositAccountDetailsBO();
         when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(depositAccountDetailsBO);
         when(detailsMapper.toAccountDetailsTO(depositAccountDetailsBO)).thenReturn(getAccountDetailsTO());
@@ -119,14 +116,14 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(accountDetails.getBalances().size()).isEqualTo(2);
     }
 
-    @Test(expected = AccountNotFoundMiddlewareException.class)
-    public void getAccountDetailsByAccountId_Failure_depositAccount_Not_Found() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
-        when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenThrow(new DepositAccountNotFoundException());
+    @Test(expected = DepositModuleException.class)
+    public void getAccountDetailsByAccountId_Failure_depositAccount_Not_Found() {
+        when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenThrow(DepositModuleException.class);
         middlewareService.getDepositAccountById(ACCOUNT_ID, TIME, false);
     }
 
     @Test
-    public void getAllAccountDetailsByUserLogin() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+    public void getAllAccountDetailsByUserLogin() {
 
         String userLogin = "spe";
 
@@ -172,7 +169,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    public void listDepositAccounts() throws DepositAccountNotFoundException {
+    public void listDepositAccounts() {
         // accounts
         List<DepositAccountDetailsBO> accounts = new ArrayList<>();
         accounts.add(getDepositAccountDetailsBO());
@@ -216,7 +213,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    public void getTransactionById() throws TransactionNotFoundMiddlewareException, TransactionNotFoundException {
+    public void getTransactionById() {
         when(accountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
         when(paymentConverter.toTransactionTO(any())).thenReturn(readYml(TransactionTO.class, "TransactionTO.yml"));
 
@@ -225,15 +222,15 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(TransactionTO.class, "TransactionTO.yml"));
     }
 
-    @Test(expected = TransactionNotFoundMiddlewareException.class)
-    public void getTransactionById_Failure() throws TransactionNotFoundMiddlewareException, TransactionNotFoundException {
-        when(accountService.getTransactionById(anyString(), anyString())).thenThrow(new TransactionNotFoundException("ACCOUNT_ID", "POSTING_ID"));
+    @Test(expected = DepositModuleException.class)
+    public void getTransactionById_Failure() {
+        when(accountService.getTransactionById(anyString(), anyString())).thenThrow(DepositModuleException.class);
 
         middlewareService.getTransactionById("ACCOUNT_ID", "POSTING_ID");
     }
 
     @Test
-    public void getAccountDetailsByIban() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
+    public void getAccountDetailsByIban() {
         DepositAccountDetailsBO accountBO = getDepositAccountDetailsBO();
         AccountDetailsTO accountDetailsTO = getAccount(AccountDetailsTO.class);
 
@@ -248,9 +245,9 @@ public class MiddlewareAccountManagementServiceImplTest {
         verify(detailsMapper, times(1)).toAccountDetailsTO(accountBO);
     }
 
-    @Test(expected = AccountNotFoundMiddlewareException.class)
-    public void getAccountDetailsByIbanDepositAccountNotFoundException() throws DepositAccountNotFoundException, AccountNotFoundMiddlewareException {
-        when(accountService.getDepositAccountByIban(IBAN, TIME, false)).thenThrow(new DepositAccountNotFoundException());
+    @Test(expected = DepositModuleException.class)
+    public void getAccountDetailsByIbanDepositAccountNotFoundException() {
+        when(accountService.getDepositAccountByIban(IBAN, TIME, false)).thenThrow(DepositModuleException.class);
 
         middlewareService.getDepositAccountByIban(IBAN, TIME, false);
         verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
@@ -305,15 +302,15 @@ public class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    public void depositCashDelegatesToDepositAccountService() throws Exception {
+    public void depositCashDelegatesToDepositAccountService() {
         doNothing().when(accountService).depositCash(eq(ACCOUNT_ID), any(), any());
         middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO());
         verify(accountService, times(1)).depositCash(eq(ACCOUNT_ID), any(), any());
     }
 
-    @Test(expected = AccountNotFoundMiddlewareException.class)
-    public void depositCashWrapsNotFoundException() throws Exception {
-        doThrow(DepositAccountNotFoundException.class).when(accountService).depositCash(any(), any(), any());
+    @Test(expected = DepositModuleException.class)
+    public void depositCashWrapsNotFoundException() {
+        doThrow(DepositModuleException.class).when(accountService).depositCash(any(), any(), any());
         middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO());
     }
 

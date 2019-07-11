@@ -3,10 +3,8 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountAlreadyExistsException;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountNotFoundException;
-import de.adorsys.ledgers.deposit.api.exception.DepositAccountUncheckedException;
-import de.adorsys.ledgers.deposit.api.exception.TransactionNotFoundException;
+import de.adorsys.ledgers.deposit.api.exception.DepositErrorCode;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
@@ -14,7 +12,6 @@ import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -27,6 +24,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.DEPOSIT_ACCOUNT_EXISTS;
+import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.DEPOSIT_ACCOUNT_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -71,18 +71,21 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances){
+    public DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances) {
         List<DepositAccountBO> accounts = getDepositAccountsByIban(Collections.singletonList(iban));
 
         if (accounts.isEmpty()) {
-            throw new DepositAccountNotFoundException(String.format(MSG_IBAN_NOT_FOUND, iban));
+            throw DepositModuleException.builder()
+                          .errorCode(DEPOSIT_ACCOUNT_NOT_FOUND)
+                          .devMsg(String.format(MSG_IBAN_NOT_FOUND, iban))
+                          .build();
         }
         DepositAccountBO account = accounts.iterator().next();
         return new DepositAccountDetailsBO(account, getBalancesList(account, withBalances, refTime));
     }
 
     @Override
-    public List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances){
+    public List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances) {
         List<DepositAccountDetailsBO> result = new ArrayList<>();
         for (String iban : ibans) {
             result.add(getDepositAccountByIban(iban, refTime, withBalances));
@@ -91,26 +94,22 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances){
+    public DepositAccountDetailsBO getDepositAccountById(String accountId, LocalDateTime refTime, boolean withBalances) {
         DepositAccountBO depositAccountBO = getDepositAccountById(accountId);
         return new DepositAccountDetailsBO(depositAccountBO, getBalancesList(depositAccountBO, withBalances, refTime));
     }
 
     @Override
-    public TransactionDetailsBO getTransactionById(String accountId, String transactionId) throws TransactionNotFoundException {
-        try {
-            DepositAccountBO account = getDepositAccountById(accountId);
-            LedgerBO ledgerBO = loadLedger();
-            LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
-            PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
-            return transactionDetailsMapper.toTransactionSigned(line);
-        } catch (DepositAccountNotFoundException | PostingModuleException e) {
-            throw new TransactionNotFoundException(e.getMessage());
-        }
+    public TransactionDetailsBO getTransactionById(String accountId, String transactionId) {
+        DepositAccountBO account = getDepositAccountById(accountId);
+        LedgerBO ledgerBO = loadLedger();
+        LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
+        PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
+        return transactionDetailsMapper.toTransactionSigned(line);
     }
 
     @Override
-    public List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo){
+    public List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo) {
         DepositAccountBO account = getDepositAccountById(accountId);
         LedgerBO ledgerBO = loadLedger();
         LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
@@ -121,18 +120,13 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO){
-        try {
-            DepositAccountDetailsBO account = getDepositAccountByIban(requestBO.getPsuAccount().getIban(), LocalDateTime.now(), true);
-            return account.getBalances().stream()
-                           .filter(b -> b.getBalanceType() == BalanceTypeBO.INTERIM_AVAILABLE)
-                           .findFirst()
-                           .map(b -> isSufficientAmountAvailable(requestBO, b))
-                           .orElse(Boolean.FALSE);
-        } catch (DepositAccountNotFoundException e) {
-            log.error(e.getMessage());
-            throw e;
-        }
+    public boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) {
+        DepositAccountDetailsBO account = getDepositAccountByIban(requestBO.getPsuAccount().getIban(), LocalDateTime.now(), true);
+        return account.getBalances().stream()
+                       .filter(b -> b.getBalanceType() == BalanceTypeBO.INTERIM_AVAILABLE)
+                       .findFirst()
+                       .map(b -> isSufficientAmountAvailable(requestBO, b))
+                       .orElse(Boolean.FALSE);
     }
 
     @Override
@@ -158,16 +152,22 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public void depositCash(String accountId, AmountBO amount, String recordUser){
+    public void depositCash(String accountId, AmountBO amount, String recordUser) {
         if (amount.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new DepositAccountUncheckedException("Deposited amount must be greater than zero");
+            throw DepositModuleException.builder()
+                          .errorCode(DepositErrorCode.DEPOSIT_OPERATION_FAILURE)
+                          .devMsg("Deposited amount must be greater than zero")
+                          .build();
         }
 
-        DepositAccount depositAccount = depositAccountRepository.findById(accountId)
-                                                .orElseThrow(DepositAccountNotFoundException::new);
+        DepositAccount depositAccount = getDepositAccountEntityById(accountId);
         AccountReferenceBO accountReference = depositAccountMapper.toAccountReferenceBO(depositAccount);
         if (!accountReference.getCurrency().equals(amount.getCurrency())) {
-            throw new DepositAccountUncheckedException("Deposited amount and account currencies are different");
+            throw DepositModuleException.builder()
+                          .errorCode(DepositErrorCode.DEPOSIT_OPERATION_FAILURE)
+                          .devMsg(String.format("Deposited amount and account currencies are different. Requested currency: %s, Account currency: %s",
+                                  amount.getCurrency().getCurrencyCode(), accountReference.getCurrency().getCurrencyCode()))
+                          .build();
         }
 
         LedgerBO ledger = loadLedger();
@@ -177,12 +177,16 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     private void checkDepositAccountAlreadyExist(DepositAccountBO depositAccountBO) {
-        Optional<DepositAccount> depositAccount = depositAccountRepository.findByIbanAndCurrency(depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
-        if (depositAccount.isPresent()) {
+        boolean isExistingAccount = depositAccountRepository.findByIbanAndCurrency(depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode())
+                                            .isPresent();
+        if (isExistingAccount) {
             String message = String.format("Deposit account already exists. IBAN %s. Currency %s",
                     depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
             log.error(message);
-            throw new DepositAccountAlreadyExistsException(message);
+            throw DepositModuleException.builder()
+                          .errorCode(DEPOSIT_ACCOUNT_EXISTS)
+                          .devMsg(message)
+                          .build();
         }
     }
 
@@ -206,10 +210,16 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                        : Collections.emptyList();
     }
 
-    private DepositAccountBO getDepositAccountById(String accountId){
+    private DepositAccountBO getDepositAccountById(String accountId) {
+        return depositAccountMapper.toDepositAccountBO(getDepositAccountEntityById(accountId));
+    }
+
+    private DepositAccount getDepositAccountEntityById(String accountId) {
         return depositAccountRepository.findById(accountId)
-                       .map(depositAccountMapper::toDepositAccountBO)
-                       .orElseThrow(() -> new DepositAccountNotFoundException(accountId));
+                       .orElseThrow(() -> DepositModuleException.builder()
+                                                  .errorCode(DEPOSIT_ACCOUNT_NOT_FOUND)
+                                                  .devMsg(String.format("Account with id: %s not found!", accountId))
+                                                  .build());
     }
 
     private List<BalanceBO> getBalances(String iban, Currency currency, LocalDateTime refTime) {
@@ -342,7 +352,10 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         try {
             return objectMapper.writeValueAsString(transactionDetails);
         } catch (JsonProcessingException e) {
-            throw new DepositAccountUncheckedException(e.getMessage(), e);
+            throw DepositModuleException.builder()
+                          .errorCode(DepositErrorCode.PAYMENT_PROCESSING_FAILURE)
+                          .devMsg(e.getMessage())
+                          .build();
         }
     }
 }
