@@ -20,8 +20,6 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class AccessService {
-    private static final String ERROR_MESSAGE_USER_NF = "Can not find user with id %s. But this user is supposed to exist.";
-
     private final UserService userService;
 
     public void updateAccountAccess(UserBO user, AccountAccessBO access) {

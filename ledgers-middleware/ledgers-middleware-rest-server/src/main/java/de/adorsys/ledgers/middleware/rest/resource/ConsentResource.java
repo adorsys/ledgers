@@ -21,7 +21,9 @@ import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import de.adorsys.ledgers.middleware.rest.exception.*;
+import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
+import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
+import de.adorsys.ledgers.middleware.rest.exception.ValidationRestException;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,80 +38,67 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ConsentRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class ConsentResource implements ConsentRestAPI {
-	private final ScaInfoHolder scaInfoHolder;
+    private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService middlewareAccountService;
 
-	@Override
-	public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent){
-		try {
-			return ResponseEntity.ok(middlewareAccountService.startSCA(scaInfoHolder.getScaInfo(), consentId, aisConsent));
-		} catch (InsufficientPermissionMiddlewareException e) {
-			log.error(e.getMessage(), e);
-			throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
-		}
-	}
+    @Override
+    public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.startSCA(scaInfoHolder.getScaInfo(), consentId, aisConsent));
+        } catch (InsufficientPermissionMiddlewareException e) {
+            log.error(e.getMessage(), e);
+            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+        }
+    }
 
-	// TODO: Bearer token must contain autorization id
-	@Override
-	public ResponseEntity<SCAConsentResponseTO> getSCA(String consentId, String authorisationId)
-			throws ConflictRestException {
-		try {
-			return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId));
-		} catch (SCAOperationExpiredMiddlewareException | AisConsentNotFoundMiddlewareException e) {
+    // TODO: Bearer token must contain autorization id
+    @Override
+    public ResponseEntity<SCAConsentResponseTO> getSCA(String consentId, String authorisationId){
+        try {
+            return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId));
+        } catch (SCAOperationExpiredMiddlewareException | AisConsentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage());
-		}
-	}
+        }
+    }
 
-	// TODO: Bearer token must contain autorization id
-	@Override
-	public ResponseEntity<SCAConsentResponseTO> selectMethod(String consentId, String authorisationId,
-			String scaMethodId) throws ValidationRestException, ConflictRestException, NotFoundRestException {
-		try {
-			return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId, scaMethodId));
-		} catch (PaymentNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException | SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
+    // TODO: Bearer token must contain autorization id
+    @Override
+    public ResponseEntity<SCAConsentResponseTO> selectMethod(String consentId, String authorisationId,
+                                                             String scaMethodId) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId, scaMethodId));
+        } catch (PaymentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
-			throw new NotFoundRestException(e.getMessage());
-		} catch (SCAOperationValidationMiddlewareException e) {
-            log.error(e.getMessage(), e);
-			throw new ValidationRestException(e.getMessage());
-		} catch (SCAMethodNotSupportedMiddleException e) {
-            log.error(e.getMessage(), e);
-			throw new NotAcceptableRestException(e.getMessage());
-		}
-	}
+            throw new NotFoundRestException(e.getMessage());
+        }
+    }
 
-	// TODO: Bearer token must contain autorization id
-	@Override
-	public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode) {
-		try {
-			return ResponseEntity.ok(middlewareAccountService.authorizeConsent(scaInfoHolder.getScaInfoWithAuthCode(authCode), consentId));
-		} catch (SCAOperationNotFoundMiddlewareException | AisConsentNotFoundMiddlewareException e) {
+    // TODO: Bearer token must contain autorization id
+    @Override
+    public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode) {
+        try {
+            return ResponseEntity.ok(middlewareAccountService.authorizeConsent(scaInfoHolder.getScaInfoWithAuthCode(authCode), consentId));
+        } catch (AisConsentNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
-			throw new NotFoundRestException(e.getMessage());
-		} catch (SCAOperationValidationMiddlewareException e) {
+            throw new NotFoundRestException(e.getMessage());
+        } catch (SCAOperationValidationMiddlewareException e) {
             log.error(e.getMessage(), e);
-			throw new ValidationRestException(e.getMessage());
-		} catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            log.error(e.getMessage(), e);
-			throw new NotAcceptableRestException(e.getMessage());
-		} catch (SCAOperationExpiredMiddlewareException e) {
-            log.error(e.getMessage());
-			throw new GoneRestException(e.getMessage());
-		}
-	}
+            throw new ValidationRestException(e.getMessage());
+        }
+    }
 
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#aisConsent)")
     public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO aisConsent) {
         try {
-			return ResponseEntity.ok(middlewareAccountService.grantAisConsent(scaInfoHolder.getScaInfo(), aisConsent));
+            return ResponseEntity.ok(middlewareAccountService.grantAisConsent(scaInfoHolder.getScaInfo(), aisConsent));
         } catch (InsufficientPermissionMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
         } catch (AccountNotFoundMiddlewareException e) {
             log.error(e.getMessage(), e);
             throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-		}
+        }
     }
 }

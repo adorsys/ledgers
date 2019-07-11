@@ -1,8 +1,7 @@
 package de.adorsys.ledgers.sca.mock;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,10 +17,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Starts SMTP server to be used during development that logs outbound emails
  */
+@Slf4j
 public class MockSmtpServer implements ApplicationRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(MockSmtpServer.class);
-
     @Value("${spring.mail.port}")
     private int port;
 
