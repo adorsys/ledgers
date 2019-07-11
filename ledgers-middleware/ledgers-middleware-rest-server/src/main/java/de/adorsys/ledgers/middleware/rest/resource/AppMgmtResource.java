@@ -28,7 +28,6 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.exception.RestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -62,12 +60,8 @@ public class AppMgmtResource implements AppMgmtRestAPI {
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> initApp() {
-    	try {
-			appManagementService.initApp();
-			return ResponseEntity.ok().build();
-		} catch (IOException e) {
-			throw new RestException("Error initializing deposit account module.", e);
-		}
+	    appManagementService.initApp();
+	    return ResponseEntity.ok().build();
     }
 
     @Override

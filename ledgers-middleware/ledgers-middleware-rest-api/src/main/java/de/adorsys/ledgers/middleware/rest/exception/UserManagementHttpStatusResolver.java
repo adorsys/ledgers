@@ -20,11 +20,13 @@ public class UserManagementHttpStatusResolver {
         container.put(CONSENT_NOT_FOUND, NOT_FOUND);
 
         //400 Block
-        container.put(USER_ALREADY_EXISTS, BAD_REQUEST);
         container.put(TOKEN_CREATION_ERROR, BAD_REQUEST);
 
         //401 Block
         container.put(INSUFFICIENT_PERMISSION, UNAUTHORIZED);
+
+        //409 Block
+        container.put(USER_ALREADY_EXISTS, CONFLICT);
     }
 
     public static HttpStatus resolveHttpStatusByCode(UserManagementErrorCode code) {

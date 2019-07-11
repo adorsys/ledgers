@@ -10,7 +10,7 @@ import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.*;
+import de.adorsys.ledgers.sca.exception.ScaModuleException;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
@@ -72,7 +72,7 @@ public class SCAOperationServiceImplTest {
 
     @Mock
     private HashGenerator hashGenerator;
-    
+
     @Mock
     private SCAOperationMapper scaOperationMapper;
 
@@ -84,7 +84,7 @@ public class SCAOperationServiceImplTest {
 
     @Before
     public void setUp() {
-    	LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         scaOperationService.setHashGenerator(hashGenerator);
 
         scaOperationEntity = readFromFile("scaOperationEntity.yml", SCAOperationEntity.class);
@@ -98,7 +98,7 @@ public class SCAOperationServiceImplTest {
         scaOperationBO.setCreated(now);
         scaOperationBO.setStatusTime(now);
         scaOperationBO.setScaMethodId(SCA_USER_DATA_ID);
-        
+
         codeDataBO = new AuthCodeDataBO();
         codeDataBO.setAuthorisationId(AUTH_ID);
         codeDataBO.setOpData(OP_DATA);
@@ -121,7 +121,7 @@ public class SCAOperationServiceImplTest {
 
 
     private <T> T readFromFile(String file, Class<T> tClass) {
-    	InputStream is = SCAOperationServiceImplTest.class.getResourceAsStream(file);
+        InputStream is = SCAOperationServiceImplTest.class.getResourceAsStream(file);
         try {
             return YamlReader.getInstance().getObjectFromInputStream(is, tClass);
         } catch (IOException e) {
@@ -130,7 +130,7 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
-    public void generateAuthCode() throws HashGenerationException, SCAMethodNotSupportedException, SCAOperationValidationException {
+    public void generateAuthCode() throws HashGenerationException {
         String email = "spe@adorsys.com.ua";
 
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
@@ -167,8 +167,8 @@ public class SCAOperationServiceImplTest {
         verify(repository, times(1)).save(entity);
     }
 
-    @Test(expected = ScaUncheckedException.class)
-    public void generateAuthCodeWithException() throws HashGenerationException, SCAMethodNotSupportedException, SCAOperationValidationException {
+    @Test(expected = ScaModuleException.class)
+    public void generateAuthCodeWithException() throws HashGenerationException {
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
@@ -185,7 +185,7 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test(expected = ScaModuleException.class)
-    public void scaDataNotFound() throws SCAMethodNotSupportedException, SCAOperationValidationException {
+    public void scaDataNotFound() {
         String email = "spe@adorsys.com.ua";
 
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
@@ -201,7 +201,7 @@ public class SCAOperationServiceImplTest {
 
 
     @Test
-    public void validateAuthCode() throws SCAOperationNotFoundException, SCAOperationValidationException, HashGenerationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    public void validateAuthCode() throws HashGenerationException {
 
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
 
@@ -223,7 +223,7 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
-    public void validateAuthCodeNotValid() throws SCAOperationNotFoundException, SCAOperationValidationException, HashGenerationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    public void validateAuthCodeNotValid() throws HashGenerationException {
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
@@ -238,25 +238,25 @@ public class SCAOperationServiceImplTest {
         verify(hashGenerator, times(1)).hash(any());
     }
 
-    @Test(expected = SCAOperationNotFoundException.class)
-    public void validateAuthCodeOperationNotFound() throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCodeOperationNotFound() {
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.empty());
 
         scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
     }
 
-    @Test(expected = SCAOperationValidationException.class)
-    public void validateAuthCodeOperationHashException() throws SCAOperationNotFoundException, SCAOperationValidationException, HashGenerationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCodeOperationHashException() throws HashGenerationException {
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
-        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN, 0);
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
     }
 
-    @Test(expected = SCAOperationUsedOrStolenException.class)
-    public void validateAuthCodeOperationStolenException() throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCodeOperationStolenException() {
 
         // operation was used
         scaOperationEntity.setStatus(AuthCodeStatus.SENT);
@@ -265,11 +265,11 @@ public class SCAOperationServiceImplTest {
         scaOperationEntity.setStatus(AuthCodeStatus.VALIDATED);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
 
-        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN, 0);
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
     }
 
-    @Test(expected = SCAOperationExpiredException.class)
-    public void validateAuthCodeOperationExpiredException() throws SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCodeOperationExpiredException() {
 
         // operation was created 5 minutes ago
         scaOperationEntity.setCreated(LocalDateTime.now().minusMinutes(5));
@@ -277,7 +277,7 @@ public class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(repository.save(any())).thenReturn(scaOperationEntity);
 
-        scaOperationService.validateAuthCode(AUTH_ID,OP_ID, OP_DATA, TAN, 0);
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
     }
 
     @SuppressWarnings("unchecked")
@@ -287,7 +287,8 @@ public class SCAOperationServiceImplTest {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         objectMapper.findAndRegisterModules();
         InputStream inputStream = getClass().getResourceAsStream("list-of-sca-operations.yml");
-        List<SCAOperationEntity> list = objectMapper.readValue(inputStream, new TypeReference<List<SCAOperationEntity>>() {});
+        List<SCAOperationEntity> list = objectMapper.readValue(inputStream, new TypeReference<List<SCAOperationEntity>>() {
+        });
         list.add(scaOperationEntity);
 
         assertThat(list.size(), is(3));

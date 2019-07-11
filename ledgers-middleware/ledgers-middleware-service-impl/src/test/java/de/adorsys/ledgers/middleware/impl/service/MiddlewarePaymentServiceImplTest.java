@@ -25,7 +25,6 @@ import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -119,7 +118,7 @@ public class MiddlewarePaymentServiceImplTest {
 
 
     @Test
-    public void generateAuthCode() throws SCAMethodNotSupportedException, SCAMethodNotSupportedMiddleException, SCAOperationValidationException, SCAOperationNotFoundException, PaymentNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException, PaymentNotFoundException {
+    public void generateAuthCode() throws PaymentNotFoundException, PaymentNotFoundMiddlewareException {
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         UserTO userTO = readYml(UserTO.class, "user1.yml");
         SCAOperationBO scaOperationBO = readYml(SCAOperationBO.class, "scaOperationEntity.yml");
@@ -170,7 +169,7 @@ public class MiddlewarePaymentServiceImplTest {
     }
 
     @Test
-    public void executePayment_Success() throws PaymentNotFoundException, PaymentProcessingException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException, SCAOperationNotFoundException, SCAOperationValidationException, SCAOperationUsedOrStolenException, SCAOperationExpiredException {
+    public void executePayment_Success() throws PaymentNotFoundException, PaymentProcessingException, SCAOperationValidationMiddlewareException, PaymentNotFoundMiddlewareException {
 
     	PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
     	BearerTokenBO bearerTokenBO = new BearerTokenBO();
@@ -196,7 +195,7 @@ public class MiddlewarePaymentServiceImplTest {
 	}
 
     @Test(expected = SCAOperationValidationMiddlewareException.class)
-    public void executePayment_Failure() throws PaymentNotFoundException, SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException {
+    public void executePayment_Failure() throws PaymentNotFoundException, SCAOperationValidationMiddlewareException, PaymentNotFoundMiddlewareException {
     	PaymentBO payment = readYml(PaymentBO.class, SINGLE_BO);
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);

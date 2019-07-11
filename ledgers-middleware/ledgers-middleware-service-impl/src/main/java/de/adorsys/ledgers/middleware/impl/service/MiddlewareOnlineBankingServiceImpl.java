@@ -5,7 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
-import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.ScaInfoMapper;
@@ -14,7 +14,6 @@ import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -45,7 +44,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
 
     @Override
-    public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role) throws InsufficientPermissionMiddlewareException {
+    public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role) {
         UserBO user = user(login);
         LoginKeyDataTO keyData = new LoginKeyDataTO(user.getId(), LocalDateTime.now());
         String opId = keyData.toOpId();
@@ -65,12 +64,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
             if (userTo.getScaUserData().size() == 1) {
                 ScaUserDataTO chosenScaMethod = userTo.getScaUserData().iterator().next();
                 authCodeData.setScaUserDataId(chosenScaMethod.getId());
-                try {
-                    scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
-                } catch (SCAMethodNotSupportedException | SCAOperationValidationException
-                                 | SCAOperationNotFoundException e) {
-                    throw new AccountMiddlewareUncheckedException(e.getMessage(), e);
-                }
+                scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
             } else {
                 scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUIDENTIFIED);
             }
@@ -82,7 +76,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     }
 
     @Override
-    public SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId, OpTypeTO opType) throws InsufficientPermissionMiddlewareException {
+    public SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId, OpTypeTO opType) {
         OpTypeBO opTypeBO = OpTypeBO.valueOf(opType.name());
         UserBO user = user(login);
         // FOr login we use the login name and login time for authId and authorizationId.
@@ -117,59 +111,35 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 
     @Override
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    public SCALoginResponseTO generateLoginAuthCode(ScaInfoTO scaInfoTO, String userMessage,
-                                                    int validitySeconds) throws SCAOperationNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, SCAOperationValidationMiddlewareException {
-        try {
-            UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
-            SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(scaInfoTO.getAuthorisationId());
-            LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
-            String opId = scaOperationBO.getOpId();
-            String opData = opId;
-            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaInfoTO.getScaMethodId(),
-                    opId, opData, userMessage, validitySeconds,
-                    OpTypeBO.LOGIN, scaInfoTO.getAuthorisationId(), 0);
-            scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
-            SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
-            BearerTokenBO loginToken = userService.loginToken(scaInfoMapper.toScaInfoBO(scaInfoTO));
-            scaResponse.setBearerToken(bearerTokenMapper.toBearerTokenTO(loginToken));
-            return scaResponse;
-        } catch (SCAMethodNotSupportedException e) {
-            throw new SCAMethodNotSupportedMiddleException(e);
-        } catch (SCAOperationNotFoundException e) {
-            log.error(e.getMessage(), e);
-            throw new SCAOperationNotFoundMiddlewareException(e);
-        } catch (SCAOperationValidationException e) {
-            log.error(e.getMessage(), e);
-            throw new SCAOperationValidationMiddlewareException(e);
-        }
+    public SCALoginResponseTO generateLoginAuthCode(ScaInfoTO scaInfoTO, String userMessage, int validitySeconds) {
+        UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
+        SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(scaInfoTO.getAuthorisationId());
+        LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
+        String opId = scaOperationBO.getOpId();
+        String opData = opId;
+        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaInfoTO.getScaMethodId(),
+                opId, opData, userMessage, validitySeconds,
+                OpTypeBO.LOGIN, scaInfoTO.getAuthorisationId(), 0);
+        scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
+        SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
+        BearerTokenBO loginToken = userService.loginToken(scaInfoMapper.toScaInfoBO(scaInfoTO));
+        scaResponse.setBearerToken(bearerTokenMapper.toBearerTokenTO(loginToken));
+        return scaResponse;
     }
 
     @Override
-    @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    public SCALoginResponseTO authenticateForLogin(ScaInfoTO scaInfoTO)
-            throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-                           SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException{
-        try {
-            UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
-            SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(scaInfoTO.getAuthorisationId());
-            LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
-            String authorisationId = scaInfoTO.getAuthorisationId();
-            boolean valid = scaOperationService.validateAuthCode(authorisationId, authorisationId, authorisationId, scaInfoTO.getAuthCode(), 0);
-            SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
-            if (valid) {
-                BearerTokenBO scaToken = userService.scaToken(scaInfoMapper.toScaInfoBO(scaInfoTO));
-                scaResponse.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaToken));
-            }
-            return scaResponse;
-        } catch (SCAOperationNotFoundException e) {
-            throw new SCAOperationNotFoundMiddlewareException(e);
-        } catch (SCAOperationValidationException e) {
-            throw new SCAOperationValidationMiddlewareException(e);
-        } catch (SCAOperationExpiredException e) {
-            throw new SCAOperationExpiredMiddlewareException(e);
-        } catch (SCAOperationUsedOrStolenException e) {
-            throw new SCAOperationUsedOrStolenMiddlewareException(e);
+    public SCALoginResponseTO authenticateForLogin(ScaInfoTO scaInfoTO) {
+        UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
+        SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(scaInfoTO.getAuthorisationId());
+        LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
+        String authorisationId = scaInfoTO.getAuthorisationId();
+        boolean valid = scaOperationService.validateAuthCode(authorisationId, authorisationId, authorisationId, scaInfoTO.getAuthCode(), 0);
+        SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
+        if (valid) {
+            BearerTokenBO scaToken = userService.scaToken(scaInfoMapper.toScaInfoBO(scaInfoTO));
+            scaResponse.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaToken));
         }
+        return scaResponse;
     }
 
     private SCALoginResponseTO toScaResponse(UserBO user, String userMessage,
@@ -208,7 +178,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         return userService.findByLogin(login);
     }
 
-    private BearerTokenBO proceedToLogin(UserBO user, String pin, UserRoleTO role, String scaId, String authorisationId) throws InsufficientPermissionMiddlewareException {
+    private BearerTokenBO proceedToLogin(UserBO user, String pin, UserRoleTO role, String scaId, String authorisationId) {
         UserRoleBO roleBo = UserRoleBO.valueOf(role.name());
         // FOr login we use the login name and login time for authId and authorizationId.
         BearerTokenBO loginTokenBO = userService.authorise(user.getLogin(), pin, roleBo, scaId, authorisationId);

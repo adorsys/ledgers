@@ -22,6 +22,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
 import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.sca.exception.ScaModuleException;
 import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +81,13 @@ public class ExceptionAdvisor {
     @ExceptionHandler(UserManagementModuleException.class)
     public ResponseEntity<Map> handleUserManagementModuleException(UserManagementModuleException ex) {
         HttpStatus status = UserManagementHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
+        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(ScaModuleException.class)
+    public ResponseEntity<Map> handleScaModuleException(ScaModuleException ex) {
+        HttpStatus status = ScaHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }

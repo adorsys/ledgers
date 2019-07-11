@@ -26,7 +26,6 @@ import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.exception.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -283,8 +282,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId)
-            throws SCAOperationExpiredMiddlewareException {
+    public SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId) {
         UserTO user = userMapper.toUserTO(scaUtils.userBO(userId));
         AisConsentBO consent = userService.loadConsent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
@@ -294,11 +292,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    @SuppressWarnings("PMD.IdenticalCatchBranches")
-    public SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId,
-                                                             String scaMethodId) throws SCAMethodNotSupportedMiddleException,
-                                                                                                SCAOperationValidationMiddlewareException,
-                                                                                                SCAOperationNotFoundMiddlewareException {
+    public SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId, String scaMethodId) {
         UserBO userBO = scaUtils.userBO(userId);
         UserTO userTO = scaUtils.user(userBO);
         AisConsentBO consent = userService.loadConsent(consentId);
@@ -310,58 +304,35 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
                 consentId, template, template,
                 defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
-        try {
-            SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
-            return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
-        } catch (SCAMethodNotSupportedException e) {
-            log.error(e.getMessage());
-            throw new SCAMethodNotSupportedMiddleException(e);
-        } catch (SCAOperationValidationException e) {
-            throw new SCAOperationValidationMiddlewareException(e.getMessage(), e);
-        } catch (SCAOperationNotFoundException e) {
-            throw new SCAOperationNotFoundMiddlewareException(e.getMessage(), e);
-        }
+
+        SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
+        return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
     }
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    public SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId)
-            throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-                           SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException {
+    public SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId) throws SCAOperationValidationMiddlewareException {
         AisConsentBO consent = userService.loadConsent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-        try {
-            UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
-            int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
-            boolean validAuthCode = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
-                    consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
-            if (!validAuthCode) {
-                throw new SCAOperationValidationMiddlewareException("Wrong auth code");
-            }
-            UserTO userTO = scaUtils.user(userBO);
-            SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
-            SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
-            if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
-                BearerTokenBO consentToken = userService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
-                response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-            } else if (multilevelScaEnable) {
-                response.setPartiallyAuthorised(true);
-            }
-            return response;
-        } catch (SCAOperationNotFoundException e) {
-            log.error(e.getMessage());
-            throw new SCAOperationNotFoundMiddlewareException(e);
-        } catch (SCAOperationValidationException e) {
-            log.error(e.getMessage());
-            throw new SCAOperationValidationMiddlewareException(e);
-        } catch (SCAOperationExpiredException e) {
-            log.error(e.getMessage());
-            throw new SCAOperationExpiredMiddlewareException(e);
-        } catch (SCAOperationUsedOrStolenException e) {
-            log.error(e.getMessage());
-            throw new SCAOperationUsedOrStolenMiddlewareException(e);
+
+        UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
+        int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
+        boolean validAuthCode = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
+                consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
+        if (!validAuthCode) {
+            throw new SCAOperationValidationMiddlewareException("Wrong auth code");
         }
+        UserTO userTO = scaUtils.user(userBO);
+        SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
+        SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+        if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
+            BearerTokenBO consentToken = userService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
+            response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
+        } else if (multilevelScaEnable) {
+            response.setPartiallyAuthorised(true);
+        }
+        return response;
     }
 
     @Override
