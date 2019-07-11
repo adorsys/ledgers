@@ -6,4 +6,8 @@ import lombok.Data;
 public class SCAConsentResponseTO extends SCAResponseTO {
 	private String consentId;
 	private boolean partiallyAuthorised;
+
+	public SCAConsentResponseTO() {
+		super(SCAConsentResponseTO.class.getSimpleName());
+	}
 }

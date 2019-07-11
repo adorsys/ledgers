@@ -11,4 +11,8 @@ public class SCAPaymentResponseTO extends SCAResponseTO {
 	private TransactionStatusTO transactionStatus;
 	private PaymentProductTO paymentProduct;
 	private PaymentTypeTO paymentType;
+
+	public SCAPaymentResponseTO() {
+		super(SCAPaymentResponseTO.class.getSimpleName());
+	}
 }

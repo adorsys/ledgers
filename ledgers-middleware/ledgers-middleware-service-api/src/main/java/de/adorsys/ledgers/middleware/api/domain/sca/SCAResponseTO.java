@@ -26,4 +26,13 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
     private BearerTokenTO bearerToken;
 
 	private String objectType;
+
+	public SCAResponseTO(String objectType) {
+		this.objectType = objectType;
+	}
+
+	@Override
+	public String getObjectType() {
+		return objectType;
+	}
 }
