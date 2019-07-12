@@ -21,6 +21,7 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.sca.exception.ScaModuleException;
 import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class ExceptionAdvisor {
     private static final String MESSAGE = "message";
@@ -41,6 +43,7 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map> globalExceptionHandler(Exception ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         Map<String, String> body = getHandlerContent(status, null, "Something went wrong during execution of your request.");
+        log.error("INTERNAL SERVER ERROR", ex);
         return new ResponseEntity<>(body, status);
     }
 
@@ -83,15 +86,6 @@ public class ExceptionAdvisor {
     private Map<String, String> getHandlerContent(HttpStatus status, String message, String devMessage) {
         Map<String, String> error = new HashMap<>();
         error.put(CODE, String.valueOf(status.value()));
-        error.put(MESSAGE, message);
-        error.put(DEV_MESSAGE, devMessage);
-        error.put(DATE_TIME, LocalDateTime.now().toString());
-        return error;
-    }
-
-    private Map<String, String> getHandlerContent(String code, String message, String devMessage) {
-        Map<String, String> error = new HashMap<>();
-        error.put(CODE, code);
         error.put(MESSAGE, message);
         error.put(DEV_MESSAGE, devMessage);
         error.put(DATE_TIME, LocalDateTime.now().toString());

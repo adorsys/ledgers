@@ -35,7 +35,6 @@ public class PaymentRestInitiationService {
             SCAPaymentResponseTO response = paymentRestClient.initiatePayment(paymentType, payment).getBody();
             logger.info("Payment from: {}, successfully committed, payment ID: {}, transaction status: {}", user.getLogin(), response.getPaymentId(), response.getTransactionStatus());
             performScaIfRequired(response);
-            logger.info("Payment finalized!");
         } catch (FeignException e) {
             logger.error("Payment from: {}, failed due to: {}", user.getLogin(), e.getMessage());
         }
@@ -53,6 +52,7 @@ public class PaymentRestInitiationService {
             if (response.getScaStatus() == ScaStatusTO.SCAMETHODSELECTED) {
                 paymentRestClient.authorizePayment(response.getPaymentId(), response.getAuthorisationId(), "123456").getBody();
                 authRequestInterceptor.setAccessToken(null);
+                logger.info("Payment finalized!");
             }
         } catch (FeignException e) {
             logger.error("Failed authorising payment: {}, authId: {}", response.getPaymentId(), response.getAuthorisationId());
