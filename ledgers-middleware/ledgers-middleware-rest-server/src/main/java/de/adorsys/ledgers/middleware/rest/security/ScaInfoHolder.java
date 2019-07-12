@@ -11,7 +11,7 @@ public interface ScaInfoHolder {
 
     ScaInfoTO getScaInfo();
 
-    ScaInfoTO getScaInfoWithScaMethodId(String scaMethodId);
+    ScaInfoTO getScaInfoWithScaMethodIdAndAuthorisationId(String scaMethodId, String authorizationId);
 
     ScaInfoTO getScaInfoWithAuthCode(String authCode);
 }

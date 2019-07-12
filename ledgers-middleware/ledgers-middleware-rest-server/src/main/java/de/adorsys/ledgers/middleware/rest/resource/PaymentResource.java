@@ -66,7 +66,7 @@ public class PaymentResource implements PaymentRestAPI {
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, String authorisationId, String scaMethodId) {
-        return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(scaInfoHolder.getScaInfoWithScaMethodId(scaMethodId), paymentId));
+        return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), paymentId));
     }
 
     @Override
@@ -90,7 +90,7 @@ public class PaymentResource implements PaymentRestAPI {
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> selecCancelPaymentSCAtMethod(String paymentId, String cancellationId, String scaMethodId) {
-        return ResponseEntity.ok(paymentService.selectSCAMethodForCancelPayment(scaInfoHolder.getScaInfoWithScaMethodId(scaMethodId), paymentId, cancellationId));
+        return ResponseEntity.ok(paymentService.selectSCAMethodForCancelPayment(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, cancellationId), paymentId, cancellationId));
     }
 
     @Override

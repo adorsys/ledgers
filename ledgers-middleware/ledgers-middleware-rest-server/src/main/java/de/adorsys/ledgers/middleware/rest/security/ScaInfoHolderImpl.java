@@ -27,9 +27,10 @@ public class ScaInfoHolderImpl implements ScaInfoHolder {
     }
 
     @Override
-    public ScaInfoTO getScaInfoWithScaMethodId(String scaMethodId) {
+    public ScaInfoTO getScaInfoWithScaMethodIdAndAuthorisationId(String scaMethodId, String authorizationId) {
         ScaInfoTO info = buildScaInfo();
         info.setScaMethodId(scaMethodId);
+        info.setAuthorisationId(authorizationId);
         return info;
     }
 
