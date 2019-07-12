@@ -17,10 +17,7 @@
 package de.adorsys.ledgers.middleware.rest.exception;
 
 import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientFundsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
 import de.adorsys.ledgers.sca.exception.ScaModuleException;
 import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
@@ -40,29 +37,18 @@ public class ExceptionAdvisor {
     private static final String CODE = "code";
     private static final String DATE_TIME = "dateTime";
 
-    @ExceptionHandler(InsufficientPermissionMiddlewareException.class)
-    public ResponseEntity handleInsufficientPermission(InsufficientPermissionMiddlewareException e) {
-        Map<String, String> body = getHandlerContent(HttpStatus.FORBIDDEN, null, e.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map> globalExceptionHandler(Exception ex) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        Map<String, String> body = getHandlerContent(status, null, "Something went wrong during execution of your request.");
+        return new ResponseEntity<>(body, status);
     }
 
-    @ExceptionHandler(InsufficientFundsMiddlewareException.class)
-    public ResponseEntity<SCAPaymentResponseTO> handleInsufficientFundsException(InsufficientFundsMiddlewareException e) {
-        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
-        response.setTransactionStatus(TransactionStatusTO.RJCT);
-        response.setPsuMessage(e.getMessage());
-        return ResponseEntity.ok(response);
-    }
-
-    @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity handleUnsupportedOperationException(UnsupportedOperationException e) {
-        return ResponseEntity.status(501).body(e.getMessage());
-    }
-
-    @ExceptionHandler(RestException.class)
-    public ResponseEntity<Map> handleRestException(RestException ex) {
-        Map<String, String> body = getHandlerContent(ex.getCode(), ex.getMessage(), ex.devMessage);
-        return new ResponseEntity<>(body, ex.getStatus());
+    @ExceptionHandler(MiddlewareModuleException.class)
+    public ResponseEntity<Map> handleMiddlewareModuleException(MiddlewareModuleException ex) {
+        HttpStatus status = MiddlewareHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
+        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(PostingModuleException.class)
@@ -92,6 +78,7 @@ public class ExceptionAdvisor {
         Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
+
     //TODO Consider a separate Class for this with a builder?
     private Map<String, String> getHandlerContent(HttpStatus status, String message, String devMessage) {
         Map<String, String> error = new HashMap<>();

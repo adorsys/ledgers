@@ -2,7 +2,6 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
-import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,6 @@ public interface UserMgmtStaffResourceAPI {
      * Registers a new user within a given branch.
      *
      * @return user object without pin
-     * @throws ConflictRestException user with same login or email already exists
      */
     @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Register", notes = "Registers a new user for a given branch.")
     @ApiResponses(value = {

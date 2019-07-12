@@ -1,18 +1,16 @@
 package de.adorsys.ledgers.app.mock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
+import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
+import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
-import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
 
 @Component
 public class MockBankConfigSource implements ASPSPConfigSource {
@@ -35,7 +33,7 @@ public class MockBankConfigSource implements ASPSPConfigSource {
         try {
             ledgerAccounts = mapper.readValue(inputStream, LedgerAccountModel[].class);
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Could not get resource", e);
         }
         return Arrays.asList(ledgerAccounts);
     }

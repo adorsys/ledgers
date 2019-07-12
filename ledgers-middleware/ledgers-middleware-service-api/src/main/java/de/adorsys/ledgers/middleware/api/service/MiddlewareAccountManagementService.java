@@ -8,7 +8,6 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,8 +24,7 @@ public interface MiddlewareAccountManagementService {
      * @param scaInfoTO      : SCA information
      * @param depositAccount : the deposit account to be crated.
      */
-    void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount)
-            throws AccountNotFoundMiddlewareException;
+    void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount);
 
     /**
      * Creates a new DepositAccount for the connected user.
@@ -35,11 +33,8 @@ public interface MiddlewareAccountManagementService {
      * @param accountNumberPrefix : the account number prefix : the account number prefix
      * @param accountNumberSuffix : th eaccount number suffix
      * @param accDetails          : account to create.
-     * @throws AccountWithPrefixGoneMiddlewareException   : another user owns this prefic
-     * @throws AccountWithSuffixExistsMiddlewareException : user has account with same prefix and this suffix
      */
-    void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
-            throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException, AccountNotFoundMiddlewareException;
+    void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails);
 
     /**
      * Retrieve the list of account viewable by the connected user.
@@ -65,9 +60,8 @@ public interface MiddlewareAccountManagementService {
      * @param time        the reference time.
      * @param withBalance boolean specifying if Balances has to be added to AccountDetails
      * @return account details.
-     * @throws AccountNotFoundMiddlewareException : target account not found.
      */
-    AccountDetailsTO getDepositAccountById(String id, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException;
+    AccountDetailsTO getDepositAccountById(String id, LocalDateTime time, boolean withBalance);
 
     /**
      * Retrieves AccountDetails with Balance on demand
@@ -76,9 +70,8 @@ public interface MiddlewareAccountManagementService {
      * @param time        the reference time.
      * @param withBalance boolean specifying if Balances has to be added to AccountDetails
      * @return account details.
-     * @throws AccountNotFoundMiddlewareException : target account not found.
      */
-    AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) throws AccountNotFoundMiddlewareException;
+    AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance);
 
     //============================ Account Details ==============================//
 
@@ -87,9 +80,8 @@ public interface MiddlewareAccountManagementService {
      *
      * @param userLogin the user login
      * @return list of account details.
-     * @throws AccountNotFoundMiddlewareException : target account not found.
      */
-    List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) throws AccountNotFoundMiddlewareException;
+    List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin);
 
     /**
      * Retrieves transaction by accountId and transactionId
@@ -97,10 +89,8 @@ public interface MiddlewareAccountManagementService {
      * @param accountId     the account id
      * @param transactionId the transaction id
      * @return the corresponding transaction
-     * @throws AccountNotFoundMiddlewareException     : target account not found.
-     * @throws TransactionNotFoundMiddlewareException : no transaction with this id.
      */
-    TransactionTO getTransactionById(String accountId, String transactionId) throws AccountNotFoundMiddlewareException, TransactionNotFoundMiddlewareException;
+    TransactionTO getTransactionById(String accountId, String transactionId);
 
     /**
      * Retrieves a List of transactions by accountId and dates (from/to) if dateTo is empty it is considered that requested date is today
@@ -109,18 +99,16 @@ public interface MiddlewareAccountManagementService {
      * @param dateFrom  from this time
      * @param dateTo    to this time
      * @return : List of transactions.
-     * @throws AccountNotFoundMiddlewareException : target account not found.
      */
-    List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) throws AccountNotFoundMiddlewareException;
+    List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo);
 
     /**
      * Confirm the availability of funds on user account to perform the operation with specified amount
      *
      * @param request : teh fund confirmation request.
      * @return : true if fund available else false.
-     * @throws AccountNotFoundMiddlewareException : target account not found.
      */
-    boolean confirmFundsAvailability(FundsConfirmationRequestTO request) throws AccountNotFoundMiddlewareException;
+    boolean confirmFundsAvailability(FundsConfirmationRequestTO request);
 
     String iban(String id);
 
@@ -136,9 +124,9 @@ public interface MiddlewareAccountManagementService {
      */
     SCAConsentResponseTO startSCA(ScaInfoTO scaInfoTO, String consentId, AisConsentTO aisConsent);
 
-    SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId) throws SCAOperationExpiredMiddlewareException, AisConsentNotFoundMiddlewareException;
+    SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId);
 
-    SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId, String scaMethodId) throws PaymentNotFoundMiddlewareException;
+    SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId, String scaMethodId);
 
     /**
      * Authorizes a consent request. If the authentication is completed, the returned response will contain a valid bearer token.
@@ -146,10 +134,8 @@ public interface MiddlewareAccountManagementService {
      * @param scaInfoTO : SCA information
      * @param consentId : the cosent id
      * @return SCAConsentResponseTO : the consent response.
-     * @throws AisConsentNotFoundMiddlewareException : consent not found.
      */
-    SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId)
-            throws AisConsentNotFoundMiddlewareException, SCAOperationValidationMiddlewareException;
+    SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId);
 
     /**
      * Provide a third party provider with necessary permission to read accounts and
@@ -158,10 +144,8 @@ public interface MiddlewareAccountManagementService {
      * @param scaInfoTO  : SCA information
      * @param aisConsent : the consent details
      * @return the corresponding access token describing the account access
-     * @throws AccountNotFoundMiddlewareException : target account not found.
      */
-    SCAConsentResponseTO grantAisConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent)
-            throws AccountNotFoundMiddlewareException;
+    SCAConsentResponseTO grantAisConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent);
 
     /**
      * Deposits given amount in cash into specified account.
@@ -171,9 +155,8 @@ public interface MiddlewareAccountManagementService {
      * @param scaInfoTO SCA information
      * @param accountId id of the account deposited into
      * @param amount    amount of cash deposited
-     * @throws AccountNotFoundMiddlewareException target account not found
      */
-    void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) throws AccountNotFoundMiddlewareException;
+    void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount);
 
     /**
      * Retrieves a List of AccountAccessTO by userId

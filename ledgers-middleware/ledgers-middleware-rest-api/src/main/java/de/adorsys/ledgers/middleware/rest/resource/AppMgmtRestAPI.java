@@ -16,35 +16,29 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.exception.ForbiddenRestException;
-import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
-import de.adorsys.ledgers.middleware.rest.exception.RestException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-@Api(tags = "LDG005 - Application Management" , description= "Application management")
+@Api(tags = "LDG005 - Application Management", description = "Application management")
 public interface AppMgmtRestAPI {
-	String BASE_PATH = "/management/app";
+    String BASE_PATH = "/management/app";
 
     @GetMapping("/ping")
-    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Echo the server")
+    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Echo the server")
     ResponseEntity<String> ping();
-	
+
     @PostMapping("/init")
     @ApiOperation("Initializes the deposit account module.")
-    ResponseEntity<Void> initApp() throws RestException;
-    
+    ResponseEntity<Void> initApp();
+
     @PostMapping("/admin")
-    @ApiOperation(tags=UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value="Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
-    ResponseEntity<BearerTokenTO> admin(@RequestBody(required=true) UserTO adminUser)
-    		throws NotFoundRestException, ForbiddenRestException, ConflictRestException;
+    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
+    ResponseEntity<BearerTokenTO> admin(@RequestBody(required = true) UserTO adminUser);
 
 }

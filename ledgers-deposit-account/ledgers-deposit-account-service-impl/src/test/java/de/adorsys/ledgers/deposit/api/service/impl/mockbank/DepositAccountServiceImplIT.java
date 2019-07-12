@@ -112,7 +112,7 @@ public class DepositAccountServiceImplIT {
         checkBalance("DE38760700240320465700", LocalDateTime.now(), new BigDecimal(-5000.00));
     }
 
-    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) throws IllegalStateException {
+    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance){
         LedgerBO ledger = loadLedger();
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();

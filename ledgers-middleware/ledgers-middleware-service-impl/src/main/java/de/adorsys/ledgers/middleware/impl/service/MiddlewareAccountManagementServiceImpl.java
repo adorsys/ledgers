@@ -16,9 +16,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithPrefixGoneMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.AccountWithSuffixExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
@@ -39,6 +37,9 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.ACCOUNT_CREATION_VALIDATION_FAILURE;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
 
 @Slf4j
 @Service
@@ -67,57 +68,57 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
-            UserBO user = userService.findById(userId);
-            DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
-            DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, user.getId(), user.getBranch());
+        UserBO user = userService.findById(userId);
+        DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
+        DepositAccountBO createdAccount = depositAccountService.createDepositAccountForBranch(accountToCreate, user.getId(), user.getBranch());
 
-            AccountAccessBO accountAccess = accessService.createAccountAccess(createdAccount.getIban(), AccessTypeBO.OWNER);
-            accessService.updateAccountAccess(user, accountAccess);
+        AccountAccessBO accountAccess = accessService.createAccountAccess(createdAccount.getIban(), AccessTypeBO.OWNER);
+        accessService.updateAccountAccess(user, accountAccess);
 
-            //Check if the account is created by Branch and if so add access to this account to Branch
-            if (!user.getLogin().equals(scaInfoTO.getUserLogin())) {
-                UserBO userBO = userService.findByLogin(scaInfoTO.getUserLogin());
-                accessService.updateAccountAccess(userBO, accountAccess);
-            }
+        //Check if the account is created by Branch and if so add access to this account to Branch
+        if (!user.getLogin().equals(scaInfoTO.getUserLogin())) {
+            UserBO userBO = userService.findByLogin(scaInfoTO.getUserLogin());
+            accessService.updateAccountAccess(userBO, accountAccess);
+        }
     }
 
     @Override
-    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance)  {
-            DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
-            return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
+    public AccountDetailsTO getDepositAccountById(String accountId, LocalDateTime time, boolean withBalance) {
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountById(accountId, time, true);
+        return accountDetailsMapper.toAccountDetailsTO(accountDetailsBO);
     }
 
     @Override
     public AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance) {
-            DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
-            return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
+        DepositAccountDetailsBO depositAccountBO = depositAccountService.getDepositAccountByIban(iban, time, withBalance);
+        return accountDetailsMapper.toAccountDetailsTO(depositAccountBO);
     }
 
     @Override
     public List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin) {
         log.info("Retrieving accounts by user login {}", userLogin);
-            UserBO userBO = userService.findByLogin(userLogin);
-            List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
-            log.info("{} accounts were retrieved", accountAccess.size());
+        UserBO userBO = userService.findByLogin(userLogin);
+        List<AccountAccessBO> accountAccess = userBO.getAccountAccesses();
+        log.info("{} accounts were retrieved", accountAccess.size());
 
-            List<String> ibans = accountAccess.stream()
-                                         .filter(a -> a.getAccessType() == AccessTypeBO.OWNER)
-                                         .map(AccountAccessBO::getIban)
-                                         .collect(Collectors.toList());
-            log.info("{} were accounts were filtered as OWN", ibans.size());
+        List<String> ibans = accountAccess.stream()
+                                     .filter(a -> a.getAccessType() == AccessTypeBO.OWNER)
+                                     .map(AccountAccessBO::getIban)
+                                     .collect(Collectors.toList());
+        log.info("{} were accounts were filtered as OWN", ibans.size());
 
-            List<DepositAccountDetailsBO> depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, BASE_TIME, false);
-            log.info("{} deposit accounts were found", depositAccounts.size());
+        List<DepositAccountDetailsBO> depositAccounts = depositAccountService.getDepositAccountsByIban(ibans, BASE_TIME, false);
+        log.info("{} deposit accounts were found", depositAccounts.size());
 
-            return depositAccounts.stream()
-                           .map(accountDetailsMapper::toAccountDetailsTO)
-                           .collect(Collectors.toList());
+        return depositAccounts.stream()
+                       .map(accountDetailsMapper::toAccountDetailsTO)
+                       .collect(Collectors.toList());
     }
 
     @Override
-    public TransactionTO getTransactionById(String accountId, String transactionId){
-            TransactionDetailsBO transaction = depositAccountService.getTransactionById(accountId, transactionId);
-            return paymentConverter.toTransactionTO(transaction);
+    public TransactionTO getTransactionById(String accountId, String transactionId) {
+        TransactionDetailsBO transaction = depositAccountService.getTransactionById(accountId, transactionId);
+        return paymentConverter.toTransactionTO(transaction);
     }
 
     @Override
@@ -130,8 +131,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                                            ? accessService.getTimeAtEndOfTheDay(today)
                                            : accessService.getTimeAtEndOfTheDay(dateTo);
 
-            List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
-            return paymentConverter.toTransactionTOList(transactions);
+        List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
+        return paymentConverter.toTransactionTOList(transactions);
     }
 
     @Override
@@ -141,8 +142,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails)
-            throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
+    public void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails) {
         String accNbr = accountNumberPrefix + accountNumberSuffix;
         // if the list is not empty, we mus make sure that account belong to the current user.s
         List<DepositAccountBO> accounts = depositAccountService.findByAccountNumberPrefix(accountNumberPrefix);
@@ -153,7 +153,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     // Validate that
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    private void validateInput(String userId, List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) throws AccountWithPrefixGoneMiddlewareException, AccountWithSuffixExistsMiddlewareException {
+    private void validateInput(String userId, List<DepositAccountBO> accounts, String accountNumberPrefix, String accountNumberSuffix) {
         // This prefix is still free
         if (accounts.isEmpty()) {
             return;
@@ -165,7 +165,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         // Empty if user is not owner of this prefix.
         if (accountAccesses == null || accountAccesses.isEmpty()) {
             // User can not own any of those accounts.
-            throw new AccountWithPrefixGoneMiddlewareException(String.format("Account prefix %s is gone.", accountNumberPrefix));
+            throw MiddlewareModuleException.builder()
+                          .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                          .devMsg(String.format("Account prefix %s is gone.", accountNumberPrefix))
+                          .build();
         }
 
         List<String> ownedAccounts = accessService.filterOwnedAccounts(accountAccesses);
@@ -173,13 +176,19 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         // user already has account with this prefix and suffix
         String accNbr = accountNumberPrefix + accountNumberSuffix;
         if (ownedAccounts.contains(accNbr)) {
-            throw new AccountWithSuffixExistsMiddlewareException(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix));
+            throw MiddlewareModuleException.builder()
+                          .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                          .devMsg(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix))
+                          .build();
         }
 
         // All accounts with this prefix must be owned by this user.
         for (DepositAccountBO a : accounts) {
             if (ownedAccounts.contains(a.getIban())) {
-                throw new AccountWithSuffixExistsMiddlewareException(String.format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(), accountNumberPrefix));
+                throw MiddlewareModuleException.builder()
+                              .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                              .devMsg(String.format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(), accountNumberPrefix))
+                              .build();
             }
         }
     }
@@ -270,7 +279,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    public SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId) throws SCAOperationValidationMiddlewareException {
+    public SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId) {
         AisConsentBO consent = userService.loadConsent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
@@ -280,7 +289,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         boolean validAuthCode = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
                 consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
         if (!validAuthCode) {
-            throw new SCAOperationValidationMiddlewareException("Wrong auth code");
+            throw MiddlewareModuleException.builder()
+                          .errorCode(AUTHENTICATION_FAILURE)
+                          .devMsg("Wrong auth code")
+                          .build();
         }
         UserTO userTO = scaUtils.user(userBO);
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());

@@ -20,7 +20,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
 
 public interface MiddlewarePaymentService {
 
@@ -31,36 +30,26 @@ public interface MiddlewarePaymentService {
      * <p>
      * This call sets the status RCVD
      *
-     * @param scaInfoTO : SCA information
-     * @param payment : the payment object
+     * @param scaInfoTO   : SCA information
+     * @param payment     : the payment object
      * @param paymentType : the payment type
      * @return : the sca response object.
-	 * @throws AccountNotFoundMiddlewareException : account non existant.
-	 * @throws NoAccessMiddlewareException : missing permissions
-     * @throws PaymentWithIdMiddlewareException : payment with given id exist. 
-	 */
-    <T> SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, T payment, PaymentTypeTO paymentType) throws AccountNotFoundMiddlewareException, NoAccessMiddlewareException, PaymentWithIdMiddlewareException;
+     */
+    <T> SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, T payment, PaymentTypeTO paymentType);
 
 
     // ================= SCA =======================================//
+
     /**
      * PROC: 02c
      * <p>
      * This is called when the user enters the received code.
-     * 
+     *
      * @param scaInfoTO : SCA information
      * @param paymentId : the payment id
      * @return : auth response.
-     * @throws SCAOperationNotFoundMiddlewareException : not found
-     * @throws SCAOperationValidationMiddlewareException : not valid
-     * @throws SCAOperationExpiredMiddlewareException : expired
-     * @throws SCAOperationUsedOrStolenMiddlewareException : malicious
-     * @throws PaymentNotFoundMiddlewareException  : payment not found.
      */
-	SCAPaymentResponseTO authorizePayment(ScaInfoTO scaInfoTO, String paymentId)
-			throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException,
-			SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, 
-			PaymentNotFoundMiddlewareException;
+    SCAPaymentResponseTO authorizePayment(ScaInfoTO scaInfoTO, String paymentId);
 
     //============================ Payment Execution ==============================//
 
@@ -73,9 +62,8 @@ public interface MiddlewarePaymentService {
      *
      * @param paymentId : the payment id
      * @return : the transaction status
-     * @throws PaymentNotFoundMiddlewareException : payment with id not found.
      */
-    TransactionStatusTO getPaymentStatusById(String paymentId) throws PaymentNotFoundMiddlewareException;
+    TransactionStatusTO getPaymentStatusById(String paymentId);
 
 
     //============================ Payment Status ==============================//
@@ -85,32 +73,29 @@ public interface MiddlewarePaymentService {
      *
      * @param paymentId : the payment id
      * @return the payment
-     * @throws PaymentNotFoundMiddlewareException
      */
-    Object getPaymentById(String paymentId) throws PaymentNotFoundMiddlewareException;
-    
+    Object getPaymentById(String paymentId);
+
     /**
      * Checks the possibility of payment cancellation
      *
      * @param scaInfoTO : SCA information
      * @param paymentId : the payment id
      * @return : the auth response object.
-     * @throws PaymentNotFoundMiddlewareException : not found
-     * @throws PaymentProcessingMiddlewareException : processing
      */
-    SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId) throws PaymentNotFoundMiddlewareException, PaymentProcessingMiddlewareException;
+    SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId);
 
-	String iban(String paymentId);
+    String iban(String paymentId);
 
 
-	SCAPaymentResponseTO loadSCAForPaymentData(ScaInfoTO scaInfoTO, String paymentId) throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException;
+    SCAPaymentResponseTO loadSCAForPaymentData(ScaInfoTO scaInfoTO, String paymentId);
 
-	SCAPaymentResponseTO selectSCAMethodForPayment(ScaInfoTO scaInfoTO, String paymentId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException;
+    SCAPaymentResponseTO selectSCAMethodForPayment(ScaInfoTO scaInfoTO, String paymentId);
 
-	SCAPaymentResponseTO loadSCAForCancelPaymentData(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) throws PaymentNotFoundMiddlewareException, SCAOperationExpiredMiddlewareException;
+    SCAPaymentResponseTO loadSCAForCancelPaymentData(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
 
-	SCAPaymentResponseTO selectSCAMethodForCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) throws PaymentNotFoundMiddlewareException, SCAMethodNotSupportedMiddleException, UserScaDataNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationNotFoundMiddlewareException;
+    SCAPaymentResponseTO selectSCAMethodForCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
 
-	SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) throws SCAOperationNotFoundMiddlewareException, SCAOperationValidationMiddlewareException, SCAOperationExpiredMiddlewareException, SCAOperationUsedOrStolenMiddlewareException, PaymentNotFoundMiddlewareException;
-	
+    SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
+
 }

@@ -4,9 +4,8 @@ package de.adorsys.ledgers.middleware.rest.security;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.exception.InsufficientPermissionMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
+import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +46,7 @@ public class TokenAuthenticationService {
         BearerTokenTO bearerToken;
         try {
             bearerToken = onlineBankingService.validate(accessToken);
-        } catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
+        } catch (UserManagementModuleException e) {
             debug("User with token not found.", e);
             return null;
         }
