@@ -1,18 +1,14 @@
 package de.adorsys.ledgers.postings.impl.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.postings.db.domain.Posting;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.postings.db.domain.Posting;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class LoadPostingYMLTest {
 	private ObjectMapper mapper = new ObjectMapper();
@@ -28,7 +24,7 @@ public class LoadPostingYMLTest {
 	}
 	
 	@Test
-	public void testReadYml() throws JsonParseException, JsonMappingException, IOException{
+	public void testReadYml() throws IOException{
 		InputStream inputStream = LoadPostingYMLTest.class.getResourceAsStream("LoadPostingYMLTest.yml");
 		Posting[] postings = mapper.readValue(inputStream, Posting[].class);
 		Assert.assertNotNull(postings);

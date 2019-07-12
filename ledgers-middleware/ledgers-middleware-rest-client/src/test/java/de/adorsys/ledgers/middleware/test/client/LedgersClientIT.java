@@ -8,7 +8,6 @@ import de.adorsys.ledgers.middleware.api.domain.account.UsageTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.client.rest.*;
-import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -77,7 +76,7 @@ public class LedgersClientIT {
     }
 
     @Test
-    public void b_createUserAndAccount() throws ConflictRestException {
+    public void b_createUserAndAccount() {
         ResponseEntity<UserTO> user = userMgmtRestClient.register("francis.pouatcha", "fpo@mail.ledgers", "12345", CUSTOMER);
         AccountDetailsTO a = new AccountDetailsTO();
         a.setIban("DE69760700240340283600");

@@ -5,8 +5,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.UserAlreadyExistsMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.UserNotFoundMiddlewareException;
 
 import java.util.List;
 
@@ -15,28 +13,25 @@ public interface MiddlewareUserManagementService {
      * Creates a new user
      *
      * @param user User transfer object
-     * @return A persisted user or trows a UserAlreadyExistsException
-     * @throws UserAlreadyExistsMiddlewareException is thrown if user already exists
+     * @return A persisted user
      */
-    UserTO create(UserTO user) throws UserAlreadyExistsMiddlewareException;
+    UserTO create(UserTO user);
 
     /**
      * Finds a User by its identifier
      *
      * @param id User identifier
-     * @return a User or throws a UserNotFoundMiddlewareException
-     * @throws UserNotFoundMiddlewareException is thrown if user can`t be found
+     * @return a User
      */
-    UserTO findById(String id) throws UserNotFoundMiddlewareException;
+    UserTO findById(String id);
 
     /**
      * Finds user by login
      *
      * @param userLogin users login
      * @return UserTO object
-     * @throws UserNotFoundMiddlewareException thrown exception if user is not found
      */
-    UserTO findByUserLogin(String userLogin) throws UserNotFoundMiddlewareException;
+    UserTO findByUserLogin(String userLogin);
 
     /**
      * Update SCA methods by user login
@@ -44,16 +39,16 @@ public interface MiddlewareUserManagementService {
      * @param scaDataList user methods
      * @param userLogin   user login
      */
-    UserTO updateScaData(String userLogin, List<ScaUserDataTO> scaDataList) throws UserNotFoundMiddlewareException;
+    UserTO updateScaData(String userLogin, List<ScaUserDataTO> scaDataList);
 
     /**
      * Adds new account for a specific User
      *
      * @param scaInfo container for TPP data from access token
-     * @param userId user id
-     * @param access Access to an account
+     * @param userId  user id
+     * @param access  Access to an account
      */
-    void updateAccountAccess(ScaInfoTO scaInfo,String userId, AccountAccessTO access);
+    void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access);
 
     /**
      * Loads paginated user collection

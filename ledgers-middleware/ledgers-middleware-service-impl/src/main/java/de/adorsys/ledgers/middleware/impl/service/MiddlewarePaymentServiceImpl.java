@@ -31,8 +31,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.PaymentProcessingMiddlewareException;
-import de.adorsys.ledgers.middleware.api.exception.SCAOperationValidationMiddlewareException;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
@@ -58,6 +57,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
 
 @Slf4j
 @Service
@@ -87,7 +88,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @Override
-    public SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId) throws PaymentProcessingMiddlewareException {
+    public SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId) {
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         PaymentBO paymentBO = loadPayment(paymentId);
         TransactionStatusTO originalTxStatus = TransactionStatusTO.valueOf(paymentBO.getTransactionStatus().name());
@@ -171,7 +172,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
      *
      */
     @Override
-    public SCAPaymentResponseTO authorizePayment(ScaInfoTO scaInfoTO, String paymentId) throws SCAOperationValidationMiddlewareException {
+    public SCAPaymentResponseTO authorizePayment(ScaInfoTO scaInfoTO, String paymentId) {
         PaymentBO payment = loadPayment(paymentId);
         PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(payment);
         TransactionStatusBO tx = payment.getTransactionStatus();
@@ -265,8 +266,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @Override
-    public SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId)
-            throws SCAOperationValidationMiddlewareException {
+    public SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) {
         PaymentBO payment = loadPayment(paymentId);
         PaymentCoreDataTO paymentKeyData = coreDataPolicy.getCancelPaymentCoreData(payment);
         validateAuthCode(scaInfoTO.getUserId(), payment, cancellationId, scaInfoTO.getAuthCode(), paymentKeyData.template());
@@ -283,12 +283,14 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    private void validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode, String template)
-            throws SCAOperationValidationMiddlewareException {
+    private void validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode, String template) {
         UserBO userBO = scaUtils.userBO(userId);
         int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
         if (!scaOperationService.validateAuthCode(authorisationId, payment.getPaymentId(), template, authCode, scaWeight)) {
-            throw new SCAOperationValidationMiddlewareException("Wrong auth code");
+            throw MiddlewareModuleException.builder()
+                          .errorCode(AUTHENTICATION_FAILURE)
+                          .devMsg("Wrong auth code")
+                          .build();
         }
     }
 

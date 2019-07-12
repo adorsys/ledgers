@@ -22,11 +22,10 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import de.adorsys.ledgers.middleware.rest.exception.*;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -42,6 +41,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -54,15 +55,10 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 
     @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
-        try {
-            // TODO: add activation of non customer members.
-            UserTO user = onlineBankingService.register(login, email, pin, role);
-            user.setPin(null);
-            return ResponseEntity.ok(user);
-        } catch (UserAlreadyExistsMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ConflictRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        // TODO: add activation of non customer members.
+        UserTO user = onlineBankingService.register(login, email, pin, role);
+        user.setPin(null);
+        return ResponseEntity.ok(user);
     }
 
     /**
@@ -74,129 +70,64 @@ public class UserMgmtResource implements UserMgmtRestAPI {
      */
     @Override
     public ResponseEntity<SCALoginResponseTO> authorise(String login, String pin, UserRoleTO role) {
-        try {
-            return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
-        } catch (UserNotFoundMiddlewareException e) {
-            log.error(e.getMessage());
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
     }
 
     @Override
     public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String login, String pin,
                                                                   String consentId, String authorisationId, OpTypeTO opType) {
-        try {
-            return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
-        } catch (UserNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
     }
 
     @Override
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId) {
-        try {
-            return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaInfoHolder.getScaInfoWithScaMethodId(scaMethodId), null, 1800));
-        } catch (SCAOperationNotFoundMiddlewareException | UserScaDataNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage());
-        } catch (SCAMethodNotSupportedMiddleException e) {
-            log.error(e.getMessage(), e);
-            throw new NotAcceptableRestException(e.getMessage());
-        } catch (SCAOperationValidationMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ValidationRestException(e.getMessage());
-        }
+        return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaInfoHolder.getScaInfoWithScaMethodId(scaMethodId), null, 1800));
     }
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode) {
-        try {
-            return ResponseEntity.ok(onlineBankingService.authenticateForLogin(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
-        } catch (SCAOperationNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage());
-        } catch (SCAOperationValidationMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ExpectationFailedRestException(e.getMessage());
-        } catch (SCAOperationExpiredMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new GoneRestException(e.getMessage());
-        } catch (SCAOperationUsedOrStolenMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotAcceptableRestException(e.getMessage());
-        } catch (InsufficientPermissionMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage());
-        }
+        return ResponseEntity.ok(onlineBankingService.authenticateForLogin(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
     }
 
     @Override
     public ResponseEntity<BearerTokenTO> validate(String token) {
-        try {
-            BearerTokenTO tokenTO = onlineBankingService.validate(token);
-            if (tokenTO != null) {
-                return ResponseEntity.ok(tokenTO);
-            } else {
-                log.error("Token is null !!!");
-                throw new ForbiddenRestException("Token invalid");
-            }
-        } catch (UserNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new ForbiddenRestException(e.getMessage()).withDevMessage(e.getMessage());
+        BearerTokenTO tokenTO = onlineBankingService.validate(token);
+        if (tokenTO != null) {
+            return ResponseEntity.ok(tokenTO);
+        } else {
+            log.error("Token is null !!!");
+            throw MiddlewareModuleException.builder()
+                          .errorCode(AUTHENTICATION_FAILURE)
+                          .devMsg("Token invalid")
+                          .build();
         }
-
     }
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<UserTO> getUserById(String userId) {
-        try {
-            return ResponseEntity.ok(middlewareUserService.findById(userId));
-        } catch (UserNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage());
-        }
+        return ResponseEntity.ok(middlewareUserService.findById(userId));
     }
 
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<UserTO> getUser() {
-        try {
-            return ResponseEntity.ok(middlewareUserService.findById(scaInfoHolder.getUserId()));
-        } catch (UserNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage());
-        }
+        return ResponseEntity.ok(middlewareUserService.findById(scaInfoHolder.getUserId()));
     }
 
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
-        try {
-            UserTO userTO = middlewareUserService.findById(scaInfoHolder.getUserId());
-            UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
+        UserTO userTO = middlewareUserService.findById(scaInfoHolder.getUserId());
+        UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
-            URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
-                              .build().toUri();
+        URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
+                          .build().toUri();
 
-            return ResponseEntity.created(uri).build();
-        } catch (UserNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage());
-        }
+        return ResponseEntity.created(uri).build();
     }
 
     @PutMapping("/{userId}/sca-data")
@@ -213,19 +144,13 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     })
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> updateScaDataByUserId(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) {
-        try {
-            UserTO userTO = middlewareUserService.findById(userId);
-            UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
+        UserTO userTO = middlewareUserService.findById(userId);
+        UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
-            URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
-                              .build().toUri();
+        URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
+                          .build().toUri();
 
-            return ResponseEntity.created(uri).build();
-
-        } catch (UserNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage());
-        }
+        return ResponseEntity.created(uri).build();
     }
 
     @Override

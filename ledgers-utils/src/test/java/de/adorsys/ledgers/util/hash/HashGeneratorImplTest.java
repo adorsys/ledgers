@@ -1,11 +1,9 @@
 package de.adorsys.ledgers.util.hash;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class HashGeneratorImplTest {
 
@@ -13,7 +11,7 @@ public class HashGeneratorImplTest {
     private static final String ENCODED_TEXT = "6C629DBB529DA292F35C3A5A84711228";
 
     @Test
-    public void hash() throws HashGenerationException, JsonProcessingException {
+    public void hash() throws HashGenerationException {
 
         HashGeneratorImpl hashGenerator = new HashGeneratorImpl();
 

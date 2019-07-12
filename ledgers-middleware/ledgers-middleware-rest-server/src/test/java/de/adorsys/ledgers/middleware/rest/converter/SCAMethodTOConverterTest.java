@@ -1,23 +1,20 @@
 package de.adorsys.ledgers.middleware.rest.converter;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.middleware.api.domain.sca.SCAMethodTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mapstruct.factory.Mappers;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mapstruct.factory.Mappers;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import de.adorsys.ledgers.middleware.api.domain.sca.SCAMethodTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.rest.converter.SCAMethodTOConverter;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class SCAMethodTOConverterTest {
 
@@ -28,7 +25,7 @@ public class SCAMethodTOConverterTest {
     private static List<SCAMethodTO> scaMethodTOS;
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() {
         objectMapper.findAndRegisterModules();
         userData = getDataFromFile(SCAMethodTOConverterTest.class, "SCAUserDataBO.yml", new TypeReference<List<ScaUserDataTO>>() {});
         scaMethodTOS = getDataFromFile(SCAMethodTOConverterTest.class, "SCAMethodTO.yml", new TypeReference<List<SCAMethodTO>>() {});

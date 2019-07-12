@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentType;
@@ -21,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
+
+import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
 
 @Service
 @RequiredArgsConstructor
@@ -103,7 +106,7 @@ public class PaymentExecutionService implements InitializingBean {
         try {
             return YamlReader.getInstance().getListFromFile("holidays.yml", LocalDate.class);
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw DepositModuleException.builder().errorCode(PAYMENT_PROCESSING_FAILURE).devMsg(e.getMessage()).build();
         }
     }
 }

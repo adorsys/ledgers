@@ -1,7 +1,11 @@
 package de.adorsys.ledgers.middleware.impl.mockbank;
 
-import java.io.IOException;
-
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
+import de.adorsys.ledgers.middleware.impl.test.MiddlewareServiceApplication;
+import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,17 +17,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
-
-import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
-import de.adorsys.ledgers.middleware.api.service.AppManagementService;
-import de.adorsys.ledgers.middleware.impl.test.MiddlewareServiceApplication;
-import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = MiddlewareServiceApplication.class)
@@ -40,7 +33,7 @@ public class MiddlewareServiceImplIT {
     private LedgerAccountRepository repo;
     
     @Before
-    public void initDepositAccount() throws IOException {
+    public void initDepositAccount() {
         appManagementService.initApp();
     }
 

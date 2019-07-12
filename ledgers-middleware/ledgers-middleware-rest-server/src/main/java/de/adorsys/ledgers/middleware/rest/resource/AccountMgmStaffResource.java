@@ -18,11 +18,8 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.exception.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import de.adorsys.ledgers.middleware.rest.exception.ConflictRestException;
-import de.adorsys.ledgers.middleware.rest.exception.NotFoundRestException;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,20 +43,10 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
-        try {
-            middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
+        middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
 
-            // TODO: change to created after Account Middleware service refactoring
-            return ResponseEntity.ok().build();
-        } catch (DepositAccountAlreadyExistsMiddlewareException e) {
-            throw new ConflictRestException(e.getMessage());
-        } catch (UserNotFoundMiddlewareException e) {
-            return ResponseEntity.notFound().build();
-        } catch (UserNotInBranchMiddlewareException e) {
-            return ResponseEntity.status(403).build();
-        } catch (AccountNotFoundMiddlewareException e) {
-            throw new NotFoundRestException(e.getMessage());
-        }
+        // TODO: change to created after Account Middleware service refactoring
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -71,23 +58,13 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @Override
     @PreAuthorize("accountInfoById(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
-        try {
-            return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
-        } catch (AccountNotFoundMiddlewareException | InsufficientPermissionMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
     }
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
-        try {
-            middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
-            return ResponseEntity.accepted().build();
-        } catch (AccountNotFoundMiddlewareException e) {
-            log.error(e.getMessage(), e);
-            throw new NotFoundRestException(e.getMessage()).withDevMessage(e.getMessage());
-        }
+        middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
+        return ResponseEntity.accepted().build();
     }
 }
