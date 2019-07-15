@@ -5,16 +5,18 @@ import de.adorsys.ledgers.middleware.api.domain.um.AisAccountAccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class ConsentKeyDataTO {
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
 
-    private final AisConsentTO consent;
+    private AisConsentTO consent;
 
 	public String template() {
 		checkNullConsent();

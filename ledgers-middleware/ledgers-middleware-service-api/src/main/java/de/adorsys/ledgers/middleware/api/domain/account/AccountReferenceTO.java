@@ -16,11 +16,15 @@
 
 package de.adorsys.ledgers.middleware.api.domain.account;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Currency;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountReferenceTO {
     private String iban;
     private String bban;

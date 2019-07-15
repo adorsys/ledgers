@@ -16,64 +16,17 @@
 
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SCAMethodTO {
     private String id;
     private SCAMethodTypeTO type;
     private String value;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public SCAMethodTypeTO getType() {
-        return type;
-    }
-
-    public void setType(SCAMethodTypeTO type) {
-        this.type = type;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SCAMethodTO that = (SCAMethodTO) o;
-        return Objects.equals(id, that.id) &&
-                       type == that.type &&
-                       Objects.equals(value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, type, value);
-    }
-
-    @Override
-    public String toString() {
-        return "SCAMethodTO{" +
-                       "id='" + id + '\'' +
-                       ", type=" + type +
-                       ", value='" + value + '\'' +
-                       '}';
-    }
 }
 
 

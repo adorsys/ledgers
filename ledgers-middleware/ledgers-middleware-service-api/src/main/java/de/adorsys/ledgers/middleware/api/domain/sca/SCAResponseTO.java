@@ -2,12 +2,18 @@ package de.adorsys.ledgers.middleware.api.domain.sca;
 
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class SCAResponseTO implements AspspConsentDataSerial {
 	private ScaStatusTO scaStatus;
 	private String authorisationId;

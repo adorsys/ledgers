@@ -1,8 +1,12 @@
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaymentCoreDataTO {
 	public static final String SINGLE_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your one time %s order to %s at date %s; account %s; %s %s is: ";
 	public static final String PERIODIC_PAYMENT_TAN_MESSAGE_TEMPLATE = "The TAN for your recurring %s order to %s; account %s; Day of execution %s; Rule %s, Frequency %s; Amount %s %s is: ";
