@@ -19,11 +19,15 @@ package de.adorsys.ledgers.middleware.api.domain.um;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "Ais consent request", value = "AisConsentRequest")
 public class AisConsentTO {
 

@@ -16,13 +16,19 @@
 
 package de.adorsys.ledgers.middleware.api.domain.payment;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.domain.payment.ResultStatusTO.SUCCESS;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaymentResultTO<T> {
 
     /**
@@ -37,9 +43,6 @@ public class PaymentResultTO<T> {
     private List<String> messages;
 
     private T paymentResult;
-
-    public PaymentResultTO() {
-    }
 
     public PaymentResultTO(T paymentResult) {
         this.paymentResult = paymentResult;

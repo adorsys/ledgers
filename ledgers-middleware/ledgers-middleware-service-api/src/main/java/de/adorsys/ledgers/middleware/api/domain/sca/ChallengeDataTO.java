@@ -3,10 +3,12 @@ package de.adorsys.ledgers.middleware.api.domain.sca;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class ChallengeDataTO {
     private byte[] image;
