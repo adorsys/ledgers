@@ -67,7 +67,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
                           .build();
         }
         UserTO user = findById(userId);
-        if (!branch.getLogin().equals(user.getBranch())) {
+        if (!branch.getBranch().equals(user.getBranch())) {
             log.error("User id: {} with Branch: {} is not from branch: {}", user.getId(), user.getBranch(), branch.getLogin());
 
             throw MiddlewareModuleException.builder()
