@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.app;
 
 import de.adorsys.ledgers.app.initiation.BankInitService;
-import de.adorsys.ledgers.data.upload.service.EnableBatchDataUploadForTpp;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
@@ -47,7 +46,6 @@ import java.util.Arrays;
 @EnableDepositAccountService
 @EnableLedgersMiddlewareService
 @EnableLedgersMiddlewareRest
-@EnableBatchDataUploadForTpp
 @EnableFeignClients(basePackageClasses = AccountRestClient.class)
 public class LedgersApplication implements ApplicationListener<ApplicationReadyEvent> {
     private final BankInitService bankInitService;

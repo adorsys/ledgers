@@ -26,7 +26,6 @@
 		<module>ledgers-middleware</module>
 		<module>ledgers-sca</module>
 		<module>ledgers-db</module>
-        <module>data-upload</module>
     </modules>
 
 	<packaging>pom</packaging>
@@ -111,7 +110,7 @@
 		<nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
 		<liquibase.version>3.6.2</liquibase.version>
 		<spring-boot-dependencies.version>2.1.1.RELEASE</spring-boot-dependencies.version>
-		<spring-cloud-dependencies.version>Greenwich.M3</spring-cloud-dependencies.version>
+		<spring-cloud-feign.version>2.1.1.RELEASE</spring-cloud-feign.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
 		<jackson.version>2.9.8</jackson.version>
 		<lombok.version>1.18.8</lombok.version>
@@ -160,8 +159,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud-dependencies.version}</version>
+				<artifactId>spring-cloud-starter-openfeign</artifactId>
+				<version>${spring-cloud-feign.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
