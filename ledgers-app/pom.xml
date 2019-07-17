@@ -51,6 +51,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>ledgers-middleware-rest-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- posting -->
 
         <dependency>
@@ -108,14 +114,6 @@
         <dependency>
             <groupId>de.adorsys.ledgers</groupId>
             <artifactId>ledgers-sca-repository</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- Upload dependency -->
-
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>data-upload</artifactId>
             <version>${project.version}</version>
         </dependency>
 
