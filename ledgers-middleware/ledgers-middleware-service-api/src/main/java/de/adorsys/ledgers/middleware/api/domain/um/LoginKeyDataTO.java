@@ -26,12 +26,12 @@ public class LoginKeyDataTO {
 	private static final DateTimeFormatter storage_formatter = DateTimeFormatter.ofPattern(FORMAT_V00);
 	private static final DateTimeFormatter display_formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
 	
-	private static String curent_version;
+	private static String current_version;
 	
 	private static final Map<String, String> formatMap = new HashMap<>();
 	static {
 		formatMap.put(V_00, FORMAT_V00);
-		curent_version = V_00;
+		current_version = V_00;
 	}
 
     private final String userId;
@@ -47,17 +47,14 @@ public class LoginKeyDataTO {
 			throw new IllegalStateException("Not expecting userId to be null.");
 		}
 
-		StringBuilder b = new StringBuilder(String.format("Login process started at %s for %s:%n", loginTime.format(display_formatter), userId));
-
-		b.append("TAN: %s");
-		return b.toString();
+		return String.format("Login process started at %s for %s", loginTime.format(display_formatter), userId);
 	}
 	
 	public String toOpId() {
-		if(curent_version.length()!=VERSION_STRING_LENGTH) {
-			throw new IllegalStateException(String.format("Version string must be of length %s and shall never change.", curent_version.length()));
+		if(current_version.length()!=VERSION_STRING_LENGTH) {
+			throw new IllegalStateException(String.format("Version string must be of length %s and shall never change.", current_version.length()));
 		}
-		return curent_version + loginTime.format(storage_formatter) + userId;
+		return current_version + loginTime.format(storage_formatter) + userId;
 	}
 	
 	public static LoginKeyDataTO fromOpId(String opId) {

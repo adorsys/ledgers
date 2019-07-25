@@ -1,15 +1,9 @@
 package de.adorsys.ledgers.um.db.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-
 import de.adorsys.ledgers.util.Ids;
 import lombok.Data;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "sca_data")
@@ -26,11 +20,17 @@ public class ScaUserDataEntity {
 
     @Column(nullable = false)
     private String methodValue;
-    
+
+    @Column(nullable = false)
+    private boolean usesStaticTan;
+
+    @Column
+    private String staticTan;
+
     @PrePersist
     public void prePersist() {
-    	if(id==null) {
-    		id = Ids.id();
-    	}
+        if (id == null) {
+            id = Ids.id();
+        }
     }
 }

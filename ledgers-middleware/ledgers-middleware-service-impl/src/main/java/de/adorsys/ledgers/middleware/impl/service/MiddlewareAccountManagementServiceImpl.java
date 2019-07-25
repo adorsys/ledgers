@@ -25,6 +25,7 @@ import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
+import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +63,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
     private final AmountMapper amountMapper;
     private final ScaInfoMapper scaInfoMapper;
+    private final AuthorizationService authorizationService;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -298,7 +300,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
         SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
         if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
-            BearerTokenBO consentToken = userService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
+            BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
             response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
         } else if (multilevelScaEnable) {
             response.setPartiallyAuthorised(true);
@@ -312,7 +314,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(piisConsentTO);
         AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(piisConsentTO);
 
-        BearerTokenBO consentToken = userService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consentBO);
+        BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consentBO);
         SCAConsentResponseTO response = new SCAConsentResponseTO();
         response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
         response.setAuthorisationId(scaUtils.authorisationId(scaInfoTO));
@@ -355,7 +357,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     private BearerTokenBO checkAisConsent(ScaInfoBO scaInfoBO, AisConsentTO aisConsent) {
         AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
-        return userService.consentToken(scaInfoBO, consentBO);
+        return authorizationService.consentToken(scaInfoBO, consentBO);
 
     }
     /*

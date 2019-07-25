@@ -16,36 +16,30 @@
 
 package de.adorsys.ledgers.um.impl.service;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.db.domain.*;
+import de.adorsys.ledgers.um.db.domain.AccountAccess;
+import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
+import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
+import de.adorsys.ledgers.util.tan.encriptor.TanEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.*;
 
@@ -53,123 +47,34 @@ import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.*;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.TooManyMethods") // TODO: refactor class: issue #228
 public class UserServiceImpl implements UserService {
-
-    private static final String NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS = "No transaction access. User with id %s does not have access to accounts %s";
-    private static final String NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS = "No balance access. User with id %s does not have access to accounts %s";
-    private static final String NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS = "No account access. User with id %s does not have access to accounts %s";
-    private static final String CAN_NOT_LOAD_USER_WITH_ID = "Can not load user with id: ";
-    private static final String PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION = "Permission model changed for user with subject %s no sufficient permission on account %s.";
-    private static final String COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT = "Could not verify signature of token with subject : {}";
-    private static final String TOKEN_WITH_SUBJECT_EXPIRED = "Token with subject {} is expired at {} and reference time is {}";
-    private static final String WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT = "Wrong jws algo for token with subject : {}";
-    private static final String USER_DOES_NOT_HAVE_THE_ROLE_S = "User with id %s and login %s does not have the role %s";
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
     private static final String USER_WITH_ID_NOT_FOUND = "User with id=%s not found";
     private static final String CONSENT_WITH_ID_S_NOT_FOUND = "Consent with id=%s not found";
-    private static final int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
 
     private final UserRepository userRepository;
     private final AisConsentRepository consentRepository;
     private final UserConverter userConverter;
     private final PasswordEnc passwordEnc;
-    private final HashMacSecretSource secretSource;
+    private final TanEncryptor tanEncryptor;
     private final AisConsentMapper aisConsentMapper;
-    private final BearerTokenService bearerTokenService;
 
     @Override
     public UserBO create(UserBO user) {
         checkUserAlreadyExists(user);
 
-        UserEntity userPO = userConverter.toUserPO(user);
+        UserEntity userEntity = userConverter.toUserPO(user);
 
         // if user is TPP and has an ID than do not reset it
-        if (userPO.getId() == null) {
-            log.info("User with login {} has no id, generating one", userPO.getLogin());
-            userPO.setId(Ids.id());
+        if (userEntity.getId() == null) {
+            log.info("User with login {} has no id, generating one", userEntity.getLogin());
+            userEntity.setId(Ids.id());
         }
 
-        userPO.setPin(passwordEnc.encode(userPO.getId(), user.getPin()));
-        return userConverter.toUserBO(userRepository.save(userPO));
-    }
+        userEntity.setPin(passwordEnc.encode(userEntity.getId(), user.getPin()));
+        hashStaticTan(userEntity);
 
-    @Override
-    public BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId) {
-        UserEntity user = getUser(login);
-        boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
-        if (!success) {
-            return null;
-        }
-
-        // Check user has defined role.
-        UserRole userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
-                                    .findFirst().orElseThrow(() -> UserManagementModuleException.builder()
-                                                                           .errorCode(INSUFFICIENT_PERMISSION)
-                                                                           .devMsg(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), role))
-                                                                           .build());
-
-        String scaIdParam = scaId != null
-                                    ? scaId
-                                    : Ids.id();
-        String authorisationIdParam = authorisationId != null
-                                              ? authorisationId
-                                              : scaIdParam;
-
-        Date issueTime = new Date();
-        Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-        return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, userRole, scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
-    }
-
-    @Override
-    public BearerTokenBO validate(String accessToken, Date refTime) {
-        try {
-            SignedJWT jwt = SignedJWT.parse(accessToken);
-            JWTClaimsSet jwtClaimsSet = jwt.getJWTClaimsSet();
-            JWSHeader header = jwt.getHeader();
-
-            // CHeck algorithm
-            if (!JWSAlgorithm.HS256.equals(header.getAlgorithm())) {
-                log.warn(WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
-                return null;
-            }
-
-            int expiresIn = bearerTokenService.expiresIn(refTime, jwtClaimsSet);
-
-            if (expiresIn <= 0) {
-                log.warn(TOKEN_WITH_SUBJECT_EXPIRED, jwtClaimsSet.getSubject(), jwtClaimsSet.getExpirationTime(), refTime);
-                return null;
-            }
-
-            // check signature.
-            boolean verified = jwt.verify(new MACVerifier(secretSource.getHmacSecret()));
-            if (!verified) {
-                log.warn(COULD_NOT_VERIFY_SIGNATURE_OF_TOKEN_WITH_SUBJECT, jwtClaimsSet.getSubject());
-                return null;
-            }
-
-            // Retrieve user.
-            UserEntity userEntity = userRepository.findById(jwtClaimsSet.getSubject())
-                                            .orElseThrow(() -> UserManagementModuleException.builder()
-                                                                       .errorCode(USER_NOT_FOUND)
-                                                                       .devMsg(String.format(USER_WITH_ID_NOT_FOUND, jwtClaimsSet.getSubject()))
-                                                                       .build());
-
-            AccessTokenBO accessTokenJWT = bearerTokenService.toAccessTokenObject(jwtClaimsSet);
-
-            validateAccountAcesses(userEntity, accessTokenJWT);
-            UserBO user = userConverter.toUserBO(userEntity);
-            AisConsentBO aisConsent = accessTokenJWT.getConsent();
-            validateAisConsent(aisConsent, user);
-
-            return bearerTokenService.bearerToken(accessToken, expiresIn, accessTokenJWT);
-
-        } catch (ParseException | JOSEException e) {
-            // If we can not parse the token, we log the error and return false.
-            log.warn(e.getMessage(), e);
-            return null;
-        }
+        return userConverter.toUserBO(userRepository.save(userEntity));
     }
 
     @Override
@@ -205,6 +110,7 @@ public class UserServiceImpl implements UserService {
         List<ScaUserDataEntity> scaMethods = userConverter.toScaUserDataListEntity(scaDataList);
         user.getScaUserData().clear();
         user.getScaUserData().addAll(scaMethods);
+        hashStaticTan(user);
 
         log.info("{} sca methods would be updated", scaMethods.size());
         UserEntity save = userRepository.save(user);
@@ -227,33 +133,6 @@ public class UserServiceImpl implements UserService {
         log.info("{} account accesses would be updated", accountAccesses.size());
         UserEntity save = userRepository.save(user);
         return userConverter.toUserBO(save);
-    }
-
-    @Override
-    public BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent) {
-        UserBO user = findById(scaInfoBO.getUserId());
-        aisConsent.setUserId(user.getId());
-        validateAisConsent(aisConsent, user);
-        Date issueTime = new Date();
-        Date expires = getExpirationDate(aisConsent, issueTime);
-        // Produce the token
-        Map<String, String> act = new HashMap<>();
-        String tppId = aisConsent.getTppId();
-        act.put("tppId", tppId);
-        UserRole userRole = UserRole.valueOf(scaInfoBO.getUserRole().name());
-        return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null,
-                aisConsent, userRole,
-                scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
-    }
-
-    @Override
-    public BearerTokenBO scaToken(ScaInfoBO scaInfoBO) {
-        return getToken(scaInfoBO, TokenUsageBO.DIRECT_ACCESS);
-    }
-
-    @Override
-    public BearerTokenBO loginToken(ScaInfoBO scaInfoBO) {
-        return getToken(scaInfoBO, TokenUsageBO.LOGIN);
     }
 
     @Override
@@ -283,55 +162,14 @@ public class UserServiceImpl implements UserService {
         return userRepository.countByBranch(branch);
     }
 
-    /**
-     * Makes sure the user has access to all those accounts.
-     *
-     * @param accessibleAccounts accessible account
-     * @param requestedAccounts  requested accounts
-     * @param message            message
-     */
-    private void checkAccountAccess(List<String> accessibleAccounts, List<String> requestedAccounts, String message, String userId) {
-        ArrayList<String> copy = new ArrayList<>();
-        if (requestedAccounts != null) {
-            copy.addAll(requestedAccounts);
-        }
-
-        copy.removeAll(accessibleAccounts);
-
-        if (!copy.isEmpty()) {
-            throw UserManagementModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(String.format(message, userId, copy.toString()))
-                          .build();
-        }
-    }
-
-    private void validateAisConsent(AisConsentBO aisConsent, UserBO user) {
-        if (aisConsent == null) {
-            return;
-        }
-
-        List<String> accessibleAccounts = user.getAccountAccesses().stream()
-                                                  .map(AccountAccessBO::getIban)
-                                                  .collect(Collectors.toList());
-
-        AisAccountAccessInfoBO access = aisConsent.getAccess();
-        if (access != null) {
-            checkAccountAccess(accessibleAccounts, access.getAccounts(), NO_ACCOUNT_ACCESS_DOES_NOT_HAVE_ACCESS, user.getId());
-            checkAccountAccess(accessibleAccounts, access.getBalances(), NO_BALANCE_ACCESS_DOES_NOT_HAVE_ACCESS, user.getId());
-            checkAccountAccess(accessibleAccounts, access.getTransactions(), NO_TRANSACTION_ACCESS_USER_DOES_NOT_HAVE_ACCESS, user.getId());
-        }
-    }
-
-    private Date getExpirationDate(AisConsentBO aisConsent, Date iat) {
-        LocalDate expirationLocalDate = aisConsent.getValidUntil();
-        return expirationLocalDate == null
-                       ? DateUtils.addDays(iat, 90) // default to 90 days
-                       : Date.from(expirationLocalDate.atTime(23, 59, 59, 99).atZone(ZoneId.systemDefault()).toInstant());
+    private void hashStaticTan(UserEntity userEntity) {
+        userEntity.getScaUserData().stream()
+                .filter(d -> StringUtils.isNotBlank(d.getStaticTan()))
+                .forEach(d -> d.setStaticTan(tanEncryptor.encryptTan(d.getStaticTan())));
     }
 
     @NotNull
-    private UserEntity getUser(String login) {
+    public UserEntity getUser(String login) {
         return userRepository.findFirstByLogin(login)
                        .orElseThrow(() -> UserManagementModuleException.builder()
                                                   .errorCode(USER_NOT_FOUND)
@@ -350,49 +188,5 @@ public class UserServiceImpl implements UserService {
                           .devMsg(message)
                           .build();
         }
-    }
-
-    private void validateAccountAcesses(UserEntity userEntity, AccessTokenBO accessTokenJWT) {
-        List<AccountAccess> accountAccessesFromToken = userConverter.toAccountAccessListEntity(accessTokenJWT.getAccountAccesses());
-        for (AccountAccess accountAccessFT : accountAccessesFromToken) {
-            confirmAndReturnAccess(userEntity.getId(), accountAccessFT, userEntity.getAccountAccesses());
-        }
-    }
-
-    private void confirmAndReturnAccess(String subject, AccountAccess accountAccessFT, List<AccountAccess> accountAccesses) {
-        accountAccesses.stream()
-                .filter(a -> matchAccess(accountAccessFT, a))
-                .findFirst()
-                .orElseThrow(() -> {
-                    String message = String.format(PERMISSION_MODEL_CHANGED_NO_SUFFICIENT_PERMISSION, subject, accountAccessFT.getIban());
-                    log.warn(message);
-                    return UserManagementModuleException.builder()
-                                   .errorCode(INSUFFICIENT_PERMISSION)
-                                   .devMsg(message)
-                                   .build();
-                });
-    }
-
-    private boolean matchAccess(AccountAccess requested, AccountAccess existent) {
-        return
-                // Same iban
-                StringUtils.equals(requested.getIban(), existent.getIban())
-                        &&
-                        // Make sure old access still valid
-                        requested.getAccessType().compareTo(existent.getAccessType()) <= 0;
-    }
-
-    private BearerTokenBO getToken(ScaInfoBO scaInfoBO, TokenUsageBO usageType) {
-        UserEntity user = userRepository.findById(scaInfoBO.getUserId()).orElseThrow(() -> UserManagementModuleException.builder()
-                                                                                                   .errorCode(USER_NOT_FOUND)
-                                                                                                   .devMsg(CAN_NOT_LOAD_USER_WITH_ID + scaInfoBO.getUserId())
-                                                                                                   .build());
-        Date issueTime = new Date();
-        Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-
-        return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
-                scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),
-                issueTime, expires, usageType, null);
     }
 }

@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.um.api.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,11 +11,14 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ScaUserDataBO {
 
     private String id;
     private ScaMethodTypeBO scaMethod;
     private String methodValue;
+    private boolean usesStaticTan;
+    private String staticTan;
 
     public ScaUserDataBO(
             @NotNull ScaMethodTypeBO scaMethod,

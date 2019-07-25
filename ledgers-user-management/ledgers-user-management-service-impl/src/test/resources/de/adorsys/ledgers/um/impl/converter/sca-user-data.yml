@@ -1,0 +1,9 @@
+- scaMethod: EMAIL
+  methodValue: vne@adorsys.de
+  usesStaticTan: false
+  staticTan:
+
+- methodValue: 3737463673647
+  scaMethod: MOBILE
+  usesStaticTan: true
+  staticTan: 1X2

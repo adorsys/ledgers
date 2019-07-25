@@ -18,7 +18,6 @@ package de.adorsys.ledgers.um.api.service;
 
 import de.adorsys.ledgers.um.api.domain.*;
 
-import java.util.Date;
 import java.util.List;
 
 public interface UserService {
@@ -30,20 +29,6 @@ public interface UserService {
      * @return A persisted user
      */
     UserBO create(UserBO user);
-
-    /**
-     * Verify user credential and produces a corresponding login token.
-     * <p>
-     * The granted access token can no be used to access account information.
-     *
-     * @param login           User login
-     * @param pin             User PIN
-     * @param role            the role of this user
-     * @param scaId           the scaId
-     * @param authorisationId the authorization id
-     * @return BearerTokenBO representation of authorization status true for success
-     */
-    BearerTokenBO authorise(String login, String pin, UserRoleBO role, String scaId, String authorisationId);
 
     /**
      * Finds a User by its identifier
@@ -73,40 +58,6 @@ public interface UserService {
     UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO);
 
     List<UserBO> listUsers(int page, int size);
-
-    /**
-     * Check if the provided token is valid at the given reference time and return the corresponding user.
-     *
-     * @param accessToken the access token to validate
-     * @param refTime     the reference time
-     * @return the bearer token
-     */
-    BearerTokenBO validate(String accessToken, Date refTime);
-
-    /**
-     * Provides a token used to gain read access to an account.
-     *
-     * @param scaInfoBO SCA information
-     * @param aisConsent  the ais consent.
-     * @return the bearer token
-     */
-    BearerTokenBO consentToken(ScaInfoBO scaInfoBO, AisConsentBO aisConsent);
-
-    /**
-     * Create a new token for the current user, after a successful auth code process..
-     *
-     * @param scaInfoBO      : SCA information
-     * @return the bearer token
-     */
-    BearerTokenBO scaToken(ScaInfoBO scaInfoBO);
-
-    /**
-     * Create a new token for the current user, with a new authorization id
-     *
-     * @param scaInfoBO      : SCA information
-     * @return the bearer token
-     */
-    BearerTokenBO loginToken(ScaInfoBO scaInfoBO);
 
     /**
      * Stores a consent in the consent database and returns the original consent
