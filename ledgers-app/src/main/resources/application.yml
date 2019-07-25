@@ -75,6 +75,12 @@ sca:
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
+#TanEncryption
+application:
+  security:
+    masterPassword: $VoL973@sd
+    encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
+
 # Cors configuration
 management:
   endpoints:

@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.core.env.Environment;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -75,6 +76,9 @@ public class SCAOperationServiceImplTest {
 
     @Mock
     private SCAOperationMapper scaOperationMapper;
+
+    @Mock
+    private Environment env;
 
     private SCAOperationEntity scaOperationEntity;
     private SCAOperationBO scaOperationBO;
@@ -138,7 +142,7 @@ public class SCAOperationServiceImplTest {
         UserBO userBO = mock(UserBO.class);
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
         method.setId(SCA_USER_DATA_ID);
-
+        when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
         when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
         when(authCodeGenerator.generate()).thenReturn(TAN);
@@ -180,6 +184,7 @@ public class SCAOperationServiceImplTest {
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
 
         scaOperationService.generateAuthCode(codeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
     }
@@ -208,7 +213,7 @@ public class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
-
+        when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
         boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
 
         assertThat(valid, is(Boolean.TRUE));
@@ -227,7 +232,7 @@ public class SCAOperationServiceImplTest {
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
-
+        when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
         boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
 
         assertThat(valid, is(Boolean.FALSE));
@@ -240,7 +245,6 @@ public class SCAOperationServiceImplTest {
 
     @Test(expected = ScaModuleException.class)
     public void validateAuthCodeOperationNotFound() {
-
         when(repository.findById(AUTH_ID)).thenReturn(Optional.empty());
 
         scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
@@ -248,7 +252,7 @@ public class SCAOperationServiceImplTest {
 
     @Test(expected = ScaModuleException.class)
     public void validateAuthCodeOperationHashException() throws HashGenerationException {
-
+        when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 

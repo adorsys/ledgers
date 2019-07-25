@@ -14,7 +14,7 @@ db:
 
 spring:
   application.name: ledgers
-#  profiles: default. This will prevent from running the h2 profile.
+  #  profiles: default. This will prevent from running the h2 profile.
   datasource:
     url: ${db.url}
     username: ${db.user}
@@ -53,9 +53,15 @@ sca:
       from: noreply@adorsys.de
     phone:
       subject: "Your TAN from MockBank"
-      
+
 user-service:
-  jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4      
+  jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
+
+#TanEncryption
+application:
+  security:
+    masterPassword: $VoL973@sd
+    encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
 
 logging.level.org.hibernate: WARN
 

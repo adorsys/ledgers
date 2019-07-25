@@ -25,6 +25,7 @@ import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -90,6 +91,8 @@ public class MiddlewarePaymentServiceImplTest {
     private AccessService accessService;
     @Mock
     private ScaInfoMapper scaInfoMapper;
+    @Mock
+    private AuthorizationService authorizationService;
 
     @Test
     public void getPaymentStatusById() {
@@ -172,7 +175,7 @@ public class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(operationService.validateAuthCode(AUTHORISATION_ID, PAYMENT_ID, EMAIL_TEMPLATE, AUTH_CODE, 0)).thenReturn(Boolean.TRUE);
-        when(userService.consentToken(any(), any())).thenReturn(bearerTokenBO);
+        when(authorizationService.consentToken(any(), any())).thenReturn(bearerTokenBO);
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.FALSE);
         when(bearerTokenMapper.toBearerTokenTO(bearerTokenBO)).thenReturn(new BearerTokenTO());
         when(scaUtils.user(USER_ID)).thenReturn(new UserTO(USER_ID, EMAIL, "123456"));

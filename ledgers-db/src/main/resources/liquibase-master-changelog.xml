@@ -1,39 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-	<include file="migration/0001-initial-schema.xml" relativeToChangelogFile="true" />
-	
-	<!-- These tests data are discarded. Critical field missing. Can not be fixed manually.
-	<include file="migration/0002-initial-data.xml" relativeToChangelogFile="true"/>
-	 -->
+    <include file="migration/0001-initial-schema.xml" relativeToChangelogFile="true"/>
 
-	<!-- This change log modifies the type of the field payment#requested_execution_time from timestamp to time.
-		make sure no future change revert this. Hibernate auto generates LocalTime as timestamp. 
-	-->
-	<include file="migration/0003-lob-to-separate-table.xml" relativeToChangelogFile="true" />
-	
-	<!-- Data type revert removed here. -->
-	<include file="migration/0004-ais-consent-and-sca-operations.xml" relativeToChangelogFile="true" />
+    <!-- These tests data are discarded. Critical field missing. Can not be fixed manually.
+    <include file="migration/0002-initial-data.xml" relativeToChangelogFile="true"/>
+     -->
 
-	<!-- 
-	<include file="migration/0005-initial-data-v2.xml" relativeToChangelogFile="true" />
-	 -->
+    <!-- This change log modifies the type of the field payment#requested_execution_time from timestamp to time.
+        make sure no future change revert this. Hibernate auto generates LocalTime as timestamp.
+    -->
+    <include file="migration/0003-lob-to-separate-table.xml" relativeToChangelogFile="true"/>
 
-	<!--add branch to users table-->
-	<include file="migration/0006-add-branch-to-users-table.xml" relativeToChangelogFile="true" />
+    <!-- Data type revert removed here. -->
+    <include file="migration/0004-ais-consent-and-sca-operations.xml" relativeToChangelogFile="true"/>
 
-	<!--add branch to deposit account-->
-	<include file="migration/0007-add-branch-to-deposit-account-table.xml" relativeToChangelogFile="true" />
+    <!--
+    <include file="migration/0005-initial-data-v2.xml" relativeToChangelogFile="true" />
+     -->
+
+    <!--add branch to users table-->
+    <include file="migration/0006-add-branch-to-users-table.xml" relativeToChangelogFile="true"/>
+
+    <!--add branch to deposit account-->
+    <include file="migration/0007-add-branch-to-deposit-account-table.xml" relativeToChangelogFile="true"/>
 
     <!--add required numbers of scas for current user and sertain account-->
-    <include file="migration/0008-scas-required.xml" relativeToChangelogFile="true" />
+    <include file="migration/0008-scas-required.xml" relativeToChangelogFile="true"/>
 
-	<!-- add sca weights for multi-level sca support -->
-    <include file="migration/0009-add-sca-weights.xml" relativeToChangelogFile="true" />
-	<include file="migration/0010-remove-table-scheduled_payment_order.xml" relativeToChangelogFile="true" />
+    <!-- add sca weights for multi-level sca support -->
+    <include file="migration/0009-add-sca-weights.xml" relativeToChangelogFile="true"/>
+    <include file="migration/0010-remove-table-scheduled_payment_order.xml" relativeToChangelogFile="true"/>
+
+    <!-- add static tan fields to sca_data table-->
+    <include file="migration/0011-add_fields_to_sca_data_for_static_tan.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

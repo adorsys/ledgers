@@ -16,11 +16,6 @@
 
 package de.adorsys.ledgers.middleware.test.client;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
@@ -28,9 +23,15 @@ import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
 import de.adorsys.ledgers.um.impl.EnableUserManagementService;
+import de.adorsys.ledgers.util.EnableUtils;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication
+@EnableUtils
 @EnableUserManagementService
 @EnableSCAService
 @EnablePostingService

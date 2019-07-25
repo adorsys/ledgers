@@ -25,6 +25,7 @@ import de.adorsys.ledgers.postings.impl.EnablePostingService;
 import de.adorsys.ledgers.sca.mock.MockSmtpServer;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
 import de.adorsys.ledgers.um.impl.EnableUserManagementService;
+import de.adorsys.ledgers.util.EnableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -46,6 +47,7 @@ import java.util.Arrays;
 @EnableDepositAccountService
 @EnableLedgersMiddlewareService
 @EnableLedgersMiddlewareRest
+@EnableUtils
 @EnableFeignClients(basePackageClasses = AccountRestClient.class)
 public class LedgersApplication implements ApplicationListener<ApplicationReadyEvent> {
     private final BankInitService bankInitService;

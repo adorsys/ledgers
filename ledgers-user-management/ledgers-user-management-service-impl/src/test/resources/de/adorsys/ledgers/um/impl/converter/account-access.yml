@@ -1,0 +1,9 @@
+- id: 1X1
+  iban: DE123
+  accessType: DISPOSE
+  scaWeight: 10
+
+- id: 2X2
+  iban: DE321
+  accessType: OWNER
+  scaWeight: 90

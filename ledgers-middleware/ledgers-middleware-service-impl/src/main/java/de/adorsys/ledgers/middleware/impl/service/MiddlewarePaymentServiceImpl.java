@@ -46,6 +46,7 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +77,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final PaymentCoreDataPolicy coreDataPolicy;
     private final AccessService accessService;
     private final ScaInfoMapper scaInfoMapper;
+    private final AuthorizationService authorizationService;
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
 
     @Value("${sca.multilevel.enabled:false}")
@@ -203,7 +205,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         aisConsent.setRecurringIndicator(true);
         // This is the user login for psd2 and not the technical id.
         aisConsent.setUserId(userName);
-        return bearerTokenMapper.toBearerTokenTO(userService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), aisConsent));
+        return bearerTokenMapper.toBearerTokenTO(authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), aisConsent));
     }
 
     @Override
@@ -282,7 +284,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
                 paymentKeyData, scaUtils.loadAuthCode(cancellationId), bearerToken);
     }
 
-    @SuppressWarnings("PMD.CyclomaticComplexity")
     private void validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode, String template) {
         UserBO userBO = scaUtils.userBO(userId);
         int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
@@ -302,7 +303,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
      * The SCA requirement shall be added as property of a deposit account permission.
      *
      * For now we will assume there is no sca requirement, when the user having access
-     * to the account does not habe any sca data configured.
+     * to the account does not have any sca data configured.
      */
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private boolean scaRequired(PaymentBO payment, UserBO user, OpTypeBO opType) {
