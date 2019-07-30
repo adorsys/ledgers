@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @MiddlewareUserResource
 @RequiredArgsConstructor
-@RequestMapping(ResetPasswordAPI.BASE_PATH)
-public class ResetPasswordResources implements ResetPasswordAPI {
+@RequestMapping(ResetPasswordRestAPI.BASE_PATH)
+public class ResetPasswordResources implements ResetPasswordRestAPI {
 
     private final MiddlewareResetPasswordService middlewarePasswordResetService;
 
