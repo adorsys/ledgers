@@ -26,6 +26,7 @@
 		<module>ledgers-middleware</module>
 		<module>ledgers-sca</module>
 		<module>ledgers-db</module>
+        <module>ledgers-security</module>
     </modules>
 
 	<packaging>pom</packaging>

@@ -21,9 +21,12 @@ public class UserManagementHttpStatusResolver {
 
         //400 Block
         container.put(TOKEN_CREATION_ERROR, BAD_REQUEST);
+        container.put(RESET_PASSWORD_CODE_SENDING_ERROR, BAD_REQUEST);
+        container.put(RESET_PASSWORD_CODE_INVALID, BAD_REQUEST);
 
         //401 Block
         container.put(INSUFFICIENT_PERMISSION, UNAUTHORIZED);
+        container.put(RESET_PASSWORD_CODE_EXPIRED, UNAUTHORIZED);
 
         //409 Block
         container.put(USER_ALREADY_EXISTS, CONFLICT);

@@ -39,4 +39,5 @@
 
     <!-- add static tan fields to sca_data table-->
     <include file="migration/0011-add_fields_to_sca_data_for_static_tan.xml" relativeToChangelogFile="true"/>
+    <include file="migration/0012-create-table-reset-password.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

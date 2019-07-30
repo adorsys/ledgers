@@ -47,7 +47,6 @@ import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
-import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +70,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final DepositAccountService accountService;
     private final PaymentConverter paymentConverter;
     private final BearerTokenMapper bearerTokenMapper;
-    private final UserService userService;
     private final SCAUtils scaUtils;
     private final PaymentCancelPolicy cancelPolicy;
     private final PaymentCoreDataPolicy coreDataPolicy;
