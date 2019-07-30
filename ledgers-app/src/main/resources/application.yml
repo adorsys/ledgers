@@ -125,9 +125,9 @@ spring:
     change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
-  user: cms
-  password: cms
-  database: consent
+  user: ledgers
+  password: ledgers
+  database: ledgers
   port: 5432
   url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
 ---
