@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "LDG007 - Reset password for user")
-public interface ResetPasswordAPI {
+public interface ResetPasswordRestAPI {
     String BASE_PATH = "/password";
 
     @PostMapping
