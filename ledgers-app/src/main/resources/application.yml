@@ -72,6 +72,13 @@ sca:
   multilevel.enabled: false
   final.weight: 100
 
+reset-password:
+  expiration-code-minites: 5
+  email:
+    template-message: "Please use this code %s to reset your password"
+    subject: "Your code for password reset"
+    from: noreply@adorsys.de
+
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
@@ -118,9 +125,9 @@ spring:
     change-log: classpath:liquibase-master-changelog.xml
 db:
   host: localhost
-  user: ledgers
-  password: ledgers
-  database: ledgers
+  user: cms
+  password: cms
+  database: consent
   port: 5432
   url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
 ---

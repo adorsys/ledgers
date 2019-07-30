@@ -181,7 +181,7 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity> user = userRepository.findByEmailOrLogin(userBO.getEmail(), userBO.getLogin());
         if (user.isPresent()) {
             String message = String.format("User with this email or login already exists. Email %s. Login %s.",
-                    userBO.getEmail(), userBO.getLogin());
+                                           userBO.getEmail(), userBO.getLogin());
             log.error(message);
             throw UserManagementModuleException.builder()
                           .errorCode(USER_ALREADY_EXISTS)

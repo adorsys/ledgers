@@ -22,6 +22,12 @@
 
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-security</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-middleware-service-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>

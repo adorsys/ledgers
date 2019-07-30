@@ -25,7 +25,8 @@ public class PermittedResources {
             "/data-test/upload-mockbank-data",
             "/data-test/db-flush",
             "/staff-access/users/register",
-            "/staff-access/users/login"
+            "/staff-access/users/login",
+            "/password/**"
     };
 
     public static final String[] CONSOLE_WHITELIST = {

@@ -19,6 +19,11 @@
 	<dependencies>
 
 		<!-- project dependencies -->
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-security</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- spring dependencies -->
 		<dependency>

@@ -67,4 +67,6 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
      * @return amount of users
      */
     int countByBranch(String branch);
+
+    Optional<UserEntity> findByLoginAndEmail(String login, String email);
 }
