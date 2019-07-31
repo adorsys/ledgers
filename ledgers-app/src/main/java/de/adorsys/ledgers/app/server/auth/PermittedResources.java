@@ -26,7 +26,7 @@ public class PermittedResources {
             "/data-test/db-flush",
             "/staff-access/users/register",
             "/staff-access/users/login",
-            "/password/**"
+            "/password"
     };
 
     public static final String[] CONSOLE_WHITELIST = {

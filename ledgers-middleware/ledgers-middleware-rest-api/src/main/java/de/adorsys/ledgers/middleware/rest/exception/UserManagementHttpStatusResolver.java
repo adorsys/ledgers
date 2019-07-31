@@ -26,7 +26,6 @@ public class UserManagementHttpStatusResolver {
 
         //401 Block
         container.put(INSUFFICIENT_PERMISSION, UNAUTHORIZED);
-        container.put(RESET_PASSWORD_CODE_EXPIRED, UNAUTHORIZED);
 
         //409 Block
         container.put(USER_ALREADY_EXISTS, CONFLICT);
