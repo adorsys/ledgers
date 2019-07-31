@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.RESET_PASSWORD_CODE_INVALID;
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.RESET_PASSWORD_CODE_EXPIRED;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class ResetPasswordCodeVerifierImpl implements ResetPasswordCodeVerifier 
                                                                                      .build());
         if (resetPasswordEntity.isExpired()) {
             throw UserManagementModuleException.builder()
-                          .errorCode(RESET_PASSWORD_CODE_EXPIRED)
+                          .errorCode(RESET_PASSWORD_CODE_INVALID)
                           .devMsg(CODE_EXPIRED)
                           .build();
         }
