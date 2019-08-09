@@ -33,6 +33,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -116,6 +117,12 @@ public class AccountResource implements AccountRestAPI {
     @Override
     @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
     public ResponseEntity<Boolean> fundsConfirmation(FundsConfirmationRequestTO request) {
+        if (request.getInstructedAmount().getAmount().compareTo(BigDecimal.ZERO) != 1) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(REQUEST_VALIDATION_FAILURE)
+                          .devMsg("Requested amount less or equal zero")
+                          .build();
+        }
         boolean fundsAvailable = middlewareAccountService.confirmFundsAvailability(request);
         return ResponseEntity.ok(fundsAvailable);
     }
