@@ -115,7 +115,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         } catch (ParseException | JOSEException e) {
             // If we can not parse the token, we log the error and return false.
-            log.warn(e.getMessage(), e);
+            log.warn(e.getMessage());
             return null;
         }
     }

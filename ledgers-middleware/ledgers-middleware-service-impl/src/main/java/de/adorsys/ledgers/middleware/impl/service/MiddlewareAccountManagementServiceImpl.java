@@ -327,6 +327,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) {
+        depositAccountService.getDepositAccountByIbanAndCheckStatus(iban(accountId), LocalDateTime.now(), false);
         depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
     }
 

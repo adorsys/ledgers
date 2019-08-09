@@ -40,6 +40,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
+import static de.adorsys.ledgers.deposit.db.domain.AccountStatus.*;
 import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.POSTING_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,7 +87,7 @@ public class DepositAccountServiceImplTest {
     public void createDepositAccount() {
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(getLedgerAccountBO().getName());
         when(ledgerService.newLedgerAccount(any(), anyString())).thenReturn(getLedgerAccountBO());
-        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount());
+        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(ENABLED));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
         DepositAccountBO depositAccount = depositAccountService.createDepositAccount(getDepositAccountBO(), SYSTEM);
@@ -97,7 +98,7 @@ public class DepositAccountServiceImplTest {
 
     @Test
     public void getDepositAccountById() {
-        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount()));
+        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
         //When
         DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getDepositAccountById("id", LocalDateTime.now(), false);
         //Then
@@ -114,7 +115,7 @@ public class DepositAccountServiceImplTest {
 
     @Test
     public void getDepositAccountByIBAN() {
-        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
         //When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIban("iban", LocalDateTime.now(), false);
         //Then
@@ -123,8 +124,38 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
+    public void getDepositAccountByIbanAndCheckStatus_enabled() {
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
+        //When
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIbanAndCheckStatus("iban", LocalDateTime.now(), false);
+        //Then
+        assertThat(accountDetailsBO).isNotNull();
+        assertThat(accountDetailsBO.getAccount()).isNotNull();
+    }
+
+    @Test(expected = DepositModuleException.class)
+    public void getDepositAccountByIbanAndCheckStatus_blocked() {
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount(BLOCKED)));
+        //When
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIbanAndCheckStatus("iban", LocalDateTime.now(), false);
+        //Then
+        assertThat(accountDetailsBO).isNotNull();
+        assertThat(accountDetailsBO.getAccount()).isNotNull();
+    }
+
+    @Test(expected = DepositModuleException.class)
+    public void getDepositAccountByIbanAndCheckStatus_deleted() {
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount(DELETED)));
+        //When
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getDepositAccountByIbanAndCheckStatus("iban", LocalDateTime.now(), false);
+        //Then
+        assertThat(accountDetailsBO).isNotNull();
+        assertThat(accountDetailsBO.getAccount()).isNotNull();
+    }
+
+    @Test
     public void findDepositAccountsByBranch() {
-        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount()));
+        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
 
         List<DepositAccountDetailsBO> accounts = depositAccountService.findByBranch(anyString());
 
@@ -179,7 +210,7 @@ public class DepositAccountServiceImplTest {
     }
 
     private void confirmationOfFunds_more_than_necessary_available(long amount) {
-        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount()));
+        when(depositAccountRepository.findByIbanIn(any())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
@@ -199,9 +230,9 @@ public class DepositAccountServiceImplTest {
         return pl;
     }
 
-    private DepositAccount getDepositAccount() {
+    private DepositAccount getDepositAccount(AccountStatus status) {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
+                "name", "product", null, AccountType.CASH, status, "bic", null,
                 AccountUsage.PRIV, "details");
     }
 
@@ -260,7 +291,7 @@ public class DepositAccountServiceImplTest {
 
     @Test
     public void depositCashCreatesPostingWithTransactionAsDetails() throws IOException {
-        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(getDepositAccount()));
+        when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(getDepositAccount(ENABLED)));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
         when(objectMapper.writeValueAsString(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
@@ -277,7 +308,7 @@ public class DepositAccountServiceImplTest {
             assertThat(transactionDetails.getEndToEndId()).isEqualTo(line.getId());
             assertThat(transactionDetails.getTransactionId()).isNotBlank();
             assertThat(transactionDetails.getBookingDate()).isEqualTo(transactionDetails.getValueDate());
-            assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(depositAccountMapper.toAccountReferenceBO(getDepositAccount()));
+            assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(depositAccountMapper.toAccountReferenceBO(getDepositAccount(ENABLED)));
             assertThat(transactionDetails.getTransactionAmount()).isEqualToComparingFieldByField(amount);
         }
     }

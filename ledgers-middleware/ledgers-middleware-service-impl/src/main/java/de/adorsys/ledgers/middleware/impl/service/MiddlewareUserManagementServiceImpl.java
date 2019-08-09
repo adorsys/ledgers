@@ -56,7 +56,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
-        depositAccountService.getDepositAccountByIban(access.getIban(), LocalDateTime.now(), false);
+        depositAccountService.getDepositAccountByIbanAndCheckStatus(access.getIban(), LocalDateTime.now(), false);
         UserTO branch = findById(scaInfo.getUserId());
         boolean tppHasAccessToAccount = accessService.userHasAccessToAccount(branch, access.getIban());
         if (!tppHasAccessToAccount) {
