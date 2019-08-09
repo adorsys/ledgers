@@ -11,6 +11,8 @@ public interface DepositAccountService {
 
     DepositAccountBO createDepositAccountForBranch(DepositAccountBO depositAccount, String userName, String branch);
 
+    DepositAccountDetailsBO getDepositAccountByIbanAndCheckStatus(String iban, LocalDateTime refTime, boolean withBalances);
+
     DepositAccountDetailsBO getDepositAccountByIban(String iban, LocalDateTime refTime, boolean withBalances);
 
     List<DepositAccountDetailsBO> getDepositAccountsByIban(List<String> ibans, LocalDateTime refTime, boolean withBalances);

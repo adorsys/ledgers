@@ -27,6 +27,7 @@ public class DepositHttpStatusResolver {
         container.put(PAYMENT_PROCESSING_FAILURE, BAD_REQUEST);
         container.put(PAYMENT_WITH_ID_EXISTS, BAD_REQUEST);
         container.put(DEPOSIT_OPERATION_FAILURE, BAD_REQUEST);
+        container.put(ACCOUNT_BLOCKED_DELETED, BAD_REQUEST);
     }
 
     public static HttpStatus resolveHttpStatusByCode(DepositErrorCode code) {

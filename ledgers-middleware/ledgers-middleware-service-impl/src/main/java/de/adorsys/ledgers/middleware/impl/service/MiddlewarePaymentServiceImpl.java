@@ -110,7 +110,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     public <T> SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, T payment, PaymentTypeTO paymentType) {
         PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
-        checkDepositAccount(paymentBO);
+        accountService.getDepositAccountByIbanAndCheckStatus(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
 
         TransactionStatusBO status = scaUtils.hasSCA(userBO)
                                              ? TransactionStatusBO.ACCP
@@ -150,10 +150,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             paymentBO.setPaymentId(Ids.id());
         }
         return paymentService.initiatePayment(paymentBO, status);
-    }
-
-    private void checkDepositAccount(PaymentBO paymentBO) {
-        accountService.getDepositAccountByIban(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
     }
 
     @Override
