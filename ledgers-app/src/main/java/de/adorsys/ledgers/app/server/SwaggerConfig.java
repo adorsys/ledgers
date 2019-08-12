@@ -1,6 +1,8 @@
 package de.adorsys.ledgers.app.server;
 
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -21,9 +23,10 @@ import java.util.List;
 
 @Configuration
 @EnableSwagger2
+@RequiredArgsConstructor
 @Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
-
+    private final BuildProperties buildProperties;
 
     @Bean
     public Docket productApi() {
@@ -123,7 +126,7 @@ public class SwaggerConfig {
                         + "<li><b>DELEGATED_ACCESS</b>: delegation token are issued as a result of a successful consent grant or payment authorization. A delegation token issued as result of a succesful payment authorisation can be used to access the corresponding transaction. Delegation token are generaly stored in the consent database and used to authenticate TPP requests with the core banking system.</li>"
                         + "</lu>"
                 ,
-                "0.5.0",
+                buildProperties.getVersion(),
                 "Terms of Service: to be edited...",
                 contact,
                 "Apache License Version 2.0",
