@@ -24,6 +24,7 @@ import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -44,6 +45,14 @@ public class ExceptionAdvisor {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         Map<String, String> body = getHandlerContent(status, null, "Something went wrong during execution of your request.");
         log.error("INTERNAL SERVER ERROR", ex);
+        return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map> accessDeniedExceptionHandler(AccessDeniedException ex) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        Map<String, String> body = getHandlerContent(status, null, "Access Denied! You're trying to access resources you have no permission for.");
+        log.error("Access Denied: {}", ex.getMessage());
         return new ResponseEntity<>(body, status);
     }
 
