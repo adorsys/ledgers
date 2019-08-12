@@ -128,7 +128,7 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
         return ResponseEntity.accepted().build();
