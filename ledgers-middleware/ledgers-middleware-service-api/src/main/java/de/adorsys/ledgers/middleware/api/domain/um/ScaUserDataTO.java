@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties(value = {"user", "usesStaticTan", "staticTan"}, allowSetters = true)
+@JsonIgnoreProperties(value = {"user"}, allowSetters = true)
 public class ScaUserDataTO {
     private String id;
     @NotNull

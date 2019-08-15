@@ -4,7 +4,10 @@ import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.LoginKeyDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
@@ -55,28 +58,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         String authorisationId = opId;
         String scaId = opId;
         BearerTokenBO loginTokenBO = proceedToLogin(user, pin, role, scaId, authorisationId);
-        if (!scaRequired(user, OpTypeBO.LOGIN)) {
-            return authorizeResponse(loginTokenBO);
-        } else {
-            SCAOperationBO scaOperationBO;
-            UserTO userTo = scaUtils.user(user);
-            String scaUserDataId = null;
-            String opData = opId;
-            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaUserDataId,
-                    keyData.toOpId(), opData, keyData.messageTemplate(),
-                    defaultLoginTokenExpireInSeconds, OpTypeBO.LOGIN, authorisationId, 0);
-            if (userTo.getScaUserData().size() == 1) {
-                ScaUserDataTO chosenScaMethod = userTo.getScaUserData().iterator().next();
-                authCodeData.setScaUserDataId(chosenScaMethod.getId());
-                scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
-            } else {
-                scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUIDENTIFIED);
-            }
-            SCALoginResponseTO response = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
-            authorizationService.loginToken(loginTokenBO.getAccessTokenObject().buildScaInfoBO());
-            response.setBearerToken(bearerTokenMapper.toBearerTokenTO(loginTokenBO));
-            return response;
-        }
+        return authorizeResponse(loginTokenBO);
     }
 
     @Override
