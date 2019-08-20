@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public enum OtpFormatTO {
@@ -33,4 +34,8 @@ public enum OtpFormatTO {
         return Optional.ofNullable(container.get(name));
     }
 
+    @JsonCreator
+    public static OtpFormatTO forValue(String value) {
+        return container.get(value);
+    }
 }

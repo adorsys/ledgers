@@ -29,10 +29,12 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.api.service.ScaChallengeDataResolver;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaInfoMapper;
@@ -76,6 +78,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final AccessService accessService;
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
+    private final ScaChallengeDataResolver scaChallengeDataResolver;
     private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
 
     @Value("${sca.multilevel.enabled:false}")
@@ -345,8 +348,11 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
                                                       SCAOperationBO a, BearerTokenTO paymentAccountAccessToken) {
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         response.setAuthorisationId(a.getId());
-        response.setChosenScaMethod(scaUtils.getScaMethod(user, a.getScaMethodId()));
-        response.setChallengeData(null);
+        ScaUserDataTO scaMethod = scaUtils.getScaMethod(user, a.getScaMethodId());
+        response.setChosenScaMethod(scaMethod);
+        if(scaMethod != null) {
+            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData());
+        }
         response.setExpiresInSeconds(a.getValiditySeconds());
         response.setPaymentId(paymentId);
         response.setPsuMessage(paymentKeyData.template());
