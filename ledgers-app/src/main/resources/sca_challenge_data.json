@@ -17,7 +17,7 @@
   },
   "CHIP_OTP": {
     "image": null,
-    "data": null,
+    "data": "17850120452019980412345678041234567804123456789E",
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
