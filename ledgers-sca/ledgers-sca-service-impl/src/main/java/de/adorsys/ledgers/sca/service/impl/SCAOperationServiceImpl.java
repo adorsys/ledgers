@@ -93,7 +93,8 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     @Override
     public void afterPropertiesSet() {
         if (sendersList != null) {
-            sendersList.forEach(s -> this.senders.put(s.getType(), s));
+            Arrays.stream(ScaMethodTypeBO.values()).forEach(m-> this.senders.put(m,sendersList.get(0)));
+            //sendersList.forEach(s -> this.senders.put(s.getType(), s));
         }
     }
 

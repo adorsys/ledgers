@@ -412,7 +412,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         ScaUserDataTO scaMethod = scaUtils.getScaMethod(user, operation.getScaMethodId());
         response.setChosenScaMethod(scaMethod);
         if(scaMethod != null) {
-            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData());
+            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData(scaMethod.getMethodValue()));
         }
         response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setConsentId(consent.getId());

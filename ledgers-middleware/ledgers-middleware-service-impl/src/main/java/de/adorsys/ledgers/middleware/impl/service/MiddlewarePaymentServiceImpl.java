@@ -351,7 +351,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         ScaUserDataTO scaMethod = scaUtils.getScaMethod(user, a.getScaMethodId());
         response.setChosenScaMethod(scaMethod);
         if(scaMethod != null) {
-            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData());
+            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData(scaMethod.getMethodValue()));
         }
         response.setExpiresInSeconds(a.getValiditySeconds());
         response.setPaymentId(paymentId);
