@@ -29,7 +29,7 @@ public class MailSCASenderTest {
     private static final String SUBJECT = "Email subject";
 
     @InjectMocks
-    private MailSCASender sender;
+    private EmailSender sender;
 
     @Mock
     private JavaMailSender mailSender;

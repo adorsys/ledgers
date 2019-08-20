@@ -14,8 +14,10 @@ public class MobileScaChallengeData implements ScaChallengeData {
     private final Map<String, ChallengeDataTO> challengeDatas;
 
     @Override
-    public ChallengeDataTO getChallengeData() {
-        return challengeDatas.get(getScaMethodType().name());
+    public ChallengeDataTO getChallengeData(String methodValue) {
+        ChallengeDataTO data = challengeDatas.get(getScaMethodType().name());
+        data.setAdditionalInformation(String.format(data.getAdditionalInformation(), methodValue));
+        return data;
     }
 
     @Override

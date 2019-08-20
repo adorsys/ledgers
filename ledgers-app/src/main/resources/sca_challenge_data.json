@@ -5,7 +5,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "MOBILE SCA method REDIRECT: url is <<<the url>> . sent email to <<<email address>>>."
+    "additionalInformation": "MOBILE SCA method REDIRECT: url is <<<the url>> . sent email to %s."
   },
   "EMAIL": {
     "image": null,
@@ -13,6 +13,46 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to <<<email address>>>."
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+  },
+  "CHIP_OTP": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+  },
+  "PHOTO_OTP": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+  },
+  "PUSH_OTP": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+  },
+  "SMS_OTP": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+  },
+  "APP_OTP": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
   }
 }

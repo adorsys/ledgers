@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class EmailScaChallengeData implements ScaChallengeData {
+public class PhotoOtpScaChallengeData implements ScaChallengeData {
     private final Map<String, ChallengeDataTO> challengeDatas;
 
     @Override
@@ -23,6 +23,6 @@ public class EmailScaChallengeData implements ScaChallengeData {
 
     @Override
     public ScaMethodTypeTO getScaMethodType() {
-        return ScaMethodTypeTO.EMAIL;
+        return ScaMethodTypeTO.PHOTO_OTP;
     }
 }

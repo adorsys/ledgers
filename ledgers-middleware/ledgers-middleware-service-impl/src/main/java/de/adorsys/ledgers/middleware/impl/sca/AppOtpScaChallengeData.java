@@ -8,10 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-
 @Component
 @RequiredArgsConstructor
-public class EmailScaChallengeData implements ScaChallengeData {
+public class AppOtpScaChallengeData implements ScaChallengeData {
     private final Map<String, ChallengeDataTO> challengeDatas;
 
     @Override
@@ -23,6 +22,6 @@ public class EmailScaChallengeData implements ScaChallengeData {
 
     @Override
     public ScaMethodTypeTO getScaMethodType() {
-        return ScaMethodTypeTO.EMAIL;
+        return ScaMethodTypeTO.APP_OTP;
     }
 }

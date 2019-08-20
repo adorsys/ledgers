@@ -4,7 +4,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ChallengeDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
 
 public interface ScaChallengeData {
-    ChallengeDataTO getChallengeData();
+    ChallengeDataTO getChallengeData(String methodValue);
 
     ScaMethodTypeTO getScaMethodType();
 }
