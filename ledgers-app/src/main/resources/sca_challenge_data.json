@@ -1,0 +1,18 @@
+{
+  "MOBILE": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "MOBILE SCA method REDIRECT: url is <<<the url>> . sent email to <<<email address>>>."
+  },
+  "EMAIL": {
+    "image": null,
+    "data": null,
+    "imageLink": null,
+    "otpMaxLength": 6,
+    "otpFormat": "integer",
+    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to <<<email address>>>."
+  }
+}

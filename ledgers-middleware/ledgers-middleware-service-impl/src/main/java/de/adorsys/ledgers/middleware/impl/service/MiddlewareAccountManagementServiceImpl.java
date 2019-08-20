@@ -15,9 +15,11 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.api.service.ScaChallengeDataResolver;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
@@ -64,6 +66,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final AmountMapper amountMapper;
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
+    private final ScaChallengeDataResolver scaChallengeDataResolver;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -406,8 +409,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
         SCAConsentResponseTO response = new SCAConsentResponseTO(); //TODO - matter of refactoring
         response.setAuthorisationId(operation.getId());
-        response.setChosenScaMethod(scaUtils.getScaMethod(user, operation.getScaMethodId()));
-        response.setChallengeData(null);
+        ScaUserDataTO scaMethod = scaUtils.getScaMethod(user, operation.getScaMethodId());
+        response.setChosenScaMethod(scaMethod);
+        if(scaMethod != null) {
+            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData());
+        }
         response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setConsentId(consent.getId());
         response.setPsuMessage(messageTemplate);
