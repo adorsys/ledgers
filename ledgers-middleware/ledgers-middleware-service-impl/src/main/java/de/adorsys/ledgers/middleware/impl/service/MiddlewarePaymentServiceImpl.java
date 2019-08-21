@@ -25,6 +25,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
@@ -345,20 +346,21 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     private SCAPaymentResponseTO toScaPaymentResponse(UserTO user, String paymentId, TransactionStatusBO tx,
                                                       PaymentCoreDataTO paymentKeyData,
-                                                      SCAOperationBO a, BearerTokenTO paymentAccountAccessToken) {
+                                                      SCAOperationBO operation, BearerTokenTO paymentAccountAccessToken) {
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
-        response.setAuthorisationId(a.getId());
-        ScaUserDataTO scaMethod = scaUtils.getScaMethod(user, a.getScaMethodId());
-        response.setChosenScaMethod(scaMethod);
-        if(scaMethod != null) {
-            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData(scaMethod.getMethodValue()));
+        response.setAuthorisationId(operation.getId());
+        ScaUserDataTO userData = scaUtils.getScaMethod(user, operation.getScaMethodId());
+        response.setChosenScaMethod(userData);
+        if (userData != null) {
+            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(userData.getScaMethod())
+                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getAuthCodeHash())));
         }
-        response.setExpiresInSeconds(a.getValiditySeconds());
+        response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setPaymentId(paymentId);
         response.setPsuMessage(paymentKeyData.template());
         response.setScaMethods(user.getScaUserData());
-        response.setScaStatus(ScaStatusTO.valueOf(a.getScaStatus().name()));
-        response.setStatusDate(a.getStatusTime());
+        response.setScaStatus(ScaStatusTO.valueOf(operation.getScaStatus().name()));
+        response.setStatusDate(operation.getStatusTime());
         response.setTransactionStatus(TransactionStatusTO.valueOf(tx.name()));
         response.setPaymentProduct(PaymentProductTO.getByValue(paymentKeyData.getPaymentProduct()).orElse(null));
         response.setBearerToken(paymentAccountAccessToken);

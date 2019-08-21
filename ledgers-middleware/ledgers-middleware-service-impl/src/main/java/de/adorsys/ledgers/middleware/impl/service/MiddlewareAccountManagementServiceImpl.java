@@ -10,6 +10,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequest
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
@@ -409,10 +410,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
         SCAConsentResponseTO response = new SCAConsentResponseTO(); //TODO - matter of refactoring
         response.setAuthorisationId(operation.getId());
-        ScaUserDataTO scaMethod = scaUtils.getScaMethod(user, operation.getScaMethodId());
-        response.setChosenScaMethod(scaMethod);
-        if(scaMethod != null) {
-            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(scaMethod.getScaMethod()).getChallengeData(scaMethod.getMethodValue()));
+        ScaUserDataTO userData = scaUtils.getScaMethod(user, operation.getScaMethodId());
+        response.setChosenScaMethod(userData);
+        if (userData != null) {
+            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(userData.getScaMethod())
+                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getAuthCodeHash())));
         }
         response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setConsentId(consent.getId());
