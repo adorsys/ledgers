@@ -187,6 +187,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
                 <configuration>
                     <mainClass>de.adorsys.ledgers.app.LedgersApplication</mainClass>
                 </configuration>

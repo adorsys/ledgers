@@ -4,6 +4,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.ScaChallengeData;
 import de.adorsys.ledgers.middleware.api.service.ScaChallengeDataResolver;
+import de.adorsys.ledgers.middleware.impl.sca.AbstractScaChallengeData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.CA
 
 @Service
 @RequiredArgsConstructor
-public class ScaChallengeDataResolverImpl<T extends ScaChallengeData> implements ScaChallengeDataResolver, InitializingBean {
+public class ScaChallengeDataResolverImpl<T extends AbstractScaChallengeData> implements ScaChallengeDataResolver, InitializingBean {
     private final Map<ScaMethodTypeTO, ScaChallengeData> container = new EnumMap<>(ScaMethodTypeTO.class);
     private final List<T> scaChallengeDataServices;
 

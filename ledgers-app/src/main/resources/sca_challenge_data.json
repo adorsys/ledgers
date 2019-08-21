@@ -5,7 +5,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "MOBILE SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method MOBILE: tan is %s . sent email to %s."
   },
   "EMAIL": {
     "image": null,
@@ -13,7 +13,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method EMAIL: tan is %s . sent email to %s."
   },
   "CHIP_OTP": {
     "image": null,
@@ -21,7 +21,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method CHIP_OTP: tan is %s . sent email to %s."
   },
   "PHOTO_OTP": {
     "image": null,
@@ -29,7 +29,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method PHOTO_OTP: tan is %s . sent email to %s."
   },
   "PUSH_OTP": {
     "image": null,
@@ -37,7 +37,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method PUSH_OTP: tan is %s . sent email to %s."
   },
   "SMS_OTP": {
     "image": null,
@@ -45,7 +45,7 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method SMS_OTP: tan is %s . sent email to %s."
   },
   "APP_OTP": {
     "image": null,
@@ -53,6 +53,6 @@
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
-    "additionalInformation": "EMAIL SCA method REDIRECT: url is <<<the url>> . sent email to %s."
+    "additionalInformation": "SCA method APP_OTP: tan is %s . sent email to %s."
   }
 }
