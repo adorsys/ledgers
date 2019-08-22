@@ -64,6 +64,7 @@ public class UserServiceImplTest {
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
         when(repository.save(userEntity)).thenReturn(userEntity);
+        when(converter.toUserBO(any())).thenReturn(userBO);
 
         userService.updateScaData(scaUserDataBOS, USER_LOGIN);
 
