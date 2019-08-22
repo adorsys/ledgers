@@ -21,4 +21,9 @@ public class ScaUserDataTO {
 
     private boolean usesStaticTan;
     private String staticTan;
+    private boolean decoupled;
+
+    public boolean isDecoupled() {
+        return scaMethod.isDecoupled();
+    }
 }
