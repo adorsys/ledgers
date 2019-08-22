@@ -75,4 +75,6 @@ public interface MiddlewareUserManagementService {
      * @return amount of users
      */
     int countUsersByBranch(String branch);
+
+    UserTO updateUser(String branchId, UserTO user);
 }

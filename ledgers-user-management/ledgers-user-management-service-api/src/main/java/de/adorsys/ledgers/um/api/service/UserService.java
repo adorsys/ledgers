@@ -92,4 +92,12 @@ public interface UserService {
      * @return amount of users
      */
     int countUsersByBranch(String branch);
+
+    /**
+     * Updates user
+     *
+     * @param userBO user to update
+     * @return
+     */
+    UserBO updateUser(UserBO userBO);
 }
