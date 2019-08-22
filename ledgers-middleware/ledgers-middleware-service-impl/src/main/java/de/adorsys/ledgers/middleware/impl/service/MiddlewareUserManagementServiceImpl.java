@@ -19,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
 
 @Slf4j
 @Service
@@ -92,5 +94,21 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     @Override
     public int countUsersByBranch(String branch) {
         return userService.countUsersByBranch(branch);
+    }
+
+    @Override
+    public UserTO updateUser(String branchId, UserTO user) {
+        String userId = Optional.ofNullable(user.getId()).orElseThrow(() -> MiddlewareModuleException.builder()
+                                                                                    .errorCode(REQUEST_VALIDATION_FAILURE)
+                                                                                    .devMsg("User id is not present in request!")
+                                                                                    .build());
+        if (userService.findById(userId).getBranch().equals(branchId)) {
+            UserBO userBO = userTOMapper.toUserBO(user);
+            return userTOMapper.toUserTO(userService.updateUser(userBO));
+        }
+        throw MiddlewareModuleException.builder()
+                      .errorCode(INSUFFICIENT_PERMISSION)
+                      .devMsg("User doesn't belong to your branch!")
+                      .build();
     }
 }

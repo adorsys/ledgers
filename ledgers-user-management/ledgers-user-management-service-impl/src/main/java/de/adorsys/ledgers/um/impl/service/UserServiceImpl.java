@@ -164,6 +164,22 @@ public class UserServiceImpl implements UserService {
         return userRepository.countByBranch(branch);
     }
 
+    @Override
+    public UserBO updateUser(UserBO userBO) {
+        UserEntity user = userConverter.toUserPO(userBO);
+        checkIfPasswordModifiedAndEncode(user);
+        hashStaticTan(user);
+        UserEntity save = userRepository.save(user);
+        return convertToUserBoAndDecodeTan(save);
+    }
+
+    private void checkIfPasswordModifiedAndEncode(UserEntity user) {
+        String oldPin = findById(user.getId()).getPin();
+        if (!user.getPin().equals(oldPin)) {
+            user.setPin(passwordEnc.encode(user.getId(), user.getPin()));
+        }
+    }
+
     @NotNull
     public UserEntity getUser(String login) {
         return userRepository.findFirstByLogin(login)

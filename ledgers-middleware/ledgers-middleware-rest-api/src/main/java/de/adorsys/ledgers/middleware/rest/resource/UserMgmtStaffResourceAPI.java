@@ -33,6 +33,22 @@ public interface UserMgmtStaffResourceAPI {
     ResponseEntity<UserTO> register(@RequestParam(BRANCH) String branch, @RequestBody UserTO branchStaff);
 
     /**
+     * Modify a user within a given branch.
+     *
+     * @return user object without pin
+     */
+    @ApiOperation(value = "Modify user",
+            notes = "Modify existing user within the same branch as creator.",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Updated user is provided in the response."),
+            @ApiResponse(code = 401, message = "Wrong authentication credential."),
+            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+    })
+    @PostMapping("/modify")
+    ResponseEntity<UserTO> modifyUser(@RequestParam(BRANCH) String branch, @RequestBody UserTO user);
+
+    /**
      * Authorize returns a bearer token that can be reused by the consuming application.
      *
      * @param userCredentials tpp login and tpp pin

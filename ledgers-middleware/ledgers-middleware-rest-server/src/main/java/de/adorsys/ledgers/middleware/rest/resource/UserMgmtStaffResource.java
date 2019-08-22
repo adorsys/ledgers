@@ -51,6 +51,11 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
+    public ResponseEntity<UserTO> modifyUser(String branch, UserTO user) {
+        return ResponseEntity.ok(middlewareUserService.updateUser(branch, user));
+    }
+
+    @Override
     public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) {
         return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
     }

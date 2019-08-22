@@ -194,7 +194,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         return Arrays.asList(this.env.getActiveProfiles()).contains("sandbox")
                        && scaUserData.isUsesStaticTan()
                        && StringUtils.isNotBlank(scaUserData.getStaticTan())
-                       ? tanEncryptor.decryptTan(scaUserData.getStaticTan())
+                       ? scaUserData.getStaticTan()
                        : authCodeGenerator.generate();
     }
 
