@@ -1,11 +1,21 @@
 package de.adorsys.ledgers.um.db.domain;
 
 public enum ScaMethodType {
-    EMAIL,
-    MOBILE,
-    CHIP_OTP,
-    PHOTO_OTP,
-    PUSH_OTP,
-    SMS_OTP,
-    APP_OTP
+    EMAIL(false),
+    MOBILE(false),
+    CHIP_OTP(false),
+    PHOTO_OTP(false),
+    PUSH_OTP(false),
+    SMS_OTP(false),
+    APP_OTP(true);
+
+    private final boolean decoupled;
+
+    ScaMethodType(boolean decoupled) {
+        this.decoupled = decoupled;
+    }
+
+    public boolean isDecoupled() {
+        return decoupled;
+    }
 }
