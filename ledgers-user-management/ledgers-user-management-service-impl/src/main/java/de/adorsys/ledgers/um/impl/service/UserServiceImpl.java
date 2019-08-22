@@ -73,8 +73,8 @@ public class UserServiceImpl implements UserService {
 
         userEntity.setPin(passwordEnc.encode(userEntity.getId(), user.getPin()));
         hashStaticTan(userEntity);
-
-        return userConverter.toUserBO(userRepository.save(userEntity));
+        UserEntity save = userRepository.save(userEntity);
+        return convertToUserBoAndDecodeTan(save);
     }
 
     @Override
@@ -85,12 +85,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserBO findById(String id) {
-        UserEntity userPO = userRepository.findById(id)
-                                    .orElseThrow(() -> UserManagementModuleException.builder()
-                                                               .errorCode(USER_NOT_FOUND)
-                                                               .devMsg(String.format(USER_WITH_ID_NOT_FOUND, id))
-                                                               .build());
-        return userConverter.toUserBO(userPO);
+        UserEntity user = userRepository.findById(id)
+                                  .orElseThrow(() -> UserManagementModuleException.builder()
+                                                             .errorCode(USER_NOT_FOUND)
+                                                             .devMsg(String.format(USER_WITH_ID_NOT_FOUND, id))
+                                                             .build());
+        return convertToUserBoAndDecodeTan(user);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("{} sca methods would be updated", scaMethods.size());
         UserEntity save = userRepository.save(user);
-        return userConverter.toUserBO(save);
+        return convertToUserBoAndDecodeTan(save);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("{} account accesses would be updated", accountAccesses.size());
         UserEntity save = userRepository.save(user);
-        return userConverter.toUserBO(save);
+        return convertToUserBoAndDecodeTan(save);
     }
 
     @Override
@@ -154,18 +154,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles) {
         List<UserEntity> userEntities = userRepository.findByBranchAndUserRolesIn(branch, userConverter.toUserRole(userRoles));
-        return userConverter.toUserBOList(userEntities);
+        List<UserBO> userBOs = userConverter.toUserBOList(userEntities);
+        userBOs.forEach(this::decodeStaticTanForUser);
+        return userBOs;
     }
 
     @Override
     public int countUsersByBranch(String branch) {
         return userRepository.countByBranch(branch);
-    }
-
-    private void hashStaticTan(UserEntity userEntity) {
-        userEntity.getScaUserData().stream()
-                .filter(d -> StringUtils.isNotBlank(d.getStaticTan()))
-                .forEach(d -> d.setStaticTan(tanEncryptor.encryptTan(d.getStaticTan())));
     }
 
     @NotNull
@@ -177,11 +173,34 @@ public class UserServiceImpl implements UserService {
                                                   .build());
     }
 
+    private UserBO convertToUserBoAndDecodeTan(UserEntity user) {
+        UserBO userBO = userConverter.toUserBO(user);
+        decodeStaticTanForUser(userBO);
+        return userBO;
+    }
+
+    private void decodeStaticTanForUser(UserBO user) {
+        Optional.ofNullable(user.getScaUserData())
+                .ifPresent(d -> d.forEach(this::decodeStaticTan));
+    }
+
+    private void decodeStaticTan(ScaUserDataBO scaUserData) {
+        if (scaUserData.isUsesStaticTan() && StringUtils.isNotBlank(scaUserData.getStaticTan())) {
+            scaUserData.setStaticTan(tanEncryptor.decryptTan(scaUserData.getStaticTan()));
+        }
+    }
+
+    private void hashStaticTan(UserEntity userEntity) {
+        userEntity.getScaUserData().stream()
+                .filter(d -> StringUtils.isNotBlank(d.getStaticTan()))
+                .forEach(d -> d.setStaticTan(tanEncryptor.encryptTan(d.getStaticTan())));
+    }
+
     private void checkUserAlreadyExists(UserBO userBO) {
         Optional<UserEntity> user = userRepository.findByEmailOrLogin(userBO.getEmail(), userBO.getLogin());
         if (user.isPresent()) {
             String message = String.format("User with this email or login already exists. Email %s. Login %s.",
-                                           userBO.getEmail(), userBO.getLogin());
+                    userBO.getEmail(), userBO.getLogin());
             log.error(message);
             throw UserManagementModuleException.builder()
                           .errorCode(USER_ALREADY_EXISTS)
