@@ -5,7 +5,7 @@ import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.CHIP_OTP;
+import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.PUSH_OTP;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +19,6 @@ public class PushOtpSender implements SCASender {
 
     @Override
     public ScaMethodTypeBO getType() {
-        return CHIP_OTP;
+        return PUSH_OTP;
     }
 }
