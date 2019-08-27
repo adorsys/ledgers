@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum OtpFormatTO {
     CHARACTERS("characters"),
@@ -25,6 +26,7 @@ public enum OtpFormatTO {
         this.value = value;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
