@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.CURRENCY_MISMATCH;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.NO_SUCH_ALGORITHM;
@@ -53,9 +55,9 @@ public class PaymentCoreDataPolicyHelper {
                 for (PaymentTargetBO t : targets) {
                     if (p.getCurrency() != null && !p.getCurrency().equals(t.getInstructedAmount().getCurrency().getCurrencyCode())) {
                         throw MiddlewareModuleException.builder()
-                                      .errorCode(CURRENCY_MISMATCH)
-                                      .devMsg(String.format("Currency mismatched in bulk payment with id %s", r.getPaymentId()))
-                                      .build();
+                                .errorCode(CURRENCY_MISMATCH)
+                                .devMsg(String.format("Currency mismatched in bulk payment with id %s", r.getPaymentId()))
+                                .build();
                     }
                     p.setCurrency(t.getInstructedAmount().getCurrency().getCurrencyCode());
                     md.update(t.getCreditorAccount().getIban().getBytes(StandardCharsets.UTF_8));
@@ -65,9 +67,8 @@ public class PaymentCoreDataPolicyHelper {
                 p.setCreditorIban(DatatypeConverter.printHexBinary(md.digest()));
             }
 
-            if (r.getRequestedExecutionDate() != null) {
-                p.setRequestedExecutionDate(r.getRequestedExecutionDate().format(formatter));
-            }
+            p.setRequestedExecutionDate(resolveExecutionDate(r.getRequestedExecutionDate()));
+
             if (PaymentTypeBO.PERIODIC.equals(r.getPaymentType())) {
                 p.setDayOfExecution("" + r.getDayOfExecution());
                 p.setExecutionRule(r.getExecutionRule());
@@ -76,16 +77,22 @@ public class PaymentCoreDataPolicyHelper {
             return p;
         } catch (NoSuchAlgorithmException e) {
             throw MiddlewareModuleException.builder()
-                          .errorCode(NO_SUCH_ALGORITHM)
-                          .devMsg("INTERNAL ERROR, A MESSAGE HAS BEING SENT TO THE BANK ADMINISTRATION TO FIX THIS ISSUE. WE ARE SORRY FOR TEMPORARY INCONVENIENCES.")
-                          .build();
+                    .errorCode(NO_SUCH_ALGORITHM)
+                    .devMsg("INTERNAL ERROR, A MESSAGE HAS BEING SENT TO THE BANK ADMINISTRATION TO FIX THIS ISSUE. WE ARE SORRY FOR TEMPORARY INCONVENIENCES.")
+                    .build();
         }
+    }
+
+    private static String resolveExecutionDate(LocalDate requestedExecutionDate) {
+        return Optional.ofNullable(requestedExecutionDate)
+                .orElseGet(LocalDate::now)
+                .format(formatter);
     }
 
     private static void setPaymentProduct(PaymentCoreDataTO p, PaymentTargetBO t) {
         String paymentProduct = t.getPaymentProduct() == null
-                                        ? null
-                                        : t.getPaymentProduct().getValue();
+                ? null
+                : t.getPaymentProduct().getValue();
         p.setPaymentProduct(paymentProduct);
     }
 
