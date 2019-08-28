@@ -113,7 +113,9 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
                                              : data.getUserMessage();
         String message = String.format(userMessageTemplate, tan);
         senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
-        return scaOperationMapper.toBO(scaOperation);
+        SCAOperationBO scaOperationBO = scaOperationMapper.toBO(scaOperation);
+        scaOperationBO.setTan(tan);
+        return scaOperationBO;
     }
 
     @Override

@@ -34,4 +34,5 @@ public class SCAOperationBO {
      */
     private int failledCount;
     private ScaStatusBO scaStatus;
+    private String tan;
 }
