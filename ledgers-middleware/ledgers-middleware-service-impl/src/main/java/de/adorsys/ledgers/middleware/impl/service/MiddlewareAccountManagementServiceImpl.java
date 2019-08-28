@@ -10,8 +10,8 @@ import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequest
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
@@ -414,7 +414,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         response.setChosenScaMethod(userData);
         if (userData != null) {
             response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(userData.getScaMethod())
-                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getAuthCodeHash())));
+                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getTan())));
         }
         response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setConsentId(consent.getId());
