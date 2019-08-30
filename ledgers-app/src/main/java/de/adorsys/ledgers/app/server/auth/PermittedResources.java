@@ -26,12 +26,14 @@ public class PermittedResources {
             "/data-test/db-flush",
             "/staff-access/users/register",
             "/staff-access/users/login",
-            "/password"
+            "/password",
+            "/users/validate"
     };
 
     public static final String[] CONSOLE_WHITELIST = {
             "/console/**"
     };
 
-    private PermittedResources() {}
+    private PermittedResources() {
+    }
 }
