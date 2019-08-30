@@ -25,8 +25,8 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -353,7 +353,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         response.setChosenScaMethod(userData);
         if (userData != null) {
             response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(userData.getScaMethod())
-                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getAuthCodeHash())));
+                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getTan())));
         }
         response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setPaymentId(paymentId);
