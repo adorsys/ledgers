@@ -1,12 +1,12 @@
 package de.adorsys.ledgers.postings.db.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
+import de.adorsys.ledgers.postings.db.domain.Posting;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.postings.db.domain.Posting;
+import java.util.List;
+import java.util.Optional;
 
 public interface PostingRepository extends PagingAndSortingRepository<Posting, String> {
     /**
@@ -20,4 +20,6 @@ public interface PostingRepository extends PagingAndSortingRepository<Posting, S
     List<Posting> findByOprId(String oprId);
 
     Optional<Posting> findFirstByLedgerOrderByRecordTimeDesc(Ledger ledger);
+
+    List<Posting> deleteAllByLines_Account(LedgerAccount account);
 }

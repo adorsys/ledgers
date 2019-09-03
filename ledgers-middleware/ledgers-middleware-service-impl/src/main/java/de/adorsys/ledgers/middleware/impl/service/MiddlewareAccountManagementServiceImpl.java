@@ -18,6 +18,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.ScaChallengeDataResolver;
@@ -340,6 +341,17 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         UserBO user = userService.findById(userId);
         UserTO userTO = userMapper.toUserTO(user);
         return userTO.getAccountAccesses();
+    }
+
+    @Override
+    public void deleteTransactions(String branchId, String iban) {
+        userService.findByLogin(branchId).getAccountAccesses().stream()
+                .filter(a -> a.getIban().equals(iban)).findAny()
+                .orElseThrow(() -> MiddlewareModuleException.builder()
+                                           .devMsg("You dont have permission to modify this account")
+                                           .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
+                                           .build());
+        depositAccountService.deleteTransactions(iban);
     }
 
     /*
