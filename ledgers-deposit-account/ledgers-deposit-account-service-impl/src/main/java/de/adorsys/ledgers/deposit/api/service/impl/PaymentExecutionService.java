@@ -1,17 +1,21 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
+import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.objectlab.kit.datecalc.common.DateCalculator;
 import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar;
 import net.objectlab.kit.datecalc.common.HolidayCalendar;
 import net.objectlab.kit.datecalc.jdk8.LocalDateKitCalculatorsFactory;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import pro.javatar.commons.reader.YamlReader;
@@ -20,11 +24,13 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Currency;
 import java.util.HashSet;
 import java.util.List;
 
 import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentExecutionService implements InitializingBean {
@@ -32,6 +38,8 @@ public class PaymentExecutionService implements InitializingBean {
     private static final String PRECEDING = "preceeding";
     private final PaymentRepository paymentRepository;
     private final DepositAccountTransactionService txService;
+    private final DepositAccountService accountService;
+    private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
 
     @Override
     public void afterPropertiesSet() {
@@ -40,18 +48,29 @@ public class PaymentExecutionService implements InitializingBean {
     }
 
     public TransactionStatusBO executePayment(Payment payment, String userName) {
+        PaymentBO paymentBO = paymentMapper.toPaymentBO(payment);
+        AmountBO amountToVerify = calculateTotalPaymentAmount(paymentBO);
+        boolean confirmationOfFunds = accountService.confirmationOfFunds(new FundsConfirmationRequestBO(null, paymentBO.getDebtorAccount(), amountToVerify, null, null));
+
+        if (!confirmationOfFunds) {
+            updatePaymentStatus(payment, TransactionStatus.RJCT);
+            log.info("Scheduler couldn't execute payment : {}. Insufficient funds to complete the operation", payment.getTransactionStatus());
+            return TransactionStatusBO.RJCT;
+        }
         LocalDateTime executionTime = LocalDateTime.now();
         txService.bookPayment(payment, executionTime, userName);
         payment.setExecutedDate(executionTime);
 
-        if (payment.getPaymentType() == PaymentType.PERIODIC) {
-            return schedulePayment(payment);
-        } else {
-            payment.setTransactionStatus(TransactionStatus.ACSC);
-            payment.setNextScheduledExecution(null);
-            Payment savedPayment = paymentRepository.save(payment);
-            return TransactionStatusBO.valueOf(savedPayment.getTransactionStatus().name());
-        }
+        return payment.getPaymentType() == PaymentType.PERIODIC
+                       ? schedulePayment(payment)
+                       : updatePaymentStatus(payment, TransactionStatus.ACSC);
+    }
+
+    private TransactionStatusBO updatePaymentStatus(Payment payment, TransactionStatus status) {
+        payment.setTransactionStatus(status);
+        payment.setNextScheduledExecution(null);
+        paymentRepository.save(payment);
+        return TransactionStatusBO.valueOf(status.name());
     }
 
     public TransactionStatusBO schedulePayment(Payment payment) {
@@ -70,6 +89,16 @@ public class PaymentExecutionService implements InitializingBean {
         payment.setNextScheduledExecution(executionDateTime);
         Payment savedPayment = paymentRepository.save(payment);
         return TransactionStatusBO.valueOf(savedPayment.getTransactionStatus().name());
+    }
+
+    public AmountBO calculateTotalPaymentAmount(PaymentBO payment) {
+        return payment.getTargets().stream()
+                       .map(PaymentTargetBO::getInstructedAmount)
+                       .reduce((left, right) -> new AmountBO(Currency.getInstance("EUR"), left.getAmount().add(right.getAmount())))
+                       .orElseThrow(() -> DepositModuleException.builder()
+                                                  .errorCode(PAYMENT_PROCESSING_FAILURE)
+                                                  .devMsg(String.format("Could not calculate total amount for payment: %s.", payment.getPaymentId()))
+                                                  .build());
     }
 
     private LocalDate calculateExecutionDate(Payment payment) {
