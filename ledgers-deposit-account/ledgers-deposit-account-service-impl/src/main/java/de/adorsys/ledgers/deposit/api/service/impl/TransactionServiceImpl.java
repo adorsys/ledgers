@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.SINGLE;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSC;
@@ -31,7 +28,7 @@ import static de.adorsys.ledgers.postings.api.domain.PostingTypeBO.BUSI_TX;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
     private static final String MOCK_DATA_IMPORT = "MockDataImport";
-    public static final String SEPA_CLEARING_ACCOUNT = "11031";
+    private static final String SEPA_CLEARING_ACCOUNT = "11031";
     private final SerializeService serializeService;
     private final PostingService postingService;
     private final LedgerService ledgerService;
@@ -168,7 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
     private String createPostingLineDetails(MockBookingDetails details, String lineId) {
         TransactionDetailsBO lineDetails = new TransactionDetailsBO();
         lineDetails.setTransactionId(lineId);
-        lineDetails.setEndToEndId("MockedTransaction");
+        lineDetails.setEndToEndId(UUID.randomUUID().toString());
         lineDetails.setBookingDate(details.getBookingDate());
         lineDetails.setValueDate(details.getValueDate());
         lineDetails.setTransactionAmount(new AmountBO(details.getCurrency(), details.isPaymentTransaction()
