@@ -164,4 +164,6 @@ public interface MiddlewareAccountManagementService {
      * @param userId id of the user
      */
     List<AccountAccessTO> getAccountAccesses(String userId);
+
+    void deleteTransactions(String userId, String iban);
 }

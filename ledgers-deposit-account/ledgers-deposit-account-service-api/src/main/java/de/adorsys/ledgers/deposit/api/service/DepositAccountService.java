@@ -32,4 +32,6 @@ public interface DepositAccountService {
     List<DepositAccountDetailsBO> findByBranch(String branch);
 
     void depositCash(String accountId, AmountBO amount, String user);
+
+    void deleteTransactions(String iban);
 }

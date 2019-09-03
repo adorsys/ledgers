@@ -189,6 +189,13 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         depositCash(accountReference, amount, recordUser, ledger, postingDateTime);
     }
 
+    @Override
+    public void deleteTransactions(String iban) {
+        getDepositAccountByIban(iban,LocalDateTime.now(),false);
+        LedgerBO ledger = loadLedger();
+        postingService.deletePostings(iban, ledger);
+    }
+
     private void checkDepositAccountAlreadyExist(DepositAccountBO depositAccountBO) {
         boolean isExistingAccount = depositAccountRepository.findByIbanAndCurrency(depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode())
                                             .isPresent();

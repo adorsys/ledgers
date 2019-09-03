@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.postings.api.service;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 
@@ -32,4 +33,6 @@ public interface PostingService {
     List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime dateFrom, LocalDateTime dateTo);
 
     PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String transactionId);
+
+    void deletePostings(String iban, LedgerBO ledger);
 }
