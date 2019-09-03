@@ -41,6 +41,8 @@ public class DepositAccountPaymentServiceImplTest {
 
     @Mock
     private DepositAccountService accountService;
+    @Mock
+    private PaymentExecutionService paymentExecutionService;
 
     @Test
     public void getPaymentStatus() {

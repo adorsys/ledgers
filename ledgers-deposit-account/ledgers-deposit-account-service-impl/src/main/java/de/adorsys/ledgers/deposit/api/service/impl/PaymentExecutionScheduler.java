@@ -18,12 +18,10 @@ public class PaymentExecutionScheduler {
     private final PaymentRepository paymentRepository;
     private final PaymentExecutionService executionService;
 
-
     @Scheduled(initialDelayString = "${paymentScheduler.initialDelay}", fixedDelayString = "${paymentScheduler.delay}")
     public void scheduler() {
         log.info("Scheduler started at {}", LocalDateTime.now());
         List<Payment> payments = paymentRepository.getAllDuePayments();
         payments.forEach(p -> executionService.executePayment(p, SCHEDULER));
-        log.info("Scheduler executed : {} payments", payments.size());
     }
 }

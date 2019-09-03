@@ -29,7 +29,6 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
 import org.springframework.stereotype.Service;
 
-import java.util.Currency;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
@@ -80,7 +79,7 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         });
         persistedPayment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
 
-        AmountBO amountToVerify = calculateTotalPaymentAmount(payment);
+        AmountBO amountToVerify = executionService.calculateTotalPaymentAmount(payment);
 
         boolean confirmationOfFunds = accountService.confirmationOfFunds(new FundsConfirmationRequestBO(null, payment.getDebtorAccount(), amountToVerify, null, null));
         if (confirmationOfFunds) {
@@ -93,16 +92,6 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
                           .devMsg(String.format("Payment with id: %s failed due to Insufficient Funds Available", persistedPayment.getPaymentId()))
                           .build();
         }
-    }
-
-    private AmountBO calculateTotalPaymentAmount(PaymentBO payment) {
-        return payment.getTargets().stream()
-                       .map(PaymentTargetBO::getInstructedAmount)
-                       .reduce((left, right) -> new AmountBO(Currency.getInstance("EUR"), left.getAmount().add(right.getAmount())))
-                       .orElseThrow(() -> DepositModuleException.builder()
-                                                  .errorCode(PAYMENT_PROCESSING_FAILURE)
-                                                  .devMsg(String.format("Could not calculate total amount for payment: %s.", payment.getPaymentId()))
-                                                  .build());
     }
 
     /**
