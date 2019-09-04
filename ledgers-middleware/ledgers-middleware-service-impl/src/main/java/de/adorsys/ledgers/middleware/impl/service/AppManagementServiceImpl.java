@@ -17,4 +17,10 @@ public class AppManagementServiceImpl implements AppManagementService {
 		// Init deposit account config  data.
 		depositAccountInitService.initConfigData();
 	}
+
+	@Override
+	public void removeBranch(String branchId) {
+
+
+	}
 }
