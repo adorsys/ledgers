@@ -7,4 +7,6 @@ public interface AppManagementService {
 	 * some data.
 	 */
 	void initApp();
+
+	void removeBranch(String branchId);
 }

@@ -19,7 +19,7 @@ public interface ResetDataMgmtStaffAPI {
     })
     ResponseEntity<Void> account(@PathVariable("iban") String iban);
 
-    @DeleteMapping(value = "/tpp")
+    @DeleteMapping(value = "/branch")
     @ApiOperation(value = "Removes all data related to TPP", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The user data record without the user pin."),

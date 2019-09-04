@@ -344,8 +344,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void deleteTransactions(String branchId, String iban) {
-        userService.findByLogin(branchId).getAccountAccesses().stream()
+    public void deleteTransactions(String userId, String iban) {
+        userService.findById(userId).getAccountAccesses().stream()
                 .filter(a -> a.getIban().equals(iban)).findAny()
                 .orElseThrow(() -> MiddlewareModuleException.builder()
                                            .devMsg("You dont have permission to modify this account")
