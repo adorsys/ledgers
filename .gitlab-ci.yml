@@ -160,7 +160,7 @@ Deploy Openshift (sandbox-dev):
     name: dev
     url: https://dev-dynamicsandbox-ledgers.cloud.adorsys.de
   variables:
-    DOCKER_TAG: develop
+    DOCKER_TAG: latest
     OPENSHIFT_NAMESPACE:  ${OPENSHIFT_SANDBOX_DEV_NAMESPACE}
   <<: *push_docker_openshift
 
