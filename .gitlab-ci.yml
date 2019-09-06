@@ -21,6 +21,7 @@ variables: &variables
   ###########################
 
   OPENSHIFT_NAMESPACE: "ledgers-dev"
+  OPENSHIFT_SANDBOX_DEV_NAMESPACE: "adorsys-dynamic-sandbox-dev"
 
   SONAR_HOST: "https://psd2-quality.cloud.adorsys.de"
 
@@ -149,6 +150,18 @@ Deploy Openshift (develop):
     url: https://ledgers-dev.cloud.adorsys.de
   variables:
     DOCKER_TAG: develop
+  <<: *push_docker_openshift
+
+Deploy Openshift (sandbox-dev):
+  stage: Deployment
+  only:
+    - develop
+  environment:
+    name: dev
+    url: https://dev-dynamicsandbox-ledgers.cloud.adorsys.de
+  variables:
+    DOCKER_TAG: latest
+    OPENSHIFT_NAMESPACE:  ${OPENSHIFT_SANDBOX_DEV_NAMESPACE}
   <<: *push_docker_openshift
 
 ##########
