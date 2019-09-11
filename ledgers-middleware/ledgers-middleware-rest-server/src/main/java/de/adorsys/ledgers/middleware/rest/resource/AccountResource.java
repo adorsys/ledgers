@@ -57,7 +57,7 @@ public class AccountResource implements AccountRestAPI {
      * @return : the list of accounts linked with the current customer.
      */
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','SYSTEM')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listDepositAccounts(scaInfoHolder.getUserId()));
     }
