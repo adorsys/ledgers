@@ -39,7 +39,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Map<String, String> bookMockTransaction(List<MockBookingDetails> trDetails) {
         Map<String, String> errorMap = new HashMap<>();
-        trDetails.forEach(d -> {
+        trDetails.parallelStream().forEach(d -> {
             try {
                 performTransaction(d);
             } catch (Exception e) {

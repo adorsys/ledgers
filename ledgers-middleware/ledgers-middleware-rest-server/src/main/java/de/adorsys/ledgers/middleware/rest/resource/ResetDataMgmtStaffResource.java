@@ -20,14 +20,14 @@ public class ResetDataMgmtStaffResource implements ResetDataMgmtStaffAPI {
     private final AppManagementService appManagementService;
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> account(String iban) {
         accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), iban);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> branch(String branchId) {
         appManagementService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
         return ResponseEntity.ok().build();
