@@ -156,6 +156,6 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<List<UserTO>> getAllUsers() {
-        return ResponseEntity.ok(middlewareUserService.listUsers(0, 150));
+        return ResponseEntity.ok(middlewareUserService.listUsers(0, 1000));
     }
 }

@@ -129,6 +129,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) {
+        log.info("Start retrieving transactions for {}", accountId);
+        long start = System.nanoTime();
         LocalDate today = LocalDate.now();
         LocalDateTime dateTimeFrom = dateFrom == null
                                              ? today.atStartOfDay()
@@ -138,6 +140,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                                            : accessService.getTimeAtEndOfTheDay(dateTo);
 
         List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
+        log.info("Retrieved {} transactions in {} secs", transactions.size(), (double) (System.nanoTime() - start) / NANO_TO_SECOND);
         return paymentConverter.toTransactionTOList(transactions);
     }
 

@@ -28,7 +28,10 @@ public class AppManagementServiceImpl implements AppManagementService {
     @Override
     public void initApp() {
         // Init deposit account config  data.
+        log.info("Initiating Ledgers");
+        long start = System.nanoTime();
         depositAccountInitService.initConfigData();
+        log.info("Initiation completed in {} seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     @Override

@@ -62,7 +62,6 @@ public class AppMgmtResource implements AppMgmtRestAPI {
     }
 
     @Override
-    @SuppressWarnings("PMD.IdenticalCatchBranches")
     public ResponseEntity<BearerTokenTO> admin(@RequestBody(required = true) UserTO adminUser) {
         List<UserTO> users = userManagementService.listUsers(0, 1);
         if (!users.isEmpty()) {
@@ -81,6 +80,5 @@ public class AppMgmtResource implements AppMgmtRestAPI {
 
         SCALoginResponseTO scaLoginResponseTO = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
         return ResponseEntity.ok(scaLoginResponseTO.getBearerToken());
-
     }
 }

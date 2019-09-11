@@ -29,6 +29,7 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.RE
 @Transactional
 @RequiredArgsConstructor
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
+    private static final int NANO_TO_SECOND = 1000000000;
     private final UserService userService;
     private final DepositAccountService depositAccountService;
     private final AccessService accessService;
@@ -82,7 +83,10 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public List<UserTO> listUsers(int page, int size) {
-        return userTOMapper.toUserTOList(userService.listUsers(page, size));
+        long start = System.nanoTime();
+        List<UserTO> users = userTOMapper.toUserTOList(userService.listUsers(page, size));
+        log.info("Retrieving: {} users in {} seconds", users.size(), (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+        return users;
     }
 
     @Override
