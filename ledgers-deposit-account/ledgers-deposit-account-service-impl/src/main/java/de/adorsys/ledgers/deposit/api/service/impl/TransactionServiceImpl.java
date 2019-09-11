@@ -31,6 +31,7 @@ import static de.adorsys.ledgers.postings.api.domain.PostingTypeBO.BUSI_TX;
 public class TransactionServiceImpl implements TransactionService {
     private static final String MOCK_DATA_IMPORT = "MockDataImport";
     private static final String SEPA_CLEARING_ACCOUNT = "11031";
+    private static final int NANO_TO_SECOND = 1000000000;
     private final SerializeService serializeService;
     private final PostingService postingService;
     private final LedgerService ledgerService;
@@ -38,6 +39,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Map<String, String> bookMockTransaction(List<MockBookingDetails> trDetails) {
+        log.info("Start upload mock transactions, size: {}", trDetails.size());
+        long start = System.nanoTime();
         Map<String, String> errorMap = new HashMap<>();
         trDetails.parallelStream().forEach(d -> {
             try {
@@ -46,6 +49,7 @@ public class TransactionServiceImpl implements TransactionService {
                 errorMap.put(d.toString(), e.getMessage());
             }
         });
+        log.info("Initiation completed in {} seconds, errors: {}", (double) (System.nanoTime() - start) / NANO_TO_SECOND, errorMap.size());
         return errorMap;
     }
 
