@@ -34,4 +34,6 @@ public interface DepositAccountService {
     void depositCash(String accountId, AmountBO amount, String user);
 
     void deleteTransactions(String iban);
+
+    void deleteBranch(String branchId);
 }

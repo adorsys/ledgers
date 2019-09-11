@@ -8,6 +8,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -165,5 +166,5 @@ public interface MiddlewareAccountManagementService {
      */
     List<AccountAccessTO> getAccountAccesses(String userId);
 
-    void deleteTransactions(String userId, String iban);
+    void deleteTransactions(String userId, UserRoleTO userRole, String iban);
 }

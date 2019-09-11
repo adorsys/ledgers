@@ -17,8 +17,8 @@ public interface PostingLineRepository extends PagingAndSortingRepository<Postin
     List<PostingLine> findByAccountAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByRecordTimeDesc(LedgerAccount account, LocalDateTime refTime);
 
     @Query("select pl from PostingLine pl join fetch pl.details " +
-            "where pl.account = :account and pl.pstTime > :fromDt and pl.pstTime <= :toDt and pl.discardedTime is null " +
-            "order by pl.pstTime desc")
+                   "where pl.account = :account and pl.pstTime > :fromDt and pl.pstTime <= :toDt and pl.discardedTime is null " +
+                   "order by pl.pstTime desc")
     List<PostingLine> findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(
             @Param("account") LedgerAccount ledgerAccount, @Param("fromDt") LocalDateTime timeFrom, @Param("toDt") LocalDateTime timeTo);
 

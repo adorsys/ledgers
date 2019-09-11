@@ -6,8 +6,7 @@ import org.springframework.http.HttpStatus;
 import java.util.EnumMap;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.*;
 
 public class MiddlewareHttpStatusResolver {
     private static final EnumMap<MiddlewareErrorCode, HttpStatus> container = new EnumMap<>(MiddlewareErrorCode.class);
@@ -26,6 +25,9 @@ public class MiddlewareHttpStatusResolver {
         //403 Block
         container.put(AUTHENTICATION_FAILURE, FORBIDDEN);
         container.put(INSUFFICIENT_PERMISSION, FORBIDDEN);
+
+        //404 Block
+        container.put(BRANCH_NOT_FOUND, NOT_FOUND);
 
         //500 Block
         container.put(NO_SUCH_ALGORITHM, BAD_REQUEST);

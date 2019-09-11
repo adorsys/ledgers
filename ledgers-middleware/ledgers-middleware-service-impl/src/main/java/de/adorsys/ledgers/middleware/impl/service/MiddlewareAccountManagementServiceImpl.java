@@ -14,10 +14,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
@@ -43,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.ACCOUNT_CREATION_VALIDATION_FAILURE;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
 
@@ -53,6 +51,7 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AU
 @SuppressWarnings("PMD.TooManyMethods")
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
     private static final LocalDateTime BASE_TIME = LocalDateTime.MIN;
+    private static final int NANO_TO_SECOND = 1000000000;
 
     private final UserMapper userMapper;
     private final DepositAccountService depositAccountService;
@@ -344,14 +343,20 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void deleteTransactions(String userId, String iban) {
-        userService.findById(userId).getAccountAccesses().stream()
-                .filter(a -> a.getIban().equals(iban)).findAny()
-                .orElseThrow(() -> MiddlewareModuleException.builder()
-                                           .devMsg("You dont have permission to modify this account")
-                                           .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
-                                           .build());
+    public void deleteTransactions(String userId, UserRoleTO userRole, String iban) {
+        log.info("User {} attempting delete postings for iban: {}", userId, iban);
+        long start = System.nanoTime();
+        if (userRole == STAFF) {
+            userService.findById(userId).getAccountAccesses().stream()
+                    .filter(a -> a.getIban().equals(iban)).findAny()
+                    .orElseThrow(() -> MiddlewareModuleException.builder()
+                                               .devMsg("You dont have permission to modify this account")
+                                               .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
+                                               .build());
+        }
+        log.info("Permission checked -> OK");
         depositAccountService.deleteTransactions(iban);
+        log.info("Deleting postings for: {} Successful, in {} seconds", iban, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     /*

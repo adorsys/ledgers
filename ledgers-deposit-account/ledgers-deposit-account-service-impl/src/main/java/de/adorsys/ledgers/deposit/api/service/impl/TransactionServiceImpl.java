@@ -12,6 +12,7 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSC;
 import static de.adorsys.ledgers.postings.api.domain.PostingStatusBO.POSTED;
 import static de.adorsys.ledgers.postings.api.domain.PostingTypeBO.BUSI_TX;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {

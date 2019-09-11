@@ -16,23 +16,38 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.mapstruct.factory.Mappers;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
 import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
+import static java.lang.String.format;
 
 @Slf4j
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s not found";
     private static final String OPERATION_ON_BLOCKED_ACCOUNT = "Operation is Rejected as account: %s is %s";
+    private static final String DELETE_BRANCH_ERROR_MSG = "Something went wrong during deletion of branch: %s, msg: %s";
+    private static final String BRANCH_SQL = "classpath:deleteBranch.sql";
+    private static final String POSTING_SQL = "classpath:deletePostings.sql";
+    private static final String DELETE_POSTINGS_ERROR_MSG = "Something went wrong during deletion of postings for iban: %s, msg: %s";
 
+    @PersistenceContext
+    private final EntityManager entityManager;
+    private final ResourceLoader loader;
     private final DepositAccountRepository depositAccountRepository;
     private final DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
     private final AccountStmtService accountStmtService;
@@ -41,11 +56,13 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private final ObjectMapper objectMapper;
 
     public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
-                                     LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
+                                     LedgerService ledgerService, EntityManager entityManager, ResourceLoader loader, DepositAccountRepository depositAccountRepository,
                                      AccountStmtService accountStmtService,
                                      PostingService postingService, TransactionDetailsMapper transactionDetailsMapper,
                                      ObjectMapper objectMapper) {
         super(depositAccountConfigService, ledgerService);
+        this.entityManager = entityManager;
+        this.loader = loader;
         this.depositAccountRepository = depositAccountRepository;
         this.accountStmtService = accountStmtService;
         this.postingService = postingService;
@@ -77,7 +94,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         if (accountStatus != ENABLED) {
             throw DepositModuleException.builder()
                           .errorCode(ACCOUNT_BLOCKED_DELETED)
-                          .devMsg(String.format(OPERATION_ON_BLOCKED_ACCOUNT, account.getAccount().getIban(), accountStatus))
+                          .devMsg(format(OPERATION_ON_BLOCKED_ACCOUNT, account.getAccount().getIban(), accountStatus))
                           .build();
         }
         return account;
@@ -90,7 +107,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         if (accounts.isEmpty()) {
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_ACCOUNT_NOT_FOUND)
-                          .devMsg(String.format(MSG_IBAN_NOT_FOUND, iban))
+                          .devMsg(format(MSG_IBAN_NOT_FOUND, iban))
                           .build();
         }
         DepositAccountBO account = accounts.iterator().next();
@@ -178,7 +195,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         if (!accountReference.getCurrency().equals(amount.getCurrency())) {
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_OPERATION_FAILURE)
-                          .devMsg(String.format("Deposited amount and account currencies are different. Requested currency: %s, Account currency: %s",
+                          .devMsg(format("Deposited amount and account currencies are different. Requested currency: %s, Account currency: %s",
                                   amount.getCurrency().getCurrencyCode(), accountReference.getCurrency().getCurrencyCode()))
                           .build();
         }
@@ -191,16 +208,37 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     @Override
     public void deleteTransactions(String iban) {
-        getDepositAccountByIban(iban,LocalDateTime.now(),false);
+        getDepositAccountByIban(iban, LocalDateTime.now(), false);
         LedgerBO ledger = loadLedger();
-        postingService.deletePostings(iban, ledger);
+        String accountId = ledgerService.findLedgerAccount(ledger, iban).getId();
+        executeNativeQuery(POSTING_SQL, accountId, DELETE_POSTINGS_ERROR_MSG);
+    }
+
+    @Override
+    public void deleteBranch(String branchId) {
+        executeNativeQuery(BRANCH_SQL, branchId, DELETE_BRANCH_ERROR_MSG);
+    }
+
+    private void executeNativeQuery(String queryFilePath, String parameter, String errorMsg) {
+        try {
+            InputStream stream = loader.getResource(queryFilePath).getInputStream();
+            String query = IOUtils.toString(stream, StandardCharsets.UTF_8);
+            entityManager.createNativeQuery(query)
+                    .setParameter(1, parameter)
+                    .executeUpdate();
+        } catch (IOException e) {
+            throw DepositModuleException.builder()
+                          .devMsg(format(errorMsg, parameter, e.getMessage()))
+                          .errorCode(COULD_NOT_EXECUTE_STATEMENT)
+                          .build();
+        }
     }
 
     private void checkDepositAccountAlreadyExist(DepositAccountBO depositAccountBO) {
         boolean isExistingAccount = depositAccountRepository.findByIbanAndCurrency(depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode())
                                             .isPresent();
         if (isExistingAccount) {
-            String message = String.format("Deposit account already exists. IBAN %s. Currency %s",
+            String message = format("Deposit account already exists. IBAN %s. Currency %s",
                     depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
             log.error(message);
             throw DepositModuleException.builder()
@@ -238,7 +276,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         return depositAccountRepository.findById(accountId)
                        .orElseThrow(() -> DepositModuleException.builder()
                                                   .errorCode(DEPOSIT_ACCOUNT_NOT_FOUND)
-                                                  .devMsg(String.format("Account with id: %s not found!", accountId))
+                                                  .devMsg(format("Account with id: %s not found!", accountId))
                                                   .build());
     }
 
@@ -258,7 +296,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
 
     private BalanceBO composeBalance(Currency currency, AccountStmtBO stmt) {
         BalanceBO balanceBO = new BalanceBO();
-        AmountBO amount = composeAmount(currency, stmt);
+        AmountBO amount = new AmountBO(currency, stmt.creditBalance());
         balanceBO.setAmount(amount);
         balanceBO.setBalanceType(BalanceTypeBO.INTERIM_AVAILABLE);
         balanceBO.setReferenceDate(stmt.getPstTime().toLocalDate());
@@ -274,13 +312,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             balance.setLastChangeDateTime(stmt.getPstTime());
         }
         return balance;
-    }
-
-    private AmountBO composeAmount(Currency currency, AccountStmtBO stmt) {
-        AmountBO amount = new AmountBO();
-        amount.setCurrency(currency);
-        amount.setAmount(stmt.creditBalance());
-        return amount;
     }
 
     private List<DepositAccountBO> getDepositAccountsByIban(List<String> ibans) {

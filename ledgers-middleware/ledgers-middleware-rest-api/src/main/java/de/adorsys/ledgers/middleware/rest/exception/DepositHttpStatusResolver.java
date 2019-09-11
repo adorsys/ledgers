@@ -6,8 +6,7 @@ import org.springframework.http.HttpStatus;
 import java.util.EnumMap;
 
 import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 public class DepositHttpStatusResolver {
     private static final EnumMap<DepositErrorCode, HttpStatus> container = new EnumMap<>(DepositErrorCode.class);
@@ -28,6 +27,9 @@ public class DepositHttpStatusResolver {
         container.put(PAYMENT_WITH_ID_EXISTS, BAD_REQUEST);
         container.put(DEPOSIT_OPERATION_FAILURE, BAD_REQUEST);
         container.put(ACCOUNT_BLOCKED_DELETED, BAD_REQUEST);
+
+        //417 Block
+        container.put(COULD_NOT_EXECUTE_STATEMENT, EXPECTATION_FAILED);
     }
 
     public static HttpStatus resolveHttpStatusByCode(DepositErrorCode code) {

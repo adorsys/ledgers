@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
@@ -16,18 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class ResetDataMgmtStaffResource implements ResetDataMgmtStaffAPI {
     private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService accountManagementService;
+    private final AppManagementService appManagementService;
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
     public ResponseEntity<Void> account(String iban) {
-        accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), iban);
+        accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), iban);
         return ResponseEntity.ok().build();
     }
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    public ResponseEntity<Void> branch() {
-
+    public ResponseEntity<Void> branch(String branchId) {
+        appManagementService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
         return ResponseEntity.ok().build();
     }
 }

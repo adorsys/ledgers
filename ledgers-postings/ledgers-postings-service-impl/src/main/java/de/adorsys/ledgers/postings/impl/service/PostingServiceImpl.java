@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.postings.impl.service;
 
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
@@ -80,18 +79,6 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
                                                   .errorCode(POSTING_NOT_FOUND)
                                                   .devMsg(String.format(POSTING_NF_MSG, account.getId(), transactionId))
                                                   .build());
-    }
-
-    @Override
-    public void deletePostings(String iban, LedgerBO ledger) {
-        Ledger loadedLedger = loadLedger(ledger);
-        LedgerAccount account = ledgerAccountRepository.findOptionalByLedgerAndName(loadedLedger, iban)
-                                        .orElseThrow(() -> PostingModuleException.builder()
-                                                                   .errorCode(LEDGER_ACCOUNT_NOT_FOUND)
-                                                                   .devMsg(String.format(LA_NF_BY_NAME_MSG, iban))
-                                                                   .build());
-        List<Posting> postings = postingRepository.deleteAllByLines_Account(account);
-        log.info("Deleted {} postings for account {}", postings.size(), iban);
     }
 
     private Posting newPosting(Posting posting) {

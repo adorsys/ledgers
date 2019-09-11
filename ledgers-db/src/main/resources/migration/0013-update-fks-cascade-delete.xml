@@ -1,0 +1,120 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="06-09-2019-01">
+        <comment>Drop foreign keys in payment_target.</comment>
+        <dropAllForeignKeyConstraints baseTableName="payment_target"/>
+        <comment>Drop foreign keys in consents accounts.</comment>
+        <dropAllForeignKeyConstraints baseTableName="sca_ais_consent_accounts"/>
+        <comment>Drop foreign keys in consents balances.</comment>
+        <dropAllForeignKeyConstraints baseTableName="sca_ais_consent_balances"/>
+        <comment>Drop foreign keys in consents transactions.</comment>
+        <dropAllForeignKeyConstraints baseTableName="sca_ais_consent_transactions"/>
+        <comment>Drop foreign keys in account access.</comment>
+        <dropAllForeignKeyConstraints baseTableName="account_accesses"/>
+        <comment>Drop foreign keys in user roles.</comment>
+        <dropAllForeignKeyConstraints baseTableName="users_roles"/>
+        <comment>Drop foreign keys in sca data.</comment>
+        <dropAllForeignKeyConstraints baseTableName="sca_data"/>
+        <comment>Drop foreign keys in posting line.</comment>
+        <dropAllForeignKeyConstraints baseTableName="posting_line"/>
+        <comment>Drop foreign keys in payment targets.</comment>
+        <dropAllForeignKeyConstraints baseTableName="payment_targets"/>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="06-09-2019-02">
+        <comment>Create foreign key in payment_target.</comment>
+        <addForeignKeyConstraint baseTableName="payment_target"
+                                 baseColumnNames="payment_payment_id"
+                                 constraintName="fk_payment_target_payment"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="payment_id"
+                                 referencedTableName="payment"
+        />
+
+        <comment>Create foreign key in sca_ais_consent_accounts.</comment>
+        <addForeignKeyConstraint baseTableName="sca_ais_consent_accounts"
+                                 baseColumnNames="ais_consent_entity_id"
+                                 constraintName="fk_accounts_consent"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="sca_ais_consent"
+        />
+
+        <comment>Create foreign key in sca_ais_consent_balances.</comment>
+        <addForeignKeyConstraint baseTableName="sca_ais_consent_balances"
+                                 baseColumnNames="ais_consent_entity_id"
+                                 constraintName="fk_balances_consent"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="sca_ais_consent"
+        />
+
+        <comment>Create foreign key in sca_ais_consent_transactions.</comment>
+        <addForeignKeyConstraint baseTableName="sca_ais_consent_transactions"
+                                 baseColumnNames="ais_consent_entity_id"
+                                 constraintName="fk_transactions_consent"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="sca_ais_consent"
+        />
+        <addForeignKeyConstraint baseTableName="account_accesses"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_access_users"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="users"
+        />
+        <addForeignKeyConstraint baseTableName="users_roles"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_roles_users"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="users"
+        />
+        <addForeignKeyConstraint baseTableName="sca_data"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_sca_users"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="users"
+        />
+        <addForeignKeyConstraint baseTableName="posting_line"
+                                 baseColumnNames="posting_id"
+                                 constraintName="fk_line_posting"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="posting"
+        />
+        <addForeignKeyConstraint baseTableName="posting_line"
+                                 baseColumnNames="account_id"
+                                 constraintName="fk_line_account"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="ledger_account"
+        />
+        <addForeignKeyConstraint baseTableName="posting_line"
+                                 baseColumnNames="details_id"
+                                 constraintName="fk_line_details"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="operation_details"
+        />
+        <addForeignKeyConstraint baseTableName="payment_targets"
+                                 baseColumnNames="payment_payment_id"
+                                 constraintName="fk_targets_payment"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="payment_id"
+                                 referencedTableName="payment"
+        />
+        <!--addForeignKeyConstraint baseTableName="payment_targets"
+                                 baseColumnNames="targets_payment_id"
+                                 constraintName="fk_targets_target"
+                                 referencedColumnNames="payment_id"
+                                 referencedTableName="payment"
+        /-->
+
+    </changeSet>
+</databaseChangeLog>
