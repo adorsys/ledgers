@@ -11,7 +11,7 @@ with ibans as (
      ),
      consentIds as (
          Select distinct id
-         FROM ledgers.sca_ais_consent
+         FROM sca_ais_consent
                   join sca_ais_consent_accounts
                        on (id = sca_ais_consent_accounts.ais_consent_entity_id) or accounts in (select * from ibans)
                   join sca_ais_consent_balances
