@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.postings.db.repository;
 
 import de.adorsys.ledgers.postings.db.domain.Ledger;
-import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import de.adorsys.ledgers.postings.db.domain.Posting;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -20,6 +19,4 @@ public interface PostingRepository extends PagingAndSortingRepository<Posting, S
     List<Posting> findByOprId(String oprId);
 
     Optional<Posting> findFirstByLedgerOrderByRecordTimeDesc(Ledger ledger);
-
-    List<Posting> deleteAllByLines_Account(LedgerAccount account);
 }

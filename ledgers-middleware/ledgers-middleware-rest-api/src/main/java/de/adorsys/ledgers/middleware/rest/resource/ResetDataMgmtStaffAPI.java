@@ -19,7 +19,7 @@ public interface ResetDataMgmtStaffAPI {
     })
     ResponseEntity<Void> account(@PathVariable("iban") String iban);
 
-    @DeleteMapping(value = "/branch")
+    @DeleteMapping(value = "/branch/{branchId}")
     @ApiOperation(value = "Removes all data related to TPP", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The user data record without the user pin."),
@@ -27,5 +27,5 @@ public interface ResetDataMgmtStaffAPI {
             @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
             @ApiResponse(code = 404, message = "Tpp not found.")
     })
-    ResponseEntity<Void> branch();
+    ResponseEntity<Void> branch(@PathVariable("branchId") String branchId);
 }
