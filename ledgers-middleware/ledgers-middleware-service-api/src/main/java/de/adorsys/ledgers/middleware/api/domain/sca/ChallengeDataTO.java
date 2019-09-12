@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChallengeDataTO {
     private byte[] image;
-    private String data;
+    private List<String> data;
     private String imageLink;
     private Integer otpMaxLength;
     private OtpFormatTO otpFormat;

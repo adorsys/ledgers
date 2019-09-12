@@ -1,7 +1,7 @@
 {
   "MOBILE": {
     "image": null,
-    "data": null,
+    "data": [null],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
@@ -9,7 +9,7 @@
   },
   "EMAIL": {
     "image": null,
-    "data": null,
+    "data": [null],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
@@ -17,7 +17,7 @@
   },
   "CHIP_OTP": {
     "image": null,
-    "data": "17850120452019980412345678041234567804123456789E",
+    "data": ["17850120452019980412345678041234567804123456789E"],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
@@ -25,7 +25,7 @@
   },
   "PHOTO_OTP": {
     "image": null,
-    "data": null,
+    "data": [null],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
@@ -33,7 +33,7 @@
   },
   "PUSH_OTP": {
     "image": null,
-    "data": null,
+    "data": [null],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
@@ -41,7 +41,7 @@
   },
   "SMS_OTP": {
     "image": null,
-    "data": null,
+    "data": [null],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
@@ -49,7 +49,7 @@
   },
   "APP_OTP": {
     "image": null,
-    "data": null,
+    "data": [null],
     "imageLink": null,
     "otpMaxLength": 6,
     "otpFormat": "integer",
