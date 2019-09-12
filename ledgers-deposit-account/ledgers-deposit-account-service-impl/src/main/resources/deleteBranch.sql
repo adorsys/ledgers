@@ -14,11 +14,6 @@ with ibans as (
          FROM sca_ais_consent
                   join sca_ais_consent_accounts
                        on (id = sca_ais_consent_accounts.ais_consent_entity_id) or accounts in (select * from ibans)
-                  join sca_ais_consent_balances
-                       on (id = sca_ais_consent_balances.ais_consent_entity_id) or accounts in (select * from ibans)
-                  join sca_ais_consent_transactions
-                       on (id = sca_ais_consent_transactions.ais_consent_entity_id) or
-                          accounts in (select * from ibans)
      ),
      deleteConsents as (
          delete FROM sca_ais_consent where id in (select * from consentIds)

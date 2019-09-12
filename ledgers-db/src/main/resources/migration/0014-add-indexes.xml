@@ -1,0 +1,67 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="pru@adorsys.com.ua" id="12-09-2019-01">
+        <createIndex indexName="idx_deposit_account_branch"
+                     tableName="deposit_account">
+            <column name="branch" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_id"
+                     tableName="payment">
+            <column name="payment_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_debt_iban"
+                     tableName="payment">
+            <column name="debt_iban" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_ledger_account_id"
+                     tableName="ledger_account">
+            <column name="id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_ledger_account_name"
+                     tableName="ledger_account">
+            <column name="name" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_sca_ais_consent_id"
+                     tableName="sca_ais_consent">
+            <column name="id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_sca_ais_consent_accounts"
+                     tableName="sca_ais_consent_accounts">
+            <column name="accounts" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_sca_operation_op_id"
+                     tableName="sca_operation">
+            <column name="op_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_posting_line_account_id"
+                     tableName="posting_line">
+            <column name="account_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_posting_line_posting_id"
+                     tableName="posting_line">
+            <column name="posting_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_posting_id"
+                     tableName="posting">
+            <column name="id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="idx_operation_details_id"
+                     tableName="operation_details">
+            <column name="id" type="varchar(255)"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

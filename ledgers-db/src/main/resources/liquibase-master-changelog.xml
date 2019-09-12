@@ -44,4 +44,7 @@
     <!-- modify foreign key in payment_target table -->
     <include file="migration/0013-update-fks-cascade-delete.xml" relativeToChangelogFile="true" />
 
+    <!-- add indexes to tables -->
+    <include file="migration/0014-add-indexes.xml" relativeToChangelogFile="true" />
+
 </databaseChangeLog>
