@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -26,4 +27,11 @@ public class PaymentBO {
     private AccountReferenceBO debtorAccount;
     private TransactionStatusBO transactionStatus;
     private List<PaymentTargetBO> targets = new ArrayList<>();
+
+    public boolean isValidAmount() {
+        return targets.stream()
+                       .map(PaymentTargetBO::getInstructedAmount)
+                       .allMatch(a -> a.getAmount().compareTo(BigDecimal.ZERO) > 0
+                                              && a.getAmount().scale() < 3);
+    }
 }
