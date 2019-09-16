@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
 
 @Slf4j
 @Service
@@ -113,6 +114,12 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @SuppressWarnings("unchecked")
     public <T> SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, T payment, PaymentTypeTO paymentType) {
         PaymentBO paymentBO = paymentConverter.toPaymentBO(payment, paymentType.getPaymentClass());
+        if (!paymentBO.isValidAmount()) {
+            throw MiddlewareModuleException.builder()
+                          .devMsg("Payment validation failed! Instructed amount is invalid.")
+                          .errorCode(REQUEST_VALIDATION_FAILURE)
+                          .build();
+        }
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         accountService.getDepositAccountByIbanAndCheckStatus(paymentBO.getDebtorAccount().getIban(), LocalDateTime.now(), false);
 
