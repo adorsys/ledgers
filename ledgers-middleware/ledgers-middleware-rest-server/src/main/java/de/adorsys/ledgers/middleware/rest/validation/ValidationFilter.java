@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 
 @Slf4j
 @Component
@@ -28,10 +26,9 @@ public class ValidationFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-        if (APPLICATION_JSON_VALUE.equals(httpServletRequest.getHeader("Content-Type"))) {
-            MultiReadHttpServletRequest servletRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
-            if (servletRequest.getContentLength() > 0) {
+        MultiReadHttpServletRequest servletRequest = new MultiReadHttpServletRequest((HttpServletRequest) request);
+        if (servletRequest.getContentLength() > 0) {
+            try {
                 List<JsonNode> values = objectMapper.readTree(servletRequest.getInputStream())
                                                 .findValues("iban");
                 for (JsonNode node : values) {
@@ -42,11 +39,14 @@ public class ValidationFilter extends GenericFilterBean {
                         return;
                     }
                 }
+            } catch (IOException e) {
+                String msg = String.format("Could not parse request body, msg: %s", e.getMessage());
+                log.error(msg);
+                ((HttpServletResponse) response).sendError(400, msg);
+                return;
             }
-            chain.doFilter(servletRequest, response);
-            return;
         }
-        chain.doFilter(httpServletRequest, response);
+        chain.doFilter(servletRequest, response);
     }
 }
 

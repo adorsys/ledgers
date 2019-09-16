@@ -57,8 +57,8 @@ public class LedgersClientIT {
     private static final String BANK_CODE = "76070024";
 
     private static final UserTO BRANCH = getUser(BRANCH_LOGIN, UserRoleTO.STAFF);
-    private static UserTO USER_1 = getUser("1", CUSTOMER);
-    private static UserTO USER_2 = getUser("2", CUSTOMER);
+    private static UserTO USER_1 = getUser("01", CUSTOMER);
+    private static UserTO USER_2 = getUser("02", CUSTOMER);
     private static AccountDetailsTO ACCOUNT_1 = getAccountDetails(USER_1.getLogin());
     private static AccountDetailsTO ACCOUNT_2 = getAccountDetails(USER_2.getLogin());
 
@@ -207,16 +207,13 @@ public class LedgersClientIT {
     }
 
 
-    private static String generateIban(String singleDigitToEndIban) {
-        if (isDigitsAndSize(singleDigitToEndIban, 1)) {
-            BigInteger totalNr = new BigInteger(BANK_CODE + BRANCH_LOGIN + 0 + singleDigitToEndIban + "131400");
-            String checkSum = String.valueOf(98 - totalNr.remainder(BigInteger.valueOf(97)).intValue());
-            if (checkSum.length() < 2) {
-                checkSum = "0" + checkSum;
-            }
-            return "DE" + checkSum + BANK_CODE + 0 + singleDigitToEndIban;
+    private static String generateIban(String ibanEnding) {
+        if (isDigitsAndSize(BRANCH_LOGIN, 8) && isDigitsAndSize(ibanEnding, 2)) {
+            BigInteger totalNr = new BigInteger(LedgersClientIT.BANK_CODE + BRANCH_LOGIN + ibanEnding + "131400");
+            String checkSum = String.format("%02d", 98 - totalNr.remainder(BigInteger.valueOf(97)).intValue());
+            return "DE" + checkSum + LedgersClientIT.BANK_CODE + BRANCH_LOGIN + ibanEnding;
         }
-        throw new IllegalArgumentException(String.format("Inappropriate data for IBAN creation %s", singleDigitToEndIban));
+        throw new IllegalArgumentException(String.format("Inappropriate data for IBAN creation %s %s", BRANCH_LOGIN, ibanEnding));
     }
 
     private static boolean isDigitsAndSize(String toCheck, int size) {
