@@ -11,6 +11,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
+import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.*;
+
 public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionAdapter {
 
     public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService) {
@@ -72,11 +74,11 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     private boolean checkPaymentInitAccess(String iban) {
         AccessTokenTO token = getAccessTokenTO();
         // Customer must have explicit permission
-        if (UserRoleTO.CUSTOMER == token.getRole()) {
+        if (EnumSet.of(CUSTOMER, STAFF).contains(token.getRole())) {
             return getAccountAccesses(token.getSub()).stream()
                            .anyMatch(a -> a.hasPaymentAccess(iban));
         }
-        return UserRoleTO.STAFF == token.getRole();
+        return SYSTEM == token.getRole();
     }
 
     private List<AccountAccessTO> getAccountAccesses(String userId) {
@@ -89,12 +91,12 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         }
         AccessTokenTO token = getAccessTokenTO();
 
-        // Staff always have account access
-        if (EnumSet.of(UserRoleTO.STAFF, UserRoleTO.SYSTEM).contains(token.getRole())) {
+        // System always have account access
+        if (SYSTEM == token.getRole()) {
             return true;
         }
-        // Customer must have explicit permission
-        if (UserRoleTO.CUSTOMER == token.getRole()) {
+        // Customer and Staff must have explicit permission
+        if (EnumSet.of(CUSTOMER, STAFF).contains(token.getRole())) {
             return getAccountAccesses(token.getSub()).stream()
                            .anyMatch(a -> a.hasIban(iban))
                            || checkConsentAccess(token, iban);

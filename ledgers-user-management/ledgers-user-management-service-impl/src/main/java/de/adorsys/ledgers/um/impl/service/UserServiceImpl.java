@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.*;
 
@@ -171,6 +172,15 @@ public class UserServiceImpl implements UserService {
         hashStaticTan(user);
         UserEntity save = userRepository.save(user);
         return convertToUserBoAndDecodeTan(save);
+    }
+
+    @Override
+    public List<UserBO> findUsersByIban(String iban) {
+        List<UserBO> users = userConverter.toUserBOList(userRepository.finUsersByIban(iban));
+        users.forEach(u -> u.setAccountAccesses(u.getAccountAccesses().stream()
+                                                        .filter(accountAccess -> accountAccess.getIban().equals(iban))
+                                                        .collect(Collectors.toList())));
+        return users;
     }
 
     private void checkIfPasswordModifiedAndEncode(UserEntity user) {

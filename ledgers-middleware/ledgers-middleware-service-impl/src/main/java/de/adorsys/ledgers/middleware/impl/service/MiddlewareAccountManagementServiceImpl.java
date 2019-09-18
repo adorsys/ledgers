@@ -6,6 +6,7 @@ import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
@@ -38,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
@@ -360,6 +362,17 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         log.info("Permission checked -> OK");
         depositAccountService.deleteTransactions(iban);
         log.info("Deleting postings for: {} Successful, in {} seconds", iban, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+    }
+
+    @Override
+    public AccountReportTO getAccountReport(String accountId) {
+        long start = System.nanoTime();
+        AccountDetailsTO details = getDepositAccountById(accountId, LocalDateTime.now(), true);
+        log.info("Loaded details with balances in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
+        start = System.nanoTime();
+        List<UserTO> users = userMapper.toUserTOList(userService.findUsersByIban(details.getIban()));
+        log.info("Loaded users in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
+        return new AccountReportTO(details, users);
     }
 
     /*

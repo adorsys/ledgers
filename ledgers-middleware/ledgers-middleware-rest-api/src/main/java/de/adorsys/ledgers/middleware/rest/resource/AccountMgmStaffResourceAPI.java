@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -88,4 +89,14 @@ public interface AccountMgmStaffResourceAPI {
     })
     @PostMapping("/{accountId}/cash")
     ResponseEntity<Void> depositCash(@PathVariable(ACCOUNT_ID) String accountId, @RequestBody AmountTO amount);
+
+    @ApiOperation(value = "Load Extended Account Details by AccountId",
+            notes = "Returns extended account details information for the given account id. "
+                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = AccountReportTO.class, message = "Extended Account details.")
+    })
+    @GetMapping("/{accountId}/extended")
+    ResponseEntity<AccountReportTO> getExtendedAccountDetailsById(@ApiParam(ACCOUNT_ID) @PathVariable(ACCOUNT_ID) String accountId);
 }

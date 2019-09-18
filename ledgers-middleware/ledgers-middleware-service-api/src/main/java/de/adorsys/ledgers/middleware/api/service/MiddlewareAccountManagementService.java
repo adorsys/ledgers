@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.api.service;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
@@ -167,4 +168,6 @@ public interface MiddlewareAccountManagementService {
     List<AccountAccessTO> getAccountAccesses(String userId);
 
     void deleteTransactions(String userId, UserRoleTO userRole, String iban);
+
+    AccountReportTO getAccountReport(String accountId);
 }

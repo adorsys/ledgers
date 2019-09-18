@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -62,9 +64,18 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')&&accountInfoById(#accountId)")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
         return ResponseEntity.accepted().build();
+    }
+
+    @Override
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<AccountReportTO> getExtendedAccountDetailsById(String accountId) {
+        long start = System.nanoTime();
+        AccountReportTO accountReport = middlewareAccountService.getAccountReport(accountId);
+        log.info("Loaded report in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
+        return ResponseEntity.ok(accountReport);
     }
 }

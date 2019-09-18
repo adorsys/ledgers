@@ -100,4 +100,6 @@ public interface UserService {
      * @return
      */
     UserBO updateUser(UserBO userBO);
+
+    List<UserBO> findUsersByIban(String iban);
 }

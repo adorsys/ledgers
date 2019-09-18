@@ -19,6 +19,7 @@ package de.adorsys.ledgers.um.db.repository;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
@@ -69,4 +70,7 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     int countByBranch(String branch);
 
     Optional<UserEntity> findByLoginAndEmail(String login, String email);
+
+    @Query(value = "select distinct u from UserEntity u join u.accountAccesses a where a.iban = ?1")
+    List<UserEntity> finUsersByIban(String iban);
 }
