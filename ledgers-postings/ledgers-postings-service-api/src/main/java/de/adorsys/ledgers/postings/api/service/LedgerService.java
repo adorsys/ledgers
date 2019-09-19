@@ -3,7 +3,9 @@ package de.adorsys.ledgers.postings.api.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Service implementing all ledger functionalities.
@@ -51,10 +53,11 @@ public interface LedgerService {
     LedgerAccountBO findLedgerAccount(LedgerBO ledger, String name);
 
     /**
-     *
      * @param ledger ledger
-     * @param name ledger account name
+     * @param name   ledger account name
      * @return boolean representation of presence of requested ledger account
      */
     boolean checkIfLedgerAccountExist(LedgerBO ledger, String name);
+
+    Map<String, LedgerAccountBO> finLedgerAccountsByIbans(Set<String> ibans, LedgerBO ledger);
 }
