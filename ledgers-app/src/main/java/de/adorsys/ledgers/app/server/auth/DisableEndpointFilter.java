@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.app.server.auth;
 
-import de.adorsys.ledgers.middleware.rest.resource.ResetDataMgmtStaffAPI;
+import de.adorsys.ledgers.middleware.rest.resource.DataMgmtStaffAPI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DisableEndpointFilter extends OncePerRequestFilter {
     private static final String SUFFIX = "/**";
-    private static final List<String> EXCLUDED_URLS = Collections.singletonList(ResetDataMgmtStaffAPI.BASE_PATH + SUFFIX);
+    private static final List<String> EXCLUDED_URLS = Collections.singletonList(DataMgmtStaffAPI.BASE_PATH + SUFFIX);
     private static final List<String> PROFILES = Arrays.asList("develop", "sandbox");
     private static final AntPathMatcher matcher = new AntPathMatcher();
     private final Environment environment;

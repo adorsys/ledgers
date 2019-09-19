@@ -44,5 +44,5 @@ public class AccountBalanceTO {
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate referenceDate;
     private String lastCommittedTransaction;
-
+    private String iban;
 }

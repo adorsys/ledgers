@@ -40,4 +40,10 @@ public class UserTO {
         this.email=email;
         this.pin=pin;
     }
+
+    @JsonIgnore
+    public UserTO updateUserBranch(String newBranch) {
+        this.branch = newBranch;
+        return this;
+    }
 }
