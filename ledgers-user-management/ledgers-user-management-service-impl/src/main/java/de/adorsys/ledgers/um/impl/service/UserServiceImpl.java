@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,6 +65,7 @@ public class UserServiceImpl implements UserService {
     public UserBO create(UserBO user) {
         checkUserAlreadyExists(user);
 
+        checkDuplicateScaMethods(user.getScaUserData());
         UserEntity userEntity = userConverter.toUserPO(user);
 
         // if user is TPP and has an ID than do not reset it
@@ -107,6 +109,8 @@ public class UserServiceImpl implements UserService {
                                                              .errorCode(USER_NOT_FOUND)
                                                              .devMsg(String.format(USER_WITH_LOGIN_NOT_FOUND, userLogin))
                                                              .build());
+
+        checkDuplicateScaMethods(scaDataList);
 
         List<ScaUserDataEntity> scaMethods = userConverter.toScaUserDataListEntity(scaDataList);
         user.getScaUserData().clear();
@@ -181,6 +185,15 @@ public class UserServiceImpl implements UserService {
                                                         .filter(accountAccess -> accountAccess.getIban().equals(iban))
                                                         .collect(Collectors.toList())));
         return users;
+    }
+
+    private void checkDuplicateScaMethods(List<ScaUserDataBO> scaUserData) {
+        if (new HashSet<>(scaUserData).size() != scaUserData.size()) {
+            throw UserManagementModuleException.builder()
+                          .devMsg("Duplicating Sca Methods is forbidden!")
+                          .errorCode(DUPLICATE_SCA)
+                          .build();
+        }
     }
 
     private void checkIfPasswordModifiedAndEncode(UserEntity user) {
