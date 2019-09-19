@@ -1,12 +1,15 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-@Api(tags = "LDG011 - Reset test data (STAFF access)")
-public interface ResetDataMgmtStaffAPI {
+@Api(tags = "LDG011 - Data management (STAFF access)")
+public interface DataMgmtStaffAPI {
     String BASE_PATH = "/staff-access/data";
 
     @DeleteMapping(value = "/transactions/{iban}")
@@ -28,4 +31,8 @@ public interface ResetDataMgmtStaffAPI {
             @ApiResponse(code = 404, message = "Tpp not found.")
     })
     ResponseEntity<Void> branch(@PathVariable("branchId") String branchId);
+
+    @ApiOperation(value = "Upload data to Ledgers (users, accounts, transactions, balances)", authorizations = @Authorization(value = "apiKey"))
+    @PostMapping(value = "/upload")
+    ResponseEntity<Void> uploadData(@RequestBody UploadedDataTO data);
 }

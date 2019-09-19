@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.middleware.api.service;
 
+import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 
 public interface AppManagementService {
@@ -16,4 +18,11 @@ public interface AppManagementService {
      * @param branchId branch to remove
      */
     void removeBranch(String userId, UserRoleTO role, String branchId);
+
+    /**
+     * Upload NISP compliant Test Data
+     * @param data uploaded data
+     * @param info SCA information
+     */
+    void uploadData(UploadedDataTO data, ScaInfoTO info);
 }
