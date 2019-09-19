@@ -6,6 +6,8 @@ import de.adorsys.ledgers.postings.db.domain.Posting;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(uses = {LedgerAccountMapper.class, LedgerMapper.class})
 public interface PostingMapper {
 
@@ -19,4 +21,6 @@ public interface PostingMapper {
     @Mapping(target = "opDetails", source = "operationDetails")
     @Mapping(target = "id", expression = "java(de.adorsys.ledgers.util.Ids.id())")
     OperationDetails toOperationDetails(String operationDetails);
+
+    List<Posting> toPostingList(List<PostingBO> postingsBO);
 }

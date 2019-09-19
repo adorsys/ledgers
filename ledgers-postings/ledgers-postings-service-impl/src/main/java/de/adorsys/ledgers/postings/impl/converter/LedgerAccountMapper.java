@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
+import java.util.List;
+
 @Mapper(uses = LedgerMapper.class)
 public interface LedgerAccountMapper {
 
@@ -20,4 +22,6 @@ public interface LedgerAccountMapper {
             @Mapping(source = "category", target = "category")
     })
     LedgerAccount toLedgerAccount(LedgerAccountBO ledgerAccount);
+
+    List<LedgerAccountBO> toLedgerAccountsBO(List<LedgerAccount> accounts);
 }
