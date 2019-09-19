@@ -38,14 +38,13 @@ public class ScaUserDataBO {
         }
 
         ScaUserDataBO that = (ScaUserDataBO) o;
-        return Objects.equals(id, that.id) &&
-                       scaMethod == that.scaMethod &&
+        return scaMethod == that.scaMethod &&
                        Objects.equals(methodValue, that.methodValue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, scaMethod, methodValue);
+        return Objects.hash(scaMethod, methodValue);
     }
 
     @Override
