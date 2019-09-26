@@ -156,6 +156,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
         response.setExpiresInSeconds(scaTokenBO.getExpires_in());
         response.setStatusDate(LocalDateTime.now());
+        response.setAuthorisationId(loginTokenBO.getAccessTokenObject().getAuthorisationId());
         return response;
     }
 
