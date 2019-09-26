@@ -86,7 +86,6 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @SuppressWarnings("PMD.CyclomaticComplexity")
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode) {
         return ResponseEntity.ok(onlineBankingService.authenticateForLogin(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
