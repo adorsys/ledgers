@@ -171,6 +171,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserBO updateUser(UserBO userBO) {
+        checkDuplicateScaMethods(userBO.getScaUserData());
         UserEntity user = userConverter.toUserPO(userBO);
         checkIfPasswordModifiedAndEncode(user);
         hashStaticTan(user);
