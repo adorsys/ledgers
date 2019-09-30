@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
 
@@ -67,7 +68,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         UserBO user = user(login);
         // FOr login we use the login name and login time for authId and authorizationId.
         BearerTokenBO loginTokenBO = proceedToLogin(user, pin, UserRoleTO.CUSTOMER, consentId, authorisationId);
-        if (!scaRequired(user, opTypeBO)) {
+        if (scaRequired(user, opTypeBO)) {
             return authorizeResponse(loginTokenBO);
         } else {
             AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null,
@@ -167,13 +168,10 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     private BearerTokenBO proceedToLogin(UserBO user, String pin, UserRoleTO role, String scaId, String authorisationId) {
         UserRoleBO roleBo = UserRoleBO.valueOf(role.name());
         // FOr login we use the login name and login time for authId and authorizationId.
-        BearerTokenBO loginTokenBO = authorizationService.authorise(user.getLogin(), pin, roleBo, scaId, authorisationId);
-        if (loginTokenBO == null) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg("Unknown credentials.")
-                          .build();
-        }
-        return loginTokenBO;
+        return Optional.ofNullable(authorizationService.authorise(user.getLogin(), pin, roleBo, scaId, authorisationId))
+                       .orElseThrow(() -> MiddlewareModuleException.builder()
+                                                  .errorCode(INSUFFICIENT_PERMISSION)
+                                                  .devMsg("Unknown credentials.")
+                                                  .build());
     }
 }
