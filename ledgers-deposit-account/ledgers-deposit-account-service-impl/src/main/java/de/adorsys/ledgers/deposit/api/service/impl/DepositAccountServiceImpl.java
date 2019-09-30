@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
+import static de.adorsys.ledgers.deposit.api.domain.BalanceTypeBO.*;
 import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
 import static java.lang.String.format;
 
@@ -153,7 +154,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     public boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) {
         DepositAccountDetailsBO account = getDepositAccountByIban(requestBO.getPsuAccount().getIban(), LocalDateTime.now(), true);
         return account.getBalances().stream()
-                       .filter(b -> b.getBalanceType() == BalanceTypeBO.INTERIM_AVAILABLE)
+                       .filter(b -> b.getBalanceType() == INTERIM_AVAILABLE)
                        .findFirst()
                        .map(b -> isSufficientAmountAvailable(requestBO, b))
                        .orElse(Boolean.FALSE);
@@ -287,18 +288,17 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     private List<BalanceBO> getBalances(Currency currency, LocalDateTime refTime, LedgerAccountBO ledgerAccountBO) {
-        List<BalanceBO> result = new ArrayList<>();
         AccountStmtBO stmt = accountStmtService.readStmt(ledgerAccountBO, refTime);
-        BalanceBO balanceBO = composeBalance(currency, stmt);
-        result.add(balanceBO);
-        return result;
+        BalanceBO interimBalance = composeBalance(currency, stmt, INTERIM_AVAILABLE);
+        BalanceBO closingBalance = composeBalance(currency, stmt, CLOSING_BOOKED);
+        return Arrays.asList(interimBalance, closingBalance);
     }
 
-    private BalanceBO composeBalance(Currency currency, AccountStmtBO stmt) {
+    private BalanceBO composeBalance(Currency currency, AccountStmtBO stmt, BalanceTypeBO balanceType) {
         BalanceBO balanceBO = new BalanceBO();
         AmountBO amount = new AmountBO(currency, stmt.creditBalance());
         balanceBO.setAmount(amount);
-        balanceBO.setBalanceType(BalanceTypeBO.INTERIM_AVAILABLE);
+        balanceBO.setBalanceType(balanceType);
         balanceBO.setReferenceDate(stmt.getPstTime().toLocalDate());
         return composeFinalBalance(balanceBO, stmt);
     }
