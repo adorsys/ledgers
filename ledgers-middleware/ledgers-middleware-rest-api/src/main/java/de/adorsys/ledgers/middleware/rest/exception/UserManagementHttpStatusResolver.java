@@ -27,6 +27,10 @@ public class UserManagementHttpStatusResolver {
 
         //401 Block
         container.put(INSUFFICIENT_PERMISSION, UNAUTHORIZED);
+        container.put(INVALID_CREDENTIAL, UNAUTHORIZED);
+
+        // 403
+        container.put(OAUTH_CODE_INVALID, FORBIDDEN);
 
         //409 Block
         container.put(USER_ALREADY_EXISTS, CONFLICT);

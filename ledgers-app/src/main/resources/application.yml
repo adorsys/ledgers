@@ -94,6 +94,13 @@ application:
     masterPassword: $VoL973@sd
     encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
 
+# Oauth properties
+oauth:
+  lifetime:
+    auth_code: 2
+    access_token: 5
+    refresh_token: 15
+
 # Cors configuration
 management:
   endpoints:

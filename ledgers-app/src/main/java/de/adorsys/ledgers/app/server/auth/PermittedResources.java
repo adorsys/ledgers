@@ -27,7 +27,8 @@ public class PermittedResources {
             "/staff-access/users/register",
             "/staff-access/users/login",
             "/password",
-            "/users/validate"
+            "/users/validate",
+            "/oauth/**"
     };
 
     public static final String[] CONSOLE_WHITELIST = {
