@@ -5,6 +5,7 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -30,13 +31,14 @@ public class ExecutionTimeHolder {
 
     public static LocalDate getExecutionDate(Payment payment) {
         LocalDate nextExecution = holder.get(payment.getFrequency()).apply(payment);
-        return payment.getDayOfExecution() == null
+        return payment.getDayOfExecution() == null ||
+                       EnumSet.of(FrequencyCode.DAILY, FrequencyCode.WEEKLY, FrequencyCode.EVERYTWOWEEKS).contains(payment.getFrequency())
                        ? nextExecution
                        : LocalDate.of(nextExecution.getYear(), nextExecution.getMonth(), payment.getDayOfExecution());
     }
 
     private static LocalDate getDateForWeeks(Payment payment, int weeksToAdd) {
-        return payment.getStartDate().plusWeeks(getWeeksDifference(payment) + weeksToAdd);
+            return payment.getExecutedDate().toLocalDate().plusWeeks(weeksToAdd);
     }
 
     private static LocalDate getDateForMonths(Payment payment, int monthsToAdd) {
@@ -44,10 +46,6 @@ public class ExecutionTimeHolder {
     }
 
     private static long getMonthDifference(Payment payment) {
-        return ChronoUnit.MONTHS.between(payment.getExecutedDate().toLocalDate(), payment.getStartDate());
-    }
-
-    private static long getWeeksDifference(Payment payment) {
-        return ChronoUnit.WEEKS.between(payment.getExecutedDate().toLocalDate(), payment.getStartDate());
+        return ChronoUnit.MONTHS.between(payment.getStartDate(), payment.getExecutedDate().toLocalDate());
     }
 }
