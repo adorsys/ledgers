@@ -35,7 +35,7 @@ import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.PAYMENT_
 @RequiredArgsConstructor
 public class PaymentExecutionService implements InitializingBean {
     private static final String CALENDAR_NAME = "LEDGERS";
-    private static final String PRECEDING = "preceeding";
+    private static final String PRECEDING = "preceding";
     private final PaymentRepository paymentRepository;
     private final DepositAccountTransactionService txService;
     private final DepositAccountService accountService;
@@ -119,8 +119,15 @@ public class PaymentExecutionService implements InitializingBean {
 
     private LocalDate calculateForPeriodicPmt(Payment payment) {
         return payment.getExecutedDate() == null
-                       ? payment.getStartDate()
+                       ? nextDayOfExecution(payment)
                        : ExecutionTimeHolder.getExecutionDate(payment);
+    }
+
+    private static LocalDate nextDayOfExecution(Payment payment){
+        if (payment.getStartDate().isAfter(payment.getStartDate().withDayOfMonth(payment.getDayOfExecution()))) {
+            return payment.getStartDate();
+        }
+        return payment.getStartDate().withDayOfMonth(payment.getDayOfExecution());
     }
 
     private LocalDate calculateBusinessDate(String executionRule, LocalDate date) {
