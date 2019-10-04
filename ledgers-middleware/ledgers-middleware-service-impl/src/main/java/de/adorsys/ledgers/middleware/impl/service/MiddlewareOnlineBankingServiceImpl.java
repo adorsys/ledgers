@@ -68,7 +68,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         UserBO user = user(login);
         // FOr login we use the login name and login time for authId and authorizationId.
         BearerTokenBO loginTokenBO = proceedToLogin(user, pin, UserRoleTO.CUSTOMER, consentId, authorisationId);
-        if (scaRequired(user, opTypeBO)) {
+        if (!scaRequired(user, opTypeBO)) {
             return authorizeResponse(loginTokenBO);
         } else {
             AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null,
