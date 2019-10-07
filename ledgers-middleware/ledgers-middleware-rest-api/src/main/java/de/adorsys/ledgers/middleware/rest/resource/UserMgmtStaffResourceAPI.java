@@ -2,22 +2,23 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.rest.utils.CustomPageImpl;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG007 - User Management (STAFF access)",
-        description = "Provides endpoint for registering, authorizing and managing users by staff management")
+@Api(tags = "LDG007 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
     String BRANCH = "branch";
     String ROLES = "roles";
+    String PAGE = "page";
+    String SIZE = "size";
     String USER_ID = "userId";
     String USER_NOT_IN_BRANCH = "User is not your branch";
     String USER_CANNOT_REGISTER_IN_BRANCH = "User cannot register for this branch. The branch is occupied by other user";
-    String USER_EMAIL_OR_LOGIN_TAKEN = "Provided email or login are already taken";
 
     /**
      * Registers a new user within a given branch.
@@ -82,8 +83,6 @@ public interface UserMgmtStaffResourceAPI {
     @PostMapping
     ResponseEntity<UserTO> createUser(@RequestBody UserTO user);
 
-    // TODO: pagination for users and limit users for branch
-
     /**
      * Lists users within the branch and roles
      *
@@ -99,7 +98,7 @@ public interface UserMgmtStaffResourceAPI {
     })
 
     @GetMapping
-    ResponseEntity<List<UserTO>> getBranchUsersByRoles(@RequestParam(ROLES) List<UserRoleTO> roles);
+    ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(@RequestParam(ROLES) List<UserRoleTO> roles, @RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
 
     /**
      * Gets user by ID if it's within the branch

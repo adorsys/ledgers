@@ -14,6 +14,8 @@ import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,9 +92,9 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
-    public List<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles) {
-        List<UserBO> users = userService.findByBranchAndUserRolesIn(branch, userTOMapper.toUserRoleBO(roles));
-        return userTOMapper.toUserTOList(users);
+    public Page<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles, Pageable pageable) {
+        return userService.findByBranchAndUserRolesIn(branch, userTOMapper.toUserRoleBO(roles), pageable)
+                       .map(userTOMapper::toUserTO);
     }
 
     @Override

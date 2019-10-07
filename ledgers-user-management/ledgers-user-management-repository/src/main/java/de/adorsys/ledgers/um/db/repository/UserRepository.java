@@ -18,7 +18,8 @@ package de.adorsys.ledgers.um.db.repository;
 
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -43,14 +44,6 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
      */
     Optional<UserEntity> findByEmailOrLogin(String email, String login);
 
-    /**
-     * List all users
-     *
-     * @return list of users
-     */
-    @NotNull
-    @Override
-    List<UserEntity> findAll();
 
     /**
      * Finds all users of the branch with the given roles
@@ -59,7 +52,7 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
      * @param roles  user roles
      * @return list pf users
      */
-    List<UserEntity> findByBranchAndUserRolesIn(String branch, List<UserRole> roles);
+    Page<UserEntity> findByBranchAndUserRolesIn(String branch, List<UserRole> roles, Pageable pageable);
 
     /**
      * Counts amount of users for a branch

@@ -8,7 +8,10 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
+import de.adorsys.ledgers.middleware.rest.utils.CustomPageImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,12 +81,12 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
         return ResponseEntity.ok(newUser);
     }
 
-    // TODO: pagination for users and limit users for branch
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles) {
+    public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
-        List<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles);
+        CustomPageImpl<UserTO> users = new CustomPageImpl<>(middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles, pageable));
         return ResponseEntity.ok(users);
     }
 

@@ -34,7 +34,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -157,11 +159,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles) {
-        List<UserEntity> userEntities = userRepository.findByBranchAndUserRolesIn(branch, userConverter.toUserRole(userRoles));
-        List<UserBO> userBOs = userConverter.toUserBOList(userEntities);
-        userBOs.forEach(this::decodeStaticTanForUser);
-        return userBOs;
+    public Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, Pageable pageable) {
+        Page<UserBO> users = userRepository.findByBranchAndUserRolesIn(branch, userConverter.toUserRole(userRoles), pageable)
+                                     .map(userConverter::toUserBO);
+        users.forEach(this::decodeStaticTanForUser);
+        return users;
     }
 
     @Override
