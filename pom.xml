@@ -114,7 +114,7 @@
 		<spring-boot-dependencies.version>2.1.1.RELEASE</spring-boot-dependencies.version>
 		<spring-cloud-feign.version>2.1.1.RELEASE</spring-cloud-feign.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
-		<jackson.version>2.9.8</jackson.version>
+		<jackson.version>2.9.10</jackson.version>
 		<lombok.version>1.18.8</lombok.version>
 		<jasypt.version>1.9.3</jasypt.version>
 		<!--Sonar -->
