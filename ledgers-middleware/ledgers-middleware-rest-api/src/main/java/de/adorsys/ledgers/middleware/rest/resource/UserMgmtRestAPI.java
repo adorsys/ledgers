@@ -169,6 +169,18 @@ public interface UserMgmtRestAPI {
             @RequestParam("authorisationId") String authorisationId,
             @RequestParam("opType") OpTypeTO opType);
 
+    @PostMapping("/loginForConsent/oauth")
+    @ApiOperation( value = "Login for consent operation with bearer token", authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = SCALoginResponseTO.class, message = "Success. LoginToken contained in the returned response object."),
+            @ApiResponse(code = 401, message = "Wrong authentication credential."),
+            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+    })
+    ResponseEntity<SCALoginResponseTO> authoriseForConsent(
+            @RequestParam("consentId") String consentId,
+            @RequestParam("authorisationId") String authorisationId,
+            @RequestParam("opType") OpTypeTO opType);
+
     @PostMapping("/validate")
     @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Introspect Token", nickname = "IntrospectToken",
             notes = "Validates a JWT access token and make sure permissions contained in this token are still in synch with the state of permission associated with the underlying user."

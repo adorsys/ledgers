@@ -80,6 +80,11 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
+    public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String consentId, String authorisationId, OpTypeTO opType) {
+        return ResponseEntity.ok(onlineBankingService.authoriseForConsentWithToken(scaInfoHolder.getScaInfo(), consentId, authorisationId, opType));
+    }
+
+    @Override
     @PreAuthorize("loginToken(#scaId,#authorisationId)")
     public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId) {
         return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), null, 1800));

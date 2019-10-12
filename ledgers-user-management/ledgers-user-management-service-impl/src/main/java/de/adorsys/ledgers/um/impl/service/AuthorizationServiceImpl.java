@@ -76,6 +76,29 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     @Override
+    public BearerTokenBO authorizeNewAuthorizationId(ScaInfoBO scaInfoBO, String authorizationId) {
+        UserBO user = userService.findByLogin(scaInfoBO.getUserLogin());
+        // Check user has defined role.
+        UserRoleBO userRole = user.getUserRoles().stream().filter(r -> r.name().equals(scaInfoBO.getUserRole().name()))
+                                      .findFirst().orElseThrow(() -> UserManagementModuleException.builder()
+                                                                             .errorCode(INSUFFICIENT_PERMISSION)
+                                                                             .devMsg(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), scaInfoBO.getUserRole()))
+                                                                             .build());
+
+        String scaIdParam = scaInfoBO.getScaId() != null
+                                    ? scaInfoBO.getScaId()
+                                    : Ids.id();
+        String authorisationIdParam = authorizationId != null
+                                              ? authorizationId
+                                              : scaIdParam;
+
+        Date issueTime = new Date();
+        Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
+        return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
+                null, null, UserRole.valueOf(userRole.name()), scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
+    }
+
+    @Override
     public BearerTokenBO validate(String accessToken, Date refTime) {
         try {
             SignedJWT jwt = SignedJWT.parse(accessToken);

@@ -52,6 +52,16 @@ public interface MiddlewareOnlineBankingService {
     SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId, OpTypeTO opType);
 
     /**
+     * Special login associated with a account information, a payment or a payment cancellation consent.
+     *
+     * @param consentId       the consentId or paymentId
+     * @param authorisationId the authorisationId
+     * @param opType          the operation type
+     * @return login response
+     */
+    SCALoginResponseTO authoriseForConsentWithToken(ScaInfoTO scaInfo, String consentId, String authorisationId, OpTypeTO opType);
+
+    /**
      * Caller can be sure that returned user object contains a mirror of permissions
      * contained in the token. This is generally a subset of permissions really held
      * by the user. If during validation we notice that the user has less permission
