@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -191,7 +192,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkDuplicateScaMethods(List<ScaUserDataBO> scaUserData) {
-        if (new HashSet<>(scaUserData).size() != scaUserData.size()) {
+        List<ScaUserDataBO> checkedData = Optional.ofNullable(scaUserData).orElse(Collections.emptyList());
+        if (new HashSet<>(checkedData).size() != checkedData.size()) {
             throw UserManagementModuleException.builder()
                           .devMsg("Duplicating Sca Methods is forbidden!")
                           .errorCode(DUPLICATE_SCA)
