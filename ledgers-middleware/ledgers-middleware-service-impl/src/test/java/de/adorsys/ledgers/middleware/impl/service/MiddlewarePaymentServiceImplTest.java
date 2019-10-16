@@ -2,7 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;

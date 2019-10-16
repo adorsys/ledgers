@@ -29,9 +29,12 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +73,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
     private final ScaChallengeDataResolver scaChallengeDataResolver;
+    private final PageMapper pageMapper;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -144,6 +148,20 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(accountId, dateTimeFrom, dateTimeTo);
         log.info("Retrieved {} transactions in {} secs", transactions.size(), (double) (System.nanoTime() - start) / NANO_TO_SECOND);
         return paymentConverter.toTransactionTOList(transactions);
+    }
+
+    @Override
+    public CustomPageImpl<TransactionTO> getTransactionsByDatesPaged(String accountId, LocalDate dateFrom, LocalDate dateTo, CustomPageableImpl pageable) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime dateTimeFrom = dateFrom == null
+                                             ? today.atStartOfDay()
+                                             : dateFrom.atStartOfDay();
+        LocalDateTime dateTimeTo = dateTo == null
+                                           ? accessService.getTimeAtEndOfTheDay(today)
+                                           : accessService.getTimeAtEndOfTheDay(dateTo);
+
+        return pageMapper.toCustomPageImpl(depositAccountService.getTransactionsByDatesPaged(accountId, dateTimeFrom, dateTimeTo, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                                   .map(paymentConverter::toTransactionTO));
     }
 
     @Override

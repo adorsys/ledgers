@@ -5,8 +5,8 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
 import java.util.List;
 
@@ -68,7 +68,7 @@ public interface MiddlewareUserManagementService {
      * @param roles user roles
      * @return list of users by branch and role
      */
-    Page<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles, Pageable pageable);
+    CustomPageImpl<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles, CustomPageableImpl pageable);
 
     /**
      * Counts users by branch

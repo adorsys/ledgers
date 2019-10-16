@@ -1,7 +1,7 @@
 package de.adorsys.ledgers.postings.impl.service;
 
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.PostingMockService;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.DOBLE_ENTRY_ERROR;
+import static de.adorsys.ledgers.util.exception.PostingErrorCode.DOBLE_ENTRY_ERROR;
 
 @Slf4j
 @Service

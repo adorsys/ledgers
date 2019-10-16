@@ -5,7 +5,7 @@ import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthTokenResponseBO;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.OauthAuthorisationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.OauthCodeEntity;
@@ -25,8 +25,8 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.INVALID_CREDENTIAL;
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.OAUTH_CODE_INVALID;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.INVALID_CREDENTIAL;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.OAUTH_CODE_INVALID;
 
 @Slf4j
 @Service

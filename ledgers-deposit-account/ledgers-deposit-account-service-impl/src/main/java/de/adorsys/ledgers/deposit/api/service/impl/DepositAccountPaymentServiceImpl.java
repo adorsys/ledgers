@@ -17,7 +17,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
+import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 
 @Service
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {

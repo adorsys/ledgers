@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
-import de.adorsys.ledgers.sca.exception.ScaModuleException;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.Test;
 
 public class MobileSCASenderTest {

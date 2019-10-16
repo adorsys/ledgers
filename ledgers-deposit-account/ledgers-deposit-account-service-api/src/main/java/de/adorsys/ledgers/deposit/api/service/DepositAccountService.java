@@ -2,6 +2,8 @@ package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +24,8 @@ public interface DepositAccountService {
     TransactionDetailsBO getTransactionById(String accountId, String transactionId);
 
     List<TransactionDetailsBO> getTransactionsByDates(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo);
+
+    Page<TransactionDetailsBO> getTransactionsByDatesPaged(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
 
     boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO);
 

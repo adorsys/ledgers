@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.deposit.api.domain;
+package de.adorsys.ledgers.middleware.api.domain.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;

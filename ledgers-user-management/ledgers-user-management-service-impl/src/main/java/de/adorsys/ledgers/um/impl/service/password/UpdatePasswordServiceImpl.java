@@ -1,7 +1,7 @@
 package de.adorsys.ledgers.um.impl.service.password;
 
 import de.adorsys.ledgers.security.UpdatePassword;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UpdatePasswordService;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.USER_NOT_FOUND;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

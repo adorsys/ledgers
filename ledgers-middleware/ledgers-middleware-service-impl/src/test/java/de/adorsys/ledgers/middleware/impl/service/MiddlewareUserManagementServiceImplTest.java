@@ -3,7 +3,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaMethodTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.BeforeClass;
 import org.junit.Test;

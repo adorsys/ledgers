@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.um.api.exception;
+package de.adorsys.ledgers.util.exception;
 
 public enum UserManagementErrorCode {
     USER_NOT_FOUND,

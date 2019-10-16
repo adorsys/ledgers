@@ -2,11 +2,11 @@ package de.adorsys.ledgers.deposit.api.service.mappers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
+import static de.adorsys.ledgers.util.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
 
 @Service
 @RequiredArgsConstructor

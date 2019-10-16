@@ -12,7 +12,7 @@ import de.adorsys.ledgers.um.api.domain.AccessTokenBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.util.Ids;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.TOKEN_CREATION_ERROR;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.TOKEN_CREATION_ERROR;
 
 @Service
 @RequiredArgsConstructor

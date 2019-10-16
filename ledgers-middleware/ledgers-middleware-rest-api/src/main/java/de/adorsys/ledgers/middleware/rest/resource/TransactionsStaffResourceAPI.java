@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.deposit.api.domain.MockBookingDetails;
+import de.adorsys.ledgers.middleware.api.domain.account.MockBookingDetails;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;

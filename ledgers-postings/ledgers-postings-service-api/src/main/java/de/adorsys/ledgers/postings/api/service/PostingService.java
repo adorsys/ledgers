@@ -3,6 +3,8 @@ package de.adorsys.ledgers.postings.api.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +32,8 @@ public interface PostingService {
     List<PostingBO> findPostingsByOperationId(String oprId);
 
     List<PostingLineBO> findPostingsByDates(LedgerAccountBO ledgerAccount, LocalDateTime dateFrom, LocalDateTime dateTo);
+
+    Page<PostingLineBO> findPostingsByDatesPaged(LedgerAccountBO ledgerAccount, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
 
     PostingLineBO findPostingLineById(LedgerAccountBO ledgerAccount, String transactionId);
 }

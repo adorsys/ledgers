@@ -7,7 +7,7 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -32,7 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.LEDGER_NOT_FOUND;
+import static de.adorsys.ledgers.util.exception.PostingErrorCode.LEDGER_NOT_FOUND;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = PostingsApplication.class)

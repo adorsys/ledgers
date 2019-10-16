@@ -1,7 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
+import static de.adorsys.ledgers.util.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
 
 @Slf4j
 @Service

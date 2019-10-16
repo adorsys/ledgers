@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.sca.exception;
+package de.adorsys.ledgers.util.exception;
 
 public enum SCAErrorCode {
     USER_SCA_DATA_NOT_FOUND,

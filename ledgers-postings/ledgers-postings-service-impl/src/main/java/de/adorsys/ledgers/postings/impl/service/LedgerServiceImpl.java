@@ -3,8 +3,8 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.NamedBO;
-import de.adorsys.ledgers.postings.api.exception.PostingErrorCode;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.util.exception.PostingErrorCode;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.NO_CATEGORY;
+import static de.adorsys.ledgers.util.exception.PostingErrorCode.NO_CATEGORY;
 
 @Service
 public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerService {

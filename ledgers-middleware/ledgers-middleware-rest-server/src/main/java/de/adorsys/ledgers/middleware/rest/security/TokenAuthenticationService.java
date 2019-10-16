@@ -5,7 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

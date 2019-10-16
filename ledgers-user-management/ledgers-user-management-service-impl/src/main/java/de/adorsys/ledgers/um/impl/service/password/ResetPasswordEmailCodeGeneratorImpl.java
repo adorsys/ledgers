@@ -2,7 +2,7 @@ package de.adorsys.ledgers.um.impl.service.password;
 
 import de.adorsys.ledgers.security.GenerateCode;
 import de.adorsys.ledgers.security.ResetPassword;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.ResetPasswordCodeGenerator;
 import de.adorsys.ledgers.um.db.domain.ResetPasswordEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.USER_NOT_FOUND;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

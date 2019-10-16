@@ -16,11 +16,11 @@
 
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
-import de.adorsys.ledgers.sca.exception.ScaModuleException;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
