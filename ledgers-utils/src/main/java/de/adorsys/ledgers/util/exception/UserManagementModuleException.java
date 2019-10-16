@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.um.api.exception;
+package de.adorsys.ledgers.util.exception;
 
 import lombok.Builder;
 import lombok.Data;

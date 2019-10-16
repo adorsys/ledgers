@@ -8,7 +8,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.UsageTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.client.rest.*;
-import de.adorsys.ledgers.middleware.rest.utils.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;

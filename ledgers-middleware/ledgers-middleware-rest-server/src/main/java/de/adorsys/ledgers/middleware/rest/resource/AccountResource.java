@@ -23,8 +23,11 @@ import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +52,7 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.RE
 public class AccountResource implements AccountRestAPI {
     private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService middlewareAccountService;
+    private final PageMapper pageMapper;
 
 
     /**
@@ -67,7 +71,7 @@ public class AccountResource implements AccountRestAPI {
     public ResponseEntity<Void> createDepositAccount(AccountDetailsTO accountDetailsTO) {
         // create account. It does not exist.
         String iban = accountDetailsTO.getIban();
-        // Splitt in prefix and suffix
+        // Split in prefix and suffix
         String accountNumberPrefix = StringUtils.substring(iban, 0, iban.length() - 2);
         String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
 
@@ -95,6 +99,15 @@ public class AccountResource implements AccountRestAPI {
         dateChecker(dateFrom, dateTo);
         List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
         return ResponseEntity.ok(transactions);
+    }
+
+    @Override
+    @PreAuthorize("accountInfoById(#accountId)")
+    public ResponseEntity<CustomPageImpl<TransactionTO>> getTransactionByDatesPaged(String accountId, LocalDate dateFrom, LocalDate dateTo, int page, int size) {
+        dateChecker(dateFrom, dateTo);
+        CustomPageableImpl pageable = new CustomPageableImpl(page, size);
+        CustomPageImpl<TransactionTO> customPage = middlewareAccountService.getTransactionsByDatesPaged(accountId, dateFrom, dateTo, pageable);
+        return ResponseEntity.ok(customPage);
     }
 
     @Override

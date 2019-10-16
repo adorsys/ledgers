@@ -6,12 +6,12 @@ import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
-import de.adorsys.ledgers.middleware.rest.utils.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +34,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final ScaInfoHolder scaInfoHolder;
+    private final PageMapper pageMapper;
 
     @Override
     public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) {
@@ -84,9 +85,9 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
-        CustomPageImpl<UserTO> users = new CustomPageImpl<>(middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles, pageable));
+        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles, pageable);
         return ResponseEntity.ok(users);
     }
 

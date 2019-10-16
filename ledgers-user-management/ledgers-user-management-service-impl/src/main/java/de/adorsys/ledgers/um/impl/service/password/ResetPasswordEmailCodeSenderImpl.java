@@ -2,13 +2,13 @@ package de.adorsys.ledgers.um.impl.service.password;
 
 import de.adorsys.ledgers.security.ResetPassword;
 import de.adorsys.ledgers.security.SendCode;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.ResetPasswordCodeSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.RESET_PASSWORD_CODE_SENDING_ERROR;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.RESET_PASSWORD_CODE_SENDING_ERROR;
 
 @Service
 @RequiredArgsConstructor

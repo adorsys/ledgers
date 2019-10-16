@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.deposit.api.exception;
+package de.adorsys.ledgers.util.exception;
 
 public enum DepositErrorCode {
    DEPOSIT_ACCOUNT_EXISTS,

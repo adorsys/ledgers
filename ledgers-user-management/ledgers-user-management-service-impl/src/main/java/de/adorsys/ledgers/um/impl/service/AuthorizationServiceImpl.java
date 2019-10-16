@@ -7,7 +7,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.um.api.exception.UserManagementModuleException;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.UserRole;
@@ -25,7 +25,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.INSUFFICIENT_PERMISSION;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.INSUFFICIENT_PERMISSION;
 
 @Slf4j
 @Service

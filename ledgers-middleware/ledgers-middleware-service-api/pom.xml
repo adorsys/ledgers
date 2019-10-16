@@ -25,16 +25,18 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- spring dependencies -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-utils</artifactId>
+			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.9.2</version>
 		</dependency>
+
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-bean-validators</artifactId>
@@ -84,6 +86,7 @@
 									<excludes>
 										<exclude>de.adorsys.ledgers:ledgers-middleware-service-impl</exclude>
 										<exclude>de.adorsys.ledgers:ledgers-middleware-rest-server</exclude>
+										<exclude>de.adorsys.ledgers:ledgers-postings-service-api</exclude>
 									</excludes>
 								</bannedDependencies>
 							</rules>

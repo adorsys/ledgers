@@ -16,12 +16,12 @@
 
 package de.adorsys.ledgers.sca.service.impl.sender;
 
-import de.adorsys.ledgers.sca.exception.ScaModuleException;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import org.springframework.stereotype.Service;
 
-import static de.adorsys.ledgers.sca.exception.SCAErrorCode.SCA_METHOD_NOT_SUPPORTED;
+import static de.adorsys.ledgers.util.exception.SCAErrorCode.SCA_METHOD_NOT_SUPPORTED;
 
 @Service
 public class MobileSCASender implements SCASender {

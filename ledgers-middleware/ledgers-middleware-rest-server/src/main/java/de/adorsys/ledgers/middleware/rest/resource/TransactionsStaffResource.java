@@ -1,8 +1,10 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.deposit.api.domain.MockBookingDetails;
+import de.adorsys.ledgers.deposit.api.domain.MockBookingDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.TransactionService;
+import de.adorsys.ledgers.middleware.api.domain.account.MockBookingDetails;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
+import de.adorsys.ledgers.middleware.rest.mapper.MockTransactionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +21,12 @@ import java.util.Map;
 @RequestMapping(TransactionsStaffResourceAPI.BASE_PATH)
 public class TransactionsStaffResource implements TransactionsStaffResourceAPI {
     private final TransactionService transactionService;
+    private final MockTransactionMapper transactionMapper;
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Map<String, String>> transactions(List<MockBookingDetails> data) {
-        return new ResponseEntity<>(transactionService.bookMockTransaction(data), HttpStatus.CREATED);
+        List<MockBookingDetailsBO> dataBO = transactionMapper.toMockTransactionDetailsBO(data);
+        return new ResponseEntity<>(transactionService.bookMockTransaction(dataBO), HttpStatus.CREATED);
     }
 }

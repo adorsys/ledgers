@@ -38,7 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final DepositAccountConfigService depositAccountConfigService;
 
     @Override
-    public Map<String, String> bookMockTransaction(List<MockBookingDetails> trDetails) {
+    public Map<String, String> bookMockTransaction(List<MockBookingDetailsBO> trDetails) {
         log.info("Start upload mock transactions, size: {}", trDetails.size());
         long start = System.nanoTime();
         LedgerBO ledger = loadLedger();
@@ -60,7 +60,7 @@ public class TransactionServiceImpl implements TransactionService {
         return errorMap;
     }
 
-    private Map<String, LedgerAccountBO> getAccounts(List<MockBookingDetails> transactions, LedgerBO ledger) {
+    private Map<String, LedgerAccountBO> getAccounts(List<MockBookingDetailsBO> transactions, LedgerBO ledger) {
         long start = System.nanoTime();
         Set<String> ibans = new HashSet<>();
         transactions.forEach(t -> {
@@ -74,7 +74,7 @@ public class TransactionServiceImpl implements TransactionService {
         return ledgerAccounts;
     }
 
-    private PostingBO preparePosting(MockBookingDetails details, LedgerBO ledger, Map<String, LedgerAccountBO> accounts) {
+    private PostingBO preparePosting(MockBookingDetailsBO details, LedgerBO ledger, Map<String, LedgerAccountBO> accounts) {
         return details.isPaymentTransaction()
                        ? preparePaymentPosting(ledger, details, accounts)
                        : prepareDepositPosting(ledger, details, accounts);
@@ -87,7 +87,7 @@ public class TransactionServiceImpl implements TransactionService {
                        .orElseThrow(() -> new IllegalStateException(String.format("Ledger with name %s not found", ledgerName)));
     }
 
-    private PostingBO prepareDepositPosting(LedgerBO ledger, MockBookingDetails details, Map<String, LedgerAccountBO> accounts) {
+    private PostingBO prepareDepositPosting(LedgerBO ledger, MockBookingDetailsBO details, Map<String, LedgerAccountBO> accounts) {
         AccountReferenceBO debtorAccount = getAccountReference(details.getOtherAccount(), details);
 
         PostingBO posting = composePosting(ledger, details, debtorAccount);
@@ -97,7 +97,7 @@ public class TransactionServiceImpl implements TransactionService {
         return posting;
     }
 
-    private PostingBO preparePaymentPosting(LedgerBO ledger, MockBookingDetails details, Map<String, LedgerAccountBO> accounts) {
+    private PostingBO preparePaymentPosting(LedgerBO ledger, MockBookingDetailsBO details, Map<String, LedgerAccountBO> accounts) {
         AccountReferenceBO debtorAccount = getAccountReference(details.getUserAccount(), details);
 
         PostingBO posting = composePosting(ledger, details, debtorAccount);
@@ -107,7 +107,7 @@ public class TransactionServiceImpl implements TransactionService {
         return posting;
     }
 
-    private PostingLineBO composeLine(PostingBO posting, MockBookingDetails details, boolean isPayment, boolean isDebitLine, Map<String, LedgerAccountBO> accounts) {
+    private PostingLineBO composeLine(PostingBO posting, MockBookingDetailsBO details, boolean isPayment, boolean isDebitLine, Map<String, LedgerAccountBO> accounts) {
         PostingLineBO line = new PostingLineBO();
         line.setId(Ids.id());
         line.setAccount(isDebitLine
@@ -123,30 +123,30 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    private BigDecimal resolveAmountByOperationType(MockBookingDetails details, boolean isPayment) {
+    private BigDecimal resolveAmountByOperationType(MockBookingDetailsBO details, boolean isPayment) {
         return isPayment
                        ? details.getAmount().negate()
                        : details.getAmount();
     }
 
-    private LedgerAccountBO resolveAccountForDebitLine(MockBookingDetails details, boolean isPayment, Map<String, LedgerAccountBO> accounts) {
+    private LedgerAccountBO resolveAccountForDebitLine(MockBookingDetailsBO details, boolean isPayment, Map<String, LedgerAccountBO> accounts) {
         return isPayment
                        ? accounts.get(details.getUserAccount())
                        : checkOtherAccountOrLoadClearing(details, accounts);
     }
 
-    private LedgerAccountBO resolveAccountForCreditLine(MockBookingDetails details, boolean isPayment, Map<String, LedgerAccountBO> accounts) {
+    private LedgerAccountBO resolveAccountForCreditLine(MockBookingDetailsBO details, boolean isPayment, Map<String, LedgerAccountBO> accounts) {
         return isPayment
                        ? checkOtherAccountOrLoadClearing(details, accounts)
                        : accounts.get(details.getUserAccount());
     }
 
-    private LedgerAccountBO checkOtherAccountOrLoadClearing(MockBookingDetails details, Map<String, LedgerAccountBO> accounts) {
+    private LedgerAccountBO checkOtherAccountOrLoadClearing(MockBookingDetailsBO details, Map<String, LedgerAccountBO> accounts) {
         return Optional.ofNullable(accounts.get(details.getOtherAccount()))
                        .orElseGet(() -> accounts.get(SEPA_CLEARING_ACCOUNT));
     }
 
-    private PostingLineBO fillCommonPostingLineFields(PostingBO posting, MockBookingDetails details, PostingLineBO line) {
+    private PostingLineBO fillCommonPostingLineFields(PostingBO posting, MockBookingDetailsBO details, PostingLineBO line) {
         String lineDetails = createPostingLineDetails(details, line.getId());
         line.setDetails(lineDetails);
         line.setSubOprSrcId(posting.getOprId());
@@ -157,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
         return line;
     }
 
-    private PostingBO composePosting(LedgerBO ledger, MockBookingDetails details, AccountReferenceBO debtorAccount) {
+    private PostingBO composePosting(LedgerBO ledger, MockBookingDetailsBO details, AccountReferenceBO debtorAccount) {
         PostingBO posting = new PostingBO();
         String postingDetails = createPostingDetails(details, debtorAccount);
 
@@ -178,14 +178,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    private String createPostingDetails(MockBookingDetails details, AccountReferenceBO account) {
+    private String createPostingDetails(MockBookingDetailsBO details, AccountReferenceBO account) {
         return serializeService.serializeOprDetails(
                 new PaymentOrderDetailsBO(null, false, details.getBookingDate(),
                         LocalTime.now(), SINGLE, null, null, null, null,
                         null, account, ACSC));
     }
 
-    private String createPostingLineDetails(MockBookingDetails details, String lineId) {
+    private String createPostingLineDetails(MockBookingDetailsBO details, String lineId) {
         TransactionDetailsBO lineDetails = new TransactionDetailsBO();
         lineDetails.setTransactionId(lineId);
         lineDetails.setEndToEndId(UUID.randomUUID().toString());
@@ -203,13 +203,13 @@ public class TransactionServiceImpl implements TransactionService {
         return serializeService.serializeOprDetails(lineDetails);
     }
 
-    private AccountReferenceBO getCrDrReference(MockBookingDetails details, boolean isPaymentOperation) {
+    private AccountReferenceBO getCrDrReference(MockBookingDetailsBO details, boolean isPaymentOperation) {
         return getAccountReference(isPaymentOperation
                                            ? details.getUserAccount()
                                            : details.getOtherAccount(), details);
     }
 
-    private AccountReferenceBO getAccountReference(String iban, MockBookingDetails details) {
+    private AccountReferenceBO getAccountReference(String iban, MockBookingDetailsBO details) {
         AccountReferenceBO reference = new AccountReferenceBO();
         reference.setCurrency(details.getCurrency());
         reference.setIban(iban);

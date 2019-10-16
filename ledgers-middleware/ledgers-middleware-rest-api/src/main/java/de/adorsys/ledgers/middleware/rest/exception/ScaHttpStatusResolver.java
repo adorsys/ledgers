@@ -1,11 +1,11 @@
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.sca.exception.SCAErrorCode;
+import de.adorsys.ledgers.util.exception.SCAErrorCode;
 import org.springframework.http.HttpStatus;
 
 import java.util.EnumMap;
 
-import static de.adorsys.ledgers.sca.exception.SCAErrorCode.*;
+import static de.adorsys.ledgers.util.exception.SCAErrorCode.*;
 import static org.springframework.http.HttpStatus.*;
 
 public class ScaHttpStatusResolver {

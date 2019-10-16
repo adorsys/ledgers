@@ -21,10 +21,10 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import io.swagger.annotations.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -39,8 +39,8 @@ public interface AccountRestAPI {
     String DATE_FROM_QUERY_PARAM = "dateFrom";
     String ACCOUNT_ID = "accountId";
     String TRANSACTION_ID = "transactionId";
-    String THE_ID_OF_THE_DEPOSIT_ACCOUNT_CANNOT_BE_EMPTY = "The id of the deposit account. Cannot be empty.";
-    String THE_ID_OF_THE_TRANSACTION_CANNOT_BE_EMPTY = "The id of the transaction. Cannot be empty.";
+    String PAGE = "page";
+    String SIZE = "size";
 
     /**
      * Return the list of accounts linked with the current customer.
@@ -100,8 +100,19 @@ public interface AccountRestAPI {
     ResponseEntity<List<TransactionTO>> getTransactionByDates(
             @ApiParam(ACCOUNT_ID)
             @PathVariable(name = "accountId") String accountId,
-            @RequestParam(name = DATE_FROM_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
-            @RequestParam(name = DATE_TO_QUERY_PARAM) @Nullable @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo);
+            @RequestParam(name = DATE_FROM_QUERY_PARAM, required = false) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
+            @RequestParam(name = DATE_TO_QUERY_PARAM) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo);
+
+    @GetMapping(path = "/{accountId}/transactions/page", params = {DATE_FROM_QUERY_PARAM, DATE_TO_QUERY_PARAM, PAGE, SIZE})
+    @ApiOperation(value = "Find Transactions By Date", notes = "Returns transactions for the given account id for certain dates, paged view",
+            authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<CustomPageImpl<TransactionTO>> getTransactionByDatesPaged(
+            @ApiParam(ACCOUNT_ID)
+            @PathVariable(name = "accountId") String accountId,
+            @RequestParam(name = DATE_FROM_QUERY_PARAM, required = false) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
+            @RequestParam(name = DATE_TO_QUERY_PARAM) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo,
+            @RequestParam(PAGE) int page,
+            @RequestParam(SIZE) int size);
 
     @GetMapping("/{accountId}/transactions/{transactionId}")
     @ApiOperation(value = "Load Transaction", notes = "Returns the transaction with the given account id and transaction id.",

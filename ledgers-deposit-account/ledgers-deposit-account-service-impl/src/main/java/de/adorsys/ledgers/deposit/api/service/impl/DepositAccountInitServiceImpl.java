@@ -5,7 +5,7 @@ import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.ChartOfAccountService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.LEDGER_ACCOUNT_NOT_FOUND;
+import static de.adorsys.ledgers.util.exception.PostingErrorCode.LEDGER_ACCOUNT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

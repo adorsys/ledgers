@@ -3,7 +3,7 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.exception.PostingModuleException;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
@@ -14,7 +14,7 @@ import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.*;
+import static de.adorsys.ledgers.util.exception.PostingErrorCode.*;
 
 @RequiredArgsConstructor
 public class AbstractServiceImpl {

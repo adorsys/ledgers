@@ -1,11 +1,11 @@
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.um.api.exception.UserManagementErrorCode;
+import de.adorsys.ledgers.util.exception.UserManagementErrorCode;
 import org.springframework.http.HttpStatus;
 
 import java.util.EnumMap;
 
-import static de.adorsys.ledgers.um.api.exception.UserManagementErrorCode.*;
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.*;
 import static org.springframework.http.HttpStatus.*;
 
 public class UserManagementHttpStatusResolver {

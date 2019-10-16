@@ -1,11 +1,11 @@
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.deposit.api.exception.DepositErrorCode;
+import de.adorsys.ledgers.util.exception.DepositErrorCode;
 import org.springframework.http.HttpStatus;
 
 import java.util.EnumMap;
 
-import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
+import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 import static org.springframework.http.HttpStatus.*;
 
 public class DepositHttpStatusResolver {

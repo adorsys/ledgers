@@ -37,6 +37,12 @@
 			<artifactId>ledgers-middleware-rest-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>ledgers-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<!-- spring dependencies -->
 
@@ -135,13 +141,6 @@
 		<dependency>
 			<groupId>pro.javatar.commons</groupId>
 			<artifactId>javatar-commons</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>ledgers-utils</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 

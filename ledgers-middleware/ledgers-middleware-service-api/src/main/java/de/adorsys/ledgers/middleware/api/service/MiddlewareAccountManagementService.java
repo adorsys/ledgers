@@ -10,6 +10,8 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -103,6 +105,16 @@ public interface MiddlewareAccountManagementService {
      * @return : List of transactions.
      */
     List<TransactionTO> getTransactionsByDates(String accountId, LocalDate dateFrom, LocalDate dateTo);
+
+    /**
+     * Retrieves a List of transactions by accountId and dates (from/to) if dateTo is empty it is considered that requested date is today
+     *
+     * @param accountId the account id
+     * @param dateFrom  from this time
+     * @param dateTo    to this time
+     * @return : List of transactions.
+     */
+    CustomPageImpl<TransactionTO> getTransactionsByDatesPaged(String accountId, LocalDate dateFrom, LocalDate dateTo, CustomPageableImpl pageable);
 
     /**
      * Confirm the availability of funds on user account to perform the operation with specified amount

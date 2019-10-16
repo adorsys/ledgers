@@ -1,11 +1,11 @@
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.postings.api.exception.PostingErrorCode;
+import de.adorsys.ledgers.util.exception.PostingErrorCode;
 import org.springframework.http.HttpStatus;
 
 import java.util.EnumMap;
 
-import static de.adorsys.ledgers.postings.api.exception.PostingErrorCode.*;
+import static de.adorsys.ledgers.util.exception.PostingErrorCode.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 

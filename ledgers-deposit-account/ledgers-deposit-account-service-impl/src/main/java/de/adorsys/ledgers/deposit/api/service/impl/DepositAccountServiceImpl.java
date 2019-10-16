@@ -3,7 +3,6 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
@@ -15,10 +14,13 @@ import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
 import static de.adorsys.ledgers.deposit.api.domain.BalanceTypeBO.*;
-import static de.adorsys.ledgers.deposit.api.exception.DepositErrorCode.*;
+import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 import static java.lang.String.format;
 
 @Slf4j
@@ -148,6 +150,16 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                        .stream()
                        .map(transactionDetailsMapper::toTransactionSigned)
                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TransactionDetailsBO> getTransactionsByDatesPaged(String accountId, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable) {
+        DepositAccountBO account = getDepositAccountById(accountId);
+        LedgerBO ledgerBO = loadLedger();
+        LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccount(ledgerBO, account.getIban());
+
+        return postingService.findPostingsByDatesPaged(ledgerAccountBO, dateFrom, dateTo, pageable)
+                       .map(transactionDetailsMapper::toTransactionSigned);
     }
 
     @Override

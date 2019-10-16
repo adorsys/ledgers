@@ -1,10 +1,10 @@
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.deposit.api.exception.DepositErrorCode;
+import de.adorsys.ledgers.util.exception.DepositErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
-import de.adorsys.ledgers.postings.api.exception.PostingErrorCode;
-import de.adorsys.ledgers.sca.exception.SCAErrorCode;
-import de.adorsys.ledgers.um.api.exception.UserManagementErrorCode;
+import de.adorsys.ledgers.util.exception.PostingErrorCode;
+import de.adorsys.ledgers.util.exception.SCAErrorCode;
+import de.adorsys.ledgers.util.exception.UserManagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
