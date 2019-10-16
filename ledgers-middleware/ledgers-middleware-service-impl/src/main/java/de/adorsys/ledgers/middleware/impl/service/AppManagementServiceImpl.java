@@ -66,7 +66,8 @@ public class AppManagementServiceImpl implements AppManagementService {
 
     @Override
     public void uploadData(UploadedDataTO data, ScaInfoTO info) {
-        List<UserTO> uploadedUsers = uploadUserService.uploadUsers(data.getUsers(), data.getBranch());
+        String branchId = userService.findById(info.getUserId()).getBranch();
+        List<UserTO> uploadedUsers = uploadUserService.uploadUsers(data.getUsers(), branchId);
         uploadDepositAccountService.uploadDepositAccounts(uploadedUsers, data.getDetails(), info);
 
         CompletableFuture.runAsync(() -> uploadBalanceService.uploadBalances(data, info), FIXED_THREAD_POOL);
