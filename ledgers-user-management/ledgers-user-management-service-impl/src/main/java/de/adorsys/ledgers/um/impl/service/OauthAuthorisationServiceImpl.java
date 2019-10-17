@@ -57,15 +57,15 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
         String code = RandomStringUtils.random(24, true, true);
         Optional<OauthCodeEntity> oauthCodeEntity = oauthCodeRepository.findByUserId(user.getId());
 
-        if (!oauthCodeEntity.isPresent()) {
-            OauthCodeEntity saved = oauthCodeRepository.save(new OauthCodeEntity(user.getId(), code, expiryTime));
-            return new OauthCodeResponseBO(saved.getCode());
+        if (oauthCodeEntity.isPresent()) {
+            OauthCodeEntity existed = oauthCodeEntity.get();
+            existed.setCode(code);
+            existed.setExpiryTime(expiryTime);
+            existed.setUsed(false);
+            return new OauthCodeResponseBO(code);
         }
-        OauthCodeEntity existed = oauthCodeEntity.get();
-        existed.setCode(code);
-        existed.setExpiryTime(expiryTime);
-        existed.setUsed(false);
-        return new OauthCodeResponseBO(code);
+        OauthCodeEntity saved = oauthCodeRepository.save(new OauthCodeEntity(user.getId(), code, expiryTime));
+        return new OauthCodeResponseBO(saved.getCode());
     }
 
     @Override
