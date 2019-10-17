@@ -96,10 +96,17 @@ application:
 
 # Oauth properties
 oauth:
+  base_path: http://localhost:8088
   lifetime:
     auth_code: 2
     access_token: 5
     refresh_token: 15
+  authorization_endpoint: ${oauth.base_path}/oauth/authorise
+  token_endpoint: ${oauth.base_path}/oauth/token
+  response_types_supported:
+    - CODE
+  grant_types_supported:
+    - AUTHORISATION_CODE
 
 # Cors configuration
 management:

@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.um.api.service;
 
 import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
+import de.adorsys.ledgers.um.api.domain.oauth.OauthServerInfoBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthTokenResponseBO;
 
 public interface OauthAuthorisationService {
@@ -17,4 +18,9 @@ public interface OauthAuthorisationService {
      * @return OauthTokenResponseBO representation of oauth token
      */
     OauthTokenResponseBO oauthToken(String code);
+
+    /**
+     * @return OauthServerInfoBO Authorization server metadata request
+     */
+    OauthServerInfoBO oauthServerInfo();
 }

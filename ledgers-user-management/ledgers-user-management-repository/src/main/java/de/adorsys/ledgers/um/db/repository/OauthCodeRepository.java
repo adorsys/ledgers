@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.Optional;
 
 public interface OauthCodeRepository extends CrudRepository<OauthCodeEntity, Long> {
-    Optional<OauthCodeEntity> findByCode(String code);
+    Optional<OauthCodeEntity> findByCodeAndUsed(String code, boolean used);
 
     Optional<OauthCodeEntity> findByUserId(String userId);
 }
