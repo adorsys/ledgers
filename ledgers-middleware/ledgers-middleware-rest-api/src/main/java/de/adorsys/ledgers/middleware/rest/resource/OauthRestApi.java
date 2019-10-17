@@ -6,6 +6,7 @@ import de.adorsys.ledgers.middleware.api.domain.oauth.OauthServerInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,10 @@ public interface OauthRestApi {
     @PostMapping("/authorise")
     @ApiOperation(value = "Get authorisation code")
     ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("login") String login, @RequestParam("pin") String pin, @RequestParam("redirect_uri") String redirectUri);
+
+    @PostMapping("/authorise/oauth")
+    @ApiOperation(value = "Get authorisation code, with token", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("redirect_uri") String redirectUri);
 
     @PostMapping("/token")
     @ApiOperation(value = "Get/refresh access token")

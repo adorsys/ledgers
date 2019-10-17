@@ -14,6 +14,12 @@ public interface OauthAuthorisationService {
     OauthCodeResponseBO oauthCode(String login, String pin);
 
     /**
+     * @param userId User id
+     * @return OauthCodeResponseBO representation of oauth code
+     */
+    OauthCodeResponseBO oauthCode(String userId);
+
+    /**
      * @param code Oauth code
      * @return OauthTokenResponseBO representation of oauth token
      */
