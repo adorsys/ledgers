@@ -2,7 +2,6 @@ package de.adorsys.ledgers.middleware.api.domain.oauth;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,6 @@ public enum ResponseTypeTO {
         this.value = value;
     }
 
-    @JsonValue
     public String getValue() {
         return this.value;
     }
