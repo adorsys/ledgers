@@ -48,5 +48,6 @@
     <include file="migration/0014-add-indexes.xml" relativeToChangelogFile="true" />
 
     <include file="migration/0015-create-table-oauth-code.xml" relativeToChangelogFile="true" />
+    <include file="migration/0016-add-oauth-code-usages-table.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

@@ -100,6 +100,12 @@ oauth:
     auth_code: 2
     access_token: 5
     refresh_token: 15
+  authorization_endpoint: http://localhost:8088/oauth/authorise
+  token_endpoint: http://localhost:8088/oauth/token
+  response_types_supported:
+    - CODE
+  grant_types_supported:
+    - AUTHORISATION_CODE
 
 # Cors configuration
 management:

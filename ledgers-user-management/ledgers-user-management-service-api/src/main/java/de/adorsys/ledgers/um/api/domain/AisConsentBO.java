@@ -22,7 +22,6 @@ import java.time.LocalDate;
 
 @Data
 public class AisConsentBO {
-	
 	private String id;
     private String userId;
     private String tppId;

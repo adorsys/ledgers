@@ -26,6 +26,8 @@ public class OauthCodeEntity {
     @Column(name = "expiry_time", nullable = false)
     private OffsetDateTime expiryTime;
 
+    @Column(name = "is_used", nullable = false)
+    private boolean used;
 
     public OauthCodeEntity(String userId, String code, OffsetDateTime expiryTime) {
         this.userId = userId;
