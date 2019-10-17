@@ -50,7 +50,18 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
                           .devMsg("Invalid credentials")
                           .build();
         }
+        return resolveOauthCode(user);
+    }
 
+    @Override
+    @Transactional
+    public OauthCodeResponseBO oauthCode(String userId) {
+        UserBO user = userService.findById(userId);
+
+        return resolveOauthCode(user);
+    }
+
+    private OauthCodeResponseBO resolveOauthCode(UserBO user) {
         OffsetDateTime expiryTime = OffsetDateTime.now()
                                             .plusMinutes(oauthConfigProp.getLifeTime().getAuthCode());
 
@@ -88,7 +99,7 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
         Date expires = DateUtils.addMinutes(issueTime, oauthConfigProp.getLifeTime().getAccessToken());
 
         BearerTokenBO token = bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                                                             null, null, UserRole.CUSTOMER, scaIdParam, scaIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
+                null, null, UserRole.CUSTOMER, scaIdParam, scaIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
         return new OauthTokenResponseBO(token);
     }
 

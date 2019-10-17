@@ -28,6 +28,12 @@ public class MiddlewareOauthServiceImpl implements MiddlewareOauthService {
     }
 
     @Override
+    public OauthCodeResponseTO oauthCode(String userId, String redirectUri) {
+        OauthCodeResponseBO response = oauthAuthorisationService.oauthCode(userId);
+        return new OauthCodeResponseTO(redirectUri + OAUTH_CODE_PARAM + response.getCode());
+    }
+
+    @Override
     public BearerTokenTO oauthToken(String code) {
         OauthTokenResponseBO response = oauthAuthorisationService.oauthToken(code);
         return bearerTokenMapper.toBearerTokenTO(response.getBearerTokenBO());
