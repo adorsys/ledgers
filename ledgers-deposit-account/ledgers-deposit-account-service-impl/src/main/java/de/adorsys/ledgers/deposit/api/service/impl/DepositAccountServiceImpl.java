@@ -40,6 +40,7 @@ import static java.lang.String.format;
 
 @Slf4j
 @Service
+@SuppressWarnings("PMD.TooManyMethods")
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s not found";
     private static final String OPERATION_ON_BLOCKED_ACCOUNT = "Operation is Rejected as account: %s is %s";
@@ -195,6 +196,13 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    public Page<DepositAccountDetailsBO> findByBranchPaged(String branch, Pageable pageable) {
+        return depositAccountRepository.findByBranch(branch, pageable)
+                       .map(depositAccountMapper::toDepositAccountBO)
+                       .map(d -> new DepositAccountDetailsBO(d, Collections.emptyList()));
+    }
+
+    @Override
     public void depositCash(String accountId, AmountBO amount, String recordUser) {
         if (amount.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw DepositModuleException.builder()
@@ -209,7 +217,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_OPERATION_FAILURE)
                           .devMsg(format("Deposited amount and account currencies are different. Requested currency: %s, Account currency: %s",
-                                  amount.getCurrency().getCurrencyCode(), accountReference.getCurrency().getCurrencyCode()))
+                                         amount.getCurrency().getCurrencyCode(), accountReference.getCurrency().getCurrencyCode()))
                           .build();
         }
 
@@ -252,7 +260,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                                             .isPresent();
         if (isExistingAccount) {
             String message = format("Deposit account already exists. IBAN %s. Currency %s",
-                    depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
+                                    depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
             log.error(message);
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_ACCOUNT_EXISTS)

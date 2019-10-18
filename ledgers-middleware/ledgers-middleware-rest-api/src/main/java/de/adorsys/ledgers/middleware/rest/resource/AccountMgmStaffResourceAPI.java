@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,8 @@ public interface AccountMgmStaffResourceAPI {
     String BASE_PATH = "/staff-access" + AccountRestAPI.BASE_PATH;
     String ACCOUNT_ID = "accountId";
     String USER_ID = "userId";
+    String PAGE = "page";
+    String SIZE = "size";
 
     /**
      * Creates a new deposit account for a user specified by ID
@@ -64,6 +67,14 @@ public interface AccountMgmStaffResourceAPI {
     @GetMapping
     ResponseEntity<List<AccountDetailsTO>> getListOfAccounts();
 
+    @ApiOperation(value = "List fo Accessible Accounts", authorizations = @Authorization(value = "apiKey"),
+            notes = "Returns the list of all accounts linked to the connected user, paged view. "
+                            + "Call only available to role CUSTOMER.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = AccountDetailsTO[].class, message = "List of accounts accessible to the user.")
+    })
+    @GetMapping(path = "/page")
+    ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(@RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
 
     @ApiOperation(value = "Load Account by AccountId",
             notes = "Returns account details information for the given account id. "

@@ -4,6 +4,7 @@ import de.adorsys.ledgers.deposit.api.domain.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,6 +35,8 @@ public interface DepositAccountService {
     List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix);
 
     List<DepositAccountDetailsBO> findByBranch(String branch);
+
+    Page<DepositAccountDetailsBO> findByBranchPaged(String branch, Pageable pageable);
 
     void depositCash(String accountId, AmountBO amount, String user);
 

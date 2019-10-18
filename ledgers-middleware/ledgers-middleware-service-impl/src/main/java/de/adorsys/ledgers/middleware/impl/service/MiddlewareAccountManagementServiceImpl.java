@@ -254,6 +254,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
+    public CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, CustomPageableImpl pageable) {
+        UserBO user = accessService.loadCurrentUser(userId);
+        return pageMapper.toCustomPageImpl(depositAccountService.findByBranchPaged(user.getBranch(), PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                                   .map(accountDetailsMapper::toAccountDetailsTO));
+    }
+
+
+    @Override
     public String iban(String id) {
         return depositAccountService.readIbanById(id);
     }
@@ -299,8 +307,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
 
         AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
-                consentId, template, template,
-                defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+                                              consentId, template, template,
+                                              defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
 
         SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
         return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
@@ -316,7 +324,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
         boolean validAuthCode = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
-                consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
+                                                                     consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
         if (!validAuthCode) {
             throw MiddlewareModuleException.builder()
                           .errorCode(AUTHENTICATION_FAILURE)
@@ -448,9 +456,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             int scaWeight = accessService.resolveMinimalScaWeightForConsent(consentBO.getAccess(), user.getAccountAccesses());
 
             AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
-                    aisConsent.getId(), aisConsent.getId(),
-                    consentKeyDataTemplate, consentKeyDataTemplate,
-                    defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+                                                             aisConsent.getId(), aisConsent.getId(),
+                                                             consentKeyDataTemplate, consentKeyDataTemplate,
+                                                             defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
             // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside
             // The system. Even if a user ha only one sca method.
             scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
