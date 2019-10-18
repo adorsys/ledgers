@@ -95,8 +95,8 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
-    public CustomPageImpl<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles, CustomPageableImpl pageable) {
-        return pageMapper.toCustomPageImpl(userService.findByBranchAndUserRolesIn(branch, userTOMapper.toUserRoleBO(roles), PageRequest.of(pageable.getPage(), pageable.getSize()))
+    public CustomPageImpl<UserTO> getUsersByBranchAndRoles(String branch, List<UserRoleTO> roles, String queryParam, CustomPageableImpl pageable) {
+        return pageMapper.toCustomPageImpl(userService.findByBranchAndUserRolesIn(branch, userTOMapper.toUserRoleBO(roles), queryParam, PageRequest.of(pageable.getPage(), pageable.getSize()))
                                                    .map(userTOMapper::toUserTO));
     }
 

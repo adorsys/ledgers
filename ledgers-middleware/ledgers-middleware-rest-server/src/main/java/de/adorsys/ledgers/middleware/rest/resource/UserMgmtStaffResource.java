@@ -84,10 +84,10 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, int page, int size) {
+    public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, String queryParam, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
-        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles, pageable);
+        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles, queryParam, pageable);
         return ResponseEntity.ok(users);
     }
 
