@@ -134,7 +134,7 @@ public class LedgersClientIT {
         assertThat(accountResponse2.getStatusCode()).isEqualTo(OK);
 
         //Check Users Accesses and Branch Accesses are correct
-        ResponseEntity<CustomPageImpl<UserTO>> allBranchUsersResponse = userMgmtStaffRestClient.getBranchUsersByRoles(Collections.singletonList(CUSTOMER), 0, Integer.MAX_VALUE);
+        ResponseEntity<CustomPageImpl<UserTO>> allBranchUsersResponse = userMgmtStaffRestClient.getBranchUsersByRoles(Collections.singletonList(CUSTOMER), "",0, Integer.MAX_VALUE);
         checkUsersListAccesses(allBranchUsersResponse, OK, 2, 1);
 
         ResponseEntity<UserTO> branchResponse = userMgmtRestClient.getUser();

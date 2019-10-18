@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
@@ -29,6 +28,7 @@ import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.util.tan.encriptor.TanEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -160,8 +160,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, Pageable pageable) {
-        Page<UserBO> users = userRepository.findByBranchAndUserRolesIn(branch, userConverter.toUserRole(userRoles), pageable)
+    public Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, String queryParam, Pageable pageable) {
+        Page<UserBO> users = userRepository.findByBranchAndUserRolesInAndLoginContaining(branch, userConverter.toUserRole(userRoles), queryParam, pageable)
                                      .map(userConverter::toUserBO);
         users.forEach(this::decodeStaticTanForUser);
         return users;
