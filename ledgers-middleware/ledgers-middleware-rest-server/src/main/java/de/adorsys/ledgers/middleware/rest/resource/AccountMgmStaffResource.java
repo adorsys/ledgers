@@ -22,6 +22,8 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +57,14 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch(scaInfoHolder.getUserId()));
+    }
+
+    @Override
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(int page, int size) {
+        CustomPageableImpl pageable = new CustomPageableImpl(page, size);
+        CustomPageImpl<AccountDetailsTO> details = middlewareAccountService.listDepositAccountsByBranchPaged(scaInfoHolder.getUserId(), pageable);
+        return ResponseEntity.ok(details);
     }
 
     @Override
