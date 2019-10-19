@@ -5,8 +5,8 @@ import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring")
-public interface PageMapper<T> {
-    default CustomPageImpl<T> toCustomPageImpl(Page<T> page) {
+public interface PageMapper {
+    default <T> CustomPageImpl<T> toCustomPageImpl(Page<T> page) {
         return new CustomPageImpl<>(page.getNumber(), page.getSize(), page.getTotalPages(), page.getNumberOfElements(), page.getTotalElements(), page.hasPrevious(), page.isFirst(), page.hasNext(), page.isLast(), page.getContent());
     }
 }
