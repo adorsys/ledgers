@@ -36,7 +36,7 @@ public interface DepositAccountService {
 
     List<DepositAccountDetailsBO> findByBranch(String branch);
 
-    Page<DepositAccountDetailsBO> findByBranchPaged(String branch, Pageable pageable);
+    Page<DepositAccountDetailsBO> findByBranchPaged(String branch, String queryParam, Pageable pageable);
 
     void depositCash(String accountId, AmountBO amount, String user);
 

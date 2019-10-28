@@ -57,7 +57,7 @@ public interface MiddlewareAccountManagementService {
      */
     List<AccountDetailsTO> listDepositAccountsByBranch(String userId);
 
-    CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, CustomPageableImpl pageable);
+    CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, CustomPageableImpl pageable);
 
     /**
      * Retrieves AccountDetails with Balance on demand

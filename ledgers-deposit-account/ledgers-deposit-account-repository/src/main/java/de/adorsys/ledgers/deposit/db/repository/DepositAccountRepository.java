@@ -15,7 +15,7 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
 
     List<DepositAccount> findByBranch(String branch);
 
-    Page<DepositAccount> findByBranch(String branch, Pageable pageable);
+    Page<DepositAccount> findByBranchAndIbanContaining(String branch, String queryParam, Pageable pageable);
 
     Optional<DepositAccount> findByIbanAndCurrency(String iban, String currency);
 
