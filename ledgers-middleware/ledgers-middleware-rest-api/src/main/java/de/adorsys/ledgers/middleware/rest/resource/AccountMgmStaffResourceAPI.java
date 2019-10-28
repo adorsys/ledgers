@@ -31,6 +31,7 @@ public interface AccountMgmStaffResourceAPI {
     String BASE_PATH = "/staff-access" + AccountRestAPI.BASE_PATH;
     String ACCOUNT_ID = "accountId";
     String USER_ID = "userId";
+    String QUERY_PARAM = "queryParam";
     String PAGE = "page";
     String SIZE = "size";
 
@@ -74,7 +75,9 @@ public interface AccountMgmStaffResourceAPI {
             @ApiResponse(code = 200, response = AccountDetailsTO[].class, message = "List of accounts accessible to the user.")
     })
     @GetMapping(path = "/page")
-    ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(@RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
+    ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(
+            @RequestParam(value = QUERY_PARAM, defaultValue = "", required = false) String queryParam,
+            @RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
 
     @ApiOperation(value = "Load Account by AccountId",
             notes = "Returns account details information for the given account id. "
