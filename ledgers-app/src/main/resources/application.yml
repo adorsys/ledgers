@@ -88,6 +88,11 @@ reset-password:
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
+#Supported currencies
+currency:
+  currencies:
+    - EUR
+
 #TanEncryption
 application:
   security:

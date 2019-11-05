@@ -76,6 +76,11 @@ reset-password:
     subject: "Your code for password reset"
     from: noreply@adorsys.de
 
+#Supported currencies
+currency:
+  currencies:
+    - EUR
+
 #TanEncryption
 application:
   security:
