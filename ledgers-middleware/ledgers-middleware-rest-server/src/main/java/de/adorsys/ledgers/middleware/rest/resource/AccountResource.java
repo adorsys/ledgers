@@ -23,7 +23,6 @@ import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -52,7 +51,6 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.RE
 public class AccountResource implements AccountRestAPI {
     private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService middlewareAccountService;
-    private final PageMapper pageMapper;
 
 
     /**
