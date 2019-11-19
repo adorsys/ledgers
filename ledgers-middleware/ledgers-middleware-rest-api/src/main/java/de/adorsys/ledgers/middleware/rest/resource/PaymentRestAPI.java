@@ -47,6 +47,18 @@ public interface PaymentRestAPI {
             @RequestParam("paymentType") PaymentTypeTO paymentType,
             @RequestBody Object payment);
 
+    @PostMapping(value = "/pain", params = "paymentType")
+    @ApiOperation(value = "Initiates a pain Payment", notes = "Initiates a pain payment", authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = String.class, message = "Success"),
+            @ApiResponse(code = 404, message = "Specified account not found."),
+            @ApiResponse(code = 403, message = "Not authorized to execute payment on this account"),
+            @ApiResponse(code = 409, message = "Payment with specified paymentId exists. Either leaved it blank or generate a new one.")
+    })
+    ResponseEntity<String> initiatePainPayment(
+            @RequestParam("paymentType") PaymentTypeTO paymentType,
+            @RequestBody String payment);
+
     @GetMapping(value = "/{paymentId}/authorisations/{authorisationId}")
     @ApiOperation(value = "Get SCA", notes = "Get the authorization response object eventually containing the list of selected sca methods.",
             authorizations = @Authorization(value = "apiKey"))

@@ -11,5 +11,4 @@ import java.util.*;
 @ConfigurationProperties(prefix = "currency")
 public class CurrencyConfigurationProperties {
     private Set<Currency> currencies = new HashSet<>();
-
 }

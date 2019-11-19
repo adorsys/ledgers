@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.middleware.rest.validation;
+package de.adorsys.ledgers.middleware.rest.filter;
 
 import lombok.extern.slf4j.Slf4j;
 
