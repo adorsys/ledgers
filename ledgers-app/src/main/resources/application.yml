@@ -90,6 +90,7 @@ user-service:
 
 #Supported currencies
 currency:
+  default: EUR
   currencies:
     - EUR
 
