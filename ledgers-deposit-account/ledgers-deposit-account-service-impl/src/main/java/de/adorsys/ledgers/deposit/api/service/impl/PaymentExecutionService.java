@@ -16,6 +16,7 @@ import net.objectlab.kit.datecalc.common.DateCalculator;
 import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar;
 import net.objectlab.kit.datecalc.common.HolidayCalendar;
 import net.objectlab.kit.datecalc.jdk8.LocalDateKitCalculatorsFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Currency;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
@@ -66,48 +65,17 @@ public class PaymentExecutionService implements InitializingBean {
         payment.setExecutedDate(executionTime);
 
         if (EnumSet.of(PaymentType.SINGLE, PaymentType.BULK).contains(payment.getPaymentType())) {
-            return updatePaymentStatus(payment, TransactionStatus.ACSC);
+            return finalizePaymentStatus(payment);
         }
         return payment.getFrequency().equals(FrequencyCode.DAILY)
                        ? checkDailyPayment(payment, userName)
                        : schedulePayment(payment);
     }
 
-
-    private TransactionStatusBO checkDailyPayment(Payment payment, String userName) {
-        return payment.getExecutionRule().equals(PRECEDING)
-                       ? precedingExecution(payment, userName, payment.getStartDate().withDayOfMonth(payment.getDayOfExecution()))
-                       : followingExecution(payment, userName, payment.getStartDate().withDayOfMonth(payment.getDayOfExecution()));
-    }
-
-    private TransactionStatusBO followingExecution(Payment payment, String userName, LocalDate dayOfExecution) {
-        if (dateCalculator(PRECEDING, LocalDate.now()).isNonWorkingDay(LocalDate.now().minusDays(1)) && !dateCalculator(PRECEDING, LocalDate.now()).isNonWorkingDay(dayOfExecution)) {
-            LocalDate prevBusinessDay = dateCalculator(PRECEDING, LocalDate.now().minusDays(1)).getCurrentBusinessDate();
-            IntStream.range(prevBusinessDay.getDayOfMonth(), LocalDate.now().getDayOfMonth() - 1).forEach(i -> txService.bookPayment(payment, LocalDateTime.now(), userName));
-        }
-        return schedulePayment(payment);
-    }
-
-    private TransactionStatusBO precedingExecution(Payment payment, String userName, LocalDate dayOfExecution) {
-        LocalDate nextBusinessDay = dateCalculator(FOLLOWING, LocalDate.now().plusDays(1)).getCurrentBusinessDate();
-        if (dateCalculator(FOLLOWING, LocalDate.now()).isNonWorkingDay(LocalDate.now().plusDays(1)) && !dateCalculator(FOLLOWING, LocalDate.now()).isNonWorkingDay(dayOfExecution)) {
-            IntStream.range(LocalDate.now().getDayOfMonth() + 1, nextBusinessDay.getDayOfMonth()).forEach(i -> txService.bookPayment(payment, LocalDateTime.now(), userName));
-        }
-        payment.setExecutedDate(LocalDateTime.of(nextBusinessDay.minusDays(1), LocalTime.MIN));
-        return schedulePayment(payment);
-    }
-
-    private TransactionStatusBO updatePaymentStatus(Payment payment, TransactionStatus status) {
-        payment.setTransactionStatus(status);
-        payment.setNextScheduledExecution(null);
-        paymentRepository.save(payment);
-        return TransactionStatusBO.valueOf(status.name());
-    }
-
     public TransactionStatusBO schedulePayment(Payment payment) {
         LocalDate executionDate = calculateExecutionDate(payment);
         TransactionStatus status = executionDate == null
-                                           ? TransactionStatus.ACSC
+                                           ? paymentMapper.toTransactionStatus(finalizePaymentStatus(payment))
                                            : TransactionStatus.ACSP;
         payment.setTransactionStatus(status);
         LocalDateTime executionDateTime = null;
@@ -130,6 +98,49 @@ public class PaymentExecutionService implements InitializingBean {
                                                   .errorCode(PAYMENT_PROCESSING_FAILURE)
                                                   .devMsg(String.format("Could not calculate total amount for payment: %s.", payment.getPaymentId()))
                                                   .build());
+    }
+
+    private TransactionStatusBO finalizePaymentStatus(Payment payment) {
+        TransactionStatusBO status = null;
+        try {
+            List<DepositAccountDetailsBO> creditorAccounts = accountService.getDepositAccountsByIban(payment.getTargets().stream().map(t -> t.getCreditorAccount().getIban()).collect(Collectors.toList()), LocalDateTime.now(), false);
+            if (CollectionUtils.isNotEmpty(creditorAccounts)) {
+                status = updatePaymentStatus(payment, TransactionStatus.ACCC);
+            }
+        } catch (DepositModuleException e) {
+            status = updatePaymentStatus(payment, TransactionStatus.ACSC);
+        }
+        return status;
+    }
+
+    private TransactionStatusBO updatePaymentStatus(Payment payment, TransactionStatus status) {
+        payment.setTransactionStatus(status);
+        payment.setNextScheduledExecution(null);
+        paymentRepository.save(payment);
+        return TransactionStatusBO.valueOf(status.name());
+    }
+
+    private TransactionStatusBO checkDailyPayment(Payment payment, String userName) {
+        return payment.getExecutionRule().equals(PRECEDING)
+                       ? precedingExecution(payment, userName)
+                       : followingExecution(payment, userName);
+    }
+
+    private TransactionStatusBO followingExecution(Payment payment, String userName) {
+        if (dateCalculator(PRECEDING, LocalDate.now()).isNonWorkingDay(LocalDate.now().minusDays(1)) && LocalDate.now().isAfter(payment.getStartDate())) {
+            LocalDate prevBusinessDay = dateCalculator(PRECEDING, LocalDate.now().minusDays(1)).getCurrentBusinessDate();
+            IntStream.range(prevBusinessDay.getDayOfMonth(), LocalDate.now().getDayOfMonth() - 1).forEach(i -> txService.bookPayment(payment, LocalDateTime.now(), userName));
+        }
+        return schedulePayment(payment);
+    }
+
+    private TransactionStatusBO precedingExecution(Payment payment, String userName) {
+        LocalDate nextBusinessDay = dateCalculator(FOLLOWING, LocalDate.now().plusDays(1)).getCurrentBusinessDate();
+        if (dateCalculator(FOLLOWING, LocalDate.now()).isNonWorkingDay(LocalDate.now().plusDays(1))) {
+            IntStream.range(LocalDate.now().getDayOfMonth() + 1, nextBusinessDay.getDayOfMonth()).forEach(i -> txService.bookPayment(payment, LocalDateTime.now(), userName));
+        }
+        payment.setExecutedDate(LocalDateTime.of(nextBusinessDay.minusDays(1), LocalTime.MIN));
+        return schedulePayment(payment);
     }
 
     private LocalDate calculateExecutionDate(Payment payment) {

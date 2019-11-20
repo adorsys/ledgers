@@ -73,6 +73,10 @@
             <artifactId>datecalc-jdk8</artifactId>
             <version>1.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+        </dependency>
 
         <!-- test dependencies -->
 
