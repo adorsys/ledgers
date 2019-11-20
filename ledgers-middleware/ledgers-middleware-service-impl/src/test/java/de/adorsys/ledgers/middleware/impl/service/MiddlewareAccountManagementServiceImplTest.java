@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
-import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
-import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
@@ -18,14 +18,17 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.AmountMapper;
+import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -71,7 +74,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     @Mock
     private PaymentConverter paymentConverter;
     @Mock
-    private DepositAccountService accountService;
+    private DepositAccountService depositAccountService;
     @Mock
     private AccountDetailsMapper detailsMapper;
     @Mock
@@ -87,27 +90,27 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     public void getAccountDetailsByAccountId() {
-        when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(getDepositAccountDetailsBO());
+        when(depositAccountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(getDepositAccountDetailsBO());
 
         when(detailsMapper.toAccountDetailsTO(any())).thenReturn(getAccount(AccountDetailsTO.class));
         AccountDetailsTO details = middlewareService.getDepositAccountById(ACCOUNT_ID, TIME, false);
 
         assertThat(details).isNotNull();
-        verify(accountService, times(1)).getDepositAccountById(ACCOUNT_ID, TIME, true);
+        verify(depositAccountService, times(1)).getDepositAccountById(ACCOUNT_ID, TIME, true);
     }
 
     @Test(expected = DepositModuleException.class)
     public void getAccountDetailsByAccountId_wrong_id() {
-        when(accountService.getDepositAccountById(WRONG_ID, TIME, true)).thenThrow(DepositModuleException.class);
+        when(depositAccountService.getDepositAccountById(WRONG_ID, TIME, true)).thenThrow(DepositModuleException.class);
 
         middlewareService.getDepositAccountById(WRONG_ID, TIME, false);
-        verify(accountService, times(1)).getDepositAccountById(WRONG_ID, TIME, true);
+        verify(depositAccountService, times(1)).getDepositAccountById(WRONG_ID, TIME, true);
     }
 
     @Test
     public void getAccountDetailsByAccountId_Success() {
         DepositAccountDetailsBO depositAccountDetailsBO = getDepositAccountDetailsBO();
-        when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(depositAccountDetailsBO);
+        when(depositAccountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenReturn(depositAccountDetailsBO);
         when(detailsMapper.toAccountDetailsTO(depositAccountDetailsBO)).thenReturn(getAccountDetailsTO());
 
         AccountDetailsTO accountDetails = middlewareService.getDepositAccountById(ACCOUNT_ID, TIME, false);
@@ -118,7 +121,7 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     @Test(expected = DepositModuleException.class)
     public void getAccountDetailsByAccountId_Failure_depositAccount_Not_Found() {
-        when(accountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenThrow(DepositModuleException.class);
+        when(depositAccountService.getDepositAccountById(ACCOUNT_ID, TIME, true)).thenThrow(DepositModuleException.class);
         middlewareService.getDepositAccountById(ACCOUNT_ID, TIME, false);
     }
 
@@ -138,7 +141,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         userBO.getAccountAccesses().addAll(accessBOList);
         when(userService.findByLogin(userLogin)).thenReturn(userBO);
 
-        when(accountService.getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false)).thenReturn(Collections.singletonList(accountBO));
+        when(depositAccountService.getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false)).thenReturn(Collections.singletonList(accountBO));
         when(detailsMapper.toAccountDetailsTO(accountBO)).thenReturn(account);
 
         List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
@@ -147,7 +150,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(details.get(0), is(account));
 
         verify(userService, times(1)).findByLogin(userLogin);
-        verify(accountService, times(1)).getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false);
+        verify(depositAccountService, times(1)).getDepositAccountsByIban(Collections.singletonList(iban), LocalDateTime.MIN, false);
         verify(detailsMapper, times(1)).toAccountDetailsTO(accountBO);
     }
 
@@ -176,7 +179,7 @@ public class MiddlewareAccountManagementServiceImplTest {
 
         when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(buildUserBO());
         when(userMapper.toUserTO(buildUserBO())).thenReturn(buildUserTO());
-        when(accountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
+        when(depositAccountService.getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean())).thenReturn(accounts);
         when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
         List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccounts(CORRECT_USER_ID);
@@ -185,7 +188,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(accountsToBeTested).isNotEmpty();
 
         verify(accessService, times(1)).loadCurrentUser(CORRECT_USER_ID);
-        verify(accountService, times(1)).getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean());
+        verify(depositAccountService, times(1)).getDepositAccountsByIban(anyList(), any(LocalDateTime.class), anyBoolean());
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
 
@@ -199,7 +202,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         accounts.add(getDepositAccountDetailsBO());
 
         when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
-        when(accountService.findByBranch(anyString())).thenReturn(accounts);
+        when(depositAccountService.findByBranch(anyString())).thenReturn(accounts);
         when(detailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
         List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccountsByBranch(CORRECT_USER_ID);
@@ -208,13 +211,13 @@ public class MiddlewareAccountManagementServiceImplTest {
         assertThat(accountsToBeTested).isNotEmpty();
 
         verify(accessService, times(1)).loadCurrentUser(CORRECT_USER_ID);
-        verify(accountService, times(1)).findByBranch(anyString());
+        verify(depositAccountService, times(1)).findByBranch(anyString());
         verify(detailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
 
     @Test
     public void getTransactionById() {
-        when(accountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
+        when(depositAccountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
         when(paymentConverter.toTransactionTO(any())).thenReturn(readYml(TransactionTO.class, "TransactionTO.yml"));
 
         TransactionTO result = middlewareService.getTransactionById("ACCOUNT_ID", "POSTING_ID");
@@ -224,7 +227,7 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     @Test(expected = DepositModuleException.class)
     public void getTransactionById_Failure() {
-        when(accountService.getTransactionById(anyString(), anyString())).thenThrow(DepositModuleException.class);
+        when(depositAccountService.getTransactionById(anyString(), anyString())).thenThrow(DepositModuleException.class);
 
         middlewareService.getTransactionById("ACCOUNT_ID", "POSTING_ID");
     }
@@ -234,23 +237,23 @@ public class MiddlewareAccountManagementServiceImplTest {
         DepositAccountDetailsBO accountBO = getDepositAccountDetailsBO();
         AccountDetailsTO accountDetailsTO = getAccount(AccountDetailsTO.class);
 
-        when(accountService.getDepositAccountByIban(any(), any(), anyBoolean())).thenReturn(accountBO);
+        when(depositAccountService.getDepositAccountByIban(any(), any(), anyBoolean())).thenReturn(accountBO);
         when(detailsMapper.toAccountDetailsTO(accountBO)).thenReturn(accountDetailsTO);
         AccountDetailsTO details = middlewareService.getDepositAccountByIban(IBAN, TIME, false);
 
         assertThat(details).isNotNull();
         assertThat(details, is(accountDetailsTO));
 
-        verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
+        verify(depositAccountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
         verify(detailsMapper, times(1)).toAccountDetailsTO(accountBO);
     }
 
     @Test(expected = DepositModuleException.class)
     public void getAccountDetailsByIbanDepositAccountNotFoundException() {
-        when(accountService.getDepositAccountByIban(IBAN, TIME, false)).thenThrow(DepositModuleException.class);
+        when(depositAccountService.getDepositAccountByIban(IBAN, TIME, false)).thenThrow(DepositModuleException.class);
 
         middlewareService.getDepositAccountByIban(IBAN, TIME, false);
-        verify(accountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
+        verify(depositAccountService, times(1)).getDepositAccountByIban(IBAN, TIME, false);
     }
 
     @Test
@@ -303,15 +306,24 @@ public class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     public void depositCashDelegatesToDepositAccountService() {
-        doNothing().when(accountService).depositCash(eq(ACCOUNT_ID), any(), any());
+        when(depositAccountService.readIbanById(anyString())).thenReturn("DE123");
+        when(depositAccountService.getDepositAccountByIban(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(AccountStatusBO.ENABLED));
+        doNothing().when(depositAccountService).depositCash(eq(ACCOUNT_ID), any(), any());
         middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO());
-        verify(accountService, times(1)).depositCash(eq(ACCOUNT_ID), any(), any());
+        verify(depositAccountService, times(1)).depositCash(eq(ACCOUNT_ID), any(), any());
     }
 
-    @Test(expected = DepositModuleException.class)
+    @Test(expected = MiddlewareModuleException.class)
     public void depositCashWrapsNotFoundException() {
-        doThrow(DepositModuleException.class).when(accountService).depositCash(any(), any(), any());
+        when(depositAccountService.readIbanById(anyString())).thenReturn("DE123");
+        when(depositAccountService.getDepositAccountByIban(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(AccountStatusBO.BLOCKED));
         middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO());
+    }
+
+    private DepositAccountDetailsBO getAccountDetails(AccountStatusBO status) {
+        DepositAccountBO account = new DepositAccountBO();
+        account.setAccountStatus(status);
+        return new DepositAccountDetailsBO(account, Collections.emptyList());
     }
 
     private static UserBO buildUserBO() {

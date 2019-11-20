@@ -16,7 +16,6 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.ScaChallengeDataResolver;
@@ -46,8 +45,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.ACCOUNT_CREATION_VALIDATION_FAILURE;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -196,7 +195,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             // User can not own any of those accounts.
             throw MiddlewareModuleException.builder()
                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                          .devMsg(String.format("Account prefix %s is gone.", accountNumberPrefix))
+                          .devMsg(format("Account prefix %s is gone.", accountNumberPrefix))
                           .build();
         }
 
@@ -207,7 +206,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         if (ownedAccounts.contains(accNbr)) {
             throw MiddlewareModuleException.builder()
                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                          .devMsg(String.format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix))
+                          .devMsg(format("Account with suffix %S and prefix %s already exist", accountNumberPrefix, accountNumberSuffix))
                           .build();
         }
 
@@ -216,7 +215,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             if (ownedAccounts.contains(a.getIban())) {
                 throw MiddlewareModuleException.builder()
                               .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                              .devMsg(String.format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(), accountNumberPrefix))
+                              .devMsg(format("User not owner of account with iban %s that also holds the requested prefix %s", a.getIban(), accountNumberPrefix))
                               .build();
             }
         }
@@ -362,7 +361,13 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) {
-        depositAccountService.getDepositAccountByIbanAndCheckStatus(iban(accountId), LocalDateTime.now(), false);
+        DepositAccountDetailsBO account = depositAccountService.getDepositAccountByIban(iban(accountId), LocalDateTime.now(), false);
+        if (!account.isEnabled()) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(PAYMENT_PROCESSING_FAILURE)
+                          .devMsg(format("Operation is Rejected as account: %s is %s", account.getAccount().getIban(), account.getAccount().getAccountStatus()))
+                          .build();
+        }
         depositAccountService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
     }
 
@@ -382,7 +387,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                     .filter(a -> a.getIban().equals(iban)).findAny()
                     .orElseThrow(() -> MiddlewareModuleException.builder()
                                                .devMsg("You dont have permission to modify this account")
-                                               .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
+                                               .errorCode(INSUFFICIENT_PERMISSION)
                                                .build());
         }
         log.info("Permission checked -> OK");
