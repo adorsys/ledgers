@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
 import static de.adorsys.ledgers.deposit.api.domain.BalanceTypeBO.*;
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 import static java.lang.String.format;
@@ -43,7 +42,6 @@ import static java.lang.String.format;
 @SuppressWarnings("PMD.TooManyMethods")
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s not found";
-    private static final String OPERATION_ON_BLOCKED_ACCOUNT = "Operation is Rejected as account: %s is %s";
     private static final String DELETE_BRANCH_ERROR_MSG = "Something went wrong during deletion of branch: %s, msg: %s";
     private static final String BRANCH_SQL = "classpath:deleteBranch.sql";
     private static final String POSTING_SQL = "classpath:deletePostings.sql";
@@ -89,19 +87,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         da.setBranch(branch);
         DepositAccount saved = depositAccountRepository.save(da);
         return depositAccountMapper.toDepositAccountBO(saved);
-    }
-
-    @Override
-    public DepositAccountDetailsBO getDepositAccountByIbanAndCheckStatus(String iban, LocalDateTime refTime, boolean withBalances) {
-        DepositAccountDetailsBO account = getDepositAccountByIban(iban, refTime, withBalances);
-        AccountStatusBO accountStatus = account.getAccount().getAccountStatus();
-        if (accountStatus != ENABLED) {
-            throw DepositModuleException.builder()
-                          .errorCode(ACCOUNT_BLOCKED_DELETED)
-                          .devMsg(format(OPERATION_ON_BLOCKED_ACCOUNT, account.getAccount().getIban(), accountStatus))
-                          .build();
-        }
-        return account;
     }
 
     @Override

@@ -1,7 +1,8 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.service.impl.DepositAccountServiceImpl;
+import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
@@ -36,6 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
@@ -156,6 +158,7 @@ public class MiddlewarePaymentServiceImplTest {
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         UserTO userTO = readYml(UserTO.class, "user1.yml");
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+        when(accountService.getDepositAccountByIban(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails());
         when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
@@ -243,6 +246,12 @@ public class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentById(any())).thenReturn(payment);
         doThrow(MiddlewareModuleException.class).when(cancelPolicy).onCancel(any(), any());
         middlewareService.initiatePaymentCancellation(buildScaInfoTO(), PAYMENT_ID);
+    }
+
+    private DepositAccountDetailsBO getAccountDetails() {
+        DepositAccountBO account = new DepositAccountBO();
+        account.setAccountStatus(AccountStatusBO.ENABLED);
+        return new DepositAccountDetailsBO(account, Collections.emptyList());
     }
 
     private static <T> T readYml(Class<T> aClass, String fileName) {

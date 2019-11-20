@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
@@ -25,8 +26,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -64,14 +65,20 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
-        depositAccountService.getDepositAccountByIbanAndCheckStatus(access.getIban(), LocalDateTime.now(), false);
+        DepositAccountDetailsBO account = depositAccountService.getDepositAccountByIban(access.getIban(), LocalDateTime.now(), false);
+        if (!account.isEnabled()) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(PAYMENT_PROCESSING_FAILURE)
+                          .devMsg(format("Operation is Rejected as account: %s is %s", account.getAccount().getIban(), account.getAccount().getAccountStatus()))
+                          .build();
+        }
         UserTO branch = findById(scaInfo.getUserId());
         boolean tppHasAccessToAccount = accessService.userHasAccessToAccount(branch, access.getIban());
         if (!tppHasAccessToAccount) {
             log.error("Branch: {} has no access to account: {}", branch.getLogin(), access.getIban());
             throw MiddlewareModuleException.builder()
                           .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(String.format("Current Branch does have no access to the requested account: %s", access.getIban()))
+                          .devMsg(format("Current Branch does have no access to the requested account: %s", access.getIban()))
                           .build();
         }
         UserTO user = findById(userId);
@@ -80,7 +87,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
             throw MiddlewareModuleException.builder()
                           .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(String.format("Requested user: %s is not a part of the branch: %s", user.getLogin(), scaInfo.getUserLogin()))
+                          .devMsg(format("Requested user: %s is not a part of the branch: %s", user.getLogin(), scaInfo.getUserLogin()))
                           .build();
         }
         accessService.updateAccountAccess(userTOMapper.toUserBO(user), userTOMapper.toAccountAccessBO(access));
