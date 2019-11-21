@@ -20,6 +20,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import io.swagger.annotations.*;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,7 @@ public interface PaymentRestAPI {
             @RequestParam("paymentType") PaymentTypeTO paymentType,
             @RequestBody Object payment);
 
-    @PostMapping(value = "/pain", params = "paymentType")
+    @PostMapping(value = "/pain", params = "paymentType", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     @ApiOperation(value = "Initiates a pain Payment", notes = "Initiates a pain payment", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = String.class, message = "Success"),
