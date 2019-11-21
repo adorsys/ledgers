@@ -14,7 +14,6 @@ public class MockBankInitDataConfiguration {
 
     @Bean
     public MockbankInitData init() {
-
         return loadTestData("mockbank-simple-init-data.yml");
     }
 

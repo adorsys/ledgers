@@ -27,6 +27,13 @@ accounts:
     accountType: CASH
     accountStatus: ENABLED
     usageType: PRIV
+  - iban: DE32760700240271232100
+    currency: EUR
+    name: multi-level-access-testing-account
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: ORGA
 
 ###############################################
 #
@@ -42,6 +49,8 @@ balances:
     balance: 30000.00
   - accNbr: DE38760700240320465700
     balance: 10000.00
+  - accNbr: DE32760700240271232100
+    balance: 1000000.00
 
 ###############################################
 #
@@ -61,6 +70,7 @@ users:
     accountAccesses:
       - iban: DE69760700240340283600
         accessType: OWNER
+        scaWeight: 100
   # Anton Brueckner has one sca configured. So her login process has one single phase with an ScaStatus.SCAMETHODSELECTED
   - login: anton.brueckner
     email: anton.brueckner@mail.de
@@ -71,6 +81,7 @@ users:
     accountAccesses:
       - iban: DE80760700240271232400
         accessType: OWNER
+        scaWeight: 100
   # Max Mustermann has two sca methods configured. So her login process has one single phase with an ScaStatus.PSUAUTHENTICATED
   - login: max.musterman
     email: max.musterman@mail.de
@@ -83,6 +94,52 @@ users:
     accountAccesses:
       - iban: DE38760700240320465700
         accessType: OWNER
+        scaWeight: 100
+  # Multi-level-SCA users
+  # Accountant has 30% access to account
+  - login: accountant
+    email: accountant@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: accountant@mail.de
+    accountAccesses:
+      - iban: DE32760700240271232100
+        accessType: OWNER
+        scaWeight: 30
+  # Chief Accountant has 60% access to account
+  - login: chief.accountant
+    email: chief.accountant@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: chief.accountant@mail.de
+    accountAccesses:
+      - iban: DE32760700240271232100
+        accessType: OWNER
+        scaWeight: 60
+  # SupplyChain Manager has 10% access to account
+  - login: sc.manager
+    email: sc.manager@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: sc.manager@mail.de
+    accountAccesses:
+      - iban: DE32760700240271232100
+        accessType: OWNER
+        scaWeight: 10
+  # General Manager has 90% access to account
+  - login: g.manager
+    email: g.manager@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: g.manager@mail.de
+    accountAccesses:
+      - iban: DE32760700240271232100
+        accessType: OWNER
+        scaWeight: 90
 
 
 ###############################################
