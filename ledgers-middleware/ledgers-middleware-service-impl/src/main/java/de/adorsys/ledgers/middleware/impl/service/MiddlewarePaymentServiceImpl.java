@@ -58,6 +58,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -97,6 +98,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     public SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId) {
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         PaymentBO paymentBO = loadPayment(paymentId);
+        paymentBO.setRequestedExecutionTime(LocalTime.now().plusMinutes(10));
         TransactionStatusTO originalTxStatus = TransactionStatusTO.valueOf(paymentBO.getTransactionStatus().name());
         cancelPolicy.onCancel(paymentId, originalTxStatus);
 
