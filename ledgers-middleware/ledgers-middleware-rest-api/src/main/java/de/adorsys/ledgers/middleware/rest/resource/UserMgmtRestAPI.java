@@ -39,6 +39,14 @@ public interface UserMgmtRestAPI {
     //
     //==========================================================================================================================
 
+    @GetMapping("/multilevel")
+    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Check if multilevel SCA required for certain user")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the user pin."),
+            @ApiResponse(code = 409, message = "Conflict. A user with email or login name already exist.")
+    })
+    ResponseEntity<Boolean> multilevel(@RequestParam("login") String login, @RequestParam("iban") String iban);
+
     /**
      * Registers a new user with the system. Activation is dependent on the user role.
      * - A Customer will be automatically activated.
@@ -170,7 +178,7 @@ public interface UserMgmtRestAPI {
             @RequestParam("opType") OpTypeTO opType);
 
     @PostMapping("/loginForConsent/oauth")
-    @ApiOperation( value = "Login for consent operation with bearer token", authorizations = @Authorization(value = "apiKey"))
+    @ApiOperation(value = "Login for consent operation with bearer token", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = SCALoginResponseTO.class, message = "Success. LoginToken contained in the returned response object."),
             @ApiResponse(code = 401, message = "Wrong authentication credential."),
@@ -321,6 +329,4 @@ public interface UserMgmtRestAPI {
                                                                     + "</lu>",
             authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<List<UserTO>> getAllUsers();
-
-
 }

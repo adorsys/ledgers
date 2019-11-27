@@ -44,12 +44,16 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     private final MiddlewareAccountManagementService middlewareAccountService;
     private final ScaInfoHolder scaInfoHolder;
 
+
+    @Override
+    public ResponseEntity<List<AccountDetailsTO>> getAccountsByIbanAndCurrency(String iban, String currency) {
+        return ResponseEntity.ok(middlewareAccountService.getAccountsByIbanAndCurrency(iban, currency));
+    }
+
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
         middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
-
-        // TODO: change to created after Account Middleware service refactoring
         return ResponseEntity.ok().build();
     }
 

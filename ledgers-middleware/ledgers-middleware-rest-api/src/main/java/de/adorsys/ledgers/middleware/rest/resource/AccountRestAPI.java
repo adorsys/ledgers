@@ -69,7 +69,7 @@ public interface AccountRestAPI {
                             + "</ul>",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = Void.class, message = "Account creation successful. Still planing to work with 201 here."),
+            @ApiResponse(code = 200, message = "Account creation successful. Still planing to work with 201 here."),
             @ApiResponse(code = 409, message = "Account with given IBAN already exists.")
     })
     ResponseEntity<Void> createDepositAccount(@RequestBody AccountDetailsTO accountDetailsTO);

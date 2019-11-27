@@ -26,4 +26,6 @@ public abstract class AccountDetailsMapper {
     }
 
     public abstract FundsConfirmationRequestBO toFundsConfirmationRequestBO(FundsConfirmationRequestTO request);
+
+    public abstract List<AccountDetailsTO> toAccountDetailsList(List<DepositAccountBO> accountsByIbanAndCurrency);
 }

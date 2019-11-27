@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.impl.test;
 
+import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
@@ -24,6 +25,7 @@ import de.adorsys.ledgers.um.impl.EnableUserManagementService;
 import de.adorsys.ledgers.util.EnableUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableLedgersMiddlewareService
@@ -32,6 +34,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 @EnableSCAService
 @EnablePostingService
 @EnableUtils
+@EnableFeignClients(basePackageClasses = ExchangeRateClient.class)
 public class MiddlewareServiceApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(MiddlewareServiceApplication.class).run(args);

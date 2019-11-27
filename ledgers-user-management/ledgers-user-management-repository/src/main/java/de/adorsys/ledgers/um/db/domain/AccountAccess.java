@@ -22,16 +22,20 @@ public class AccountAccess {
 
     @NotNull
     @Column(nullable = false)
+    private String currency;
+
+    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private AccessType accessType= AccessType.OWNER;
+    private AccessType accessType = AccessType.OWNER;
 
     @Column(nullable = false)
     private int scaWeight;
-    
+
     @PrePersist
     public void prePersist() {
-    	if(id==null) {
-    		id = Ids.id();
-    	}
+        if (id == null) {
+            id = Ids.id();
+        }
     }
 }

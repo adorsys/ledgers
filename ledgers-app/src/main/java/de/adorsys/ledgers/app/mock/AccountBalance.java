@@ -1,20 +1,13 @@
 package de.adorsys.ledgers.app.mock;
 
-import java.math.BigDecimal;
+import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.Currency;
+
+@Data
 public class AccountBalance {
-	private BigDecimal balance;
-	private String accNbr;
-	public BigDecimal getBalance() {
-		return balance;
-	}
-	public void setBalance(BigDecimal balance) {
-		this.balance = balance;
-	}
-	public String getAccNbr() {
-		return accNbr;
-	}
-	public void setAccNbr(String accNbr) {
-		this.accNbr = accNbr;
-	}
+    private BigDecimal balance;
+    private String accNbr;
+    private Currency currency;
 }

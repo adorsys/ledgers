@@ -79,4 +79,6 @@ public interface MiddlewareUserManagementService {
     int countUsersByBranch(String branch);
 
     UserTO updateUser(String branchId, UserTO user);
+
+    boolean checkMultilevelScaRequired(String login, String iban);
 }

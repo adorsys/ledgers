@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Service implementing all ledger functionalities.
+ * Service implementing all ledger functionality.
  *
  * @author fpo
  */
@@ -17,8 +17,8 @@ public interface LedgerService {
     /**
      * Creates a new Ledger.
      *
-     * @param ledger
-     * @return
+     * @param ledger ledger
+     * @return created ledger
      */
     LedgerBO newLedger(LedgerBO ledger);
 
@@ -27,28 +27,27 @@ public interface LedgerService {
     /**
      * List all ledgers with the given name. These are generally different versions of the same ledger.
      *
-     * @param name
-     * @return
+     * @param name ledger name
+     * @return ledger
      */
     Optional<LedgerBO> findLedgerByName(String name);
 
     /**
      * Create a new Ledger account.
-     * <p>
-     * While creating a ledger account, the parent hat to be specified.
+     * While creating a ledger account, the parent has to be specified.
      *
-     * @param ledgerAccount
-     * @return
+     * @param ledgerAccount new ledger account
+     * @return created ledger account
      */
     LedgerAccountBO newLedgerAccount(LedgerAccountBO ledgerAccount, String userName);
 
-    Optional<LedgerAccountBO> findLedgerAccountById(String id);
+    LedgerAccountBO findLedgerAccountById(String id);
 
     /**
      * Find the ledger account with the given name
      *
-     * @param name
-     * @return
+     * @param name ledger account name
+     * @return requested ledger account
      */
     LedgerAccountBO findLedgerAccount(LedgerBO ledger, String name);
 

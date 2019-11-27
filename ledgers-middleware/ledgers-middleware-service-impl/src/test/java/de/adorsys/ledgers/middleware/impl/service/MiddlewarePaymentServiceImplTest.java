@@ -1,11 +1,10 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.service.impl.DepositAccountServiceImpl;
-import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
-import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
@@ -20,6 +19,7 @@ import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
+import de.adorsys.ledgers.middleware.impl.sca.EmailScaChallengeData;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
@@ -28,16 +28,23 @@ import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Currency;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
@@ -59,6 +66,9 @@ public class MiddlewarePaymentServiceImplTest {
     private static final String AUTHORISATION_ID = "authorisationId";
     private static final String EMAIL_TEMPLATE = "The TAN for your one time sepa-credit-transfers order to Rozetka.ua at date 12-12-2018; account DE91100000000123456789; EUR 100 is: %s";
     private static final String USER_LOGIN = "userLogin";
+    private static final String IBAN = "DE1234567890";
+    private static final Currency EUR = Currency.getInstance("EUR");
+    private static final Currency USD = Currency.getInstance("USD");
 
     @InjectMocks
     private MiddlewarePaymentServiceImpl middlewareService;
@@ -95,6 +105,10 @@ public class MiddlewarePaymentServiceImplTest {
     private ScaInfoMapper scaInfoMapper;
     @Mock
     private AuthorizationService authorizationService;
+    @Mock
+    private ScaResponseMapper scaResponseMapper = new ScaResponseMapper(scaUtils, new ScaChallengeDataResolverImpl(Arrays.asList(new EmailScaChallengeData())));
+
+    private final PaymentConverter pmtMapper = Mappers.getMapper(PaymentConverter.class);
 
     @Test
     public void getPaymentStatusById() {
@@ -158,10 +172,10 @@ public class MiddlewarePaymentServiceImplTest {
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         UserTO userTO = readYml(UserTO.class, "user1.yml");
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
-        when(accountService.getDepositAccountByIban(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails());
         when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, AccountStatusBO.ENABLED, null, null, null, null)));
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
@@ -169,6 +183,111 @@ public class MiddlewarePaymentServiceImplTest {
         when(scaUtils.user(userBO)).thenReturn(userTO);
         Object result = middlewareService.initiatePayment(buildScaInfoTO(), readYml(SinglePaymentTO.class, SINGLE_TO), PaymentTypeTO.SINGLE);
         assertNotNull(result);
+    }
+
+    @Test
+    public void initPmtRejectByCurrencySuccess() {
+        //Payment: debtor - EUR / amount - EUR // Account - EUR
+        SinglePaymentTO paymentTO = getPayment(EUR, EUR);
+        PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
+        paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
+        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        UserBO userBO = new UserBO("Test", "", "");
+        UserTO userTO = new UserTO("Test", "", "");
+
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.ENABLED, EUR));
+
+        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
+        when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
+        when(scaUtils.user(userBO)).thenReturn(userTO);
+        when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
+        when(coreDataPolicy.getPaymentCoreData(paymentBO)).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
+        when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
+
+        SCAPaymentResponseTO result = middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
+        assertNotNull(result);
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void initPmtRejectByCurrencyFail_NullEur2Accs() {
+        //Payment: debtor - null / amount - EUR // Account - EUR/USD
+        SinglePaymentTO paymentTO = getPayment(null, USD);
+        PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
+        paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
+        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        UserBO userBO = new UserBO("Test", "", "");
+        UserTO userTO = new UserTO("Test", "", "");
+
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.ENABLED, EUR, USD));
+
+        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
+
+        middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void initPmtRejectByCurrencyFail_UsdEurEur() {
+        //Payment: debtor - USD / amount - EUR // Account - EUR
+        SinglePaymentTO paymentTO = getPayment(USD, EUR);
+        PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
+        paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
+        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        UserBO userBO = new UserBO("Test", "", "");
+        UserTO userTO = new UserTO("Test", "", "");
+
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.emptyList());
+
+        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
+
+        middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void initPmtRejectByCurrencyFail_BlockedAccount() {
+        //Payment: debtor - USD / amount - EUR // Account - EUR
+        SinglePaymentTO paymentTO = getPayment(USD, EUR);
+        PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
+        paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
+        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        UserBO userBO = new UserBO("Test", "", "");
+        UserTO userTO = new UserTO("Test", "", "");
+
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.BLOCKED, EUR));
+
+        when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
+
+        middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
+    }
+
+
+    private List<DepositAccountBO> getAccounts(AccountStatusBO status, Currency... currency) {
+        return Arrays.stream(currency)
+                       .map(c -> getAccount(c, status))
+                       .collect(Collectors.toList());
+    }
+
+    private DepositAccountBO getAccount(Currency currency, AccountStatusBO status) {
+        DepositAccountBO account = new DepositAccountBO();
+        account.setIban(IBAN);
+        account.setCurrency(currency);
+        account.setAccountStatus(status);
+        return account;
+    }
+
+    private SinglePaymentTO getPayment(Currency payerCur, Currency amountCur) {
+        SinglePaymentTO payment = new SinglePaymentTO();
+        payment.setDebtorAccount(getReference(payerCur));
+        payment.setInstructedAmount(getAmount(amountCur));
+        payment.setCreditorAccount(getReference(payerCur));
+        return payment;
+    }
+
+    private AmountTO getAmount(Currency amountCur) {
+        return new AmountTO(amountCur, BigDecimal.TEN);
+    }
+
+    private AccountReferenceTO getReference(Currency payerCur) {
+        return new AccountReferenceTO(IBAN, null, null, null, null, payerCur);
     }
 
     @Test

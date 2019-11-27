@@ -9,7 +9,6 @@ import org.springframework.security.core.Authentication;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.*;
 
@@ -17,17 +16,6 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 
     public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService) {
         super(authentication, accountService, paymentService);
-    }
-
-    public boolean paymentInit(Object payment) {
-        // Either the payment is directly available or wrapped
-        Map<String, ?> map = (Map<String, ?>) payment;
-        if (map.size() == 1) {
-            map = (Map<String, ?>) map.values().iterator().next();
-        }
-        Map<String, ?> debtorAccount = (Map<String, ?>) map.get("debtorAccount");
-        String iban = (String) debtorAccount.get("iban");
-        return checkPaymentInitAccess(iban);
     }
 
     public boolean accountInfoById(String id) {

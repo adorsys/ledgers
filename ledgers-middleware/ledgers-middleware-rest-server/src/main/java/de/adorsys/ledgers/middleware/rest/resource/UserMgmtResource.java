@@ -54,6 +54,11 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
+    public ResponseEntity<Boolean> multilevel(String login, String iban) {
+        return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, iban));
+    }
+
+    @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
         // TODO: add activation of non customer members.
         UserTO user = onlineBankingService.register(login, email, pin, role);
@@ -61,13 +66,6 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         return ResponseEntity.ok(user);
     }
 
-    /**
-     * Authorize returns a bearer token that can be reused by the consuming application.
-     *
-     * @param login
-     * @param pin
-     * @return
-     */
     @Override
     public ResponseEntity<SCALoginResponseTO> authorise(String login, String pin, UserRoleTO role) {
         return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));

@@ -34,10 +34,4 @@ public class PaymentBO {
                        .allMatch(a -> a.getAmount().compareTo(BigDecimal.ZERO) > 0
                                               && a.getAmount().scale() < 3);
     }
-
-    public String getIbanFromCreditorAccount() {
-        return targets.stream().map(t -> t.getCreditorAccount().getIban())
-                       .findFirst()
-                       .get();
-    }
 }

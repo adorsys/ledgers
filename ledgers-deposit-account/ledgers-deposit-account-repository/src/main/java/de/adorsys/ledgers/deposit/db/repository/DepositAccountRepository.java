@@ -19,4 +19,5 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
 
     Optional<DepositAccount> findByIbanAndCurrency(String iban, String currency);
 
+    List<DepositAccount> findAllByIbanAndCurrencyContaining(String iban, String currency);
 }

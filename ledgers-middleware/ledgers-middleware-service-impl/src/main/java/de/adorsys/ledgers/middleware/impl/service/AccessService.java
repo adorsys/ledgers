@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
@@ -22,8 +23,19 @@ import java.util.stream.Stream;
 public class AccessService {
     private final UserService userService;
 
+    public void updateAccountAccessNewAccount(DepositAccountBO createdAccount, UserBO user, String operationInitiator) {
+        AccountAccessBO accountAccess = createAccountAccess(createdAccount.getIban(), createdAccount.getCurrency(), AccessTypeBO.OWNER);
+        updateAccountAccess(user, accountAccess);
+
+        //Check if the account is created by Branch and if so add access to this account to Branch
+        if (!user.getLogin().equals(operationInitiator)) {
+            UserBO userBO = userService.findByLogin(operationInitiator);
+            updateAccountAccess(userBO, accountAccess);
+        }
+    }
+
     public void updateAccountAccess(UserBO user, AccountAccessBO access) {
-        if (!containsAccess(user.getAccountAccesses(), access.getIban())) {
+        if (!containsAccess(user.getAccountAccesses(), access.getIban(), access.getCurrency())) {
             user.getAccountAccesses().add(access);
         } else {
             user.getAccountAccesses().forEach(a -> {
@@ -36,9 +48,9 @@ public class AccessService {
         userService.updateAccountAccess(user.getLogin(), user.getAccountAccesses());
     }
 
-    private boolean containsAccess(List<AccountAccessBO> accesses, String iban) {
+    private boolean containsAccess(List<AccountAccessBO> accesses, String iban, Currency currency) {
         return accesses.stream()
-                       .anyMatch(a -> a.getIban().equals(iban));
+                       .anyMatch(a -> a.getIban().equals(iban) && a.getCurrency().equals(currency));
     }
 
     public UserBO loadCurrentUser(String userId) {
@@ -57,10 +69,11 @@ public class AccessService {
                                  .collect(Collectors.toList());
     }
 
-    public AccountAccessBO createAccountAccess(String accNbr, AccessTypeBO accessType) {
+    public AccountAccessBO createAccountAccess(String accNbr, Currency currency, AccessTypeBO accessType) {
         AccountAccessBO accountAccess = new AccountAccessBO();
         accountAccess.setAccessType(accessType);
         accountAccess.setIban(accNbr);
+        accountAccess.setCurrency(currency);
         return accountAccess;
     }
 
@@ -75,7 +88,7 @@ public class AccessService {
         return accountAccesses.stream()
                        .filter(ac -> StringUtils.equalsIgnoreCase(ac.getIban(), debtorAccount))
                        .map(AccountAccessBO::getScaWeight)
-                       .findFirst()
+                       .min(Comparator.comparingInt(Integer::intValue))
                        .orElse(0);
     }
 

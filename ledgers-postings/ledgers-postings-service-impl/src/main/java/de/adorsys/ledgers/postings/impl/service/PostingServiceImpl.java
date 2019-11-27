@@ -3,7 +3,6 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.repository.*;
@@ -11,6 +10,7 @@ import de.adorsys.ledgers.postings.impl.converter.PostingLineMapper;
 import de.adorsys.ledgers.postings.impl.converter.PostingMapper;
 import de.adorsys.ledgers.util.CloneUtils;
 import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
@@ -183,6 +183,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         }
 
         if (!sumDebit.equals(sumCredit)) {
+            log.error(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit));
             throw PostingModuleException.builder()
                           .errorCode(DOBLE_ENTRY_ERROR)
                           .devMsg(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit))
