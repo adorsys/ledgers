@@ -3,8 +3,6 @@ package de.adorsys.ledgers.postings.impl.service;
 import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.domain.NamedBO;
-import de.adorsys.ledgers.util.exception.PostingErrorCode;
-import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.repository.ChartOfAccountRepository;
@@ -12,6 +10,8 @@ import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
 import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.impl.converter.LedgerMapper;
 import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.exception.PostingErrorCode;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
@@ -95,9 +95,13 @@ public class LedgerServiceImpl extends AbstractServiceImpl implements LedgerServ
     }
 
     @Override
-    public Optional<LedgerAccountBO> findLedgerAccountById(String id) {
+    public LedgerAccountBO findLedgerAccountById(String id) {
         return ledgerAccountRepository.findById(id)
-                       .map(ledgerAccountMapper::toLedgerAccountBO);
+                       .map(ledgerAccountMapper::toLedgerAccountBO)
+                       .orElseThrow(() -> PostingModuleException.builder()
+                                                  .errorCode(PostingErrorCode.LEDGER_ACCOUNT_NOT_FOUND)
+                                                  .devMsg(String.format(LA_NF_BY_NAME_MSG, id))
+                                                  .build());
     }
 
     @Override

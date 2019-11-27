@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.Currency;
 
+import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,7 +52,7 @@ public class DepositAccountBO {
 
     private AccountTypeBO accountType;
 
-    private AccountStatusBO accountStatus = AccountStatusBO.ENABLED;
+    private AccountStatusBO accountStatus = ENABLED;
 
     /*
      * SWIFT
@@ -77,4 +79,19 @@ public class DepositAccountBO {
      * - characteristics of the relevant card
      */
     private String details;
+
+    public boolean isEnabled() {
+        return accountStatus == ENABLED;
+    }
+
+    public AccountReferenceBO getReference() {
+        AccountReferenceBO reference = new AccountReferenceBO();
+        reference.setIban(iban);
+        reference.setCurrency(currency);
+        reference.setBban(bban);
+        reference.setMsisdn(msisdn);
+        reference.setPan(pan);
+        reference.setMaskedPan(maskedPan);
+        return reference;
+    }
 }

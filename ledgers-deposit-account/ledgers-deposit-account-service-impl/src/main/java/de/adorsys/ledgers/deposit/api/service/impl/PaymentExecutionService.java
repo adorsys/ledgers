@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
@@ -10,13 +9,13 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.objectlab.kit.datecalc.common.DateCalculator;
 import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar;
 import net.objectlab.kit.datecalc.common.HolidayCalendar;
 import net.objectlab.kit.datecalc.jdk8.LocalDateKitCalculatorsFactory;
-import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
@@ -61,7 +59,7 @@ public class PaymentExecutionService implements InitializingBean {
             return TransactionStatusBO.RJCT;
         }
         LocalDateTime executionTime = LocalDateTime.now();
-        txService.bookPayment(payment, executionTime, userName);
+        txService.bookPayment(paymentBO, executionTime, userName);
         payment.setExecutedDate(executionTime);
 
         if (EnumSet.of(PaymentType.SINGLE, PaymentType.BULK).contains(payment.getPaymentType())) {
@@ -101,16 +99,11 @@ public class PaymentExecutionService implements InitializingBean {
     }
 
     private TransactionStatusBO finalizePaymentStatus(Payment payment) {
-        TransactionStatusBO status = null;
-        try {
-            List<DepositAccountDetailsBO> creditorAccounts = accountService.getDepositAccountsByIban(payment.getTargets().stream().map(t -> t.getCreditorAccount().getIban()).collect(Collectors.toList()), LocalDateTime.now(), false);
-            if (CollectionUtils.isNotEmpty(creditorAccounts)) {
-                status = updatePaymentStatus(payment, TransactionStatus.ACCC);
-            }
-        } catch (DepositModuleException e) {
-            status = updatePaymentStatus(payment, TransactionStatus.ACSC);
-        }
-        return status;
+        return payment.getTargets().stream()
+                       .map(t -> accountService.getOptionalAccountByIbanAndCurrency(t.getCreditorAccount().getIban(), Currency.getInstance(t.getCreditorAccount().getCurrency())))
+                       .allMatch(Optional::isPresent)
+                       ? updatePaymentStatus(payment, TransactionStatus.ACCC)
+                       : updatePaymentStatus(payment, TransactionStatus.ACSC);
     }
 
     private TransactionStatusBO updatePaymentStatus(Payment payment, TransactionStatus status) {
@@ -129,7 +122,7 @@ public class PaymentExecutionService implements InitializingBean {
     private TransactionStatusBO followingExecution(Payment payment, String userName) {
         if (dateCalculator(PRECEDING, LocalDate.now()).isNonWorkingDay(LocalDate.now().minusDays(1)) && LocalDate.now().isAfter(payment.getStartDate())) {
             LocalDate prevBusinessDay = dateCalculator(PRECEDING, LocalDate.now().minusDays(1)).getCurrentBusinessDate();
-            IntStream.range(prevBusinessDay.getDayOfMonth(), LocalDate.now().getDayOfMonth() - 1).forEach(i -> txService.bookPayment(payment, LocalDateTime.now(), userName));
+            IntStream.range(prevBusinessDay.getDayOfMonth(), LocalDate.now().getDayOfMonth() - 1).forEach(i -> txService.bookPayment(paymentMapper.toPaymentBO(payment), LocalDateTime.now(), userName));
         }
         return schedulePayment(payment);
     }
@@ -137,7 +130,7 @@ public class PaymentExecutionService implements InitializingBean {
     private TransactionStatusBO precedingExecution(Payment payment, String userName) {
         LocalDate nextBusinessDay = dateCalculator(FOLLOWING, LocalDate.now().plusDays(1)).getCurrentBusinessDate();
         if (dateCalculator(FOLLOWING, LocalDate.now()).isNonWorkingDay(LocalDate.now().plusDays(1))) {
-            IntStream.range(LocalDate.now().getDayOfMonth() + 1, nextBusinessDay.getDayOfMonth()).forEach(i -> txService.bookPayment(payment, LocalDateTime.now(), userName));
+            IntStream.range(LocalDate.now().getDayOfMonth() + 1, nextBusinessDay.getDayOfMonth()).forEach(i -> txService.bookPayment(paymentMapper.toPaymentBO(payment), LocalDateTime.now(), userName));
         }
         payment.setExecutedDate(LocalDateTime.of(nextBusinessDay.minusDays(1), LocalTime.MIN));
         return schedulePayment(payment);

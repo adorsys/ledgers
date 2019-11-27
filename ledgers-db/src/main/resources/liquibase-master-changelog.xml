@@ -50,5 +50,6 @@
     <include file="migration/0015-create-table-oauth-code.xml" relativeToChangelogFile="true" />
     <include file="migration/0016-add-oauth-code-usages-table.xml" relativeToChangelogFile="true" />
     <include file="migration/0017-fix-sca-weight-to-100.xml" relativeToChangelogFile="true" />
+    <include file="migration/0018-link-DA-to-LA.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

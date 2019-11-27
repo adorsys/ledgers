@@ -35,6 +35,16 @@ public interface AccountMgmStaffResourceAPI {
     String PAGE = "page";
     String SIZE = "size";
 
+    @ApiOperation(value = "Retrieves account by iban and Currency",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Account creation successful"),
+            @ApiResponse(code = 404, message = "User with this ID not found"),
+            @ApiResponse(code = 409, message = "Account with given IBAN already exists.")
+    })
+    @GetMapping("/acc/acc")
+    ResponseEntity<List<AccountDetailsTO>> getAccountsByIbanAndCurrency(@RequestParam(name = "iban") String iban, @RequestParam(name = "currency", required = false, defaultValue = "") String currency);
+
     /**
      * Creates a new deposit account for a user specified by ID
      * Account is created for the same branch as Staff user

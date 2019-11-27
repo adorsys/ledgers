@@ -22,6 +22,7 @@ public class PermittedResources {
             "/users/login",
             "/users/register",
             "/users/loginForConsent",
+            "/users/multilevel",
             "/data-test/upload-mockbank-data",
             "/data-test/db-flush",
             "/staff-access/users/register",

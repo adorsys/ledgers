@@ -44,12 +44,16 @@ accounts:
 ###############################################
 balances:
   - accNbr: DE69760700240340283600
+    currency: EUR
     balance: 25000.00
   - accNbr: DE80760700240271232400
+    currency: EUR
     balance: 30000.00
   - accNbr: DE38760700240320465700
+    currency: EUR
     balance: 10000.00
   - accNbr: DE32760700240271232100
+    currency: EUR
     balance: 1000000.00
 
 ###############################################
@@ -69,6 +73,7 @@ users:
     #        methodValue: marion.mueller@mail.de
     accountAccesses:
       - iban: DE69760700240340283600
+        currency: EUR
         accessType: OWNER
         scaWeight: 100
   # Anton Brueckner has one sca configured. So her login process has one single phase with an ScaStatus.SCAMETHODSELECTED
@@ -80,6 +85,7 @@ users:
         methodValue: anton.brueckner@mail.de
     accountAccesses:
       - iban: DE80760700240271232400
+        currency: EUR
         accessType: OWNER
         scaWeight: 100
   # Max Mustermann has two sca methods configured. So her login process has one single phase with an ScaStatus.PSUAUTHENTICATED
@@ -93,6 +99,7 @@ users:
         methodValue: max.musterman2@mail.de
     accountAccesses:
       - iban: DE38760700240320465700
+        currency: EUR
         accessType: OWNER
         scaWeight: 100
   # Multi-level-SCA users
@@ -105,6 +112,7 @@ users:
         methodValue: accountant@mail.de
     accountAccesses:
       - iban: DE32760700240271232100
+        currency: EUR
         accessType: OWNER
         scaWeight: 30
   # Chief Accountant has 60% access to account
@@ -116,6 +124,7 @@ users:
         methodValue: chief.accountant@mail.de
     accountAccesses:
       - iban: DE32760700240271232100
+        currency: EUR
         accessType: OWNER
         scaWeight: 60
   # SupplyChain Manager has 10% access to account
@@ -127,6 +136,7 @@ users:
         methodValue: sc.manager@mail.de
     accountAccesses:
       - iban: DE32760700240271232100
+        currency: EUR
         accessType: OWNER
         scaWeight: 10
   # General Manager has 90% access to account
@@ -138,6 +148,7 @@ users:
         methodValue: g.manager@mail.de
     accountAccesses:
       - iban: DE32760700240271232100
+        currency: EUR
         accessType: OWNER
         scaWeight: 90
 

@@ -3,15 +3,15 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Currency;
+import java.util.Set;
 
 @Api(tags = "LDG011 - Data management (STAFF access)")
 public interface DataMgmtStaffAPI {
     String BASE_PATH = "/staff-access/data";
-
+//TODO CONSIDER REFACTORING TO USE ACCOUNT-ID AS SIMPLE IBAN IS NOT A VALID IDENTIFIER ANYMORE https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/467
     @DeleteMapping(value = "/transactions/{iban}")
     @ApiOperation(value = "Removes all transactions for account", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -35,4 +35,8 @@ public interface DataMgmtStaffAPI {
     @ApiOperation(value = "Upload data to Ledgers (users, accounts, transactions, balances)", authorizations = @Authorization(value = "apiKey"))
     @PostMapping(value = "/upload")
     ResponseEntity<Void> uploadData(@RequestBody UploadedDataTO data);
+
+    @ApiOperation(value = "Retrieve the currencies list supported by ASPSP", authorizations = @Authorization(value = "apiKey"))
+    @GetMapping(value = "/currencies")
+    ResponseEntity<Set<Currency>> currencies();
 }

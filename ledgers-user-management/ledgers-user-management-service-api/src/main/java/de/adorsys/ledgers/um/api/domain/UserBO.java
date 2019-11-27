@@ -19,12 +19,10 @@ package de.adorsys.ledgers.um.api.domain;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 @Setter
@@ -84,5 +82,15 @@ public class UserBO {
                        ", userRoles=" + userRoles +
                        ", branch='" + branch + '\'' +
                        '}';
+    }
+
+    public boolean hasAccessToAccount(String iban) {
+        return accountAccesses.stream()
+                       .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban));
+    }
+
+    public boolean hasAccessToAccount(String iban, Currency currency) {
+        return accountAccesses.stream()
+                       .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban) && a.getCurrency().equals(currency));
     }
 }

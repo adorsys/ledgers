@@ -4,6 +4,7 @@ import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.rest.exception.NotFoundRestException;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriBuilder;
@@ -70,8 +71,12 @@ public class LedgerController {
 
     @GetMapping(path = "/accounts/{id}")
     public ResponseEntity<LedgerAccountBO> findLedgerAccountById(@PathVariable("id") String id) {
-        LedgerAccountBO la = ledgerService.findLedgerAccountById(id).orElseThrow(() -> new NotFoundRestException(id));
-        return ResponseEntity.ok(la);
+        try {
+            LedgerAccountBO la = ledgerService.findLedgerAccountById(id);
+            return ResponseEntity.ok(la);
+        } catch (PostingModuleException e) {
+            throw new NotFoundRestException(id);
+        }
     }
 
     /**

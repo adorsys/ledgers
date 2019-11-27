@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
+import de.adorsys.ledgers.middleware.api.service.CurrencyService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
@@ -11,6 +12,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Currency;
+import java.util.Set;
+
 @RestController
 @MiddlewareResetResource
 @RequiredArgsConstructor
@@ -19,6 +23,7 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService accountManagementService;
     private final AppManagementService appManagementService;
+    private final CurrencyService currencyService;
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
@@ -39,5 +44,11 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     public ResponseEntity<Void> uploadData(UploadedDataTO data) {
         appManagementService.uploadData(data, scaInfoHolder.getScaInfo());
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    public ResponseEntity<Set<Currency>> currencies() {
+        return ResponseEntity.ok(currencyService.getSupportedCurrencies());
     }
 }

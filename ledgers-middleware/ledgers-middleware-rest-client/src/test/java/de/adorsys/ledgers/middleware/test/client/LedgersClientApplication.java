@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.test.client;
 
+import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
@@ -38,10 +39,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDepositAccountService
 @EnableLedgersMiddlewareService
 @EnableLedgersMiddlewareRest
-@EnableFeignClients(basePackageClasses=AccountRestClient.class)
+@EnableFeignClients(basePackageClasses = {AccountRestClient.class, ExchangeRateClient.class})
 public class LedgersClientApplication {
 
-	public static void main(String[] args) {
-		new SpringApplicationBuilder(LedgersClientApplication.class).run(args);
-	}
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(LedgersClientApplication.class).run(args);
+    }
 }

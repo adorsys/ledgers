@@ -52,7 +52,6 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("paymentInit(#payment)")
     public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, Object payment) {
         return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment, paymentType), HttpStatus.CREATED);
     }

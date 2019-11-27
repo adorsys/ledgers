@@ -2,6 +2,8 @@ package de.adorsys.ledgers.deposit.api.domain;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PaymentTargetDetailsBO extends TransactionDetailsBO {
     private AddressBO creditorAddress;
@@ -13,4 +15,5 @@ public class PaymentTargetDetailsBO extends TransactionDetailsBO {
     private TransactionStatusBO transactionStatus;
     private PaymentProductBO paymentProduct;
     private String creditorAgent;
+    private List<ExchangeRateBO> exchangeRate;
 }

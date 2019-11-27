@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="11-11-2019-01">
+        <comment>Fill ids of Ledger Account at DepositAccount</comment>
+        <sql>
+            update deposit_account
+            set linked_accounts =
+            (select id from ledger_account
+            where ledger_account.name = deposit_account.iban)
+        </sql>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-11-2019-01">
+        <comment>Add column currency to Account Accesses anf fix values</comment>
+        <addColumn tableName="account_accesses">
+            <column name="currency" type="VARCHAR(255)"/>
+        </addColumn>
+        <sql>
+            update account_accesses
+            set currency =
+            (select currency from deposit_account
+            where deposit_account.iban = account_accesses.iban)
+        </sql>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-11-2019-02">
+        <comment>Drop constraint for ledger_account</comment>
+        <dropUniqueConstraint constraintName="ledgeraccount_ledger_id_name_unique" tableName="ledger_account"/>
+    </changeSet>
+</databaseChangeLog>

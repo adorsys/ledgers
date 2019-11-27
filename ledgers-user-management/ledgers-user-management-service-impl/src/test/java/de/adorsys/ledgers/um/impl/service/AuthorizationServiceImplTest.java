@@ -1,9 +1,9 @@
 package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.PasswordEnc;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 
@@ -108,6 +109,7 @@ public class AuthorizationServiceImplTest {
 
     private List<AccountAccessBO> getAccesses() {
         AccountAccessBO accessBO = new AccountAccessBO(USER_IBAN, AccessTypeBO.OWNER);
+        accessBO.setCurrency(Currency.getInstance("EUR"));
         return Collections.singletonList(accessBO);
     }
 }

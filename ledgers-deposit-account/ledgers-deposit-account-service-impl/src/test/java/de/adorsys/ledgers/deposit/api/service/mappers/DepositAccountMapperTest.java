@@ -38,24 +38,6 @@ public class DepositAccountMapperTest {
         assertThat(account).isEqualToComparingFieldByFieldRecursively(getDepositAccount());
     }
 
-    @Test
-    public void createDepositAccountObj() {
-        DepositAccount result = depositAccountMapper.createDepositAccountObj(getDepositAccount());
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getIban()).isEqualTo(getDepositAccount().getIban());
-        assertThat(result.getMsisdn()).isEqualTo(getDepositAccount().getMsisdn());
-        assertThat(result.getCurrency()).isEqualTo(getDepositAccount().getCurrency());
-        assertThat(result.getName()).isEqualTo(getDepositAccount().getName());
-        assertThat(result.getProduct()).isEqualTo(getDepositAccount().getProduct());
-        assertThat(result.getAccountType()).isEqualTo(getDepositAccount().getAccountType());
-        assertThat(result.getAccountStatus()).isEqualTo(getDepositAccount().getAccountStatus());
-        assertThat(result.getBic()).isEqualTo(getDepositAccount().getBic());
-        assertThat(result.getLinkedAccounts()).isEqualTo(getDepositAccount().getLinkedAccounts());
-        assertThat(result.getUsageType()).isEqualTo(getDepositAccount().getUsageType());
-        assertThat(result.getDetails()).isEqualTo(getDepositAccount().getDetails());
-
-    }
-
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
                 "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic",

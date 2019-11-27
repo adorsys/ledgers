@@ -6,7 +6,6 @@ import de.adorsys.ledgers.middleware.api.service.CurrencyService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.IBANValidator;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -68,9 +69,12 @@ public class ValidationFilter extends OncePerRequestFilter {
     @SneakyThrows
     private Collection<String> readValuesByField(MultiReadHttpServletRequest servletRequest, String fieldName) {
         JsonNode jsonNode = mapper.readTree(servletRequest.getInputStream());
-        return jsonNode != null
-                       ? jsonNode.findValuesAsText(fieldName)
-                       : CollectionUtils.emptyCollection();
+        List<String> values = jsonNode != null
+                                      ? jsonNode.findValuesAsText(fieldName)
+                                      : new ArrayList<>();
+        Optional.ofNullable(servletRequest.getParameter(fieldName))
+                .ifPresent(values::add);
+        return values;
     }
 
     private boolean isSupportedCurrency(String currency) {

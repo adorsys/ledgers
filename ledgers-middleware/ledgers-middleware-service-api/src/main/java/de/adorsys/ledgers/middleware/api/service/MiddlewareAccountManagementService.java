@@ -19,6 +19,8 @@ import java.util.List;
 
 public interface MiddlewareAccountManagementService {
 
+    List<AccountDetailsTO> getAccountsByIbanAndCurrency(String iban, String currency);
+
     /**
      * Creates a new DepositAccount. This deposit account is then linked with the specified user.
      * <p>

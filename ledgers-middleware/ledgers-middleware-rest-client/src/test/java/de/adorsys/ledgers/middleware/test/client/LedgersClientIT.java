@@ -9,6 +9,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.client.rest.*;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import feign.FeignException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -171,6 +172,7 @@ public class LedgersClientIT {
     private AccountAccessTO getAccountAccess(AccountDetailsTO account, AccessTypeTO accessType, int scaWeight) {
         AccountAccessTO access = new AccountAccessTO();
         access.setIban(account.getIban());
+        access.setCurrency(Currency.getInstance("EUR"));
         access.setAccessType(accessType);
         access.setScaWeight(scaWeight);
         return access;

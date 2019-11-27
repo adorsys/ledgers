@@ -7,12 +7,12 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -194,9 +194,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         return
                 // Same iban
                 StringUtils.equals(requested.getIban(), existent.getIban())
-                        &&
+                        // Same currency
+                        && requested.getCurrency().equals(existent.getCurrency())
                         // Make sure old access still valid
-                        requested.getAccessType().compareTo(existent.getAccessType()) <= 0;
+                        && requested.getAccessType().compareTo(existent.getAccessType()) <= 0;
     }
 
     private BearerTokenBO getToken(ScaInfoBO scaInfoBO, TokenUsageBO usageType) {
