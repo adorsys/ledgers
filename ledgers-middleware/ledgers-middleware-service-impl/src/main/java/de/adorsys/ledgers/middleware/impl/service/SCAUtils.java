@@ -31,6 +31,10 @@ public class SCAUtils {
                        .orElse(null);
     }
 
+    public ScaUserDataTO getScaMethod(UserBO user, String scaMethodId) {
+        return getScaMethod(userMapper.toUserTO(user), scaMethodId);
+    }
+
     public UserTO user(String userId) {
         return user(userBO(userId));
     }

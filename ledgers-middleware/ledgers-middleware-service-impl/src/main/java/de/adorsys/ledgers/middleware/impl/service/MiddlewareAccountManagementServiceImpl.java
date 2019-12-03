@@ -77,7 +77,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
     private final PageMapper pageMapper;
-    private final ScaResponseMapper scaResponseMapper;
+    private final ScaResponseResolver scaResponseResolver;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -204,7 +204,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         List<AccountAccessTO> accountAccesses = userMapper.toAccountAccessListTO(userService.findById(userId).getAccountAccesses());
 
         // Empty if user is not owner of this prefix.
-        if (accountAccesses == null || accountAccesses.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(accountAccesses)) {
             // User can not own any of those accounts.
             throw MiddlewareModuleException.builder()
                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
@@ -295,18 +295,20 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId) {
-        UserTO user = userMapper.toUserTO(scaUtils.userBO(userId));
+        UserBO user = scaUtils.userBO(userId);
         AisConsentBO consent = userService.loadConsent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
-        return toScaConsentResponse(user, consent, consentKeyData.template(), scaOperationBO);
+        int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), user.getAccountAccesses());
+        SCAConsentResponseTO response = toScaConsentResponse(userMapper.toUserTO(user), consent, consentKeyData.template(), scaOperationBO);
+        response.setMultilevelScaRequired(multilevelScaEnable && scaWeight < 100);
+        return response;
     }
 
     @Override
     public SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId, String scaMethodId) {
         UserBO userBO = scaUtils.userBO(userId);
-        UserTO userTO = scaUtils.user(userBO);
         AisConsentBO consent = userService.loadConsent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
@@ -318,7 +320,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                 defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
 
         SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
-        return toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+        SCAConsentResponseTO response = toScaConsentResponse(userMapper.toUserTO(userBO), consent, consentKeyData.template(), scaOperationBO);
+        response.setMultilevelScaRequired(multilevelScaEnable && scaWeight < 100);
+        return response;
     }
 
     @Override
@@ -344,8 +348,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
             BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
             response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-        } else if (multilevelScaEnable) {
-            response.setPartiallyAuthorised(true);
+        } else {
+            response.setPartiallyAuthorised(multilevelScaEnable);
+            response.setMultilevelScaRequired(multilevelScaEnable);
         }
         return response;
     }
@@ -462,7 +467,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
             return response;
         } else {
             // start SCA
-            SCAOperationBO scaOperationBO;
             AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
             consentBO = userService.storeConsent(consentBO);
 
@@ -474,14 +478,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                     defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
             // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside
             // The system. Even if a user ha only one sca method.
-            scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
-            return toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
+            SCAOperationBO scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
+            SCAConsentResponseTO response = toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
+            response.setMultilevelScaRequired(multilevelScaEnable && scaWeight < 100);
+            return response;
         }
     }
 
     private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
         SCAConsentResponseTO response = new SCAConsentResponseTO();
-        scaResponseMapper.completeResponse(response, operation, user, messageTemplate, null);
+        scaResponseResolver.completeResponse(response, operation, user, messageTemplate, null);
         response.setConsentId(consent.getId());
         return response;
     }

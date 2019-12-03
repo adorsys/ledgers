@@ -16,17 +16,37 @@
 
 package de.adorsys.ledgers.um.api.domain;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
-@Data
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AisConsentBO {
-	private String id;
+    private String id;
     private String userId;
     private String tppId;
     private int frequencyPerDay;
     private AisAccountAccessInfoBO access;
     private LocalDate validUntil;
     private boolean recurringIndicator;
+
+    public AisConsentBO(String ibanForAccess, int frequencyPerDay, boolean recurringIndicator, String userId) {
+        this.access = new AisAccountAccessInfoBO();
+        List<String> list = Collections.singletonList(ibanForAccess);
+        this.access.setAccounts(list);
+        this.access.setTransactions(list);
+        this.access.setBalances(list);
+        this.frequencyPerDay = frequencyPerDay;
+        this.recurringIndicator = recurringIndicator;
+        this.userId = userId;
+    }
 }

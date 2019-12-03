@@ -16,8 +16,10 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.util.exception.DepositModuleException;
+import de.adorsys.ledgers.deposit.api.domain.AmountBO;
+import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
@@ -27,6 +29,7 @@ import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -72,24 +75,23 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
                           .build();
         }
 
-        Payment persistedPayment = paymentMapper.toPayment(payment);
-        persistedPayment.getTargets().forEach(t -> {
-            t.setPayment(persistedPayment);
+        Payment paymentToPersist = paymentMapper.toPayment(payment);
+        paymentToPersist.getTargets().forEach(t -> {
+            t.setPayment(paymentToPersist);
             t.setPaymentId(Ids.id());
         });
-        persistedPayment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
 
         AmountBO amountToVerify = executionService.calculateTotalPaymentAmount(payment);
-
         boolean confirmationOfFunds = accountService.confirmationOfFunds(new FundsConfirmationRequestBO(null, payment.getDebtorAccount(), amountToVerify, null, null));
+
         if (confirmationOfFunds) {
-            Payment savedPayment = paymentRepository.save(persistedPayment);
+            paymentToPersist.setTransactionStatus(TransactionStatus.valueOf(status.name()));
+            Payment savedPayment = paymentRepository.save(paymentToPersist);
             return paymentMapper.toPaymentBO(savedPayment);
         } else {
-            persistedPayment.setTransactionStatus(TransactionStatus.RJCT);
             throw DepositModuleException.builder()
                           .errorCode(INSUFFICIENT_FUNDS)
-                          .devMsg(String.format("Payment with id: %s failed due to Insufficient Funds Available", persistedPayment.getPaymentId()))
+                          .devMsg(String.format("Payment with id: %s failed due to Insufficient Funds Available", paymentToPersist.getPaymentId()))
                           .build();
         }
     }
