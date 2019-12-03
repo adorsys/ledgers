@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -59,8 +60,12 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
+    public ResponseEntity<Boolean> multilevelAccounts(String login, List<AccountReferenceTO> references) {
+        return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, references));
+    }
+
+    @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
-        // TODO: add activation of non customer members.
         UserTO user = onlineBankingService.register(login, email, pin, role);
         user.setPin(null);
         return ResponseEntity.ok(user);

@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
@@ -11,12 +12,14 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -147,5 +150,39 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         }
 
         return accessService.resolveScaWeightByDebtorAccount(user.getAccountAccesses(), iban) < 100;
+    }
+
+    @Override
+    public boolean checkMultilevelScaRequired(String login, List<AccountReferenceTO> references) {
+        if (!multilevelScaEnable) {
+            return false;
+        }
+        UserBO user = userService.findByLogin(login);
+
+        if (CollectionUtils.isEmpty(references)) {
+            return user.getAccountAccesses().stream()
+                           .anyMatch(a -> a.getScaWeight() < 100);
+        }
+        boolean allMatch = references.stream()
+                                   .allMatch(r -> Optional.ofNullable(r.getCurrency())
+                                                          .map(c -> user.hasAccessToAccount(r.getIban(), c))
+                                                          .orElse(user.hasAccessToAccount(r.getIban())));
+        if (!allMatch) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg("User doesn't have access to the requested account")
+                          .build();
+        }
+
+        return user.getAccountAccesses().stream()
+                       .filter(a -> contained(a, references))
+                       .anyMatch(a -> a.getScaWeight() < 100);
+    }
+
+    private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {
+        return references.stream()
+                       .anyMatch(r -> Optional.ofNullable(r.getCurrency())
+                                              .map(c -> access.getCurrency().equals(c) && access.getIban().equalsIgnoreCase(r.getIban()))
+                                              .orElse(access.getIban().equalsIgnoreCase(r.getIban())));
     }
 }
