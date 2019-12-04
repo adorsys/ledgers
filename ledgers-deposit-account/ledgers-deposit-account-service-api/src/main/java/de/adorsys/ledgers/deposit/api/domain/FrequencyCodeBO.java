@@ -35,7 +35,9 @@ public enum FrequencyCodeBO {
 
     SEMIANNUAL("SemiAnnual"),
 
-    ANNUAL("Annual");
+    ANNUAL("Annual"),
+
+    MONTHLYVARIABLE("Monthlyvariable");
 
     private String value;
 

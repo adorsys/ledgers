@@ -36,6 +36,11 @@ public class PermittedResources {
             "/console/**"
     };
 
+    public static final String[] ACTUATOR_WHITELIST = {
+            "/actuator/info",
+            "/actuator/health"
+    };
+
     private PermittedResources() {
     }
 }

@@ -31,14 +31,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests().antMatchers(
-                APP_WHITELIST).permitAll()
+                .authorizeRequests().antMatchers(APP_WHITELIST).permitAll()
                 .and()
                 .authorizeRequests().antMatchers(INDEX_WHITELIST).permitAll()
                 .and()
                 .authorizeRequests().antMatchers(SWAGGER_WHITELIST).permitAll()
                 .and()
                 .authorizeRequests().antMatchers(CONSOLE_WHITELIST).permitAll()
+                .and()
+                .authorizeRequests().antMatchers(ACTUATOR_WHITELIST).permitAll()
                 .and()
                 .cors()
                 .and()

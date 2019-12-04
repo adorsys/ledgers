@@ -126,7 +126,15 @@ management:
         allowed-headers: Access-Control-Allow-Headers, Content-Type, Origin, X-Requested-With, Cookie, Authorization
         allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
         max-age: 3600
-
+    enabled-by-default: false
+  endpoint:
+    info:
+      enabled: true
+    health:
+      enabled: true
+  health:
+    mail:
+      enabled: false
 ---
 spring:
   profiles: h2
