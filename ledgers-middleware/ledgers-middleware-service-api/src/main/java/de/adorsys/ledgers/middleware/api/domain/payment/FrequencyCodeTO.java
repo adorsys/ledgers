@@ -8,7 +8,8 @@ public enum FrequencyCodeTO {
     EVERYTWOMONTHS("EveryTwoMonths"),
     QUARTERLY("Quarterly"),
     SEMIANNUAL("SemiAnnual"),
-    ANNUAL("Annual");
+    ANNUAL("Annual"),
+    MONTHLYVARIABLE("Monthlyvariable");
 
     private String value;
 
