@@ -47,7 +47,7 @@ public interface PaymentMapper {
     @Mapping(source = "rate", target = "exchangeRate")
     PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime, List<ExchangeRateBO> rate);
 
-    @Mapping(target = "transactionId", expression = "java( id())")
+    @Mapping(target = "transactionId", source = "postingLineId")
     @Mapping(target = "endToEndId", source = "postingLineId")
     @Mapping(target = "bookingDate", source = "postingDate")
     @Mapping(target = "valueDate", source = "postingDate")
