@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class ASPSPConfigData {
-    private static final ClearingAccount NO_ACCOUNT = new ClearingAccount();
     private String name;
     private String ledger;
     private String coaFile;
@@ -20,9 +19,9 @@ public class ASPSPConfigData {
     private String updateMarkerAccountNbr;
 
     public String getClearingAccount(String paymentProduct) {
-        return clearingAccounts.stream()
-                       .filter(c -> c.getPaymentProduct().equals(paymentProduct))
+        return clearingAccounts.stream().filter(a -> a.getPaymentProduct().equalsIgnoreCase(paymentProduct))
+                       .map(ClearingAccount::getAccountNbr)
                        .findFirst()
-                       .orElse(NO_ACCOUNT).getAccountNbr();
+                       .orElseGet(() -> getClearingAccount("others"));
     }
 }

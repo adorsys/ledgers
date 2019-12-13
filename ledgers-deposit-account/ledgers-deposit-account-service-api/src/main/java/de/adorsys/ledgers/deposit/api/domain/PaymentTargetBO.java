@@ -18,8 +18,9 @@ public class PaymentTargetBO {
     private String creditorAgent;
     private String creditorName;
     private AddressBO creditorAddress;
+    private PurposeCodeBO purposeCode;
     private String remittanceInformationUnstructured;
-    private PaymentProductBO paymentProduct;
+    private RemittanceInformationStructuredBO remittanceInformationStructured;
     private PaymentBO payment;
 
     public boolean isAllCurrenciesMatch() {

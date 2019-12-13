@@ -16,7 +16,6 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +37,8 @@ public class DepositAccountConfigServiceImpl implements DepositAccountConfigServ
     }
 
     @Override
-    public String getClearingAccount(PaymentProductBO paymentProduct) {
-        return configData.getClearingAccount(paymentProduct.name());
+    public String getClearingAccount(String paymentProduct) {
+        return configData.getClearingAccount(paymentProduct);
     }
 
     @Override

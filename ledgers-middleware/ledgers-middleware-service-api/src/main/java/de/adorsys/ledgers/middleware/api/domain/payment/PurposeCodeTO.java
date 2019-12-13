@@ -1,9 +1,6 @@
-package de.adorsys.ledgers.deposit.api.domain;
+package de.adorsys.ledgers.middleware.api.domain.payment;
 
-/**
- * ExternalPurpose1Code from ISO 20022.  Values from ISO 20022 External Code List ExternalCodeSets_1Q2018 June 2018.
- */
-public enum PurposeCodeBO {
+public enum PurposeCodeTO {
     BKDF,
     BKFE,
     BKFM,

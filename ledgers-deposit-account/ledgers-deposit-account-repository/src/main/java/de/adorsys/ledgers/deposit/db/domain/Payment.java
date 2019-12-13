@@ -49,6 +49,8 @@ public class Payment {
     @Column(nullable = false)
     private PaymentType paymentType;
 
+    private String paymentProduct;
+
     /**
      * Represents the starting date for Periodic payments
      */
@@ -108,16 +110,6 @@ public class Payment {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     private List<PaymentTarget> targets = new ArrayList<>();
-
-
-    //Additional PaymentRelated Logic
-    public boolean isInstant() {
-        return getTargets().stream()
-                       .findFirst()
-                       .map(t -> t.getPaymentProduct() == PaymentProduct.INSTANT_SEPA
-                                         || t.getPaymentProduct() == PaymentProduct.TARGET2)
-                       .orElse(false);
-    }
 
     public boolean isLastExecuted(LocalDate nextPossibleExecutionDate){
         return endDate != null && nextPossibleExecutionDate.isAfter(endDate);

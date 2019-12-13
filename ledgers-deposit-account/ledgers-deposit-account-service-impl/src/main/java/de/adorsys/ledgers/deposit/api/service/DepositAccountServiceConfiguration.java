@@ -24,5 +24,4 @@ public class DepositAccountServiceConfiguration {
     public ASPSPConfigData configData() {
         return configSource.aspspConfigData();
     }
-
 }

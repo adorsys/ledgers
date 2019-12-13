@@ -3,6 +3,7 @@ batchBookingPreferred:
 requestedExecutionDate: 2018-12-12
 requestedExecutionTime: 12:00:00
 paymentType: SINGLE
+paymentProduct: "sepa-credit-transfers"
 startDate:
 endDate:
 executionRule:

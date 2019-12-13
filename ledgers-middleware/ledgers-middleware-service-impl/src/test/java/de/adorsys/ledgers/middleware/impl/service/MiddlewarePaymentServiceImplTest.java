@@ -1,13 +1,13 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
@@ -15,6 +15,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.impl.config.PaymentProductsConfig;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
@@ -32,15 +33,13 @@ import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.core.Is.is;
@@ -173,6 +172,7 @@ public class MiddlewarePaymentServiceImplTest {
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
+        Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
         Object result = middlewareService.initiatePayment(buildScaInfoTO(), readYml(SinglePaymentTO.class, SINGLE_TO), PaymentTypeTO.SINGLE);
         assertNotNull(result);
     }
@@ -183,7 +183,7 @@ public class MiddlewarePaymentServiceImplTest {
         SinglePaymentTO paymentTO = getPayment(EUR, EUR);
         PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
         paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
-        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        paymentBO.setPaymentProduct("instant-sepa-credit-transfers");
         UserBO userBO = new UserBO("Test", "", "");
         UserTO userTO = new UserTO("Test", "", "");
 
@@ -195,6 +195,7 @@ public class MiddlewarePaymentServiceImplTest {
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
+        Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
 
         SCAPaymentResponseTO result = middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
         assertNotNull(result);
@@ -206,14 +207,12 @@ public class MiddlewarePaymentServiceImplTest {
         SinglePaymentTO paymentTO = getPayment(null, USD);
         PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
         paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
-        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        paymentBO.setPaymentProduct("instant-sepa-credit-transfers");
         UserBO userBO = new UserBO("Test", "", "");
         UserTO userTO = new UserTO("Test", "", "");
 
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.ENABLED, EUR, USD));
-
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
-
+        Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
         middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
     }
 
@@ -223,11 +222,11 @@ public class MiddlewarePaymentServiceImplTest {
         SinglePaymentTO paymentTO = getPayment(USD, EUR);
         PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
         paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
-        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        paymentBO.setPaymentProduct("instant-sepa-credit-transfers");
         UserBO userBO = new UserBO("Test", "", "");
         UserTO userTO = new UserTO("Test", "", "");
 
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.emptyList());
+        Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
 
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
 
@@ -240,12 +239,10 @@ public class MiddlewarePaymentServiceImplTest {
         SinglePaymentTO paymentTO = getPayment(USD, EUR);
         PaymentBO paymentBO = pmtMapper.toPaymentBO(paymentTO);
         paymentBO.setTransactionStatus(TransactionStatusBO.ACSC);
-        paymentBO.getTargets().get(0).setPaymentProduct(PaymentProductBO.INSTANT_SEPA);
+        paymentBO.setPaymentProduct("instant-sepa-credit-transfers");
         UserBO userBO = new UserBO("Test", "", "");
         UserTO userTO = new UserTO("Test", "", "");
-
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.BLOCKED, EUR));
-
+        Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
         when(paymentConverter.toPaymentBO(any(), any())).thenReturn(paymentBO);
 
         middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
@@ -268,6 +265,7 @@ public class MiddlewarePaymentServiceImplTest {
 
     private SinglePaymentTO getPayment(Currency payerCur, Currency amountCur) {
         SinglePaymentTO payment = new SinglePaymentTO();
+        payment.setPaymentProduct(PaymentProductTO.SEPA);
         payment.setDebtorAccount(getReference(payerCur));
         payment.setInstructedAmount(getAmount(amountCur));
         payment.setCreditorAccount(getReference(payerCur));
@@ -369,5 +367,11 @@ public class MiddlewarePaymentServiceImplTest {
         info.setScaMethodId(SCA_METHOD_ID);
         info.setUserLogin(USER_LOGIN);
         return info;
+    }
+
+    private PaymentProductsConfig getPaymentConfig() {
+        PaymentProductsConfig config = new PaymentProductsConfig();
+        config.setInstant(new HashSet<>(Arrays.asList("sepa-credit-transfers", "instant-sepa-credit-transfers", "target-2-payments", "cross-border-credit-transfers")));
+        return config;
     }
 }

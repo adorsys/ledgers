@@ -19,7 +19,10 @@ package de.adorsys.ledgers.deposit.api.domain;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * @deprecated Shall be removed in v2.5
+ */
+@Deprecated
 public enum PaymentProductBO {
     SEPA("sepa-credit-transfers"),
     INSTANT_SEPA("instant-sepa-credit-transfers"),

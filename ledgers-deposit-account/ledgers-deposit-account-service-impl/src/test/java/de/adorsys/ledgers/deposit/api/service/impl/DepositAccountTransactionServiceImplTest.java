@@ -39,7 +39,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.adorsys.ledgers.deposit.api.domain.PaymentProductBO.INSTANT_SEPA;
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.SINGLE;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSP;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -180,6 +179,7 @@ public class DepositAccountTransactionServiceImplTest {
         details.setTransactionStatus(null);
         details.setTransactionId(trId);
         details.setEndToEndId(payment.getTargets().get(0).getEndToEndIdentification());
+        details.setPaymentProduct("sepa-credit-transfers");
         details.setBookingDate(REQUEST_TIME.toLocalDate());
         details.setValueDate(REQUEST_TIME.toLocalDate());
         details.setTransactionAmount(payment.getTargets().get(0).getInstructedAmount());
@@ -191,7 +191,6 @@ public class DepositAccountTransactionServiceImplTest {
         details.setDebtorAccount(payment.getDebtorAccount());
         details.setPaymentOrderId(payment.getPaymentId());
         details.setPaymentType(payment.getPaymentType());
-        details.setPaymentProduct(INSTANT_SEPA);
         return details;
     }
 
@@ -248,7 +247,7 @@ public class DepositAccountTransactionServiceImplTest {
 
     private PaymentBO getPayment(PaymentTypeBO type, Currency debtor, Currency amount, Currency creditor, Currency creditor2) {
         return new PaymentBO("pmt1", false, null,
-                null, type, null, null, null, null,
+                null, type, "sepa-credit-transfers", null, null, null, null,
                 null, getReference(debtor), ACSP, getTargets(amount, creditor, creditor2));
     }
 
@@ -256,7 +255,7 @@ public class DepositAccountTransactionServiceImplTest {
         return Stream.of(curr1, curr2)
                        .filter(Objects::nonNull)
                        .map(this::getReference)
-                       .map(r -> new PaymentTargetBO(nextTargetId(), "END-TO-END", getAmount(amount), r, null, "name", null, null, INSTANT_SEPA, null))
+                       .map(r -> new PaymentTargetBO(nextTargetId(), "END-TO-END", getAmount(amount), r, null, "name", null, null, null, null, null))
                        .collect(Collectors.toList());
     }
 

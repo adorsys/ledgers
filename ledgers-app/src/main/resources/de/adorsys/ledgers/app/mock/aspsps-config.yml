@@ -15,16 +15,21 @@ coaExtensions:
   - shortDesc: CROSS_BORDER-Clearing Account (cross-border-credit-transfers)
     name: 11034
     parent: 1103
+  - shortDesc: OTHERS-Clearing Account (others)
+    name: 11035
+    parent: 1103
 ### Payment products supported.
 clearingAccounts:
-  - paymentProduct: SEPA
+  - paymentProduct: sepa-credit-transfers
     accountNbr: 11031
-  - paymentProduct: INSTANT_SEPA
+  - paymentProduct: instant-sepa-credit-transfers
     accountNbr: 11032
-  - paymentProduct: TARGET2
+  - paymentProduct: target-2-payments
     accountNbr: 11033
-  - paymentProduct: CROSS_BORDER
+  - paymentProduct: cross-border-credit-transfers
     accountNbr: 11034
+  - paymentProduct: others
+    accountNbr: 11035
 depositParentAccount: 2332
 cashAccount: 1001
 

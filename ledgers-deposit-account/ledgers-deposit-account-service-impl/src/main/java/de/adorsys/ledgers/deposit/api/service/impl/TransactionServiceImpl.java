@@ -181,8 +181,8 @@ public class TransactionServiceImpl implements TransactionService {
     private String createPostingDetails(MockBookingDetailsBO details, AccountReferenceBO account) {
         return serializeService.serializeOprDetails(
                 new PaymentOrderDetailsBO(null, false, details.getBookingDate(),
-                        LocalTime.now(), SINGLE, null, null, null, null,
-                        null, account, ACSC));
+                        LocalTime.now(), SINGLE, "instant-sepa-credit-transfers", null, null, null,
+                        null, null, account, ACSC));
     }
 
     private String createPostingLineDetails(MockBookingDetailsBO details, String lineId) {

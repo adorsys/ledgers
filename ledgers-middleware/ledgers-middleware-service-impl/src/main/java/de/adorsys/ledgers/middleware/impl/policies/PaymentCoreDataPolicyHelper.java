@@ -40,12 +40,9 @@ public class PaymentCoreDataPolicyHelper {
                     p.setCurrency(r.getDebtorAccount().getCurrency().getCurrencyCode());
                 }
                 p.setAmount(formatAmount(t.getInstructedAmount().getAmount()));
-                setPaymentProduct(p, t);
+                p.setPaymentProduct(r.getPaymentProduct());
             } else {
                 List<PaymentTargetBO> targets = r.getTargets();
-                if (!targets.isEmpty()) {
-                    setPaymentProduct(p, targets.iterator().next());
-                }
                 // Bulk
                 p.setPaymentsSize("" + targets.size());
                 p.setCreditorName("Many Receipients");
@@ -55,9 +52,9 @@ public class PaymentCoreDataPolicyHelper {
                 for (PaymentTargetBO t : targets) {
                     if (p.getCurrency() != null && !p.getCurrency().equals(t.getInstructedAmount().getCurrency().getCurrencyCode())) {
                         throw MiddlewareModuleException.builder()
-                                .errorCode(CURRENCY_MISMATCH)
-                                .devMsg(String.format("Currency mismatched in bulk payment with id %s", r.getPaymentId()))
-                                .build();
+                                      .errorCode(CURRENCY_MISMATCH)
+                                      .devMsg(String.format("Currency mismatched in bulk payment with id %s", r.getPaymentId()))
+                                      .build();
                     }
                     p.setCurrency(t.getInstructedAmount().getCurrency().getCurrencyCode());
                     md.update(t.getCreditorAccount().getIban().getBytes(StandardCharsets.UTF_8));
@@ -77,23 +74,16 @@ public class PaymentCoreDataPolicyHelper {
             return p;
         } catch (NoSuchAlgorithmException e) {
             throw MiddlewareModuleException.builder()
-                    .errorCode(NO_SUCH_ALGORITHM)
-                    .devMsg("INTERNAL ERROR, A MESSAGE HAS BEING SENT TO THE BANK ADMINISTRATION TO FIX THIS ISSUE. WE ARE SORRY FOR TEMPORARY INCONVENIENCES.")
-                    .build();
+                          .errorCode(NO_SUCH_ALGORITHM)
+                          .devMsg("INTERNAL ERROR, A MESSAGE HAS BEING SENT TO THE BANK ADMINISTRATION TO FIX THIS ISSUE. WE ARE SORRY FOR TEMPORARY INCONVENIENCES.")
+                          .build();
         }
     }
 
     private static String resolveExecutionDate(LocalDate requestedExecutionDate) {
         return Optional.ofNullable(requestedExecutionDate)
-                .orElseGet(LocalDate::now)
-                .format(formatter);
-    }
-
-    private static void setPaymentProduct(PaymentCoreDataTO p, PaymentTargetBO t) {
-        String paymentProduct = t.getPaymentProduct() == null
-                ? null
-                : t.getPaymentProduct().getValue();
-        p.setPaymentProduct(paymentProduct);
+                       .orElseGet(LocalDate::now)
+                       .format(formatter);
     }
 
     private static String formatAmount(BigDecimal amount) {

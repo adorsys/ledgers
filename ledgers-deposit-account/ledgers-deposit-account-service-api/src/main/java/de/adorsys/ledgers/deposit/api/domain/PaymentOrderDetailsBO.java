@@ -16,6 +16,7 @@ public class PaymentOrderDetailsBO {
     private LocalDate requestedExecutionDate;
     private LocalTime requestedExecutionTime;
     private PaymentTypeBO paymentType;
+    private String paymentProduct;
     private LocalDate startDate;
     private LocalDate endDate;
     private String executionRule;

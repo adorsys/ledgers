@@ -32,6 +32,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.impl.config.PaymentProductsConfig;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
@@ -82,6 +83,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final AuthorizationService authorizationService;
     private final PainPaymentConverter painPaymentConverter;
     private final ScaResponseResolver scaResponseResolver;
+    private final PaymentProductsConfig paymentProductsConfig;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -114,12 +116,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     @SuppressWarnings("PMD.PrematureDeclaration")
     private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
-        if (!paymentBO.isValidAmount()) {
-            throw MiddlewareModuleException.builder()
-                          .devMsg("Payment validation failed! Instructed amount is invalid.")
-                          .errorCode(REQUEST_VALIDATION_FAILURE)
-                          .build();
-        }
+        validatePayment(paymentBO);
         DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount());
         try {
             paymentBO.getTargets()
@@ -142,6 +139,23 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
                                              ? ACCP
                                              : ACTC;
         return prepareScaAndResolveResponse(scaInfoTO, persist(paymentBO, status), user, PAYMENT);
+    }
+
+    private void validatePayment(PaymentBO paymentBO) {
+        String msg = null;
+        if (!paymentBO.isValidAmount()) {
+            msg = "Instructed amount is invalid.";
+        }
+
+        if (paymentProductsConfig.isNotSupportedPaymentProduct(paymentBO.getPaymentProduct())) {
+            msg = "Payment Product not Supported!";
+        }
+        if (msg != null) {
+            throw MiddlewareModuleException.builder()
+                          .devMsg(String.format("Payment validation failed! %s", msg))
+                          .errorCode(REQUEST_VALIDATION_FAILURE)
+                          .build();
+        }
     }
 
     private SCAPaymentResponseTO prepareScaAndResolveResponse(ScaInfoTO scaInfoTO, PaymentBO payment, UserBO user, OpTypeBO opType) {

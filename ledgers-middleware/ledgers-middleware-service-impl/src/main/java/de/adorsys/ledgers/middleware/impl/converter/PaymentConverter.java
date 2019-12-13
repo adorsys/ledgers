@@ -24,6 +24,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,11 +46,7 @@ public abstract class PaymentConverter {
 
     public abstract PaymentTypeTO toPaymentTypeTO(PaymentTypeBO paymentType);
 
-    public abstract PaymentProductBO toPaymentProductBO(PaymentProductTO paymentProduct);
-
-    public abstract PaymentProductTO toPaymentProductTO(PaymentProductBO paymentProduct);
-
-    public Object toPaymentTO(PaymentBO payment) { //TODO Consider refactoring
+    public Object toPaymentTO(PaymentBO payment) {
         if (payment.getPaymentType() == PaymentTypeBO.SINGLE) {
             return toSinglePaymentTO(payment, payment.getTargets().get(0));
         } else if (payment.getPaymentType() == PaymentTypeBO.PERIODIC) {
@@ -62,23 +59,30 @@ public abstract class PaymentConverter {
 
     @Mapping(source = "payment.paymentId", target = "paymentId")
     @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
+    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
     public abstract SinglePaymentTO toSinglePaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
 
     @Mapping(source = "payment.paymentId", target = "paymentId")
     @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
+    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
     public abstract PeriodicPaymentTO toPeriodicPaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
 
     @Mapping(source = "payment.paymentId", target = "paymentId")
     @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
-    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(paymentTarget.getPaymentProduct()))")
+    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
     @Mapping(target = "payments", expression = "java(payment.getTargets().stream().map(t -> toSingleBulkPartTO(payment, t)).collect(java.util.stream.Collectors.toList()))")
     public abstract BulkPaymentTO toBulkPaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
     @Mapping(source = "paymentTarget.paymentId", target = "paymentId")
     @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
+    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
     public abstract SinglePaymentTO toSingleBulkPartTO(PaymentBO payment, PaymentTargetBO paymentTarget);
+
+    public PaymentProductTO toPaymentProductTO(String paymentProduct) {
+        return PaymentProductTO.getByValue(paymentProduct).get();
+    }
 
     @SuppressWarnings("unchecked")
     public <T> PaymentBO toPaymentBO(Object payment, Class<T> tClass) {
@@ -89,6 +93,10 @@ public abstract class PaymentConverter {
                 map = (Map<String, ?>) map.values().iterator().next();
             }
             o = map;
+
+            if (((LinkedHashMap) o).get("targets") != null) {
+                return toPaymentBO(mapper.convertValue(payment, PaymentTO.class));
+            }
         }
 
         if (tClass.equals(SinglePaymentTO.class)) {
@@ -98,30 +106,30 @@ public abstract class PaymentConverter {
         } else if (tClass.equals(BulkPaymentTO.class)) {
             BulkPaymentTO paymentTO = (BulkPaymentTO) mapper.convertValue(o, tClass);
             PaymentBO paymentBO = toPaymentBO(paymentTO);
-            paymentBO.getTargets()
-                    .forEach(t -> {
-                        if (t.getPaymentProduct() == null)
-                            t.setPaymentProduct(toPaymentProductBO(paymentTO.getPaymentProduct()));
-                    });
             return paymentBO;
         } else {
             throw new IllegalStateException(String.format("Unknown payment type %s", tClass.getName()));
         }
     }
 
+    public abstract PaymentBO toPaymentBO(PaymentTO payment);
+
     @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.SINGLE)")
     @Mapping(source = "paymentStatus", target = "transactionStatus")
+    @Mapping(target = "paymentProduct", expression = "java(payment.getPaymentProduct().getValue())")
     @Mapping(target = "targets", expression = "java(java.util.Collections.singletonList(toPaymentTarget(payment)))")
     public abstract PaymentBO toPaymentBO(SinglePaymentTO payment);
 
     @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.PERIODIC)")
     @Mapping(source = "paymentStatus", target = "transactionStatus")
+    @Mapping(target = "paymentProduct", expression = "java(payment.getPaymentProduct().getValue())")
     @Mapping(target = "targets", expression = "java(java.util.Collections.singletonList(toPaymentTarget(payment)))")
     public abstract PaymentBO toPaymentBO(PeriodicPaymentTO payment);
 
     @Mapping(target = "paymentType", expression = "java(PaymentTypeBO.BULK)")
     @Mapping(target = "requestedExecutionTime", expression = "java(java.util.Optional.ofNullable(payment.getPayments()).map(l -> l.get(0).getRequestedExecutionTime()).orElse(null))")
     @Mapping(source = "paymentStatus", target = "transactionStatus")
+    @Mapping(target = "paymentProduct", expression = "java(payment.getPaymentProduct().getValue())")
     @Mapping(target = "targets", source = "payment.payments")
     public abstract PaymentBO toPaymentBO(BulkPaymentTO payment);
 

@@ -26,6 +26,6 @@ creditorName: multiple
 creditorAddress:
 ultimateCreditor:
 remittanceInformationUnstructured:
-paymentProduct:
+paymentProduct: sepa-credit-transfers
 transactionStatus: RCVD
 exchangeRate:

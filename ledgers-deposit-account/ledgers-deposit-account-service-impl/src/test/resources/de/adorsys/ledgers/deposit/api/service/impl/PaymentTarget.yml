@@ -25,13 +25,13 @@ creditorAddress:
     country: Ukraine
   }
 remittanceInformationUnstructured: remittance
-paymentProduct: SEPA
 payment:
   {
      paymentId: orderId,
      requestedExecutionDate: 2018-12-12,
      requestedExecutionTime: "12:00:00",
      paymentType: SINGLE,
+     paymentProduct: "sepa-credit-transfers",
      debtorAccount:
        {
          iban: DE91100000000123456789,

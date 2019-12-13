@@ -1,8 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentProductBO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentProductTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
@@ -22,7 +20,6 @@ import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -99,10 +96,7 @@ public class ScaResponseResolver {
         response.setPaymentId(payment.getPaymentId());
         response.setTransactionStatus(TransactionStatusTO.valueOf(payment.getTransactionStatus().name()));
         response.setPaymentType(PaymentTypeTO.valueOf(payment.getPaymentType().name()));
-        if (CollectionUtils.isNotEmpty(payment.getTargets())) {
-            PaymentProductBO paymentProduct = payment.getTargets().iterator().next().getPaymentProduct();
-            response.setPaymentProduct(PaymentProductTO.getByValue(paymentProduct.getValue()).orElse(null));
-        }
+        response.setPaymentProduct(payment.getPaymentProduct());
         return response;
     }
 }

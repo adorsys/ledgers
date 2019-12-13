@@ -34,6 +34,7 @@ public interface PaymentMapper {
     @Mapping(source = "paymentTarget.payment.debtorAccount", target = "debtorAccount")
     @Mapping(source = "paymentTarget.payment.paymentId", target = "paymentOrderId")
     @Mapping(source = "paymentTarget.payment.paymentType", target = "paymentType")
+    @Mapping(source = "paymentTarget.payment.paymentProduct", target = "paymentProduct")
     @Mapping(source = "rate", target = "exchangeRate")
     PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime, List<ExchangeRateBO> rate);
 
@@ -42,6 +43,7 @@ public interface PaymentMapper {
     @Mapping(source = "postingTime", target = "bookingDate")
     @Mapping(source = "id", target = "transactionId")
     @Mapping(source = "payment.paymentId", target = "paymentOrderId")
+    @Mapping(source = "payment.paymentProduct", target = "paymentProduct")
     @Mapping(constant = "multiple", target = "creditorAgent")
     @Mapping(constant = "multiple", target = "creditorName")
     @Mapping(source = "rate", target = "exchangeRate")
