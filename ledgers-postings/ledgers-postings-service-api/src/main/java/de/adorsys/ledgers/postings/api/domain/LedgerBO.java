@@ -19,4 +19,10 @@ public class LedgerBO extends NamedBO {
         super(name, id, created, userDetails, shortDesc, longDesc);
         this.coa = coa;
     }
+
+    public LedgerBO(String ledgerName, ChartOfAccountBO coa) {
+        this.setName(ledgerName);
+        this.setShortDesc(ledgerName);
+        this.setCoa(coa);
+    }
 }

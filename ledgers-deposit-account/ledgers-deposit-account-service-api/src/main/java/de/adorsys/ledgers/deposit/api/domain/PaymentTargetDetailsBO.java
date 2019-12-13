@@ -11,9 +11,9 @@ public class PaymentTargetDetailsBO extends TransactionDetailsBO {
     private String paymentOrderId;
     /*The type of the payment order.*/
     private PaymentTypeBO paymentType;
+    private String paymentProduct;
     /*The transaction status*/
     private TransactionStatusBO transactionStatus;
-    private PaymentProductBO paymentProduct;
     private String creditorAgent;
     private List<ExchangeRateBO> exchangeRate;
 }

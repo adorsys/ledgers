@@ -30,8 +30,11 @@ import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
@@ -40,6 +43,9 @@ import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implements DepositAccountPaymentService {
     private static final String PAYMENT_EXECUTION_FAILED = "Payment execution failed due to: %s, payment id: %s";
     private static final String PAYMENT_CANCELLATION_FAILED = "Can`t cancel payment id:%s, as it is already executed";
+
+    @Value(value = "${paymentProducts.instant : instant-sepa-credit-transfers,target-2-payments}")
+    private List<String> instantPayments = new ArrayList<>();
 
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
@@ -106,9 +112,10 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     @Override
     public TransactionStatusBO executePayment(String paymentId, String userName) {
         Optional<Payment> payment = paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACTC);
+
         if (payment.isPresent()) {
             Payment pmt = payment.get();
-            return pmt.isInstant()
+            return isInstantPayment(pmt)/*pmt.isInstant()*/
                            ? executionService.executePayment(pmt, userName)
                            : executionService.schedulePayment(pmt);
         }
@@ -157,5 +164,9 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
                                                   .errorCode(PAYMENT_NOT_FOUND)
                                                   .devMsg(String.format("Payment with id: %s not found!", paymentId))
                                                   .build());
+    }
+
+    private boolean isInstantPayment(Payment payment) {
+        return instantPayments.contains(payment.getPaymentProduct());
     }
 }

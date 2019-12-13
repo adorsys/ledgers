@@ -62,6 +62,16 @@ paymentScheduler:
   initialDelay: 3000
   delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
 
+payment-products:
+  instant:
+    - instant-sepa-credit-transfers
+    - target-2-payments
+    - domestic-swiss-credit-transfers-ISR
+  regular:
+    - sepa-credit-transfers
+    - cross-border-credit-transfers
+    - domestic-swiss-credit-transfers
+
 sca:
   authCode:
     validity.seconds: 180

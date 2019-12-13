@@ -59,6 +59,11 @@ public class PainPaymentConverterImpl implements PainPaymentConverter {
                                                                .build());
         PaymentBO paymentBO = new PaymentBO();
         paymentBO.setPaymentType(PaymentTypeBO.valueOf(paymentType.name()));
+        paymentBO.setPaymentProduct(document.getCstmrCdtTrfInitn()
+                                            .getPmtInves().get(0)
+                                            .getPmtTpInf()
+                                            .getSvcLvl()
+                                            .getCd());
         paymentBO.setTargets(buildPaymentTargets(document));
         paymentBO.setDebtorAccount(buildAccountReferenceBO(getDebtorAccount(document)));
         paymentBO.setRequestedExecutionDate(buildRequestedExecutionDate(document));
@@ -85,13 +90,11 @@ public class PainPaymentConverterImpl implements PainPaymentConverter {
     }
 
     private PaymentTargetBO buildPaymentTargetBO(PaymentInstructionInformation3 paymentInfo) {
-        ServiceLevel8Choice serviceChoice = paymentInfo.getPmtTpInf().getSvcLvl();
         CreditTransferTransactionInformation10 creditTransferInfo = getCreditTransferTransactionInformation(paymentInfo);
         PaymentIdentification1 pmtId = creditTransferInfo.getPmtId();
 
         PaymentTargetBO target = new PaymentTargetBO();
         target.setCreditorName(creditTransferInfo.getCdtr().getNm());
-        target.setPaymentProduct(PaymentProductBO.valueOf(serviceChoice.getCd()));
         target.setEndToEndIdentification(pmtId.getEndToEndId());
         target.setCreditorName(creditTransferInfo.getCdtr().getNm());
         target.setCreditorAccount(buildAccountReferenceBO(creditTransferInfo.getCdtrAcct()));

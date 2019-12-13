@@ -38,4 +38,4 @@ creditorAddress:
     country: Ukraine
   }
 remittanceInformationUnstructured: remittance
-paymentProduct: SEPA
+paymentProduct: sepa-credit-transfers

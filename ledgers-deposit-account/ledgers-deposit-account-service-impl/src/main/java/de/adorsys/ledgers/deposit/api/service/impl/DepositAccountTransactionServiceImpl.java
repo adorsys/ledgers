@@ -161,7 +161,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         AmountBO amount = new AmountBO(payment.getDebtorAccount().getCurrency(), batchAmount);
         String id = Ids.id();
         String debitLineDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate(), ratesForDebitLine));
-        LedgerAccountBO debtorLedgerAccount = getLedgerAccount(ledger, payment.getTargets().iterator().next().getPaymentProduct(), payment.getDebtorAccount(), true, true, false);
+        LedgerAccountBO debtorLedgerAccount = getLedgerAccount(ledger, payment.getPaymentProduct(), payment.getDebtorAccount(), true, true, false);
         PostingLineBO debitLine = postingMapper.buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, payment.getPaymentId(), id);
         posting.getLines().add(debitLine);
         posting.getLines().addAll(creditLines);
@@ -195,7 +195,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
                                                                                                                                                     .map(Collections::singletonList)
                                                                                                                                                     .orElse(null)));
 
-        LedgerAccountBO ledgerAccount = getLedgerAccount(ledger, target.getPaymentProduct(), getReferenceByValue(target, isDebitLine), isDebitLine, isFirstLine, target.isAllCurrenciesMatch());
+        LedgerAccountBO ledgerAccount = getLedgerAccount(ledger, target.getPayment().getPaymentProduct(), getReferenceByValue(target, isDebitLine), isDebitLine, isFirstLine, target.isAllCurrenciesMatch());
         BigDecimal debitAmount = getDCtAmount(target.getInstructedAmount(), isDebitLine, ratesForLine);
         BigDecimal creditAmount = getDCtAmount(target.getInstructedAmount(), !isDebitLine, ratesForLine);
         return postingMapper.buildPostingLine(targetDetails, ledgerAccount, debitAmount, creditAmount, oprId, id);
@@ -241,7 +241,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         return NumberUtils.createBigDecimal(value);
     }
 
-    private LedgerAccountBO getLedgerAccount(LedgerBO ledger, PaymentProductBO paymentProduct, AccountReferenceBO reference, boolean isDebitLine, boolean isFirstLine, boolean isAllCurrenciesMatch) {
+    private LedgerAccountBO getLedgerAccount(LedgerBO ledger, String paymentProduct, AccountReferenceBO reference, boolean isDebitLine, boolean isFirstLine, boolean isAllCurrenciesMatch) {
         if (isAllCurrenciesMatch) {
             return ledgerAccountId(reference)
                            .map(ledgerService::findLedgerAccountById)

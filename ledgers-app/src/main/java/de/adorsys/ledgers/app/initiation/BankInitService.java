@@ -88,9 +88,9 @@ public class BankInitService {
     private void createAdmin() {
         try {
             userService.findByLogin("admin");
-            logger.error("Admin user is already present. Skipping creation");
-        } catch (UserManagementModuleException e) { //TODO GET RID of Exception Driven Logic https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/211
-            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123"); //TODO Matter of refactoring
+            logger.info("Admin user is already present. Skipping creation");
+        } catch (UserManagementModuleException e) {
+            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123");
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
         }

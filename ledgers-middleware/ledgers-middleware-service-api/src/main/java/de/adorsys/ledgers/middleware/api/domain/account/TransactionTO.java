@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.RemittanceInformationStructuredTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,7 +54,7 @@ public class TransactionTO {
     private AccountReferenceTO debtorAccount;
     private String ultimateDebtor;
     private String remittanceInformationUnstructured;
-    private String remittanceInformationStructured;
+    private RemittanceInformationStructuredTO remittanceInformationStructured;
     private String purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;

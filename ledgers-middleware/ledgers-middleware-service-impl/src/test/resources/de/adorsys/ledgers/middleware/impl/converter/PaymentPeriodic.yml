@@ -3,6 +3,7 @@ batchBookingPreferred:
 requestedExecutionDate: 2018-12-12
 requestedExecutionTime: 12:00:00
 paymentType: PERIODIC
+paymentProduct: "sepa-credit-transfers"
 startDate: 2018-12-12
 endDate: 2018-12-28
 executionRule: everyday
@@ -47,6 +48,5 @@ targets:
           country: Ukraine
       },
       remittanceInformationUnstructured: remittance,
-      paymentProduct: SEPA,
       payment:
   }

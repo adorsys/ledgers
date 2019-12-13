@@ -115,24 +115,6 @@ public class PaymentConverterTest {
     }
 
     @Test
-    public void toPaymentProductBO() {
-        assertThat(PaymentProductBO.values().length).isEqualTo(PaymentProductTO.values().length);
-        assertThat(converter.toPaymentProductBO(PaymentProductTO.SEPA)).isEqualTo(PaymentProductBO.SEPA);
-        assertThat(converter.toPaymentProductBO(PaymentProductTO.CROSS_BORDER)).isEqualTo(PaymentProductBO.CROSS_BORDER);
-        assertThat(converter.toPaymentProductBO(PaymentProductTO.INSTANT_SEPA)).isEqualTo(PaymentProductBO.INSTANT_SEPA);
-        assertThat(converter.toPaymentProductBO(PaymentProductTO.TARGET2)).isEqualTo(PaymentProductBO.TARGET2);
-    }
-
-    @Test
-    public void toPaymentProductTO() {
-        assertThat(PaymentProductTO.values().length).isEqualTo(PaymentProductBO.values().length);
-        assertThat(converter.toPaymentProductTO(PaymentProductBO.SEPA)).isEqualTo(PaymentProductTO.SEPA);
-        assertThat(converter.toPaymentProductTO(PaymentProductBO.CROSS_BORDER)).isEqualTo(PaymentProductTO.CROSS_BORDER);
-        assertThat(converter.toPaymentProductTO(PaymentProductBO.INSTANT_SEPA)).isEqualTo(PaymentProductTO.INSTANT_SEPA);
-        assertThat(converter.toPaymentProductTO(PaymentProductBO.TARGET2)).isEqualTo(PaymentProductTO.TARGET2);
-    }
-
-    @Test
     public void toPaymentTO() {
         assertThat(converter.toPaymentTO(readYml(PaymentBO.class, PATH_SINGLE_BO))).isExactlyInstanceOf(SinglePaymentTO.class);
         assertThat(converter.toPaymentTO(readYml(PaymentBO.class, PATH_PERIODIC_BO))).isExactlyInstanceOf(PeriodicPaymentTO.class);

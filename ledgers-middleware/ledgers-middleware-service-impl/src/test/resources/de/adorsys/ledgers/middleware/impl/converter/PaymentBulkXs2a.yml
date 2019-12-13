@@ -3,6 +3,7 @@ batchBookingPreferred: false
 requestedExecutionDate: 2018-12-12
 requestedExecutionTime: "12:00:00"
 paymentType: BULK
+paymentProduct: "sepa-credit-transfers"
 startDate:
 endDate:
 executionRule:
@@ -47,7 +48,6 @@ targets:
           country: Ukraine
       },
       remittanceInformationUnstructured: remittance,
-      paymentProduct: SEPA,
       payment:
   }
   - {
@@ -78,6 +78,5 @@ targets:
             country: Ukraine
         },
         remittanceInformationUnstructured: remittance,
-        paymentProduct: SEPA,
         payment:
     }

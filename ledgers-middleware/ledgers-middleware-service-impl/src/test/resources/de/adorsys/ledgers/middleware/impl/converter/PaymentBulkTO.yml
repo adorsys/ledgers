@@ -93,7 +93,7 @@ payments:
             },
         remittanceInformationUnstructured: remittance,
         paymentStatus: RCVD,
-        paymentProduct: CROSS_BORDER,
+        paymentProduct: SEPA,
         requestedExecutionDate: 2018-12-12,
         requestedExecutionTime: "12:00:00"
     }

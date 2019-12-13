@@ -16,4 +16,10 @@ public class ChartOfAccountBO extends NamedBO {
     public ChartOfAccountBO(String name, String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
         super(name, id, created, userDetails, shortDesc, longDesc);
     }
+
+    public ChartOfAccountBO(String ledgerName) {
+        this.setUserDetails("System");
+        this.setName(ledgerName);
+        this.setShortDesc("COA: " + ledgerName);
+    }
 }

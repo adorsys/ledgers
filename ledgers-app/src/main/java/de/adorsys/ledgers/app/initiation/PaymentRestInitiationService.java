@@ -44,7 +44,7 @@ public class PaymentRestInitiationService {
     private void performScaIfRequired(SCAPaymentResponseTO response) {
         //Select Sca Method
         try {
-            if (response.getScaStatus() == ScaStatusTO.PSUIDENTIFIED) {
+            if (response.getScaStatus() == ScaStatusTO.PSUAUTHENTICATED) {
                 response = paymentRestClient.selectMethod(response.getPaymentId(), response.getAuthorisationId(), response.getScaMethods().iterator().next().getId()).getBody();
                 authRequestInterceptor.setAccessToken(response.getBearerToken().getAccess_token());
             }

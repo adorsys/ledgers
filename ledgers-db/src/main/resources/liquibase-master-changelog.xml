@@ -52,5 +52,5 @@
     <include file="migration/0017-fix-sca-weight-to-100.xml" relativeToChangelogFile="true" />
     <include file="migration/0018-link-DA-to-LA.xml" relativeToChangelogFile="true" />
     <include file="migration/0019-update-branch-id.xml" relativeToChangelogFile="true" />
-
+    <include file="migration/0020-update-payment-tables.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

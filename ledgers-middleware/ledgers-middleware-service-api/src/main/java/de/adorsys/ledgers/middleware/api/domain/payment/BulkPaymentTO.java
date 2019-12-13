@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * @deprecated Shall be removed in v2.5
+ */
+@Deprecated
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

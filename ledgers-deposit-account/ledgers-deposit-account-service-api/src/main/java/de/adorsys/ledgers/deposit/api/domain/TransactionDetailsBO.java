@@ -29,7 +29,7 @@ public class TransactionDetailsBO {
     private String debtorName;
     private AccountReferenceBO debtorAccount;
     private String ultimateDebtor;
-    private String remittanceInformationStructured;
+    private RemittanceInformationStructuredBO remittanceInformationStructured;
     private String remittanceInformationUnstructured;
     private PurposeCodeBO purposeCode;
     private String bankTransactionCode;

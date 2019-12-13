@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-12-2019-01">
+        <comment>Update payment products</comment>
+        <update tableName="PAYMENT_TARGET">
+            <column name="PAYMENT_PRODUCT" value="sepa-credit-transfers"/>
+            <where>payment_product='SEPA'</where>
+        </update>
+
+        <update tableName="PAYMENT_TARGET">
+            <column name="PAYMENT_PRODUCT" value="instant-sepa-credit-transfers"/>
+            <where>payment_product='INSTANT_SEPA'</where>
+        </update>
+
+        <update tableName="PAYMENT_TARGET">
+            <column name="PAYMENT_PRODUCT" value="target-2-payments"/>
+            <where>payment_product='TARGET2'</where>
+        </update>
+
+        <update tableName="PAYMENT_TARGET">
+            <column name="PAYMENT_PRODUCT" value="cross-border-credit-transfers"/>
+            <where>payment_product='CROSS_BORDER'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-12-2019-02">
+        <comment>Move payment product column to payment table</comment>
+        <addColumn tableName="PAYMENT">
+            <column name="PAYMENT_PRODUCT" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-12-2019-03">
+        <comment>Move payment product column values payment table</comment>
+        <sql>update payment
+            set payment_product = payment_target.payment_product
+            from payment_target
+            where payment_payment_id = payment.payment_id
+        </sql>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-12-2019-04">
+        <comment>Remove payment product column at payment target table</comment>
+        <dropColumn tableName="PAYMENT_TARGET">
+            <column name="PAYMENT_PRODUCT"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="12-12-2019-05">
+        <comment>Add columns to payment tables</comment>
+        <addColumn tableName="PAYMENT_TARGET">
+            <column name="PURPOSE_CODE" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <addColumn tableName="PAYMENT_TARGET">
+            <column name="REFERENCE" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <addColumn tableName="PAYMENT_TARGET">
+            <column name="REFERENCE_TYPE" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <addColumn tableName="PAYMENT_TARGET">
+            <column name="REFERENCE_ISSUER" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
