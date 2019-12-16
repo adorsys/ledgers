@@ -76,6 +76,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 100
+    userType: FAKE
   # Anton Brueckner has one sca configured. So her login process has one single phase with an ScaStatus.SCAMETHODSELECTED
   - login: anton.brueckner
     email: anton.brueckner@mail.de
@@ -88,6 +89,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 100
+    userType: FAKE
   # Max Mustermann has two sca methods configured. So her login process has one single phase with an ScaStatus.PSUAUTHENTICATED
   - login: max.musterman
     email: max.musterman@mail.de
@@ -102,6 +104,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 100
+    userType: FAKE
   # Multi-level-SCA users
   # Accountant has 30% access to account
   - login: accountant
@@ -115,6 +118,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 30
+    userType: FAKE
   # Chief Accountant has 60% access to account
   - login: chief.accountant
     email: chief.accountant@mail.de
@@ -127,6 +131,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 60
+    userType: FAKE
   # SupplyChain Manager has 10% access to account
   - login: sc.manager
     email: sc.manager@mail.de
@@ -139,6 +144,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 10
+    userType: FAKE
   # General Manager has 90% access to account
   - login: g.manager
     email: g.manager@mail.de
@@ -151,6 +157,7 @@ users:
         currency: EUR
         accessType: OWNER
         scaWeight: 90
+    userType: FAKE
 
 
 ###############################################

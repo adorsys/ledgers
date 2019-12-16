@@ -19,10 +19,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
@@ -65,8 +62,8 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
-        UserTO user = onlineBankingService.register(login, email, pin, role);
+    public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role, UserTypeTO type) {
+        UserTO user = onlineBankingService.register(login, email, pin, role, type);
         user.setPin(null);
         return ResponseEntity.ok(user);
     }

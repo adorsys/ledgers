@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="oza@adorsys.com.ua" id="16-12-2019-01">
+        <comment>Add column user_type to users table</comment>
+        <addColumn tableName="users">
+            <column name="user_type" type="VARCHAR(255)" defaultValue="FAKE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="oza@adorsys.com.ua" id="16-12-2019-02">
+        <comment>Update user type</comment>
+        <update tableName="users">
+            <column name="user_type" value="FAKE"/>
+            <where>user_type = '' and user_type is null</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

@@ -29,16 +29,19 @@ public class UserTO {
     private Collection<UserRoleTO> userRoles = new ArrayList<>();
 
     private String branch;
+    @NotNull
+    private UserTypeTO userType;
 
     @JsonIgnore
     public boolean userHasRoles() {
         return CollectionUtils.isEmpty(userRoles);
     }
 
-    public UserTO(String login, String email, String pin){
-        this.login=login;
-        this.email=email;
-        this.pin=pin;
+    public UserTO(String login, String email, String pin, UserTypeTO userType) {
+        this.login = login;
+        this.email = email;
+        this.pin = pin;
+        this.userType = userType;
     }
 
     @JsonIgnore

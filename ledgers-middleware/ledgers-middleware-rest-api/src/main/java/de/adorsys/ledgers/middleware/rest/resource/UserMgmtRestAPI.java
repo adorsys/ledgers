@@ -20,10 +20,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +60,7 @@ public interface UserMgmtRestAPI {
      * @param email users e-mail address
      * @param pin   users pin
      * @param role  users Role at Ledgers
+     * @param type  users Type at Ledgers
      * @return User object with erased pin
      */
     @PostMapping("/register")
@@ -70,6 +68,7 @@ public interface UserMgmtRestAPI {
                                                                                                        + "<ul>"
                                                                                                        + "<li>A user is always registered as customer and is activated by default.</li>"
                                                                                                        + "<li>A user can only be given another role by an administrating STAFF member.</li>"
+                                                                                                       + "<li>Choose type 'FAKE' if you don't want to receive any messages.</li>"
                                                                                                        + "</ul>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the user pin."),
@@ -79,7 +78,8 @@ public interface UserMgmtRestAPI {
                                     @RequestParam("email") String email,
                                     @RequestParam("pin") String pin,
                                     // TODO remove role parameter.
-                                    @RequestParam(name = "role", defaultValue = "CUSTOMER") UserRoleTO role);
+                                    @RequestParam(name = "role", defaultValue = "CUSTOMER") UserRoleTO role,
+                                    @RequestParam(value = "type", defaultValue = "FAKE") UserTypeTO type);
 
 
     /**

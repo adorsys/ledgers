@@ -108,11 +108,13 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         updateSCAOperation(scaOperation, hashItem);
 
         repository.save(scaOperation);
+        if (user.isRealUser()) {
         String userMessageTemplate = StringUtils.isBlank(data.getUserMessage())
                                              ? authCodeEmailBody
                                              : data.getUserMessage();
         String message = String.format(userMessageTemplate, tan);
-        senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
+            senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
+        }
         SCAOperationBO scaOperationBO = scaOperationMapper.toBO(scaOperation);
         scaOperationBO.setTan(tan);
         return scaOperationBO;

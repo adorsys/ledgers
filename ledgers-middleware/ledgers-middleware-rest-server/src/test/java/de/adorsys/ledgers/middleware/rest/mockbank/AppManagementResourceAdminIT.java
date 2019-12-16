@@ -47,7 +47,7 @@ public class AppManagementResourceAdminIT {
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
 
-	
+
 	@Before
 	public void before() {
 		this.mockMvc = MockMvcBuilders
@@ -55,11 +55,11 @@ public class AppManagementResourceAdminIT {
 				.apply(springSecurity())
 				.build();
 	}
-	
+
 	@Test
 	public void givenWac_whenServletContext_thenItProvidesGreetController() {
 	    ServletContext servletContext = wac.getServletContext();
-	     
+
 	    Assert.assertNotNull(servletContext);
 	    Assert.assertTrue(servletContext instanceof MockServletContext);
 	    Assert.assertNotNull(wac.getBean(AppMgmtResource.class));
@@ -84,6 +84,4 @@ public class AppManagementResourceAdminIT {
         			.andDo(print())
         			.andExpect(MockMvcResultMatchers.content().string(StringContains.containsString(".")));
     }
-	
-	
 }
