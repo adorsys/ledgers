@@ -56,6 +56,7 @@ public class LedgersClientIT {
     private static final String BRANCH_LOGIN = "12345678";
     private static final String PIN = "12345";
     private static final String BANK_CODE = "76070024";
+    private static final UserTypeTO USER_TYPE = UserTypeTO.FAKE;
 
     private static final UserTO BRANCH = getUser(BRANCH_LOGIN, UserRoleTO.STAFF);
     private static UserTO USER_1 = getUser("01", CUSTOMER);
@@ -70,7 +71,7 @@ public class LedgersClientIT {
 
     @Test
     public void a_createAdmin() {
-        UserTO adminUser = new UserTO("admin", "admin@ledgers.ldg", "12345");
+        UserTO adminUser = new UserTO("admin", "admin@ledgers.ldg", "12345", USER_TYPE);
         ResponseEntity<BearerTokenTO> response = appMgmtRestClient.admin(adminUser);
         assertThat(response.getStatusCode()).isEqualTo(OK);
         assertThat(response.getBody().getAccess_token()).isNotBlank();
@@ -78,7 +79,7 @@ public class LedgersClientIT {
 
     @Test
     public void b_createUserAndAccount() {
-        userMgmtRestClient.register("francis.pouatcha", "fpo@mail.ledgers", "12345", CUSTOMER);
+        userMgmtRestClient.register("francis.pouatcha", "fpo@mail.ledgers", "12345", CUSTOMER, USER_TYPE);
         AccountDetailsTO a = new AccountDetailsTO();
         a.setIban("DE69760700240340283600");
         a.setAccountStatus(AccountStatusTO.ENABLED);
@@ -203,7 +204,7 @@ public class LedgersClientIT {
     }
 
     private static UserTO getUser(String login, UserRoleTO role) {
-        UserTO user = new UserTO(login, login + "@eml.de", PIN);
+        UserTO user = new UserTO(login, login + "@eml.de", PIN, USER_TYPE);
         user.setUserRoles(Collections.singletonList(role));
         return user;
     }

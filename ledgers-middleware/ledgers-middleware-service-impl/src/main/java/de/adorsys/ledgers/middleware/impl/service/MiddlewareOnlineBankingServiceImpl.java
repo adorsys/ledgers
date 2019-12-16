@@ -4,10 +4,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.LoginKeyDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
@@ -111,9 +108,8 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     }
 
     @Override
-    public UserTO register(String login, String email, String pin, UserRoleTO role) {
-        UserTO user = new UserTO(login, email, pin);
-        log.info(user.toString());
+    public UserTO register(String login, String email, String pin, UserRoleTO role, UserTypeTO type) {
+        UserTO user = new UserTO(login, email, pin, type);
         user.getUserRoles().add(role);
         UserBO userBO = userTOMapper.toUserBO(user);
         return userTOMapper.toUserTO(userService.create(userBO));

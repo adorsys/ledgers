@@ -19,6 +19,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTypeTO;
 import de.adorsys.ledgers.middleware.api.service.CurrencyService;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
@@ -90,7 +91,7 @@ public class BankInitService {
             userService.findByLogin("admin");
             logger.info("Admin user is already present. Skipping creation");
         } catch (UserManagementModuleException e) {
-            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123");
+            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123", UserTypeTO.FAKE);
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
         }

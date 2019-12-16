@@ -1,12 +1,13 @@
 id: SomeUniqueID
-email: vne@adorsys.de
+email: test@mail.de
 pin: 25d55ad283aa400af464c76d713c07ad # md5 value of 12345678
-login: vne
+login: test
 scaUserData:
   - id: 1
-    methodValue: vne@adorsys.de
+    methodValue: test@mail.de
     scaMethod: EMAIL
   - id: 2
     methodValue: 3737463673647
     scaMethod: MOBILE
+userType: FAKE
 

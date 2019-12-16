@@ -6,6 +6,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTypeTO;
 
 /**
  * Interface used for the initialization of user interaction. Implementation of
@@ -22,9 +23,10 @@ public interface MiddlewareOnlineBankingService {
      * @param email the email of the user
      * @param pin   the pin of this user
      * @param role  the initial role of the user.
+     * @param type  the type of the user
      * @return : user
      */
-    UserTO register(String login, String email, String pin, UserRoleTO role);
+    UserTO register(String login, String email, String pin, UserRoleTO role, UserTypeTO type);
 
     /**
      * Performs user authorization.
