@@ -110,7 +110,7 @@ public class DepositAccountServiceImplTest {
     }
 
     @Test
-    public void getDepositAccountByIBAN() {
+    public void getDepositAccountByIBANAndCurrency() {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
         //When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);

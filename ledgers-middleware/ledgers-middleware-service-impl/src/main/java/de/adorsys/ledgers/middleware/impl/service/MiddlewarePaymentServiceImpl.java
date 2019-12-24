@@ -118,6 +118,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
         validatePayment(paymentBO);
         DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount());
+        paymentBO.setAccountId(debtorAccount.getId());
         try {
             paymentBO.getTargets()
                     .forEach(t -> {
@@ -345,7 +346,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference) {
         DepositAccountBO account = Optional.ofNullable(reference.getCurrency())
                                            .map(c -> accountService.getAccountByIbanAndCurrency(reference.getIban(), c))
-                                           .orElseGet(() -> getAccountByIbanErrorIfNotSingle(reference.getIban()));
+                                           .orElseGet(() -> getAccountByIbanAndParamCurrencyErrorIfNotSingle(reference.getIban()));
 
         if (!account.isEnabled()) {
             throw MiddlewareModuleException.builder()
@@ -356,7 +357,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return account;
     }
 
-    private DepositAccountBO getAccountByIbanErrorIfNotSingle(String iban) {
+    private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban) {
         List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
         if (accounts.size() != 1) {
             String msg = CollectionUtils.isEmpty(accounts)

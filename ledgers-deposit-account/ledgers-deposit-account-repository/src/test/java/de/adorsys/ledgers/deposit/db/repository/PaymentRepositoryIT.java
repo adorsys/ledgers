@@ -24,6 +24,7 @@ public class PaymentRepositoryIT {
         payment.setPaymentId(Ids.id());
 
         payment.setDebtorAccount(newAccount("DE89370400440532013000", "EUR"));
+        payment.setAccountId("accountId");
         payment.setPaymentType(PaymentType.SINGLE);
 
         payment.setTransactionStatus(TransactionStatus.RCVD);

@@ -28,6 +28,7 @@ public class PaymentBO {
     private AccountReferenceBO debtorAccount;
     private TransactionStatusBO transactionStatus;
     private List<PaymentTargetBO> targets = new ArrayList<>();
+    private String accountId;
 
     public boolean isValidAmount() {
         return targets.stream()
