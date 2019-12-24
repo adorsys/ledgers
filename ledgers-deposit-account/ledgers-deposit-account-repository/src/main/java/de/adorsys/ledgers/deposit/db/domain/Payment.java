@@ -111,6 +111,9 @@ public class Payment {
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     private List<PaymentTarget> targets = new ArrayList<>();
 
+    @Column(nullable = false)
+    private String accountId;
+
     public boolean isLastExecuted(LocalDate nextPossibleExecutionDate){
         return endDate != null && nextPossibleExecutionDate.isAfter(endDate);
     }

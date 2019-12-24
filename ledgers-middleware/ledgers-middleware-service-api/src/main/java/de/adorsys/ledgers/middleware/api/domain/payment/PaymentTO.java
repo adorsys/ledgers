@@ -24,4 +24,5 @@ public class PaymentTO {
     private AccountReferenceTO debtorAccount;
     private TransactionStatusTO transactionStatus;
     private List<PaymentTargetTO> targets = new ArrayList<>();
+    private String accountId;
 }

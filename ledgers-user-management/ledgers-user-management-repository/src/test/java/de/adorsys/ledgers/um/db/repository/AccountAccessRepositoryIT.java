@@ -44,6 +44,7 @@ public class AccountAccessRepositoryIT {
         accountAccess.setIban("FakeIban");
         accountAccess.setCurrency("EUR");
         accountAccess.setAccessType(AccessType.OWNER);
+        accountAccess.setAccountId("accountId");
         UserEntity user = new UserEntity();
         user.setId(Ids.id());
         user.setPin("1234");

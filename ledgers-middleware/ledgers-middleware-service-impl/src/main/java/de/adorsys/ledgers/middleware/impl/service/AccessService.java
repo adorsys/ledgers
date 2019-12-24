@@ -24,7 +24,7 @@ public class AccessService {
     private final UserService userService;
 
     public void updateAccountAccessNewAccount(DepositAccountBO createdAccount, UserBO user, String operationInitiator) {
-        AccountAccessBO accountAccess = createAccountAccess(createdAccount.getIban(), createdAccount.getCurrency(), AccessTypeBO.OWNER);
+        AccountAccessBO accountAccess = createAccountAccess(createdAccount.getIban(), createdAccount.getCurrency(), AccessTypeBO.OWNER, createdAccount.getId());
         updateAccountAccess(user, accountAccess);
 
         //Check if the account is created by Branch and if so add access to this account to Branch
@@ -42,6 +42,7 @@ public class AccessService {
                 if (a.getIban().equals(access.getIban())) {
                     a.setAccessType(access.getAccessType());
                     a.setScaWeight(access.getScaWeight());
+                    a.setAccountId(access.getAccountId());
                 }
             });
         }
@@ -69,11 +70,12 @@ public class AccessService {
                                  .collect(Collectors.toList());
     }
 
-    public AccountAccessBO createAccountAccess(String accNbr, Currency currency, AccessTypeBO accessType) {
+    public AccountAccessBO createAccountAccess(String accNbr, Currency currency, AccessTypeBO accessType , String accountId) {
         AccountAccessBO accountAccess = new AccountAccessBO();
         accountAccess.setAccessType(accessType);
         accountAccess.setIban(accNbr);
         accountAccess.setCurrency(currency);
+        accountAccess.setAccountId(accountId);
         return accountAccess;
     }
 

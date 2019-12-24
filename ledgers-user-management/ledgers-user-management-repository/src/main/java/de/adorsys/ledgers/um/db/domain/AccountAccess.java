@@ -32,6 +32,9 @@ public class AccountAccess {
     @Column(nullable = false)
     private int scaWeight;
 
+    @Column(nullable = false)
+    private String accountId;
+
     @PrePersist
     public void prePersist() {
         if (id == null) {

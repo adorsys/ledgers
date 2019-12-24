@@ -248,7 +248,7 @@ public class DepositAccountTransactionServiceImplTest {
     private PaymentBO getPayment(PaymentTypeBO type, Currency debtor, Currency amount, Currency creditor, Currency creditor2) {
         return new PaymentBO("pmt1", false, null,
                 null, type, "sepa-credit-transfers", null, null, null, null,
-                null, getReference(debtor), ACSP, getTargets(amount, creditor, creditor2));
+                null, getReference(debtor), ACSP, getTargets(amount, creditor, creditor2), getDepositAccount().getId());
     }
 
     private List<PaymentTargetBO> getTargets(Currency amount, Currency curr1, Currency curr2) {

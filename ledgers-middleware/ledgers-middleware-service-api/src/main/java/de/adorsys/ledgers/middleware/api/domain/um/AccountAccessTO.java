@@ -24,6 +24,8 @@ public class AccountAccessTO {
     private AccessTypeTO accessType;
     @NotNull
     private int scaWeight;
+    @NotNull
+    private String accountId;
 
     @JsonIgnore
     public boolean hasPaymentAccess(String requestedIban) {

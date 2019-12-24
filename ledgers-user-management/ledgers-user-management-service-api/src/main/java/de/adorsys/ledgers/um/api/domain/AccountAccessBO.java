@@ -16,6 +16,8 @@ public class AccountAccessBO {
     private AccessTypeBO accessType;
     @NotNull
     private int scaWeight;
+    @NotNull
+    private String accountId;
 
     public AccountAccessBO(@NotNull String iban, AccessTypeBO accessType) {
         this.iban = iban;
