@@ -34,11 +34,10 @@
     </changeSet>
 
     <changeSet author="dmi@adorsys.com.ua" id="12-12-2019-03">
+        <validCheckSum>8:338569c5d95857067cfb9f6e2c51f17c</validCheckSum>
         <comment>Move payment product column values payment table</comment>
-        <sql>update payment
-            set payment_product = payment_target.payment_product
-            from payment_target
-            where payment_payment_id = payment.payment_id
+        <sql>
+            update payment p set payment_product = (select t.payment_product from payment_target t where t.payment_payment_id = p.payment_id LIMIT 1)
         </sql>
     </changeSet>
 

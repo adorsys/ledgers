@@ -55,5 +55,6 @@
     <include file="migration/0020-update-payment-tables.xml" relativeToChangelogFile="true" />
     <include file="migration/0021-add-user-type-column-to-users-table.xml" relativeToChangelogFile="true" />
     <include file="migration/0022-add-column-account-id-to-account-accesses-and-payment-tables.xml" relativeToChangelogFile="true" />
+    <include file="migration/0023-extend-payment-related-tables.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

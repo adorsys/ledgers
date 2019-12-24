@@ -14,7 +14,10 @@ public enum PaymentProductTO {
     TARGET2("target-2-payments"),
     CROSS_BORDER("cross-border-credit-transfers"),
     DOMESTIC_SWISS("domestic-swiss-credit-transfers"),
-    DOMESTIC_SWISS_ISR("domestic-swiss-credit-transfers-ISR");
+    DOMESTIC_SWISS_ISR("domestic-swiss-credit-transfers-isr"),
+    PAIN_SEPA("pain.001-sepa-credit-transfers"),
+    PAIN_CROSS_BORDER("pain.001-cross-border-credit-transfers"),
+    PAIN_SWISS_SIX("pain.001-swiss-six-credit-transfers");
 
     private String value;
 

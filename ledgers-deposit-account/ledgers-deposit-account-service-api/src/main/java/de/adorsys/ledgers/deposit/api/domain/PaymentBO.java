@@ -26,6 +26,8 @@ public class PaymentBO {
     private FrequencyCodeBO frequency;
     private Integer dayOfExecution; //Day here max 31
     private AccountReferenceBO debtorAccount;
+    private String debtorName;
+    private String debtorAgent;
     private TransactionStatusBO transactionStatus;
     private List<PaymentTargetBO> targets = new ArrayList<>();
     private String accountId;

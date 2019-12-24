@@ -248,14 +248,14 @@ public class DepositAccountTransactionServiceImplTest {
     private PaymentBO getPayment(PaymentTypeBO type, Currency debtor, Currency amount, Currency creditor, Currency creditor2) {
         return new PaymentBO("pmt1", false, null,
                 null, type, "sepa-credit-transfers", null, null, null, null,
-                null, getReference(debtor), ACSP, getTargets(amount, creditor, creditor2), getDepositAccount().getId());
+                null, getReference(debtor), null, null, ACSP, getTargets(amount, creditor, creditor2), getDepositAccount().getId());
     }
 
     private List<PaymentTargetBO> getTargets(Currency amount, Currency curr1, Currency curr2) {
         return Stream.of(curr1, curr2)
                        .filter(Objects::nonNull)
                        .map(this::getReference)
-                       .map(r -> new PaymentTargetBO(nextTargetId(), "END-TO-END", getAmount(amount), r, null, "name", null, null, null, null, null))
+                       .map(r -> new PaymentTargetBO(nextTargetId(), "END-TO-END", getAmount(amount), r, null, "name", null, null, null, null, null, null))
                        .collect(Collectors.toList());
     }
 

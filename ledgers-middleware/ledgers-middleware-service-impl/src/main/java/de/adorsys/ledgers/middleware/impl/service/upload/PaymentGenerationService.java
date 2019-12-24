@@ -72,7 +72,7 @@ public class PaymentGenerationService {
     }
 
     private AddressTO getTestCreditorAddress() {
-        return new AddressTO("Fürther Str.", "246a", "Nürnberg", "90429", "Germany");
+        return new AddressTO("Fürther Str.", "246a", "Nürnberg", "90429", "Germany", null, null);
     }
 
     private AccountReferenceTO generateReference(String iban, Currency currency) {
@@ -84,7 +84,7 @@ public class PaymentGenerationService {
 
     private String generateEndToEndId(String branchId) {
         return String.join("_", branchId,
-                           String.valueOf(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) + random.nextInt(9),
-                           String.valueOf(ThreadLocalRandom.current().nextLong(10000, 99999)));
+                String.valueOf(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) + random.nextInt(9),
+                String.valueOf(ThreadLocalRandom.current().nextLong(10000, 99999)));
     }
 }
