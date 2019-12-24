@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
@@ -29,6 +30,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -49,6 +52,11 @@ public class PaymentResource implements PaymentRestAPI {
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<?> getPaymentById(String paymentId) {
         return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
+    }
+
+    @Override
+    public ResponseEntity<List<PaymentTO>> getPendingPeriodicPayments() {
+        return ResponseEntity.ok(paymentService.getPendingPeriodicPayments(scaInfoHolder.getScaInfo()));
     }
 
     @Override

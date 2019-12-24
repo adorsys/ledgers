@@ -16,8 +16,12 @@
 
 package de.adorsys.ledgers.deposit.api.service;
 
+import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+
+import java.util.List;
 
 public interface DepositAccountPaymentService {
 
@@ -34,4 +38,6 @@ public interface DepositAccountPaymentService {
     String readIbanByPaymentId(String paymentId);
 
     TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status);
+
+    List<PaymentBO> getPaymentsByTypeStatusAndDebtor(PaymentTypeBO paymentType, TransactionStatusBO status, List<AccountReferenceBO> referenceList);
 }
