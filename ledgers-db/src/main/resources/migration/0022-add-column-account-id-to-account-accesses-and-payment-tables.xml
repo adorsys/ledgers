@@ -4,6 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
     <changeSet author="oza@adorsys.com.ua" id="18-12-2019-01">
+        <validCheckSum>8:b51a1a911dbe85f848636e70496a199c</validCheckSum>
         <comment>Add column account_id to account_accesses table</comment>
         <addColumn tableName="account_accesses">
             <column name="account_id" type="VARCHAR(255)"/>
@@ -12,7 +13,7 @@
             update account_accesses
             set account_id =
             (select id from deposit_account
-            where deposit_account.iban = account_accesses.iban)
+            where deposit_account.iban = account_accesses.iban LIMIT 1)
         </sql>
     </changeSet>
 
@@ -25,7 +26,7 @@
             update payment
             set account_id =
             (select id from deposit_account
-            where deposit_account.iban = payment.debt_iban)
+            where deposit_account.iban = payment.debt_iban LIMIT 1)
         </sql>
     </changeSet>
 
