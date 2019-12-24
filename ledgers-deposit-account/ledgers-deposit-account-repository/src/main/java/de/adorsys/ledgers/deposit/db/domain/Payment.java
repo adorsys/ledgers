@@ -104,6 +104,10 @@ public class Payment {
     @Column(nullable = false)
     private AccountReference debtorAccount;
 
+    private String debtorName;
+
+    private String debtorAgent;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionStatus transactionStatus;

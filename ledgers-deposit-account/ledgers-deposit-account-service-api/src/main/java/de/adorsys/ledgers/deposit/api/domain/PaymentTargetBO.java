@@ -21,6 +21,7 @@ public class PaymentTargetBO {
     private PurposeCodeBO purposeCode;
     private String remittanceInformationUnstructured;
     private RemittanceInformationStructuredBO remittanceInformationStructured;
+    private ChargeBearerBO chargeBearer;
     private PaymentBO payment;
 
     public boolean isAllCurrenciesMatch() {

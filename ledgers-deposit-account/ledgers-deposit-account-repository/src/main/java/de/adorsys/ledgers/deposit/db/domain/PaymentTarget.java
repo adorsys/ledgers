@@ -56,9 +56,15 @@ public class PaymentTarget {
     @AttributeOverride(name = "city", column = @Column(name = "CRED_CITY"))
     @AttributeOverride(name = "postalCode", column = @Column(name = "CRED_ZIP"))
     @AttributeOverride(name = "country", column = @Column(name = "CRED_CTRY"))
+    @AttributeOverride(name = "line1", column = @Column(name = "line_1"))
+    @AttributeOverride(name = "line2", column = @Column(name = "line_2"))
     private Address creditorAddress;
     @Enumerated(EnumType.STRING)
     private PurposeCode purposeCode;
+
+    @Enumerated(EnumType.STRING)
+    private ChargeBearer chargeBearer;
+
     private String remittanceInformationUnstructured;
     @Embedded
     private RemittanceInformationStructured remittanceInformationStructured;

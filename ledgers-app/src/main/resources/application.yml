@@ -66,11 +66,14 @@ payment-products:
   instant:
     - instant-sepa-credit-transfers
     - target-2-payments
-    - domestic-swiss-credit-transfers-ISR
+    - domestic-swiss-credit-transfers-isr
+    - pain.001-swiss-six-credit-transfers
   regular:
     - sepa-credit-transfers
     - cross-border-credit-transfers
     - domestic-swiss-credit-transfers
+    - pain.001-sepa-credit-transfers
+    - pain.001-cross-border-credit-transfers
 
 sca:
   authCode:

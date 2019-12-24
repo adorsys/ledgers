@@ -19,4 +19,5 @@ public class PaymentTargetTO {
     private PurposeCodeTO purposeCode;
     private String remittanceInformationUnstructured;
     private RemittanceInformationStructuredTO remittanceInformationStructured;
+    private ChargeBearerTO chargeBearerTO;
 }
