@@ -60,4 +60,6 @@ public interface PaymentMapper {
     default String id() {
         return Ids.id();
     }
+
+    List<PaymentBO> toPaymentBOList(List<Payment> payments);
 }

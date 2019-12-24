@@ -16,13 +16,11 @@
 
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
@@ -84,6 +82,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final PainPaymentConverter painPaymentConverter;
     private final ScaResponseResolver scaResponseResolver;
     private final PaymentProductsConfig paymentProductsConfig;
+    private final AccountDetailsMapper detailsMapper;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -225,6 +224,14 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @Override
     public SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) {
         return authorizeOperation(scaInfoTO, paymentId, cancellationId, CANCEL_PAYMENT);
+    }
+
+    @Override
+    public List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO) {
+        List<AccountReferenceBO> referenceList = detailsMapper.toAccountReferenceList(scaUtils.userBO(scaInfoTO.getUserId()).getAccountAccesses());
+        List<PaymentBO> payments = paymentService.getPaymentsByTypeStatusAndDebtor(PaymentTypeBO.PERIODIC, ACSP, referenceList);
+
+        return paymentConverter.toPaymentTOList(payments);
     }
 
     private SCAPaymentResponseTO authorizeOperation(ScaInfoTO scaInfoTO, String paymentId, String cancellationId, OpTypeBO opType) {

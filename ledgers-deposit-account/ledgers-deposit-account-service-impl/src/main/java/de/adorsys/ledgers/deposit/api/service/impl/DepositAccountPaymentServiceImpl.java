@@ -16,15 +16,13 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.AmountBO;
-import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
-import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
+import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
@@ -36,6 +34,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 
@@ -151,6 +150,17 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         payment.setTransactionStatus(TransactionStatus.valueOf(status.name()));
         Payment p = updatePaymentStatus(payment, TransactionStatus.valueOf(status.name()));
         return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
+    }
+
+    @Override
+    public List<PaymentBO> getPaymentsByTypeStatusAndDebtor(PaymentTypeBO paymentType, TransactionStatusBO status, List<AccountReferenceBO> referenceList) {
+        List<Payment> payments = referenceList.stream()
+                                         .map(r -> paymentRepository.findAllByDebtorAccount(r.getIban(), r.getCurrency().getCurrencyCode(), PaymentType.valueOf(paymentType.name()), TransactionStatus.valueOf(status.name())))
+                                         .flatMap(List::stream)
+                                         .collect(Collectors.toList());
+
+
+        return paymentMapper.toPaymentBOList(payments);
     }
 
     private Payment updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {

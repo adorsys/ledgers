@@ -16,10 +16,13 @@
 
 package de.adorsys.ledgers.middleware.api.service;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
+
+import java.util.List;
 
 public interface MiddlewarePaymentService {
 
@@ -43,7 +46,7 @@ public interface MiddlewarePaymentService {
      * This call sets the status RCVD
      *
      * @param scaInfoTO   : SCA information
-     * @param payment  : the xml payment object
+     * @param payment     : the xml payment object
      * @param paymentType : the payment type
      * @return : the sca response object.
      */
@@ -109,4 +112,5 @@ public interface MiddlewarePaymentService {
 
     SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
 
+    List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO);
 }

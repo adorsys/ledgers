@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("PMD")
 @Mapper(componentModel = "spring")
@@ -146,4 +147,10 @@ public abstract class PaymentConverter {
 
     @Mapping(target = "transactionAmount", source = "amount")
     public abstract TransactionDetailsBO toTransactionDetailsBO(TransactionTO transaction);
+
+    public List<PaymentTO> toPaymentTOList(List<PaymentBO> payments) {
+        return payments.stream().map(this::toAbstractPaymentTO).collect(Collectors.toList());
+    }
+
+    public abstract PaymentTO toAbstractPaymentTO(PaymentBO payment);
 }
