@@ -1,4 +1,5 @@
 # Ledgers
+[![Build Status](https://travis-ci.com/adorsys/xs2a.svg?branch=develop)](https://travis-ci.com/adorsys/ledgers)
 
 Banking Booking System kept simple!
 

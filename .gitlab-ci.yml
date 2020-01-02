@@ -126,14 +126,16 @@ Unit Tests:
 # develop #
 ###########
 
-Sonarcube:
+Sonarcube Tests:
   stage: "Test"
-  script:
-    - jabba use system@1.8
-    - mvn --fail-at-end clean install
-    - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST -Dsonar.login=${SONAR_TOKEN}
   only:
     - develop
+  script:
+    - jabba use system@1.8
+    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+    - mvn -ntp --fail-at-end clean install
+    - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
 
 Push to DockerHub (develop):
   stage: "Package"

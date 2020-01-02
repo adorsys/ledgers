@@ -28,6 +28,12 @@ script:
   - mvn -B -V javadoc:javadoc
   - mvn -B -V pmd:check
 
+addons:
+  sonarcloud:
+    organization: "adorsys"
+    token:
+      secure: $SONARCLOUD_TOKEN
+
 # Schritte um Release zu veröffentlichen
 before_deploy:
   - echo $GPG_SECRET_KEY | base64 --decode | $GPG_EXECUTABLE --import

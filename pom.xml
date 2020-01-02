@@ -126,6 +126,7 @@
 		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
 		<sonar.coverage.exclusions>**/*Entity.java,**/*TO.java,**/*Exception.java,**/*Config.java</sonar.coverage.exclusions>
+		<sonar.moduleName>${project.artifactId}</sonar.moduleName>
 
 		<skipITs>false</skipITs>
 	</properties>
@@ -347,7 +348,7 @@
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
-					<version>3.6.0.1398</version>
+					<version>3.7.0.1746</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
