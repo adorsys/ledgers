@@ -18,6 +18,7 @@
     </changeSet>
 
     <changeSet author="oza@adorsys.com.ua" id="21-12-2019-02">
+        <validCheckSum>8:992683adce1d307accfe1f5dee8667ae</validCheckSum>
         <comment>Add column account_id to payment table</comment>
         <addColumn tableName="payment">
             <column name="account_id" type="VARCHAR(255)"/>
