@@ -75,6 +75,8 @@ payment-products:
     - pain.001-sepa-credit-transfers
     - pain.001-cross-border-credit-transfers
 
+payment_mapping.path:
+
 sca:
   authCode:
     validity.seconds: 180
