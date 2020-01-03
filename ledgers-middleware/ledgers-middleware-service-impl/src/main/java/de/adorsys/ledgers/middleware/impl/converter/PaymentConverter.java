@@ -76,6 +76,9 @@ public interface PaymentConverter {
 
     PaymentBO toPaymentBO(PaymentTO payment);
 
+    @Mapping(target = "paymentType", source = "paymentType")
+    PaymentBO toPaymentBO(PaymentTO payment, PaymentTypeTO paymentType);
+
     List<TransactionTO> toTransactionTOList(List<TransactionDetailsBO> transactions);
 
     @Mapping(source = "transactionAmount", target = "amount")

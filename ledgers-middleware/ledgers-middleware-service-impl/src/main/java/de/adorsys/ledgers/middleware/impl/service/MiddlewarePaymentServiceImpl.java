@@ -110,7 +110,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @Override
     @SuppressWarnings("unchecked")
     public SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType) {
-        return checkPaymentAndPrepareResponse(scaInfoTO, paymentConverter.toPaymentBO(payment));
+        return checkPaymentAndPrepareResponse(scaInfoTO, paymentConverter.toPaymentBO(payment, paymentType));
     }
 
     @SuppressWarnings("PMD.PrematureDeclaration")
