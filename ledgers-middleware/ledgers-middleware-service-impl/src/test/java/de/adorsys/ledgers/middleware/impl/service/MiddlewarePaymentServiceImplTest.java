@@ -166,7 +166,7 @@ public class MiddlewarePaymentServiceImplTest {
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class),any())).thenReturn(paymentBO);
         when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, AccountStatusBO.ENABLED, null, null, null, null)));
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
@@ -190,7 +190,7 @@ public class MiddlewarePaymentServiceImplTest {
 
         when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.ENABLED, EUR));
 
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class),any())).thenReturn(paymentBO);
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
@@ -212,7 +212,7 @@ public class MiddlewarePaymentServiceImplTest {
         UserBO userBO = new UserBO("Test", "", "", USER_TYPE_BO);
         UserTO userTO = new UserTO("Test", "", "", USER_TYPE_TO);
 
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class),any())).thenReturn(paymentBO);
         Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
         middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
     }
@@ -229,7 +229,7 @@ public class MiddlewarePaymentServiceImplTest {
 
         Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
 
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
 
         middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
     }
@@ -244,7 +244,7 @@ public class MiddlewarePaymentServiceImplTest {
         UserBO userBO = new UserBO("Test", "", "", USER_TYPE_BO);
         UserTO userTO = new UserTO("Test", "", "", USER_TYPE_TO);
         Whitebox.setInternalState(middlewareService, "paymentProductsConfig", getPaymentConfig());
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class),any())).thenReturn(paymentBO);
 
         middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
     }
