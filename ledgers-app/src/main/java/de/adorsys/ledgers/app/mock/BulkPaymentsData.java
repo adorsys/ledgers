@@ -1,16 +1,16 @@
 package de.adorsys.ledgers.app.mock;
 
-import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 
 public class BulkPaymentsData extends BalancesData {
 
-    private BulkPaymentTO bulkPayment;
+    private PaymentTO bulkPayment;
 
-    public BulkPaymentTO getBulkPayment() {
+    public PaymentTO getBulkPayment() {
         return bulkPayment;
     }
 
-    public void setBulkPayment(BulkPaymentTO bulkPayment) {
+    public void setBulkPayment(PaymentTO bulkPayment) {
         this.bulkPayment = bulkPayment;
     }
 }

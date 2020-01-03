@@ -23,42 +23,40 @@ public class PaymentGenerationService {
     private static final String TEST_CREDITOR_IBAN = "DE68370400440000000000";
     private static final Random random = new Random();
 
-    public Map<PaymentTypeTO, Object> generatePayments(AccountBalanceTO balance, String branch) {
-        EnumMap<PaymentTypeTO, Object> map = new EnumMap<>(PaymentTypeTO.class);
-        map.put(SINGLE, generateSinglePayment(balance, branch));
-        map.put(BULK, generateBulkPayment(balance, branch));
+    public Map<PaymentTypeTO, PaymentTO> generatePayments(AccountBalanceTO balance, String branch) {
+        EnumMap<PaymentTypeTO, PaymentTO> map = new EnumMap<>(PaymentTypeTO.class);
+        map.put(SINGLE, generatePaymentTO(balance, branch, false));
+        map.put(BULK, generatePaymentTO(balance, branch, true));
         return map;
     }
 
-    private BulkPaymentTO generateBulkPayment(AccountBalanceTO balance, String branch) {
-        return new BulkPaymentTO(
-                null,
-                false,
-                generateReference(balance.getIban(), balance.getAmount().getCurrency()),
-                LocalDate.now(),
-                TransactionStatusTO.RCVD,
-                Arrays.asList(generateSinglePayment(balance, branch), generateSinglePayment(balance, branch)),
-                PaymentProductTO.INSTANT_SEPA
-        );
+    private PaymentTO generatePaymentTO(AccountBalanceTO balance, String branch, boolean isBulk) {
+        PaymentTO payment = new PaymentTO();
+        payment.setDebtorAccount(generateReference(balance.getIban(), balance.getAmount().getCurrency()));
+        payment.setTransactionStatus(TransactionStatusTO.RCVD);
+        payment.setPaymentProduct("instant-sepa-credit-transfers");
+        payment.setRequestedExecutionDate(LocalDate.now());
+
+        List<PaymentTargetTO> targets = new ArrayList<>();
+        targets.add(generateTarget(balance, branch));
+        if (isBulk) {
+            targets.add(generateTarget(balance, branch));
+        }
+        payment.setTargets(targets);
+
+        return payment;
     }
 
-    private SinglePaymentTO generateSinglePayment(AccountBalanceTO balance, String branch) {
+    private PaymentTargetTO generateTarget(AccountBalanceTO balance, String branch) {
+        PaymentTargetTO target = new PaymentTargetTO();
         String endToEndId = generateEndToEndId(branch);
-        return new SinglePaymentTO(
-                null,
-                endToEndId,
-                generateReference(balance.getIban(), balance.getAmount().getCurrency()),
-                generateAmount(balance),
-                generateReference(TEST_CREDITOR_IBAN, balance.getAmount().getCurrency()),
-                "adorsys GmbH & CO KG",
-                "adorsys GmbH & CO KG",
-                getTestCreditorAddress(),
-                null,
-                TransactionStatusTO.RCVD,
-                PaymentProductTO.INSTANT_SEPA,
-                LocalDate.now(),
-                null
-        );
+        target.setEndToEndIdentification(endToEndId);
+        target.setInstructedAmount(generateAmount(balance));
+        target.setCreditorAccount(generateReference(TEST_CREDITOR_IBAN, balance.getAmount().getCurrency()));
+        target.setCreditorAgent("adorsys GmbH & CO KG");
+        target.setCreditorName("adorsys GmbH & CO KG");
+        target.setCreditorAddress(getTestCreditorAddress());
+        return target;
     }
 
     private AmountTO generateAmount(AccountBalanceTO balance) {

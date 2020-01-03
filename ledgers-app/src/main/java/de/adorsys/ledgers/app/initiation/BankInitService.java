@@ -13,9 +13,9 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.BulkPaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTargetTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -105,9 +105,9 @@ public class BankInitService {
 
     private void performSinglePayments(List<UserTO> users) {
         for (SinglePaymentsData paymentsData : mockbankInitData.getSinglePayments()) {
-            SinglePaymentTO payment = paymentsData.getSinglePayment();
+            PaymentTO payment = paymentsData.getSinglePayment();
             try {
-                if (isAbsentTransactionRegular(payment.getDebtorAccount().getIban(), payment.getDebtorAccount().getCurrency(), payment.getEndToEndIdentification())) {
+                if (isAbsentTransactionRegular(payment.getDebtorAccount().getIban(), payment.getDebtorAccount().getCurrency(), payment.getTargets().get(0).getEndToEndIdentification())) {
                     UserTO user = getUserByIban(users, payment.getDebtorAccount().getIban());
                     restInitiationService.executePayment(user, PaymentTypeTO.SINGLE, payment);
                 }
@@ -121,14 +121,14 @@ public class BankInitService {
 
     private void performBulkPayments(List<UserTO> users) {
         for (BulkPaymentsData paymentsData : mockbankInitData.getBulkPayments()) {
-            BulkPaymentTO payment = paymentsData.getBulkPayment();
+            PaymentTO payment = paymentsData.getBulkPayment();
             AccountReferenceTO debtorAccount = payment.getDebtorAccount();
             try {
                 boolean isAbsentTransaction;
                 if (Optional.ofNullable(payment.getBatchBookingPreferred()).orElse(false)) {
                     isAbsentTransaction = isAbsentTransactionBatch(payment);
                 } else {
-                    isAbsentTransaction = isAbsentTransactionRegular(debtorAccount.getIban(), debtorAccount.getCurrency(), payment.getPayments().iterator().next().getEndToEndIdentification());
+                    isAbsentTransaction = isAbsentTransactionRegular(debtorAccount.getIban(), debtorAccount.getCurrency(), payment.getTargets().iterator().next().getEndToEndIdentification());
                 }
                 if (isAbsentTransaction) {
                     UserTO user = getUserByIban(users, debtorAccount.getIban());
@@ -142,11 +142,11 @@ public class BankInitService {
         }
     }
 
-    private boolean isAbsentTransactionBatch(BulkPaymentTO payment) {
+    private boolean isAbsentTransactionBatch(PaymentTO payment) {
         DepositAccountBO account = depositAccountService.getAccountByIbanAndCurrency(payment.getDebtorAccount().getIban(), payment.getDebtorAccount().getCurrency());
         List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(account.getId(), START_DATE, LocalDateTime.now());
-        BigDecimal total = BigDecimal.ZERO.subtract(payment.getPayments().stream()
-                                                            .map(SinglePaymentTO::getInstructedAmount)
+        BigDecimal total = BigDecimal.ZERO.subtract(payment.getTargets().stream()
+                                                            .map(PaymentTargetTO::getInstructedAmount)
                                                             .map(AmountTO::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, 5));
         return transactions.stream()
                        .noneMatch(t -> t.getTransactionAmount().getAmount().equals(total));

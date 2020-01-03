@@ -1,16 +1,16 @@
 package de.adorsys.ledgers.app.mock;
 
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 
 public class SinglePaymentsData extends BalancesData {
 
-    private SinglePaymentTO singlePayment;
+    private PaymentTO singlePayment;
 
-    public SinglePaymentTO getSinglePayment() {
+    public PaymentTO getSinglePayment() {
         return singlePayment;
     }
 
-    public void setSinglePayment(SinglePaymentTO singlePayment) {
+    public void setSinglePayment(PaymentTO singlePayment) {
         this.singlePayment = singlePayment;
     }
 }

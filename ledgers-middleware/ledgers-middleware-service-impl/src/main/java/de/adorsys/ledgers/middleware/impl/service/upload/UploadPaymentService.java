@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service.upload;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
@@ -39,7 +40,7 @@ public class UploadPaymentService {
     private void generateAndExecutePayments(AccountAccessTO access, UploadedDataTO data, ScaInfoTO info) {
         AccountBalanceTO debtorBalance = Optional.ofNullable(data.getBalances().get(access.getIban()))
                                                  .orElseGet(() -> buildAccountBalance(access.getIban(), Currency.getInstance("EUR"), BigDecimal.valueOf(100)));
-        Map<PaymentTypeTO, Object> payments = paymentGenerationService.generatePayments(debtorBalance, data.getBranch());
+        Map<PaymentTypeTO, PaymentTO> payments = paymentGenerationService.generatePayments(debtorBalance, data.getBranch());
 
         payments.forEach((paymentType, payment) -> execute(() -> middlewarePaymentService.initiatePayment(info, payment, paymentType)));
     }
