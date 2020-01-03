@@ -2,7 +2,7 @@ package de.adorsys.ledgers.middleware.api.domain.um;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.SinglePaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class UploadedDataTO {
     private List<UserTO> users = new ArrayList<>();
     private Map<String, AccountDetailsTO> details = new HashMap<>();
     private Map<String, AccountBalanceTO> balances = new HashMap<>();
-    private List<SinglePaymentTO> payments = new ArrayList<>();
+    private List<PaymentTO> payments = new ArrayList<>();
     private boolean generatePayments;
     private String branch;
 }

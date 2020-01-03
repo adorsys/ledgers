@@ -60,7 +60,7 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, Object payment) {
+    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
         return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment, paymentType), HttpStatus.CREATED);
     }
 

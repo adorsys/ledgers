@@ -170,21 +170,36 @@ users:
 singlePayments:
   # Payment from Marion Mueller to Max Musterman on 2018-06-01 at 12:25:00
   - singlePayment:
-      endToEndIdentification: 20180601T20180601
+      targets:
+        - {
+          endToEndIdentification: 20180601T20180601,
+          instructedAmount:
+            {
+              currency: EUR,
+              amount: 3000
+            },
+          creditorAccount:
+            {
+              iban: DE38760700240320465700,
+              currency: EUR
+            },
+          creditorName: Max Musterman,
+          creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
+          remittanceInformationUnstructured: Payment
+        }
       requestedExecutionDate: 2018-06-01
       requestedExecutionTime: 12:25:00
       debtorAccount:
         iban: DE69760700240340283600
         currency: EUR
-      instructedAmount:
-        amount: 3000
-        currency: EUR
-      creditorAccount:
-        iban: DE38760700240320465700
-        currency: EUR
-      creditorName: Max Musterman
-      remittanceInformationUnstructured: Payment
-      paymentProduct: INSTANT_SEPA
+      paymentProduct: "instant-sepa-credit-transfers"
     balancesList:
       - refTime: 2018-06-01T00:00:01
         balances:
@@ -201,21 +216,24 @@ singlePayments:
 
   # Payment from Anton Brueckner to Max Musterman on 2018-06-01 at 13:10:00
   - singlePayment:
-      endToEndIdentification: 20180601T131000
+      targets:
+        - {
+          endToEndIdentification: 20180601T131000,
+          instructedAmount:
+            amount: 700
+            currency: EUR,
+          creditorAccount:
+            iban: DE38760700240320465700
+            currency: EUR,
+          creditorName: Max Musterman,
+          remittanceInformationUnstructured: Payment
+        }
       requestedExecutionDate: 2018-06-01
       requestedExecutionTime: 13:10:00
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      instructedAmount:
-        amount: 700
-        currency: EUR
-      creditorAccount:
-        iban: DE38760700240320465700
-        currency: EUR
-      creditorName: Max Musterman
-      remittanceInformationUnstructured: Payment
-      paymentProduct: INSTANT_SEPA
+      paymentProduct: "instant-sepa-credit-transfers"
     balancesList:
       - refTime: 2018-06-01T13:00:00
         balances:
@@ -232,21 +250,24 @@ singlePayments:
 
   # Payment from Anton Brueckner to Bank external Rainer Maier on 2018-06-02 at 10:10:00
   - singlePayment:
-      endToEndIdentification: 20180602T101000
+      targets:
+        - {
+          endToEndIdentification: 20180602T101000,
+          instructedAmount:
+            amount: 900
+            currency: EUR,
+          creditorAccount:
+            iban: DE84100100100568753108
+            currency: EUR,
+          creditorName: Rainer Maier,
+          remittanceInformationUnstructured: Payment
+        }
       requestedExecutionDate: 2018-06-02
       requestedExecutionTime: 10:10:00
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      instructedAmount:
-        amount: 900
-        currency: EUR
-      creditorAccount:
-        iban: DE84100100100568753108
-        currency: EUR
-      creditorName: Rainer Maier
-      remittanceInformationUnstructured: Payment
-      paymentProduct: INSTANT_SEPA
+      paymentProduct: "instant-sepa-credit-transfers"
     balancesList:
       - refTime: 2018-06-02T10:00:00
         balances:
@@ -263,21 +284,24 @@ singlePayments:
 
   # Payment from Marion Mueller to Miriam Krause on 2018-06-02 at 18:23:00
   - singlePayment:
-      endToEndIdentification: 20180602T182300
+      targets:
+        - {
+          endToEndIdentification: 20180602T182300,
+          instructedAmount:
+            amount: 1400
+            currency: EUR,
+          creditorAccount:
+            iban: DE64370400440136510500
+            currency: EUR,
+          creditorName: Miriam Krause,
+          remittanceInformationUnstructured: Payment
+        }
       requestedExecutionDate: 2018-06-02
       requestedExecutionTime: 18:23:00
       debtorAccount:
         iban: DE69760700240340283600
         currency: EUR
-      instructedAmount:
-        amount: 1400
-        currency: EUR
-      creditorAccount:
-        iban: DE64370400440136510500
-        currency: EUR
-      creditorName: Miriam Krause
-      remittanceInformationUnstructured: Payment
-      paymentProduct: INSTANT_SEPA
+      paymentProduct: "instant-sepa-credit-transfers"
     balancesList:
       - refTime: 2018-06-02T18:00:00
         balances:
@@ -294,21 +318,24 @@ singlePayments:
 
   # Payment from Max Musterman to Anton Brueckner on 2018-06-14 at 11:00:00
   - singlePayment:
-      endToEndIdentification: 20180614T110000
+      targets:
+        - {
+          endToEndIdentification: 20180614T110000,
+          instructedAmount:
+            amount: 2300
+            currency: EUR,
+          creditorAccount:
+            iban: DE80760700240271232400
+            currency: EUR,
+          creditorName: Anton Brueckner,
+          remittanceInformationUnstructured: Payment
+        }
       requestedExecutionDate: 2018-06-14
       requestedExecutionTime: 11:00:00
       debtorAccount:
         iban: DE38760700240320465700
         currency: EUR
-      instructedAmount:
-        amount: 2300
-        currency: EUR
-      creditorAccount:
-        iban: DE80760700240271232400
-        currency: EUR
-      creditorName: Anton Brueckner
-      remittanceInformationUnstructured: Payment
-      paymentProduct: INSTANT_SEPA
+      paymentProduct: "instant-sepa-credit-transfers"
     balancesList:
       - refTime: 2018-06-14T10:59:00
         balances:
@@ -325,21 +352,24 @@ singlePayments:
 
   # Payment from Max Musterman to Marion Mueller on 2018-06-17 at 18:10:00
   - singlePayment:
-      endToEndIdentification: 20180617T181000
+      targets:
+        - {
+          endToEndIdentification: 20180617T181000,
+          instructedAmount:
+            amount: 1280
+            currency: EUR,
+          creditorAccount:
+            iban: DE69760700240340283600
+            currency: EUR,
+          creditorName: Marion Mueller,
+          remittanceInformationUnstructured: Payment
+        }
       requestedExecutionDate: 2018-06-17
       requestedExecutionTime: 18:10:00
       debtorAccount:
         iban: DE38760700240320465700
         currency: EUR
-      instructedAmount:
-        amount: 1280
-        currency: EUR
-      creditorAccount:
-        iban: DE69760700240340283600
-        currency: EUR
-      creditorName: Marion Mueller
-      remittanceInformationUnstructured: Payment
-      paymentProduct: INSTANT_SEPA
+      paymentProduct: "instant-sepa-credit-transfers"
     balancesList:
       - refTime: 2018-06-17T18:00:00
         balances:
@@ -369,15 +399,14 @@ bulkPayments:
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      paymentProduct: INSTANT_SEPA
-      payments:
+      paymentProduct: "instant-sepa-credit-transfers"
+      targets:
         - creditorAccount:
             iban: DE67760700240243265400
             currency: EUR
           creditorName: Maria Brueckner
           remittanceInformationUnstructured: Payment
           endToEndIdentification: 20180623TAAA001
-          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 150
             currency: EUR
@@ -387,7 +416,6 @@ bulkPayments:
           creditorName: Patrick Brueckner
           endToEndIdentification: 20180623TAAA002
           remittanceInformationUnstructured: Payment
-          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 100
             currency: EUR
@@ -412,15 +440,14 @@ bulkPayments:
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      paymentProduct: INSTANT_SEPA
-      payments:
+      paymentProduct: "instant-sepa-credit-transfers"
+      targets:
         - creditorAccount:
             iban: DE69760700240340283600
             currency: EUR
           creditorName: Marion Mueller
           endToEndIdentification: 20180624TAAA001
           remittanceInformationUnstructured: Payment
-          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 2300.00
             currency: EUR
@@ -445,15 +472,14 @@ bulkPayments:
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
-      paymentProduct: INSTANT_SEPA
-      payments:
+      paymentProduct: "instant-sepa-credit-transfers"
+      targets:
         - creditorAccount:
             iban: DE67760700240243265400
             currency: EUR
           creditorName: Maria Brueckner
           endToEndIdentification: 20180625TAAA001
           remittanceInformationUnstructured: Payment
-          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 150
             currency: EUR
@@ -463,7 +489,6 @@ bulkPayments:
           creditorName: Patrick Brueckner
           endToEndIdentification: 20180625TAAA002
           remittanceInformationUnstructured: Payment
-          paymentProduct: INSTANT_SEPA
           instructedAmount:
             amount: 100
             currency: EUR

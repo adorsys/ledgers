@@ -53,7 +53,7 @@ public interface PaymentRestAPI {
     })
     ResponseEntity<SCAPaymentResponseTO> initiatePayment(
             @RequestParam("paymentType") PaymentTypeTO paymentType,
-            @RequestBody Object payment);
+            @RequestBody PaymentTO payment);
 
     @PostMapping(value = "/pain", params = "paymentType", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     @ApiOperation(value = "Initiates a pain Payment", notes = "Initiates a pain payment", authorizations = @Authorization(value = "apiKey"))

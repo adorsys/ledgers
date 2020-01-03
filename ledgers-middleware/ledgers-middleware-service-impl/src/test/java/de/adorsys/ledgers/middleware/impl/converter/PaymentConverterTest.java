@@ -132,42 +132,6 @@ public class PaymentConverterTest {
     /*
      * Intentionaly left here. Don't like thes injected hidden Mappers...
      */
-    @Mock
-    ObjectMapper om;
-    @Test
-    public void toPaymentBOFromGeneric() {
-        when(om.convertValue(any(), eq(SinglePaymentTO.class))).thenReturn(readYml(SinglePaymentTO.class, PATH_SINGLE_TO));
-        when(om.convertValue(any(), eq(PeriodicPaymentTO.class))).thenReturn(readYml(PeriodicPaymentTO.class, PATH_PERIODIC_TO));
-        when(om.convertValue(any(), eq(BulkPaymentTO.class))).thenReturn(readYml(BulkPaymentTO.class, PATH_BULK_TO));
-        assertThat(converter.toPaymentBO(new SinglePaymentTO(), SinglePaymentTO.class).getPaymentType()).isEqualTo(PaymentTypeBO.SINGLE);
-        assertThat(converter.toPaymentBO(new PeriodicPaymentTO(), PeriodicPaymentTO.class).getPaymentType()).isEqualTo(PaymentTypeBO.PERIODIC);
-        assertThat(converter.toPaymentBO(new BulkPaymentTO(), BulkPaymentTO.class).getPaymentType()).isEqualTo(PaymentTypeBO.BULK);
-    }
-
-    @Test
-    public void toPaymentBO() {
-        //BulkPartMapping
-        assertThat(converter.toPaymentTarget(readYml(SinglePaymentTO.class, PATH_SINGLE_TO)))
-                .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_SINGLE_BO).getTargets().get(0));
-        //SinglePayment
-        assertThat(converter.toPaymentBO(readYml(SinglePaymentTO.class, PATH_SINGLE_TO)))
-                .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_SINGLE_BO));
-        //PeriodicPayment
-        assertThat(converter.toPaymentBO(readYml(PeriodicPaymentTO.class, PATH_PERIODIC_TO)))
-                .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_PERIODIC_BO));
-        //BulkPayment
-        assertThat(converter.toPaymentBO(readYml(BulkPaymentTO.class, PATH_BULK_TO)))
-                .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_BULK_BO));
-    }
-
-    @Test
-    public void toPaymentBOBulkObjUnformatted(){
-        //BulkPaymentXs2aVariation
-        when(om.convertValue(any(), eq(BulkPaymentTO.class))).thenReturn(readYml(BulkPaymentTO.class, PATH_BULK_TO_XS2A));
-        assertThat(converter.toPaymentBO(readYml(Object.class, PATH_BULK_TO_XS2A),BulkPaymentTO.class))
-                .isEqualToComparingFieldByFieldRecursively(readYml(PaymentBO.class, PATH_BULK_BO_XS2A));
-
-    }
 
     @Test
     public void toTransactionTO() {

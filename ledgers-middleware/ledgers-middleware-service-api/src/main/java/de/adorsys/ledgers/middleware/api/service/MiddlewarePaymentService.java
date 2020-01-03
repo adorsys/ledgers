@@ -38,7 +38,7 @@ public interface MiddlewarePaymentService {
      * @param paymentType : the payment type
      * @return : the sca response object.
      */
-    SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, Object payment, PaymentTypeTO paymentType);
+    SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType);
 
     /**
      * PROC:01 Initiates a pain payment. Called by the channel layer.

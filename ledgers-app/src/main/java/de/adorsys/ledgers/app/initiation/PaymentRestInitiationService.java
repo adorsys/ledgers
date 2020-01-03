@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.app.initiation;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
@@ -29,7 +30,7 @@ public class PaymentRestInitiationService {
         this.authRequestInterceptor = authRequestInterceptor;
     }
 
-    public void executePayment(UserTO user, PaymentTypeTO paymentType, Object payment) {
+    public void executePayment(UserTO user, PaymentTypeTO paymentType, PaymentTO payment) {
         try {
             loginUser(user);
             SCAPaymentResponseTO response = paymentRestClient.initiatePayment(paymentType, payment).getBody();
