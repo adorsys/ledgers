@@ -26,13 +26,13 @@ script:
   - mvn -B -V clean install
   - mvn -B -V javadoc:javadoc
   - mvn -B -V pmd:check
-  #- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=adorsys_ledgers
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=adorsys_ledgers
 
 #addons:
-#  sonarcloud:
-#    organization: "adorsys"
-#    token:
-#      secure: $SONARCLOUD_TOKEN
+  sonarcloud:
+    organization: "adorsys"
+    token:
+      secure: $SONARCLOUD_TOKEN
 
 # Schritte um Release zu veröffentlichen
 before_deploy:
