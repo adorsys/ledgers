@@ -51,10 +51,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.*;
 import static de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO.FINALISED;
@@ -116,22 +113,23 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @SuppressWarnings("PMD.PrematureDeclaration")
     private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
         validatePayment(paymentBO);
-        DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount());
+        DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount(), true, null);
         paymentBO.setAccountId(debtorAccount.getId());
-        try {
-            paymentBO.getTargets()
-                    .forEach(t -> {
-                        DepositAccountBO acc = checkAccountStatusAndCurrencyMatch(t.getCreditorAccount());
+        paymentBO.getTargets()
+                .forEach(t -> {
+                    try {
+                        DepositAccountBO acc = checkAccountStatusAndCurrencyMatch(t.getCreditorAccount(), false, t.getInstructedAmount().getCurrency());
                         t.setCreditorAccount(acc.getReference());
-                    });
-        } catch (MiddlewareModuleException e) {
-            if (EnumSet.of(ACCOUNT_DISABLED, CURRENCY_MISMATCH).contains(e.getErrorCode())) {
-                log.error(e.getDevMsg());
-                throw e;
-            }
-        } catch (DepositModuleException e) {
-            log.info("Creditor account is located in another ASPSP");
-        }
+                    } catch (MiddlewareModuleException e) {
+                        if (EnumSet.of(ACCOUNT_DISABLED, CURRENCY_MISMATCH).contains(e.getErrorCode())) {
+                            log.error(e.getDevMsg());
+                            throw e;
+                        }
+                    } catch (DepositModuleException e) {
+                        log.info("Creditor account is located in another ASPSP");
+                    }
+                });
+
         paymentBO.getDebtorAccount().setCurrency(debtorAccount.getCurrency());
 
         UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
@@ -350,10 +348,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return scaUtils.hasSCA(user);
     }
 
-    private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference) {
+    private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference, boolean isDebtor, Currency currency) {
         DepositAccountBO account = Optional.ofNullable(reference.getCurrency())
                                            .map(c -> accountService.getAccountByIbanAndCurrency(reference.getIban(), c))
-                                           .orElseGet(() -> getAccountByIbanAndParamCurrencyErrorIfNotSingle(reference.getIban()));
+                                           .orElseGet(() -> getAccountByIbanAndParamCurrencyErrorIfNotSingle(reference.getIban(), isDebtor, currency));
 
         if (!account.isEnabled()) {
             throw MiddlewareModuleException.builder()
@@ -364,8 +362,11 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return account;
     }
 
-    private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban) {
+    private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban, boolean isDebtor, Currency currency) {
         List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
+        if (CollectionUtils.isEmpty(accounts) && !isDebtor) {
+            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, AccountStatusBO.ENABLED, null, null, null, null);
+        }
         if (accounts.size() != 1) {
             String msg = CollectionUtils.isEmpty(accounts)
                                  ? String.format("Account with IBAN: %s Not Found!", iban)
