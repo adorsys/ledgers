@@ -36,6 +36,7 @@ addons:
 
 # Schritte um Release zu veröffentlichen
 before_deploy:
+  - gpg --version
   - echo $GPG_SECRET_KEY | base64 --decode | $GPG_EXECUTABLE --import
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
