@@ -169,17 +169,17 @@ Deploy Openshift (sandbox-dev):
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_SANDBOX_DEV}
   <<: *push_docker_openshift
 
-Deploy Openshift (gateway-dev):
-  stage: Deployment
-  only:
-    - develop
-  environment:
-    name: dev
-    url: https://dev-bankinggateway-sandbox-ledgers.cloud.adorsys.de
-  variables:
-    DOCKER_TAG: latest
-    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_GATEWAY_DEV}
-  <<: *push_docker_openshift
+#Deploy Openshift (gateway-dev):
+#  stage: Deployment
+#  only:
+#    - develop
+#  environment:
+#    name: dev
+#    url: https://dev-bankinggateway-sandbox-ledgers.cloud.adorsys.de
+#  variables:
+#    DOCKER_TAG: latest
+#    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_GATEWAY_DEV}
+#  <<: *push_docker_openshift
 
 Deploy Openshift (dxc-sandbox-dev):
   stage: Deployment

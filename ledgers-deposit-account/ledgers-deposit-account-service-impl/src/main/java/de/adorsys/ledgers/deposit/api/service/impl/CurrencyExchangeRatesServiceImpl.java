@@ -4,17 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
-import de.adorsys.ledgers.deposit.api.domain.exchange.CubeType;
 import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.util.exception.DepositErrorCode;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +23,51 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
     private final ExchangeRateClient client;
     private final ObjectMapper objectMapper;
 
-    @Override
+    /*@Override //TODO Restore functionality overriding xmlObjectMapper for Feign to enable reading JAXB annotations
     public Map<Currency, String> getAllRates() {
         CubeType body = client.getRatesToEur().getBody();
         List<JsonNode> parents = objectMapper.valueToTree(body).findParents(CURRENCY_FIELD_NAME);
         return parents.stream()
                        .filter(n -> StringUtils.isNotBlank(n.get(CURRENCY_FIELD_NAME).textValue()))
                        .collect(Collectors.toMap(this::getCurrency, this::getRateFromNode));
+    }*/
+
+    @Override
+    public Map<Currency, String> getAllRates() {
+        Map<Currency, String> rates = new HashMap<>();
+        rates.put(Currency.getInstance("USD"), "1.1115");
+        rates.put(Currency.getInstance("JPY"), "120.86");
+        rates.put(Currency.getInstance("BGN"), "1.9558");
+        rates.put(Currency.getInstance("CZK"), "25.265");
+        rates.put(Currency.getInstance("DKK"), "7.4731");
+        rates.put(Currency.getInstance("GBP"), "0.84868");
+        rates.put(Currency.getInstance("HUF"), "331.08");
+        rates.put(Currency.getInstance("PLN"), "4.2429");
+        rates.put(Currency.getInstance("RON"), "4.7774");
+        rates.put(Currency.getInstance("SEK"), "10.5108");
+        rates.put(Currency.getInstance("CHF"), "1.0792");
+        rates.put(Currency.getInstance("ISK"), "137.10");
+        rates.put(Currency.getInstance("NOK"), "9.8508");
+        rates.put(Currency.getInstance("HRK"), "7.4490");
+        rates.put(Currency.getInstance("RUB"), "68.6389");
+        rates.put(Currency.getInstance("TRY"), "6.6158");
+        rates.put(Currency.getInstance("AUD"), "1.6195");
+        rates.put(Currency.getInstance("BRL"), "4.5092");
+        rates.put(Currency.getInstance("CAD"), "1.4470");
+        rates.put(Currency.getInstance("CNY"), "7.7184");
+        rates.put(Currency.getInstance("HKD"), "8.6424");
+        rates.put(Currency.getInstance("IDR"), "15441.51");
+        rates.put(Currency.getInstance("ILS"), "3.8541");
+        rates.put(Currency.getInstance("INR"), "79.7090");
+        rates.put(Currency.getInstance("KRW"), "1297.37");
+        rates.put(Currency.getInstance("MXN"), "20.9079");
+        rates.put(Currency.getInstance("MYR"), "4.5588");
+        rates.put(Currency.getInstance("NZD"), "1.6739");
+        rates.put(Currency.getInstance("PHP"), "56.420");
+        rates.put(Currency.getInstance("SGD"), "1.5014");
+        rates.put(Currency.getInstance("THB"), "33.740");
+        rates.put(Currency.getInstance("ZAR"), "15.8166");
+        return rates;
     }
 
     @Override
@@ -71,10 +106,12 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
                                                   .build());
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private Currency getCurrency(JsonNode node) {
         return Currency.getInstance(node.get(CURRENCY_FIELD_NAME).textValue());
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private String getRateFromNode(JsonNode node) {
         return node.get(RATE_FIELD_NAME).asText();
     }
