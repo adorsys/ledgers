@@ -8,8 +8,11 @@ import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.util.exception.DepositErrorCode;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -20,6 +23,7 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
     private static final String CURRENCY_FIELD_NAME = "currency";
     private static final String RATE_FIELD_NAME = "rate";
     private static final String DEFAULT_RATE = "1";
+    public static final String RATE_CONTRACT = "International Currency Exchange Market";
     private final ExchangeRateClient client;
     private final ObjectMapper objectMapper;
 
@@ -72,7 +76,7 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
 
     @Override
     public List<ExchangeRateBO> getExchangeRates(Currency debtor, Currency amount, Currency creditor) {
-        if (debtor.equals(amount) && amount.equals(creditor)) {
+        if (debtor == amount && amount == creditor) {
             return Collections.emptyList();
         }
         Map<Currency, String> rates = getAllRates();
@@ -82,14 +86,44 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
         return ratesToReturn;
     }
 
-    private void updateRatesList(Currency from, Currency to, Map<Currency, String> rates, List<ExchangeRateBO> ratesToReturn) {
-        if (!from.equals(to)) {
-            String rateFrom = resolveRate(from, rates);
-            String rateTo = resolveRate(to, rates);
-            if (!rateFrom.equals(rateTo)) {
-                ratesToReturn.add(new ExchangeRateBO(from, rateFrom, to, rateTo, LocalDate.now(), "International Currency Exchange Market"));
+    @Override
+    public BigDecimal applyRate(BigDecimal amount, ExchangeRateBO rate) {
+        return Optional.ofNullable(rate)
+                       .map(r -> amount.divide(parseBD(r.getRateFrom()), 4, RoundingMode.HALF_EVEN).multiply(parseBD(r.getRateTo())))
+                       .orElse(amount);
+    }
+
+    @Override
+    public BigDecimal applyRate(Currency curFrom, Currency curTo, BigDecimal value) {
+        if (curFrom == curTo) {
+            return value;
+        }
+        ExchangeRateBO rate = resolveExchangeRate(curFrom, curTo, getAllRates());
+        return applyRate(value, rate);
+    }
+
+    private BigDecimal parseBD(String value) {
+        return NumberUtils.createBigDecimal(value);
+    }
+
+    private void updateRatesList(Currency curFrom, Currency curTo, Map<Currency, String> rates, List<ExchangeRateBO> ratesToReturn) {
+        if (curFrom != curTo) {
+            ExchangeRateBO rate = resolveExchangeRate(curFrom, curTo, rates);
+            if (!rate.getRateFrom().equals(rate.getRateTo())) {
+                ratesToReturn.add(rate);
             }
         }
+    }
+
+    private ExchangeRateBO resolveExchangeRate(Currency curFrom, Currency curTo, Map<Currency, String> rates) {
+        if (curFrom != curTo) {
+            String rateFrom = resolveRate(curFrom, rates);
+            String rateTo = resolveRate(curTo, rates);
+            if (!rateFrom.equals(rateTo)) {
+                return new ExchangeRateBO(curFrom, rateFrom, curTo, rateTo, LocalDate.now(), RATE_CONTRACT);
+            }
+        }
+        return new ExchangeRateBO(curFrom, DEFAULT_RATE, curTo, DEFAULT_RATE, LocalDate.now(), RATE_CONTRACT);
     }
 
     private String resolveRate(Currency currency, Map<Currency, String> rates) {

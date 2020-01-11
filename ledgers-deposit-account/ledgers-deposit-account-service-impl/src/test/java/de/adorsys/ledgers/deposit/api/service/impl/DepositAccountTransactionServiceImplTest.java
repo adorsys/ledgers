@@ -147,6 +147,7 @@ public class DepositAccountTransactionServiceImplTest {
         when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
 
         when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, EUR, EUR));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
 
         when(depositAccountConfigService.getClearingAccount(any())).thenReturn("clearing");
         when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));

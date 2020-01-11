@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.junit.MockitoJUnitRunner;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -65,6 +67,8 @@ public class DepositAccountServiceImplTest {
     private TransactionDetailsMapper transactionDetailsMapper;
     @Mock
     private AccountStmtService accountStmtService;
+    @Mock
+    private CurrencyExchangeRatesService exchangeRatesService;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -210,6 +214,7 @@ public class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+        Whitebox.setInternalState(depositAccountService,"exchangeRatesService",new CurrencyExchangeRatesServiceImpl(null, null));
         boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
         assertThat(response).isTrue();
     }
