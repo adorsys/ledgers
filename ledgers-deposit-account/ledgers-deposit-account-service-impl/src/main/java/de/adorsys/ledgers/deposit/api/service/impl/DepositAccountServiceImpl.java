@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
@@ -25,6 +26,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,11 +54,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private final AccountStmtService accountStmtService;
     private final PostingService postingService;
     private final TransactionDetailsMapper transactionDetailsMapper;
+    private final CurrencyExchangeRatesService exchangeRatesService;
 
     public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
                                      LedgerService ledgerService, EntityManager entityManager, ResourceLoader loader, DepositAccountRepository depositAccountRepository,
                                      AccountStmtService accountStmtService,
-                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper) {
+                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper, CurrencyExchangeRatesService exchangeRatesService) {
         super(depositAccountConfigService, ledgerService);
         this.entityManager = entityManager;
         this.loader = loader;
@@ -64,6 +67,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         this.accountStmtService = accountStmtService;
         this.postingService = postingService;
         this.transactionDetailsMapper = transactionDetailsMapper;
+        this.exchangeRatesService = exchangeRatesService;
     }
 
     @Override
@@ -132,6 +136,10 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) {
         DepositAccountDetailsBO account = getAccountDetailsByIbanAndCurrency(requestBO.getPsuAccount().getIban(), requestBO.getPsuAccount().getCurrency(), LocalDateTime.now(), true);
+        Currency accountCurrency = account.getAccount().getCurrency();
+        AmountBO instructedAmount = requestBO.getInstructedAmount();
+        BigDecimal appliedRate = exchangeRatesService.applyRate(instructedAmount.getCurrency(), accountCurrency, instructedAmount.getAmount());
+        requestBO.setInstructedAmount(new AmountBO(account.getAccount().getCurrency(), appliedRate));
         return account.getBalances().stream()
                        .filter(b -> b.getBalanceType() == INTERIM_AVAILABLE)
                        .findFirst()

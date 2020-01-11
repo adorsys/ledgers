@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.middleware.api.domain.account.ExchangeRateTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import org.mapstruct.Mapper;
@@ -83,6 +84,9 @@ public interface PaymentConverter {
 
     @Mapping(source = "transactionAmount", target = "amount")
     TransactionTO toTransactionTO(TransactionDetailsBO transaction);
+
+    @Mapping(target = "currency", source = "currencyTo")
+    ExchangeRateTO toExchangeRateTO(ExchangeRateBO exchangeRate);
 
     @Mapping(target = "transactionAmount", source = "amount")
     TransactionDetailsBO toTransactionDetailsBO(TransactionTO transaction);
