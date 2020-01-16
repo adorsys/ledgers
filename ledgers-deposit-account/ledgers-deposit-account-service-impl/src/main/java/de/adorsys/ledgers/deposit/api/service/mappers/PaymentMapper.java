@@ -4,7 +4,6 @@ import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
-import de.adorsys.ledgers.util.Ids;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -26,6 +25,21 @@ public interface PaymentMapper {
 
     PaymentOrderDetailsBO toPaymentOrder(PaymentBO payment);
 
+    @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
+    @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
+    @Mapping(target = "creditorId", defaultExpression = "java(null)")
+    @Mapping(target = "mandateId", defaultExpression = "java(null)")
+    @Mapping(target = "entryReference", defaultExpression = "java(null)")
+    @Mapping(target = "checkId", defaultExpression = "java(null)")
+    @Mapping(target = "purposeCode", defaultExpression = "java(null)")
+    @Mapping(target = "transactionStatus", source = "paymentTarget.payment.transactionStatus")
+    @Mapping(target = "remittanceInformationUnstructured", source = "paymentTarget.remittanceInformationUnstructured")
+    @Mapping(target = "remittanceInformationStructured", source = "paymentTarget.remittanceInformationStructured")
+    @Mapping(target = "debtorName", source = "paymentTarget.payment.debtorName")
+    @Mapping(target = "creditorName", source = "paymentTarget.creditorName")
+    @Mapping(target = "creditorAgent", source = "paymentTarget.creditorAgent")
+    @Mapping(target = "creditorAddress", source = "paymentTarget.creditorAddress")
+    @Mapping(target = "creditorAccount", source = "paymentTarget.creditorAccount")
     @Mapping(source = "id", target = "transactionId")
     @Mapping(source = "paymentTarget.endToEndIdentification", target = "endToEndId")
     @Mapping(source = "postingTime", target = "bookingDate")
@@ -36,8 +50,29 @@ public interface PaymentMapper {
     @Mapping(source = "paymentTarget.payment.paymentType", target = "paymentType")
     @Mapping(source = "paymentTarget.payment.paymentProduct", target = "paymentProduct")
     @Mapping(source = "rate", target = "exchangeRate")
+    @Mapping(target = "bankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(paymentTarget.getPayment().getPaymentProduct()))")
+    @Mapping(target = "proprietaryBankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(paymentTarget.getPayment().getPaymentProduct()))")
     PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime, List<ExchangeRateBO> rate);
 
+
+    @Mapping(target = "mandateId", defaultExpression = "java(null)")
+    @Mapping(target = "checkId", defaultExpression = "java(null)")
+    @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
+    @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
+    @Mapping(target = "creditorId", defaultExpression = "java(null)")
+    @Mapping(target = "creditorAddress", defaultExpression = "java(null)")
+    @Mapping(target = "entryReference", defaultExpression = "java(null)")
+    @Mapping(target = "purposeCode", defaultExpression = "java(null)")
+    @Mapping(target = "remittanceInformationStructured", defaultExpression = "java(null)")
+    @Mapping(target = "remittanceInformationUnstructured", constant = "Batch booking, no remittance information available")
+    @Mapping(target = "transactionStatus", source = "payment.transactionStatus")
+    @Mapping(target = "debtorName", source = "payment.debtorName")
+    @Mapping(target = "debtorAccount", source = "payment.debtorAccount")
+    @Mapping(target = "paymentType", source = "payment.paymentType")
+    @Mapping(target = "creditorAccount", defaultExpression = "java(null)")
+    @Mapping(target = "endToEndId", expression = "java(payment.getTargets().stream().map(PaymentTargetBO::getEndToEndIdentification).reduce(\"\", (accum, s) -> accum + \", \" + s).replaceFirst(\", \",\"\" ))")
+    @Mapping(target = "proprietaryBankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(payment.getPaymentProduct()))")
+    @Mapping(target = "bankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(payment.getPaymentProduct()))")
     @Mapping(source = "amount", target = "transactionAmount")
     @Mapping(source = "postingTime", target = "valueDate")
     @Mapping(source = "postingTime", target = "bookingDate")
@@ -49,17 +84,28 @@ public interface PaymentMapper {
     @Mapping(source = "rate", target = "exchangeRate")
     PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime, List<ExchangeRateBO> rate);
 
+    @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
+    @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
+    @Mapping(target = "creditorId", defaultExpression = "java(null)")
+    @Mapping(target = "checkId", defaultExpression = "java(null)")
+    @Mapping(target = "mandateId", defaultExpression = "java(null)")
+    @Mapping(target = "entryReference", defaultExpression = "java(null)")
+    @Mapping(target = "remittanceInformationStructured", defaultExpression = "java(null)")
+    @Mapping(target = "purposeCode", defaultExpression = "java(null)")
+    @Mapping(target = "remittanceInformationUnstructured", constant = "Cash deposit through Bank ATM")
+    @Mapping(target = "exchangeRate", defaultExpression = "java(null)")
+    //TODO In future maybe need to deposit cash in different currency
+    @Mapping(target = "debtorName", source = "depositAccount.name")
+    @Mapping(target = "debtorAccount", source = "depositAccount.reference")
+    @Mapping(target = "creditorName", source = "depositAccount.name")
+    @Mapping(target = "proprietaryBankTransactionCode", constant = "PMNT-MCOP-OTHR")
+    @Mapping(target = "bankTransactionCode", constant = "PMNT-MCOP-OTHR")
     @Mapping(target = "transactionId", source = "postingLineId")
     @Mapping(target = "endToEndId", source = "postingLineId")
     @Mapping(target = "bookingDate", source = "postingDate")
     @Mapping(target = "valueDate", source = "postingDate")
     @Mapping(target = "transactionAmount", source = "amount")
-    TransactionDetailsBO toDepositTransactionDetails(AmountBO amount, AccountReferenceBO creditorAccount, LocalDate postingDate, String postingLineId);
-
-    @SuppressWarnings("PMD.ShortMethodName")
-    default String id() {
-        return Ids.id();
-    }
+    TransactionDetailsBO toDepositTransactionDetails(AmountBO amount, DepositAccountBO depositAccount, AccountReferenceBO creditorAccount, LocalDate postingDate, String postingLineId);
 
     List<PaymentBO> toPaymentBOList(List<Payment> payments);
 }

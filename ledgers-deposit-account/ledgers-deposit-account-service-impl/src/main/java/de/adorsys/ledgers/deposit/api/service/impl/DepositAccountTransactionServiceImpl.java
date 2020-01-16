@@ -105,7 +105,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         String lineId = Ids.id();
         AccountReferenceBO creditor = depositAccount.getReference();
-        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, creditor, postingDateTime.toLocalDate(), lineId));
+        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, depositAccount, creditor, postingDateTime.toLocalDate(), lineId));
         return postingMapper.buildPostingLine(debitTransactionDetails, account, debitAmount, creditAmount, "ATM transfer", lineId);
     }
 
