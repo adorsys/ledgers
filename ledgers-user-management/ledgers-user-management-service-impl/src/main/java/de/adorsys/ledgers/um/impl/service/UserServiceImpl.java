@@ -17,11 +17,9 @@
 package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.*;
+import de.adorsys.ledgers.um.api.service.ScaUserDataService;
 import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.db.domain.AccountAccess;
-import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
-import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.domain.*;
 import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
@@ -58,6 +56,7 @@ public class UserServiceImpl implements UserService {
     private static final String CONSENT_WITH_ID_S_NOT_FOUND = "Consent with id=%s not found";
 
     private final UserRepository userRepository;
+    private final ScaUserDataService scaUserDataService;
     private final AisConsentRepository consentRepository;
     private final UserConverter userConverter;
     private final PasswordEnc passwordEnc;
@@ -177,6 +176,7 @@ public class UserServiceImpl implements UserService {
         checkDuplicateScaMethods(userBO.getScaUserData());
         UserEntity user = userConverter.toUserPO(userBO);
         checkIfPasswordModifiedAndEncode(user);
+        ifScaChangedEmailNotValid(user.getScaUserData());
         hashStaticTan(user);
         UserEntity save = userRepository.save(user);
         return convertToUserBoAndDecodeTan(save);
@@ -205,6 +205,15 @@ public class UserServiceImpl implements UserService {
         String oldPin = findById(user.getId()).getPin();
         if (!user.getPin().equals(oldPin)) {
             user.setPin(passwordEnc.encode(user.getId(), user.getPin()));
+        }
+    }
+
+    private void ifScaChangedEmailNotValid(List<ScaUserDataEntity> scaUserDataEntities) {
+        for (ScaUserDataEntity scaUserDataEntity : scaUserDataEntities) {
+            String oldEmail = scaUserDataService.findById(scaUserDataEntity.getId()).getMethodValue();
+            if (!scaUserDataEntity.getMethodValue().equals(oldEmail)) {
+                scaUserDataEntity.setValid(false);
+            }
         }
     }
 
@@ -244,7 +253,7 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity> user = userRepository.findByEmailOrLogin(userBO.getEmail(), userBO.getLogin());
         if (user.isPresent()) {
             String message = String.format("User with this email or login already exists. Email %s. Login %s.",
-                    userBO.getEmail(), userBO.getLogin());
+                                           userBO.getEmail(), userBO.getLogin());
             log.error(message);
             throw UserManagementModuleException.builder()
                           .errorCode(USER_ALREADY_EXISTS)

@@ -76,7 +76,6 @@ public class AppMgmtResource implements AppMgmtRestAPI {
         user.setPin(adminUser.getPin());
         user.setEmail(adminUser.getEmail());
         user.getUserRoles().add(UserRoleTO.SYSTEM);
-        user.setUserType(adminUser.getUserType());
         userManagementService.create(user);
 
         SCALoginResponseTO scaLoginResponseTO = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);

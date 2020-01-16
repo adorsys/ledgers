@@ -108,8 +108,8 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     }
 
     @Override
-    public UserTO register(String login, String email, String pin, UserRoleTO role, UserTypeTO type) {
-        UserTO user = new UserTO(login, email, pin, type);
+    public UserTO register(String login, String email, String pin, UserRoleTO role) {
+        UserTO user = new UserTO(login, email, pin);
         user.getUserRoles().add(role);
         UserBO userBO = userTOMapper.toUserBO(user);
         return userTOMapper.toUserTO(userService.create(userBO));

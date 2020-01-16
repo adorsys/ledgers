@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="oza@adorsys.com.ua" id="27-12-2019-01">
+        <comment>Create sequence for token id</comment>
+        <createSequence sequenceName="email_verification_id_seq"/>
+    </changeSet>
+
+    <changeSet author="oza@adorsys.com.ua" id="27-12-2019-02">
+        <comment>Create table email_verification</comment>
+
+        <createTable tableName="email_verification">
+            <column name="token_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="token" type="VARCHAR(225)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expired_date_time" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="issued_date_time" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="confirmed_date_time" type="DATETIME">
+            </column>
+
+            <column name="sca_id" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="oza@adorsys.com.ua" id="27-12-2019-03">
+        <comment>Create foreign key in email_verification table</comment>
+        <addForeignKeyConstraint baseTableName="email_verification"
+                                 baseColumnNames="sca_id"
+                                 constraintName="fk_sca_data"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="sca_id"
+                                 referencedTableName="sca_data"
+        />
+    </changeSet>
+
+    <changeSet author="oza@adorsys.com.ua" id="13-01-2020-04">
+        <comment>Remove user_type column at users table</comment>
+        <dropColumn tableName="users">
+            <column name="user_type"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet author="oza@adorsys.com.ua" id="13-01-2020-05">
+        <comment>Add column is_valid to sca_data table</comment>
+        <addColumn tableName="sca_data">
+            <column name="is_valid" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

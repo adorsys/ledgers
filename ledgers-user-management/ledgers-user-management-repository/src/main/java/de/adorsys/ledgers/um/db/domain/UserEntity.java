@@ -34,9 +34,9 @@ import javax.persistence.*;
         @UniqueConstraint(columnNames = "email", name = UserEntity.USER_EMAIL_UNIQUE)
 })
 public class UserEntity {
-	
-	public static final String USER_LOGIN_UNIQUE = "user_login_unique";
-	public static final String USER_EMAIL_UNIQUE = "user_email_unique";
+
+    public static final String USER_LOGIN_UNIQUE = "user_login_unique";
+    public static final String USER_EMAIL_UNIQUE = "user_email_unique";
 
     @Id
     @Column(name = "user_id")
@@ -60,16 +60,12 @@ public class UserEntity {
     private List<AccountAccess> accountAccesses = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="users_roles", joinColumns = @JoinColumn(name="user_id"))
-    @Column(name="role")
+    @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private Collection<UserRole> userRoles =  new ArrayList<>();
+    private Collection<UserRole> userRoles = new ArrayList<>();
 
     private String branch;
-
-    @Column(name="user_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private UserType userType;
 
     @Override
     public boolean equals(Object o) {
@@ -81,18 +77,17 @@ public class UserEntity {
         }
         UserEntity that = (UserEntity) o;
         return Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getLogin(), that.getLogin()) &&
-                Objects.equals(getEmail(), that.getEmail()) &&
-                Objects.equals(getPin(), that.getPin()) &&
-                Objects.equals(getScaUserData(), that.getScaUserData()) &&
-                Objects.equals(getAccountAccesses(), that.getAccountAccesses()) &&
-                Objects.equals(getUserRoles(), that.getUserRoles()) &&
-                Objects.equals(getBranch(), that.getBranch()) &&
-                Objects.equals(getUserType(),that.getUserType());
+                       Objects.equals(getLogin(), that.getLogin()) &&
+                       Objects.equals(getEmail(), that.getEmail()) &&
+                       Objects.equals(getPin(), that.getPin()) &&
+                       Objects.equals(getScaUserData(), that.getScaUserData()) &&
+                       Objects.equals(getAccountAccesses(), that.getAccountAccesses()) &&
+                       Objects.equals(getUserRoles(), that.getUserRoles()) &&
+                       Objects.equals(getBranch(), that.getBranch());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch(), getUserType());
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch());
     }
 }
