@@ -15,6 +15,7 @@ import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -47,7 +48,7 @@ public class ScaUserDataServiceImplTest {
 
     @Test
     public void findByEmail(){
-        when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Optional.ofNullable(scaUserDataEntity));
+        when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Collections.singletonList(scaUserDataEntity));
         when(userConverter.toScaUserDataBO(any())).thenReturn(scaUserDataBO);
 
         ScaUserDataBO scaUserDataBO = scaUserDataService.findByEmail(EMAIL);
@@ -59,7 +60,7 @@ public class ScaUserDataServiceImplTest {
 
     @Test(expected = ScaModuleException.class)
     public void findByEmail_scaNotFound(){
-        when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Optional.empty());
+        when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Collections.EMPTY_LIST);
         when(userConverter.toScaUserDataBO(any())).thenReturn(scaUserDataBO);
 
         scaUserDataService.findByEmail(EMAIL);
