@@ -39,3 +39,6 @@ creditorAddress:
   }
 remittanceInformationUnstructured: remittance
 paymentProduct: sepa-credit-transfers
+transactionStatus: RCVD
+bankTransactionCode: PMNT-ICDT-STDO
+proprietaryBankTransactionCode: PMNT-ICDT-STDO
