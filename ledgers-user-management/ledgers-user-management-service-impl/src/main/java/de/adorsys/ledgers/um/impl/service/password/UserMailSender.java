@@ -2,7 +2,6 @@ package de.adorsys.ledgers.um.impl.service.password;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,19 +10,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ResetPasswordMailSender {
-    @Value("${reset-password.email.subject}")
-    private String subject;
-    @Value("${reset-password.email.from}")
-    private String from;
+public class UserMailSender {
 
     private final JavaMailSender sender;
 
-    public boolean send(String recipient, String text) {
-        log.info("Preparing an email to send forget password code");
+    public boolean send(String subject, String from, String to, String text) {
+        log.info("Preparing an email to send code");
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(recipient);
+            message.setTo(to);
             message.setSubject(subject);
             message.setText(text);
             message.setFrom(from);

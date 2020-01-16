@@ -63,17 +63,17 @@ paymentScheduler:
   delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
 
 payment-products:
-  instant:
-    - instant-sepa-credit-transfers
-    - target-2-payments
-    - domestic-swiss-credit-transfers-isr
-    - pain.001-swiss-six-credit-transfers
-  regular:
-    - sepa-credit-transfers
-    - cross-border-credit-transfers
-    - domestic-swiss-credit-transfers
-    - pain.001-sepa-credit-transfers
-    - pain.001-cross-border-credit-transfers
+   instant:
+     instant-sepa-credit-transfers,
+     target-2-payments,
+     domestic-swiss-credit-transfers-isr,
+     pain.001-swiss-six-credit-transfers
+   regular:
+     sepa-credit-transfers,
+     cross-border-credit-transfers,
+     domestic-swiss-credit-transfers,
+     pain.001-sepa-credit-transfers,
+     pain.001-cross-border-credit-transfers
 
 payment_mapping.path:
 
@@ -103,6 +103,21 @@ reset-password:
 user-service:
   jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
+verify:
+  template:
+    subject: "Please verify your email address"
+    from: noreply@adorsys.de
+    message:
+      "Hello,
+      Please verify your email address by clicking the following link: %s
+      Please note that the above link is only valid until %s.
+      This is an automatically generated email – please do not reply to it. If you have any queries regarding your order, please email us at info@tpp.com.
+      %s
+      Best wishes,
+      Dynamic Sandbox team"
+  base_path: http://localhost:8088
+  endpoint: /emails/email
+
 #Supported currencies
 currency:
   default: EUR
@@ -110,6 +125,7 @@ currency:
     - EUR
     - USD
     - CHF
+    - GBP
 
 #TanEncryption
 application:

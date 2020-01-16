@@ -40,14 +40,14 @@ public class UserResource {
     private final UserService userService;
 
     @PostMapping
-    ResponseEntity<Void> createUser(@RequestBody UserBO user) {
+    public ResponseEntity<Void> createUser(@RequestBody UserBO user) {
         UserBO userBO = userService.create(user);
         URI uri = UriComponentsBuilder.fromUriString(USERS + userBO.getLogin()).build().toUri();
         return ResponseEntity.created(uri).build();
     }
 
     @GetMapping("{id}")
-    ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
+    public ResponseEntity<UserBO> getUserById(@PathVariable("id") String id) {
         try {
             return ResponseEntity.ok(userService.findById(id));
         } catch (UserManagementModuleException e) {
@@ -56,7 +56,7 @@ public class UserResource {
     }
 
     @GetMapping
-    ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
+    public ResponseEntity<UserBO> getUserByLogin(@RequestParam("login") String login) {
         try {
             return ResponseEntity.ok(userService.findByLogin(login));
         } catch (UserManagementModuleException e) {
@@ -65,7 +65,7 @@ public class UserResource {
     }
 
     @PutMapping("{id}/" + SCA_DATA)
-    ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
+    public ResponseEntity<Void> updateUserScaData(@PathVariable String id, @RequestBody List<ScaUserDataBO> data) {
         try {
             UserBO userBO = userService.findById(id);
             UserBO user = userService.updateScaData(data, userBO.getLogin());
@@ -80,7 +80,7 @@ public class UserResource {
     }
 
     @GetMapping("all")
-    ResponseEntity<List<UserBO>> getAllUsers() {
+    public ResponseEntity<List<UserBO>> getAllUsers() {
         return ResponseEntity.ok(userService.listUsers(0, 10));
     }
 

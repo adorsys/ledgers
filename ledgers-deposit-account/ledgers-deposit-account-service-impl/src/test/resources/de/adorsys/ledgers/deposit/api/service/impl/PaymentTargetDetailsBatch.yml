@@ -1,5 +1,5 @@
 transactionId: TR_1
-endToEndId:
+endToEndId: 123456788, 123456789
 bookingDate: 2018-12-12
 valueDate: 2018-12-12
 debtorName:
@@ -25,7 +25,9 @@ creditorAgent: multiple
 creditorName: multiple
 creditorAddress:
 ultimateCreditor:
-remittanceInformationUnstructured:
+remittanceInformationUnstructured: Batch booking, no remittance information available
 paymentProduct: sepa-credit-transfers
 transactionStatus: RCVD
 exchangeRate:
+bankTransactionCode: PMNT-ICDT-STDO
+proprietaryBankTransactionCode: PMNT-ICDT-STDO

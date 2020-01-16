@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,6 +42,7 @@ public class PaymentExecutionService implements InitializingBean {
     private final PaymentRepository paymentRepository;
     private final DepositAccountTransactionService txService;
     private final DepositAccountService accountService;
+    private final CurrencyExchangeRatesService exchangeRatesService;
     private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
 
     @Override
@@ -89,9 +92,12 @@ public class PaymentExecutionService implements InitializingBean {
     }
 
     public AmountBO calculateTotalPaymentAmount(PaymentBO payment) {
+        Currency debtorCurrency = accountService.getAccountDetailsById(payment.getAccountId(), LocalDateTime.now(), false).getAccount().getCurrency();
         return payment.getTargets().stream()
                        .map(PaymentTargetBO::getInstructedAmount)
-                       .reduce((left, right) -> new AmountBO(Currency.getInstance("EUR"), left.getAmount().add(right.getAmount())))
+                       .map(a -> exchangeRatesService.applyRate(a.getCurrency(), debtorCurrency, a.getAmount()))
+                       .reduce(BigDecimal::add)
+                       .map(a -> new AmountBO(debtorCurrency, a))
                        .orElseThrow(() -> DepositModuleException.builder()
                                                   .errorCode(PAYMENT_PROCESSING_FAILURE)
                                                   .devMsg(String.format("Could not calculate total amount for payment: %s.", payment.getPaymentId()))

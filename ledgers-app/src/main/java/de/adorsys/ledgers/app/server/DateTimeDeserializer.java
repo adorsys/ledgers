@@ -21,32 +21,30 @@ import static de.adorsys.ledgers.app.server.ApiDateConstants.DATE_TIME_PATTERN_L
 import static de.adorsys.ledgers.app.server.ApiDateConstants.DATE_TIME_PATTERN_OFFSET;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-public class DateTimeDeserializer extends StdDeserializer<LocalDateTime> {
-	Logger logger = LoggerFactory.getLogger(DateTimeDeserializer.class);
-    private final DateTimeFormatter formatter;
-
-    {
-        formatter = new DateTimeFormatterBuilder()
-                        .appendOptional(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN_OFFSET))
-                        .appendOptional(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN_LOCAL))
-                        .appendOptional(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN))
-                        .toFormatter();
-    }
+@Slf4j
+public class DateTimeDeserializer extends StdDeserializer<LocalDateTime> implements Serializable {
+    private static final long serialVersionUID = 1905122041950251207L;
+    private final transient DateTimeFormatter formatter;
 
     public DateTimeDeserializer() {
         super(LocalDateTime.class);
+        formatter = new DateTimeFormatterBuilder()
+                            .appendOptional(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN_OFFSET))
+                            .appendOptional(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN_LOCAL))
+                            .appendOptional(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN))
+                            .toFormatter();
     }
 
     @Override
@@ -55,7 +53,7 @@ public class DateTimeDeserializer extends StdDeserializer<LocalDateTime> {
             String date = jsonParser.getText();
             return LocalDateTime.parse(date, formatter);
         } catch (IOException | DateTimeParseException e) {
-        	logger.error("Unsupported dateTime format!");
+        	log.error("Unsupported dateTime format!");
         }
         return null;
     }

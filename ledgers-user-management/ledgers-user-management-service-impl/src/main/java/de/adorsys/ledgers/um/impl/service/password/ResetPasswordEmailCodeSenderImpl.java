@@ -15,14 +15,20 @@ import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.RESET_PA
 public class ResetPasswordEmailCodeSenderImpl implements ResetPasswordCodeSender {
     private static final String CAN_NOT_SEND_EMAIL_CODE = "Can't send email with code";
 
+    @Value("${reset-password.email.subject}")
+    private String subject;
+
+    @Value("${reset-password.email.from}")
+    private String from;
+
     @Value("${reset-password.email.template-message}")
     private String templateMessage;
 
-    private final ResetPasswordMailSender resetPasswordMailSender;
+    private final UserMailSender userMailSender;
 
     @Override
     public SendCode sendCode(ResetPassword source) {
-        if (!resetPasswordMailSender.send(source.getEmail(), String.format(templateMessage, source.getCode()))) {
+        if (!userMailSender.send(subject, from, source.getEmail(), String.format(templateMessage, source.getCode()))) {
             throw UserManagementModuleException.builder()
                           .errorCode(RESET_PASSWORD_CODE_SENDING_ERROR)
                           .devMsg(CAN_NOT_SEND_EMAIL_CODE)

@@ -2,20 +2,20 @@ package de.adorsys.ledgers.app.server.auth;
 
 public class PermittedResources {
 
-    public static final String[] SWAGGER_WHITELIST = {
+    protected static final String[] SWAGGER_WHITELIST = {
             "/swagger-resources",
             "/swagger-ui.html",
             "/v2/api-docs",
             "/webjars/**"
     };
 
-    public static final String[] INDEX_WHITELIST = {
+    protected static final String[] INDEX_WHITELIST = {
             "/index.css",
             "/img/*",
             "/favicon.ico"
     };
 
-    public static final String[] APP_WHITELIST = {
+    protected static final String[] APP_WHITELIST = {
             "/",
             "/management/app/admin",
             "/management/app/ping",
@@ -29,14 +29,15 @@ public class PermittedResources {
             "/staff-access/users/login",
             "/password",
             "/users/validate",
-            "/oauth/**"
+            "/oauth/**",
+            "/emails/email"
     };
 
-    public static final String[] CONSOLE_WHITELIST = {
+    protected static final String[] CONSOLE_WHITELIST = {
             "/console/**"
     };
 
-    public static final String[] ACTUATOR_WHITELIST = {
+    protected static final String[] ACTUATOR_WHITELIST = {
             "/actuator/info",
             "/actuator/health"
     };

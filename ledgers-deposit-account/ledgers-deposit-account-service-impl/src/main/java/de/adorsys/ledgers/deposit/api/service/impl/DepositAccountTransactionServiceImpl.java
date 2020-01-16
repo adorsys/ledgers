@@ -32,11 +32,9 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -107,7 +105,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         String lineId = Ids.id();
         AccountReferenceBO creditor = depositAccount.getReference();
-        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, creditor, postingDateTime.toLocalDate(), lineId));
+        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, depositAccount, creditor, postingDateTime.toLocalDate(), lineId));
         return postingMapper.buildPostingLine(debitTransactionDetails, account, debitAmount, creditAmount, "ATM transfer", lineId);
     }
 
@@ -216,29 +214,8 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
     private BigDecimal getDCtAmount(AmountBO amount, boolean debit, ExchangeRateBO rate) {
         return debit
-                       ? applyRate(amount.getAmount(), rate)
+                       ? exchangeRatesService.applyRate(amount.getAmount(), rate)
                        : BigDecimal.ZERO;
-    }
-
-    /**
-     * example:
-     * Debtor cur:   GBP
-     * Payment cur:  USD
-     * Creditor cur: JPY
-     * <p>
-     * Rates : 1) from: USD->EUR; to: EUR->GBP
-     * 2) from: USD->EUR; to: EUR->JPY
-     * <p>
-     * lines amount = amount / rateFrom * rateTo (USD->EUR->GBP) (USD->EUR->JPY)
-     */
-    private BigDecimal applyRate(BigDecimal amount, ExchangeRateBO rate) {
-        return Optional.ofNullable(rate)
-                       .map(r -> amount.divide(parseBD(r.getRateFrom()), 4, RoundingMode.HALF_EVEN).multiply(parseBD(r.getRateTo())))
-                       .orElse(amount);
-    }
-
-    private BigDecimal parseBD(String value) {
-        return NumberUtils.createBigDecimal(value);
     }
 
     private LedgerAccountBO getLedgerAccount(LedgerBO ledger, String paymentProduct, AccountReferenceBO reference, boolean isDebitLine, boolean isFirstLine, boolean isAllCurrenciesMatch) {

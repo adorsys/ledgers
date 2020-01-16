@@ -68,6 +68,21 @@ reset-password:
     subject: "Your code for password reset"
     from: noreply@adorsys.de
 
+verify:
+  template:
+    subject: "Please verify your email address"
+    from: noreply@adorsys.de
+    message:
+      "Hello,
+      Please verify your email address by clicking the following link: %s
+      Please note that the above link is only valid until %s.
+      This is an automatically generated email – please do not reply to it. If you have any queries regarding your order, please email us at info@tpp.com.
+      %s
+      Best wishes,
+      Dynamic Sandbox team"
+  base_path: http://localhost:8088
+  endpoint: /emails/email
+
 #TanEncryption
 application:
   security:

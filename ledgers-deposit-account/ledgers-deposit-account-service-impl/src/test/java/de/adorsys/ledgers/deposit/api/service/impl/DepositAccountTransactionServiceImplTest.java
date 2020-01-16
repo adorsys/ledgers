@@ -110,7 +110,7 @@ public class DepositAccountTransactionServiceImplTest {
         when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO());
         when(ledgerService.findLedgerAccountById(any())).thenReturn(new LedgerAccountBO());
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
-        when(paymentMapper.toDepositTransactionDetails(any(), any(), any(), anyString())).thenAnswer(i -> localPaymentMapper.toDepositTransactionDetails((AmountBO) i.getArguments()[0], (AccountReferenceBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (String) i.getArguments()[3]));
+        when(paymentMapper.toDepositTransactionDetails(any(), any(), any(), any(), anyString())).thenAnswer(i -> localPaymentMapper.toDepositTransactionDetails((AmountBO) i.getArgument(0), i.getArgument(1), (AccountReferenceBO) i.getArgument(2), (LocalDate) i.getArgument(3), (String) i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
@@ -147,6 +147,7 @@ public class DepositAccountTransactionServiceImplTest {
         when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
 
         when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, EUR, EUR));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
 
         when(depositAccountConfigService.getClearingAccount(any())).thenReturn("clearing");
         when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
@@ -176,7 +177,7 @@ public class DepositAccountTransactionServiceImplTest {
 
     private PaymentTargetDetailsBO getExpectedDetails(PaymentBO payment, String trId, List<ExchangeRateBO> rates) {
         PaymentTargetDetailsBO details = new PaymentTargetDetailsBO();
-        details.setTransactionStatus(null);
+        details.setTransactionStatus(ACSP);
         details.setTransactionId(trId);
         details.setEndToEndId(payment.getTargets().get(0).getEndToEndIdentification());
         details.setPaymentProduct("sepa-credit-transfers");
@@ -191,6 +192,8 @@ public class DepositAccountTransactionServiceImplTest {
         details.setDebtorAccount(payment.getDebtorAccount());
         details.setPaymentOrderId(payment.getPaymentId());
         details.setPaymentType(payment.getPaymentType());
+        details.setBankTransactionCode("PMNT-ICDT-STDO");
+        details.setProprietaryBankTransactionCode("PMNT-ICDT-STDO");
         return details;
     }
 

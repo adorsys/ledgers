@@ -1,5 +1,7 @@
 # Ledgers
 [![Build Status](https://travis-ci.com/adorsys/xs2a.svg?branch=develop)](https://travis-ci.com/adorsys/ledgers)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=adorsys_ledgers&metric=alert_status)](https://sonarcloud.io/dashboard?id=adorsys_ledgers)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=adorsys_ledgers&metric=coverage)](https://sonarcloud.io/dashboard?id=adorsys_ledgers)
 
 Banking Booking System kept simple!
 

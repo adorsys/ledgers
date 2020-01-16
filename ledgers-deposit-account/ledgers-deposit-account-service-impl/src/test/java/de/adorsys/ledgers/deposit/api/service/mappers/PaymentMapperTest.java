@@ -86,10 +86,14 @@ public class PaymentMapperTest {
 
     @Test
     public void trDetailsForDepositOperation() {
-        TransactionDetailsBO result = mapper.toDepositTransactionDetails(new AmountBO(EUR, BigDecimal.TEN), new AccountReferenceBO(), POSTING_DATE, LINE_ID);
+        TransactionDetailsBO result = mapper.toDepositTransactionDetails(new AmountBO(EUR, BigDecimal.TEN), getDepositAccount(), new AccountReferenceBO(), POSTING_DATE, LINE_ID);
         assertThat(result).isNotNull();
         assertThat(result.getTransactionId()).isNotNull();
         assertThat(result).isEqualToIgnoringGivenFields(getDepositTrDetails(), "transactionId");
+    }
+
+    private DepositAccountBO getDepositAccount() {
+        return new DepositAccountBO("id", "IBAN", null, null, null, null, EUR, "Anton Brueckner", null, null, null, null, null, null, null);
     }
 
     private TransactionDetailsBO getDepositTrDetails() {
@@ -100,6 +104,12 @@ public class PaymentMapperTest {
         t.setValueDate(POSTING_DATE);
         t.setTransactionAmount(new AmountBO(EUR, BigDecimal.TEN));
         t.setCreditorAccount(new AccountReferenceBO());
+        t.setCreditorName(getDepositAccount().getName());
+        t.setDebtorName(getDepositAccount().getName());
+        t.setDebtorAccount(getDepositAccount().getReference());
+        t.setBankTransactionCode("PMNT-MCOP-OTHR");
+        t.setProprietaryBankTransactionCode("PMNT-MCOP-OTHR");
+        t.setRemittanceInformationUnstructured("Cash deposit through Bank ATM");
         return t;
     }
 

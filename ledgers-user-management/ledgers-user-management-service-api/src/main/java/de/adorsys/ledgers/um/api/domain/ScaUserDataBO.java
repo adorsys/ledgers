@@ -19,6 +19,7 @@ public class ScaUserDataBO {
     private String methodValue;
     private boolean usesStaticTan;
     private String staticTan;
+    private boolean isValid;
 
     public ScaUserDataBO(
             @NotNull ScaMethodTypeBO scaMethod,
@@ -53,5 +54,7 @@ public class ScaUserDataBO {
                        + super.toString() + "]";
     }
 
-
+    public boolean isEmailValid() {
+        return isValid;
+    }
 }
