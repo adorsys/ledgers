@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.um.db.repository;
 
-import de.adorsys.ledgers.um.db.domain.UserType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,6 @@ public class AccountAccessRepositoryIT {
         user.setPin("1234");
         user.setLogin("test");
         user.setEmail("test@mail.de");
-        user.setUserType(UserType.FAKE);
         user.getAccountAccesses().add(accountAccess);
         user = userRepository.save(user);
         accountAccess = user.getAccountAccesses().iterator().next();

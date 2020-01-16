@@ -56,5 +56,6 @@
     <include file="migration/0021-add-user-type-column-to-users-table.xml" relativeToChangelogFile="true" />
     <include file="migration/0022-add-column-account-id-to-account-accesses-and-payment-tables.xml" relativeToChangelogFile="true" />
     <include file="migration/0023-extend-payment-related-tables.xml" relativeToChangelogFile="true" />
+    <include file="migration/0024-create-table-email-verification-and-remove-user-type.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

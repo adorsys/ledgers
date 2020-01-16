@@ -37,16 +37,13 @@ public class UserBO {
     private List<AccountAccessBO> accountAccesses = new ArrayList<>();
     private Collection<UserRoleBO> userRoles = new ArrayList<>();
     private String branch;
-    private UserTypeBO userType;
 
     public UserBO(@NotNull String login,
                   @NotNull String email,
-                  @NotNull String pin,
-                  @NotNull UserTypeBO userType) {
+                  @NotNull String pin) {
         this.login = login;
         this.email = email;
         this.pin = pin;
-        this.userType = userType;
     }
 
     @Override
@@ -65,13 +62,12 @@ public class UserBO {
                        Objects.equals(getScaUserData(), userBO.getScaUserData()) &&
                        Objects.equals(getAccountAccesses(), userBO.getAccountAccesses()) &&
                        Objects.equals(getUserRoles(), userBO.getUserRoles()) &&
-                       Objects.equals(getBranch(), userBO.getBranch()) &&
-                       Objects.equals(getUserType(), userBO.getUserType());
+                       Objects.equals(getBranch(), userBO.getBranch());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch(), getUserType());
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch());
     }
 
     @Override
@@ -85,7 +81,6 @@ public class UserBO {
                        ", accountAccesses=" + accountAccesses +
                        ", userRoles=" + userRoles +
                        ", branch='" + branch + '\'' +
-                       ", userType='" + userType + '\'' +
                        '}';
     }
 
@@ -98,6 +93,4 @@ public class UserBO {
         return accountAccesses.stream()
                        .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban) && a.getCurrency().equals(currency));
     }
-
-    public boolean isRealUser() { return getUserType() != UserTypeBO.FAKE; }
 }

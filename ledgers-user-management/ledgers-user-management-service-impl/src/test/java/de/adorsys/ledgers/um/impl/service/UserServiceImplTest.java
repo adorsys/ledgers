@@ -45,8 +45,8 @@ public class UserServiceImplTest {
     private ResourceReader reader = YamlReader.getInstance();
 
     private static final String USER_ID = "SomeUniqueID";
-    private static final String USER_EMAIL = "vne@adorsys.de";
-    private static final String USER_LOGIN = "vne";
+    private static final String USER_EMAIL = "test@mail.de";
+    private static final String USER_LOGIN = "test";
     private static final String USER_PIN = "12345678";
     private static final String THE_ENCODED_VALUE = "25d55ad283aa400af464c76d713c07ad";
     private UserEntity userEntity;

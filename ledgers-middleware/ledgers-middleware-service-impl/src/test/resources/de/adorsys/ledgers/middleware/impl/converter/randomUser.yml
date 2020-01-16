@@ -15,4 +15,3 @@ accountAccesses:
   - id: 2
     accessType: READ
     iban: 7777777
-    

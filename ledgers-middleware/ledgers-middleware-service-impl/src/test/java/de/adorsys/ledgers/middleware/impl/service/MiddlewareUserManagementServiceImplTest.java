@@ -7,7 +7,6 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserTypeBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import org.junit.BeforeClass;
@@ -149,7 +148,7 @@ public class MiddlewareUserManagementServiceImplTest {
     }
 
     private UserBO getUser() {
-        UserBO user = new UserBO("", "", "", UserTypeBO.FAKE);
+        UserBO user = new UserBO("", "", "");
         user.setAccountAccesses(getAccesses());
         return user;
     }

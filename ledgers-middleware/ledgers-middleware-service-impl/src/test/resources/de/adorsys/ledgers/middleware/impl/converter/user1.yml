@@ -15,4 +15,3 @@ accountAccesses:
   - id: 2
     accessType: READ
     iban: DE91100000000123456789
-    

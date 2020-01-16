@@ -4,6 +4,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.rest.security.JWTAuthenticationFilter;
 import de.adorsys.ledgers.middleware.rest.security.MiddlewareAuthentication;
 import de.adorsys.ledgers.middleware.rest.security.TokenAuthenticationService;
+import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ import static de.adorsys.ledgers.app.server.auth.PermittedResources.*;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final Environment environment;
     private final TokenAuthenticationService tokenAuthenticationService;
+    private final UserService userService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
