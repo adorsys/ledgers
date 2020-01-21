@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(UserVerificationRestAPI.BASE_PATH)
+@RequestMapping(ScaVerificationRestAPI.BASE_PATH)
 @MiddlewareUserResource
-public class UserVerificationResource implements UserVerificationRestAPI {
+public class ScaVerificationResource implements ScaVerificationRestAPI {
     private final EmailVerificationService emailVerificationService;
 
     @Override
