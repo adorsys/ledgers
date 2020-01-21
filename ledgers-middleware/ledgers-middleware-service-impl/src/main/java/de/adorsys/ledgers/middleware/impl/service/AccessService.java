@@ -76,6 +76,7 @@ public class AccessService {
         accountAccess.setIban(accNbr);
         accountAccess.setCurrency(currency);
         accountAccess.setAccountId(accountId);
+        accountAccess.setScaWeight(100);
         return accountAccess;
     }
 

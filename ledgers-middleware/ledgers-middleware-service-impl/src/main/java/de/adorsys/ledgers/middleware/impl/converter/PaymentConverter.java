@@ -24,6 +24,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("PMD")
@@ -72,11 +73,12 @@ public interface PaymentConverter {
     SinglePaymentTO toSingleBulkPartTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
     default PaymentProductTO toPaymentProductTO(String paymentProduct) {
-        PaymentProductTO paymentProductTO = null;
-        if (PaymentProductTO.getByValue(paymentProduct).isPresent()){
-            paymentProductTO =  PaymentProductTO.getByValue(paymentProduct).get();
+        Optional<PaymentProductTO> paymentProductTO = PaymentProductTO.getByValue(paymentProduct);
+        PaymentProductTO payment = null;
+        if (paymentProductTO.isPresent()) {
+            payment = paymentProductTO.get();
         }
-        return paymentProductTO;
+        return payment;
     }
 
     PaymentBO toPaymentBO(PaymentTO payment);
