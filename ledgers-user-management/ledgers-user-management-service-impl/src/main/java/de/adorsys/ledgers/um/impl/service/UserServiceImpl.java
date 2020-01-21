@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService {
     private void ifScaChangedEmailNotValid(List<ScaUserDataEntity> scaUserDataEntities) {
         for (ScaUserDataEntity scaUserDataEntity : scaUserDataEntities) {
             String oldEmail = scaUserDataService.findById(scaUserDataEntity.getId()).getMethodValue();
-            if (!scaUserDataEntity.getMethodValue().equals(oldEmail)) {
+            if (!scaUserDataEntity.getMethodValue().equals(oldEmail) && scaUserDataEntity.getScaMethod() == ScaMethodType.EMAIL) {
                 scaUserDataEntity.setValid(false);
             }
         }
