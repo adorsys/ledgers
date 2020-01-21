@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -66,8 +67,8 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
             // NoOp. Create ledger account below.
             log.info("Creating new Ledger Account for {}", model.getName());
             LedgerAccountBO parent = getParentLedgerAccount(ledger, model);
-            LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
-            ledgerService.newLedgerAccount(la, SYSTEM);
+            Optional<LedgerAccountBO> la = Optional.of(newLedgerAccountObj(ledger, model, parent));
+            la.ifPresent(ledgerAccountBO -> ledgerService.newLedgerAccount(ledgerAccountBO, SYSTEM));
         }
     }
 

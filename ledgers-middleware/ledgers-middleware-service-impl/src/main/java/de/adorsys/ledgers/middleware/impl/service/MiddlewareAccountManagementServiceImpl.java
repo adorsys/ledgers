@@ -44,7 +44,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -89,11 +88,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
-        Optional.ofNullable(depositAccount.getCurrency())
-                .orElseThrow(() -> MiddlewareModuleException.builder()
-                                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                                           .devMsg("Can not create new account without currency set! Please set currency to continue.")
-                                           .build());
+        if (depositAccount.getCurrency() == null) {
+            throw MiddlewareModuleException.builder()
+                    .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                    .devMsg("Can not create new account without currency set! Please set currency to continue.")
+                    .build();
+        }
         UserBO user = userService.findById(userId);
         checkPresentAccountsAndOwner(depositAccount.getIban(), user.getLogin());
         DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
@@ -395,15 +395,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public void deleteTransactions(String userId, UserRoleTO userRole, String iban) {
         log.info("User {} attempting delete postings for iban: {}", userId, iban);
         long start = System.nanoTime();
+        AccountAccessBO account = new AccountAccessBO();
         if (userRole == STAFF) {
-            userService.findById(userId).getAccountAccesses().stream()
-                    .filter(a -> a.getIban().equals(iban)).findAny()
-                    .orElseThrow(() -> MiddlewareModuleException.builder()
-                                               .devMsg("You dont have permission to modify this account")
-                                               .errorCode(INSUFFICIENT_PERMISSION)
-                                               .build());
+            account = userService.findById(userId).getAccountAccesses().stream()
+                              .filter(a -> a.getIban().equals(iban)).findAny()
+                              .orElseThrow(() -> MiddlewareModuleException.builder()
+                                                         .devMsg("You dont have permission to modify this account")
+                                                         .errorCode(INSUFFICIENT_PERMISSION)
+                                                         .build());
         }
-        log.info("Permission checked -> OK");
+        log.info("Permission checked for account {} -> OK", account.getIban());
         depositAccountService.deleteTransactions(iban);
         log.info("Deleting postings for: {} Successful, in {} seconds", iban, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
