@@ -72,7 +72,11 @@ public interface PaymentConverter {
     SinglePaymentTO toSingleBulkPartTO(PaymentBO payment, PaymentTargetBO paymentTarget);
 
     default PaymentProductTO toPaymentProductTO(String paymentProduct) {
-        return PaymentProductTO.getByValue(paymentProduct).get();
+        PaymentProductTO paymentProductTO = null;
+        if (PaymentProductTO.getByValue(paymentProduct).isPresent()){
+            paymentProductTO =  PaymentProductTO.getByValue(paymentProduct).get();
+        }
+        return paymentProductTO;
     }
 
     PaymentBO toPaymentBO(PaymentTO payment);

@@ -122,17 +122,13 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     @Override
     public boolean validateAuthCode(String authorisationId, String opId, String opData, String authCode, int scaWeight) {
-        Optional<SCAOperationEntity> operationOptional = repository.findById(authorisationId);
+        SCAOperationEntity operation = repository.findById(authorisationId)
+                                                       .orElseThrow(() -> ScaModuleException.builder()
+                                                                                  .errorCode(SCA_OPERATION_NOT_FOUND)
+                                                                                  .devMsg("Sca operation does not contain SCA DATA")
+                                                                                  .build());
 
-        String authCodeHash = operationOptional
-                                      .map(SCAOperationEntity::getAuthCodeHash)
-                                      .orElseThrow(() -> ScaModuleException.builder()
-                                                                 .errorCode(SCA_OPERATION_NOT_FOUND)
-                                                                 .devMsg("Sca operation does not contain SCA DATA")
-                                                                 .build());
-
-        SCAOperationEntity operation = operationOptional.get();
-
+        String authCodeHash = operation.getAuthCodeHash();
         checkOperationNotUsed(operation);
         checkOperationNotExpired(operation);
         checkSameOperation(operation, opId);
