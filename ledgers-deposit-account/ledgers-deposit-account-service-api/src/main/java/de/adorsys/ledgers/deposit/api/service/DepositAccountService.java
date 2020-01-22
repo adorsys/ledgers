@@ -29,7 +29,17 @@ public interface DepositAccountService {
      */
     DepositAccountBO getAccountByIbanAndCurrency(String iban, Currency currency);
 
+    /**
+     * Retrieve account by accountId
+     *
+     * @param accountId the account id
+     * @return DepositAccount
+     */
+    DepositAccountBO getAccountById(String accountId);
+
     Optional<DepositAccountBO> getOptionalAccountByIbanAndCurrency(String iban, Currency currency);
+
+    Optional<DepositAccountBO> getOptionalAccountById(String accountId);
 
     DepositAccountBO createNewAccount(DepositAccountBO depositAccountBO, String userName, String branch);
 
@@ -53,7 +63,7 @@ public interface DepositAccountService {
 
     Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, Pageable pageable);
 
-    void deleteTransactions(String iban);
+    void deleteTransactions(String accountId);
 
     void deleteBranch(String branchId);
 

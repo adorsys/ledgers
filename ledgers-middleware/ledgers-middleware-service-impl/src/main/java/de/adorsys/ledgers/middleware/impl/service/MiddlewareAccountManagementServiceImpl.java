@@ -392,21 +392,21 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void deleteTransactions(String userId, UserRoleTO userRole, String iban) {
-        log.info("User {} attempting delete postings for iban: {}", userId, iban);
+    public void deleteTransactions(String userId, UserRoleTO userRole, String accountId) {
+        log.info("User {} attempting delete postings for account: {}", userId, accountId);
         long start = System.nanoTime();
         AccountAccessBO account = new AccountAccessBO();
         if (userRole == STAFF) {
             account = userService.findById(userId).getAccountAccesses().stream()
-                              .filter(a -> a.getIban().equals(iban)).findAny()
+                              .filter(a -> a.getAccountId().equals(accountId)).findAny()
                               .orElseThrow(() -> MiddlewareModuleException.builder()
                                                          .devMsg("You dont have permission to modify this account")
                                                          .errorCode(INSUFFICIENT_PERMISSION)
                                                          .build());
         }
-        log.info("Permission checked for account {} -> OK", account.getIban());
-        depositAccountService.deleteTransactions(iban);
-        log.info("Deleting postings for: {} Successful, in {} seconds", iban, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+        log.info("Permission checked for account {} -> OK", account.getAccountId());
+        depositAccountService.deleteTransactions(accountId);
+        log.info("Deleting postings for account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     @Override

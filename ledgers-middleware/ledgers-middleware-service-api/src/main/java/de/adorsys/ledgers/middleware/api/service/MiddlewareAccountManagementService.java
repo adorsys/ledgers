@@ -184,7 +184,14 @@ public interface MiddlewareAccountManagementService {
      */
     List<AccountAccessTO> getAccountAccesses(String userId);
 
-    void deleteTransactions(String userId, UserRoleTO userRole, String iban);
+    /**
+     * Remove all transactions for deposit account
+     *
+     * @param userId id of the user
+     * @param userRole role of user initiating operation
+     * @param accountId the account id
+     */
+    void deleteTransactions(String userId, UserRoleTO userRole, String accountId);
 
     AccountReportTO getAccountReport(String accountId);
 }

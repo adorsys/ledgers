@@ -11,8 +11,8 @@ import java.util.Set;
 @Api(tags = "LDG011 - Data management (STAFF access)")
 public interface DataMgmtStaffAPI {
     String BASE_PATH = "/staff-access/data";
-//TODO CONSIDER REFACTORING TO USE ACCOUNT-ID AS SIMPLE IBAN IS NOT A VALID IDENTIFIER ANYMORE https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/467
-    @DeleteMapping(value = "/transactions/{iban}")
+
+    @DeleteMapping(value = "/transactions/{accountId}")
     @ApiOperation(value = "Removes all transactions for account", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The user data record without the user pin."),
@@ -20,7 +20,7 @@ public interface DataMgmtStaffAPI {
             @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
             @ApiResponse(code = 404, message = "Account not found.")
     })
-    ResponseEntity<Void> account(@PathVariable("iban") String iban);
+    ResponseEntity<Void> account(@PathVariable("accountId") String accountId);
 
     @DeleteMapping(value = "/branch/{branchId}")
     @ApiOperation(value = "Removes all data related to TPP", authorizations = @Authorization(value = "apiKey"))
