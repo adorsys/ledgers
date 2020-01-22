@@ -27,8 +27,8 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
-    public ResponseEntity<Void> account(String iban) {
-        accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), iban);
+    public ResponseEntity<Void> account(String accountId) {
+        accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
