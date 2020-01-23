@@ -36,6 +36,7 @@ import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
+import de.adorsys.ledgers.sca.domain.ScaValidationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
@@ -237,7 +238,13 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(opType, payment);
 
         String authorisationId = opType == PAYMENT ? scaInfoTO.getAuthorisationId() : cancellationId;
-        validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode(), paymentKeyData.template());
+        ScaValidationBO scaValidationBO = validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode(), paymentKeyData.template());
+        if (!scaValidationBO.isValidAuthCode()) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(AUTHENTICATION_FAILURE)
+                          .devMsg("Wrong auth code")
+                          .build();
+        }
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
             if (opType == PAYMENT) {
                 paymentService.updatePaymentStatus(paymentId, ACTC);
@@ -251,6 +258,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         BearerTokenTO bearerToken = paymentAccountAccessToken(scaInfoTO, payment.getDebtorAccount().getIban());
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
+        response.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
         int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
         scaResponseResolver.updateScaResponseFields(userBO, response, authorisationId, paymentKeyData.template(), bearerToken, FINALISED, scaWeight);
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
@@ -322,15 +330,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return bearerTokenMapper.toBearerTokenTO(authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), aisConsent));
     }
 
-    private void validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode, String template) {
+    private ScaValidationBO validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode, String template) {
         UserBO userBO = scaUtils.userBO(userId);
         int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
-        if (!scaOperationService.validateAuthCode(authorisationId, payment.getPaymentId(), template, authCode, scaWeight)) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Wrong auth code")
-                          .build();
-        }
+        return scaOperationService.validateAuthCode(authorisationId, payment.getPaymentId(), template, authCode, scaWeight);
     }
 
     private PaymentBO loadPayment(String paymentId) {

@@ -24,6 +24,7 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
     private LocalDateTime statusDate;
     private int expiresInSeconds;
 	private boolean multilevelScaRequired;
+	private String authConfirmationCode;
 
     /*
      * Might be returned as result of an exemption. Meaning that
