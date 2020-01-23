@@ -9,9 +9,10 @@ public enum ScaStatusTO {
 	PSUAUTHENTICATED("psuAuthenticated"),
 	SCAMETHODSELECTED("scaMethodSelected"), 
 	STARTED("started"), 
-	FINALISED("finalised"), 
+	FINALISED("finalised"),
 	FAILED("failed"),
-	EXEMPTED("exempted");
+	EXEMPTED("exempted"),
+	UNCONFIRMED("unconfirmed");
 
 	private String value;
 

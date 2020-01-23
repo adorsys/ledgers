@@ -89,6 +89,7 @@ sca:
     phone:
       subject: "Your TAN from MockBank"
   multilevel.enabled: true
+  authorisation_confirmation_enabled: true
   final.weight: 100
   challenge_data:
     path:

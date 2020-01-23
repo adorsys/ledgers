@@ -25,6 +25,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
+import de.adorsys.ledgers.sca.service.SCAOperationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -47,6 +48,7 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AU
 @RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class UserMgmtResource implements UserMgmtRestAPI {
+    private final SCAOperationService scaOperationService;
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final ScaInfoHolder scaInfoHolder;
@@ -161,5 +163,12 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<List<UserTO>> getAllUsers() {
         return ResponseEntity.ok(middlewareUserService.listUsers(0, 1000));
+    }
+
+    @Override
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<Void> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
+        scaOperationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode);
+        return ResponseEntity.accepted().build();
     }
 }

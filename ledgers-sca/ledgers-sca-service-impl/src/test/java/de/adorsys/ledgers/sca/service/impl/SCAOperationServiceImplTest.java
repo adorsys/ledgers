@@ -6,10 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.sca.db.domain.AuthCodeStatus;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCASender;
@@ -214,9 +211,9 @@ public class SCAOperationServiceImplTest {
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
-        boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
 
-        assertThat(valid, is(Boolean.TRUE));
+        assertThat(scaValidationBO.isValidAuthCode(), is(Boolean.TRUE));
 
         SCAOperationEntity savedEntity = captor.getValue();
         assertThat(savedEntity.getStatus(), is(AuthCodeStatus.VALIDATED));
@@ -233,9 +230,9 @@ public class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
         when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
-        boolean valid = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
 
-        assertThat(valid, is(Boolean.FALSE));
+        assertThat(scaValidationBO.isValidAuthCode(), is(Boolean.FALSE));
 
         assertThat(scaOperationEntity.getStatus(), is(AuthCodeStatus.FAILED));
 

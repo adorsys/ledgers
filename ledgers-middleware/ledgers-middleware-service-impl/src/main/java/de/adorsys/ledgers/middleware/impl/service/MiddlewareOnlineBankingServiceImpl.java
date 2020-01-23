@@ -10,10 +10,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.ScaInfoMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.ScaInfoBO;
@@ -138,11 +135,12 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(scaInfoTO.getAuthorisationId());
         LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
         String authorisationId = scaInfoTO.getAuthorisationId();
-        boolean valid = scaOperationService.validateAuthCode(authorisationId, authorisationId, authorisationId, scaInfoTO.getAuthCode(), 0);
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(authorisationId, authorisationId, authorisationId, scaInfoTO.getAuthCode(), 0);
         SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
-        if (valid) {
+        if (scaValidationBO.isValidAuthCode()) {
             BearerTokenBO scaToken = authorizationService.scaToken(scaInfoMapper.toScaInfoBO(scaInfoTO));
             scaResponse.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaToken));
+            scaResponse.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
         }
         return scaResponse;
     }

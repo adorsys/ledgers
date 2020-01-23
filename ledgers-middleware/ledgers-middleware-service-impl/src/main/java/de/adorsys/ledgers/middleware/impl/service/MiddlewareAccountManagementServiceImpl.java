@@ -22,10 +22,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
@@ -57,7 +54,6 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods")
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
-    private static final LocalDateTime BASE_TIME = LocalDateTime.MIN;
     private static final int NANO_TO_SECOND = 1000000000;
 
     private final UserMapper userMapper;
@@ -334,9 +330,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
-        boolean validAuthCode = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
-                consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
-        if (!validAuthCode) {
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
+                                                                               consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
+        if (!scaValidationBO.isValidAuthCode()) {
             throw MiddlewareModuleException.builder()
                           .errorCode(AUTHENTICATION_FAILURE)
                           .devMsg("Wrong auth code")
@@ -345,6 +341,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         UserTO userTO = scaUtils.user(userBO);
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
         SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+        response.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
         if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
             BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
             response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
