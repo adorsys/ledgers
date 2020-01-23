@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Api(tags = "LDG013 - Email verification", description = "Provides endpoint for sending mail with verification link and email confirmation.")
-public interface UserVerificationRestAPI {
+public interface ScaVerificationRestAPI {
     String BASE_PATH = "/emails";
 
     @PostMapping("/email-verification")

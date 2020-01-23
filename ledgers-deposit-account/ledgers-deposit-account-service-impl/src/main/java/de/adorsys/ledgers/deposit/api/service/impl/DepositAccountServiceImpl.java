@@ -41,6 +41,7 @@ import static java.lang.String.format;
 @Service
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s and currency %s not found";
+    private static final String MSG_ACCOUNT_NOT_FOUND = "Account with id %s not found";
     private static final String DELETE_BRANCH_ERROR_MSG = "Something went wrong during deletion of branch: %s, msg: %s";
     private static final String BRANCH_SQL = "classpath:deleteBranch.sql";
     private static final String POSTING_SQL = "classpath:deletePostings.sql";
@@ -85,8 +86,23 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    public DepositAccountBO getAccountById(String accountId) {
+        return getOptionalAccountById(accountId)
+                       .orElseThrow(() -> DepositModuleException.builder()
+                                                  .errorCode(DEPOSIT_ACCOUNT_NOT_FOUND)
+                                                  .devMsg(format(MSG_ACCOUNT_NOT_FOUND, accountId))
+                                                  .build());
+    }
+
+    @Override
     public Optional<DepositAccountBO> getOptionalAccountByIbanAndCurrency(String iban, Currency currency) {
         return depositAccountRepository.findByIbanAndCurrency(iban, currency.getCurrencyCode())
+                       .map(depositAccountMapper::toDepositAccountBO);
+    }
+
+    @Override
+    public Optional<DepositAccountBO> getOptionalAccountById(String accountId) {
+        return depositAccountRepository.findById(accountId)
                        .map(depositAccountMapper::toDepositAccountBO);
     }
 
@@ -177,13 +193,11 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public void deleteTransactions(String iban) {
-        List<DepositAccountBO> accounts = getAccountsByIbanAndParamCurrency(iban, "");
-        accounts.stream()
-                .map(DepositAccountBO::getLinkedAccounts)
-                .map(ledgerService::findLedgerAccountById)
-                .map(NamedBO::getId)
-                .forEach(id -> executeNativeQuery(POSTING_SQL, id, DELETE_POSTINGS_ERROR_MSG));
+    public void deleteTransactions(String accountId) {
+        DepositAccountBO account = getAccountById(accountId);
+        String linked = account.getLinkedAccounts();
+        LedgerAccountBO ledgerAccount = ledgerService.findLedgerAccountById(linked);
+        executeNativeQuery(POSTING_SQL, ledgerAccount.getId(), DELETE_POSTINGS_ERROR_MSG);
     }
 
     @Override

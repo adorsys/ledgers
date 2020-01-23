@@ -22,10 +22,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
@@ -44,7 +41,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -58,7 +54,6 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods")
 public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccountManagementService {
-    private static final LocalDateTime BASE_TIME = LocalDateTime.MIN;
     private static final int NANO_TO_SECOND = 1000000000;
 
     private final UserMapper userMapper;
@@ -89,11 +84,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
-        Optional.ofNullable(depositAccount.getCurrency())
-                .orElseThrow(() -> MiddlewareModuleException.builder()
-                                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                                           .devMsg("Can not create new account without currency set! Please set currency to continue.")
-                                           .build());
+        if (depositAccount.getCurrency() == null) {
+            throw MiddlewareModuleException.builder()
+                    .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                    .devMsg("Can not create new account without currency set! Please set currency to continue.")
+                    .build();
+        }
         UserBO user = userService.findById(userId);
         checkPresentAccountsAndOwner(depositAccount.getIban(), user.getLogin());
         DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
@@ -334,9 +330,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
-        boolean validAuthCode = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
-                consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
-        if (!validAuthCode) {
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
+                                                                               consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
+        if (!scaValidationBO.isValidAuthCode()) {
             throw MiddlewareModuleException.builder()
                           .errorCode(AUTHENTICATION_FAILURE)
                           .devMsg("Wrong auth code")
@@ -345,6 +341,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         UserTO userTO = scaUtils.user(userBO);
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
         SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
+        response.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
         if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
             BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
             response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
@@ -392,20 +389,21 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void deleteTransactions(String userId, UserRoleTO userRole, String iban) {
-        log.info("User {} attempting delete postings for iban: {}", userId, iban);
+    public void deleteTransactions(String userId, UserRoleTO userRole, String accountId) {
+        log.info("User {} attempting delete postings for account: {}", userId, accountId);
         long start = System.nanoTime();
+        AccountAccessBO account = new AccountAccessBO();
         if (userRole == STAFF) {
-            userService.findById(userId).getAccountAccesses().stream()
-                    .filter(a -> a.getIban().equals(iban)).findAny()
-                    .orElseThrow(() -> MiddlewareModuleException.builder()
-                                               .devMsg("You dont have permission to modify this account")
-                                               .errorCode(INSUFFICIENT_PERMISSION)
-                                               .build());
+            account = userService.findById(userId).getAccountAccesses().stream()
+                              .filter(a -> a.getAccountId().equals(accountId)).findAny()
+                              .orElseThrow(() -> MiddlewareModuleException.builder()
+                                                         .devMsg("You dont have permission to modify this account")
+                                                         .errorCode(INSUFFICIENT_PERMISSION)
+                                                         .build());
         }
-        log.info("Permission checked -> OK");
-        depositAccountService.deleteTransactions(iban);
-        log.info("Deleting postings for: {} Successful, in {} seconds", iban, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+        log.info("Permission checked for account {} -> OK", account.getAccountId());
+        depositAccountService.deleteTransactions(accountId);
+        log.info("Deleting postings for account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     @Override

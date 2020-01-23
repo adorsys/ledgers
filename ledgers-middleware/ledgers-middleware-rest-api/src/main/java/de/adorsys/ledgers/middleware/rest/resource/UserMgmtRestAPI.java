@@ -333,4 +333,9 @@ public interface UserMgmtRestAPI {
                                                                     + "</lu>",
             authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<List<UserTO>> getAllUsers();
+
+    @PutMapping("/authorisations/{authorisationId}/confirmation/{authConfirmCode}")
+    @ApiOperation(value = "Send an authentication confirmation code for validation", notes = "Validate an authentication code", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<Void> verifyAuthConfirmationCode(@PathVariable("authorisationId") String authorisationId,
+                                          @PathVariable(name = "authConfirmCode") String authConfirmCode);
 }

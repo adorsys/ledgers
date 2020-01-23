@@ -66,7 +66,7 @@ public class DepositAccountInitServiceImpl implements DepositAccountInitService 
             // NoOp. Create ledger account below.
             log.info("Creating new Ledger Account for {}", model.getName());
             LedgerAccountBO parent = getParentLedgerAccount(ledger, model);
-            LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent);
+            LedgerAccountBO la = newLedgerAccountObj(ledger, model, parent); // NOSONAR
             ledgerService.newLedgerAccount(la, SYSTEM);
         }
     }

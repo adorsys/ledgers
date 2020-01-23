@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.sca.service;
 
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
+import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 
 public interface SCAOperationService {
@@ -26,9 +23,9 @@ public interface SCAOperationService {
      * @param opId            : This is the id of the operation like provided by the consuming module.
      * @param opData          : This are data to be linked to the generated One Time Password.
      * @param authCode        : This auth code was generated at previous step @see #generateAuthCode(String opId, String opData, int validitySeconds)
-     * @return true if auth code is valid in other cases false will be returned
+     * @return SCA validation object
      */
-    boolean validateAuthCode(String authorisationId, String opId, String opData, String authCode, int scaWeight);
+    ScaValidationBO validateAuthCode(String authorisationId, String opId, String opData, String authCode, int scaWeight);
 
 
     /**
@@ -70,4 +67,12 @@ public interface SCAOperationService {
      * @return boolean representation of success or failure
      */
     boolean authenticationCompleted(String opId, OpTypeBO opType);
+
+    /**
+     * Verify auth confirmation code
+     *
+     * @param authorisationId : the id of this authorization instance.
+     * @param confirmationCode : Auth confirmation code
+     */
+    void verifyAuthConfirmationCode(String authorisationId, String confirmationCode);
 }
