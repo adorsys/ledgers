@@ -67,7 +67,7 @@ payment-products:
      instant-sepa-credit-transfers,
      target-2-payments,
      domestic-swiss-credit-transfers-isr,
-     domestic-swiss-foreign-credit-transfers
+     domestic-swiss-foreign-credit-transfers,
      pain.001-swiss-six-credit-transfers
    regular:
      sepa-credit-transfers,
@@ -90,7 +90,7 @@ sca:
     phone:
       subject: "Your TAN from MockBank"
   multilevel.enabled: true
-  authorisation_confirmation_enabled: true
+  authorisation_confirmation_enabled: false
   final.weight: 100
   challenge_data:
     path:
