@@ -85,7 +85,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     @Value("${sca.final.weight:100}")
     private int finalWeight;
 
-    @Value("${sca.authorisation_confirmation_enabled:true}")
+    @Value("${sca.authorisation_confirmation_enabled:false}")
     private boolean authConfirmationEnabled;
 
     @Override
