@@ -8,6 +8,7 @@ import lombok.Data;
 public class ScaValidationBO {
     private String authConfirmationCode;
     private boolean validAuthCode;
+    private ScaStatusBO scaStatus;
 
     public ScaValidationBO(boolean validAuthCode) {
         this.validAuthCode = validAuthCode;

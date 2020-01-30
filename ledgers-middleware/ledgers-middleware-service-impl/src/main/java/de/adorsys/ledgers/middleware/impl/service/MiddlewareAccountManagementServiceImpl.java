@@ -342,13 +342,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
         SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
         response.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
-        if (scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
-            BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
-            response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-        } else {
+        if (!scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
             response.setPartiallyAuthorised(multilevelScaEnable);
             response.setMultilevelScaRequired(multilevelScaEnable);
         }
+        BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
+        response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
         return response;
     }
 

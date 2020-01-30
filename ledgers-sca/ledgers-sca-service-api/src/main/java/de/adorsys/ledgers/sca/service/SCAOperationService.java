@@ -74,5 +74,5 @@ public interface SCAOperationService {
      * @param authorisationId : the id of this authorization instance.
      * @param confirmationCode : Auth confirmation code
      */
-    void verifyAuthConfirmationCode(String authorisationId, String confirmationCode);
+    ScaAuthConfirmationBO verifyAuthConfirmationCode(String authorisationId, String confirmationCode);
 }
