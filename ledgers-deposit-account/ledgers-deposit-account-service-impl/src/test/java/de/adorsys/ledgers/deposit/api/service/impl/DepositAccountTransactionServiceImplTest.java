@@ -29,6 +29,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.BULK;
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.SINGLE;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSP;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,8 +50,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class DepositAccountTransactionServiceImplTest {
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
-    private static final String POSTING_ID = "posting_ID";
-    private static final String SYSTEM = "System";
     private static final LocalDateTime REQUEST_TIME = LocalDateTime.now();
     private static final Currency EUR = Currency.getInstance("EUR");
     private static final Currency USD = Currency.getInstance("USD");
@@ -97,12 +97,31 @@ public class DepositAccountTransactionServiceImplTest {
 
     @Test(expected = DepositModuleException.class)
     public void depositCash_accountNotFound() {
+        //given
         when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenThrow(DepositModuleException.class);
+
+        //when
         transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.TEN), "recordUser");
+    }
+
+    @Test(expected = DepositModuleException.class)
+    public void depositCash_amountLessThanZero() {
+        //when
+        transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.valueOf(-123L)), "recordUser");
+    }
+
+    @Test(expected = DepositModuleException.class)
+    public void depositCash_differentCurrencies() {
+        //given
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getDepositAccountBO());
+
+        //when
+        transactionService.depositCash(ACCOUNT_ID, new AmountBO(USD, BigDecimal.TEN), "recordUser");
     }
 
     @Test
     public void depositCash_OK() throws IOException {
+        //given
         when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getDepositAccountBO());
         when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
@@ -115,8 +134,10 @@ public class DepositAccountTransactionServiceImplTest {
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
 
+        //when
         transactionService.depositCash(ACCOUNT_ID, amount, "recordUser");
 
+        //then
         ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
         verify(postingService, times(1)).newPosting(postingCaptor.capture());
         PostingBO posting = postingCaptor.getValue();
@@ -135,7 +156,7 @@ public class DepositAccountTransactionServiceImplTest {
     @Test
     public void bookPayment_single_same_currency() throws IOException {
         //given
-        PaymentBO payment = getPayment(SINGLE, EUR, EUR, EUR, null);
+        PaymentBO payment = getPayment(SINGLE, EUR, EUR, EUR, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
         when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
@@ -152,8 +173,10 @@ public class DepositAccountTransactionServiceImplTest {
         when(depositAccountConfigService.getClearingAccount(any())).thenReturn("clearing");
         when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
 
-
+        //when
         transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+
+        //then
         ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
         verify(postingService, times(1)).newPosting(postingCaptor.capture());
 
@@ -163,17 +186,283 @@ public class DepositAccountTransactionServiceImplTest {
         assertThat(dcAmountOk(lines)).isTrue();
 
         PostingLineBO line1 = lines.get(0);
-        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
+        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
         assertThat(line1.getDetails()).isNotBlank();
         assertThat(STATIC_MAPPER.readValue(line1.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line1.getId(), null));
 
         PostingLineBO line2 = lines.get(1);
-        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.ZERO, BigDecimal.TEN, null, null, null, payment.getPaymentId()), "id", "details");
+        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.ZERO, BigDecimal.TEN, null, null, null, payment.getPaymentId()), "id", "details");
         assertThat(line2.getDetails()).isNotBlank();
         assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), null));
     }
 
-    //TODO ADD MORE TESTS HERE
+    @Test
+    public void bookPayment_single_two_different_currency() throws IOException {
+        //given
+        PaymentBO payment = getPayment(SINGLE, EUR, USD, USD, null, false);
+
+        when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
+        when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
+        when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
+
+        when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
+        when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
+
+        when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, USD, USD));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
+
+        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+
+        //when
+        transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+
+        //then
+        ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
+        verify(postingService, times(1)).newPosting(postingCaptor.capture());
+
+        PostingBO posting = postingCaptor.getValue();
+        List<PostingLineBO> lines = posting.getLines();
+        assertThat(lines.size()).isEqualTo(4);
+        assertThat(dcAmountOk(lines)).isTrue();
+
+        PostingLineBO line1 = lines.get(0);
+        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.valueOf(8.3333), BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
+        assertThat(line1.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates1 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(0).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line1.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line1.getId(), exchangeRates1));
+
+        PostingLineBO line2 = lines.get(1);
+        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.ZERO, BigDecimal.valueOf(8.3333), null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line2.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates2 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(1).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), exchangeRates2));
+
+        PostingLineBO line3 = lines.get(2);
+        assertThat(line3).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
+        assertThat(line3.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates3 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(2).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line3.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line3.getId(), exchangeRates3));
+
+        PostingLineBO line4 = lines.get(3);
+        assertThat(line4).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.ZERO, BigDecimal.TEN, null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line4.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates4 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(3).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line4.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line4.getId(), exchangeRates4));
+    }
+
+    @Test(expected = DepositModuleException.class)
+    public void bookPayment_single_two_different_currency_accountNotFound() {
+        //given
+        PaymentBO payment = getPayment(SINGLE, EUR, USD, USD, null, false);
+
+        when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
+        when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
+
+        when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
+        when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
+
+        when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, USD, USD));
+        when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+
+        //when
+        transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+    }
+
+    @Test
+    public void bookPayment_single_three_different_currency() throws IOException {
+        //given
+        PaymentBO payment = getPayment(SINGLE, EUR, USD, CHF, null, false);
+
+        when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
+        when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
+        when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
+
+        when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
+        when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
+
+        when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, USD, CHF));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
+
+        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+
+        //when
+        transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+
+        //then
+        ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
+        verify(postingService, times(1)).newPosting(postingCaptor.capture());
+
+        PostingBO posting = postingCaptor.getValue();
+        List<PostingLineBO> lines = posting.getLines();
+        assertThat(lines.size()).isEqualTo(4);
+        assertThat(dcAmountOk(lines)).isTrue();
+
+        PostingLineBO line1 = lines.get(0);
+        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.valueOf(8.3333), BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
+        assertThat(line1.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates1 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(0).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line1.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line1.getId(), exchangeRates1));
+
+        PostingLineBO line2 = lines.get(1);
+        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.ZERO, BigDecimal.valueOf(8.3333), null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line2.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates2 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(1).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), exchangeRates2));
+
+        PostingLineBO line3 = lines.get(2);
+        assertThat(line3).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.valueOf(4.16665), BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
+        assertThat(line3.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates3 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(2).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line3.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line3.getId(), exchangeRates3));
+
+        PostingLineBO line4 = lines.get(3);
+        assertThat(line4).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.ZERO, BigDecimal.valueOf(4.16665), null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line4.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates4 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(3).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line4.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line4.getId(), exchangeRates4));
+    }
+
+    @Test
+    public void bookPayment_bulk_same_currency_batchBookingPreferredTrue() throws IOException {
+        //given
+        PaymentBO payment = getPayment(BULK, EUR, EUR, EUR, null, true);
+
+        Whitebox.setInternalState(transactionService, "paymentMapper", Mappers.getMapper(PaymentMapper.class));
+        when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
+        when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
+        when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
+
+        when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
+        when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
+
+        when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, EUR, EUR));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
+
+        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+
+        //when
+        transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+
+        //then
+        ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
+        verify(postingService, times(1)).newPosting(postingCaptor.capture());
+
+        PostingBO posting = postingCaptor.getValue();
+        List<PostingLineBO> lines = posting.getLines();
+        assertThat(lines.size()).isEqualTo(2);
+        assertThat(dcAmountOk(lines)).isTrue();
+
+        PostingLineBO line1 = lines.get(0);
+        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line1.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates1 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(0).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line1.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line1.getId(), exchangeRates1), "creditorAgent", "creditorName", "creditorAccount", "remittanceInformationUnstructured");
+
+        PostingLineBO line2 = lines.get(1);
+        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.ZERO, BigDecimal.TEN, null, null, null, payment.getPaymentId()), "id", "details");
+        assertThat(line2.getDetails()).isNotBlank();
+        assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), null));
+    }
+
+    @Test
+    public void bookPayment_bulk_same_currency_batchBookingPreferredFalse() throws IOException {
+        //given
+        PaymentBO payment = getPayment(BULK, EUR, EUR, EUR, null, false);
+
+        when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
+        when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
+        when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
+
+        when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
+        when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
+
+        when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, EUR, EUR));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
+
+        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+
+        //when
+        transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+
+        //then
+        ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
+        verify(postingService, times(1)).newPosting(postingCaptor.capture());
+
+        PostingBO posting = postingCaptor.getValue();
+        List<PostingLineBO> lines = posting.getLines();
+        assertThat(lines.size()).isEqualTo(2);
+        assertThat(dcAmountOk(lines)).isTrue();
+
+        PostingLineBO line1 = lines.get(0);
+        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprId()), "id", "details");
+        assertThat(line1.getDetails()).isNotBlank();
+        assertThat(STATIC_MAPPER.readValue(line1.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line1.getId(), null));
+
+        PostingLineBO line2 = lines.get(1);
+        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.ZERO, BigDecimal.TEN, null, null, null, payment.getPaymentId()), "id", "details");
+        assertThat(line2.getDetails()).isNotBlank();
+        assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), null));
+    }
+
+    @Test
+    public void bookPayment_bulk_two_different_currency() throws IOException {
+        //given
+        PaymentBO payment = getPayment(BULK, EUR, USD, USD, null, true);
+
+        Whitebox.setInternalState(transactionService, "paymentMapper", Mappers.getMapper(PaymentMapper.class));
+        when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
+        when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
+        when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
+
+        when(depositAccountConfigService.getLedger()).thenReturn("mockbank");
+        when(ledgerService.findLedgerByName(anyString())).thenReturn(Optional.of(new LedgerBO("mockbank", "id", null, null, null, null, null)));
+
+        when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, USD, USD));
+        when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
+
+        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+
+        //when
+        transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
+
+        //then
+        ArgumentCaptor<PostingBO> postingCaptor = ArgumentCaptor.forClass(PostingBO.class);
+        verify(postingService, times(1)).newPosting(postingCaptor.capture());
+
+        PostingBO posting = postingCaptor.getValue();
+        List<PostingLineBO> lines = posting.getLines();
+        assertThat(lines.size()).isEqualTo(3);
+
+        PostingLineBO line1 = lines.get(0);
+        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.valueOf(8.3333), BigDecimal.ZERO, null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line1.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates1 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(0).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+
+        PostingLineBO line2 = lines.get(1);
+        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.ZERO, BigDecimal.valueOf(8.3333), null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line2.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates2 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(1).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), exchangeRates2));
+
+        PostingLineBO line3 = lines.get(2);
+        assertThat(line3).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprSrc()), "id", "details");
+        assertThat(line3.getDetails()).isNotBlank();
+        List<ExchangeRateBO> exchangeRates3 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(2).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        assertThat(STATIC_MAPPER.readValue(line3.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line3.getId(), exchangeRates3));
+    }
 
     private PaymentTargetDetailsBO getExpectedDetails(PaymentBO payment, String trId, List<ExchangeRateBO> rates) {
         PaymentTargetDetailsBO details = new PaymentTargetDetailsBO();
@@ -197,10 +486,10 @@ public class DepositAccountTransactionServiceImplTest {
         return details;
     }
 
-    private PostingLineBO expectedLine(String id, String account, BigDecimal debit, BigDecimal credit, String details, String oprId, String oprSrcId, String subOprSrcId) {
+    private PostingLineBO expectedLine(String id, LedgerAccountBO account, BigDecimal debit, BigDecimal credit, String details, String oprId, String oprSrcId, String subOprSrcId) {
         PostingLineBO l = new PostingLineBO();
         l.setId(id);
-        l.setAccount(new LedgerAccountBO(account, new LedgerBO()));
+        l.setAccount(account);
         l.setDebitAmount(debit);
         l.setCreditAmount(credit);
         l.setDetails(details);
@@ -248,10 +537,10 @@ public class DepositAccountTransactionServiceImplTest {
         return map.get(currency);
     }
 
-    private PaymentBO getPayment(PaymentTypeBO type, Currency debtor, Currency amount, Currency creditor, Currency creditor2) {
-        return new PaymentBO("pmt1", false, null,
-                null, type, "sepa-credit-transfers", null, null, null, null,
-                null, getReference(debtor), null, null, ACSP, getTargets(amount, creditor, creditor2), getDepositAccount().getId());
+    private PaymentBO getPayment(PaymentTypeBO type, Currency debtor, Currency amount, Currency creditor, Currency creditor2, boolean batchBookingPreferred) {
+        return new PaymentBO("pmt1", batchBookingPreferred, null,
+                             null, type, "sepa-credit-transfers", null, null, null, null,
+                             null, getReference(debtor), null, null, ACSP, getTargets(amount, creditor, creditor2), getDepositAccount().getId());
     }
 
     private List<PaymentTargetBO> getTargets(Currency amount, Currency curr1, Currency curr2) {
@@ -285,14 +574,14 @@ public class DepositAccountTransactionServiceImplTest {
     }
 
     private DepositAccount getDepositAccount() {
-        return new DepositAccount("id", "iban", "msisdn", "EUR",
-                "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
-                AccountUsage.PRIV, "details");
+        return new DepositAccount("id", "DE1234567890", "msisdn", "EUR",
+                                  "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
+                                  AccountUsage.PRIV, "details");
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", "iban", null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", null, AccountUsageBO.PRIV, "details"),
+                new DepositAccountBO("id", "DE1234567890", null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details"),
                 Collections.emptyList());
     }
 }
