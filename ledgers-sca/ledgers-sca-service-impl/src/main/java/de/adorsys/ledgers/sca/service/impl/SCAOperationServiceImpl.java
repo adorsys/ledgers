@@ -188,22 +188,16 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     @Override
-    public void verifyAuthConfirmationCode(String authorisationId, String confirmationCode) {
+    public ScaAuthConfirmationBO verifyAuthConfirmationCode(String authorisationId, String confirmationCode) {
         SCAOperationEntity entity = repository.findByIdAndScaStatus(authorisationId, ScaStatus.UNCONFIRMED)
                                             .orElseThrow(() -> ScaModuleException.builder()
                                                                        .errorCode(SCA_OPERATION_NOT_FOUND)
                                                                        .devMsg(String.format("Sca operation for authorisation %s not found", authorisationId))
                                                                        .build());
         boolean isCodeConfirmValid = StringUtils.equals(entity.getAuthCodeHash(), generateHash(authorisationId, confirmationCode));
-        if (!isCodeConfirmValid) {
-            throw ScaModuleException.builder()
-                          .errorCode(SCA_OPERATION_VALIDATION_FAILED)
-                          .devMsg("Invalid auth confirmation code")
-                          .build();
-        }
-        entity.setStatus(AuthCodeStatus.VALIDATED);
-        entity.setScaStatus(ScaStatus.FINALISED);
+        entity.updateStatuses(isCodeConfirmValid);
         repository.save(entity);
+        return new ScaAuthConfirmationBO(isCodeConfirmValid, OpTypeBO.valueOf(entity.getOpType().name()), entity.getOpId());
     }
 
     private String getTanDependingOnStrategy(ScaUserDataBO scaUserData) {
@@ -259,6 +253,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
             operation.setAuthCodeHash(generateHash(operation.getId(), confirmationCode));
             scaValidation.setAuthConfirmationCode(confirmationCode);
         }
+        scaValidation.setScaStatus(ScaStatusBO.valueOf(status.name()));
         updateOperationStatus(operation, AuthCodeStatus.VALIDATED, status, scaWeight);
     }
 

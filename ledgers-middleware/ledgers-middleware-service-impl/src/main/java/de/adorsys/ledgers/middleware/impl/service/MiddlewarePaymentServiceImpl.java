@@ -55,7 +55,6 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.*;
-import static de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO.FINALISED;
 import static de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO.SCAMETHODSELECTED;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.CANCEL_PAYMENT;
@@ -260,7 +259,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         response.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
         int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
-        scaResponseResolver.updateScaResponseFields(userBO, response, authorisationId, paymentKeyData.template(), bearerToken, FINALISED, scaWeight);
+        scaResponseResolver.updateScaResponseFields(userBO, response, authorisationId, paymentKeyData.template(), bearerToken, ScaStatusTO.valueOf(scaValidationBO.getScaStatus().toString()), scaWeight);
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
     }
 

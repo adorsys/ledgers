@@ -16,19 +16,11 @@
 
 package de.adorsys.ledgers.sca.db.domain;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-
 import lombok.Data;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * The SCA operation entity. We distinguish among following business operations.
@@ -38,10 +30,10 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
  * authorisationId is a generated number. - Payment: A single payment might need
  * multiple authorisations. - the opId is the paymentId - the authorisationId is
  * a generated number.
- * 
+ *
  * We can create an SCA without have sent out the code. This is generally the
  * case when a business operation (login, consent, payment) is initiated.
- * 
+ *
  * @author fpo
  *
  */
@@ -96,10 +88,10 @@ public class SCAOperationEntity {
 	 */
 	@Column(name = "sca_method_id")
 	private String scaMethodId;
-	
+
 	/*
 	 * Records the number of failed attempts.
-	 * 
+	 *
 	 */
 	@Column(name = "failled_count")
 	private int failledCount;
@@ -110,11 +102,20 @@ public class SCAOperationEntity {
 
 	@Column(nullable = false)
 	private int scaWeight;
-	
+
 	@PrePersist
 	public void prePersist() {
 		if(created==null) {
 			created = LocalDateTime.now();
+		}
+	}
+
+	public void updateStatuses(boolean isCodeConfirmValid) {
+		this.status = AuthCodeStatus.VALIDATED;
+		this.scaStatus = ScaStatus.FINALISED;
+		if (!isCodeConfirmValid) {
+			this.status = AuthCodeStatus.FAILED;
+			this.scaStatus = ScaStatus.FAILED;
 		}
 	}
 }
