@@ -25,6 +25,7 @@ import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValueMappingStrategy;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public interface UserConverter {
 
     ScaUserDataBO toScaUserDataBO(ScaUserDataEntity entity);
 
+    @Mapping(target = "id", expression = "java(de.adorsys.ledgers.um.api.domain.ScaUserDataBO.checkId(bo.getId()))")
     ScaUserDataEntity toScaUserDataEntity(ScaUserDataBO bo);
 
     List<ScaUserDataBO> toScaUserDataListBO(List<ScaUserDataEntity> list);

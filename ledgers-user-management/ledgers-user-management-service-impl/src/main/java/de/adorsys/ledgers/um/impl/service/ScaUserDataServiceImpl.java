@@ -12,6 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.EMAIL;
+import static de.adorsys.ledgers.um.api.domain.ScaUserDataBO.checkAndUpdateValidity;
+
 @Slf4j
 @Service
 @Transactional
@@ -44,5 +49,12 @@ public class ScaUserDataServiceImpl implements ScaUserDataService {
     @Override
     public void updateScaUserData(ScaUserDataBO scaUserDataBO) {
         scaUserDataRepository.save(userConverter.toScaUserDataEntity(scaUserDataBO));
+    }
+
+    @Override
+    public void ifScaChangedEmailNotValid(List<ScaUserDataBO> oldScaData, List<ScaUserDataBO> newScaData) {
+        oldScaData.stream()
+                .filter(e -> e.getScaMethod() == EMAIL)
+                .forEach(o -> checkAndUpdateValidity(o, newScaData));
     }
 }
