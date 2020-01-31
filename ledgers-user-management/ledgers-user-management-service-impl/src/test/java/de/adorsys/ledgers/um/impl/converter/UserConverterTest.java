@@ -25,6 +25,7 @@ public class UserConverterTest {
     public static final String USER_EMAIL = "spe@adorsys.com.ua";
     public static final String USER_LOGIN = "speex";
     public static final String USER_PIN = "1234567890";
+    public static final String SCA_ID = "0UaAHbFRQxUpptZmyjq9XQ";
     private static final List<ScaUserDataEntity> scaUserDataEntityList = readListYml(ScaUserDataEntity.class, "sca-user-data.yml");
     private static final List<ScaUserDataBO> scaUserDataBOList = readListYml(ScaUserDataBO.class, "sca-user-data.yml");
     private static final List<AccountAccess> accountAccessList = readListYml(AccountAccess.class, "account-access.yml");
@@ -65,9 +66,15 @@ public class UserConverterTest {
     }
 
     @Test
-    public void toScaUserDataEntity() {
-        ScaUserDataEntity result = converter.toScaUserDataEntity(scaUserDataBOList.get(0));
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(scaUserDataEntityList.get(0));
+    public void toScaUserDataEntity_idExist() {
+        ScaUserDataEntity result = converter.toScaUserDataEntity(getScaUserDataBO(SCA_ID));
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(getScaUserDataEntity(SCA_ID));
+    }
+
+    @Test
+    public void toScaUserDataEntity_idBlank() {
+        ScaUserDataEntity result = converter.toScaUserDataEntity(getScaUserDataBO(""));
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(getScaUserDataEntity(null));
     }
 
     @Test
@@ -129,6 +136,19 @@ public class UserConverterTest {
         assertThat(po.getEmail(), is(USER_EMAIL));
         assertThat(po.getLogin(), is(USER_LOGIN));
         assertThat(po.getPin(), is(USER_PIN));
+    }
+
+
+    private ScaUserDataBO getScaUserDataBO(String id) {
+        ScaUserDataBO scaUserData = scaUserDataBOList.get(0);
+        scaUserData.setId(id);
+        return scaUserData;
+    }
+
+    private ScaUserDataEntity getScaUserDataEntity(String id) {
+        ScaUserDataEntity scaUserData = scaUserDataEntityList.get(0);
+        scaUserData.setId(id);
+        return scaUserData;
     }
 
     //todo: @spe replace by json source file
