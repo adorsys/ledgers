@@ -16,20 +16,20 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthConfirmationTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareAuthConfirmationService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
-import de.adorsys.ledgers.sca.domain.ScaAuthConfirmationBO;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.EnumSet;
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
@@ -53,10 +52,9 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AU
 @RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class UserMgmtResource implements UserMgmtRestAPI {
-    private final SCAOperationService scaOperationService;
     private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
-    private final DepositAccountPaymentService depositAccountPaymentService;
+    private final MiddlewareAuthConfirmationService authConfirmationService;
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
@@ -173,18 +171,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
-    public ResponseEntity<Void> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
-        ScaAuthConfirmationBO authConfirmationBO = scaOperationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode);
-        if(!authConfirmationBO.isConfirm()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Auth confirmation code is invalid")
-                          .build();
-        }
-        if(EnumSet.of(OpTypeBO.PAYMENT, OpTypeBO.CANCEL_PAYMENT).contains(authConfirmationBO.getOpTypeBO())) {
-            depositAccountPaymentService.updatePaymentStatus(authConfirmationBO.getOpId(), TransactionStatusBO.ACTC);
-            depositAccountPaymentService.executePayment(authConfirmationBO.getOpId(), scaInfoHolder.getScaInfo().getUserLogin());
-        }
-        return ResponseEntity.accepted().build();
+    public ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
+        return ResponseEntity.ok(authConfirmationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode, scaInfoHolder.getScaInfo().getUserLogin()));
     }
 }
