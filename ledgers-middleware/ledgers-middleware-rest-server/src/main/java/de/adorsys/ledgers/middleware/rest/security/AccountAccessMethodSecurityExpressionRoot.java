@@ -40,6 +40,10 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return checkTokenUsage(usageType);
     }
 
+    public boolean tokenUsages(String usageTypeFirst, String usageTypeSecond) {
+        return checkTokenUsage(usageTypeFirst) || checkTokenUsage(usageTypeSecond);
+    }
+
     public boolean loginToken(String scaId, String authorizationId) {
         AccessTokenTO token = getAccessTokenTO();
         return checkTokenUsage(TokenUsageTO.LOGIN.name())
