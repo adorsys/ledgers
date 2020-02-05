@@ -2,6 +2,7 @@ package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.service.ScaUserDataService;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
@@ -41,6 +42,8 @@ public class UserServiceImplTest {
     private HashMacSecretSource secretSource;
     @Mock
     private BearerTokenService bearerTokenService;
+    @Mock
+    private ScaUserDataService scaUserDataService;
 
     private ResourceReader reader = YamlReader.getInstance();
 

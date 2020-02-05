@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.AuthConfirmationTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
@@ -336,6 +337,6 @@ public interface UserMgmtRestAPI {
 
     @PutMapping("/authorisations/{authorisationId}/confirmation/{authConfirmCode}")
     @ApiOperation(value = "Send an authentication confirmation code for validation", notes = "Validate an authentication code", authorizations = @Authorization(value = "apiKey"))
-    ResponseEntity<Void> verifyAuthConfirmationCode(@PathVariable("authorisationId") String authorisationId,
-                                          @PathVariable(name = "authConfirmCode") String authConfirmCode);
+    ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(@PathVariable("authorisationId") String authorisationId,
+                                                                  @PathVariable(name = "authConfirmCode") String authConfirmCode);
 }
