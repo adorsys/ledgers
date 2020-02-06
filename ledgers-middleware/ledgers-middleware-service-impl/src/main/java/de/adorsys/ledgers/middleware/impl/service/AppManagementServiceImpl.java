@@ -69,9 +69,8 @@ public class AppManagementServiceImpl implements AppManagementService {
         String branchId = userService.findById(info.getUserId()).getBranch();
         List<UserTO> uploadedUsers = uploadUserService.uploadUsers(data.getUsers(), branchId);
         uploadDepositAccountService.uploadDepositAccounts(uploadedUsers, data.getDetails(), info);
-
-        CompletableFuture.runAsync(() -> uploadBalanceService.uploadBalances(data, info), FIXED_THREAD_POOL);
-        CompletableFuture.runAsync(() -> uploadPaymentService.uploadPayments(data, info), FIXED_THREAD_POOL);
+        CompletableFuture.runAsync(() -> uploadBalanceService.uploadBalances(data, info), FIXED_THREAD_POOL)
+                .thenRunAsync(() -> uploadPaymentService.uploadPayments(data, info));
     }
 
     private void isPermittedToRemoveBranch(String userId, UserRoleTO userRole, String branchId) {
