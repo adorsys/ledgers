@@ -57,5 +57,6 @@
     <include file="migration/0022-add-column-account-id-to-account-accesses-and-payment-tables.xml" relativeToChangelogFile="true" />
     <include file="migration/0023-extend-payment-related-tables.xml" relativeToChangelogFile="true" />
     <include file="migration/0024-create-table-email-verification-and-remove-user-type.xml" relativeToChangelogFile="true" />
+    <include file="migration/0025-rename-column-in-sca-data-table.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>
