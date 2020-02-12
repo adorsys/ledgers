@@ -127,7 +127,7 @@
 		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
 		<sonar.coverage.exclusions>**/*Entity.java,**/*TO.java,**/*BO.java,**/*PO.java,**/*Application.java,**/*Exception.java,
-			**/*Config.java,pom.xml,**/ledgers-user-management-service-api/**/*,**/ledgers-sca-service-api/**/*,**/ledgers-postings-service-api/**/*,**/ledgers-middleware-service-api/**/*,**/ledgers-deposit-account-service-api/**/*,/ledgers-jaxb-api/**/*,**/ledgers-middleware-rest-api/**/*,/ledgers-security/**/*,/ledgers-app/**/*
+			**/*Config.java,pom.xml,**/ledgers-user-management-service-api/**/*,**/ledgers-sca-service-api/**/*,**/ledgers-postings-service-api/**/*,**/ledgers-middleware-service-api/**/*,**/ledgers-deposit-account-service-api/**/*,/ledgers-jaxb-api/**/*,**/ledgers-middleware-rest-api/**/*,/ledgers-security/**/*,/ledgers-app/**/*,**/ledgers-middleware-rest-server/**/*,**/ledgers-deposit-account-repository/**/*,**/ledgers-postings-repository/**/*,**/ledgers-sca-repository/**/*,**/ledgers-user-management-repository/**/*,
 		</sonar.coverage.exclusions>
 		<sonar.moduleName>${project.artifactId}</sonar.moduleName>
 
