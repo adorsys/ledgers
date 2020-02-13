@@ -36,6 +36,7 @@ public interface PaymentMapper {
     @Mapping(target = "remittanceInformationUnstructured", source = "paymentTarget.remittanceInformationUnstructured")
     @Mapping(target = "remittanceInformationStructured", source = "paymentTarget.remittanceInformationStructured")
     @Mapping(target = "debtorName", source = "paymentTarget.payment.debtorName")
+    @Mapping(target = "debtorAgent", source = "paymentTarget.payment.debtorAgent")
     @Mapping(target = "creditorName", source = "paymentTarget.creditorName")
     @Mapping(target = "creditorAgent", source = "paymentTarget.creditorAgent")
     @Mapping(target = "creditorAddress", source = "paymentTarget.creditorAddress")
@@ -52,8 +53,7 @@ public interface PaymentMapper {
     @Mapping(source = "rate", target = "exchangeRate")
     @Mapping(target = "bankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(paymentTarget.getPayment().getPaymentProduct()))")
     @Mapping(target = "proprietaryBankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(paymentTarget.getPayment().getPaymentProduct()))")
-    PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime, List<ExchangeRateBO> rate);
-
+    PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime, List<ExchangeRateBO> rate, BalanceBO balanceAfterTransaction);
 
     @Mapping(target = "mandateId", defaultExpression = "java(null)")
     @Mapping(target = "checkId", defaultExpression = "java(null)")
@@ -67,6 +67,7 @@ public interface PaymentMapper {
     @Mapping(target = "remittanceInformationUnstructured", constant = "Batch booking, no remittance information available")
     @Mapping(target = "transactionStatus", source = "payment.transactionStatus")
     @Mapping(target = "debtorName", source = "payment.debtorName")
+    @Mapping(target = "debtorAgent", source = "payment.debtorAgent")
     @Mapping(target = "debtorAccount", source = "payment.debtorAccount")
     @Mapping(target = "paymentType", source = "payment.paymentType")
     @Mapping(target = "creditorAccount", defaultExpression = "java(null)")
@@ -82,8 +83,10 @@ public interface PaymentMapper {
     @Mapping(constant = "multiple", target = "creditorAgent")
     @Mapping(constant = "multiple", target = "creditorName")
     @Mapping(source = "rate", target = "exchangeRate")
-    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime, List<ExchangeRateBO> rate);
+    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime, List<ExchangeRateBO> rate, BalanceBO balanceAfterTransaction);
 
+    @Mapping(target = "debtorAgent", ignore = true)
+    @Mapping(target = "creditorAgent", ignore = true)
     @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
     @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
     @Mapping(target = "creditorId", defaultExpression = "java(null)")
@@ -105,7 +108,7 @@ public interface PaymentMapper {
     @Mapping(target = "bookingDate", source = "postingDate")
     @Mapping(target = "valueDate", source = "postingDate")
     @Mapping(target = "transactionAmount", source = "amount")
-    TransactionDetailsBO toDepositTransactionDetails(AmountBO amount, DepositAccountBO depositAccount, AccountReferenceBO creditorAccount, LocalDate postingDate, String postingLineId);
+    TransactionDetailsBO toDepositTransactionDetails(AmountBO amount, DepositAccountBO depositAccount, AccountReferenceBO creditorAccount, LocalDate postingDate, String postingLineId, BalanceBO balanceAfterTransaction);
 
     List<PaymentBO> toPaymentBOList(List<Payment> payments);
 }

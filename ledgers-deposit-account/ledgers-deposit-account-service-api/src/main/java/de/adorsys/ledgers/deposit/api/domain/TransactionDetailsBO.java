@@ -24,9 +24,11 @@ public class TransactionDetailsBO {
     private AmountBO transactionAmount;
     private List<ExchangeRateBO> exchangeRate;
     private String creditorName;
+    private String creditorAgent;
     private AccountReferenceBO creditorAccount;
     private String ultimateCreditor;
     private String debtorName;
+    private String debtorAgent;
     private AccountReferenceBO debtorAccount;
     private String ultimateDebtor;
     private RemittanceInformationStructuredBO remittanceInformationStructured;
@@ -34,4 +36,5 @@ public class TransactionDetailsBO {
     private PurposeCodeBO purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;
+    private BalanceBO balanceAfterTransaction;
 }

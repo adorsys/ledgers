@@ -18,8 +18,10 @@ package de.adorsys.ledgers.deposit.api.domain;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.function.BinaryOperator;
 
 
 @Data
@@ -29,4 +31,9 @@ public class BalanceBO {
     private LocalDateTime lastChangeDateTime;
     private LocalDate referenceDate;
     private String lastCommittedTransaction;
+
+    public void updateAmount(BigDecimal amount, BinaryOperator<BigDecimal> functionToApply) {
+        BigDecimal newAmount = functionToApply.apply(this.amount.getAmount(), amount);
+        this.amount.setAmount(newAmount);
+    }
 }
