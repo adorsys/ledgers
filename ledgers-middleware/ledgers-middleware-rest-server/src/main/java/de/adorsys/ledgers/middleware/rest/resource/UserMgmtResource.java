@@ -174,4 +174,10 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     public ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
         return ResponseEntity.ok(authConfirmationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode, scaInfoHolder.getScaInfo().getUserLogin()));
     }
+
+    @Override
+    @PreAuthorize("tokenUsages('DIRECT_ACCESS','DELEGATED_ACCESS')")
+    public ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed) {
+        return ResponseEntity.ok(authConfirmationService.completeAuthConfirmation(authorisationId, authCodeConfirmed, scaInfoHolder.getScaInfo().getUserLogin()));
+    }
 }

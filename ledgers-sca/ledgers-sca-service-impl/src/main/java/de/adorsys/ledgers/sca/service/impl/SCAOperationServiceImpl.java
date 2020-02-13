@@ -189,16 +189,27 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     @Override
     public ScaAuthConfirmationBO verifyAuthConfirmationCode(String authorisationId, String confirmationCode) {
-        SCAOperationEntity entity = repository.findByIdAndScaStatus(authorisationId, ScaStatus.UNCONFIRMED)
-                                            .orElseThrow(() -> ScaModuleException.builder()
-                                                                       .errorCode(SCA_OPERATION_NOT_FOUND)
-                                                                       .devMsg(String.format("Sca operation for authorisation %s not found", authorisationId))
-                                                                       .build());
+        SCAOperationEntity entity = getScaOperationEntity(authorisationId);
         boolean isCodeConfirmValid = StringUtils.equals(entity.getAuthCodeHash(), generateHash(authorisationId, confirmationCode));
-        entity.updateStatuses(isCodeConfirmValid);
-        repository.save(entity);
+        repository.save(entity.updateStatuses(isCodeConfirmValid));
         return new ScaAuthConfirmationBO(isCodeConfirmValid, OpTypeBO.valueOf(entity.getOpType().name()), entity.getOpId());
     }
+
+    @Override
+    public ScaAuthConfirmationBO completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed) {
+        SCAOperationEntity entity = getScaOperationEntity(authorisationId);
+        repository.save(entity.updateStatuses(authCodeConfirmed));
+        return new ScaAuthConfirmationBO(authCodeConfirmed, OpTypeBO.valueOf(entity.getOpType().name()), entity.getOpId());
+    }
+
+    private SCAOperationEntity getScaOperationEntity(String authorisationId) {
+        return repository.findByIdAndScaStatus(authorisationId, ScaStatus.UNCONFIRMED)
+                       .orElseThrow(() -> ScaModuleException.builder()
+                                                  .errorCode(SCA_OPERATION_NOT_FOUND)
+                                                  .devMsg(String.format("Sca operation for authorisation %s not found", authorisationId))
+                                                  .build());
+    }
+
 
     private String getTanDependingOnStrategy(ScaUserDataBO scaUserData) {
         return Arrays.asList(this.env.getActiveProfiles()).contains("sandbox")
