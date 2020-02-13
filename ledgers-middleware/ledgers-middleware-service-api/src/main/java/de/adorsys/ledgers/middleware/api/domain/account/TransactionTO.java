@@ -49,13 +49,16 @@ public class TransactionTO {
     private List<ExchangeRateTO> exchangeRate;
     private String creditorName;
     private AccountReferenceTO creditorAccount;
+    private String creditorAgent;
     private String ultimateCreditor;
     private String debtorName;
     private AccountReferenceTO debtorAccount;
+    private String debtorAgent;
     private String ultimateDebtor;
     private String remittanceInformationUnstructured;
     private RemittanceInformationStructuredTO remittanceInformationStructured;
     private String purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;
+    private AccountBalanceTO balanceAfterTransaction;
 }

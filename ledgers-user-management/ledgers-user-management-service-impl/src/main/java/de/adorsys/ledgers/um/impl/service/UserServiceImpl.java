@@ -76,7 +76,6 @@ public class UserServiceImpl implements UserService {
 
         // if user is TPP and has an ID than do not reset it
         if (userEntity.getId() == null) {
-            log.info("User with login {} has no id, generating one", userEntity.getLogin());
             userEntity.setId(Ids.id());
         }
 

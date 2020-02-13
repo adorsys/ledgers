@@ -27,6 +27,7 @@ import de.adorsys.ledgers.sca.mock.MockSmtpServer;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
 import de.adorsys.ledgers.um.impl.EnableUserManagementService;
 import de.adorsys.ledgers.util.EnableUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -65,7 +66,7 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
     }
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
+    public void onApplicationEvent(@NotNull ApplicationReadyEvent event) {
         bankInitService.init();
         if (Arrays.asList(this.env.getActiveProfiles()).contains("develop")) {
             bankInitService.uploadTestData();

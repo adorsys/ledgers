@@ -129,7 +129,7 @@ public class DepositAccountTransactionServiceImplTest {
         when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO());
         when(ledgerService.findLedgerAccountById(any())).thenReturn(new LedgerAccountBO());
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
-        when(paymentMapper.toDepositTransactionDetails(any(), any(), any(), any(), anyString())).thenAnswer(i -> localPaymentMapper.toDepositTransactionDetails((AmountBO) i.getArgument(0), i.getArgument(1), (AccountReferenceBO) i.getArgument(2), (LocalDate) i.getArgument(3), (String) i.getArgument(4)));
+        when(paymentMapper.toDepositTransactionDetails(any(), any(), any(), any(), anyString(), any())).thenAnswer(i -> localPaymentMapper.toDepositTransactionDetails((AmountBO) i.getArgument(0), i.getArgument(1), (AccountReferenceBO) i.getArgument(2), (LocalDate) i.getArgument(3), (String) i.getArgument(4), i.getArgument(5)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
@@ -159,7 +159,7 @@ public class DepositAccountTransactionServiceImplTest {
         PaymentBO payment = getPayment(SINGLE, EUR, EUR, EUR, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
-        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any(),any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3],i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
@@ -202,7 +202,7 @@ public class DepositAccountTransactionServiceImplTest {
         PaymentBO payment = getPayment(SINGLE, EUR, USD, USD, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
-        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any(),any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3],i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
@@ -259,7 +259,7 @@ public class DepositAccountTransactionServiceImplTest {
         PaymentBO payment = getPayment(SINGLE, EUR, USD, USD, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
-        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+//        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any(),any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3],i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
 
@@ -279,7 +279,7 @@ public class DepositAccountTransactionServiceImplTest {
         PaymentBO payment = getPayment(SINGLE, EUR, USD, CHF, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
-        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any(),any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3],i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
@@ -379,7 +379,7 @@ public class DepositAccountTransactionServiceImplTest {
         PaymentBO payment = getPayment(BULK, EUR, EUR, EUR, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
-        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3]));
+        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any(),any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3],i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));

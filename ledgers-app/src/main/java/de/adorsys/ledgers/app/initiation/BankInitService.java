@@ -54,8 +54,8 @@ public class BankInitService {
     private final PaymentRestInitiationService restInitiationService;
     private final CurrencyService currencyService;
 
-    private static final String ACCOUNT_NOT_FOUND_MSG = "Account not Found! Should never happen while initiating mock data!";
-    private static final String NO_USER_BY_IBAN = "Could not get User By Iban {}";
+    private static final String ACCOUNT_NOT_FOUND_MSG = "Account {} not Found! Should never happen while initiating mock data!";
+    private static final String NO_USER_BY_IBAN = "Could not get User By Iban {}! Should never happen while initiating mock data!";
     private static final LocalDateTime START_DATE = LocalDateTime.of(2018, 1, 1, 1, 1);
 
     @Autowired
@@ -111,7 +111,7 @@ public class BankInitService {
                     restInitiationService.executePayment(user, PaymentTypeTO.SINGLE, payment);
                 }
             } catch (DepositModuleException e) {
-                logger.error(ACCOUNT_NOT_FOUND_MSG);
+                logger.error(ACCOUNT_NOT_FOUND_MSG, payment.getDebtorAccount().getIban());
             } catch (UserManagementModuleException e) {
                 logger.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
             }
@@ -134,7 +134,7 @@ public class BankInitService {
                     restInitiationService.executePayment(user, PaymentTypeTO.BULK, payment);
                 }
             } catch (DepositModuleException e) {
-                logger.error(ACCOUNT_NOT_FOUND_MSG);
+                logger.error(ACCOUNT_NOT_FOUND_MSG, debtorAccount.getIban());
             } catch (UserManagementModuleException e) {
                 logger.error(NO_USER_BY_IBAN, debtorAccount.getIban());
             }
