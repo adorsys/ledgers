@@ -110,12 +110,13 @@ public class SCAOperationEntity {
 		}
 	}
 
-	public void updateStatuses(boolean isCodeConfirmValid) {
+	public SCAOperationEntity updateStatuses(boolean isCodeConfirmValid) {
 		this.status = AuthCodeStatus.VALIDATED;
 		this.scaStatus = ScaStatus.FINALISED;
 		if (!isCodeConfirmValid) {
 			this.status = AuthCodeStatus.FAILED;
 			this.scaStatus = ScaStatus.FAILED;
 		}
+		return this;
 	}
 }
