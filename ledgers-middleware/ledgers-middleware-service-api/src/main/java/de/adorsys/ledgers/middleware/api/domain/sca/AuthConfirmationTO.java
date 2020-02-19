@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthConfirmationTO {
-    private Boolean partiallyAuthorised;
-    private Boolean multilevelScaRequired;
+    private boolean partiallyAuthorised;
+    private boolean multilevelScaRequired;
     private TransactionStatusTO transactionStatus;
     private boolean success;
 
