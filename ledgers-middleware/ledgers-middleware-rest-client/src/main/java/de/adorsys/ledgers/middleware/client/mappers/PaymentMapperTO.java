@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -85,6 +86,11 @@ public class PaymentMapperTO {
         mapProperties(debtorPart, "endDate", node, paymentTO::setEndDate, LocalDate.class);
         mapProperties(debtorPart, "executionRule", node, paymentTO::setExecutionRule, String.class);
         mapProperties(debtorPart, "frequency", node, paymentTO::setFrequency, FrequencyCodeTO.class);
+        Optional.ofNullable(node.findValue("frequency")).map(JsonNode::asText).ifPresent(v -> {
+            if (!StringUtils.isAllUpperCase(v)) {
+                paymentTO.setFrequency(FrequencyCodeTO.getByValue(node.findValue("frequency").asText()));
+            }
+        });
         mapProperties(debtorPart, "dayOfExecution", node, paymentTO::setDayOfExecution, Integer.class);
         mapProperties(debtorPart, "debtorAgent", node, paymentTO::setDebtorAgent, String.class);
         mapProperties(debtorPart, "debtorName", node, paymentTO::setDebtorName, String.class);
