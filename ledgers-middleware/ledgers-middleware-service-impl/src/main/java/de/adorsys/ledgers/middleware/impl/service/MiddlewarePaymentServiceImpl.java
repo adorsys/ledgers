@@ -76,7 +76,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final AccessService accessService;
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
-    private final PainPaymentConverter painPaymentConverter;
     private final ScaResponseResolver scaResponseResolver;
     private final PaymentProductsConfig paymentProductsConfig;
     private final AccountDetailsMapper detailsMapper;
@@ -100,12 +99,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @Override
-    public String initiatePainPayment(ScaInfoTO scaInfoTO, String payment, PaymentTypeTO paymentType) {
-        return painPaymentConverter.toPayload(checkPaymentAndPrepareResponse(scaInfoTO, painPaymentConverter.toPaymentBO(payment, paymentType)));
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
     public SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType) {
         return checkPaymentAndPrepareResponse(scaInfoTO, paymentConverter.toPaymentBO(payment, paymentType));
     }

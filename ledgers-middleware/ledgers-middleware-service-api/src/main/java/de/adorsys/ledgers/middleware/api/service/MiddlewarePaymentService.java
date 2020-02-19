@@ -40,18 +40,6 @@ public interface MiddlewarePaymentService {
      */
     SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType);
 
-    /**
-     * PROC:01 Initiates a pain payment. Called by the channel layer.
-     * <p>
-     * This call sets the status RCVD
-     *
-     * @param scaInfoTO   : SCA information
-     * @param payment     : the xml payment object
-     * @param paymentType : the payment type
-     * @return : the sca response object.
-     */
-    String initiatePainPayment(ScaInfoTO scaInfoTO, String payment, PaymentTypeTO paymentType);
-
     // ================= SCA =======================================//
 
     /**
