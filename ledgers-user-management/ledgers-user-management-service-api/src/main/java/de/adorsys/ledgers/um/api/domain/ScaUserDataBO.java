@@ -23,7 +23,7 @@ public class ScaUserDataBO {
     private String methodValue;
     private boolean usesStaticTan;
     private String staticTan;
-    private boolean isValid;
+    private boolean valid;
 
     public ScaUserDataBO(
             @NotNull ScaMethodTypeBO scaMethod,
@@ -59,7 +59,7 @@ public class ScaUserDataBO {
     }
 
     public boolean isEmailValid() {
-        return isValid;
+        return valid;
     }
 
     public static String checkId(String id) {

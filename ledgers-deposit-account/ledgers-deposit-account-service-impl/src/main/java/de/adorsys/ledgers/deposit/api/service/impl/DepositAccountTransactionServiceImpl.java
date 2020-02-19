@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.DEPOSIT_ACCOUNT_NOT_FOUND;
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.DEPOSIT_OPERATION_FAILURE;
@@ -71,42 +70,19 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
                           .build();
         }
 
-        DepositAccountBO depositAccount = depositAccountService.getAccountDetailsById(accountId, LocalDateTime.now(), false).getAccount();
+        DepositAccountDetailsBO depositAccount = depositAccountService.getAccountDetailsById(accountId, LocalDateTime.now(), true);
+        Currency accountCurrency = depositAccount.getAccount().getCurrency();
 
-        if (!depositAccount.getCurrency().equals(amount.getCurrency())) {
+        if (!accountCurrency.equals(amount.getCurrency())) {
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_OPERATION_FAILURE)
                           .devMsg(format("Deposited amount and account currencies are different. Requested currency: %s, Account currency: %s",
-                                  amount.getCurrency().getCurrencyCode(), depositAccount.getCurrency()))
+                                  amount.getCurrency().getCurrencyCode(), accountCurrency))
                           .build();
         }
-
         LedgerBO ledger = loadLedger();
         LocalDateTime postingDateTime = LocalDateTime.now();
-
         depositCash(depositAccount, amount, recordUser, ledger, postingDateTime);
-    }
-
-    private void depositCash(DepositAccountBO depositAccount, AmountBO amount, String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {
-        PostingBO posting = postingMapper.buildPosting(postingDateTime, Ids.id(), "ATM Cash Deposit", ledger, recordUser);
-        PostingLineBO debitLine = composeLine(depositAccount, amount, ledger, postingDateTime, true);
-        PostingLineBO creditLine = composeLine(depositAccount, amount, ledger, postingDateTime, false);
-        posting.getLines().addAll(Arrays.asList(debitLine, creditLine));
-        postingService.newPosting(posting);
-    }
-
-    private PostingLineBO composeLine(DepositAccountBO depositAccount, AmountBO amount, LedgerBO ledger, LocalDateTime postingDateTime, boolean debit) {
-        LedgerAccountBO account = debit
-                                          ? ledgerService.findLedgerAccount(ledger, depositAccountConfigService.getCashAccount())
-                                          : ledgerService.findLedgerAccountById(depositAccount.getLinkedAccounts());
-
-        BigDecimal debitAmount = getDCtAmount(amount, debit, null);
-        BigDecimal creditAmount = getDCtAmount(amount, !debit, null);
-
-        String lineId = Ids.id();
-        AccountReferenceBO creditor = depositAccount.getReference();
-        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, depositAccount, creditor, postingDateTime.toLocalDate(), lineId));
-        return postingMapper.buildPostingLine(debitTransactionDetails, account, debitAmount, creditAmount, "ATM transfer", lineId);
     }
 
     /**
@@ -123,22 +99,69 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         String oprDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentOrder(payment));
         LedgerBO ledger = loadLedger();
 
-        Set<PostingBO> postings = payment.getPaymentType() == PaymentTypeBO.BULK && Optional.ofNullable(payment.getBatchBookingPreferred()).orElse(false)
-                                          ? createBatchPostings(pstTime, oprDetails, ledger, payment, userName)
-                                          : createRegularPostings(pstTime, oprDetails, ledger, payment, userName);
-        postings.forEach(postingService::newPosting);
+        if (payment.getPaymentType() == PaymentTypeBO.BULK && Optional.ofNullable(payment.getBatchBookingPreferred()).orElse(false)) {
+            createBatchPostings(pstTime, oprDetails, ledger, payment, userName);
+        } else {
+            createRegularPostings(pstTime, oprDetails, ledger, payment, userName);
+        }
     }
 
-    private Set<PostingBO> createRegularPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, PaymentBO payment, String userName) {
-        return payment.getTargets().stream()
-                       .map(t -> {
-                           t.setPayment(payment);
-                           return buildDCPosting(pstTime, oprDetails, ledger, t, userName);
-                       })
-                       .collect(Collectors.toSet());
+    private void depositCash(DepositAccountDetailsBO depositAccount, AmountBO amount, String recordUser, LedgerBO ledger, LocalDateTime postingDateTime) {
+        PostingBO posting = postingMapper.buildPosting(postingDateTime, Ids.id(), "ATM Cash Deposit", ledger, recordUser);
+        PostingLineBO debitLine = composeLine(depositAccount, amount, ledger, postingDateTime, true);
+        PostingLineBO creditLine = composeLine(depositAccount, amount, ledger, postingDateTime, false);
+        posting.getLines().addAll(Arrays.asList(debitLine, creditLine));
+        postingService.newPosting(posting);
     }
 
-    private Set<PostingBO> createBatchPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, PaymentBO payment, String userName) {
+    private PostingLineBO composeLine(DepositAccountDetailsBO depositAccount, AmountBO amount, LedgerBO ledger, LocalDateTime postingDateTime, boolean debit) {
+        DepositAccountBO account = depositAccount.getAccount();
+        LedgerAccountBO ledgerAccount = debit
+                                                ? ledgerService.findLedgerAccount(ledger, depositAccountConfigService.getCashAccount())
+                                                : ledgerService.findLedgerAccountById(account.getLinkedAccounts());
+
+        BigDecimal debitAmount = getDCtAmount(amount, debit, null);
+        BigDecimal creditAmount = getDCtAmount(amount, !debit, null);
+
+        BalanceBO balanceAfterTransaction = resolveBalanceAfterTransaction(!debit, depositAccount, debitAmount);
+
+        String lineId = Ids.id();
+        AccountReferenceBO creditor = account.getReference();
+        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, account, creditor, postingDateTime.toLocalDate(), lineId, balanceAfterTransaction));
+        return postingMapper.buildPostingLine(debitTransactionDetails, ledgerAccount, debitAmount, creditAmount, "ATM transfer", lineId);
+    }
+
+    private BalanceBO resolveBalanceAfterTransaction(boolean debit, DepositAccountDetailsBO details, BigDecimal amount) {
+        Optional<BalanceBO> balanceAfterTransaction = Optional.ofNullable(details)
+                                                              .map(DepositAccountDetailsBO::getBalances)
+                                                              .map(this::getBalance);
+        balanceAfterTransaction.ifPresent(b -> b.updateAmount(amount, debit ? BigDecimal::subtract : BigDecimal::add));
+        return balanceAfterTransaction.orElse(null);
+    }
+
+    private BalanceBO resolveBalanceAfterTransactionForPayment(boolean debit, PaymentTargetBO target, BigDecimal amount) {
+        DepositAccountDetailsBO accountDetails = debit
+                                                         ? depositAccountService.getAccountDetailsById(target.getPayment().getAccountId(), LocalDateTime.now(), true)
+                                                         : getAccount(target.getCreditorAccount().getIban(), target.getCreditorAccount().getCurrency());
+        return resolveBalanceAfterTransaction(debit, accountDetails, amount);
+    }
+
+    private BalanceBO getBalance(List<BalanceBO> balances) {
+        return balances.stream()
+                       .filter(b -> b.getBalanceType() == BalanceTypeBO.INTERIM_AVAILABLE)
+                       .findFirst()
+                       .orElse(null);
+    }
+
+    private void createRegularPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, PaymentBO payment, String userName) {
+        payment.getTargets().stream()
+                .map(t -> {
+                    t.setPayment(payment);
+                    return buildDCPosting(pstTime, oprDetails, ledger, t, userName);
+                }).forEach(postingService::newPosting);
+    }
+
+    private void createBatchPostings(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, PaymentBO payment, String userName) {
         PostingBO posting = postingMapper.buildPosting(pstTime, payment.getPaymentId(), oprDetails, ledger, userName);
         List<ExchangeRateBO> ratesForDebitLine = new ArrayList<>();
         BigDecimal batchAmount = BigDecimal.ZERO;
@@ -146,7 +169,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         for (PaymentTargetBO t : payment.getTargets()) {
             t.setPayment(payment);
             List<ExchangeRateBO> rates = exchangeRatesService.getExchangeRates(payment.getDebtorAccount().getCurrency(), t.getInstructedAmount().getCurrency(), t.getCreditorAccount().getCurrency());
-            ratesForDebitLine.add(resolveRateIfRequired(payment.getDebtorAccount(), rates));
+            Optional.ofNullable(resolveRateIfRequired(payment.getDebtorAccount(), rates)).ifPresent(ratesForDebitLine::add);
             PostingLineBO line = createLine(ledger, t, pstTime, rates, payment.getPaymentId(), false, true);
             creditLines.add(line);
             batchAmount = batchAmount.add(line.getCreditAmount());
@@ -158,13 +181,14 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         AmountBO amount = new AmountBO(payment.getDebtorAccount().getCurrency(), batchAmount);
         String id = Ids.id();
-        String debitLineDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate(), ratesForDebitLine));
+        BalanceBO balanceAfterTransaction = resolveBalanceAfterTransaction(true, depositAccountService.getAccountDetailsById(payment.getAccountId(), LocalDateTime.now(), true), batchAmount);
+        ratesForDebitLine = ratesForDebitLine.isEmpty() ? null : ratesForDebitLine;
+        String debitLineDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate(), ratesForDebitLine, balanceAfterTransaction));
         LedgerAccountBO debtorLedgerAccount = getLedgerAccount(ledger, payment.getPaymentProduct(), payment.getDebtorAccount(), true, true, false);
         PostingLineBO debitLine = postingMapper.buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, payment.getPaymentId(), id);
         posting.getLines().add(debitLine);
         posting.getLines().addAll(creditLines);
-
-        return new HashSet<>(Collections.singletonList(posting));
+        postingService.newPosting(posting);
     }
 
     private PostingBO buildDCPosting(LocalDateTime pstTime, String oprDetails, LedgerBO ledger, PaymentTargetBO target, String userName) {
@@ -189,14 +213,24 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     private PostingLineBO createLine(LedgerBO ledger, PaymentTargetBO target, LocalDateTime pstTime, List<ExchangeRateBO> rates, String oprId, boolean isDebitLine, boolean isFirstLine) {
         String id = Ids.id();
         ExchangeRateBO ratesForLine = resolveRateIfRequired(getReferenceByValue(target, isFirstLine), rates);
-        String targetDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime.toLocalDate(), Optional.ofNullable(ratesForLine)
-                                                                                                                                                    .map(Collections::singletonList)
-                                                                                                                                                    .orElse(null)));
 
         LedgerAccountBO ledgerAccount = getLedgerAccount(ledger, target.getPayment().getPaymentProduct(), getReferenceByValue(target, isDebitLine), isDebitLine, isFirstLine, target.isAllCurrenciesMatch());
         BigDecimal debitAmount = getDCtAmount(target.getInstructedAmount(), isDebitLine, ratesForLine);
         BigDecimal creditAmount = getDCtAmount(target.getInstructedAmount(), !isDebitLine, ratesForLine);
+
+        BalanceBO balanceAfterTransaction = resolveBalanceAfterTransactionForPayment(isDebitLine, target, isDebitLine ? debitAmount : creditAmount);
+        String targetDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetails(id, target, pstTime.toLocalDate(), Optional.ofNullable(ratesForLine)
+                                                                                                                                                    .map(Collections::singletonList)
+                                                                                                                                                    .orElse(null), balanceAfterTransaction));
         return postingMapper.buildPostingLine(targetDetails, ledgerAccount, debitAmount, creditAmount, oprId, id);
+    }
+
+    private DepositAccountDetailsBO getAccount(String iban, Currency currency) {
+        try {
+            return depositAccountService.getAccountDetailsByIbanAndCurrency(iban, currency, LocalDateTime.now(), true);
+        } catch (DepositModuleException e) {
+            return null;
+        }
     }
 
     private AccountReferenceBO getReferenceByValue(PaymentTargetBO target, boolean value) {

@@ -16,12 +16,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -70,7 +68,7 @@ public class ValidationFilter extends OncePerRequestFilter {
     private Collection<String> readValuesByField(MultiReadHttpServletRequest servletRequest, String fieldName) {
         JsonNode jsonNode = mapper.readTree(servletRequest.getInputStream());
         List<String> values = jsonNode != null
-                                      ? jsonNode.findValuesAsText(fieldName)
+                                      ? jsonNode.findValuesAsText(fieldName).stream().filter(a-> !a.equals("null")).collect(Collectors.toList())
                                       : new ArrayList<>();
         Optional.ofNullable(servletRequest.getParameter(fieldName))
                 .ifPresent(values::add);
