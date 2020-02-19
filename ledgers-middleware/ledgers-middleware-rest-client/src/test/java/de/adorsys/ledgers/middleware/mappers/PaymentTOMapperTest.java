@@ -9,10 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.general.AddressTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.ChargeBearerTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTargetTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import de.adorsys.ledgers.middleware.client.mappers.PaymentMapperConfiguration;
 import de.adorsys.ledgers.middleware.client.mappers.PaymentMapperTO;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +28,7 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
-import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.BULK;
-import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.SINGLE;
+import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,6 +52,15 @@ public class PaymentTOMapperTest {
         PaymentTO result = mapper.toAbstractPayment(payment, "SINGLE", "sepa-credit-transfers");
 
         assertThat(result).isEqualToComparingFieldByFieldRecursively(getSinglePmt());
+    }
+
+    @Test
+    public void xs2aPeriodicPaymentJson() throws IOException {
+        PaymentMapperTO mapper = configuration.paymentMapperTO();
+        String payment = readPayment("xs2aPeriodicPayment.json");
+        PaymentTO result = mapper.toAbstractPayment(payment, "PERIODIC", "instant-sepa-credit-transfers");
+
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(getPeriodicPmt());
     }
 
     @Test
@@ -117,6 +122,20 @@ public class PaymentTOMapperTest {
         payment.setPaymentProduct("sepa-credit-transfers");
         payment.setRequestedExecutionDate(LocalDate.parse("2019-12-12"));
         payment.setDebtorAccount(new AccountReferenceTO("DE40500105178578796457", null, null, null, null, Currency.getInstance("USD")));
+        payment.setTargets(getTargets());
+        return payment;
+    }
+
+    private PaymentTO getPeriodicPmt() {
+        PaymentTO payment = new PaymentTO();
+        payment.setPaymentType(PERIODIC);
+        payment.setPaymentProduct("instant-sepa-credit-transfers");
+        payment.setStartDate(LocalDate.parse("2020-05-26"));
+        payment.setEndDate(LocalDate.parse("2020-10-14"));
+        payment.setExecutionRule("following");
+        payment.setFrequency(FrequencyCodeTO.MONTHLY);
+        payment.setDayOfExecution(14);
+        payment.setDebtorAccount(new AccountReferenceTO("DE40500105178578796457", null, null, null, null, Currency.getInstance("EUR")));
         payment.setTargets(getTargets());
         return payment;
     }
