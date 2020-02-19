@@ -21,7 +21,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import io.swagger.annotations.*;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,18 +53,6 @@ public interface PaymentRestAPI {
     ResponseEntity<SCAPaymentResponseTO> initiatePayment(
             @RequestParam("paymentType") PaymentTypeTO paymentType,
             @RequestBody PaymentTO payment);
-
-    @PostMapping(value = "/pain", params = "paymentType", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    @ApiOperation(value = "Initiates a pain Payment", notes = "Initiates a pain payment", authorizations = @Authorization(value = "apiKey"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, response = String.class, message = "Success"),
-            @ApiResponse(code = 404, message = "Specified account not found."),
-            @ApiResponse(code = 403, message = "Not authorized to execute payment on this account"),
-            @ApiResponse(code = 409, message = "Payment with specified paymentId exists. Either leaved it blank or generate a new one.")
-    })
-    ResponseEntity<String> initiatePainPayment(
-            @RequestParam("paymentType") PaymentTypeTO paymentType,
-            @RequestBody String payment);
 
     @GetMapping(value = "/{paymentId}/authorisations/{authorisationId}")
     @ApiOperation(value = "Get SCA", notes = "Get the authorization response object eventually containing the list of selected sca methods.",
