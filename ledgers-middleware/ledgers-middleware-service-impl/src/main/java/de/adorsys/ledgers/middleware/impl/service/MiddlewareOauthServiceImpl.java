@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MiddlewareOauthServiceImpl implements MiddlewareOauthService {
-    private static final String OAUTH_CODE_PARAM = "?code=";
-
     private final BearerTokenMapper bearerTokenMapper;
     private final OauthAuthorisationService oauthAuthorisationService;
     private final OauthServerInfoMapper oauthServerInfoMapper;
@@ -24,13 +22,13 @@ public class MiddlewareOauthServiceImpl implements MiddlewareOauthService {
     @Override
     public OauthCodeResponseTO oauthCode(String login, String pin, String redirectUri) {
         OauthCodeResponseBO response = oauthAuthorisationService.oauthCode(login, pin);
-        return new OauthCodeResponseTO(redirectUri + OAUTH_CODE_PARAM + response.getCode());
+        return new OauthCodeResponseTO(redirectUri, response.getCode());
     }
 
     @Override
     public OauthCodeResponseTO oauthCode(String userId, String redirectUri) {
         OauthCodeResponseBO response = oauthAuthorisationService.oauthCode(userId);
-        return new OauthCodeResponseTO(redirectUri + OAUTH_CODE_PARAM + response.getCode());
+        return new OauthCodeResponseTO(redirectUri, response.getCode());
     }
 
     @Override

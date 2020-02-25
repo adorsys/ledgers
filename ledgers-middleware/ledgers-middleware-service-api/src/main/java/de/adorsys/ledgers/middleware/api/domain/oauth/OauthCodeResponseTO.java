@@ -1,12 +1,15 @@
 package de.adorsys.ledgers.middleware.api.domain.oauth;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class OauthCodeResponseTO {
     private String redirectUri;
+
+    public OauthCodeResponseTO(String redirectUriBase, String code) {
+        String paramPrefix = redirectUriBase.contains("?") ? "&" : "?";
+        this.redirectUri = redirectUriBase + paramPrefix + "code=" + code;
+    }
 }
