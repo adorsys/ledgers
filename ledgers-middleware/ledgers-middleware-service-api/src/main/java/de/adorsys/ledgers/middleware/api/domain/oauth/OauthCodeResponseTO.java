@@ -1,10 +1,8 @@
 package de.adorsys.ledgers.middleware.api.domain.oauth;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 public class OauthCodeResponseTO {
     private String redirectUri;
 
