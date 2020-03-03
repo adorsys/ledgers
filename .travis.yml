@@ -31,8 +31,7 @@ script:
 addons:
   sonarcloud:
     organization: "adorsys"
-    token:
-      secure: ${SONAR_TOKEN}
+    token: ${SONAR_TOKEN}
 
 # Schritte um Release zu veröffentlichen
 before_deploy:
