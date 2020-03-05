@@ -319,7 +319,7 @@ public class UserServiceImplTest {
     @Test
     public void findUsersByIban() {
         //given
-        when(repository.finUsersByIban(any())).thenReturn(Collections.singletonList(userEntity));
+        when(repository.findUsersByIban(anyString())).thenReturn(Collections.singletonList(userEntity));
         when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(userBO));
 
         //when
