@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
+// TODO refactor it https://git.adorsys.de/adorsys/xs2a/ledgers/issues/236
 public enum AccountIdentifierTypeBO {
     ACCOUNT_ID {
         @Override
