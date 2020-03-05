@@ -22,6 +22,8 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.CurrencyService;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
@@ -205,7 +207,18 @@ public class BankInitService {
     private DepositAccountBO createAccount(AccountDetailsTO details) {
         String userName = getUserNameByIban(details.getIban());
         DepositAccountBO accountBO = accountDetailsMapper.toDepositAccountBO(details);
-        return depositAccountService.createNewAccount(accountBO, userName, "");
+        DepositAccountBO account = depositAccountService.createNewAccount(accountBO, userName, "");
+        userService.findUsersByIban(details.getIban())
+                .forEach(u -> updateAccess(u, account.getIban(), account.getId()));
+        return account;
+    }
+
+    private void updateAccess(UserBO user, String iban, String accountId) {
+        List<AccountAccessBO> accesses = user.getAccountAccesses();
+        accesses.stream()
+                .filter(a -> a.getIban().equals(iban)).findAny()
+                .ifPresent(a -> a.setAccountId(accountId));
+        userService.updateAccountAccess(user.getLogin(), accesses);
     }
 
     private String getUserNameByIban(String iban) {

@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.security;
 
+import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
@@ -16,6 +17,12 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 
     public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService) {
         super(authentication, accountService, paymentService);
+    }
+
+    public boolean accountInfoByIdentifier(AccountIdentifierTypeTO type, String accountIdentifier) {
+        return type == AccountIdentifierTypeTO.IBAN
+                       ? accountInfoByIban(accountIdentifier)
+                       : accountInfoById(accountIdentifier);
     }
 
     public boolean accountInfoById(String id) {

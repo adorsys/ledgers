@@ -2,7 +2,9 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
@@ -10,9 +12,12 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
+import de.adorsys.ledgers.um.api.domain.AccountIdentifierTypeBO;
+import de.adorsys.ledgers.um.api.domain.AdditionalAccountInfoBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -44,6 +49,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private final AccessService accessService;
     private final UserMapper userTOMapper = Mappers.getMapper(UserMapper.class);
     private final PageMapper pageMapper;
+    private final AdditionalAccountInformationMapper additionalInfoMapper;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -177,6 +183,12 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         return user.getAccountAccesses().stream()
                        .filter(a -> contained(a, references))
                        .anyMatch(a -> a.getScaWeight() < 100);
+    }
+
+    @Override
+    public List<AdditionalAccountInformationTO> getAdditionalInformation(ScaInfoTO scaInfoHolder, AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier) {
+        List<AdditionalAccountInfoBO> info = AccountIdentifierTypeBO.valueOf(accountIdentifierType.name()).getAdditionalAccountInfo(accountIdentifier, userService::findOwnersByIban, userService::findOwnersByAccountId);
+        return additionalInfoMapper.toAdditionalAccountInformationTOs(info);
     }
 
     private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {
