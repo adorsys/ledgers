@@ -19,10 +19,7 @@ package de.adorsys.ledgers.um.impl.service;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.ScaUserDataService;
 import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.um.db.domain.AccountAccess;
-import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
-import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
+import de.adorsys.ledgers.um.db.domain.*;
 import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
@@ -53,6 +50,7 @@ import static de.adorsys.ledgers.util.exception.UserManagementModuleException.ge
 @Slf4j
 @Service
 @Transactional
+@SuppressWarnings("PMD.TooManyMethods")
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final String USER_WITH_LOGIN_NOT_FOUND = "User with login=%s not found";
@@ -121,7 +119,6 @@ public class UserServiceImpl implements UserService {
         return convertToUserBoAndDecodeTan(save);
     }
 
-
     @Override
     public UserBO updateAccountAccess(String userLogin, List<AccountAccessBO> accountAccessListBO) {
         log.info("Retrieving user by login={}", userLogin);
@@ -176,9 +173,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserBO> findUsersByIban(String iban) {
-        List<UserBO> users = userConverter.toUserBOList(userRepository.finUsersByIban(iban));
+        List<UserBO> users = userConverter.toUserBOList(userRepository.findUsersByIban(iban));
         users.forEach(u -> u.setAccountAccesses(u.getAccountAccesses().stream()
                                                         .filter(accountAccess -> accountAccess.getIban().equals(iban))
+                                                        .collect(Collectors.toList())));
+        return users;
+    }
+
+    @Override
+    public List<UserBO> findOwnersByIban(String iban) {
+        List<UserBO> users = userConverter.toUserBOList(userRepository.findOwnersByIban(iban, AccessType.OWNER));
+        users.forEach(u -> u.setAccountAccesses(u.getAccountAccesses().stream()
+                                                        .filter(accountAccess -> accountAccess.getIban().equals(iban))
+                                                        .collect(Collectors.toList())));
+        return users;
+    }
+
+    @Override
+    public List<UserBO> findOwnersByAccountId(String accountId) {
+        List<UserBO> users = userConverter.toUserBOList(userRepository.findOwnersByAccountId(accountId, AccessType.OWNER));
+        users.forEach(u -> u.setAccountAccesses(u.getAccountAccesses().stream()
+                                                        .filter(accountAccess -> accountAccess.getAccountId().equals(accountId))
                                                         .collect(Collectors.toList())));
         return users;
     }

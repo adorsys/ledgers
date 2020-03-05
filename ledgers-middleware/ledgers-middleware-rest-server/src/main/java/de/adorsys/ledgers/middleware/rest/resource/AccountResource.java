@@ -16,13 +16,11 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -51,6 +49,7 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.RE
 public class AccountResource implements AccountRestAPI {
     private final ScaInfoHolder scaInfoHolder;
     private final MiddlewareAccountManagementService middlewareAccountService;
+    private final MiddlewareUserManagementService userManagementService;
 
 
     /**
@@ -143,6 +142,12 @@ public class AccountResource implements AccountRestAPI {
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
         return ResponseEntity.accepted().build();
+    }
+
+    @Override
+    @PreAuthorize("accountInfoByIdentifier(#accountIdentifierType, #accountIdentifier)")
+    public ResponseEntity<List<AdditionalAccountInformationTO>> getAdditionalAccountInfo(AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier) {
+        return ResponseEntity.ok(userManagementService.getAdditionalInformation(scaInfoHolder.getScaInfo(), accountIdentifierType, accountIdentifier));
     }
 
     private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
