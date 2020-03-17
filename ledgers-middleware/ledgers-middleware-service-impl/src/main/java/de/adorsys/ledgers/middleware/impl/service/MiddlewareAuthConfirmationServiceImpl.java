@@ -55,7 +55,9 @@ public class MiddlewareAuthConfirmationServiceImpl implements MiddlewareAuthConf
         boolean authCompleted = scaOperationService.authenticationCompleted(authConfirmationBO.getOpId(), authConfirmationBO.getOpTypeBO());
         if (EnumSet.of(OpTypeBO.PAYMENT, OpTypeBO.CANCEL_PAYMENT).contains(authConfirmationBO.getOpTypeBO())) {
             if (authCompleted) {
-                depositAccountPaymentService.updatePaymentStatus(authConfirmationBO.getOpId(), TransactionStatusBO.ACTC);
+                depositAccountPaymentService.updatePaymentStatus(authConfirmationBO.getOpId(), authConfirmationBO.getOpTypeBO() == OpTypeBO.PAYMENT
+                                                                                                       ? TransactionStatusBO.ACTC
+                                                                                                       : TransactionStatusBO.CANC);
                 TransactionStatusBO status = depositAccountPaymentService.executePayment(authConfirmationBO.getOpId(), userLogin);
                 confirmation.transactionStatus(TransactionStatusTO.valueOf(status.toString()));
             } else if (multilevelScaEnable) {
