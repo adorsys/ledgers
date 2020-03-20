@@ -445,7 +445,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         this.authCodeEmailBody = authCodeEmailBody;
     }
 
-    private final static class OperationHashItem {
+    private static final class OperationHashItem {
         @JsonProperty
         private String id;// attach to the database line. Pinning!!!
         @JsonProperty
@@ -456,7 +456,6 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         private String tan;
 
         public OperationHashItem(String id, String opId, String opData, String tan) {
-            super();
             this.id = id;
             this.opId = opId;
             this.opData = opData;

@@ -81,6 +81,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.skyscreamer</groupId>
+					<artifactId>jsonassert</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Need these service because we are activating the module from their implementation packages. -->
@@ -130,6 +136,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20190722</version>
 		</dependency>
 
 	</dependencies>
