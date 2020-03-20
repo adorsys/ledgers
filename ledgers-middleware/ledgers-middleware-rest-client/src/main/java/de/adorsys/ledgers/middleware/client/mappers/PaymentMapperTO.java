@@ -11,7 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.json.XML;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.BULK;
 
@@ -50,9 +52,11 @@ public class PaymentMapperTO {
 
     private JsonNode readTree(String payment, String product) {
         try {
-            return product.contains("pain") || product.contains("xml")
-                           ? xmlMapper.readTree(payment)
-                           : mapper.readTree(payment);
+            if (product.contains("pain") || product.contains("xml")) {
+                JSONObject json = XML.toJSONObject(payment);
+                return mapper.readTree(json.toString());
+            }
+            return mapper.readTree(payment);
         } catch (IOException e) {
             log.error("Read tree exception {}, {}", e.getCause(), e.getMessage());
             throw new IllegalArgumentException("Could not parse payment!");
@@ -61,14 +65,18 @@ public class PaymentMapperTO {
 
     private List<PaymentTargetTO> parseCreditorParts(JsonNode node, PaymentTypeTO type) {
         List<PaymentTargetTO> targets = new ArrayList<>();
+        List<JsonNode> nodes = debtorPart.get("targets").stream()
+                                       .map(node::findValue)
+                                       .filter(Objects::nonNull).collect(Collectors.toList());
         if (type == BULK) {
-            debtorPart.get("targets").stream()
-                    .map(node::findValue)
-                    .filter(Objects::nonNull)
-                    .forEach(n -> n.elements()
-                                          .forEachRemaining(t -> targets.add(mapTarget(t))));
+            nodes.forEach(n -> n.elements()
+                                       .forEachRemaining(t -> targets.add(mapTarget(t))));
         } else {
-            targets.add(mapTarget(node));
+            if (!nodes.isEmpty()) {
+                nodes.forEach(t -> targets.add(mapTarget(t)));
+            } else {
+                targets.add(mapTarget(node));
+            }
         }
         return targets;
     }
@@ -85,12 +93,16 @@ public class PaymentMapperTO {
         mapProperties(debtorPart, "startDate", node, paymentTO::setStartDate, LocalDate.class);
         mapProperties(debtorPart, "endDate", node, paymentTO::setEndDate, LocalDate.class);
         mapProperties(debtorPart, "executionRule", node, paymentTO::setExecutionRule, String.class);
-        mapProperties(debtorPart, "frequency", node, paymentTO::setFrequency, FrequencyCodeTO.class);
-        Optional.ofNullable(node.findValue("frequency")).map(JsonNode::asText).ifPresent(v -> {
-            if (!StringUtils.isAllUpperCase(v)) {
-                paymentTO.setFrequency(FrequencyCodeTO.getByValue(node.findValue("frequency").asText()));
-            }
-        });
+
+        debtorPart.get("frequency").stream()
+                .map(node::findValue)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(JsonNode::asText)
+                .map(String::toUpperCase)
+                .map(FrequencyCodeTO::valueOf)
+                .ifPresent(paymentTO::setFrequency);
+
         mapProperties(debtorPart, "dayOfExecution", node, paymentTO::setDayOfExecution, Integer.class);
         mapProperties(debtorPart, "debtorAgent", node, paymentTO::setDebtorAgent, String.class);
         mapProperties(debtorPart, "debtorName", node, paymentTO::setDebtorName, String.class);
@@ -131,8 +143,8 @@ public class PaymentMapperTO {
         mapProperties(address, "city", node, addressTO::setCity, String.class);
         mapProperties(address, "postalCode", node, addressTO::setPostalCode, String.class);
         mapProperties(address, "country", node, addressTO::setCountry, String.class);
-        mapProperties(address, "line1", node, addressTO::setStreet, String.class);
-        mapProperties(address, "line1", node, addressTO::setStreet, String.class);
+        mapProperties(address, "line1", node, addressTO::setLine1, String.class);
+        mapProperties(address, "line2", node, addressTO::setLine2, String.class);
         return addressTO;
     }
 

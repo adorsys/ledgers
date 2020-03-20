@@ -4,6 +4,7 @@ debtorPart:
     - PmtInfId
   batchBookingPreferred:
     - batchBookingPreferred
+    - BtchBookg
   requestedExecutionDate:
     - requestedExecutionDate
     - ReqdExctnDt
@@ -32,6 +33,7 @@ debtorPart:
     - transactionStatus
   targets:
     - payments
+    - CdtTrfTxInf
 creditorPart:
   endToEndIdentification:
     - endToEndIdentification
@@ -46,11 +48,13 @@ creditorPart:
     - CdtrAcct
   creditorAgent:
     - creditorAgent
+    - CdtrAgt
   creditorName:
     - creditorName
-    - Cdtr
+    - Nm
   purposeCode:
     - purposeCode
+    - Purp
   remittanceInformationUnstructured:
     - remittanceInformationUnstructured
     - Ustrd
@@ -61,22 +65,29 @@ creditorPart:
     - ChrgBr
   creditorAddress:
     - creditorAddress
+    - PstlAdr
 address:
   street:
     - street
     - streetName
+    - StrtNm
   buildingNumber:
     - buildingNumber
+    - BldgNb
   city:
     - city
     - townName
+    - TwnNm
   postalCode:
     - postalCode
     - postCode
+    - PstCd
   country:
     - country
+    - Ctry
   line1:
     - line1
+    - AdrLine
   line2:
     - line2
 reference:
@@ -90,6 +101,7 @@ amount:
   amount:
     - amount
     - ""
+    - content
   currency:
     - currency
     - Ccy
