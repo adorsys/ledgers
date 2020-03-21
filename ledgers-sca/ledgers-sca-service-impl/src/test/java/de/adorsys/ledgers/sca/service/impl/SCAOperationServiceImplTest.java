@@ -258,7 +258,7 @@ public class SCAOperationServiceImplTest {
     @Test(expected = ScaModuleException.class)
     public void generateAuthCode_code_data_is_null_or_empty() throws HashGenerationException {
         scaOperationEntity.setScaMethodId(SCA_USER_DATA_ID);
-        callGenerateAuthCode(false, false, false, true, false, true);
+        callGenerateAuthCode(false, false, false, false, true, true);
     }
 
     @Test(expected = ScaModuleException.class)
@@ -274,10 +274,13 @@ public class SCAOperationServiceImplTest {
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
         UserBO userBO = mock(UserBO.class);
         ScaUserDataBO method = new ScaUserDataBO(methodSupported ? ScaMethodTypeBO.EMAIL : ScaMethodTypeBO.APP_OTP, email);
-        method.setId(methodIdPresent ? SCA_USER_DATA_ID : null);
+        method.setId(SCA_USER_DATA_ID );
+        codeDataBO.setScaUserDataId(methodIdPresent ? SCA_USER_DATA_ID : null);
         method.setValid(true);
         method.setUsesStaticTan(usesStaticTan);
         method.setStaticTan(staticTanPresent ? STATIC_TAN : TAN);
+        userBO.setScaUserData(methodIsPresent ? Collections.singletonList(method) : Collections.emptyList());
+
         when(env.getActiveProfiles()).thenReturn(new String[]{"sandbox"});
         when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
         when(userBO.getScaUserData()).thenReturn(methodIsPresent ? Collections.singletonList(method) : Collections.emptyList());
