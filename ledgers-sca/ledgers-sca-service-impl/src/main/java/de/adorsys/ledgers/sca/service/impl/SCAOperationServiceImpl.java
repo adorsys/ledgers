@@ -37,6 +37,7 @@ import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
@@ -232,7 +233,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
             scaOperation.setScaMethodId(data.getScaUserDataId());
         }
 
-        if (user.getScaUserData() == null) {
+        if (CollectionUtils.isEmpty(user.getScaUserData())) {
             throw ScaModuleException.builder()
                           .errorCode(SCA_OPERATION_VALIDATION_FAILED)
                           .devMsg(String.format("User with login %s has no sca data", user.getLogin()))

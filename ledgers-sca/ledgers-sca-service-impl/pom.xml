@@ -58,7 +58,11 @@
 		<dependency>
 			<groupId>pro.javatar.commons</groupId>
 			<artifactId>javatar-commons</artifactId>
-			<version>${javatar-commons.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<dependency>
