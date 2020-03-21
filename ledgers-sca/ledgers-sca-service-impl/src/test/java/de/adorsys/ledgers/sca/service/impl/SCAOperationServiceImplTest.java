@@ -20,6 +20,7 @@ import de.adorsys.ledgers.util.exception.ScaModuleException;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static de.adorsys.ledgers.sca.db.domain.AuthCodeStatus.DONE;
+import static de.adorsys.ledgers.sca.db.domain.AuthCodeStatus.EXPIRED;
+import static de.adorsys.ledgers.sca.db.domain.ScaStatus.FAILED;
+import static de.adorsys.ledgers.sca.db.domain.ScaStatus.FINALISED;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -54,6 +59,7 @@ public class SCAOperationServiceImplTest {
     private static final String OP_DATA = "opData";
     private static final int VALIDITY_SECONDS = 3 * 60;
     private static final String TAN = "my tan";
+    private static final String STATIC_TAN = "my static tan";
     private static final String AUTH_CODE_HASH = "authCodeHash";
     private static final String USER_LOGIN = "user_login";
     private static final String AUTH_ID = "authorisationId";
@@ -215,6 +221,79 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
+    public void generateAuthCode_tan_strategies() throws HashGenerationException {
+        //usesStaticTan = false / staticTan = null
+        SCAOperationBO envIsSandbox = callGenerateAuthCode(true, false, false, true, true, true);
+        assertThat(envIsSandbox.getTan(), is(TAN));
+
+        //usesStaticTan = false / staticTan = null
+        SCAOperationBO usesStaticTan = callGenerateAuthCode(true, true, false, true, true, true);
+        assertThat(usesStaticTan.getTan(), is(TAN));
+
+        //usesStaticTan = true / staticTan = "my tan"
+        SCAOperationBO staticTanSet = callGenerateAuthCode(true, true, true, true, true, true);
+        assertThat(staticTanSet.getTan(), is(STATIC_TAN));
+
+    }
+
+    @Test
+    public void generateAuthCode_sca_method_id_null() throws HashGenerationException {
+        scaOperationEntity.setScaMethodId(null);
+        SCAOperationBO result = callGenerateAuthCode(true, false, false, true, true, true);
+        assertThat(result.getScaMethodId(), is(SCA_USER_DATA_ID));
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void generateAuthCode_data_sca_method_id_null() throws HashGenerationException {
+        scaOperationEntity.setScaMethodId(null);
+        callGenerateAuthCode(true, false, false, false, true, true);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void generateAuthCode_auth_code_data_id_is_null() throws HashGenerationException {
+        scaOperationEntity.setScaMethodId(SCA_USER_DATA_ID);
+        callGenerateAuthCode(true, false, false, true, false, true);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void generateAuthCode_code_data_is_null_or_empty() throws HashGenerationException {
+        scaOperationEntity.setScaMethodId(SCA_USER_DATA_ID);
+        callGenerateAuthCode(false, false, false, true, false, true);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void generateAuthCode_sca_method_not_supported() throws HashGenerationException {
+        scaOperationEntity.setScaMethodId(SCA_USER_DATA_ID);
+
+        SCAOperationBO result = callGenerateAuthCode(true, true, true, true, true, false);
+        assertThat(result.getScaMethodId(), is(SCA_USER_DATA_ID));
+    }
+
+    private SCAOperationBO callGenerateAuthCode(boolean codeDataAuthIdPresent, boolean usesStaticTan, boolean staticTanPresent, boolean methodIdPresent, boolean methodIsPresent, boolean methodSupported) {
+        String email = "spe@adorsys.com.ua";
+        ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
+        UserBO userBO = mock(UserBO.class);
+        ScaUserDataBO method = new ScaUserDataBO(methodSupported ? ScaMethodTypeBO.EMAIL : ScaMethodTypeBO.APP_OTP, email);
+        method.setId(methodIdPresent ? SCA_USER_DATA_ID : null);
+        method.setValid(true);
+        method.setUsesStaticTan(usesStaticTan);
+        method.setStaticTan(staticTanPresent ? STATIC_TAN : TAN);
+        when(env.getActiveProfiles()).thenReturn(new String[]{"sandbox"});
+        when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
+        when(userBO.getScaUserData()).thenReturn(methodIsPresent ? Collections.singletonList(method) : Collections.emptyList());
+        when(authCodeGenerator.generate()).thenReturn(TAN);
+        when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
+        when(emailSender.send(email, TAN)).thenReturn(true);
+        when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(scaOperationMapper.toBO(scaOperationEntity)).thenReturn(scaOperationBO);
+
+        codeDataBO.setAuthorisationId(codeDataAuthIdPresent ? AUTH_ID : null);
+
+        return scaOperationService.generateAuthCode(codeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
+    }
+
+    @Test
     public void generateAuthCode_email_valid_user_msg_not_empty() throws HashGenerationException {
         String email = "spe@adorsys.com.ua";
 
@@ -310,6 +389,38 @@ public class SCAOperationServiceImplTest {
     }
 
     @Test
+    public void validateAuthCode_authConfirmationEnabled() throws HashGenerationException {
+        Whitebox.setInternalState(scaOperationService, "authConfirmationEnabled", true);
+        ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
+
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
+        when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
+        when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+
+        assertThat(scaValidationBO.isValidAuthCode(), is(Boolean.TRUE));
+
+        SCAOperationEntity savedEntity = captor.getValue();
+        assertThat(savedEntity.getStatus(), is(AuthCodeStatus.VALIDATED));
+        assertThat(savedEntity.getStatusTime().isAfter(LocalDateTime.now().minusSeconds(5)), is(Boolean.TRUE));
+        assertThat(StringUtils.isNotEmpty(scaValidationBO.getAuthConfirmationCode()), is(true));
+
+        verify(repository, times(1)).findById(AUTH_ID);
+        verify(hashGenerator, times(2)).hash(any());
+        verify(repository, times(1)).save(savedEntity);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCode_same_operation() throws HashGenerationException {
+        scaOperationEntity.setOpId("wrong id");
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+
+        verify(repository, times(1)).findById(AUTH_ID);
+    }
+
+    @Test
     public void validateAuthCodeNotValid() throws HashGenerationException {
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
@@ -366,6 +477,34 @@ public class SCAOperationServiceImplTest {
         scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
     }
 
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCode_operation_is_used_expired() {
+        scaOperationEntity.setStatus(EXPIRED);
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCode_operation_is_used_done() {
+        scaOperationEntity.setStatus(DONE);
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCode_operation_is_used_sca_failed() {
+        scaOperationEntity.setScaStatus(FAILED);
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void validateAuthCode_operation_is_used_sca_finalized() {
+        scaOperationEntity.setScaStatus(FINALISED);
+        when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
+        scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void processExpiredOperations() throws IOException {
@@ -391,12 +530,12 @@ public class SCAOperationServiceImplTest {
         assertThat(expiredOperations.size(), is(2));
 
         assertThat(expiredOperations.get(0).getOpId(), is("opId1"));
-        assertThat(expiredOperations.get(0).getStatus(), is(AuthCodeStatus.EXPIRED));
+        assertThat(expiredOperations.get(0).getStatus(), is(EXPIRED));
         // status was updated less then one minute ago
         assertThat(expiredOperations.get(0).getStatusTime().isAfter(LocalDateTime.now().minusMinutes(1)), is(true));
 
         assertThat(expiredOperations.get(1).getOpId(), is("opId2"));
-        assertThat(expiredOperations.get(1).getStatus(), is(AuthCodeStatus.EXPIRED));
+        assertThat(expiredOperations.get(1).getStatus(), is(EXPIRED));
         // status was updated less then one minute ago
         assertThat(expiredOperations.get(1).getStatusTime().isAfter(LocalDateTime.now().minusMinutes(1)), is(true));
 
@@ -436,7 +575,7 @@ public class SCAOperationServiceImplTest {
 
     @Test
     public void authenticationCompleted() {
-        scaOperationEntity.setScaStatus(ScaStatus.FINALISED);
+        scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
         boolean result = scaOperationService.authenticationCompleted(OP_ID, OpTypeBO.PAYMENT);
         assertThat(result, is(true));
@@ -453,7 +592,7 @@ public class SCAOperationServiceImplTest {
     public void authenticationCompleted_multilevel() {
         Whitebox.setInternalState(scaOperationService, "multilevelScaEnable", true);
         Whitebox.setInternalState(scaOperationService, "finalWeight", 100);
-        scaOperationEntity.setScaStatus(ScaStatus.FINALISED);
+        scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
         boolean result = scaOperationService.authenticationCompleted(OP_ID, OpTypeBO.PAYMENT);
         assertThat(result, is(true));
@@ -464,7 +603,7 @@ public class SCAOperationServiceImplTest {
         Whitebox.setInternalState(scaOperationService, "multilevelScaEnable", true);
         Whitebox.setInternalState(scaOperationService, "finalWeight", 100);
         scaOperationEntity.setScaWeight(80);
-        scaOperationEntity.setScaStatus(ScaStatus.FINALISED);
+        scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
         boolean result = scaOperationService.authenticationCompleted(OP_ID, OpTypeBO.PAYMENT);
         assertThat(result, is(false));
@@ -502,7 +641,7 @@ public class SCAOperationServiceImplTest {
         scaOperationEntity.setOpType(OpType.PAYMENT);
         when(repository.findByIdAndScaStatus(anyString(), any())).thenReturn(Optional.of(scaOperationEntity));
         ScaAuthConfirmationBO result = scaOperationService.completeAuthConfirmation(AUTH_ID, true);
-        assertThat(result,is(scaAuthConfirmationBO));
+        assertThat(result, is(scaAuthConfirmationBO));
     }
 
     private SCAOperationBO getScaOperationBO(LocalDateTime statusTime) {
