@@ -21,6 +21,7 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
+import de.adorsys.ledgers.deposit.db.domain.AccountReference;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
@@ -31,7 +32,9 @@ import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
@@ -108,18 +111,14 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
      */
     @Override
     public TransactionStatusBO executePayment(String paymentId, String userName) {
-        Optional<Payment> payment = paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACTC);
-
-        if (payment.isPresent()) {
-            Payment pmt = payment.get();
-            return isInstantPayment(pmt)/*pmt.isInstant()*/
-                           ? executionService.executePayment(pmt, userName)
-                           : executionService.schedulePayment(pmt);
-        }
-        throw DepositModuleException.builder()
-                      .errorCode(PAYMENT_PROCESSING_FAILURE)
-                      .devMsg(String.format(PAYMENT_EXECUTION_FAILED, "Payment not found", paymentId))
-                      .build();
+        return paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACTC)
+                       .map(p -> isInstantPayment(p)
+                                      ? executionService.executePayment(p, userName)
+                                      : executionService.schedulePayment(p))
+                       .orElseThrow(() -> DepositModuleException.builder()
+                                                  .errorCode(PAYMENT_PROCESSING_FAILURE)
+                                                  .devMsg(String.format(PAYMENT_EXECUTION_FAILED, "Payment not found", paymentId))
+                                                  .build());
     }
 
     @Override
@@ -133,12 +132,13 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         }
         Payment p = updatePaymentStatus(storedPayment, TransactionStatus.CANC);
         return TransactionStatusBO.valueOf(p.getTransactionStatus().name());
-
     }
 
     @Override
     public String readIbanByPaymentId(String paymentId) {
-        return paymentRepository.findById(paymentId).map(p -> p.getDebtorAccount().getIban())
+        return paymentRepository.findById(paymentId)
+                       .map(Payment::getDebtorAccount)
+                       .map(AccountReference::getIban)
                        .orElse(null);
     }
 

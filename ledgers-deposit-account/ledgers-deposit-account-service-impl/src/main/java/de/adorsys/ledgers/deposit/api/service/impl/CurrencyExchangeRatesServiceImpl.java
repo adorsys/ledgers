@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
@@ -140,7 +139,7 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
                                                   .build());
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
+   /* @SuppressWarnings("PMD.UnusedPrivateMethod") //TODO shall be revived when fixed xml mapping for online currency exchange service
     private Currency getCurrency(JsonNode node) {
         return Currency.getInstance(node.get(CURRENCY_FIELD_NAME).textValue());
     }
@@ -148,5 +147,5 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private String getRateFromNode(JsonNode node) {
         return node.get(RATE_FIELD_NAME).asText();
-    }
+    }*/
 }

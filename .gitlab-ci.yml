@@ -129,8 +129,6 @@ Unit Tests:
 
 Sonarcube Tests:
   stage: "Test"
-  only:
-    - develop
   script:
     - jabba use system@1.8
     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
