@@ -19,7 +19,7 @@ package de.adorsys.ledgers.middleware.api.domain.account;
 public enum BalanceTypeTO {
     CLOSING_BOOKED,
     EXPECTED,
-    AUTHORISED,
+    INTERIM_BOOKED,
     OPENING_BOOKED,
     INTERIM_AVAILABLE,
     FORWARD_AVAILABLE,

@@ -1,7 +1,11 @@
 package de.adorsys.ledgers.postings.db.repository;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -24,11 +28,14 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -40,7 +47,12 @@ import static org.junit.Assert.assertEquals;
 @DatabaseTearDown(value = {"PostingRepositoryIT-db-entries.xml"}, type = DatabaseOperation.DELETE_ALL)
 public class PostingRepositoryIT {
 
-    ObjectMapper om = new ObjectMapper();
+    ObjectMapper om = new ObjectMapper().findAndRegisterModules()
+                              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                              .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                              .configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false)
+                              .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+                              .registerModule(new JavaTimeModule());
 
     @Autowired
     private PostingRepository postingRepository;
@@ -88,6 +100,7 @@ public class PostingRepositoryIT {
     }
 
     @Test
+    @Transactional
     public void test_posting_hash() throws JsonProcessingException, HashGenerationException {
         Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
         Assume.assumeTrue(ledgerOptions.isPresent());
@@ -101,15 +114,10 @@ public class PostingRepositoryIT {
         p.setId(Ids.id());
         Posting saved = postingRepository.save(p);
         saved = postingRepository.save(saved.hash());
-
-        String writeValueAsString = om.writeValueAsString(saved);
-
         Posting found = postingRepository.findById(saved.getId()).orElse(null);
+        assertThat(saved).isEqualToComparingFieldByFieldRecursively(found);
+
         String recHash = found.getHash();
-
-        String writeValueAsString2 = om.writeValueAsString(found);
-        Assert.assertEquals(writeValueAsString, writeValueAsString2);
-
         RecordHashHelper recordHashHelper = new RecordHashHelper();
         found.setHash(null);
         String computedRecHash = recordHashHelper.computeRecHash(found);
