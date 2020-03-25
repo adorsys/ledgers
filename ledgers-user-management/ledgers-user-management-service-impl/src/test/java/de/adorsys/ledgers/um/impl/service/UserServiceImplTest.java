@@ -331,6 +331,26 @@ public class UserServiceImplTest {
         verify(converter, times(1)).toUserBOList(Collections.singletonList(userEntity));
     }
 
+    @Test
+    public void findOwnersByIban(){
+        when(repository.findOwnersByIban(anyString(),any())).thenReturn(Collections.emptyList());
+        when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(getUserBO()));
+        List<UserBO> result = userService.findOwnersByIban(USER_IBAN);
+        assertThat(result).isEqualTo(Collections.singletonList(getUserBO()));
+    }
+
+    @Test
+    public void findOwnersByAccountId(){
+        when(repository.findOwnersByAccountId(anyString(),any())).thenReturn(Collections.emptyList());
+        when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(getUserBO()));
+        List<UserBO> result = userService.findOwnersByAccountId("accountId");
+        assertThat(result).isEqualTo(Collections.singletonList(getUserBO()));
+    }
+
+    private UserBO getUserBO() {
+        return new UserBO("login","email","pin");
+    }
+
     private <T> List<T> getScaUserData(Class<T> clazz) throws IOException {
         return reader.getListFromInputStream(getClass().getResourceAsStream("sca-user-methods.yml"), clazz);
     }
