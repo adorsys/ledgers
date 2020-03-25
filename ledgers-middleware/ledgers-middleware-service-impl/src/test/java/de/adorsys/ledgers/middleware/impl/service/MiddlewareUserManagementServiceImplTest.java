@@ -3,10 +3,13 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
@@ -19,6 +22,7 @@ import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.util.reflection.Whitebox;
@@ -49,6 +53,7 @@ public class MiddlewareUserManagementServiceImplTest {
     private static final String SCA_ID = "scaId";
     private static final Currency EUR = Currency.getInstance("EUR");
     private static final Currency USD = Currency.getInstance("USD");
+    private static final String ANOTHER_USER_ID = "other user";
 
     @InjectMocks
     private MiddlewareUserManagementServiceImpl middlewareUserService;
@@ -132,6 +137,21 @@ public class MiddlewareUserManagementServiceImplTest {
 
         //when
         middlewareUserService.updateAccountAccess(buildScaInfoTO(), USER_ID, getAccessTO());
+
+        //then
+        verify(userService, times(2)).findById(USER_ID);
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void updateAccountAccess_wrong_branch_access() {
+        //given
+        when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
+        when(userService.findById(ANOTHER_USER_ID)).thenReturn(getUser(ANOTHER_USER_ID));
+        when(userService.findById(USER_ID)).thenReturn(userBO);
+        when(accessService.userHasAccessToAccount(any(), any())).thenReturn(true);
+
+        //when
+        middlewareUserService.updateAccountAccess(buildScaInfoTO(), ANOTHER_USER_ID, getAccessTO());
 
         //then
         verify(userService, times(2)).findById(USER_ID);
@@ -289,7 +309,7 @@ public class MiddlewareUserManagementServiceImplTest {
     public void checkMultilevelScaRequired_no_multilevel() {
         //given
         Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
-        when(userService.findByLogin(any())).thenReturn(getUser());
+        when(userService.findByLogin(any())).thenReturn(getUser(null));
 
         //when
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1"));
@@ -302,7 +322,7 @@ public class MiddlewareUserManagementServiceImplTest {
     public void checkMultilevelScaRequired_empty_list() {
         //given
         Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
-        when(userService.findByLogin(any())).thenReturn(getUser());
+        when(userService.findByLogin(any())).thenReturn(getUser(null));
 
         //when
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", new ArrayList<>());
@@ -315,7 +335,7 @@ public class MiddlewareUserManagementServiceImplTest {
     public void checkMultilevelScaRequired_2_acc_with_mlsca() {
         //given
         Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
-        when(userService.findByLogin(any())).thenReturn(getUser());
+        when(userService.findByLogin(any())).thenReturn(getUser(null));
 
         //when
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "2"));
@@ -328,7 +348,7 @@ public class MiddlewareUserManagementServiceImplTest {
     public void checkMultilevelScaRequired_1_acc_no_curr_with_mlsca() {
         //given
         Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
-        when(userService.findByLogin(any())).thenReturn(getUser());
+        when(userService.findByLogin(any())).thenReturn(getUser(null));
 
         //when
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", Collections.singletonList(getReference("1", null)));
@@ -341,7 +361,7 @@ public class MiddlewareUserManagementServiceImplTest {
     public void checkMultilevelScaRequired_acc_not_match() {
         //given
         Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
-        when(userService.findByLogin(any())).thenReturn(getUser());
+        when(userService.findByLogin(any())).thenReturn(getUser(null));
 
         //when
         middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "3"));
@@ -357,6 +377,21 @@ public class MiddlewareUserManagementServiceImplTest {
 
         //then
         assertThat(response).isFalse();
+    }
+
+    @Test
+    public void getAdditionalInformation(){
+        Whitebox.setInternalState(middlewareUserService, "additionalInfoMapper", Mappers.getMapper(AdditionalAccountInformationMapper.class));
+        when(userService.findOwnersByIban(anyString())).thenReturn(Collections.singletonList(getUser(null)));
+        List<AdditionalAccountInformationTO> result = middlewareUserService.getAdditionalInformation(new ScaInfoTO(), AccountIdentifierTypeTO.IBAN, ACCOUNT_ID);
+        assertThat(result).isEqualTo(Collections.singletonList(getAdditionalInfo()));
+    }
+
+    private AdditionalAccountInformationTO getAdditionalInfo() {
+        AdditionalAccountInformationTO to = new AdditionalAccountInformationTO();
+        to.setAccountOwnerName(USER_LOGIN);
+        to.setScaWeight(100);
+        return to;
     }
 
     private static <T> T readYml(Class<T> aClass, String fileName) {
@@ -378,9 +413,10 @@ public class MiddlewareUserManagementServiceImplTest {
         return new AccountReferenceTO(iban, null, null, null, null, currency);
     }
 
-    private UserBO getUser() {
-        UserBO user = new UserBO("", "", "");
+    private UserBO getUser(String branch) {
+        UserBO user = new UserBO("test", "", "");
         user.setAccountAccesses(getAccesses());
+        user.setBranch(branch);
         return user;
     }
 
