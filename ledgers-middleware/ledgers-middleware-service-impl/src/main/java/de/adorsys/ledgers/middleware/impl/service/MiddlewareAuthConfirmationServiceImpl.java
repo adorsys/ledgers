@@ -55,9 +55,7 @@ public class MiddlewareAuthConfirmationServiceImpl implements MiddlewareAuthConf
         boolean authCompleted = scaOperationService.authenticationCompleted(authConfirmationBO.getOpId(), authConfirmationBO.getOpTypeBO());
         if (EnumSet.of(OpTypeBO.PAYMENT, OpTypeBO.CANCEL_PAYMENT).contains(authConfirmationBO.getOpTypeBO())) {
             if (authCompleted) {
-                depositAccountPaymentService.updatePaymentStatus(authConfirmationBO.getOpId(), TransactionStatusBO.ACTC);
-                TransactionStatusBO status = depositAccountPaymentService.executePayment(authConfirmationBO.getOpId(), userLogin);
-                confirmation.transactionStatus(TransactionStatusTO.valueOf(status.toString()));
+                authCompleted(userLogin, authConfirmationBO, confirmation);
             } else if (multilevelScaEnable) {
                 TransactionStatusBO status = depositAccountPaymentService.updatePaymentStatus(authConfirmationBO.getOpId(), PATC);
                 confirmation.transactionStatus(TransactionStatusTO.valueOf(status.toString()));
@@ -67,5 +65,15 @@ public class MiddlewareAuthConfirmationServiceImpl implements MiddlewareAuthConf
             confirmation.multilevelScaRequired(multilevelScaEnable);
         }
         return confirmation;
+    }
+
+    private void authCompleted(String userLogin, ScaAuthConfirmationBO authConfirmationBO, AuthConfirmationTO confirmation) {
+        depositAccountPaymentService.updatePaymentStatus(authConfirmationBO.getOpId(), authConfirmationBO.getOpTypeBO() == OpTypeBO.PAYMENT
+                                                                                               ? TransactionStatusBO.ACTC
+                                                                                               : TransactionStatusBO.CANC);
+        TransactionStatusBO status = authConfirmationBO.getOpTypeBO() == OpTypeBO.PAYMENT
+                                             ? depositAccountPaymentService.executePayment(authConfirmationBO.getOpId(), userLogin)
+                                             : TransactionStatusBO.CANC;
+        confirmation.transactionStatus(TransactionStatusTO.valueOf(status.toString()));
     }
 }

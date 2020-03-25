@@ -5,7 +5,7 @@
         <GrpHdr>
             <MsgId>2019-02-08T09:26:08:0432</MsgId>
             <CreDtTm>2019-02-08T09:26:08</CreDtTm>
-            <NbOfTxs>1</NbOfTxs>
+            <NbOfTxs>2</NbOfTxs>
             <CtrlSum>12</CtrlSum>
             <InitgPty>
                 <Nm>TESTKONTO</Nm>
@@ -14,8 +14,9 @@
         <PmtInf>
             <PmtInfId>0001</PmtInfId>
             <PmtMtd>TRF</PmtMtd>
-            <NbOfTxs>1</NbOfTxs>
-            <CtrlSum>12</CtrlSum>
+            <BtchBookg>true</BtchBookg>
+            <NbOfTxs>2</NbOfTxs>
+            <CtrlSum>30</CtrlSum>
             <PmtTpInf>
                 <SvcLvl>
                     <Cd>SEPA</Cd>
@@ -65,6 +66,32 @@
                 </Purp>
                 <RmtInf>
                     <Ustrd>Some unstructured info on the first payment...</Ustrd>
+                </RmtInf>
+            </CdtTrfTxInf>
+            <CdtTrfTxInf>
+                <PmtId>
+                    <EndToEndId>SECOND-PAYMENT</EndToEndId>
+                </PmtId>
+                <Amt>
+                    <InstdAmt Ccy="EUR">18</InstdAmt>
+                </Amt>
+                <Cdtr>
+                    <Nm>Max Musterman</Nm>
+                    <PstlAdr>
+                        <StrtNm>BanhoffStrasse</StrtNm>
+                        <BldgNb>122</BldgNb>
+                        <PstCd>123456</PstCd>
+                        <TwnNm>Nurnberg</TwnNm>
+                        <Ctry>DE</Ctry>
+                    </PstlAdr>
+                </Cdtr>
+                <CdtrAcct>
+                    <Id>
+                        <IBAN>DE56760905000002257793</IBAN>
+                    </Id>
+                </CdtrAcct>
+                <RmtInf>
+                    <Ustrd>Some unstructured info on the second payment...</Ustrd>
                 </RmtInf>
             </CdtTrfTxInf>
         </PmtInf>

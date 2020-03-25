@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-sca</artifactId>
-		<version>2.9</version>
+		<version>3.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-utils</artifactId>
-			<version>2.9</version>
+			<version>3.0</version>
 		</dependency>
 
 		<!-- spring dependencies -->

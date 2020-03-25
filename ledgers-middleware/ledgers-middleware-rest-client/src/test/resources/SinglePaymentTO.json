@@ -1,0 +1,30 @@
+{
+  "paymentId":"0001",
+  "requestedExecutionDate":"2020-01-01",
+  "paymentType":"SINGLE",
+  "paymentProduct":"sepa-credit-transfers-xml",
+  "debtorAccount":{
+    "iban":"DE80760700240271232400"
+  },
+  "debtorAgent":"XBANDECG",
+  "debtorName":"Anton Brueckner",
+  "targets":[
+    {
+      "endToEndIdentification":"FIRST-PAYMENT",
+      "instructedAmount":{
+        "currency":"EUR",
+        "amount":12
+      },
+      "creditorAccount":{
+        "iban":"DE38760700240320465700"
+      },
+      "creditorAgent":"DEUXXXDE",
+      "creditorName":"Max Musterman",
+      "creditorAddress":{
+        "line1":"Some address here"
+      },
+      "purposeCode":"CDCD",
+      "remittanceInformationUnstructured":"Some unstructured info on the first payment..."
+    }
+  ]
+}

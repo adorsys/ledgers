@@ -9,7 +9,7 @@ package de.adorsys.ledgers.deposit.api.domain;
 public enum BalanceTypeBO {
     CLOSING_BOOKED,
     EXPECTED,
-    AUTHORISED,
+    INTERIM_BOOKED,
     OPENING_BOOKED,
     INTERIM_AVAILABLE,
     FORWARD_AVAILABLE,

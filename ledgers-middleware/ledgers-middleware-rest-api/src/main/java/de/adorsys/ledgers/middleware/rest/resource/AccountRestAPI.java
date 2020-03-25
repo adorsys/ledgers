@@ -16,10 +16,7 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import io.swagger.annotations.*;
@@ -142,4 +139,12 @@ public interface AccountRestAPI {
     @PostMapping("/{accountId}/cash")
     @ApiOperation(value = "Deposit Cash", authorizations = @Authorization(value = "apiKey"), notes = "Only technical users are authorized to perform this operation")
     ResponseEntity<Void> depositCash(@PathVariable(name = "accountId") String accountId, @RequestBody AmountTO amount);
+
+    @GetMapping(path = "/info/{accountIdentifierType}/{accountIdentifier}")
+    @ApiOperation(value = "Load Account Owner Additional information", authorizations = @Authorization(value = "apiKey"), notes = "Returns Additional Account Information by Account Identifier")
+    ResponseEntity<List<AdditionalAccountInformationTO>> getAdditionalAccountInfo(
+            @ApiParam(value = "Account identifier type i.e. ACCOUNT_ID / IBAN")
+            @PathVariable(name = "accountIdentifierType") AccountIdentifierTypeTO accountIdentifierType,
+            @ApiParam(value = "The IBAN of the requested account: e.g.: DE69760700240340283600", example = "DE69760700240340283600")
+            @PathVariable(name = "accountIdentifier") String accountIdentifier);
 }

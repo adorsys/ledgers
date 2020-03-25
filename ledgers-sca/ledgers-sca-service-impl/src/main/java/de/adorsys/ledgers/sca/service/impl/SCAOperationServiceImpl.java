@@ -37,6 +37,7 @@ import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,6 +49,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.adorsys.ledgers.sca.db.domain.AuthCodeStatus.*;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.*;
 import static de.adorsys.ledgers.util.exception.SCAErrorCode.*;
 
@@ -146,7 +148,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     @Override
     public void processExpiredOperations() {
-        List<SCAOperationEntity> operations = repository.findByStatus(AuthCodeStatus.SENT);
+        List<SCAOperationEntity> operations = repository.findByStatus(SENT);
 
         log.info("{} operations with status NEW were found", operations.size());
 
@@ -155,7 +157,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
                                                              .filter(this::isOperationAlreadyExpired)
                                                              .collect(Collectors.toList());
 
-        expiredOperations.forEach(o -> updateOperationStatus(o, AuthCodeStatus.EXPIRED, o.getScaStatus(), 0));
+        expiredOperations.forEach(o -> updateOperationStatus(o, EXPIRED, o.getScaStatus(), 0));
 
         log.info("{} operations was detected as EXPIRED", expiredOperations.size());
 
@@ -231,7 +233,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
             scaOperation.setScaMethodId(data.getScaUserDataId());
         }
 
-        if (user.getScaUserData() == null) {
+        if (CollectionUtils.isEmpty(user.getScaUserData())) {
             throw ScaModuleException.builder()
                           .errorCode(SCA_OPERATION_VALIDATION_FAILED)
                           .devMsg(String.format("User with login %s has no sca data", user.getLogin()))
@@ -265,12 +267,12 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
             scaValidation.setAuthConfirmationCode(confirmationCode);
         }
         scaValidation.setScaStatus(ScaStatusBO.valueOf(status.name()));
-        updateOperationStatus(operation, AuthCodeStatus.VALIDATED, status, scaWeight);
+        updateOperationStatus(operation, VALIDATED, status, scaWeight);
     }
 
     private void failed(SCAOperationEntity operation) {
         operation.setFailledCount(operation.getFailledCount() + 1);
-        operation.setStatus(AuthCodeStatus.FAILED);
+        operation.setStatus(FAILED);
         if (operation.getFailledCount() >= authCodeFailedMax) {
             operation.setScaStatus(ScaStatus.FAILED);
         }
@@ -306,7 +308,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     private void checkOperationNotExpired(SCAOperationEntity operation) {
         if (isOperationAlreadyExpired(operation)) {
-            updateOperationStatus(operation, AuthCodeStatus.EXPIRED, operation.getScaStatus(), 0);
+            updateOperationStatus(operation, EXPIRED, operation.getScaStatus(), 0);
             repository.save(operation);
             log.error(EXPIRATION_ERROR);
             throw ScaModuleException.builder()
@@ -338,7 +340,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         scaOp.setOpId(authCodeData.getOpId());
         scaOp.setOpType(OpType.valueOf(authCodeData.getOpType().name()));
         scaOp.setScaMethodId(authCodeData.getScaUserDataId());
-        scaOp.setStatus(AuthCodeStatus.INITIATED);
+        scaOp.setStatus(INITIATED);
         scaOp.setStatusTime(LocalDateTime.now());
         int validitySeconds = authCodeData.getValiditySeconds() <= 0
                                       ? authCodeValiditySeconds
@@ -369,7 +371,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
                                       ? authCodeValiditySeconds
                                       : scaOperation.getValiditySeconds();
         scaOperation.setValiditySeconds(validitySeconds);
-        scaOperation.setStatus(AuthCodeStatus.SENT);
+        scaOperation.setStatus(SENT);
         scaOperation.setStatusTime(LocalDateTime.now());
         scaOperation.setHashAlg(hashItem.getAlg());
         scaOperation.setAuthCodeHash(authCodeHash);
@@ -409,15 +411,12 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     private boolean isOperationAlreadyUsed(SCAOperationEntity operation) {
-        return operation.getStatus() == AuthCodeStatus.VALIDATED ||
-                       operation.getStatus() == AuthCodeStatus.EXPIRED ||
-                       operation.getStatus() == AuthCodeStatus.DONE ||
-                       operation.getScaStatus() == ScaStatus.FAILED ||
-                       operation.getScaStatus() == ScaStatus.FINALISED;
+        return EnumSet.of(VALIDATED, EXPIRED, DONE).contains(operation.getStatus())
+                       || EnumSet.of(ScaStatus.FAILED, ScaStatus.FINALISED).contains(operation.getScaStatus());
     }
 
     private boolean isOperationAlreadyExpired(SCAOperationEntity operation) {
-        boolean hasExpiredStatus = operation.getStatus() == AuthCodeStatus.EXPIRED;
+        boolean hasExpiredStatus = operation.getStatus() == EXPIRED;
         int validitySeconds = operation.getValiditySeconds();
         return hasExpiredStatus || LocalDateTime.now().isAfter(operation.getCreated().plusSeconds(validitySeconds));
     }
@@ -445,7 +444,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         this.authCodeEmailBody = authCodeEmailBody;
     }
 
-    private final static class OperationHashItem {
+    private static final class OperationHashItem {
         @JsonProperty
         private String id;// attach to the database line. Pinning!!!
         @JsonProperty
@@ -456,7 +455,6 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         private String tan;
 
         public OperationHashItem(String id, String opId, String opData, String tan) {
-            super();
             this.id = id;
             this.opId = opId;
             this.opData = opData;

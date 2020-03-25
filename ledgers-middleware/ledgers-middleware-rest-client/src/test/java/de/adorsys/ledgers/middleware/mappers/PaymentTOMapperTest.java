@@ -64,6 +64,15 @@ public class PaymentTOMapperTest {
     }
 
     @Test
+    public void xs2aPeriodicPaymentJsonFrequencyCapital() throws IOException {
+        PaymentMapperTO mapper = configuration.paymentMapperTO();
+        String payment = readPayment("xs2aPeriodicPaymentCapitals.json");
+        PaymentTO result = mapper.toAbstractPayment(payment, "PERIODIC", "instant-sepa-credit-transfers");
+
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(getPeriodicPmt());
+    }
+
+    @Test
     public void xs2aOldFormatAddress() throws IOException {
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aSinglePaymentOld.json");
@@ -87,33 +96,25 @@ public class PaymentTOMapperTest {
         String payment = readPayment("xs2aSingle.xml");
         PaymentTO result = mapper.toAbstractPayment(payment, "SINGLE", "sepa-credit-transfers-xml");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getXmlSingle());
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("SinglePaymentTO.json"));
     }
 
-    private PaymentTO getXmlSingle() {
-        PaymentTO payment = new PaymentTO();
-        payment.setPaymentId("2019-02-08T09:26:08:0432");
-        payment.setPaymentType(SINGLE);
-        payment.setPaymentProduct("sepa-credit-transfers-xml");
-        payment.setRequestedExecutionDate(LocalDate.parse("1999-01-01"));
-        payment.setDebtorName("TESTKONTO");
-        payment.setDebtorAgent("XBANDECG");
-        payment.setDebtorAccount(new AccountReferenceTO("DE51250400903312345678", null, null, null, null, null));
-        payment.setTargets(getXmlTargets());
-        return payment;
+    @Test
+    public void xmlTestBulk() throws IOException {
+        PaymentMapperTO mapper = configuration.paymentMapperTO();
+        String payment = readPayment("xs2aBulk.xml");
+        PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("BulkPaymentTO.json"));
     }
 
-    private List<PaymentTargetTO> getXmlTargets() {
-        PaymentTargetTO target = new PaymentTargetTO();
-        target.setEndToEndIdentification("NOTPROVIDED");
-        target.setInstructedAmount(new AmountTO(Currency.getInstance("EUR"), new BigDecimal("12")));
-        target.setCreditorAccount(new AccountReferenceTO("DE56760905000002257793", null, null, null, null, null));
-        target.setCreditorName("Max Mustermann");
-        target.setRemittanceInformationUnstructured("Test123");
-        target.setChargeBearerTO(ChargeBearerTO.SLEV);
-        ArrayList<PaymentTargetTO> targets = new ArrayList<>();
-        targets.add(target);
-        return targets;
+    @Test
+    public void xmlTestListBulk() throws IOException {
+       /* PaymentMapperTO mapper = configuration.paymentMapperTO();
+        String payment = readPayment("xs2aBulkList.xml");
+        PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("BulkPaymentTO.json"));*/
+
+       //TODO not implemented yet!  see task : https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/589
     }
 
     private PaymentTO getSinglePmt() {
@@ -163,6 +164,12 @@ public class PaymentTOMapperTest {
             log.error("Cant read file");
             throw e;
         }
+    }
+
+    private PaymentTO readPaymentTO(String file) throws IOException {
+        ResourceLoader loader = new DefaultResourceLoader();
+        Resource resource = loader.getResource(file);
+        return STATIC_MAPPER.readValue(resource.getInputStream(), PaymentTO.class);
     }
 
     private PaymentTO getBulk() {
