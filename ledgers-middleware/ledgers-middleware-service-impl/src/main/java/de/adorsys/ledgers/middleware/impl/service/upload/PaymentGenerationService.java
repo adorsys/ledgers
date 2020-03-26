@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -21,7 +22,7 @@ import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.SIN
 @RequiredArgsConstructor
 public class PaymentGenerationService {
     private static final String TEST_CREDITOR_IBAN = "DE68370400440000000000";
-    private static final Random random = new Random();
+    private static final Random random = new SecureRandom();
 
     public Map<PaymentTypeTO, PaymentTO> generatePayments(AccountBalanceTO balance, String branch) {
         EnumMap<PaymentTypeTO, PaymentTO> map = new EnumMap<>(PaymentTypeTO.class);
@@ -32,6 +33,7 @@ public class PaymentGenerationService {
 
     private PaymentTO generatePaymentTO(AccountBalanceTO balance, String branch, boolean isBulk) {
         PaymentTO payment = new PaymentTO();
+        payment.setPaymentType(isBulk ? BULK : SINGLE);
         payment.setDebtorAccount(generateReference(balance.getIban(), balance.getAmount().getCurrency()));
         payment.setTransactionStatus(TransactionStatusTO.RCVD);
         payment.setPaymentProduct("instant-sepa-credit-transfers");
