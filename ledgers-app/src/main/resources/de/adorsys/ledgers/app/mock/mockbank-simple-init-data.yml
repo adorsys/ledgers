@@ -83,6 +83,8 @@ users:
     scaUserData:
       - scaMethod: EMAIL
         methodValue: anton.brueckner@mail.de
+        usesStaticTan: true
+        staticTan: 123456
     accountAccesses:
       - iban: DE80760700240271232400
         currency: EUR
@@ -95,8 +97,12 @@ users:
     scaUserData:
       - scaMethod: EMAIL
         methodValue: max.musterman@mail.de
+        usesStaticTan: true
+        staticTan: 123456
       - scaMethod: EMAIL
         methodValue: max.musterman2@mail.de
+        usesStaticTan: true
+        staticTan: 123456
     accountAccesses:
       - iban: DE38760700240320465700
         currency: EUR
@@ -110,6 +116,8 @@ users:
     scaUserData:
       - scaMethod: EMAIL
         methodValue: accountant@mail.de
+        usesStaticTan: true
+        staticTan: 123456
     accountAccesses:
       - iban: DE32760700240271232100
         currency: EUR
@@ -122,6 +130,8 @@ users:
     scaUserData:
       - scaMethod: EMAIL
         methodValue: chief.accountant@mail.de
+        usesStaticTan: true
+        staticTan: 123456
     accountAccesses:
       - iban: DE32760700240271232100
         currency: EUR
@@ -134,6 +144,8 @@ users:
     scaUserData:
       - scaMethod: EMAIL
         methodValue: sc.manager@mail.de
+        usesStaticTan: true
+        staticTan: 123456
     accountAccesses:
       - iban: DE32760700240271232100
         currency: EUR
@@ -146,6 +158,8 @@ users:
     scaUserData:
       - scaMethod: EMAIL
         methodValue: g.manager@mail.de
+        usesStaticTan: true
+        staticTan: 123456
     accountAccesses:
       - iban: DE32760700240271232100
         currency: EUR
