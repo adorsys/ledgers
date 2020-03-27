@@ -57,7 +57,6 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
     @Transactional
     public OauthCodeResponseBO oauthCode(String userId) {
         UserBO user = userService.findById(userId);
-
         return resolveOauthCode(user);
     }
 

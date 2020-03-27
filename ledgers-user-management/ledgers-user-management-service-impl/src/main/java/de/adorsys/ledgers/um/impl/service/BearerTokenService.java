@@ -147,6 +147,4 @@ public class BearerTokenService {
         // Check to make sure all privileges contained in the token are still valid.
         return objectMapper.convertValue(jwtClaimsSet.toJSONObject(false), AccessTokenBO.class);
     }
-
-
 }
