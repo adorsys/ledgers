@@ -26,22 +26,17 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
-import org.hibernate.query.internal.QueryImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import pro.javatar.commons.reader.YamlReader;
 
-import javax.persistence.EntityManager;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -106,7 +101,7 @@ public class DepositAccountServiceImplTest {
 
     @Test(expected = DepositModuleException.class)
     public void createDepositAccount_account_already_exist() {
-        when(depositAccountRepository.findByIbanAndCurrency(anyString(),anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
 
         DepositAccountBO depositAccount = depositAccountService.createNewAccount(getDepositAccountBO(), SYSTEM, "");
 
@@ -293,6 +288,38 @@ public class DepositAccountServiceImplTest {
 
         Page<DepositAccountDetailsBO> result = depositAccountService.findDetailsByBranchPaged("branchId", "someParam", Pageable.unpaged());
         assertThat(result).isEqualTo(new PageImpl<>(Collections.singletonList(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()))));
+    }
+
+    @Test
+    public void readIbanById() {
+        DepositAccount account = new DepositAccount();
+        account.setIban("DE123456789");
+        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(account));
+        String result = depositAccountService.readIbanById(ACCOUNT_ID);
+        assertThat(result).isEqualTo("DE123456789");
+    }
+
+    @Test
+    public void findByAccountNumberPrefix() {
+        when(depositAccountRepository.findByIbanStartingWith(anyString())).thenReturn(Collections.singletonList(new DepositAccount()));
+        List<DepositAccountBO> result = depositAccountService.findByAccountNumberPrefix("DE123");
+        assertThat(result).isEqualTo(Collections.singletonList(new DepositAccountBO()));
+    }
+
+    @Test
+    public void getDetailsByIban(){
+        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
+        DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(new DepositAccountDetailsBO(getDepositAccountBO(),Collections.emptyList()));
+
+    }
+
+    @Test(expected = DepositModuleException.class)
+    public void getDetailsByIban_no_accounts_found(){
+        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.emptyList());
+        DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(new DepositAccountDetailsBO(getDepositAccountBO(),Collections.emptyList()));
+
     }
 
     private PostingLineBO newPostingLineBO() throws JsonProcessingException {
