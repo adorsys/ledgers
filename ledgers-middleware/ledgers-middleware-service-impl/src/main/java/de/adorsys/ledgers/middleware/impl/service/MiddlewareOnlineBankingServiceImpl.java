@@ -4,7 +4,11 @@ import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.LoginKeyDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
@@ -12,10 +16,7 @@ import de.adorsys.ledgers.middleware.impl.converter.ScaInfoMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
-import de.adorsys.ledgers.um.api.domain.ScaInfoBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -143,6 +144,27 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
             scaResponse.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
         }
         return scaResponse;
+    }
+
+    @Override
+    public SCALoginResponseTO authorizeForUser(String login, String pin, String userLogin) {
+        boolean isValid = authorizationService.validateCredentials(login, pin, UserRoleBO.SYSTEM);
+        if (!isValid){
+            throw MiddlewareModuleException.builder()
+                    .devMsg("Your credentials or role does not comply to request you're executing!")
+                    .errorCode(MiddlewareErrorCode.AUTHENTICATION_FAILURE)
+                    .build();
+        }
+
+        SCALoginResponseTO response = new SCALoginResponseTO();
+        response.setScaStatus(ScaStatusTO.EXEMPTED);
+        UserBO user = user(userLogin);
+        BearerTokenBO scaTokenBO = authorizationService.scaToken(new ScaInfoBO(user.getId(), null, null, UserRoleBO.CUSTOMER, null, null, TokenUsageBO.DIRECT_ACCESS,user.getLogin()));
+        response.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaTokenBO));
+        response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
+        response.setExpiresInSeconds(scaTokenBO.getExpires_in());
+        response.setStatusDate(LocalDateTime.now());
+        return response;
     }
 
     private SCALoginResponseTO toScaResponse(UserBO user, String userMessage,
