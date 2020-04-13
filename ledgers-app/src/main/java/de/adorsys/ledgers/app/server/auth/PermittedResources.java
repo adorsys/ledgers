@@ -27,6 +27,7 @@ public class PermittedResources {
             "/data-test/db-flush",
             "/staff-access/users/register",
             "/staff-access/users/login",
+            "/staff-access/users/admin/authorize/user",
             "/password",
             "/users/validate",
             "/oauth/**",

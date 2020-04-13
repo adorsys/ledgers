@@ -95,4 +95,6 @@ public interface MiddlewareOnlineBankingService {
      * @return the login response.
      */
     SCALoginResponseTO authenticateForLogin(ScaInfoTO scaInfoTO);
+
+    SCALoginResponseTO authorizeForUser(String login, String pin, String userLogin);
 }
