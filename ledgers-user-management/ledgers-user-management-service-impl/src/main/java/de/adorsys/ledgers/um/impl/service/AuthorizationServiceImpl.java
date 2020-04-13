@@ -169,6 +169,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         return getToken(scaInfoBO, TokenUsageBO.LOGIN);
     }
 
+    @Override
+    public boolean validateCredentials(String login, String pin, UserRoleBO role) {
+        UserBO user = userService.findByLogin(login);
+        return passwordEnc.verify(user.getId(), pin, user.getPin())
+                       && user.getUserRoles().stream().anyMatch(r -> r.equals(role));
+    }
+
     private void validateAccountAccesses(UserBO user, AccessTokenBO accessTokenJWT) {
         List<AccountAccessBO> accountAccessesFromToken = accessTokenJWT.getAccountAccesses();
         for (AccountAccessBO accountAccessFT : accountAccessesFromToken) {

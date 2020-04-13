@@ -78,6 +78,30 @@ public class AuthorizationServiceImplTest {
         assertThat(result).isNotNull();
     }
 
+    @Test
+    public void validateCredentials(){
+        when(userService.findByLogin(anyString())).thenReturn(getUser());
+        when(passwordEnc.verify(anyString(),anyString(),anyString())).thenReturn(true);
+        boolean result = authorizationService.validateCredentials("login", "pin", UserRoleBO.CUSTOMER);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void validateCredentials_wrong_creds(){
+        when(userService.findByLogin(anyString())).thenReturn(getUser());
+        when(passwordEnc.verify(anyString(),anyString(),anyString())).thenReturn(false);
+        boolean result = authorizationService.validateCredentials("login", "pin", UserRoleBO.CUSTOMER);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void validateCredentials_no_role(){
+        when(userService.findByLogin(anyString())).thenReturn(getUser());
+        when(passwordEnc.verify(anyString(),anyString(),anyString())).thenReturn(true);
+        boolean result = authorizationService.validateCredentials("login", "pin", UserRoleBO.STAFF);
+        assertThat(result).isFalse();
+    }
+
     private AisConsentBO getAisConsent() {
         AisConsentBO consentBO = new AisConsentBO();
         AisAccountAccessInfoBO accessInfoBO = new AisAccountAccessInfoBO();

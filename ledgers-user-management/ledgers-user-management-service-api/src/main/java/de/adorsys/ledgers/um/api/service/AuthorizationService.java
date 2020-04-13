@@ -58,4 +58,6 @@ public interface AuthorizationService {
      * @return the bearer token
      */
     BearerTokenBO loginToken(ScaInfoBO scaInfoBO);
+
+    boolean validateCredentials(String login, String pin, UserRoleBO role);
 }

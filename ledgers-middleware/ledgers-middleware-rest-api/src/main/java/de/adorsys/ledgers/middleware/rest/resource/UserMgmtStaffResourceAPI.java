@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -33,6 +34,14 @@ public interface UserMgmtStaffResourceAPI {
     })
     @PostMapping("/register")
     ResponseEntity<UserTO> register(@RequestParam(BRANCH) String branch, @RequestBody UserTO branchStaff);
+
+    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login fo user")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the pin."),
+            @ApiResponse(code = 404, message = "User not found.")
+    })
+    @PostMapping("/admin/authorize/user")
+    ResponseEntity<SCALoginResponseTO> authoriseForUser(@RequestBody AuthoriseForUserTO authorise);
 
     /**
      * Modify a user within a given branch.

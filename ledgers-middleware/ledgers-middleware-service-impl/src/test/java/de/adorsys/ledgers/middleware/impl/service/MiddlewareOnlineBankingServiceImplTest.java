@@ -3,7 +3,10 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.ScaInfoMapper;
@@ -23,10 +26,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiddlewareOnlineBankingServiceImplTest {
@@ -197,6 +200,22 @@ public class MiddlewareOnlineBankingServiceImplTest {
         //then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response.getBearerToken());
+    }
+
+    @Test
+    public void authorizeForUser() {
+        when(authorizationService.validateCredentials(anyString(), anyString(), any())).thenReturn(true);
+        when(userService.findByLogin(anyString())).thenReturn(new UserBO("anton.brueckner", null, null));
+        when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
+        when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
+        SCALoginResponseTO response = onlineBankingService.authorizeForUser("admin", "admin", "anton.brueckner");
+        assertThat(response.getBearerToken()).isNotNull();
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void authorizeForUser_fail() {
+        when(authorizationService.validateCredentials(anyString(), anyString(), any())).thenReturn(false);
+        SCALoginResponseTO response = onlineBankingService.authorizeForUser("admin", "admin", "anton.brueckner");
     }
 
     private UserBO getUserBO() {

@@ -1,16 +1,11 @@
 package de.adorsys.ledgers.app.mock;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class BalancesData {
 	private List<AccountBalances> balancesList = new ArrayList<>();
-
-	public List<AccountBalances> getBalancesList() {
-		return balancesList;
-	}
-
-	public void setBalancesList(List<AccountBalances> balancesList) {
-		this.balancesList = balancesList;
-	}
 }

@@ -9,6 +9,7 @@ import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.LedgerMapper;
 import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
@@ -17,11 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,12 +29,12 @@ public class LedgerServiceImplTest {
     private static final LocalDateTime DATE_TIME = LocalDateTime.now();
     private static final String USER_NAME = "Mr. Jones";
     private static final ChartOfAccount COA = new ChartOfAccount(Ids.id(), DATE_TIME, USER_NAME,
-            "Some short description", "Some long description", "COA");
+                                                                 "Some short description", "Some long description", "COA");
     private static final Ledger LEDGER = new Ledger(Ids.id(), DATE_TIME, USER_NAME, "Some short description",
-            "Some long description", "Ledger", COA);
+                                                    "Some long description", "Ledger", COA);
     private static final LedgerAccount LEDGER_ACCOUNT = new LedgerAccount(Ids.id(), DATE_TIME, USER_NAME,
-            "Some short description", "Some long description", USER_NAME, LEDGER, null, COA, BalanceSide.Cr,
-            AccountCategory.AS);
+                                                                          "Some short description", "Some long description", USER_NAME, LEDGER, null, COA, BalanceSide.Cr,
+                                                                          AccountCategory.AS);
     private static final LedgerMapper LEDGER_MAPPER = Mappers.getMapper(LedgerMapper.class);
     private static final LedgerAccountMapper LEDGER_ACCOUNT_MAPPER = Mappers.getMapper(LedgerAccountMapper.class);
     private static final String SYSTEM = "System";
@@ -50,7 +50,7 @@ public class LedgerServiceImplTest {
     private LedgerAccountRepository ledgerAccountRepository;
 
     @Test
-    public void new_ledger_must_produce_id_created_user_copy_other_fields(){
+    public void new_ledger_must_produce_id_created_user_copy_other_fields() {
         when(chartOfAccountRepository.findById(COA.getId())).thenReturn(Optional.of(COA));
         when(ledgerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         // When
@@ -86,22 +86,66 @@ public class LedgerServiceImplTest {
         assertThat(result.getLedger()).isNotNull();
     }
 
+    @Test(expected = PostingModuleException.class)
+    public void new_ledgerAccount_ledger_account_name_absent() {
+        ledgerService.newLedgerAccount(new LedgerAccountBO(), USER_NAME);
+    }
+
+    @Test
+    public void findLedgerAccountById() {
+        when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.of(new LedgerAccount()));
+        LedgerAccountBO result = ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId());
+        assertThat(result).isEqualToComparingFieldByField(new LedgerAccountBO());
+    }
+
+    @Test(expected = PostingModuleException.class)
+    public void findLedgerAccountById_nf() {
+        when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.empty());
+        ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId());
+    }
+
+    @Test
+    public void findLedgerAccount() {
+        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString())).thenReturn(Optional.of(new LedgerAccount()));
+        when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
+
+        LedgerAccountBO result = ledgerService.findLedgerAccount(new LedgerBO("name", null), LEDGER_ACCOUNT.getName());
+        assertThat(result).isEqualToComparingFieldByField(new LedgerAccountBO());
+    }
+
+    @Test(expected = PostingModuleException.class)
+    public void findLedgerAccount_nf() {
+        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString())).thenReturn(Optional.empty());
+        when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
+
+        LedgerAccountBO result = ledgerService.findLedgerAccount(new LedgerBO("name", null), LEDGER_ACCOUNT.getName());
+        assertThat(result).isEqualToComparingFieldByField(new LedgerAccountBO());
+    }
+
+    @Test
+    public void finLedgerAccountsByIbans() {
+        when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
+        when(ledgerAccountRepository.getAccountsByIbans(anySet(), any())).thenReturn(Collections.emptyList());
+        Map<String, LedgerAccountBO> result = ledgerService.finLedgerAccountsByIbans(new HashSet<>(), new LedgerBO("name", null));
+        assertThat(result).isEqualTo(new HashMap<>());
+    }
+
     @Test
     public void checkIfLedgerAccountExist() {
-        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(),anyString()))
+        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString()))
                 .thenReturn(Optional.of(new LedgerAccount()));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(new Ledger()));
-        LedgerBO testLedger = new LedgerBO(null,"id",null,null,null,null,null);
+        LedgerBO testLedger = new LedgerBO(null, "id", null, null, null, null, null);
         boolean result = ledgerService.checkIfLedgerAccountExist(testLedger, "test name");
         assertThat(result).isTrue();
     }
 
     @Test
     public void checkIfLedgerAccountExist_account_not_present() {
-        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(),anyString()))
+        when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString()))
                 .thenReturn(Optional.empty());
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(new Ledger()));
-        LedgerBO testLedger = new LedgerBO(null,"id",null,null,null,null,null);
+        LedgerBO testLedger = new LedgerBO(null, "id", null, null, null, null, null);
         boolean result = ledgerService.checkIfLedgerAccountExist(testLedger, "test name");
         assertThat(result).isFalse();
     }
@@ -109,7 +153,7 @@ public class LedgerServiceImplTest {
     @Test
     public void checkIfLedgerAccountExist_ledger_not_present() {
         when(ledgerRepository.findById(any())).thenReturn(Optional.empty());
-        LedgerBO testLedger = new LedgerBO(null,"id",null,null,null,null,null);
+        LedgerBO testLedger = new LedgerBO(null, "id", null, null, null, null, null);
         boolean result = ledgerService.checkIfLedgerAccountExist(testLedger, "test name");
         assertThat(result).isFalse();
     }

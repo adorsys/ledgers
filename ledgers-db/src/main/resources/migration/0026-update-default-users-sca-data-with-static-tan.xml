@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="26-03-2020-01">
+        <comment>Add static tan to default users if they are present</comment>
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='anton.brueckner@mail.de'</where>
+        </update>
+
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='max.musterman@mail.de'</where>
+        </update>
+
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='max.musterman2@mail.de'</where>
+        </update>
+
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='accountant@mail.de'</where>
+        </update>
+
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='chief.accountant@mail.de'</where>
+        </update>
+
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='sc.manager@mail.de'</where>
+        </update>
+
+        <update tableName="sca_data">
+            <column name="uses_static_tan" value="true"/>
+            <column name="static_tan" value="IctZPOT2oacskbVJqnqpqQ=="/>
+            <where>method_value='g.manager@mail.de'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>
