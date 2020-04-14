@@ -149,17 +149,17 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     @Override
     public SCALoginResponseTO authorizeForUser(String login, String pin, String userLogin) {
         boolean isValid = authorizationService.validateCredentials(login, pin, UserRoleBO.SYSTEM);
-        if (!isValid){
+        if (!isValid) {
             throw MiddlewareModuleException.builder()
-                    .devMsg("Your credentials or role does not comply to request you're executing!")
-                    .errorCode(MiddlewareErrorCode.AUTHENTICATION_FAILURE)
-                    .build();
+                          .devMsg("Your credentials or role does not comply to request you're executing!")
+                          .errorCode(MiddlewareErrorCode.AUTHENTICATION_FAILURE)
+                          .build();
         }
 
         SCALoginResponseTO response = new SCALoginResponseTO();
         response.setScaStatus(ScaStatusTO.EXEMPTED);
         UserBO user = user(userLogin);
-        BearerTokenBO scaTokenBO = authorizationService.scaToken(new ScaInfoBO(user.getId(), null, null, UserRoleBO.CUSTOMER, null, null, TokenUsageBO.DIRECT_ACCESS,user.getLogin()));
+        BearerTokenBO scaTokenBO = authorizationService.scaToken(new ScaInfoBO(user.getId(), null, null, UserRoleBO.CUSTOMER, null, null, TokenUsageBO.DIRECT_ACCESS, user.getLogin()));
         response.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaTokenBO));
         response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
         response.setExpiresInSeconds(scaTokenBO.getExpires_in());

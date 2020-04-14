@@ -78,6 +78,11 @@ payment-products:
 
 payment_mapping.path:
 
+default:
+  token:
+    lifetime:
+      seconds: 50000
+
 sca:
   authCode:
     validity.seconds: 180
