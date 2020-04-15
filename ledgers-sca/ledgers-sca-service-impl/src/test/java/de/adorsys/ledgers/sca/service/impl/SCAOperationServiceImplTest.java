@@ -274,7 +274,7 @@ public class SCAOperationServiceImplTest {
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
         UserBO userBO = mock(UserBO.class);
         ScaUserDataBO method = new ScaUserDataBO(methodSupported ? ScaMethodTypeBO.EMAIL : ScaMethodTypeBO.APP_OTP, email);
-        method.setId(SCA_USER_DATA_ID );
+        method.setId(SCA_USER_DATA_ID);
         codeDataBO.setScaUserDataId(methodIdPresent ? SCA_USER_DATA_ID : null);
         method.setValid(true);
         method.setUsesStaticTan(usesStaticTan);
@@ -645,6 +645,27 @@ public class SCAOperationServiceImplTest {
         when(repository.findByIdAndScaStatus(anyString(), any())).thenReturn(Optional.of(scaOperationEntity));
         ScaAuthConfirmationBO result = scaOperationService.completeAuthConfirmation(AUTH_ID, true);
         assertThat(result, is(scaAuthConfirmationBO));
+    }
+
+    @Test
+    public void checkIfExistsOrNew() {
+        when(repository.findById(anyString())).thenReturn(Optional.of(scaOperationEntity));
+        when(scaOperationMapper.toBO(any(SCAOperationEntity.class))).thenReturn(scaOperationBO);
+        SCAOperationBO result = scaOperationService.checkIfExistsOrNew(codeDataBO);
+        assertThat(result, is(scaOperationBO));
+    }
+
+    @Test
+    public void updateFailedCount() {
+        when(repository.findById(anyString())).thenReturn(Optional.of(scaOperationEntity));
+        int result = scaOperationService.updateFailedCount(AUTH_ID);
+        assertThat(result, is(-1));
+    }
+
+    @Test(expected = ScaModuleException.class)
+    public void updateFailedCount_fail() {
+        when(repository.findById(anyString())).thenReturn(Optional.empty());
+        scaOperationService.updateFailedCount(AUTH_ID);
     }
 
     private SCAOperationBO getScaOperationBO(LocalDateTime statusTime) {
