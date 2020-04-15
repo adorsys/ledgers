@@ -67,7 +67,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final SCAOperationService scaOperationService;
     private final SCAUtils scaUtils;
     private final AccessService accessService;
-    private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
+    @Value("${default.token.lifetime.seconds:600}")
+    private int defaultLoginTokenExpireInSeconds;
     private final AmountMapper amountMapper;
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;

@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,8 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     private final SCAUtils scaUtils;
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
-    private int defaultLoginTokenExpireInSeconds = 600; // 600 seconds.
+    @Value("${default.token.lifetime.seconds:600}")
+    private int defaultLoginTokenExpireInSeconds;
 
     @Override
     public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role) {
