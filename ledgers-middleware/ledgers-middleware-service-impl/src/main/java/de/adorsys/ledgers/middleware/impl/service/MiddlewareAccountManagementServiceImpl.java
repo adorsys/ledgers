@@ -67,13 +67,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final SCAOperationService scaOperationService;
     private final SCAUtils scaUtils;
     private final AccessService accessService;
-    @Value("${default.token.lifetime.seconds:600}")
-    private int defaultLoginTokenExpireInSeconds;
     private final AmountMapper amountMapper;
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
     private final PageMapper pageMapper;
     private final ScaResponseResolver scaResponseResolver;
+
+    @Value("${default.token.lifetime.seconds:600}")
+    private int defaultLoginTokenExpireInSeconds;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -333,12 +334,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
         ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
                                                                                consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
-        if (!scaValidationBO.isValidAuthCode()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Wrong auth code")
-                          .build();
-        }
+        scaUtils.checkScaResult(scaValidationBO);
+
         UserTO userTO = scaUtils.user(userBO);
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
         SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);

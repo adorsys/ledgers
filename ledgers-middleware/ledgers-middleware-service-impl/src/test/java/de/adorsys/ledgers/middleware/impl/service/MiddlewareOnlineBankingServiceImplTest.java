@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -92,10 +93,42 @@ public class MiddlewareOnlineBankingServiceImplTest {
     public void authoriseForConsent() {
         //given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(getBearerTokenBO());
         when(scaUtils.hasSCA(any())).thenReturn(false);
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
+
+        //when
+        SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
+
+        //then
+        assertThat(response).isNotNull();
+        assertEquals(getBearerTokenTO(), response.getBearerToken());
+        verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void authoriseForConsent_failed_authorization() {
+        //given
+        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.FAILED));
+
+        //when
+        SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
+
+        //then
+        assertThat(response).isNotNull();
+        assertEquals(getBearerTokenTO(), response.getBearerToken());
+        verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
+    }
+
+    @Test(expected = MiddlewareModuleException.class)
+    public void authoriseForConsent_failed_cred_validation() {
+        //given
+        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
+        when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(null);
 
         //when
         SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
@@ -113,7 +146,7 @@ public class MiddlewareOnlineBankingServiceImplTest {
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(authorizationService.authorizeNewAuthorizationId(any(), any())).thenReturn(getBearerTokenBO());
         when(scaUtils.hasSCA(any())).thenReturn(true);
-        when(scaOperationService.createAuthCode(any(), any())).thenReturn(getSCAOperationBO());
+        when(scaOperationService.createAuthCode(any(), any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
@@ -169,8 +202,8 @@ public class MiddlewareOnlineBankingServiceImplTest {
     public void generateLoginAuthCode() {
         //given
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
-        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO());
-        when(scaOperationService.generateAuthCode(any(), any(), any())).thenReturn(getSCAOperationBO());
+        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
+        when(scaOperationService.generateAuthCode(any(), any(), any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(authorizationService.loginToken(any())).thenReturn(getBearerTokenBO());
@@ -188,7 +221,7 @@ public class MiddlewareOnlineBankingServiceImplTest {
     public void authenticateForLogin() {
         //given
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
-        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO());
+        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(getScaValidationBO());
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
@@ -281,18 +314,18 @@ public class MiddlewareOnlineBankingServiceImplTest {
         return info;
     }
 
-    private SCAOperationBO getSCAOperationBO() {
+    private SCAOperationBO getSCAOperationBO(ScaStatusBO status) {
         SCAOperationBO scaOperation = new SCAOperationBO();
         scaOperation.setId("id");
         scaOperation.setScaMethodId(SCA_METHOD_ID);
         scaOperation.setOpId("V0020200302130357q2tRswcRSr4nXqUaJCXpkQ");
-        scaOperation.setScaStatus(ScaStatusBO.EXEMPTED);
+        scaOperation.setScaStatus(status);
         scaOperation.setStatusTime(LocalDateTime.now());
         scaOperation.setValiditySeconds(6200);
         return scaOperation;
     }
 
     private ScaValidationBO getScaValidationBO() {
-        return new ScaValidationBO(AUTH_CODE, true, ScaStatusBO.FINALISED);
+        return new ScaValidationBO(AUTH_CODE, true, ScaStatusBO.FINALISED, 0);
     }
 }

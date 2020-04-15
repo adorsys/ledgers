@@ -9,8 +9,10 @@ public class ScaValidationBO {
     private String authConfirmationCode;
     private boolean validAuthCode;
     private ScaStatusBO scaStatus;
+    private int attemptsLeft;
 
-    public ScaValidationBO(boolean validAuthCode) {
+    public ScaValidationBO(boolean validAuthCode, int attemptsLeft) {
         this.validAuthCode = validAuthCode;
+        this.attemptsLeft = attemptsLeft;
     }
 }

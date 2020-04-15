@@ -231,12 +231,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
         String authorisationId = opType == PAYMENT ? scaInfoTO.getAuthorisationId() : cancellationId;
         ScaValidationBO scaValidationBO = validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode(), paymentKeyData.template());
-        if (!scaValidationBO.isValidAuthCode()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Wrong auth code")
-                          .build();
-        }
+        scaUtils.checkScaResult(scaValidationBO);
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
             if (opType == PAYMENT) {
                 paymentService.updatePaymentStatus(paymentId, ACTC);

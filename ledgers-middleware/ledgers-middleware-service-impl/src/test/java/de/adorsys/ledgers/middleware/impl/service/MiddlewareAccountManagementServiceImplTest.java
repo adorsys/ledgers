@@ -542,6 +542,7 @@ public class MiddlewareAccountManagementServiceImplTest {
         when(userService.loadConsent(any())).thenReturn(getAisConsentBO());
         when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
+        doThrow(MiddlewareModuleException.class).when(scaUtils).checkScaResult(any());
         when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
         when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(getScaValidationBO(false));
 
@@ -653,7 +654,7 @@ public class MiddlewareAccountManagementServiceImplTest {
     }
 
     private ScaValidationBO getScaValidationBO(boolean validAuthCode) {
-        return new ScaValidationBO("authConfirmationCode", validAuthCode, ScaStatusBO.FINALISED);
+        return new ScaValidationBO("authConfirmationCode", validAuthCode, ScaStatusBO.FINALISED,0);
     }
 
     private SCAOperationBO getSCAOperationBO() {

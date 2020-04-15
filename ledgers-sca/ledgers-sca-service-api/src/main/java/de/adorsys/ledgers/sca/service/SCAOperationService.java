@@ -83,4 +83,8 @@ public interface SCAOperationService {
      * @param authCodeConfirmed : Auth confirmation code was successfully confirmed or not
      */
     ScaAuthConfirmationBO completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed);
+
+    SCAOperationBO checkIfExistsOrNew(AuthCodeDataBO data);
+
+    int updateFailedCount(String authorisationId);
 }

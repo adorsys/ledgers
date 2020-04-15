@@ -33,6 +33,7 @@ public class ScaResponseResolver {
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
+
     @Value("${default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
