@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSP;
+import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACTC;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -99,6 +100,8 @@ class MiddlewarePaymentServiceImplTest {
     private ScaResponseResolver scaResponseResolver;
     @Mock
     private AccountDetailsMapper detailsMapper;
+    @Mock
+    private PaymentProductsConfig paymentProductsConfig;
 
     private ScaResponseResolver localResolver = new ScaResponseResolver(scaUtils, new ScaChallengeDataResolverImpl(Arrays.asList(new EmailScaChallengeData())), Mappers.getMapper(UserMapper.class), operationService);
 
@@ -166,6 +169,32 @@ class MiddlewarePaymentServiceImplTest {
 
         // Then
         assertThrows(DepositModuleException.class, () -> middlewareService.getPaymentById(WRONG_PAYMENT_ID));
+    }
+
+    @Test
+    void execute_Payment_For_Any_Type_Of_Sca_Users() {
+        // Given
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        List<DepositAccountBO> accounts = Collections.singletonList(DepositAccountBO.builder()
+                                                                            .iban(paymentBO.getDebtorAccount().getIban())
+                                                                            .currency(paymentBO.getDebtorAccount().getCurrency())
+                                                                            .accountStatus(AccountStatusBO.ENABLED).build());
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(accounts);
+        when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
+        when(paymentService.executePayment(any(), any())).thenReturn(ACTC);
+        when(authorizationService.scaToken(any(ScaInfoBO.class))).thenReturn(new BearerTokenBO());
+        when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
+        when(scaUtils.userBO(anyString())).thenReturn(userBO);
+
+        // When
+        SCAPaymentResponseTO response = middlewareService.executePayment(buildScaInfoTO(), readYml(PaymentTO.class, SINGLE_BO));
+
+        // Then
+        assertNotNull(response);
+        assertEquals(TransactionStatusTO.ACTC, response.getTransactionStatus());
     }
 
     @Test
@@ -484,7 +513,7 @@ class MiddlewarePaymentServiceImplTest {
         return null;
     }
 
-    private static ScaInfoTO buildScaInfoTO() {
+    private ScaInfoTO buildScaInfoTO() {
         ScaInfoTO info = new ScaInfoTO();
         info.setUserId(USER_ID);
         info.setAuthorisationId(AUTHORISATION_ID);
@@ -509,11 +538,11 @@ class MiddlewarePaymentServiceImplTest {
     }
 
     private DepositAccountBO getAccount(Currency currency, AccountStatusBO status) {
-        DepositAccountBO account = new DepositAccountBO();
-        account.setIban(IBAN);
-        account.setCurrency(currency);
-        account.setAccountStatus(status);
-        return account;
+        return DepositAccountBO.builder()
+                       .iban(IBAN)
+                       .currency(currency)
+                       .accountStatus(status)
+                       .build();
     }
 
     private PaymentTO getPayment(Currency payerCur, Currency amountCur) {
