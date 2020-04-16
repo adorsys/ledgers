@@ -7,24 +7,25 @@ import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.service.ScaUserDataService;
 import de.adorsys.ledgers.um.api.service.ScaVerificationService;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class EmailVerificationServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class EmailVerificationServiceImplTest {
 
     @InjectMocks
     private EmailVerificationServiceImpl emailVerificationService;
@@ -43,42 +44,50 @@ public class EmailVerificationServiceImplTest {
     private static final EmailVerificationStatusBO STATUS_PENDING = EmailVerificationStatusBO.PENDING;
     private ScaUserDataBO scaUserDataBO;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         scaUserDataBO = readScaUserDataBO();
     }
 
     @Test
-    public void createVerificationToken() {
+    void createVerificationToken() {
+        // Given
         when(scaUserDataService.findByEmail(any())).thenReturn(scaUserDataBO);
         when(scaVerificationService.findByScaIdAndStatusNot(any(), any())).thenReturn(getEmailVerificationBO(date));
 
+        // When
         String token = emailVerificationService.createVerificationToken(EMAIL);
         assertFalse(token.isEmpty());
     }
 
     @Test
-    public void sendVerificationEmail() {
+    void sendVerificationEmail() {
+        // Given
         when(scaVerificationService.findByToken(any())).thenReturn(getEmailVerificationBO(date));
         when(scaVerificationService.sendMessage(any(), any(), any(), any())).thenReturn(true);
         when(emailVerificationProperties.getTemplate()).thenReturn(getEmailTemplate());
 
+        // When
         emailVerificationService.sendVerificationEmail(VERIFICATION_TOKEN);
     }
 
     @Test
-    public void confirmUser() {
+    void confirmUser() {
+        // Given
         when(scaVerificationService.findByTokenAndStatus(any(), any())).thenReturn(getEmailVerificationBO(date.plusWeeks(1)));
         when(scaUserDataService.findByEmail(any())).thenReturn(scaUserDataBO);
 
+        // When
         emailVerificationService.confirmUser(VERIFICATION_TOKEN);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void confirmUser_expiredToken() {
+    @Test
+    void confirmUser_expiredToken() {
+        // Given
         when(scaVerificationService.findByTokenAndStatus(any(), any())).thenReturn(getEmailVerificationBO(date.minusWeeks(1)));
 
-        emailVerificationService.confirmUser(VERIFICATION_TOKEN);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> emailVerificationService.confirmUser(VERIFICATION_TOKEN));
     }
 
     private ScaUserDataBO readScaUserDataBO() {
@@ -100,7 +109,7 @@ public class EmailVerificationServiceImplTest {
         return bo;
     }
 
-    private EmailVerificationProperties.EmailTemplate getEmailTemplate(){
+    private EmailVerificationProperties.EmailTemplate getEmailTemplate() {
         EmailVerificationProperties.EmailTemplate template = new EmailVerificationProperties.EmailTemplate();
         template.setSubject("Please verify your email address");
         template.setFrom("noreply@adorsys.de");

@@ -8,40 +8,43 @@ import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Currency;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
-public class DepositAccountMapperTest {
+@ExtendWith(MockitoExtension.class)
+class DepositAccountMapperTest {
 
     @InjectMocks
     private DepositAccountMapperImpl depositAccountMapper;
 
     @Test
-    public void toDepositAccountBO() {
+    void toDepositAccountBO() {
+        // When
         DepositAccountBO account = depositAccountMapper.toDepositAccountBO(getDepositAccount());
 
         //Then
-        assertThat(account).isEqualToComparingFieldByFieldRecursively(getDepositAccountBO());
+        assertEquals(account, getDepositAccountBO());
     }
 
     @Test
-    public void toDepositAccount() {
+    void toDepositAccount() {
+        // When
         DepositAccount account = depositAccountMapper.toDepositAccount(getDepositAccountBO());
 
         //Then
-        assertThat(account).isEqualToComparingFieldByFieldRecursively(getDepositAccount());
+        assertEquals(account, getDepositAccount());
     }
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic",
-                "Some linked account", AccountUsage.PRIV, "details");
+                                  "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic",
+                                  "Some linked account", AccountUsage.PRIV, "details");
     }
 
     private DepositAccountBO getDepositAccountBO() {

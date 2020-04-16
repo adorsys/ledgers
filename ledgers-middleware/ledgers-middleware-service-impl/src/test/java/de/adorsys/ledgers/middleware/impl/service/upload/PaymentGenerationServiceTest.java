@@ -5,7 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.BalanceTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.general.AddressTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,13 +16,14 @@ import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.SIN
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 
-public class PaymentGenerationServiceTest {
+class PaymentGenerationServiceTest {
     private static final String TEST_CREDITOR_IBAN = "DE68370400440000000000";
     private static final String IBAN = "DE123456789";
     private static final Currency EUR = Currency.getInstance("EUR");
 
     @Test
-    public void generatePayments() {
+    void generatePayments() {
+        // Given
         Map<PaymentTypeTO, PaymentTO> result = new PaymentGenerationService().generatePayments(getAccountBalance(), "BRANCH_1");
         assertThat(result.values().size() == 2).isTrue();
         checkPayment(result, SINGLE);
@@ -32,6 +33,8 @@ public class PaymentGenerationServiceTest {
                                    .map(this::sumUp)
                                    .reduce(BigDecimal::add)
                                    .orElse(BigDecimal.ZERO);
+
+        // Then
         assertThat(total.compareTo(getAccountBalance().getAmount().getAmount()) < 1).isTrue();
     }
 
@@ -50,7 +53,7 @@ public class PaymentGenerationServiceTest {
                 .forEach(t -> {
                     assertThat(t).isEqualToIgnoringGivenFields(getExpected(paymentType).getTargets().iterator().next(), "endToEndIdentification", "instructedAmount");
                     assertThat(t.getInstructedAmount().getCurrency()).isEqualTo(EUR);
-                    assertThat(t.getInstructedAmount().getAmount().compareTo(BigDecimal.TEN)<1).isTrue();
+                    assertThat(t.getInstructedAmount().getAmount().compareTo(BigDecimal.TEN) < 1).isTrue();
                     assertThat(t.getEndToEndIdentification()).isNotEmpty();
                 });
     }

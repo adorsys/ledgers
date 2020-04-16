@@ -5,12 +5,12 @@ import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.repository.ScaUserDataRepository;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -20,11 +20,12 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ScaUserDataServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class ScaUserDataServiceImplTest {
 
     @InjectMocks
     private ScaUserDataServiceImpl scaUserDataService;
@@ -40,59 +41,68 @@ public class ScaUserDataServiceImplTest {
     private ScaUserDataEntity scaUserDataEntity;
     private ScaUserDataBO scaUserDataBO;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         scaUserDataEntity = readScaUserDataEntity();
         scaUserDataBO = readScaUserDataBO();
     }
 
     @Test
-    public void findByEmail(){
+    void findByEmail() {
+        // Given
         when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Collections.singletonList(scaUserDataEntity));
         when(userConverter.toScaUserDataBO(any())).thenReturn(scaUserDataBO);
 
+        // When
         ScaUserDataBO scaUserDataBO = scaUserDataService.findByEmail(EMAIL);
 
+        // Then
         assertThat(scaUserDataBO.getMethodValue(), is(EMAIL));
-
         verify(scaUserDataRepository, times(1)).findByMethodValue(EMAIL);
     }
 
-    @Test(expected = ScaModuleException.class)
-    public void findByEmail_scaNotFound(){
+    @Test
+    void findByEmail_scaNotFound() {
+        // Given
         when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Collections.EMPTY_LIST);
-        when(userConverter.toScaUserDataBO(any())).thenReturn(scaUserDataBO);
 
-        scaUserDataService.findByEmail(EMAIL);
+        // Then
+        assertThrows(ScaModuleException.class, () -> scaUserDataService.findByEmail(EMAIL));
     }
 
     @Test
-    public void findById(){
+    void findById() {
+        // Given
         when(scaUserDataRepository.findById(any())).thenReturn(Optional.ofNullable(scaUserDataEntity));
         when(userConverter.toScaUserDataBO(any())).thenReturn(scaUserDataBO);
 
+        // When
         ScaUserDataBO scaUserDataBO = scaUserDataService.findById(SCA_ID);
 
+        // Then
         assertThat(scaUserDataBO.getId(), is(SCA_ID));
-
         verify(scaUserDataRepository, times(1)).findById(SCA_ID);
     }
 
-    @Test(expected = ScaModuleException.class)
-    public void findById_scaNotFound(){
+    @Test
+    void findById_scaNotFound() {
+        // Given
         when(scaUserDataRepository.findById(any())).thenReturn(Optional.empty());
-        when(userConverter.toScaUserDataBO(any())).thenReturn(scaUserDataBO);
 
-        scaUserDataService.findById(SCA_ID);
+        // Then
+        assertThrows(ScaModuleException.class, () -> scaUserDataService.findById(SCA_ID));
     }
 
     @Test
-    public void updateScaUserData(){
+    void updateScaUserData() {
+        // Given
         when(scaUserDataRepository.save(any())).thenReturn(scaUserDataEntity);
         when(userConverter.toScaUserDataEntity(any())).thenReturn(scaUserDataEntity);
 
+        // When
         scaUserDataService.updateScaUserData(scaUserDataBO);
 
+        // Then
         verify(scaUserDataRepository, times(1)).save(scaUserDataEntity);
     }
 

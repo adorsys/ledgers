@@ -9,11 +9,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.general.AddressTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.*;
+import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.FrequencyCodeTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTargetTO;
 import de.adorsys.ledgers.middleware.client.mappers.PaymentMapperConfiguration;
 import de.adorsys.ledgers.middleware.client.mappers.PaymentMapperTO;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -30,10 +33,10 @@ import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public class PaymentTOMapperTest {
+class PaymentTOMapperTest {
     private static final ObjectMapper STATIC_MAPPER = new ObjectMapper()
                                                               .findAndRegisterModules()
                                                               .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
@@ -46,75 +49,104 @@ public class PaymentTOMapperTest {
     private static final PaymentMapperConfiguration configuration = new PaymentMapperConfiguration(STATIC_MAPPER);
 
     @Test
-    public void xs2aPaymentJson() throws IOException {
+    void xs2aPaymentJson() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aSinglePayment.json");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "SINGLE", "sepa-credit-transfers");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getSinglePmt());
+        // Then
+        assertEquals(getSinglePmt(), result);
     }
 
     @Test
-    public void xs2aPeriodicPaymentJson() throws IOException {
+    void xs2aPeriodicPaymentJson() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aPeriodicPayment.json");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "PERIODIC", "instant-sepa-credit-transfers");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getPeriodicPmt());
+        // Then
+        assertEquals(getPeriodicPmt(), result);
     }
 
     @Test
-    public void xs2aPeriodicPaymentJsonFrequencyCapital() throws IOException {
+    void xs2aPeriodicPaymentJsonFrequencyCapital() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aPeriodicPaymentCapitals.json");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "PERIODIC", "instant-sepa-credit-transfers");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getPeriodicPmt());
+        // Then
+        assertEquals(getPeriodicPmt(), result);
     }
 
     @Test
-    public void xs2aOldFormatAddress() throws IOException {
+    void xs2aOldFormatAddress() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aSinglePaymentOld.json");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "SINGLE", "sepa-credit-transfers");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getSinglePmt());
+        // Then
+        assertEquals(getSinglePmt(), result);
     }
 
     @Test
-    public void xs2aBulk() throws IOException {
+    void xs2aBulk() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aBulkPaymentOld.json");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(getBulk());
+        // Then
+        assertEquals(getBulk(), result);
     }
 
     @Test
-    public void xmlTest() throws IOException {
+    void xmlTest() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aSingle.xml");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "SINGLE", "sepa-credit-transfers-xml");
 
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("SinglePaymentTO.json"));
+        // Then
+        assertEquals(readPaymentTO("SinglePaymentTO.json"), result);
     }
 
     @Test
-    public void xmlTestBulk() throws IOException {
+    void xmlTestBulk() throws IOException {
+        // Given
         PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aBulk.xml");
+
+        // When
         PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("BulkPaymentTO.json"));
+
+        // Then
+        assertEquals(readPaymentTO("BulkPaymentTO.json"), result);
     }
 
     @Test
-    public void xmlTestListBulk() throws IOException {
+    void xmlTestListBulk() throws IOException {
        /* PaymentMapperTO mapper = configuration.paymentMapperTO();
         String payment = readPayment("xs2aBulkList.xml");
         PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
         assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("BulkPaymentTO.json"));*/
 
-       //TODO not implemented yet!  see task : https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/589
+        //TODO not implemented yet!  see task : https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/589
     }
 
     private PaymentTO getSinglePmt() {

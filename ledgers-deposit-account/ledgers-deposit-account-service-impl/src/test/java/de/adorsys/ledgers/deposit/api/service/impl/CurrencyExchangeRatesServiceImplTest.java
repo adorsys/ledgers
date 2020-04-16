@@ -2,25 +2,26 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.Data;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CurrencyExchangeRatesServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class CurrencyExchangeRatesServiceImplTest {
     private static final Currency EUR = Currency.getInstance("EUR");
     private static final Currency USD = Currency.getInstance("USD");
     private static final Currency GBP = Currency.getInstance("GBP");
@@ -38,10 +39,6 @@ public class CurrencyExchangeRatesServiceImplTest {
 
     @InjectMocks
     private CurrencyExchangeRatesServiceImpl currencyExchangeRatesService;
-    @Mock
-    private ObjectMapper objectMapper;
-    @Mock
-    private ExchangeRateClient client;
 
     private JsonNode getNodes() {
         List<RateCube> collect = rates.entrySet().stream().map(e -> new RateCube(e.getKey(), e.getValue())).collect(Collectors.toList());
@@ -49,45 +46,64 @@ public class CurrencyExchangeRatesServiceImplTest {
     }
 
     @Test
-    public void getExchangeRates_all_same() {
+    void getExchangeRates_all_same() {
+        // Given
      /*   when(client.getRatesToEur()).thenReturn(ResponseEntity.ok(new CubeType()));
         when(objectMapper.valueToTree(any())).thenReturn(getNodes());
         List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, USD, GBP);
         List<ExchangeRateBO> expected = getExpected(USD, EUR, USD, GBP);
         assertThat(result).isEqualTo(expected);*/
 
+        // When
         List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, EUR);
-        assertThat(result).isEqualTo(Collections.emptyList());
+
+        // Then
+        assertEquals(Collections.emptyList(), result);
     }
 
     @Test
-    public void getExchangeRates_creditor_currency_differs() {
+    void getExchangeRates_creditor_currency_differs() {
+        // When
         List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, USD);
-        assertThat(result).isEqualTo(Collections.singletonList(getRate(EUR, USD)));
-    }
 
-    @Test(expected = DepositModuleException.class)
-    public void getExchangeRates_currency_not_supported() {
-        List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, Currency.getInstance("UAH"));
-        assertThat(result).isEqualTo(Collections.singletonList(getRate(EUR, USD)));
+        // Then
+        assertEquals(Collections.singletonList(getRate(EUR, USD)), result);
     }
 
     @Test
-    public void applyRate() {
+    void getExchangeRates_currency_not_supported() {
+        // Then
+        assertThrows(DepositModuleException.class, () -> {
+            List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, Currency.getInstance("UAH"));
+            assertEquals(Collections.singletonList(getRate(EUR, USD)), result);
+        });
+    }
+
+    @Test
+    void applyRate() {
+        // When
         BigDecimal result = currencyExchangeRatesService.applyRate(BigDecimal.TEN, getRate(EUR, USD));
-        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(11.11500000));
+
+        // Then
+        assertThat(result, Matchers.comparesEqualTo(BigDecimal.valueOf(11.11500000)));
     }
 
     @Test
-    public void applyRate_2() {
+    void applyRate_2() {
+        // When
         BigDecimal result = currencyExchangeRatesService.applyRate(EUR, USD, BigDecimal.TEN);
-        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(11.11500000));
+
+        // Then
+        assertThat(result, Matchers.comparesEqualTo(BigDecimal.valueOf(11.11500000)));
     }
 
     @Test
-    public void applyRate_2_same_currencies() {
+    void applyRate_2_same_currencies() {
+        // When
         BigDecimal result = currencyExchangeRatesService.applyRate(USD, USD, BigDecimal.TEN);
-        assertThat(result).isEqualByComparingTo(BigDecimal.TEN);
+
+        // Then
+        assertThat(result, Matchers.comparesEqualTo(BigDecimal.TEN));
     }
 
     private List<ExchangeRateBO> getExpected(Currency one, Currency two, Currency three, Currency four) {

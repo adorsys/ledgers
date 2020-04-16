@@ -4,21 +4,22 @@ import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.ScaUserDataService;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.AisConsentEntity;
+import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.um.db.repository.AisConsentRepository;
-import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
-import de.adorsys.ledgers.um.impl.converter.UserConverterTest;
-import de.adorsys.ledgers.util.exception.UserManagementModuleException;
-import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
+import de.adorsys.ledgers.um.impl.converter.UserConverterTest;
 import de.adorsys.ledgers.util.PasswordEnc;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -33,14 +34,12 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UserServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class UserServiceImplTest {
     private static final List<AccountAccess> accountAccessList = readListYml(AccountAccess.class, "account-access.yml");
     private static final List<AccountAccessBO> accountAccessBOList = readListYml(AccountAccessBO.class, "account-access.yml");
     private static final String USER_ID = "SomeUniqueID";
@@ -63,10 +62,6 @@ public class UserServiceImplTest {
     @Mock
     private PasswordEnc passwordEnc;
     @Mock
-    private HashMacSecretSource secretSource;
-    @Mock
-    private BearerTokenService bearerTokenService;
-    @Mock
     private ScaUserDataService scaUserDataService;
     @Mock
     private AisConsentMapper aisConsentMapper;
@@ -75,65 +70,65 @@ public class UserServiceImplTest {
 
     private ResourceReader reader = YamlReader.getInstance();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         userEntity = readUserEntity();
         userBO = readUserBO();
     }
 
     @Test
-    public void create() {
-        //given
+    void create() {
+        // Given
         when(repository.findByEmailOrLogin(any(), any())).thenReturn(Optional.empty());
         when(converter.toUserPO(any())).thenReturn(userEntity);
         when(passwordEnc.encode(any(), any())).thenReturn(USER_PIN);
         when(repository.save(any())).thenReturn(userEntity);
         when(converter.toUserBO(any())).thenReturn(userBO);
 
-        //when
+        // When
         UserBO user = userService.create(userBO);
 
-        //then
-        assertThat(user).isNotNull();
+        // Then
+        assertNotNull(user);
         assertEquals(userBO, user);
         verify(repository, times(1)).save(userEntity);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void create_userExist() {
-        //given
+    @Test
+    void create_userExist() {
+        // Given
         when(repository.findByEmailOrLogin(any(), any())).thenReturn(Optional.of(userEntity));
 
-        //when
-        userService.create(userBO);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> userService.create(userBO));
     }
 
     @Test
-    public void listUsers() {
-        //given
+    void listUsers() {
+        // Given
         when(repository.findAll(PageRequest.of(0, 15))).thenReturn(new PageImpl<UserEntity>(Collections.singletonList(userEntity)));
         when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(userBO));
 
-        //when
+        // When
         List<UserBO> users = userService.listUsers(0, 15);
 
-        //then;
+        // Then
         assertEquals(userBO, users.get(0));
         verify(repository, times(1)).findAll(PageRequest.of(0, 15));
     }
 
     @Test
-    public void findById() {
-        //given
+    void findById() {
+        // Given
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
         when(converter.toUserBO(any())).thenReturn(userBO);
         when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
         when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
 
-        //when
+        // When
         UserBO user = userService.findById(USER_ID);
 
-        //then
+        // Then
         assertThat(user.getId(), is(USER_ID));
         assertThat(user.getEmail(), is(USER_EMAIL));
         assertThat(user.getLogin(), is(USER_LOGIN));
@@ -142,59 +137,60 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void findByLogin() {
-        //given
+    void findByLogin() {
+        // Given
         when(repository.findFirstByLogin(any())).thenReturn(Optional.ofNullable(userEntity));
         when(converter.toUserBO(any())).thenReturn(userBO);
 
-        //when
+        // When
         UserBO user = userService.findByLogin(USER_LOGIN);
 
-        //then
-        assertThat(user).isNotNull();
+        // Then
+        assertNotNull(user);
         assertEquals(userBO, user);
         verify(repository, times(1)).findFirstByLogin(USER_LOGIN);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void findByLogin_userNotFound() {
-        //given
+    @Test
+    void findByLogin_userNotFound() {
+        // Given
         when(repository.findFirstByLogin(any())).thenThrow(UserManagementModuleException.builder().build());
 
-        //when
-        userService.findByLogin(USER_LOGIN);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> userService.findByLogin(USER_LOGIN));
+
     }
 
     @Test
-    public void updateScaData() throws IOException {
-        //given
+    void updateScaData() throws IOException {
+        // Given
         List<ScaUserDataBO> scaUserDataBOS = getScaUserData(ScaUserDataBO.class);
 
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.ofNullable(userEntity));
         when(repository.save(userEntity)).thenReturn(userEntity);
         when(converter.toUserBO(any())).thenReturn(userBO);
 
-        //when
+        // When
         userService.updateScaData(scaUserDataBOS, USER_LOGIN);
 
-        //then
+        // Then
         verify(repository, times(1)).findFirstByLogin(USER_LOGIN);
         verify(repository, times(1)).save(userEntity);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void updateScaDataUserNotFound() throws IOException {
-        //given
+    @Test
+    void updateScaDataUserNotFound() throws IOException {
+        // Given
         List<ScaUserDataBO> scaUserDataBOS = getScaUserData(ScaUserDataBO.class);
         when(repository.findFirstByLogin(USER_LOGIN)).thenReturn(Optional.empty());
 
-        //when
-        userService.updateScaData(scaUserDataBOS, USER_LOGIN);
+        // When
+        assertThrows(UserManagementModuleException.class, () -> userService.updateScaData(scaUserDataBOS, USER_LOGIN));
     }
 
     @Test
-    public void updateAccountAccess() {
-        //given
+    void updateAccountAccess() {
+        // Given
         when(repository.findFirstByLogin(any())).thenReturn(Optional.of(userEntity));
         when(converter.toAccountAccessListEntity(any())).thenReturn(accountAccessList);
         when(repository.save(any())).thenReturn(userEntity);
@@ -204,151 +200,153 @@ public class UserServiceImplTest {
         UserBO user = userService.updateAccountAccess(USER_LOGIN, accountAccessBOList);
 
         //then
-        assertThat(user).isNotNull();
+        assertNotNull(user);
         assertEquals(userBO, user);
         verify(repository, times(1)).save(userEntity);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void updateAccountAccess_userNotFound() {
-        //given
+    @Test
+    void updateAccountAccess_userNotFound() {
+        // Given
         when(repository.findFirstByLogin(any())).thenThrow(UserManagementModuleException.builder().build());
 
-        //when
-        userService.updateAccountAccess(USER_LOGIN, accountAccessBOList);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> userService.updateAccountAccess(USER_LOGIN, accountAccessBOList));
     }
 
     @Test
-    public void storeConsent() {
-        //given
+    void storeConsent() {
+        // Given
         when(consentRepository.findById(any())).thenReturn(Optional.of(new AisConsentEntity()));
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
-        //when
+        // When
         AisConsentBO consent = userService.storeConsent(getAisConsentBO());
 
-        //then
-        assertThat(consent).isNotNull();
-        assertThat(consent).isEqualToComparingFieldByFieldRecursively(getAisConsentBO());
+        // Then
+        assertNotNull(consent);
+        assertTrue(EqualsBuilder.reflectionEquals(getAisConsentBO(), consent));
         verify(consentRepository, times(1)).findById("id");
     }
 
     @Test
-    public void loadConsent() {
-        //given
+    void loadConsent() {
+        // Given
         when(consentRepository.findById(any())).thenReturn(Optional.of(new AisConsentEntity()));
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
-        //when
+        // When
         AisConsentBO consent = userService.loadConsent(CONSENT_ID);
 
-        //then
-        assertThat(consent).isNotNull();
-        assertThat(consent).isEqualToComparingFieldByFieldRecursively(getAisConsentBO());
+        // Then
+        assertNotNull(consent);
+        assertTrue(EqualsBuilder.reflectionEquals(getAisConsentBO(), consent));
         verify(consentRepository, times(1)).findById(CONSENT_ID);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void loadConsent_consentNotFound() {
-        //given
+    @Test
+    void loadConsent_consentNotFound() {
+        // Given
         when(consentRepository.findById(any())).thenThrow(UserManagementModuleException.builder().build());
 
-        //when
-        userService.loadConsent(CONSENT_ID);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> userService.loadConsent(CONSENT_ID));
     }
 
     @Test
-    public void findByBranchAndUserRolesIn() {
-        //given
+    void findByBranchAndUserRolesIn() {
+        // Given
         when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
         when(converter.toUserBO(any())).thenReturn(userBO);
-        when(repository.findByBranchAndUserRolesInAndLoginContaining(any(), any(), any(), any())).thenReturn(new PageImpl<UserEntity>(Collections.singletonList(userEntity)));
+        when(repository.findByBranchAndUserRolesInAndLoginContaining(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
 
-        //when
+        // When
         Page<UserBO> user = userService.findByBranchAndUserRolesIn(USER_BRANCH, Collections.singletonList(UserRoleBO.CUSTOMER), "", null);
 
-        //then
-        assertThat(user.getContent().get(0)).isNotNull();
+        // Then
+        assertNotNull(user.getContent().get(0));
         assertEquals(userBO, user.getContent().get(0));
         verify(converter, times(1)).toUserRole(Collections.singletonList(UserRoleBO.CUSTOMER));
     }
 
     @Test
-    public void countUsersByBranch() {
-        //given
+    void countUsersByBranch() {
+        // Given
         when(repository.countByBranch(any())).thenReturn(1);
 
-        //when
+        // When
         int result = userService.countUsersByBranch(USER_BRANCH);
 
-        //then
+        // Then
         assertEquals(1, result);
         verify(repository, times(1)).countByBranch(USER_BRANCH);
     }
 
     @Test
-    public void updateUser() {
-        //given
+    void updateUser() {
+        // Given
         when(converter.toUserPO(any())).thenReturn(userEntity);
         when(repository.findById(any())).thenReturn(Optional.of(userEntity));
         when(repository.save(any())).thenReturn(userEntity);
         when(converter.toUserBO(any())).thenReturn(userBO);
 
-        //when
+        // When
         UserBO user = userService.updateUser(userBO);
 
-        //then
-        assertThat(user).isNotNull();
-        assertThat(user).isEqualToComparingFieldByFieldRecursively(userBO);
+        // Then
+        assertNotNull(user);
+        assertEquals(userBO, user);
         verify(repository, times(2)).findById(USER_ID);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void updateUser_duplicatingScaMethods() {
-        //given
+    @Test
+    void updateUser_duplicatingScaMethods() {
+        // Given
         userBO.getScaUserData().add(getScaUserDataBO());
-        when(converter.toUserPO(any())).thenReturn(userEntity);
-        when(repository.findById(any())).thenReturn(Optional.of(userEntity));
-        when(repository.save(any())).thenReturn(userEntity);
-        when(converter.toUserBO(any())).thenReturn(userBO);
 
-        //when
-        userService.updateUser(userBO);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> userService.updateUser(userBO));
     }
 
     @Test
-    public void findUsersByIban() {
-        //given
+    void findUsersByIban() {
+        // Given
         when(repository.findUsersByIban(anyString())).thenReturn(Collections.singletonList(userEntity));
         when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(userBO));
 
-        //when
+        // When
         List<UserBO> users = userService.findUsersByIban(USER_IBAN);
 
-        //then
-        assertThat(users).isNotNull();
-        assertThat(users.get(0)).isEqualToComparingFieldByFieldRecursively(userBO);
+        // Then
+        assertNotNull(users);
+        assertEquals(userBO, users.get(0));
         verify(converter, times(1)).toUserBOList(Collections.singletonList(userEntity));
     }
 
     @Test
-    public void findOwnersByIban(){
-        when(repository.findOwnersByIban(anyString(),any())).thenReturn(Collections.emptyList());
+    void findOwnersByIban() {
+        // Given
+        when(repository.findOwnersByIban(anyString(), any())).thenReturn(Collections.emptyList());
         when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(getUserBO()));
         List<UserBO> result = userService.findOwnersByIban(USER_IBAN);
-        assertThat(result).isEqualTo(Collections.singletonList(getUserBO()));
+
+        // Then
+        assertEquals(Collections.singletonList(getUserBO()), result);
     }
 
     @Test
-    public void findOwnersByAccountId(){
-        when(repository.findOwnersByAccountId(anyString(),any())).thenReturn(Collections.emptyList());
+    void findOwnersByAccountId() {
+        // Given
+        when(repository.findOwnersByAccountId(anyString(), any())).thenReturn(Collections.emptyList());
         when(converter.toUserBOList(any())).thenReturn(Collections.singletonList(getUserBO()));
         List<UserBO> result = userService.findOwnersByAccountId("accountId");
-        assertThat(result).isEqualTo(Collections.singletonList(getUserBO()));
+
+        // Then
+        assertEquals(Collections.singletonList(getUserBO()), result);
     }
 
     private UserBO getUserBO() {
-        return new UserBO("login","email","pin");
+        return new UserBO("login", "email", "pin");
     }
 
     private <T> List<T> getScaUserData(Class<T> clazz) throws IOException {

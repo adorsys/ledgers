@@ -1,49 +1,58 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mapstruct.factory.Mappers;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import de.adorsys.ledgers.deposit.api.domain.BalanceBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
-import pro.javatar.commons.reader.YamlReader;
-
-public class AccountDetailsMapperTest {
+class AccountDetailsMapperTest {
     private AccountDetailsMapper mapper;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         mapper = Mappers.getMapper(AccountDetailsMapper.class);
     }
 
     @Test
-    public void toAccountDetailsTO() throws IOException {
+    void toAccountDetailsTO() throws IOException {
+        // Given
         AccountDetailsTO expected = getAccount(AccountDetailsTO.class);
+
+        // When
         AccountDetailsTO details = mapper.toAccountDetailsTO(getAccount(DepositAccountBO.class), getBalances(BalanceBO.class));
 
+        // Then
         assertThat(details).isEqualToComparingFieldByFieldRecursively(expected);
     }
 
     @Test
-    public void toDepositAccountBO() throws IOException {
+    void toDepositAccountBO() throws IOException {
+        // When
         DepositAccountBO details = mapper.toDepositAccountBO(getAccount(AccountDetailsTO.class));
+
+        // Then
         assertThat(details).isEqualToComparingFieldByFieldRecursively(getAccount(DepositAccountBO.class));
     }
 
     @Test
-    public void toAccountBalancesTO() throws IOException {
+    void toAccountBalancesTO() throws IOException {
+        // Given
         List<AccountBalanceTO> expected = getBalances(AccountBalanceTO.class);
+
+        // When
         List<AccountBalanceTO> balances = mapper.toAccountBalancesTO(getBalances(BalanceBO.class));
 
+        // Then
         assertThat(balances).isNotEmpty();
         assertThat(balances.size()).isEqualTo(2);
         assertThat(balances.get(0)).isEqualToComparingFieldByFieldRecursively(expected.get(0));

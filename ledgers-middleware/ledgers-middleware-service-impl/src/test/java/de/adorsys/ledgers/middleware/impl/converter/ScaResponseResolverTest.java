@@ -18,20 +18,20 @@ import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ScaResponseResolverTest {
+@ExtendWith(MockitoExtension.class)
+class ScaResponseResolverTest {
     private static final String TEMPLATE = "TEMPLATE";
     private static final String PAYMENT_ID = "payment id";
     private static final String AUTH_ID = "auth id";
@@ -51,51 +51,55 @@ public class ScaResponseResolverTest {
     private SCAOperationService scaOperationService;
 
     @Test
-    public void completeResponse() {
+    void completeResponse() {
+        // Given
         SCAConsentResponseTO response = getConsentResponse();
+
+        // When
         service.completeResponse(response, getOperation(), new UserTO(), TEMPLATE, new BearerTokenTO());
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(getConsentResponse());
-    }
 
-    private SCAConsentResponseTO getConsentResponse() {
-        SCAConsentResponseTO response = new SCAConsentResponseTO();
-        response.setBearerToken(new BearerTokenTO());
-        response.setPsuMessage(TEMPLATE);
-        response.setScaMethods(Collections.emptyList());
-        response.setScaStatus(ScaStatusTO.PSUIDENTIFIED);
-        return response;
-    }
-
-    private SCAOperationBO getOperation() {
-        SCAOperationBO op = new SCAOperationBO();
-        op.setScaStatus(ScaStatusBO.PSUIDENTIFIED);
-        return op;
+        // Then
+        assertEquals(getConsentResponse(), response);
     }
 
     @Test
-    public void resolveScaStatus() {
+    void resolveScaStatus() {
+        // When
         ScaStatusTO result = service.resolveScaStatus(TokenUsageTO.LOGIN, false);
-        assertThat(result).isEqualTo(ScaStatusTO.EXEMPTED);
+
+        // Then
+        assertEquals(ScaStatusTO.EXEMPTED, result);
     }
 
     @Test
-    public void resolveScaStatus_sca_required() {
+    void resolveScaStatus_sca_required() {
+        // When
         ScaStatusTO result = service.resolveScaStatus(TokenUsageTO.LOGIN, true);
-        assertThat(result).isEqualTo(ScaStatusTO.PSUAUTHENTICATED);
+
+        // Then
+        assertEquals(ScaStatusTO.PSUAUTHENTICATED, result);
     }
 
     @Test
-    public void resolveScaStatus_sca_required_delegated_token() {
+    void resolveScaStatus_sca_required_delegated_token() {
+        // When
         ScaStatusTO result = service.resolveScaStatus(TokenUsageTO.DELEGATED_ACCESS, true);
-        assertThat(result).isEqualTo(ScaStatusTO.PSUIDENTIFIED);
+
+        // Then
+        assertEquals(ScaStatusTO.PSUIDENTIFIED, result);
     }
 
     @Test
-    public void prepareScaAndUpdateResponse() {
+    void prepareScaAndUpdateResponse() {
+        // Given
         SCAPaymentResponseTO response = getPaymentResponse();
         when(scaOperationService.createAuthCode(any(), any())).thenReturn(new SCAOperationBO());
+
+        // When
         service.prepareScaAndUpdateResponse(PAYMENT_ID, response, AUTH_ID, PSU_MSG, 100, new UserBO(), OpTypeBO.PAYMENT);
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(getPaymentResponse());
+
+        // Then
+        assertEquals(getPaymentResponse(), response);
     }
 
     private SCAPaymentResponseTO getPaymentResponse() {
@@ -105,15 +109,17 @@ public class ScaResponseResolverTest {
     }
 
     @Test
-    public void generateCodeAndUpdateResponse() {
+    void generateCodeAndUpdateResponse() {
+        // Given
         when(scaOperationService.generateAuthCode(any(), any(), any())).thenReturn(new SCAOperationBO());
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         service.generateCodeAndUpdateResponse(PAYMENT_ID, response, AUTH_ID, PSU_MSG, 100, new UserBO(), OpTypeBO.PAYMENT, SCA_METHOD);
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(new SCAPaymentResponseTO());
+        assertEquals(new SCAPaymentResponseTO(), response);
     }
 
     @Test
-    public void updateScaResponseFields() {
+    void updateScaResponseFields() {
+        // Given
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         service.updateScaResponseFields(new UserBO(), response, AUTH_ID, PSU_MSG, new BearerTokenTO(), ScaStatusTO.PSUIDENTIFIED, 100);
         SCAPaymentResponseTO expected = getPaymentResponse();
@@ -121,14 +127,21 @@ public class ScaResponseResolverTest {
         expected.setPsuMessage(PSU_MSG);
         expected.setScaMethods(Collections.emptyList());
         expected.setAuthorisationId(AUTH_ID);
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(expected);
+
+        // Then
+        assertEquals(expected, response);
     }
 
     @Test
-    public void updatePaymentRelatedResponseFields() {
+    void updatePaymentRelatedResponseFields() {
+        // Given
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
+
+        // When
         service.updatePaymentRelatedResponseFields(response, getPayment());
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(getExpectedPaymentResponse());
+
+        // Then
+        assertEquals(getExpectedPaymentResponse(), response);
     }
 
     private SCAPaymentResponseTO getExpectedPaymentResponse() {
@@ -147,5 +160,20 @@ public class ScaResponseResolverTest {
         payment.setPaymentType(PaymentTypeBO.SINGLE);
         payment.setPaymentProduct("sepa");
         return payment;
+    }
+
+    private SCAConsentResponseTO getConsentResponse() {
+        SCAConsentResponseTO response = new SCAConsentResponseTO();
+        response.setBearerToken(new BearerTokenTO());
+        response.setPsuMessage(TEMPLATE);
+        response.setScaMethods(Collections.emptyList());
+        response.setScaStatus(ScaStatusTO.PSUIDENTIFIED);
+        return response;
+    }
+
+    private SCAOperationBO getOperation() {
+        SCAOperationBO op = new SCAOperationBO();
+        op.setScaStatus(ScaStatusBO.PSUIDENTIFIED);
+        return op;
     }
 }

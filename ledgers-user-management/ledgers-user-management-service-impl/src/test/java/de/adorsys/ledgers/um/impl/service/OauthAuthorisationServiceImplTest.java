@@ -9,23 +9,23 @@ import de.adorsys.ledgers.um.db.repository.OauthCodeRepository;
 import de.adorsys.ledgers.um.impl.service.config.OauthConfigurationProperties;
 import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OauthAuthorisationServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class OauthAuthorisationServiceImplTest {
     private static final String LOGIN = "login";
     private static final String PIN = "pin";
     private static final String USER_ID = "user id";
@@ -47,82 +47,112 @@ public class OauthAuthorisationServiceImplTest {
     private OauthConfigurationProperties oauthConfigProp;
 
     @Test
-    public void oauthCode_code_present() {
+    void oauthCode_code_present() {
+        // Given
         when(userService.findByLogin(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(anyString(), anyString(), anyString())).thenReturn(true);
+        when(passwordEnc.verify(null, PIN, null)).thenReturn(true);
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(anyString())).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX)));
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX)));
+
+        // When
         OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN);
-        assertThat(result).isNotNull();
+
+        // Then
+        assertNotNull(result);
     }
 
     @Test
-    public void oauthCode_new_code() {
+    void oauthCode_new_code() {
+        // Given
         when(userService.findByLogin(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(anyString(), anyString(), anyString())).thenReturn(true);
+        when(passwordEnc.verify(null, PIN, null)).thenReturn(true);
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(anyString())).thenReturn(Optional.empty());
-        when(oauthCodeRepository.save(any())).then(a -> a.getArgumentAt(0, OauthCodeEntity.class));
-        OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN);
-        assertThat(result).isNotNull();
-    }
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.empty());
+        when(oauthCodeRepository.save(any())).then(a -> a.getArgument(0));
 
-    @Test(expected = UserManagementModuleException.class)
-    public void oauthCode_not_successful() {
-        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(anyString(), anyString(), anyString())).thenReturn(false);
-        service.oauthCode(LOGIN, PIN);
+        // When
+        OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN);
+
+        // Then
+        assertNotNull(result);
     }
 
     @Test
-    public void testOauthCode() {
+    void oauthCode_not_successful() {
+        // Given
+        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
+        when(passwordEnc.verify(null, PIN, null)).thenReturn(false);
+
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> service.oauthCode(LOGIN, PIN));
+    }
+
+    @Test
+    void testOauthCode() {
+        // Given
         when(userService.findById(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(anyString(), anyString(), anyString())).thenReturn(true);
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(anyString())).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX)));
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX)));
+
+        // When
         OauthCodeResponseBO result = service.oauthCode(USER_ID);
-        assertThat(result).isNotNull();
+
+        // Then
+        assertNotNull(result);
     }
 
     @Test
-    public void oauthToken() {
+    void oauthToken() {
+        // Given
         OauthCodeEntity codeEntity = new OauthCodeEntity();
         codeEntity.setExpiryTime(OffsetDateTime.MAX);
         when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.of(codeEntity));
-        when(userService.findById(anyString())).thenReturn(new UserBO());
+        when(userService.findById(null)).thenReturn(new UserBO());
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(bearerTokenService.bearerToken(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new BearerTokenBO());
+        when(bearerTokenService.bearerToken(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new BearerTokenBO());
+
+        // When
         OauthTokenResponseBO result = service.oauthToken(CODE);
-        assertThat(result).isEqualToComparingFieldByField(new OauthTokenResponseBO(new BearerTokenBO()));
-    }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void oauthToken_nf() {
-        when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.empty());
-        service.oauthToken(CODE);
-    }
-
-    @Test(expected = UserManagementModuleException.class)
-    public void oauthToken_expired_operation() {
-        OauthCodeEntity codeEntity = new OauthCodeEntity();
-        codeEntity.setExpiryTime(OffsetDateTime.MIN);
-        when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.of(codeEntity));
-        service.oauthToken(CODE);
+        // Then
+        assertEquals(new OauthTokenResponseBO(new BearerTokenBO()), result);
     }
 
     @Test
-    public void oauthServerInfo() {
-        Whitebox.setInternalState(service, "oauthConfigProp", getProps());
+    void oauthToken_nf() {
+        // Given
+        when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> service.oauthToken(CODE));
+    }
+
+    @Test
+    void oauthToken_expired_operation() {
+        // Given
+        OauthCodeEntity codeEntity = new OauthCodeEntity();
+        codeEntity.setExpiryTime(OffsetDateTime.MIN);
+        when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.of(codeEntity));
+
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> service.oauthToken(CODE));
+    }
+
+    @Test
+    void oauthServerInfo() throws NoSuchFieldException {
+        FieldSetter.setField(service, service.getClass().getDeclaredField("oauthConfigProp"), getProps());
         OauthServerInfoBO result = service.oauthServerInfo();
-        assertThat(result).isEqualTo(getServerInfo());
+
+        // Then
+        assertEquals(getServerInfo(), result);
     }
 
     private OauthConfigurationProperties getProps() {

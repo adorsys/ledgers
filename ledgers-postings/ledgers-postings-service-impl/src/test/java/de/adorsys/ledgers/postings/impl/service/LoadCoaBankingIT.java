@@ -12,28 +12,29 @@ import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class, DbUnitTestExecutionListener.class})
 @DatabaseSetup("LoadCoaBankingIT-db-entries.xml")
 @DatabaseTearDown(value = {"LoadCoaBankingIT-db-delete.xml"}, type = DatabaseOperation.DELETE_ALL)
-public class LoadCoaBankingIT {
+class LoadCoaBankingIT {
 
     private static final String SYSTEM = "System";
     private ObjectMapper mapper = new ObjectMapper();
@@ -41,16 +42,17 @@ public class LoadCoaBankingIT {
     @Autowired
     private LedgerService ledgerService;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void init() {
         final YAMLFactory ymlFactory = new YAMLFactory();
         mapper = new ObjectMapper(ymlFactory);
     }
 
     @Test
-    public void test_load_coa_ok() throws IOException {
+    void test_load_coa_ok() throws IOException {
+        // Given
         LedgerBO ledger = ledgerService.findLedgerById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
-        Assume.assumeNotNull(ledger);
+        assumeTrue(ledger != null);
 
         InputStream inputStream = LoadLedgerAccountYMLTest.class.getResourceAsStream("LoadCoaBankingIT-coa.yml");
         LegAccYamlModel[] ledgerAccounts = mapper.readValue(inputStream, LegAccYamlModel[].class);
@@ -71,13 +73,15 @@ public class LoadCoaBankingIT {
             ledgerService.newLedgerAccount(l, SYSTEM);
         }
 
+        // When
         LedgerAccountBO la = ledgerService.findLedgerAccount(ledger, "1003");
-        Assume.assumeNotNull(la);
-        Assert.assertEquals("Cash in transit", la.getShortDesc());
-        Assert.assertEquals(AccountCategoryBO.AS, la.getCategory());
-        Assert.assertEquals(BalanceSideBO.Dr, la.getBalanceSide());
-    }
 
+        // Then
+        assumeTrue(la != null);
+        assertEquals("Cash in transit", la.getShortDesc());
+        assertEquals(AccountCategoryBO.AS, la.getCategory());
+        assertEquals(BalanceSideBO.Dr, la.getBalanceSide());
+    }
 
     private static class LegAccYamlModel {
         private String shortDesc;

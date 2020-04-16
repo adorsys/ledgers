@@ -10,22 +10,23 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.Currency;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SCAUtilsTest {
+@ExtendWith(MockitoExtension.class)
+class SCAUtilsTest {
     @InjectMocks
     private SCAUtils utils;
 
@@ -37,7 +38,7 @@ public class SCAUtilsTest {
     private UserMapper userMapper;
 
     @Test
-    public void getScaMethod_TO() {
+    void getScaMethod_TO() {
         ScaUserDataTO result = utils.getScaMethod(getUserTO(), "id");
         assertThat(result).isEqualTo(getScaUserDataTO());
     }
@@ -69,7 +70,7 @@ public class SCAUtilsTest {
     }
 
     @Test
-    public void hasSCA() {
+    void hasSCA() {
         boolean result = utils.hasSCA(getUserBO());
         assertThat(result).isTrue();
     }
@@ -81,7 +82,7 @@ public class SCAUtilsTest {
     }
 
     @Test
-    public void authorisationId() {
+    void authorisationId() {
         String result = utils.authorisationId(getScaInfo());
         assertThat(result).isEqualTo("authId");
     }
@@ -92,12 +93,12 @@ public class SCAUtilsTest {
     }
 
     @Test
-    public void checkScaResult() {
+    void checkScaResult() {
         utils.checkScaResult(new ScaValidationBO("code", true, ScaStatusBO.RECEIVED, 3));
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void checkScaResult_fail() {
-        utils.checkScaResult(new ScaValidationBO("code", false, ScaStatusBO.RECEIVED, 3));
+    @Test
+    void checkScaResult_fail() {
+        assertThrows(MiddlewareModuleException.class, () -> utils.checkScaResult(new ScaValidationBO("code", false, ScaStatusBO.RECEIVED, 3)));
     }
 }

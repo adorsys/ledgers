@@ -1,20 +1,22 @@
 package de.adorsys.ledgers.util.hash;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class HashGeneratorImplTest {
+class HashGeneratorImplTest {
 
     private static final String PLAIN_TEXT = "my simple string";
     private static final String ENCODED_TEXT = "6C629DBB529DA292F35C3A5A84711228";
 
     @Test
-    public void hash() throws HashGenerationException {
-
+    void hash() throws HashGenerationException {
+        // Given
         HashGeneratorImpl hashGenerator = new HashGeneratorImpl();
 
+        // When
         String hash = hashGenerator.hash(new HashItem<String>() {
             @Override
             public String getAlg() {
@@ -27,15 +29,17 @@ public class HashGeneratorImplTest {
             }
         });
 
+        // Then
         assertThat(hash, is(ENCODED_TEXT));
     }
 
-    @Test(expected = HashGenerationException.class)
-    public void hashWithException() throws HashGenerationException {
-
+    @Test
+    void hashWithException() throws HashGenerationException {
+        // Given
         HashGeneratorImpl hashGenerator = new HashGeneratorImpl();
 
-        String hash = hashGenerator.hash(new HashItem<String>() {
+        // Then
+        assertThrows(HashGenerationException.class, () -> hashGenerator.hash(new HashItem<String>() {
             @Override
             public String getAlg() {
                 return "UNKNOWN_ALG";
@@ -45,6 +49,6 @@ public class HashGeneratorImplTest {
             public String getItem() {
                 return PLAIN_TEXT;
             }
-        });
+        }));
     }
 }

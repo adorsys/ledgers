@@ -1,12 +1,15 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
 import de.adorsys.ledgers.util.exception.ScaModuleException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class MobileSCASenderTest {
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    @Test(expected = ScaModuleException.class)
-    public void send() {
-        new MobileSCASender().send("+380933434344", "myAuthCode");
+class MobileSCASenderTest {
+
+    @Test
+    void send() {
+        // Then
+        assertThrows(ScaModuleException.class, () -> new MobileSCASender().send("+380933434344", "myAuthCode"));
     }
 }
