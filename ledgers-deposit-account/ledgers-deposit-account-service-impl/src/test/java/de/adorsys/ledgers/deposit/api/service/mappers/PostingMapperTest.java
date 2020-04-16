@@ -2,15 +2,16 @@ package de.adorsys.ledgers.deposit.api.service.mappers;
 
 import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.util.Ids;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PostingMapperTest {
+class PostingMapperTest {
     private PostingMapper mapper = Mappers.getMapper(PostingMapper.class);
     private static final LocalDateTime PST_TIME = LocalDateTime.now();
     private static final String PAYMENT_ID = "123";
@@ -20,15 +21,21 @@ public class PostingMapperTest {
     private static final String USR_NAME = "Test";
 
     @Test
-    public void buildPosting() {
+    void buildPosting() {
+        // When
         PostingBO result = mapper.buildPosting(PST_TIME, PAYMENT_ID, OPR_DETAILS, getLedger(), USR_NAME);
-        assertThat(result.getOprId()).isNotNull();
+
+        // Then
+        assertNotNull(result.getOprId());
         assertThat(result).isEqualToIgnoringGivenFields(getTestPosting(), "oprId");
     }
 
     @Test
-    public void buildPostingLine() {
+    void buildPostingLine() {
+        // When
         PostingLineBO result = mapper.buildPostingLine(OPR_DETAILS, getAccount(), BigDecimal.TEN, BigDecimal.TEN, OPR_ID, LINE_ID);
+
+        // Then
         assertThat(result).isEqualTo(getLine());
     }
 

@@ -7,21 +7,21 @@ import de.adorsys.ledgers.middleware.api.domain.sca.AuthConfirmationTO;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.ScaAuthConfirmationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.PATC;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.RJCT;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-@RunWith(PowerMockRunner.class)
-public class MiddlewareAuthConfirmationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class MiddlewareAuthConfirmationServiceTest {
     private static final String AUTH_ID = "auth_id";
     private static final String USER_LOGIN = "user_login";
     private static final String OPERATION_ID = "234lkjsdf9234";
@@ -37,160 +37,171 @@ public class MiddlewareAuthConfirmationServiceTest {
     private DepositAccountPaymentService depositAccountPaymentService;
 
     @Test
-    public void verifyAuthConfirmationCode_Payment() throws Exception {
+    void verifyAuthConfirmationCode_Payment() {
+        // Given
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .success(true)
                                               .transactionStatus(TransactionStatusTO.ACCP);
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
-
         when(scaOperationService.verifyAuthConfirmationCode(anyString(), anyString())).thenReturn(new ScaAuthConfirmationBO(true, OpTypeBO.PAYMENT, OPERATION_ID));
         when(scaOperationService.authenticationCompleted(anyString(), any(OpTypeBO.class))).thenReturn(true);
         when(depositAccountPaymentService.executePayment(anyString(), anyString())).thenReturn(TransactionStatusBO.ACCP);
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).verifyAuthConfirmationCode(anyString(), anyString());
         verify(scaOperationService, times(1)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(1)).executePayment(anyString(), anyString());
-
-        assertThat(actual).isEqualTo(expected);
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void verifyAuthConfirmationCode_Payment_Multilevel() throws Exception {
+    void verifyAuthConfirmationCode_Payment_Multilevel() {
+        // Given
         ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .transactionStatus(TransactionStatusTO.PATC)
                                               .multilevelScaRequired(true)
                                               .partiallyAuthorised(true);
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
 
         when(scaOperationService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE)).thenReturn(new ScaAuthConfirmationBO(true, OpTypeBO.PAYMENT, OPERATION_ID));
         when(scaOperationService.authenticationCompleted(OPERATION_ID, OpTypeBO.PAYMENT)).thenReturn(false);
         when(depositAccountPaymentService.updatePaymentStatus(anyString(), any(TransactionStatusBO.class))).thenReturn(PATC);
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).verifyAuthConfirmationCode(anyString(), anyString());
         verify(scaOperationService, times(1)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(0)).executePayment(anyString(), anyString());
         verify(depositAccountPaymentService, times(1)).updatePaymentStatus(anyString(), any(TransactionStatusBO.class));
 
-        assertThat(actual.getTransactionStatus()).isEqualTo(expected.getTransactionStatus());
+        assertEquals(expected.getTransactionStatus(), actual.getTransactionStatus());
     }
 
     @Test
-    public void verifyAuthConfirmationCode_Consent() throws Exception {
+    void verifyAuthConfirmationCode_Consent() {
+        // Given
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .success(true);
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
 
         when(scaOperationService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE)).thenReturn(new ScaAuthConfirmationBO(true, OpTypeBO.CONSENT, OPERATION_ID));
         when(scaOperationService.authenticationCompleted(OPERATION_ID, OpTypeBO.CONSENT)).thenReturn(true);
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).verifyAuthConfirmationCode(anyString(), anyString());
         verify(scaOperationService, times(1)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(0)).executePayment(anyString(), anyString());
         verify(depositAccountPaymentService, times(0)).updatePaymentStatus(anyString(), any(TransactionStatusBO.class));
 
-        assertThat(actual).isEqualTo(expected);
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void verifyAuthConfirmationCode_Consent_Multilevel() throws Exception {
-        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
+    void verifyAuthConfirmationCode_Consent_Multilevel() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .success(true)
                                               .partiallyAuthorised(true)
                                               .multilevelScaRequired(true);
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
 
         when(scaOperationService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE)).thenReturn(new ScaAuthConfirmationBO(true, OpTypeBO.CONSENT, OPERATION_ID));
         when(scaOperationService.authenticationCompleted(OPERATION_ID, OpTypeBO.CONSENT)).thenReturn(false);
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).verifyAuthConfirmationCode(anyString(), anyString());
         verify(scaOperationService, times(1)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(0)).executePayment(anyString(), anyString());
         verify(depositAccountPaymentService, times(0)).updatePaymentStatus(anyString(), any(TransactionStatusBO.class));
 
-        assertThat(actual).isEqualTo(expected);
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void verifyAuthConfirmationCode_Fail() throws Exception {
+    void verifyAuthConfirmationCode_Fail() {
+        // Given
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .success(false);
 
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
-
         when(scaOperationService.verifyAuthConfirmationCode(anyString(), anyString())).thenReturn(new ScaAuthConfirmationBO(false, any(OpTypeBO.class), anyString()));
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.verifyAuthConfirmationCode(AUTH_ID, AUTH_CONFIRM_CODE, USER_LOGIN);
 
-        assertThat(actual).isEqualTo(expected);
+        // Then
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void completeAuthConfirmation_Payment_Success() throws Exception {
+    void completeAuthConfirmation_Payment_Success() {
+        // Given
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .transactionStatus(TransactionStatusTO.ACCP)
                                               .success(true);
-
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
 
         when(scaOperationService.authenticationCompleted(OPERATION_ID, OpTypeBO.PAYMENT)).thenReturn(true);
         when(scaOperationService.completeAuthConfirmation(anyString(), anyBoolean())).thenReturn(new ScaAuthConfirmationBO(true, OpTypeBO.PAYMENT, OPERATION_ID));
         when(depositAccountPaymentService.executePayment(anyString(), anyString())).thenReturn(TransactionStatusBO.ACCP);
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.completeAuthConfirmation(AUTH_ID, true, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(1)).executePayment(anyString(), anyString());
 
-        assertThat(actual).isEqualTo(expected);
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void completeAuthConfirmation_Payment_Fail() throws Exception {
+    void completeAuthConfirmation_Payment_Fail() {
+        // Given
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .transactionStatus(TransactionStatusTO.RJCT)
                                               .success(false);
 
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
-
         when(scaOperationService.completeAuthConfirmation(anyString(), anyBoolean())).thenReturn(new ScaAuthConfirmationBO(false, OpTypeBO.PAYMENT, OPERATION_ID));
         when(depositAccountPaymentService.updatePaymentStatus(anyString(), any(TransactionStatusBO.class))).thenReturn(RJCT);
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.completeAuthConfirmation(AUTH_ID, false, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).completeAuthConfirmation(anyString(), anyBoolean());
         verify(scaOperationService, times(0)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(1)).updatePaymentStatus(anyString(), any(TransactionStatusBO.class));
         verify(depositAccountPaymentService, times(0)).executePayment(anyString(), anyString());
 
-        assertThat(actual).isEqualTo(expected);
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void completeAuthConfirmation_Consent_Fail() throws Exception {
+    void completeAuthConfirmation_Consent_Fail() {
+        // Given
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .success(false);
 
-        whenNew(AuthConfirmationTO.class).withArguments(anyBoolean(), anyBoolean(), any(TransactionStatusTO.class), anyBoolean()).thenReturn(expected);
-
         when(scaOperationService.completeAuthConfirmation(anyString(), anyBoolean())).thenReturn(new ScaAuthConfirmationBO(false, OpTypeBO.CONSENT, OPERATION_ID));
 
+        // When
         AuthConfirmationTO actual = middlewareUserService.completeAuthConfirmation(AUTH_ID, false, USER_LOGIN);
 
+        // Then
         verify(scaOperationService, times(1)).completeAuthConfirmation(anyString(), anyBoolean());
         verify(scaOperationService, times(0)).authenticationCompleted(anyString(), any(OpTypeBO.class));
         verify(depositAccountPaymentService, times(0)).updatePaymentStatus(anyString(), any(TransactionStatusBO.class));
         verify(depositAccountPaymentService, times(0)).executePayment(anyString(), anyString());
 
-        assertThat(actual).isEqualTo(expected);
+        assertEquals(expected, actual);
     }
 }

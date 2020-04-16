@@ -3,23 +3,23 @@ package de.adorsys.ledgers.deposit.db.repository;
 import de.adorsys.ledgers.deposit.db.domain.*;
 import de.adorsys.ledgers.deposit.db.test.DepositAccountRepositoryApplication;
 import de.adorsys.ledgers.util.Ids;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DepositAccountRepositoryApplication.class)
-public class PaymentRepositoryIT {
+class PaymentRepositoryIT {
 
     @Autowired
     private PaymentRepository paymentRepository;
 
     @Test
-    public void test() {
+    void test() {
         Payment payment = new Payment();
         payment.setPaymentId(Ids.id());
 

@@ -4,16 +4,13 @@ import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
-import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.db.domain.*;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
-import de.adorsys.ledgers.util.exception.DepositModuleException;
-import net.objectlab.kit.datecalc.common.HolidayCalendar;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -26,12 +23,12 @@ import java.util.stream.Stream;
 
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.SINGLE;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSP;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PaymentExecutionServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PaymentExecutionServiceTest {
     private static int PMT_ID = 0;
     private static final String IBAN = "DE1234567890";
     private static final Currency EUR = Currency.getInstance("EUR");
@@ -53,142 +50,138 @@ public class PaymentExecutionServiceTest {
     @Mock
     private DepositAccountTransactionService txService;
     @Mock
-    private HolidayCalendar<LocalDate> calendar;
-    @Mock
     private DepositAccountService accountService;
     @Mock
     private CurrencyExchangeRatesService exchangeRatesService;
-    @Mock
-    private PaymentMapper paymentMapper;
 
     @Test
-    public void executeSinglePayment_status_ACCC() {
-        //given
+    void executeSinglePayment_status_ACCC() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(true);
         when(accountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO(EUR)));
         when(paymentRepository.save(any())).thenReturn(getSinglePayment());
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getSinglePayment(), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACCC, status);
     }
 
     @Test
-    public void executeSinglePayment_status_ACSC() {
-        //given
+    void executeSinglePayment_status_ACSC() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(true);
         when(accountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.empty());
         when(paymentRepository.save(any())).thenReturn(getSinglePayment());
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getSinglePayment(), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSC, status);
     }
 
     @Test
-    public void executeSinglePayment_insufficientFunds() {
-        //given
+    void executeSinglePayment_insufficientFunds() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(false);
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getSinglePayment(), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_RJCT, status);
     }
 
     @Test
-    public void executeBulkPayment_status_ACSC() {
-        //given
+    void executeBulkPayment_status_ACSC() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(true);
         when(accountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.empty());
         when(paymentRepository.save(any())).thenReturn(getBulkPayment());
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getBulkPayment(), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSC, status);
     }
 
     @Test
-    public void executeDailyPeriodicPayment_status_ACSP() {
-        //given
+    void executeDailyPeriodicPayment_status_ACSP() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(true);
         when(paymentRepository.save(any())).thenReturn(getDailyPeriodicPaymentChanged(STATUS_ACSP, getDailyPeriodicPayment().getEndDate(), executionRuleFollowing));
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getDailyPeriodicPayment(), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSP, status);
     }
 
     @Test
-    public void executeDailyPeriodicPayment_executionRulePreceding() {
-        //given
+    void executeDailyPeriodicPayment_executionRulePreceding() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(true);
         when(paymentRepository.save(any())).thenReturn(getDailyPeriodicPaymentChanged(STATUS_ACSP, getDailyPeriodicPayment().getEndDate(), executionRulePreceding));
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getDailyPeriodicPaymentChanged(STATUS_RCVD, getDailyPeriodicPayment().getEndDate(), executionRulePreceding), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSP, status);
     }
 
     @Test
-    public void executeMonthlyPeriodicPayment_status_ACSP() {
-        //given
+    void executeMonthlyPeriodicPayment_status_ACSP() {
+        // Given
         when(accountService.getAccountDetailsById(anyString(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO(EUR));
         when(exchangeRatesService.applyRate(any(), any(), any())).thenReturn(BigDecimal.TEN);
         when(accountService.confirmationOfFunds(any())).thenReturn(true);
         when(paymentRepository.save(any())).thenReturn(getMonthlyPeriodicPaymentChanged(STATUS_ACSP, getMonthlyPeriodicPayment().getEndDate()));
 
-        //when
+        // When
         TransactionStatusBO status = executionService.executePayment(getMonthlyPeriodicPayment(), "userName");
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSP, status);
     }
 
     @Test
-    public void schedulePayment() {
-        //given
+    void schedulePayment() {
+        // Given
         when(paymentRepository.save(any())).thenReturn(getSinglePaymentChanged(STATUS_ACSP, getSinglePayment().getEndDate()));
 
-        //when
+        // When
         TransactionStatusBO status = executionService.schedulePayment(getSinglePayment());
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSP, status);
     }
 
     @Test
-    public void schedulePayment_periodicPaymentHasLastExecutedDate() {
-        //given
+    void schedulePayment_periodicPaymentHasLastExecutedDate() {
+        // Given
         when(paymentRepository.save(any())).thenReturn(getSinglePaymentChanged(STATUS_ACSC, getSinglePayment().getEndDate()));
 
-        //when
+        // When
         TransactionStatusBO status = executionService.schedulePayment(getMonthlyPeriodicPaymentChanged(STATUS_RCVD, LocalDate.now().minusDays(5)));
 
-        //then
+        // Then
         assertSame(STATUS_BO_ACSC, status);
     }
 

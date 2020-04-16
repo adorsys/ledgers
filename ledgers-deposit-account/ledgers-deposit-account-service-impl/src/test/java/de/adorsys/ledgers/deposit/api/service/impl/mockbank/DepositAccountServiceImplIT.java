@@ -11,15 +11,13 @@ import de.adorsys.ledgers.postings.api.domain.PostingBO;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
@@ -29,11 +27,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DepositAccountServiceApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class})
-public class DepositAccountServiceImplIT {
+class DepositAccountServiceImplIT {
 
     @Autowired
     private AccountStmtService accountStmtService;
@@ -47,19 +49,17 @@ public class DepositAccountServiceImplIT {
     private DepositAccountInitService depositAccountInitService;
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    
-    @Before
-    public void initDepositAccount() {
-    	depositAccountInitService.initConfigData();
+
+    @BeforeEach
+    void initDepositAccount() {
+        depositAccountInitService.initConfigData();
     }
 
     /**
      * Testing the test. Negative case, if comparison with wrong balance works.
-     *
-     * @throws IOException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok() throws IOException{
+    void use_case_newbank_no_overriden_tx_nok() throws IOException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
         LocalDateTime dateTime = LocalDateTime.of(2018, Month.JANUARY, 01, 23, 59);
@@ -69,12 +69,10 @@ public class DepositAccountServiceImplIT {
     }
 
     /**
-     * Classical case, no overriden transaction. Test balance computation.
-     *
-     * @throws IOException
+     * Classical case, no overridden transaction. Test balance computation.
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok() throws IOException{
+    void use_case_newbank_no_overriden_tx_ok() throws IOException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
         LocalDateTime dateTime = LocalDateTime.of(2018, Month.JANUARY, 01, 8, 30);
@@ -103,32 +101,31 @@ public class DepositAccountServiceImplIT {
         checkBalance("1006", dateTime, new BigDecimal(3500.00));
         checkBalance("DE80760700240271232400", dateTime, new BigDecimal(-3500.00));
         checkBalance("DE38760700240320465700", dateTime, new BigDecimal(-5000.00));
-
     }
-    
+
     @Test
-    public void use_case_check_account_balance() throws IOException {
+    void use_case_check_account_balance() throws IOException {
         loadPosting("use_case_newbank_no_overriden_tx.yml");
         checkBalance("DE38760700240320465700", LocalDateTime.now(), new BigDecimal(-5000.00));
     }
 
-    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance){
+    private void checkBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
         LedgerBO ledger = loadLedger();
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
-        Assert.assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
+        assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
     private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
         LedgerBO ledger = loadLedger();
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
-        Assert.assertNotEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
+        assertNotEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
     private void loadPosting(String s) throws IOException {
         LedgerBO ledger = loadLedger();
-        Assume.assumeNotNull(ledger);
+        assumeTrue(ledger != null);
         InputStream inputStream = DepositAccountServiceImplIT.class.getResourceAsStream(s);
         PostingBO[] postings = mapper.readValue(inputStream, PostingBO[].class);
         for (PostingBO p : postings) {

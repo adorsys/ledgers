@@ -6,155 +6,168 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PaymentConverterTest {
+@ExtendWith(MockitoExtension.class)
+class PaymentConverterTest {
     private static final String PATH_SINGLE_BO = "PaymentSingle.yml";
     private static final String PATH_SINGLE_TO = "PaymentSingleTO.yml";
     private static final String PATH_PERIODIC_BO = "PaymentPeriodic.yml";
     private static final String PATH_PERIODIC_TO = "PaymentPeriodicTO.yml";
     private static final String PATH_BULK_BO = "PaymentBulk.yml";
-    private static final String PATH_BULK_BO_XS2A = "PaymentBulkXs2a.yml";
     private static final String PATH_BULK_TO = "PaymentBulkTO.yml";
-    private static final String PATH_BULK_TO_XS2A = "PaymentBulkTOxs2a.yml";
 
     @InjectMocks
     private PaymentConverterImpl converter;
-    
+
     private static ObjectMapper mapper = getObjectMapper();
 
     @Test
-    public void toPaymentResultTO() {
+    void toPaymentResultTO() {
+        // Given
         PaymentResultBO bo = readYml(PaymentResultBO.class, "payment-result.yml");
+
+        // When
         PaymentResultTO to = converter.toPaymentResultTO(bo);
 
-        assertThat(to.getResponseStatus(), is(ResultStatusTO.SUCCESS));
-        assertThat(to.getPaymentResult(), is(TransactionStatusTO.RCVD.name()));
-        assertThat(to.getMessages().size(), is(2));
-        assertThat(to.getMessages().get(0), is("message1"));
-        assertThat(to.getMessages().get(1), is("message2"));
+        // Then
+        assertEquals(ResultStatusTO.SUCCESS, to.getResponseStatus());
+        assertEquals(TransactionStatusTO.RCVD.name(), to.getPaymentResult());
+        assertEquals(2, to.getMessages().size());
+        assertEquals("message1", to.getMessages().get(0));
+        assertEquals("message2", to.getMessages().get(1));
     }
 
     @Test
-    public void toPaymentResultBO() {
+    void toPaymentResultBO() {
+        // Given
         PaymentResultTO to = readYml(PaymentResultTO.class, "payment-result.yml");
 
         PaymentResultBO bo = converter.toPaymentResultBO(to);
 
-        assertThat(bo.getResponseStatus(), is(ResultStatusBO.SUCCESS));
-        assertThat(bo.getPaymentResult(), is(TransactionStatusBO.RCVD.name()));
-        assertThat(bo.getMessages().size(), is(2));
-        assertThat(bo.getMessages().get(0), is("message1"));
-        assertThat(bo.getMessages().get(1), is("message2"));
+        assertEquals(ResultStatusBO.SUCCESS, bo.getResponseStatus());
+        assertEquals(TransactionStatusBO.RCVD.name(), bo.getPaymentResult());
+        assertEquals(2, bo.getMessages().size());
+        assertEquals("message1", bo.getMessages().get(0));
+        assertEquals("message2", bo.getMessages().get(1));
     }
 
     @Test
-    public void toSinglePaymentTO() {
-        //Given
+    void toSinglePaymentTO() {
+        // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, PATH_SINGLE_BO);
         SinglePaymentTO expected = readYml(SinglePaymentTO.class, PATH_SINGLE_TO);
 
-        //When
+        // When
         SinglePaymentTO payment = converter.toSinglePaymentTO(paymentBO, paymentBO.getTargets().get(0));
-        assertThat(payment).isNotNull();
-        assertThat(payment).isEqualToComparingFieldByFieldRecursively(expected);
+
+        // Then
+        assertNotNull(payment);
+        assertEquals(expected, payment);
     }
 
     @Test
-    public void toPeriodicPaymentTO() {
-        //Given
+    void toPeriodicPaymentTO() {
+        // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, PATH_PERIODIC_BO);
         PeriodicPaymentTO expected = readYml(PeriodicPaymentTO.class, PATH_PERIODIC_TO);
 
-        //When
+        // When
         SinglePaymentTO payment = converter.toPeriodicPaymentTO(paymentBO, paymentBO.getTargets().get(0));
-        assertThat(payment).isNotNull();
-        assertThat(payment).isEqualToComparingFieldByFieldRecursively(expected);
+
+        // Then
+        assertNotNull(payment);
+        assertEquals(expected, payment);
     }
 
     @Test
-    public void toBulkPaymentTO() {
-        //Given
+    void toBulkPaymentTO() {
+        // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, PATH_BULK_BO);
         BulkPaymentTO expected = readYml(BulkPaymentTO.class, PATH_BULK_TO);
 
-        //When
+        // When
         BulkPaymentTO payment = converter.toBulkPaymentTO(paymentBO, paymentBO.getTargets().get(0));
-        assertThat(payment).isNotNull();
-        assertThat(payment).isEqualToComparingFieldByFieldRecursively(expected);
+
+        // Then
+        assertNotNull(payment);
+        assertEquals(expected, payment);
     }
 
     @Test
-    public void toPaymentTypeBO() {
-        assertThat(PaymentTypeBO.values().length).isEqualTo(PaymentTypeTO.values().length);
-        assertThat(converter.toPaymentTypeBO(PaymentTypeTO.SINGLE)).isEqualTo(PaymentTypeBO.SINGLE);
-        assertThat(converter.toPaymentTypeBO(PaymentTypeTO.PERIODIC)).isEqualTo(PaymentTypeBO.PERIODIC);
-        assertThat(converter.toPaymentTypeBO(PaymentTypeTO.BULK)).isEqualTo(PaymentTypeBO.BULK);
+    void toPaymentTypeBO() {
+        // Then
+        assertEquals(PaymentTypeTO.values().length, PaymentTypeBO.values().length);
+        assertEquals(PaymentTypeBO.SINGLE, converter.toPaymentTypeBO(PaymentTypeTO.SINGLE));
+        assertEquals(PaymentTypeBO.PERIODIC, converter.toPaymentTypeBO(PaymentTypeTO.PERIODIC));
+        assertEquals(PaymentTypeBO.BULK, converter.toPaymentTypeBO(PaymentTypeTO.BULK));
     }
 
     @Test
-    public void toPaymentTypeTO() {
-        assertThat(PaymentTypeBO.values().length).isEqualTo(PaymentTypeTO.values().length);
-        assertThat(converter.toPaymentTypeTO(PaymentTypeBO.SINGLE)).isEqualTo(PaymentTypeTO.SINGLE);
-        assertThat(converter.toPaymentTypeTO(PaymentTypeBO.PERIODIC)).isEqualTo(PaymentTypeTO.PERIODIC);
-        assertThat(converter.toPaymentTypeTO(PaymentTypeBO.BULK)).isEqualTo(PaymentTypeTO.BULK);
+    void toPaymentTypeTO() {
+        // Then
+        assertEquals(PaymentTypeTO.values().length, PaymentTypeBO.values().length);
+        assertEquals(PaymentTypeTO.SINGLE, converter.toPaymentTypeTO(PaymentTypeBO.SINGLE));
+        assertEquals(PaymentTypeTO.PERIODIC, converter.toPaymentTypeTO(PaymentTypeBO.PERIODIC));
+        assertEquals(PaymentTypeTO.BULK, converter.toPaymentTypeTO(PaymentTypeBO.BULK));
     }
 
     @Test
-    public void toPaymentTO() {
-        assertThat(converter.toPaymentTO(readYml(PaymentBO.class, PATH_SINGLE_BO))).isExactlyInstanceOf(SinglePaymentTO.class);
-        assertThat(converter.toPaymentTO(readYml(PaymentBO.class, PATH_PERIODIC_BO))).isExactlyInstanceOf(PeriodicPaymentTO.class);
-        assertThat(converter.toPaymentTO(readYml(PaymentBO.class, PATH_BULK_BO))).isExactlyInstanceOf(BulkPaymentTO.class);
+    void toPaymentTO() {
+        // Then
+        assertTrue(converter.toPaymentTO(readYml(PaymentBO.class, PATH_SINGLE_BO)) instanceof SinglePaymentTO);
+        assertTrue(converter.toPaymentTO(readYml(PaymentBO.class, PATH_PERIODIC_BO)) instanceof PeriodicPaymentTO);
+        assertTrue(converter.toPaymentTO(readYml(PaymentBO.class, PATH_BULK_BO)) instanceof BulkPaymentTO);
     }
 
     @Test
-    public void toSingleBulkPartTO() {
+    void toSingleBulkPartTO() {
+        // Given
         PaymentBO payment = readYml(PaymentBO.class, PATH_BULK_BO);
         SinglePaymentTO expectedResult = readYml(BulkPaymentTO.class, PATH_BULK_TO).getPayments().get(0);
+
+        // When
         SinglePaymentTO result = converter.toSingleBulkPartTO(payment, payment.getTargets().get(0));
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(expectedResult);
+
+        // Then
+        assertEquals(expectedResult, result);
     }
 
-    /*
-     * Intentionaly left here. Don't like thes injected hidden Mappers...
-     */
-
     @Test
-    public void toTransactionTO() {
+    void toTransactionTO() {
+        // When
         TransactionTO result = converter.toTransactionTO(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(TransactionTO.class, "TransactionTO.yml"));
+
+        // Then
+        assertEquals(readYml(TransactionTO.class, "TransactionTO.yml"), result);
     }
 
     @Test
-    public void toTransactionDetailsBO() {
+    void toTransactionDetailsBO() {
+        // When
         TransactionDetailsBO result = converter.toTransactionDetailsBO(readYml(TransactionTO.class, "TransactionTO.yml"));
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
+
+        // Then
+        assertEquals(readYml(TransactionDetailsBO.class, "TransactionBO.yml"), result);
     }
 
     private static <T> T readYml(Class<T> aClass, String file) {
         try {
-        	return mapper.readValue(PaymentConverterTest.class.getResourceAsStream(file), aClass);
+            return mapper.readValue(PaymentConverterTest.class.getResourceAsStream(file), aClass);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
     }
-    
-    protected static ObjectMapper getObjectMapper() {
+
+    static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         objectMapper.findAndRegisterModules();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);

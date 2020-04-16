@@ -5,22 +5,23 @@ import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequest
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AccountResourceTest {
+@ExtendWith(MockitoExtension.class)
+class AccountResourceTest {
 
     @InjectMocks
     AccountResource accountResource;
@@ -28,25 +29,32 @@ public class AccountResourceTest {
     @Mock
     MiddlewareAccountManagementService middlewareAccountService;
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void fundsConfirmation_zero() {
-        accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.ZERO));
+    @Test
+    void fundsConfirmation_zero() {
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.ZERO)));
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void fundsConfirmation_negative() {
-        accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.valueOf(-100)));
+    @Test
+    void fundsConfirmation_negative() {
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.valueOf(-100))));
     }
 
     @Test()
-    public void fundsConfirmation_positive() {
+    void fundsConfirmation_positive() {
+        // Given
         when(middlewareAccountService.confirmFundsAvailability(any())).thenReturn(true);
+
+        // When
         ResponseEntity<Boolean> confirmation = accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.TEN));
-        assertThat(confirmation.getStatusCode().is2xxSuccessful()).isTrue();
-        assertThat(confirmation.getBody()).isTrue();
+
+        // Then
+        assertTrue(confirmation.getStatusCode().is2xxSuccessful());
+        assertTrue(confirmation.getBody());
     }
 
     private FundsConfirmationRequestTO getFundsConfirmationRequest(BigDecimal amount) {
-        return new FundsConfirmationRequestTO("PSU_ID",new AccountReferenceTO(),new AmountTO(Currency.getInstance("EUR"), amount),null,null);
+        return new FundsConfirmationRequestTO("PSU_ID", new AccountReferenceTO(), new AmountTO(Currency.getInstance("EUR"), amount), null, null);
     }
 }

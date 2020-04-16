@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.postings.db.repository;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -18,34 +17,31 @@ import de.adorsys.ledgers.postings.db.tests.PostingRepositoryApplication;
 import de.adorsys.ledgers.postings.db.utils.RecordHashHelper;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
 @DatabaseSetup("PostingRepositoryIT-db-entries.xml")
 @DatabaseTearDown(value = {"PostingRepositoryIT-db-entries.xml"}, type = DatabaseOperation.DELETE_ALL)
-public class PostingRepositoryIT {
+class PostingRepositoryIT {
 
     ObjectMapper om = new ObjectMapper().findAndRegisterModules()
                               .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
@@ -61,9 +57,10 @@ public class PostingRepositoryIT {
     private LedgerRepository ledgerRepository;
 
     @Test
-    public void test_create_posting_ok() {
+    void test_create_posting_ok() {
+        // Given
         Optional<Ledger> ledgerOption = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
-        Assume.assumeTrue(ledgerOption.isPresent());
+        assumeTrue(ledgerOption.isPresent());
         Posting p = new Posting();
         p.setRecordUser("recUser");
         p.setOprId("oprId");
@@ -72,38 +69,50 @@ public class PostingRepositoryIT {
         p.setLedger(ledgerOption.get());
         p.setOprDetails(new OperationDetails("oprDetails"));
         p.setId(Ids.id());
+
+        // When
         postingRepository.save(p);
     }
 
     @Test
-    public void test_load_posting_by_id_ok() {
+    void test_load_posting_by_id_ok() {
+        // When
         Optional<Posting> posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING");
-        Assume.assumeTrue(posting.isPresent());
+
+        // Then
+        assumeTrue(posting.isPresent());
     }
 
     @Test
-    public void test_find_posting_by_operation_id() {
+    void test_find_posting_by_operation_id() {
+        // When
         List<Posting> posting = postingRepository.findByOprId("Zd0ND5YwSzGwIfZilhumPg_OPERATION");
+
+        // Then
         assertEquals(2, posting.size());
     }
 
     @Test
-    public void test_find_first_optional_by_ledger_order_by_record_time_desc() {
+    void test_find_first_optional_by_ledger_order_by_record_time_desc() {
+        // Given
         Ledger ledger = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg").orElse(null);
-        Assume.assumeNotNull(ledger);
+        assumeTrue(ledger != null);
 
+        // When
         Posting posting = postingRepository.findFirstByLedgerOrderByRecordTimeDesc(ledger).orElse(null);
-        Assume.assumeNotNull(posting);
+
+        // Then
+        assumeTrue(posting != null);
         assertEquals("Zd0ND5YwSzGwIfZilhumPg_POSTING2", posting.getId());
         System.out.println(posting.getId());
-
     }
 
     @Test
     @Transactional
-    public void test_posting_hash() throws JsonProcessingException, HashGenerationException {
+    void test_posting_hash() throws HashGenerationException {
+        // Given
         Optional<Ledger> ledgerOptions = ledgerRepository.findById("Zd0ND5YwSzGwIfZilhumPg");
-        Assume.assumeTrue(ledgerOptions.isPresent());
+        assumeTrue(ledgerOptions.isPresent());
         Posting p = new Posting();
         p.setRecordUser("recUser");
         p.setOprId("oprId");
@@ -115,13 +124,14 @@ public class PostingRepositoryIT {
         Posting saved = postingRepository.save(p);
         saved = postingRepository.save(saved.hash());
         Posting found = postingRepository.findById(saved.getId()).orElse(null);
-        assertThat(saved).isEqualToComparingFieldByFieldRecursively(found);
+        assertEquals(found, saved);
 
         String recHash = found.getHash();
         RecordHashHelper recordHashHelper = new RecordHashHelper();
         found.setHash(null);
         String computedRecHash = recordHashHelper.computeRecHash(found);
 
-        Assert.assertEquals(recHash, computedRecHash);
+        // Then
+        assertEquals(recHash, computedRecHash);
     }
 }

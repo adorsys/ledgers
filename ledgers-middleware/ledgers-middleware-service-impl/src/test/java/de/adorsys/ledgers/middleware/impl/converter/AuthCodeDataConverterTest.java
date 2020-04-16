@@ -2,34 +2,36 @@ package de.adorsys.ledgers.middleware.impl.converter;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthCodeDataTO;
 import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AuthCodeDataConverterTest {
+class AuthCodeDataConverterTest {
 
     @Test
-    public void toAuthCodeDataBO() {
+    void toAuthCodeDataBO() {
+        // Given
         AuthCodeDataConverter mapper = Mappers.getMapper(AuthCodeDataConverter.class);
 
-        AuthCodeDataTO to = readYml(AuthCodeDataTO.class, "auth-code-data.yml");
+        AuthCodeDataTO to = readYml();
 
+        // When
         AuthCodeDataBO bo = mapper.toAuthCodeDataBO(to);
 
-        assertThat(bo.getOpId(), is(to.getOpId()));
-        assertThat(bo.getUserLogin(), is(to.getUserLogin()));
-        assertThat(bo.getOpData(), is(to.getOpData()));
-        assertThat(bo.getScaUserDataId(), is(to.getScaUserDataId()));
+        // Then
+        assertEquals(to.getOpId(), bo.getOpId());
+        assertEquals(to.getUserLogin(), bo.getUserLogin());
+        assertEquals(to.getOpData(), bo.getOpData());
+        assertEquals(to.getScaUserDataId(), bo.getScaUserDataId());
     }
 
-    private <T> T readYml(Class<T> aClass, String file) {
+    private <T> T readYml() {
         try {
-            return YamlReader.getInstance().getObjectFromInputStream(getClass().getResourceAsStream(file), aClass);
+            return YamlReader.getInstance().getObjectFromInputStream(getClass().getResourceAsStream("auth-code-data.yml"), (Class<T>) AuthCodeDataTO.class);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);

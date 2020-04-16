@@ -1,19 +1,16 @@
 package de.adorsys.ledgers.sca.service.job;
 
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SCAOperationExpirationJobTest {
+@ExtendWith(MockitoExtension.class)
+class SCAOperationExpirationJobTest {
 
     @InjectMocks
     private SCAOperationExpirationJob job;
@@ -22,12 +19,14 @@ public class SCAOperationExpirationJobTest {
     private SCAOperationService service;
 
     @Test
-    public void checkOperationExpiration() {
-
+    void checkOperationExpiration() {
+        // Given
         doNothing().when(service).processExpiredOperations();
 
+        // When
         job.checkOperationExpiration();
 
+        // Then
         verify(service, times(1)).processExpiredOperations();
     }
 }

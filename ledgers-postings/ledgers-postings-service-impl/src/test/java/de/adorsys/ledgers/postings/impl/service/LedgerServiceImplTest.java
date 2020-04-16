@@ -10,22 +10,22 @@ import de.adorsys.ledgers.postings.impl.converter.LedgerAccountMapper;
 import de.adorsys.ledgers.postings.impl.converter.LedgerMapper;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class LedgerServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class LedgerServiceImplTest {
     private static final LocalDateTime DATE_TIME = LocalDateTime.now();
     private static final String USER_NAME = "Mr. Jones";
     private static final ChartOfAccount COA = new ChartOfAccount(Ids.id(), DATE_TIME, USER_NAME,
@@ -50,111 +50,152 @@ public class LedgerServiceImplTest {
     private LedgerAccountRepository ledgerAccountRepository;
 
     @Test
-    public void new_ledger_must_produce_id_created_user_copy_other_fields() {
+    void new_ledger_must_produce_id_created_user_copy_other_fields() {
+        // Given
         when(chartOfAccountRepository.findById(COA.getId())).thenReturn(Optional.of(COA));
         when(ledgerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
         // When
         LedgerBO result = ledgerService.newLedger(LEDGER_MAPPER.toLedgerBO(LEDGER));
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getCreated()).isNotNull();
-        assertThat(result.getUserDetails()).isEqualTo(LEDGER.getName());
-        assertThat(result.getName()).isEqualTo(LEDGER.getName());
-        assertThat(result.getShortDesc()).isEqualTo(LEDGER.getShortDesc());
-        assertThat(result.getLongDesc()).isEqualTo(LEDGER.getLongDesc());
 
-        assertThat(result.getCoa()).isNotNull();
+        // Then
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertNotNull(result.getCreated());
+        assertEquals(LEDGER.getName(), result.getUserDetails());
+        assertEquals(LEDGER.getName(), result.getName());
+        assertEquals(LEDGER.getShortDesc(), result.getShortDesc());
+        assertEquals(LEDGER.getLongDesc(), result.getLongDesc());
+
+        assertNotNull(result.getCoa());
     }
 
     @Test
-    public void new_ledgerAccount_must_produce_id_created_user_copy_other_fields() {
+    void new_ledgerAccount_must_produce_id_created_user_copy_other_fields() {
+        // Given
         when(ledgerAccountRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(LEDGER));
+
         // When
         LedgerAccountBO result = ledgerService.newLedgerAccount(LEDGER_ACCOUNT_MAPPER.toLedgerAccountBO(LEDGER_ACCOUNT), SYSTEM);
+
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getCreated()).isNotNull();
-        assertThat(result.getUserDetails()).isEqualTo(SYSTEM);
-        assertThat(result.getName()).isEqualTo(LEDGER_ACCOUNT.getName());
-        assertThat(result.getShortDesc()).isEqualTo(LEDGER_ACCOUNT.getShortDesc());
-        assertThat(result.getLongDesc()).isEqualTo(LEDGER_ACCOUNT.getLongDesc());
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertNotNull(result.getCreated());
+        assertEquals(SYSTEM, result.getUserDetails());
+        assertEquals(LEDGER_ACCOUNT.getName(), result.getName());
+        assertEquals(LEDGER.getShortDesc(), result.getShortDesc());
+        assertEquals(LEDGER.getLongDesc(), result.getLongDesc());
 
-        assertThat(result.getCoa()).isNotNull();
-        assertThat(result.getLedger()).isNotNull();
-    }
-
-    @Test(expected = PostingModuleException.class)
-    public void new_ledgerAccount_ledger_account_name_absent() {
-        ledgerService.newLedgerAccount(new LedgerAccountBO(), USER_NAME);
+        assertNotNull(result.getCoa());
+        assertNotNull(result.getLedger());
     }
 
     @Test
-    public void findLedgerAccountById() {
+    void new_ledgerAccount_ledger_account_name_absent() {
+        // Then
+        assertThrows(PostingModuleException.class, () -> ledgerService.newLedgerAccount(new LedgerAccountBO(), USER_NAME));
+    }
+
+    @Test
+    void findLedgerAccountById() {
+        // Given
         when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.of(new LedgerAccount()));
-        LedgerAccountBO result = ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId());
-        assertThat(result).isEqualToComparingFieldByField(new LedgerAccountBO());
-    }
 
-    @Test(expected = PostingModuleException.class)
-    public void findLedgerAccountById_nf() {
-        when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.empty());
-        ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId());
+        // When
+        LedgerAccountBO result = ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId());
+
+        // Then
+        assertEquals(new LedgerAccountBO(), result);
     }
 
     @Test
-    public void findLedgerAccount() {
+    void findLedgerAccountById_nf() {
+        // Given
+        when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(PostingModuleException.class, () -> ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId()));
+    }
+
+    @Test
+    void findLedgerAccount() {
+        // Given
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString())).thenReturn(Optional.of(new LedgerAccount()));
         when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
 
+        // When
         LedgerAccountBO result = ledgerService.findLedgerAccount(new LedgerBO("name", null), LEDGER_ACCOUNT.getName());
-        assertThat(result).isEqualToComparingFieldByField(new LedgerAccountBO());
+
+        // Then
+        assertEquals(new LedgerAccountBO(), result);
     }
 
-    @Test(expected = PostingModuleException.class)
-    public void findLedgerAccount_nf() {
+    @Test
+    void findLedgerAccount_nf() {
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString())).thenReturn(Optional.empty());
         when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
 
-        LedgerAccountBO result = ledgerService.findLedgerAccount(new LedgerBO("name", null), LEDGER_ACCOUNT.getName());
-        assertThat(result).isEqualToComparingFieldByField(new LedgerAccountBO());
+        assertThrows(PostingModuleException.class, () -> {
+            LedgerAccountBO result = ledgerService.findLedgerAccount(new LedgerBO("name", null), LEDGER_ACCOUNT.getName());
+            assertEquals(new LedgerAccountBO(), result);
+        });
     }
 
     @Test
-    public void finLedgerAccountsByIbans() {
+    void finLedgerAccountsByIbans() {
+        // Given
         when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
         when(ledgerAccountRepository.getAccountsByIbans(anySet(), any())).thenReturn(Collections.emptyList());
+
+        // When
         Map<String, LedgerAccountBO> result = ledgerService.finLedgerAccountsByIbans(new HashSet<>(), new LedgerBO("name", null));
-        assertThat(result).isEqualTo(new HashMap<>());
+
+        // Then
+        assertEquals(new HashMap<>(), result);
     }
 
     @Test
-    public void checkIfLedgerAccountExist() {
+    void checkIfLedgerAccountExist() {
+        // Given
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString()))
                 .thenReturn(Optional.of(new LedgerAccount()));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(new Ledger()));
         LedgerBO testLedger = new LedgerBO(null, "id", null, null, null, null, null);
+
+        // When
         boolean result = ledgerService.checkIfLedgerAccountExist(testLedger, "test name");
-        assertThat(result).isTrue();
+
+        // Then
+        assertTrue(result);
     }
 
     @Test
-    public void checkIfLedgerAccountExist_account_not_present() {
+    void checkIfLedgerAccountExist_account_not_present() {
+        // Given
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString()))
                 .thenReturn(Optional.empty());
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(new Ledger()));
         LedgerBO testLedger = new LedgerBO(null, "id", null, null, null, null, null);
+
+        // When
         boolean result = ledgerService.checkIfLedgerAccountExist(testLedger, "test name");
-        assertThat(result).isFalse();
+
+        // Then
+        assertFalse(result);
     }
 
     @Test
-    public void checkIfLedgerAccountExist_ledger_not_present() {
+    void checkIfLedgerAccountExist_ledger_not_present() {
+        // Given
         when(ledgerRepository.findById(any())).thenReturn(Optional.empty());
         LedgerBO testLedger = new LedgerBO(null, "id", null, null, null, null, null);
+
+        // When
         boolean result = ledgerService.checkIfLedgerAccountExist(testLedger, "test name");
-        assertThat(result).isFalse();
+
+        // Then
+        assertFalse(result);
     }
 }

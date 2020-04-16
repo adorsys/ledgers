@@ -7,24 +7,21 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.postings.api.domain.*;
-import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.postings.impl.test.PostingsApplication;
 import de.adorsys.ledgers.util.Ids;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import de.adorsys.ledgers.util.exception.PostingModuleException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,15 +30,17 @@ import java.time.LocalDateTime;
 import java.time.Month;
 
 import static de.adorsys.ledgers.util.exception.PostingErrorCode.LEDGER_NOT_FOUND;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = PostingsApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
 @DatabaseSetup("AccountStmtServiceImplIT-db-create.xml")
 @DatabaseTearDown(value = {"AccountStmtServiceImplIT-db-delete.xml"}, type = DatabaseOperation.DELETE_ALL)
-public class AccountStmtServiceImplIT {
+class AccountStmtServiceImplIT {
 
     private static final String SYSTEM = "System";
     @Autowired
@@ -53,34 +52,37 @@ public class AccountStmtServiceImplIT {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void init() {
         final YAMLFactory ymlFactory = new YAMLFactory();
         mapper = new ObjectMapper(ymlFactory);
     }
 
     @Test
-    public void test_load_coa_ok() throws IOException {
+    void test_load_coa_ok() throws IOException {
+        // Given
         loadCoa("sample_coa_banking.yml");
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
-        Assume.assumeNotNull(ledger);
+        assumeTrue(ledger != null);
+
+        // When
         LedgerAccountBO ledgerAccount = loadLedgerAccount(ledger, "1128");
-        Assert.assertNotNull(ledgerAccount);
+
+        // Then
+        assertNotNull(ledgerAccount);
     }
 
     @Test
-    public void test_load_posting_ok() throws IOException {
+    void test_load_posting_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("sample_posting.yml");
     }
 
     /**
      * Testing the test. Negative case, if comparison with wrong balance works.
-     *
-     * @throws IOException
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_nok() throws IOException {
+    void use_case_newbank_no_overriden_tx_nok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -91,12 +93,10 @@ public class AccountStmtServiceImplIT {
     }
 
     /**
-     * Classical case, no overriden transaction. Test balance computation.
-     *
-     * @throws IOException
+     * Classical case, no overridden transaction. Test balance computation.
      */
     @Test
-    public void use_case_newbank_no_overriden_tx_ok() throws IOException {
+    void use_case_newbank_no_overriden_tx_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_no_overriden_tx.yml");
 
@@ -128,9 +128,8 @@ public class AccountStmtServiceImplIT {
         checkBalance("2332003", dateTime, new BigDecimal(-5000.00));
     }
 
-
     @Test
-    public void use_case_newbank_overriden_amount_ok() throws IOException {
+    void use_case_newbank_overriden_amount_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_overriden_amount.yml");
 
@@ -163,7 +162,7 @@ public class AccountStmtServiceImplIT {
     }
 
     @Test
-    public void use_case_newbank_overriden_account_number_ok() throws IOException {
+    void use_case_newbank_overriden_account_number_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("use_case_newbank_overriden_account_number.yml");
 
@@ -199,14 +198,14 @@ public class AccountStmtServiceImplIT {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
-        Assert.assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
+        assertEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
     private void checkWrongBalance(String accountNumber, LocalDateTime date, BigDecimal expectedBalance) {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
         LedgerAccountBO account = loadLedgerAccount(ledger, accountNumber);
         BigDecimal balance = accountStmtService.readStmt(account, date).debitBalance();
-        Assert.assertNotEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
+        assertNotEquals(expectedBalance.doubleValue(), balance.doubleValue(), 0d);
     }
 
     private static class LegAccYamlModel {
@@ -239,7 +238,7 @@ public class AccountStmtServiceImplIT {
 
     private void loadPosting(String s) throws IOException {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");//.orElseThrow(() -> new IllegalStateException());
-        Assume.assumeNotNull(ledger);
+        assumeTrue(ledger != null);
         InputStream inputStream = AccountStmtServiceImplIT.class.getResourceAsStream(s);
         PostingBO[] postings = mapper.readValue(inputStream, PostingBO[].class);
         for (PostingBO p : postings) {
@@ -264,7 +263,7 @@ public class AccountStmtServiceImplIT {
 
     private void loadCoa(String s) throws IOException {
         LedgerBO ledger = loadLedger("Zd0ND5YwSzGwIfZilhumPg");
-        Assume.assumeNotNull(ledger);
+        assumeTrue(ledger != null);
 
         InputStream inputStream = AccountStmtServiceImplIT.class.getResourceAsStream(s);
         LegAccYamlModel[] ledgerAccounts = mapper.readValue(inputStream, LegAccYamlModel[].class);
@@ -295,14 +294,5 @@ public class AccountStmtServiceImplIT {
             la.setCategory(category);
             ledgerService.newLedgerAccount(la, SYSTEM);
         }
-    }
-
-    private static <T> T readYml(Class<T> aClass, String fileName) {
-        try {
-            return YamlReader.getInstance().getObjectFromResource(PostingServiceImpl.class, fileName, aClass);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

@@ -2,17 +2,19 @@ package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.EmailVerificationBO;
 import de.adorsys.ledgers.um.api.domain.EmailVerificationStatusBO;
-import de.adorsys.ledgers.um.db.domain.*;
+import de.adorsys.ledgers.um.db.domain.EmailVerificationEntity;
+import de.adorsys.ledgers.um.db.domain.EmailVerificationStatus;
 import de.adorsys.ledgers.um.db.repository.EmailVerificationRepository;
 import de.adorsys.ledgers.um.impl.converter.EmailVerificationMapper;
 import de.adorsys.ledgers.um.impl.service.password.UserMailSender;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -21,12 +23,12 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ScaVerificationServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class ScaVerificationServiceImplTest {
 
     @InjectMocks
     private ScaVerificationServiceImpl verificationService;
@@ -48,14 +50,14 @@ public class ScaVerificationServiceImplTest {
     private EmailVerificationEntity emailVerificationEntity;
     private EmailVerificationBO emailVerificationBO;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         emailVerificationEntity = readEmailVerificationEntity();
         emailVerificationBO = readEmailVerificationBO();
     }
 
     @Test
-    public void findByScaIdAndStatusNot() {
+    void findByScaIdAndStatusNot() {
         when(emailVerificationRepository.findByScaUserDataIdAndStatusNot(any(), any())).thenReturn(Optional.ofNullable(emailVerificationEntity));
         when(emailVerificationMapper.toEmailVerificationStatus(any())).thenReturn(STATUS_VERIFIED);
         when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
@@ -67,72 +69,83 @@ public class ScaVerificationServiceImplTest {
         verify(emailVerificationRepository, times(1)).findByScaUserDataIdAndStatusNot(SCA_ID, STATUS_VERIFIED);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void findByScaIdAndStatusNot_tokenNotFound() {
+    @Test
+    void findByScaIdAndStatusNot_tokenNotFound() {
+        // Given
         when(emailVerificationRepository.findByScaUserDataIdAndStatusNot(any(), any())).thenReturn(Optional.empty());
         when(emailVerificationMapper.toEmailVerificationStatus(any())).thenReturn(STATUS_VERIFIED);
-        when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
 
-        verificationService.findByScaIdAndStatusNot(SCA_ID, STATUS_BO_VERIFIED);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> verificationService.findByScaIdAndStatusNot(SCA_ID, STATUS_BO_VERIFIED));
     }
 
     @Test
-    public void findByToken() {
+    void findByToken() {
+        // Given
         when(emailVerificationRepository.findByToken(any())).thenReturn(Optional.ofNullable(emailVerificationEntity));
         when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
 
+        // When
         EmailVerificationBO emailVerificationBO = verificationService.findByToken(TOKEN);
 
+        // Then
         assertThat(emailVerificationBO.getToken(), is(TOKEN));
         verify(emailVerificationRepository, times(1)).findByToken(TOKEN);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void findByToken_tokenNotFound() {
+    @Test
+    void findByToken_tokenNotFound() {
+        // Given
         when(emailVerificationRepository.findByToken(any())).thenReturn(Optional.empty());
-        when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
 
-        verificationService.findByToken(TOKEN);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> verificationService.findByToken(TOKEN));
     }
 
     @Test
-    public void findByTokenAndStatus() {
+    void findByTokenAndStatus() {
+        // Given
         when(emailVerificationRepository.findByTokenAndStatus(any(), any())).thenReturn(Optional.ofNullable(emailVerificationEntity));
         when(emailVerificationMapper.toEmailVerificationStatus(any())).thenReturn(STATUS_PENDING);
         when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
 
+        // When
         EmailVerificationBO emailVerificationBO = verificationService.findByTokenAndStatus(TOKEN, STATUS_BO_PENDING);
 
+        // Then
         assertThat(emailVerificationBO.getToken(), is(TOKEN));
         assertThat(emailVerificationBO.getStatus(), is(STATUS_BO_PENDING));
 
         verify(emailVerificationRepository, times(1)).findByTokenAndStatus(TOKEN, STATUS_PENDING);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void findByTokenAndStatus_tokenNotFound() {
+    @Test
+    void findByTokenAndStatus_tokenNotFound() {
+        // Given
         when(emailVerificationRepository.findByTokenAndStatus(any(), any())).thenReturn(Optional.empty());
         when(emailVerificationMapper.toEmailVerificationStatus(any())).thenReturn(STATUS_PENDING);
-        when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
 
-        verificationService.findByTokenAndStatus(TOKEN, STATUS_BO_PENDING);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> verificationService.findByTokenAndStatus(TOKEN, STATUS_BO_PENDING));
     }
 
     @Test
-    public void updateEmailVerification() {
-        when(emailVerificationMapper.toEmailVerificationBO(any())).thenReturn(emailVerificationBO);
+    void updateEmailVerification() {
+        // Given
         when(emailVerificationMapper.toEmailVerificationEntity(any())).thenReturn(emailVerificationEntity);
 
+        // When
         verificationService.updateEmailVerification(emailVerificationBO);
 
+        // Then
         verify(emailVerificationRepository, times(1)).save(emailVerificationEntity);
     }
 
     @Test
-    public void sendMessage() {
+    void sendMessage() {
         when(userMailSender.send(any(), any(), any(), any())).thenReturn(true);
 
-        assertTrue(verificationService.sendMessage("subject", "from", "email", "message"));
+        Assertions.assertTrue(verificationService.sendMessage("subject", "from", "email", "message"));
     }
 
     private EmailVerificationEntity readEmailVerificationEntity() {

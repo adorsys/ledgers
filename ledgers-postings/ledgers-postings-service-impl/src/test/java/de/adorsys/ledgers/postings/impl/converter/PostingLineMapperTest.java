@@ -5,25 +5,24 @@ import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.domain.PostingStatusBO;
 import de.adorsys.ledgers.postings.api.domain.PostingTypeBO;
 import de.adorsys.ledgers.postings.db.domain.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PostingLineMapperTest {
+
+@ExtendWith(MockitoExtension.class)
+class PostingLineMapperTest {
 
     private PostingLineMapper postingLineMapper = Mappers.getMapper(PostingLineMapper.class);
 
-    private LedgerAccountMapper ledgerAccountMapper = Mappers.getMapper(LedgerAccountMapper.class);
-
     @Test
-    public void toPostingLineBO() {
+    void toPostingLineBO() {
         PostingLine postingLine = new PostingLine();
         postingLine.setId("id");
         postingLine.setBaseLine("baseLine");
@@ -65,7 +64,7 @@ public class PostingLineMapperTest {
     }
 
     @Test
-    public void toPostingLine() {
+    void toPostingLine() {
         PostingLineBO postingLineBO = new PostingLineBO();
         postingLineBO.setId("id");
         postingLineBO.setBaseLine("baseLine");
