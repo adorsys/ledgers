@@ -20,7 +20,7 @@ public class PaymentExecutionScheduler {
 
     @Scheduled(initialDelayString = "${paymentScheduler.initialDelay}", fixedDelayString = "${paymentScheduler.delay}")
     public void scheduler() {
-        log.info("Scheduler started at {}", LocalDateTime.now());
+        log.info("Payment Execution Scheduler started at {}", LocalDateTime.now());
         List<Payment> payments = paymentRepository.getAllDuePayments();
         payments.forEach(p -> executionService.executePayment(p, SCHEDULER));
     }
