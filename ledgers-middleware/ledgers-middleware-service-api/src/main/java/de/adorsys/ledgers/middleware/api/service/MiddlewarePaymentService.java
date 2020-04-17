@@ -40,6 +40,15 @@ public interface MiddlewarePaymentService {
      */
     SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType);
 
+    /**
+     * Executes a payment
+     *
+     * @param scaInfoTO   : SCA information
+     * @param payment     : the payment object
+     * @return : the sca response object.
+     */
+    SCAPaymentResponseTO executePayment(ScaInfoTO scaInfoTO, PaymentTO payment);
+
     // ================= SCA =======================================//
 
     /**

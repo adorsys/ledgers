@@ -355,7 +355,7 @@ class DepositAccountServiceImplTest {
         List<DepositAccountBO> result = depositAccountService.findByAccountNumberPrefix("DE123");
 
         // Then
-        assertEquals(Collections.singletonList(new DepositAccountBO()), result);
+        assertEquals(Collections.singletonList(DepositAccountBO.builder().build()), result);
     }
 
     @Test
@@ -408,20 +408,14 @@ class DepositAccountServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        DepositAccountBO bo = new DepositAccountBO();
-        bo.setId("id");
-        bo.setIban("iban");
-        bo.setMsisdn("msisdn");
-        bo.setCurrency(Currency.getInstance("EUR"));
-        bo.setName("name");
-        bo.setProduct("product");
-        bo.setAccountType(AccountTypeBO.CASH);
-        bo.setAccountStatus(AccountStatusBO.ENABLED);
-        bo.setBic("bic");
-        bo.setUsageType(AccountUsageBO.PRIV);
-        bo.setDetails("details");
-        bo.setLinkedAccounts("linked");
-        return bo;
+        return DepositAccountBO.builder().id("id")
+                       .iban("iban").msisdn("msisdn")
+                       .currency(Currency.getInstance("EUR"))
+                       .name("name").product("product")
+                       .accountType(AccountTypeBO.CASH)
+                       .accountStatus(AccountStatusBO.ENABLED).bic("bic")
+                       .usageType(AccountUsageBO.PRIV).details("details")
+                       .linkedAccounts("linked").build();
     }
 
     private LedgerAccountBO getLedgerAccountBO() {
