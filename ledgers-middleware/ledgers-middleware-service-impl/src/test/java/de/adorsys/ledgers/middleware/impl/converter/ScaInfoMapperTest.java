@@ -4,12 +4,12 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.um.api.domain.ScaInfoBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ScaInfoMapperTest {
+class ScaInfoMapperTest {
     private static final String USER_ID = "werw235asr";
     private static final String AUTH_ID = "234234234kjk";
     private static final String SCA_ID = "2344dfffff";
@@ -17,19 +17,27 @@ public class ScaInfoMapperTest {
     private final ScaInfoMapper mapper = Mappers.getMapper(ScaInfoMapper.class);
 
     @Test
-    public void toScaInfoBO() {
+    void toScaInfoBO() {
+        // Given
         ScaInfoBO expected = buildScaInfoBO();
+
+        // When
         ScaInfoBO actual = mapper.toScaInfoBO(buildScaInfoTO());
 
-        assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+        // Then
+        assertThat(actual).isEqualToComparingFieldByField(expected);
     }
 
     @Test
-    public void toScaInfoTO() {
+    void toScaInfoTO() {
+        // Given
         ScaInfoTO expected = buildScaInfoTO();
+
+        // When
         ScaInfoTO actual = mapper.toScaInfoTO(buildScaInfoBO());
 
-        assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+        // Then
+        assertThat(actual).isEqualToComparingFieldByField(expected);
     }
 
     private ScaInfoTO buildScaInfoTO() {

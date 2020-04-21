@@ -38,19 +38,19 @@ import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaValidationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
-import de.adorsys.ledgers.um.api.domain.AisConsentBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -103,9 +103,44 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return checkPaymentAndPrepareResponse(scaInfoTO, paymentConverter.toPaymentBO(payment, paymentType));
     }
 
-    @SuppressWarnings("PMD.PrematureDeclaration")
     private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
         validatePayment(paymentBO);
+        paymentBO.updateDebtorAccountCurrency(getCheckedAccount(paymentBO).getCurrency());
+        UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
+        TransactionStatusBO status = scaUtils.hasSCA(user)
+                                             ? ACCP
+                                             : ACTC;
+        return prepareScaAndResolveResponse(scaInfoTO, persist(paymentBO, status), user, PAYMENT);
+    }
+
+    @Override
+    public SCAPaymentResponseTO executePayment(ScaInfoTO scaInfoTO, PaymentTO payment) {
+        PaymentBO paymentBO = paymentConverter.toPaymentBO(payment);
+        validatePayment(paymentBO);
+
+        paymentBO.updateDebtorAccountCurrency(getCheckedAccount(paymentBO).getCurrency());
+
+        paymentBO = persist(paymentBO, ACTC);
+        UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
+        TransactionStatusBO status = paymentService.executePayment(paymentBO.getPaymentId(), user.getLogin());
+
+        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
+        response.setPaymentId(paymentBO.getPaymentId());
+        response.setTransactionStatus(TransactionStatusTO.valueOf(status.name()));
+        response.setPaymentType(PaymentTypeTO.valueOf(paymentBO.getPaymentType().name()));
+        response.setPaymentProduct(paymentBO.getPaymentProduct());
+        BearerTokenBO token = authorizationService.scaToken(new ScaInfoBO(user.getId(),
+                                                                          user.getLogin(),
+                                                                          TokenUsageBO.DIRECT_ACCESS,
+                                                                          UserRoleBO.CUSTOMER));
+        response.setBearerToken(bearerTokenMapper.toBearerTokenTO(token));
+        response.setExpiresInSeconds(token.getExpires_in());
+        response.setStatusDate(LocalDateTime.now());
+        return response;
+    }
+
+    @NotNull
+    private DepositAccountBO getCheckedAccount(PaymentBO paymentBO) {
         DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount(), true, null);
         paymentBO.setAccountId(debtorAccount.getId());
         paymentBO.getTargets()
@@ -122,14 +157,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
                         log.info("Creditor account is located in another ASPSP");
                     }
                 });
-
-        paymentBO.getDebtorAccount().setCurrency(debtorAccount.getCurrency());
-
-        UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
-        TransactionStatusBO status = scaUtils.hasSCA(user)
-                                             ? ACCP
-                                             : ACTC;
-        return prepareScaAndResolveResponse(scaInfoTO, persist(paymentBO, status), user, PAYMENT);
+        return debtorAccount;
     }
 
     private void validatePayment(PaymentBO paymentBO) {
@@ -231,12 +259,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
         String authorisationId = opType == PAYMENT ? scaInfoTO.getAuthorisationId() : cancellationId;
         ScaValidationBO scaValidationBO = validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode(), paymentKeyData.template());
-        if (!scaValidationBO.isValidAuthCode()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Wrong auth code")
-                          .build();
-        }
+        scaUtils.checkScaResult(scaValidationBO);
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
             if (opType == PAYMENT) {
                 paymentService.updatePaymentStatus(paymentId, ACTC);

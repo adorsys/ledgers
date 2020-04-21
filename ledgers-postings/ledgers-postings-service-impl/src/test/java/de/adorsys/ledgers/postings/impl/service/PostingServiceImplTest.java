@@ -7,11 +7,11 @@ import de.adorsys.ledgers.postings.db.repository.LedgerRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingLineRepository;
 import de.adorsys.ledgers.postings.db.repository.PostingRepository;
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -20,12 +20,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PostingServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class PostingServiceImplTest {
     private static final String LEDGER_ID = "Ledger Id";
     private static final LocalDateTime DATE_TIME = LocalDateTime.now();
     private static final String NAME = "Mr. Jones";
@@ -43,34 +44,45 @@ public class PostingServiceImplTest {
     private LedgerAccountRepository ledgerAccountRepository;
 
     @Test
-    public void newPosting() {
+    void newPosting() {
+        // Given
         when(postingRepository.findFirstByLedgerOrderByRecordTimeDesc(any()))
                 .thenReturn(Optional.of(new Posting()));
         when(ledgerRepository.findById(any())).thenReturn(Optional.of(getLedger()));
         when(postingRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
-        //When
+
+        // When
         PostingBO result = postingService.newPosting(getPostingBO());
-        //Then
-        assertThat(result).isNotNull();
+
+        // Then
+        assertNotNull(result);
     }
 
     @Test
-    public void findPostingsByOperationId() {
+    void findPostingsByOperationId() {
+        // Given
         when(postingRepository.findByOprId(any())).thenReturn(Collections.singletonList(getPosting()));
-        //When
+
+        // When
         List<PostingBO> result = postingService.findPostingsByOperationId(OP_ID);
-        //then
-        assertThat(CollectionUtils.isNotEmpty(result)).isTrue();
+
+        // then
+        assertTrue(CollectionUtils.isNotEmpty(result));
     }
 
     @Test
-    public void findPostingsByDates() {
+    void findPostingsByDates() {
+        // Given
         when(postingLineRepository.findByAccountAndPstTimeGreaterThanAndPstTimeLessThanEqualAndDiscardedTimeIsNullOrderByPstTimeDesc(any(), any(), any()))
                 .thenReturn(Collections.singletonList(readYml(PostingLine.class, "PostingLine.yml")));
         when(ledgerAccountRepository.findById(any())).thenReturn(Optional.of(new LedgerAccount()));
         LedgerAccountBO readYml = readYml(LedgerAccountBO.class, "LedgerAccount.yml");
+
+        // When
         List<PostingLineBO> result = postingService.findPostingsByDates(readYml, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 20, 0, 0));
-        assertThat(CollectionUtils.isNotEmpty(result)).isTrue();
+
+        // Then
+        assertTrue(CollectionUtils.isNotEmpty(result));
     }
 
     private Posting getPosting() {
@@ -118,21 +130,21 @@ public class PostingServiceImplTest {
 
     private Ledger getLedger() {
         return new Ledger(LEDGER_ID, DATE_TIME, "User", "Some short description",
-                "Some long description", NAME, getChartOfAccount());
+                          "Some long description", NAME, getChartOfAccount());
     }
 
     private LedgerBO getLedgerBO() {
         return new LedgerBO(NAME, LEDGER_ID, DATE_TIME, "User", "Some short description",
-                "Some long description", getChartOfAccountBO());
+                            "Some long description", getChartOfAccountBO());
     }
 
     private ChartOfAccount getChartOfAccount() {
         return new ChartOfAccount("id", DATE_TIME, NAME, "Some short description",
-                "Some long description", NAME);
+                                  "Some long description", NAME);
     }
 
     private ChartOfAccountBO getChartOfAccountBO() {
         return new ChartOfAccountBO(NAME, "id", DATE_TIME, "Some short description",
-                "Some long description", NAME);
+                                    "Some long description", NAME);
     }
 }

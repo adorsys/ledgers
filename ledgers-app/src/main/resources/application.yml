@@ -84,6 +84,8 @@ default:
       seconds: 50000
 
 sca:
+  authCode.failed.max: 2
+  login.failed.max: 2
   authCode:
     validity.seconds: 180
     expiration:

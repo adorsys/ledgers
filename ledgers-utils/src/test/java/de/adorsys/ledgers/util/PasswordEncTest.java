@@ -1,8 +1,8 @@
 package de.adorsys.ledgers.util;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PasswordEncTest {
 
@@ -11,7 +11,7 @@ public class PasswordEncTest {
     private static final String USER_ID = "XRouZLSnkfe54YTHRHLl1j";
 
     @Test
-    public void verify() {
+    void verify() {
     	PasswordEnc passwordEnc = new PasswordEnc();
         assertThat("Verify source and encoded version of string", passwordEnc.verify(USER_ID, RAW_PASSWORD, ENCODED_PASSWORD));
     }

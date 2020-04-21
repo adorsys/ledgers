@@ -54,6 +54,17 @@ public interface PaymentRestAPI {
             @RequestParam("paymentType") PaymentTypeTO paymentType,
             @RequestBody PaymentTO payment);
 
+
+    @PostMapping("/execution")
+    @ApiOperation(value = "Executes a Payment", notes = "Executes a payment", authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = SCAPaymentResponseTO.class, message = "Success. ScaToken contained in the returned response object."),
+            @ApiResponse(code = 404, message = "Specified account not found."),
+            @ApiResponse(code = 403, message = "Not authorized to execute payment on this account"),
+            @ApiResponse(code = 409, message = "Payment with specified paymentId exists.")
+    })
+    ResponseEntity<SCAPaymentResponseTO> executePayment(@RequestBody PaymentTO payment);
+
     @GetMapping(value = "/{paymentId}/authorisations/{authorisationId}")
     @ApiOperation(value = "Get SCA", notes = "Get the authorization response object eventually containing the list of selected sca methods.",
             authorizations = @Authorization(value = "apiKey"))

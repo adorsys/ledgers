@@ -18,21 +18,21 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MiddlewareOnlineBankingServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class MiddlewareOnlineBankingServiceImplTest {
     private static final String USER_ID = "userId";
     private static final String CONSENT_ID = "consentId";
     private static final String AUTHORIZATION_ID = "authorizationId";
@@ -63,159 +63,201 @@ public class MiddlewareOnlineBankingServiceImplTest {
     private UserMapper userMapper;
 
     @Test
-    public void authorise() {
-        //given
+    void authorise() {
+        // Given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(getBearerTokenBO());
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
-        //when
+        // When
         SCALoginResponseTO response = onlineBankingService.authorise(USER_LOGIN, USER_PIN, USER_ROLE_TO_CUSTOMER);
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response.getBearerToken());
         verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void authorise_unknownCredentials() {
-        //given
+    @Test
+    void authorise_unknownCredentials() {
+        // Given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
 
-        //when
-        onlineBankingService.authorise(USER_LOGIN, USER_PIN, USER_ROLE_TO_CUSTOMER);
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> onlineBankingService.authorise(USER_LOGIN, USER_PIN, USER_ROLE_TO_CUSTOMER));
     }
 
     @Test
-    public void authoriseForConsent() {
-        //given
+    void authoriseForConsent() {
+        // Given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(getBearerTokenBO());
         when(scaUtils.hasSCA(any())).thenReturn(false);
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
-        //when
+        // When
         SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response.getBearerToken());
         verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
     }
 
     @Test
-    public void authoriseForConsentWithToken() {
+    void authoriseForConsent_failed_authorization() {
         //given
+        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.FAILED));
+
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> {
+            SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
+            assertThat(response).isNotNull();
+            assertEquals(getBearerTokenTO(), response.getBearerToken());
+            verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
+        });
+    }
+
+    @Test
+    void authoriseForConsent_failed_cred_validation() {
+        //given
+        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
+        when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(null);
+
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> {
+            SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
+
+            //then
+            assertThat(response).isNotNull();
+            assertEquals(getBearerTokenTO(), response.getBearerToken());
+            verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
+        });
+    }
+
+    @Test
+    void authoriseForConsentWithToken() {
+        // Given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(authorizationService.authorizeNewAuthorizationId(any(), any())).thenReturn(getBearerTokenBO());
         when(scaUtils.hasSCA(any())).thenReturn(true);
-        when(scaOperationService.createAuthCode(any(), any())).thenReturn(getSCAOperationBO());
+        when(scaOperationService.createAuthCode(any(), any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
-        //when
+        // When
         SCALoginResponseTO response = onlineBankingService.authoriseForConsentWithToken(buildScaInfoTO(), CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response.getBearerToken());
         verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
         verify(scaInfoMapper, times(1)).toScaInfoBO(buildScaInfoTO());
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void authoriseForConsentWithToken_unknownCredentials() {
-        //given
+    @Test
+    void authoriseForConsentWithToken_unknownCredentials() {
+        // Given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
 
-        //when
-        onlineBankingService.authoriseForConsentWithToken(buildScaInfoTO(), CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> onlineBankingService.authoriseForConsentWithToken(buildScaInfoTO(), CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT));
     }
 
     @Test
-    public void validate() {
-        //given
+    void validate() {
+        // Given
         when(authorizationService.validate(any(), any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
-        //when
+        // When
         BearerTokenTO response = onlineBankingService.validate(ACCESS_TOKEN);
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response);
         verify(bearerTokenMapper, times(1)).toBearerTokenTO(getBearerTokenBO());
     }
 
     @Test
-    public void register() {
-        //given
+    void register() {
+        // Given
         when(userService.create(any())).thenReturn(getUserBO());
 
-        //when
+        // When
         UserTO response = onlineBankingService.register(USER_LOGIN, USER_EMAIL, USER_PIN, USER_ROLE_TO_CUSTOMER);
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertThat(response).isEqualToComparingFieldByFieldRecursively(getUserTO());
     }
 
     @Test
-    public void generateLoginAuthCode() {
-        //given
+    void generateLoginAuthCode() {
+        // Given
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
-        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO());
-        when(scaOperationService.generateAuthCode(any(), any(), any())).thenReturn(getSCAOperationBO());
+        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
+        when(scaOperationService.generateAuthCode(any(), any(), any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(authorizationService.loginToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
-        //when
+        // When
         SCALoginResponseTO response = onlineBankingService.generateLoginAuthCode(buildScaInfoTO(), "userMessage", 6200);
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response.getBearerToken());
     }
 
     @Test
-    public void authenticateForLogin() {
-        //given
+    void authenticateForLogin() {
+        // Given
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
-        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO());
+        when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(getScaValidationBO());
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
-        //when
+        // When
         SCALoginResponseTO response = onlineBankingService.authenticateForLogin(buildScaInfoTO());
 
-        //then
+        // Then
         assertThat(response).isNotNull();
         assertEquals(getBearerTokenTO(), response.getBearerToken());
     }
 
     @Test
-    public void authorizeForUser() {
+    void authorizeForUser() {
+        // Given
         when(authorizationService.validateCredentials(anyString(), anyString(), any())).thenReturn(true);
         when(userService.findByLogin(anyString())).thenReturn(new UserBO("anton.brueckner", null, null));
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
+
+        // When
         SCALoginResponseTO response = onlineBankingService.authorizeForUser("admin", "admin", "anton.brueckner");
-        assertThat(response.getBearerToken()).isNotNull();
+
+        // Then
+        assertNotNull(response.getBearerToken());
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void authorizeForUser_fail() {
+    @Test
+    void authorizeForUser_fail() {
+        // Given
         when(authorizationService.validateCredentials(anyString(), anyString(), any())).thenReturn(false);
-        SCALoginResponseTO response = onlineBankingService.authorizeForUser("admin", "admin", "anton.brueckner");
+
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> onlineBankingService.authorizeForUser("admin", "admin", "anton.brueckner"));
     }
 
     private UserBO getUserBO() {
@@ -281,18 +323,18 @@ public class MiddlewareOnlineBankingServiceImplTest {
         return info;
     }
 
-    private SCAOperationBO getSCAOperationBO() {
+    private SCAOperationBO getSCAOperationBO(ScaStatusBO status) {
         SCAOperationBO scaOperation = new SCAOperationBO();
         scaOperation.setId("id");
         scaOperation.setScaMethodId(SCA_METHOD_ID);
         scaOperation.setOpId("V0020200302130357q2tRswcRSr4nXqUaJCXpkQ");
-        scaOperation.setScaStatus(ScaStatusBO.EXEMPTED);
+        scaOperation.setScaStatus(status);
         scaOperation.setStatusTime(LocalDateTime.now());
         scaOperation.setValiditySeconds(6200);
         return scaOperation;
     }
 
     private ScaValidationBO getScaValidationBO() {
-        return new ScaValidationBO(AUTH_CODE, true, ScaStatusBO.FINALISED);
+        return new ScaValidationBO(AUTH_CODE, true, ScaStatusBO.FINALISED, 0);
     }
 }

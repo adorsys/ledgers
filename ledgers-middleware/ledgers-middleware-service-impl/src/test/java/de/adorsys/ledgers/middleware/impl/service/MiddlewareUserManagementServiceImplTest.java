@@ -19,14 +19,14 @@ import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -35,12 +35,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MiddlewareUserManagementServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class MiddlewareUserManagementServiceImplTest {
     private static final String USER_ID = "SomeUniqueID";
     private static final String BRANCH_ID = "Nuremberg";
     private static final String USER_LOGIN = "test";
@@ -71,317 +70,317 @@ public class MiddlewareUserManagementServiceImplTest {
     private static UserBO userBO = null;
     private static UserTO userTO = null;
 
-    @BeforeClass
-    public static void before() {
+    @BeforeAll
+    static void before() {
         userBO = readYml(UserBO.class, "user.yml");
         userTO = readYml(UserTO.class, "user.yml");
     }
 
     @Test
-    public void create() {
-        //given
+    void create() {
+        // Given
         when(userService.create(any())).thenReturn(userBO);
 
-        //when
+        // When
         UserTO user = middlewareUserService.create(userTO);
 
-        //then
-        assertThat(user).isNotNull();
+        // Then
+        assertNotNull(user);
         assertThat(user).isEqualToComparingFieldByField(userTO);
         verify(userService, times(1)).create(userBO);
     }
 
     @Test
-    public void findById() {
-        //given
+    void findById() {
+        // Given
         when(userService.findById(any())).thenReturn(userBO);
 
-        //when
+        // When
         UserTO user = middlewareUserService.findById(USER_ID);
 
-        //then
-        assertThat(user).isNotNull();
+        // Then
+        assertNotNull(user);
         assertThat(user).isEqualToComparingFieldByField(userTO);
         verify(userService, times(1)).findById(USER_ID);
     }
 
-    @Test(expected = UserManagementModuleException.class)
-    public void findByUserLoginUserNotFound() {
-        //given
+    @Test
+    void findByUserLoginUserNotFound() {
+        // Given
         String login = "spe@adorsys.com.ua";
         when(userService.findByLogin(login)).thenThrow(UserManagementModuleException.builder().build());
 
-        //when
-        middlewareUserService.findByUserLogin(login);
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> middlewareUserService.findByUserLogin(login));
     }
 
     @Test
-    public void updateScaMethods() {
-        //given
+    void updateScaMethods() {
+        // Given
         String userLogin = "userLogin";
         when(userService.updateScaData(userBO.getScaUserData(), userLogin)).thenReturn(userBO);
 
-        //when
+        // When
         middlewareUserService.updateScaData(userLogin, userTO.getScaUserData());
 
-        //then
+        // Then
         verify(userService, times(1)).updateScaData(userBO.getScaUserData(), userLogin);
     }
 
     @Test
-    public void updateAccountAccess() {
-        //given
+    void updateAccountAccess() {
+        // Given
         when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
         when(userService.findById(any())).thenReturn(userBO);
         when(accessService.userHasAccessToAccount(any(), any())).thenReturn(true);
 
-        //when
+        // When
         middlewareUserService.updateAccountAccess(buildScaInfoTO(), USER_ID, getAccessTO());
 
-        //then
+        // Then
         verify(userService, times(2)).findById(USER_ID);
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void updateAccountAccess_wrong_branch_access() {
-        //given
+    @Test
+    void updateAccountAccess_wrong_branch_access() {
+        // Given
         when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
         when(userService.findById(ANOTHER_USER_ID)).thenReturn(getUser(ANOTHER_USER_ID));
         when(userService.findById(USER_ID)).thenReturn(userBO);
         when(accessService.userHasAccessToAccount(any(), any())).thenReturn(true);
 
-        //when
-        middlewareUserService.updateAccountAccess(buildScaInfoTO(), ANOTHER_USER_ID, getAccessTO());
+        // When
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(), ANOTHER_USER_ID, getAccessTO()));
 
-        //then
-        verify(userService, times(2)).findById(USER_ID);
+        // Then
+        verify(userService, times(1)).findById(USER_ID);
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void updateAccountAccess_accountNotEnabled() {
-        //given
+    @Test
+    void updateAccountAccess_accountNotEnabled() {
+        // Given
         DepositAccountDetailsBO accountDetails = getDepositAccountDetailsBO();
         accountDetails.getAccount().setAccountStatus(AccountStatusBO.BLOCKED);
         when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(accountDetails);
 
-        //when
-        middlewareUserService.updateAccountAccess(buildScaInfoTO(), USER_ID, getAccessTO());
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(), USER_ID, getAccessTO()));
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void updateAccountAccess_noAccessToAccount() {
-        //given
+    @Test
+    void updateAccountAccess_noAccessToAccount() {
+        // Given
         when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
         when(userService.findById(any())).thenReturn(userBO);
         when(accessService.userHasAccessToAccount(any(), any())).thenReturn(false);
 
-        //when
-        middlewareUserService.updateAccountAccess(buildScaInfoTO(), USER_ID, getAccessTO());
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(), USER_ID, getAccessTO()));
     }
 
     @Test
-    public void listUsers() {
-        //given
+    void listUsers() {
+        // Given
         when(userService.listUsers(anyInt(), anyInt())).thenReturn(Collections.singletonList(userBO));
 
-        //when
+        // When
         middlewareUserService.listUsers(0, 15);
 
-        //then
+        // Then
         verify(userService, times(1)).listUsers(0, 15);
     }
 
     @Test
-    public void getUsersByBranchAndRoles() {
-        //given
-        when(userService.findByBranchAndUserRolesIn(any(), any(), any(), any())).thenReturn(new PageImpl<UserBO>(Collections.singletonList(userBO)));
+    void getUsersByBranchAndRoles() {
+        // Given
+        when(userService.findByBranchAndUserRolesIn(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userBO)));
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getCustomPageImpl());
 
-        //when
+        // When
         CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(USER_BRANCH, Collections.singletonList(UserRoleTO.CUSTOMER), "", getCustomPageableImpl());
 
-        //then
-        assertThat(users.getContent().get(0)).isNotNull();
+        // Then
+        assertNotNull(users.getContent().get(0));
         assertThat(users.getContent().get(0)).isEqualToComparingFieldByField(userTO);
     }
 
     @Test
-    public void countUsersByBranch() {
-        //given
+    void countUsersByBranch() {
+        // Given
         when(userService.countUsersByBranch(any())).thenReturn(2);
 
-        //when
+        // When
         int result = middlewareUserService.countUsersByBranch(USER_BRANCH);
 
-        //then
+        // Then
         assertEquals(2, result);
         verify(userService, times(1)).countUsersByBranch(USER_BRANCH);
     }
 
     @Test
-    public void updateUser() {
-        //given
+    void updateUser() {
+        // Given
         UserTO user = userTO;
         user.setId(USER_ID);
         when(userService.findById(any())).thenReturn(userBO);
         when(userService.updateUser(any())).thenReturn(userBO);
 
-        //when
+        // When
         UserTO result = middlewareUserService.updateUser(BRANCH_ID, user);
 
-        //then
-        assertThat(result).isNotNull();
+        // Then
+        assertNotNull(result);
         verify(userService, times(1)).findById(USER_ID);
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void updateUser_userIdNull() {
-        //when
-        middlewareUserService.updateUser(BRANCH_ID, userTO);
+    @Test
+    void updateUser_userIdNull() {
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateUser(BRANCH_ID, userTO));
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void updateUser_branchesNotMatch() {
-        //given
+    @Test
+    void updateUser_branchesNotMatch() {
+        // Given
         UserTO user = userTO;
         user.setId(USER_ID);
         when(userService.findById(any())).thenReturn(userBO);
 
-        //when
-        middlewareUserService.updateUser("anotherBranch", user);
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateUser("anotherBranch", user));
     }
 
     @Test
-    public void getSCAMethods() {
-        //given
+    void getSCAMethods() {
+        // Given
         String userLogin = "spe@adorsys.com.ua";
         when(userService.findByLogin(userLogin)).thenReturn(userBO);
 
-        //when
+        // When
         UserTO user = middlewareUserService.findByUserLogin(userLogin);
 
-        //then
-        assertThat(user.getScaUserData().size()).isEqualTo((2));
+        // Then
+        assertEquals(2, user.getScaUserData().size());
         assertThat(user.getScaUserData().get(0).getScaMethod()).isEqualByComparingTo(ScaMethodTypeTO.EMAIL);
-        assertThat(user.getScaUserData().get(0).getMethodValue()).isEqualTo("spe@adorsys.com.ua");
-        assertThat(user.getScaUserData().get(1).getScaMethod()).isEqualTo(ScaMethodTypeTO.MOBILE);
-        assertThat(user.getScaUserData().get(1).getMethodValue()).isEqualTo("+380933686868");
+        assertEquals("spe@adorsys.com.ua", user.getScaUserData().get(0).getMethodValue());
+        assertEquals(ScaMethodTypeTO.MOBILE, user.getScaUserData().get(1).getScaMethod());
+        assertEquals("+380933686868", user.getScaUserData().get(1).getMethodValue());
         verify(userService, times(1)).findByLogin(userLogin);
     }
 
     @Test
-    public void checkMultilevelScaRequired_multilevelNotEnabled() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", false);
+    void checkMultilevelScaRequired_multilevelNotEnabled() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), false);
 
-        //when
+        // When
         boolean result = middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, USER_IBAN);
 
-        //then
-        assertThat(result).isFalse();
-    }
-
-    @Test(expected = MiddlewareModuleException.class)
-    public void checkMultilevelScaRequired_noAccess() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
-        when(userService.findByLogin(any())).thenReturn(userBO);
-
-        //when
-        middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, "");
+        // Then
+        assertFalse(result);
     }
 
     @Test
-    public void checkMultilevelScaRequired() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
+    void checkMultilevelScaRequired_noAccess() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        when(userService.findByLogin(any())).thenReturn(userBO);
+
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, ""));
+    }
+
+    @Test
+    void checkMultilevelScaRequired() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(userBO);
         when(accessService.resolveScaWeightByDebtorAccount(any(), any())).thenReturn(100);
 
-        //when
+        // When
         boolean result = middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, "1234567");
 
-        //then
-        assertThat(result).isFalse();
+        // Then
+        assertFalse(result);
     }
 
     @Test
-    public void checkMultilevelScaRequired_no_multilevel() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
+    void checkMultilevelScaRequired_no_multilevel() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(getUser(null));
 
-        //when
+        // When
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1"));
 
-        //then
-        assertThat(response).isFalse();
+        // Then
+        assertFalse(response);
     }
 
     @Test
-    public void checkMultilevelScaRequired_empty_list() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
+    void checkMultilevelScaRequired_empty_list() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(getUser(null));
 
-        //when
+        // When
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", new ArrayList<>());
 
-        //then
-        assertThat(response).isTrue();
+        // Then
+        assertTrue(response);
     }
 
     @Test
-    public void checkMultilevelScaRequired_2_acc_with_mlsca() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
+    void checkMultilevelScaRequired_2_acc_with_mlsca() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(getUser(null));
 
-        //when
+        // When
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "2"));
 
-        //then
-        assertThat(response).isTrue();
+        // Then
+        assertTrue(response);
     }
 
     @Test
-    public void checkMultilevelScaRequired_1_acc_no_curr_with_mlsca() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
+    void checkMultilevelScaRequired_1_acc_no_curr_with_mlsca() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(getUser(null));
 
-        //when
+        // When
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", Collections.singletonList(getReference("1", null)));
 
-        //then
-        assertThat(response).isTrue();
+        // Then
+        assertTrue(response);
     }
 
-    @Test(expected = MiddlewareModuleException.class)
-    public void checkMultilevelScaRequired_acc_not_match() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", true);
+    @Test
+    void checkMultilevelScaRequired_acc_not_match() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(getUser(null));
 
-        //when
-        middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "3"));
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "3")));
     }
 
     @Test
-    public void checkMultilevelScaRequired_multilevel_false() {
-        //given
-        Whitebox.setInternalState(middlewareUserService, "multilevelScaEnable", false);
+    void checkMultilevelScaRequired_multilevel_false() throws NoSuchFieldException {
+        // Given
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), false);
 
-        //when
+        // When
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "2"));
 
-        //then
-        assertThat(response).isFalse();
+        // Then
+        assertFalse(response);
     }
 
     @Test
-    public void getAdditionalInformation(){
-        Whitebox.setInternalState(middlewareUserService, "additionalInfoMapper", Mappers.getMapper(AdditionalAccountInformationMapper.class));
+    void getAdditionalInformation() throws NoSuchFieldException {
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("additionalInfoMapper"), Mappers.getMapper(AdditionalAccountInformationMapper.class));
         when(userService.findOwnersByIban(anyString())).thenReturn(Collections.singletonList(getUser(null)));
         List<AdditionalAccountInformationTO> result = middlewareUserService.getAdditionalInformation(new ScaInfoTO(), AccountIdentifierTypeTO.IBAN, ACCOUNT_ID);
         assertThat(result).isEqualTo(Collections.singletonList(getAdditionalInfo()));

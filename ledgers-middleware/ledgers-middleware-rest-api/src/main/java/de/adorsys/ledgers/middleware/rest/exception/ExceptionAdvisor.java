@@ -16,8 +16,8 @@
 
 package de.adorsys.ledgers.middleware.rest.exception;
 
-import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @ControllerAdvice
@@ -38,12 +39,13 @@ public class ExceptionAdvisor {
     private static final String MESSAGE = "message";
     private static final String DEV_MESSAGE = "devMessage";
     private static final String CODE = "code";
+    private static final String ERROR_CODE = "errorCode";
     private static final String DATE_TIME = "dateTime";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map> globalExceptionHandler(Exception ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        Map<String, String> body = getHandlerContent(status, null, "Something went wrong during execution of your request.");
+        Map<String, String> body = getHandlerContent(status, null, null, "Something went wrong during execution of your request.");
         log.error("INTERNAL SERVER ERROR", ex);
         return new ResponseEntity<>(body, status);
     }
@@ -51,7 +53,7 @@ public class ExceptionAdvisor {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map> accessDeniedExceptionHandler(AccessDeniedException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        Map<String, String> body = getHandlerContent(status, null, "Access Denied! You're trying to access resources you have no permission for.");
+        Map<String, String> body = getHandlerContent(status, null, null, "Access Denied! You're trying to access resources you have no permission for.");
         log.error("Access Denied: {}", ex.getMessage());
         return new ResponseEntity<>(body, status);
     }
@@ -59,42 +61,43 @@ public class ExceptionAdvisor {
     @ExceptionHandler(MiddlewareModuleException.class)
     public ResponseEntity<Map> handleMiddlewareModuleException(MiddlewareModuleException ex) {
         HttpStatus status = MiddlewareHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
-        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(PostingModuleException.class)
     public ResponseEntity<Map> handlePostingModuleException(PostingModuleException ex) {
         HttpStatus status = PostingHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
-        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(UserManagementModuleException.class)
     public ResponseEntity<Map> handleUserManagementModuleException(UserManagementModuleException ex) {
         HttpStatus status = UserManagementHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
-        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(ScaModuleException.class)
     public ResponseEntity<Map> handleScaModuleException(ScaModuleException ex) {
         HttpStatus status = ScaHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
-        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(DepositModuleException.class)
     public ResponseEntity<Map> handleDepositModuleException(DepositModuleException ex) {
         HttpStatus status = DepositHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
-        Map<String, String> body = getHandlerContent(status, null, ex.getDevMsg());
+        Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     //TODO Consider a separate Class for this with a builder?
-    private Map<String, String> getHandlerContent(HttpStatus status, String message, String devMessage) {
+    private Map<String, String> getHandlerContent(HttpStatus status, String errorCode, String message, String devMessage) {
         Map<String, String> error = new HashMap<>();
         error.put(CODE, String.valueOf(status.value()));
+        Optional.ofNullable(errorCode).ifPresent(e -> error.put(ERROR_CODE, e));
         error.put(MESSAGE, message);
         error.put(DEV_MESSAGE, devMessage);
         error.put(DATE_TIME, LocalDateTime.now().toString());

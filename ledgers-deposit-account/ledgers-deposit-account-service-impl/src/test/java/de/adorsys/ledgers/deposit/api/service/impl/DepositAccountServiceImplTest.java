@@ -9,7 +9,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
@@ -26,12 +25,12 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -47,13 +46,13 @@ import java.util.Optional;
 
 import static de.adorsys.ledgers.deposit.db.domain.AccountStatus.*;
 import static de.adorsys.ledgers.util.exception.PostingErrorCode.POSTING_NOT_FOUND;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DepositAccountServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class DepositAccountServiceImplTest {
     private final static String ACCOUNT_ID = "ACCOUNT_ID";
     private final static String POSTING_ID = "posting_ID";
     private static final String SYSTEM = "System";
@@ -70,8 +69,6 @@ public class DepositAccountServiceImplTest {
     private TransactionDetailsMapper transactionDetailsMapper;
     @Mock
     private AccountStmtService accountStmtService;
-    @Mock
-    private CurrencyExchangeRatesService exchangeRatesService;
 
     @InjectMocks
     private DepositAccountServiceImpl depositAccountService;
@@ -87,239 +84,314 @@ public class DepositAccountServiceImplTest {
                                                               .registerModule(new ParameterNamesModule());
 
     @Test
-    public void createDepositAccount() {
+    void createDepositAccount() {
+        // Given
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(getLedgerAccountBO().getName());
         when(ledgerService.newLedgerAccount(any(), anyString())).thenReturn(getLedgerAccountBO());
         when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(ENABLED));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
+        // When
         DepositAccountBO depositAccount = depositAccountService.createNewAccount(getDepositAccountBO(), SYSTEM, "");
 
-        assertThat(depositAccount).isNotNull();
-        assertThat(depositAccount.getId()).isNotBlank();
+        // Then
+        assertNotNull(depositAccount);
+        assertFalse(depositAccount.getId().isEmpty());
     }
 
-    @Test(expected = DepositModuleException.class)
-    public void createDepositAccount_account_already_exist() {
+    @Test
+    void createDepositAccount_account_already_exist() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
 
-        DepositAccountBO depositAccount = depositAccountService.createNewAccount(getDepositAccountBO(), SYSTEM, "");
-
-        assertThat(depositAccount).isNotNull();
-        assertThat(depositAccount.getId()).isNotBlank();
+        // Then
+        assertThrows(DepositModuleException.class, () -> {
+            DepositAccountBO depositAccount = depositAccountService.createNewAccount(getDepositAccountBO(), SYSTEM, "");
+            assertNotNull(depositAccount);
+            assertFalse(depositAccount.getId().isEmpty());
+        });
     }
 
     @Test
-    public void getDepositAccountById() {
+    void getDepositAccountById() {
+        // Given
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
-        //When
+
+        // When
         DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getAccountDetailsById("id", LocalDateTime.now(), false);
-        //Then
-        assertThat(depositAccountDetailsBO).isNotNull();
-        assertThat(depositAccountDetailsBO.getAccount()).isNotNull();
+        // Then
+        assertNotNull(depositAccountDetailsBO);
+        assertNotNull(depositAccountDetailsBO.getAccount());
     }
 
-    @Test(expected = DepositModuleException.class)
-    public void getDepositAccountById_wrong_id() {
+    @Test
+    void getDepositAccountById_wrong_id() {
+        // Given
         when(depositAccountRepository.findById("wrong_id")).thenReturn(Optional.empty());
-        //When
-        depositAccountService.getAccountDetailsById("wrong_id", LocalDateTime.now(), false);
+
+        // Then
+        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountDetailsById("wrong_id", LocalDateTime.now(), false));
     }
 
     @Test
-    public void getDepositAccountByIBANAndCurrency() {
+    void getDepositAccountByIBANAndCurrency() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
-        //When
+
+        // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
-        //Then
-        assertThat(accountDetailsBO).isNotNull();
-        assertThat(accountDetailsBO.getAccount()).isNotNull();
+        // Then
+        assertNotNull(accountDetailsBO);
+        assertNotNull(accountDetailsBO.getAccount());
     }
 
     @Test
-    public void checkAccountStatus_enabled() {
+    void checkAccountStatus_enabled() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
-        //When
+
+        // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
-        //Then
-        assertThat(accountDetailsBO).isNotNull();
-        assertThat(accountDetailsBO.getAccount()).isNotNull();
-        assertThat(checkAccountStatus).isTrue();
+
+        // Then
+        assertNotNull(accountDetailsBO);
+        assertNotNull(accountDetailsBO.getAccount());
+        assertTrue(checkAccountStatus);
     }
 
     @Test
-    public void checkAccountStatus_blocked() {
+    void checkAccountStatus_blocked() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(BLOCKED)));
-        //When
+
+        // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
-        //Then
-        assertThat(accountDetailsBO).isNotNull();
-        assertThat(accountDetailsBO.getAccount()).isNotNull();
-        assertThat(checkAccountStatus).isFalse();
+
+        // Then
+        assertNotNull(accountDetailsBO);
+        assertNotNull(accountDetailsBO.getAccount());
+        assertFalse(checkAccountStatus);
     }
 
     @Test
-    public void checkAccountStatus_deleted() {
+    void checkAccountStatus_deleted() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(DELETED)));
-        //When
+
+        // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
-        //Then
-        assertThat(accountDetailsBO).isNotNull();
-        assertThat(accountDetailsBO.getAccount()).isNotNull();
-        assertThat(checkAccountStatus).isFalse();
+
+        // Then
+        assertNotNull(accountDetailsBO);
+        assertNotNull(accountDetailsBO.getAccount());
+        assertFalse(checkAccountStatus);
     }
 
     @Test
-    public void findDepositAccountsByBranch() {
+    void findDepositAccountsByBranch() {
+        // Given
         when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
 
+        // When
         List<DepositAccountDetailsBO> accounts = depositAccountService.findDetailsByBranch(anyString());
 
+        // Then
         // account detail collection is not null
-        assertThat(accounts).isNotNull();
-
+        assertNotNull(accounts);
         // account detail collection is not empty
-        assertThat(accounts).isNotEmpty();
+        assertFalse(accounts.isEmpty());
     }
 
     @Test
-    public void getTransactionById() {
+    void getTransactionById() {
+        // Given
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
+        // When
         TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
-        assertThat(result).isNotNull();
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
+        // Then
+        assertNotNull(result);
+        assertEquals(readFile(TransactionDetailsBO.class, "Transaction.yml"), result);
     }
 
-    @Test(expected = PostingModuleException.class)
-    public void getTransactionById_Failure() {
+    @Test
+    void getTransactionById_Failure() {
+        // Given
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(postingService.findPostingLineById(any(), any())).thenThrow(PostingModuleException.builder()
                                                                                  .errorCode(POSTING_NOT_FOUND)
                                                                                  .devMsg(String.format("Could not find posting by ac id: %s and posting id: %s", ACCOUNT_ID, POSTING_ID))
                                                                                  .build());
-
-        depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
+        // Then
+        assertThrows(PostingModuleException.class, () -> depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID));
     }
 
     @Test
-    public void getTransactionsByDates() throws JsonProcessingException {
+    void getTransactionsByDates() throws JsonProcessingException {
+        // Given
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(new DepositAccount()));
         when(postingService.findPostingsByDates(any(), any(), any())).thenReturn(Collections.singletonList(newPostingLineBO()));
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
+
+        // When
         List<TransactionDetailsBO> result = depositAccountService.getTransactionsByDates(ACCOUNT_ID, LocalDateTime.of(2018, 12, 12, 0, 0), LocalDateTime.of(2018, 12, 18, 0, 0));
-        assertThat(result.isEmpty()).isFalse();
+
+        // Then
+        assertFalse(result.isEmpty());
     }
 
     @Test
-    public void confirmationOfFunds_more_than_necessary_available() {
+    void confirmationOfFunds_more_than_necessary_available() throws NoSuchFieldException {
         confirmationOfFunds_more_than_necessary_available(100);
         confirmationOfFunds_more_than_necessary_available(101);
     }
 
-    private void confirmationOfFunds_more_than_necessary_available(long amount) {
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
-        when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
-        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
-        Whitebox.setInternalState(depositAccountService, "exchangeRatesService", new CurrencyExchangeRatesServiceImpl(null, null));
-        boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
-        assertThat(response).isTrue();
-    }
-
-    @Test(expected = DepositModuleException.class)
-    public void confirmationOfFunds_Failure() {
-        depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
+    @Test
+    void confirmationOfFunds_Failure() {
+        // Then
+        assertThrows(DepositModuleException.class, () -> depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml")));
     }
 
     @Test
-    public void getAccountsByIbanAndParamCurrency() {
+    void getAccountsByIbanAndParamCurrency() {
         when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
         List<DepositAccountBO> result = depositAccountService.getAccountsByIbanAndParamCurrency("iban", "EUR");
-        assertThat(result).isEqualTo(Collections.singletonList(getDepositAccountBO()));
+        assertEquals(Collections.singletonList(getDepositAccountBO()), result);
     }
 
     @Test
-    public void getAccountByIbanAndCurrency() {
+    void getAccountByIbanAndCurrency() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+
+        // When
         DepositAccountBO result = depositAccountService.getAccountByIbanAndCurrency("iban", Currency.getInstance("EUR"));
-        assertThat(result).isEqualTo(getDepositAccountBO());
+
+        // Then
+        assertEquals(getDepositAccountBO(), result);
     }
 
-    @Test(expected = DepositModuleException.class)
-    public void getAccountByIbanAndCurrency_not_found() {
+    @Test
+    void getAccountByIbanAndCurrency_not_found() {
+        // Given
         when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.empty());
-        DepositAccountBO result = depositAccountService.getAccountByIbanAndCurrency("iban", Currency.getInstance("EUR"));
-        assertThat(result).isEqualTo(getDepositAccountBO());
+
+        // Then
+        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountByIbanAndCurrency("iban", Currency.getInstance("EUR")));
     }
 
     @Test
-    public void getAccountById() {
+    void getAccountById() {
+        // Given
         when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
-        DepositAccountBO result = depositAccountService.getAccountById("accountId");
-        assertThat(result).isEqualTo(getDepositAccountBO());
-    }
 
-    @Test(expected = DepositModuleException.class)
-    public void getAccountById_not_found() {
-        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.empty());
+        // When
         DepositAccountBO result = depositAccountService.getAccountById("accountId");
-        assertThat(result).isEqualTo(getDepositAccountBO());
+
+        // Then
+        assertEquals(getDepositAccountBO(), result);
     }
 
     @Test
-    public void getTransactionsByDatesPaged() throws JsonProcessingException {
+    void getAccountById_not_found() {
+        // Given
+        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountById("accountId"));
+    }
+
+    @Test
+    void getTransactionsByDatesPaged() throws JsonProcessingException {
+        // Given
         when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
         when(postingService.findPostingsByDatesPaged(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(newPostingLineBO())));
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
+        // When
         Page<TransactionDetailsBO> result = depositAccountService.getTransactionsByDatesPaged("accountId", LocalDateTime.now(), LocalDateTime.now(), Pageable.unpaged());
-        assertThat(result).isEqualTo(new PageImpl<>(Collections.singletonList(readFile(TransactionDetailsBO.class, "Transaction.yml"))));
+
+        // Then
+        assertEquals(new PageImpl<>(Collections.singletonList(readFile(TransactionDetailsBO.class, "Transaction.yml"))), result);
     }
 
     @Test
-    public void findDetailsByBranchPaged() {
+    void findDetailsByBranchPaged() {
+        // Given
         when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(ENABLED))));
 
+        // When
         Page<DepositAccountDetailsBO> result = depositAccountService.findDetailsByBranchPaged("branchId", "someParam", Pageable.unpaged());
-        assertThat(result).isEqualTo(new PageImpl<>(Collections.singletonList(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()))));
+
+        // Then
+        assertEquals(new PageImpl<>(Collections.singletonList(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()))), result);
     }
 
     @Test
-    public void readIbanById() {
+    void readIbanById() {
+        // Given
         DepositAccount account = new DepositAccount();
         account.setIban("DE123456789");
         when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(account));
+
+        // When
         String result = depositAccountService.readIbanById(ACCOUNT_ID);
-        assertThat(result).isEqualTo("DE123456789");
+
+        // Then
+        assertEquals("DE123456789", result);
     }
 
     @Test
-    public void findByAccountNumberPrefix() {
+    void findByAccountNumberPrefix() {
+        // Given
         when(depositAccountRepository.findByIbanStartingWith(anyString())).thenReturn(Collections.singletonList(new DepositAccount()));
+        // When
         List<DepositAccountBO> result = depositAccountService.findByAccountNumberPrefix("DE123");
-        assertThat(result).isEqualTo(Collections.singletonList(new DepositAccountBO()));
+
+        // Then
+        assertEquals(Collections.singletonList(DepositAccountBO.builder().build()), result);
     }
 
     @Test
-    public void getDetailsByIban(){
+    void getDetailsByIban() {
+        // Given
         when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
+
+        // When
         DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(new DepositAccountDetailsBO(getDepositAccountBO(),Collections.emptyList()));
+
+        // Then
+        assertEquals(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()), result);
 
     }
 
-    @Test(expected = DepositModuleException.class)
-    public void getDetailsByIban_no_accounts_found(){
+    @Test
+    void getDetailsByIban_no_accounts_found() {
+        // Given
         when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.emptyList());
-        DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(new DepositAccountDetailsBO(getDepositAccountBO(),Collections.emptyList()));
 
+        // Then
+        assertThrows(DepositModuleException.class, () -> {
+            DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
+            assertEquals(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()), result);
+        });
+    }
+
+    private void confirmationOfFunds_more_than_necessary_available(long amount) throws NoSuchFieldException {
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+
+        FieldSetter.setField(depositAccountService, depositAccountService.getClass().getDeclaredField("exchangeRatesService"), new CurrencyExchangeRatesServiceImpl(null, null));
+
+        boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
+        assertTrue(response);
     }
 
     private PostingLineBO newPostingLineBO() throws JsonProcessingException {
@@ -336,20 +408,14 @@ public class DepositAccountServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        DepositAccountBO bo = new DepositAccountBO();
-        bo.setId("id");
-        bo.setIban("iban");
-        bo.setMsisdn("msisdn");
-        bo.setCurrency(Currency.getInstance("EUR"));
-        bo.setName("name");
-        bo.setProduct("product");
-        bo.setAccountType(AccountTypeBO.CASH);
-        bo.setAccountStatus(AccountStatusBO.ENABLED);
-        bo.setBic("bic");
-        bo.setUsageType(AccountUsageBO.PRIV);
-        bo.setDetails("details");
-        bo.setLinkedAccounts("linked");
-        return bo;
+        return DepositAccountBO.builder().id("id")
+                       .iban("iban").msisdn("msisdn")
+                       .currency(Currency.getInstance("EUR"))
+                       .name("name").product("product")
+                       .accountType(AccountTypeBO.CASH)
+                       .accountStatus(AccountStatusBO.ENABLED).bic("bic")
+                       .usageType(AccountUsageBO.PRIV).details("details")
+                       .linkedAccounts("linked").build();
     }
 
     private LedgerAccountBO getLedgerAccountBO() {

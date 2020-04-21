@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.deposit.api.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.util.Currency;
 import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DepositAccountBO {

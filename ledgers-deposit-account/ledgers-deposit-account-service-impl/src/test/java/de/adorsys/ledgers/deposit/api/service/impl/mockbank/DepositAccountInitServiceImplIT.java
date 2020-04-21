@@ -2,26 +2,26 @@ package de.adorsys.ledgers.deposit.api.service.impl.mockbank;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.impl.test.DepositAccountServiceApplication;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DepositAccountServiceApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class})
-public class DepositAccountInitServiceImplIT {
+class DepositAccountInitServiceImplIT {
 
     @Autowired
     private DepositAccountInitService depositAccountInitService;
 
     @Test()
-    public void should_run_init_config_data_without_exception() {
-    	depositAccountInitService.initConfigData();
+    void should_run_init_config_data_without_exception() {
+        depositAccountInitService.initConfigData();
     }
 }

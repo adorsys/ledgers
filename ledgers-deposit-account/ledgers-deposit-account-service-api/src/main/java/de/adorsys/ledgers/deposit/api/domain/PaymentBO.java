@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 @Data
@@ -37,5 +38,9 @@ public class PaymentBO {
                        .map(PaymentTargetBO::getInstructedAmount)
                        .allMatch(a -> a.getAmount().compareTo(BigDecimal.ZERO) > 0
                                               && a.getAmount().scale() < 3);
+    }
+
+    public void updateDebtorAccountCurrency(Currency currency) {
+        debtorAccount.setCurrency(currency);
     }
 }

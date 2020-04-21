@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-middleware</artifactId>
-		<version>3.0.3</version>
+		<version>3.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -157,18 +157,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito2</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 	</dependencies>
 

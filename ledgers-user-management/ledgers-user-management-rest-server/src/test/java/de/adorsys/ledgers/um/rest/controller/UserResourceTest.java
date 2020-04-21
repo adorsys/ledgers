@@ -2,38 +2,29 @@ package de.adorsys.ledgers.um.rest.controller;
 
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.ResponseEntity;
 import pro.javatar.commons.reader.JsonReader;
 import pro.javatar.commons.reader.ResourceReader;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 public class UserResourceTest {
 
@@ -48,112 +39,87 @@ public class UserResourceTest {
 
     private ResourceReader reader = YamlReader.getInstance();
 
-    private MockMvc mockMvc;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        mockMvc = MockMvcBuilders
-                          .standaloneSetup(userResource)
-                          .setMessageConverters(new MappingJackson2HttpMessageConverter())
-                          .build();
-    }
-
     @Test
-    public void createUser() throws Exception {
+    void createUser() throws Exception {
+        // Given
         String jsonUser = JsonReader.getInstance().getStringFromFile("de/adorsys/ledgers/um/rest/controller/user.json");
         UserBO userBO = JsonReader.getInstance().getObjectFromString(jsonUser, UserBO.class);
 
-        when(userService.create(any())).thenReturn(userBO);
+        when(userService.create(userBO)).thenReturn(userBO);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .post("/users/")
-                                                      .contentType(APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(jsonUser))
-                                      .andExpect(status().is(HttpStatus.CREATED.value()))
-                                      .andReturn();
+        // When
+        ResponseEntity actual = userResource.createUser(userBO);
 
-        assertThat(mvcResult.getResponse().getHeader("Location"), is("/users/vne_ua"));
-
+        // Then
+        assertEquals("/users/vne_ua", actual.getHeaders().get("Location").get(0));
         verify(userService, times(1)).create(any());
     }
 
     @Test
-    public void getUserByLogin() throws Exception {
+    void getUserByLogin() {
+        // Given
         UserBO userBO = getUserBO();
         when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .get("/users/").param("login", USER_LOGIN))
-                                      .andExpect(status().is(HttpStatus.OK.value()))
-                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                                      .andReturn();
+        // When
+        ResponseEntity actual = userResource.getUserByLogin(USER_LOGIN);
 
-        String userString = mvcResult.getResponse().getContentAsString();
-        UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
+        UserBO user = (UserBO) actual.getBody();
 
+        // Then
         assertNotNull(user);
         assertEquals(user, userBO);
-
         verify(userService, times(1)).findByLogin(USER_LOGIN);
     }
 
     @Test
-    public void getUserById() throws Exception {
+    void getUserById() {
+        // Given
         UserBO userBO = getUserBO();
         when(userService.findById(USER_ID)).thenReturn(userBO);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .get("/users/" + USER_ID))
-                                      .andExpect(status().is(HttpStatus.OK.value()))
-                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                                      .andReturn();
+        // When
+        ResponseEntity actual = userResource.getUserById(USER_ID);
 
-        String userString = mvcResult.getResponse().getContentAsString();
-        UserBO user = JsonReader.getInstance().getObjectFromString(userString, UserBO.class);
+        UserBO user = (UserBO) actual.getBody();
 
+        // Then
         assertNotNull(user);
         assertEquals(user, userBO);
-
         verify(userService, times(1)).findById(USER_ID);
     }
 
     @Test
-    public void updateUserScaData() throws Exception {
+    void updateUserScaData() throws Exception {
+        // Given
         UserBO userBO = getUserBO();
         when(userService.findById(anyString())).thenReturn(userBO);
         when(userService.updateScaData(any(), anyString())).thenReturn(userBO);
 
         String jsonScaUserData = JsonReader.getInstance().getStringFromFile("de/adorsys/ledgers/um/rest/controller/scaUserData.json");
+        List scaUserData = JsonReader.getInstance().getObjectFromString(jsonScaUserData, ArrayList.class);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .put("/users/" + USER_ID + "/sca-data")
-                                                      .contentType(APPLICATION_JSON_UTF8_VALUE)
-                                                      .content(jsonScaUserData))
-                                      .andExpect(status().is(HttpStatus.CREATED.value()))
-                                      .andReturn();
+        // When
+        ResponseEntity actual = userResource.updateUserScaData(USER_ID, scaUserData);
 
-        assertThat(mvcResult.getResponse().getHeader("Location"), is("/users/" + USER_ID));
-
+        // Then
+        assertEquals("/users/" + USER_ID, actual.getHeaders().get("Location").get(0));
         verify(userService, times(1)).findById(USER_ID);
         verify(userService, times(1)).updateScaData(any(), anyString());
     }
 
     @Test
-    public void getAllUsers() throws Exception {
+    void getAllUsers() {
+        // Given
         List<UserBO> userList = Collections.singletonList(getUserBO());
-        when(userService.listUsers(anyInt(),anyInt())).thenReturn(userList);
+        when(userService.listUsers(anyInt(), anyInt())).thenReturn(userList);
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                                      .get("/users/all"))
-                                      .andExpect(status().is(HttpStatus.OK.value()))
-                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                                      .andReturn();
+        // When
+        ResponseEntity<List<UserBO>> actual = userResource.getAllUsers();
 
-        String userString = mvcResult.getResponse().getContentAsString();
-        List<UserBO> users = JsonReader.getInstance().getListFromString(userString, UserBO.class);
+        List<UserBO> users = actual.getBody();
 
+        // Then
         assertNotNull(users);
         assertEquals(users, userList);
 

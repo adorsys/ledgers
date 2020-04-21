@@ -1,21 +1,24 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDateTime;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LoginKeyDataTOTest {
+class LoginKeyDataTOTest {
 
-	@Test
-	public void testFromOpId() {
-		String userId = "q2tRswcRSr4nXqUaJCXpkQ";
-		LocalDateTime time = LocalDateTime.now();
-		LoginKeyDataTO loginKeyDataTO = new LoginKeyDataTO(userId, time);
-		String opId = loginKeyDataTO.toOpId();
-		LoginKeyDataTO lkd = LoginKeyDataTO.fromOpId(opId);
-		String userId2 = lkd.getUserId();
-		Assert.assertEquals(userId, userId2);
-	}
+    @Test
+    void testFromOpId() {
+        // Given
+        String userId = "q2tRswcRSr4nXqUaJCXpkQ";
+        LocalDateTime time = LocalDateTime.now();
+        LoginKeyDataTO loginKeyDataTO = new LoginKeyDataTO(userId, time);
+        String opId = loginKeyDataTO.toOpId();
+        LoginKeyDataTO lkd = LoginKeyDataTO.fromOpId(opId);
+        String userId2 = lkd.getUserId();
 
+        // Then
+        assertEquals(userId, userId2);
+    }
 }

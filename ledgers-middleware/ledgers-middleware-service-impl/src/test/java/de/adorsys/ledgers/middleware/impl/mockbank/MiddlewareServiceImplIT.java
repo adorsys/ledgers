@@ -6,41 +6,42 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.impl.test.MiddlewareServiceApplication;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = MiddlewareServiceApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class, TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
 @ActiveProfiles("h2")
 @DatabaseTearDown(value = {"MiddlewareServiceImplIT-db-delete.xml"}, type = DatabaseOperation.DELETE_ALL)
-public class MiddlewareServiceImplIT {
+class MiddlewareServiceImplIT {
 
     @Autowired
     private AppManagementService appManagementService;
-    
+
     @Autowired
     private LedgerAccountRepository repo;
-    
-    @Before
-    public void initDepositAccount() {
+
+    @BeforeEach
+    void initDepositAccount() {
         appManagementService.initApp();
     }
 
     @Test
-    public void test(){
-    	// DO nothing. Just run app initialization.
-    	long count = repo.count();
-    	Assert.assertEquals(26, count);
+    void test() {
+        // DO nothing. Just run app initialization.
+        long count = repo.count();
+        assertEquals(26, count);
     }
 }

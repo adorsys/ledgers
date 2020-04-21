@@ -1,35 +1,38 @@
 package de.adorsys.ledgers.deposit.api.domain;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Currency;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PaymentBOTest {
+
+class PaymentBOTest {
     private static final Currency EUR = Currency.getInstance("EUR");
 
     @Test
-    public void isValidAmount() {
+    void isValidAmount() {
         PaymentBO given = getPayment(true, true);
         boolean valid = given.isValidAmount();
-        assertThat(valid).isTrue();
+        assertTrue(valid);
     }
 
     @Test
-    public void isValidAmount_negative() {
+    void isValidAmount_negative() {
         PaymentBO given = getPayment(false, true);
         boolean valid = given.isValidAmount();
-        assertThat(valid).isFalse();
+        assertFalse(valid);
     }
 
     @Test
-    public void isValidAmount_overScaled() {
+    void isValidAmount_overScaled() {
         PaymentBO given = getPayment(true, false);
         boolean valid = given.isValidAmount();
-        assertThat(valid).isFalse();
+        assertFalse(valid);
     }
 
     private PaymentBO getPayment(boolean isPositiveAmount, boolean scaleLessThanThree) {

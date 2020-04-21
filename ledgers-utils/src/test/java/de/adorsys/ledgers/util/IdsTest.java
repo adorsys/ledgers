@@ -1,27 +1,29 @@
 package de.adorsys.ledgers.util;
 
-import org.junit.Assert;
-import org.junit.Test;
 
+import org.junit.jupiter.api.Test;
 
-public class IdsTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+class IdsTest {
 
     @Test
-    public void test() {
-        Assert.assertEquals(22, Ids.id().length());
+    void test() {
+        assertEquals(22, Ids.id().length());
 
         for (int i = 0; i < 1000; i++) {
             String id = Ids.id();
-            Assert.assertFalse(id.contains("/"));
+            assertFalse(id.contains("/"));
         }
     }
 
     @Test
-    public void test_url_encoded() {
+    void test_url_encoded() {
         for (int i = 0; i < 1000; i++) {
             String id = Ids.id();
-            Assert.assertFalse(id.contains("/"));
-            Assert.assertFalse(id.contains("+"));
+            assertFalse(id.contains("/"));
+            assertFalse(id.contains("+"));
         }
     }
 }

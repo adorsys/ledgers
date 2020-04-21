@@ -24,6 +24,7 @@ public class MiddlewareHttpStatusResolver {
         container.put(ACCOUNT_DISABLED, BAD_REQUEST);
 
         //403 Block
+        container.put(PSU_AUTH_ATTEMPT_INVALID,FORBIDDEN);
         container.put(AUTHENTICATION_FAILURE, FORBIDDEN);
         container.put(INSUFFICIENT_PERMISSION, FORBIDDEN);
 

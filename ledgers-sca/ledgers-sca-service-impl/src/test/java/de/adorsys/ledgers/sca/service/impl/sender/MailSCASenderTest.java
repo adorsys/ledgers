@@ -1,27 +1,24 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailMessage;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MailSCASenderTest {
+@ExtendWith(MockitoExtension.class)
+class MailSCASenderTest {
 
     private static final String EMAIL = "spe@adorsys.com.ua";
     private static final String FROM = "noreply@adorsys.com.ua";
@@ -34,23 +31,25 @@ public class MailSCASenderTest {
     @Mock
     private JavaMailSender mailSender;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         sender.setSubject(SUBJECT);
         sender.setFrom(FROM);
     }
 
     @Test
-    public void send() {
-
+    void send() {
+        // Given
         ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
 
         doNothing().when(mailSender).send(captor.capture());
 
+        // When
         boolean result = sender.send(EMAIL, AUTH_CODE);
 
         SimpleMailMessage message = captor.getValue();
 
+        // Then
         assertThat(result, is(Boolean.TRUE));
 
         assertThat(message.getTo(), is(Stream.of(EMAIL).toArray()));
@@ -62,12 +61,14 @@ public class MailSCASenderTest {
     }
 
     @Test
-    public void sendNotSend() {
-
+    void sendNotSend() {
+        // Given
         doThrow(MailSendException.class).when(mailSender).send(any(SimpleMailMessage.class));
 
+        // When
         boolean result = sender.send(EMAIL, AUTH_CODE);
 
+        // Then
         assertThat(result, is(Boolean.FALSE));
     }
 }

@@ -1,15 +1,16 @@
 package de.adorsys.ledgers.deposit.api.domain;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 
 @Slf4j
-public class BankTransactionCodeTest {
+class BankTransactionCodeTest {
     private static Map<String, String> productVsCode;
 
     static {
@@ -26,7 +27,7 @@ public class BankTransactionCodeTest {
     }
 
     @Test
-    public void getByPaymentProduct() {
+    void getByPaymentProduct() {
         productVsCode
                 .forEach((k, v) -> {
                     log.info("checking {}, expecting {}", k, v);
@@ -36,6 +37,6 @@ public class BankTransactionCodeTest {
 
     private void assertion(String product) {
         String result = BankTransactionCode.getByPaymentProduct(product);
-        assertThat(result == (productVsCode.get(product))).isTrue();
+        assertSame(result, (productVsCode.get(product)));
     }
 }

@@ -7,11 +7,11 @@ import de.adorsys.ledgers.postings.api.domain.ChartOfAccountBO;
 import de.adorsys.ledgers.postings.api.domain.LedgerBO;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingMockService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,12 +21,13 @@ import java.util.Currency;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TransactionServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class TransactionServiceImplTest {
     private static final String USER_ACCOUNT = "userAccount";
     private static final String REMITTANCE = "remittance";
     private static final String CR_DR_NAME = "crDrName";
@@ -45,42 +46,42 @@ public class TransactionServiceImplTest {
     private DepositAccountConfigService depositAccountConfigService;
 
     @Test
-    public void bookMockTransaction_depositPosting() {
-        //given
+    void bookMockTransaction_depositPosting() {
+        // Given
         when(depositAccountConfigService.getLedger()).thenReturn("ledger");
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
-        //when
+        // When
         Map<String, String> map = transactionService.bookMockTransaction(Collections.singletonList(getMockBookingDetailsBO(BigDecimal.TEN)));
 
-        //then
+        // Then
         assertTrue(map.isEmpty());
         verify(depositAccountConfigService, times(1)).getLedger();
         verify(ledgerService, times(1)).findLedgerByName("ledger");
     }
 
     @Test
-    public void bookMockTransaction_paymentPosting() {
-        //given
+    void bookMockTransaction_paymentPosting() {
+        // Given
         when(depositAccountConfigService.getLedger()).thenReturn("ledger");
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
-        //when
+        // When
         Map<String, String> map = transactionService.bookMockTransaction(Collections.singletonList(getMockBookingDetailsBO(BigDecimal.valueOf(-1))));
 
-        //then
+        // Then
         assertTrue(map.isEmpty());
         verify(depositAccountConfigService, times(1)).getLedger();
         verify(ledgerService, times(1)).findLedgerByName("ledger");
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void bookMockTransaction_ledgersNotFound() {
-        //given
+    @Test
+    void bookMockTransaction_ledgersNotFound() {
+        // Given
         when(depositAccountConfigService.getLedger()).thenReturn("ledger");
 
-        //when
-        transactionService.bookMockTransaction(Collections.singletonList(getMockBookingDetailsBO(BigDecimal.TEN)));
+        // Then
+        assertThrows(IllegalStateException.class, () -> transactionService.bookMockTransaction(Collections.singletonList(getMockBookingDetailsBO(BigDecimal.TEN))));
     }
 
     private MockBookingDetailsBO getMockBookingDetailsBO(BigDecimal amount) {
