@@ -52,7 +52,7 @@ variables: &variables
   script:
     - docker pull adorsys/ledgers:${DOCKER_TAG}
     - docker login -u openshift -p $OPENSHIFT_TOKEN $OPENSHIFT_REGISTRY
-    - docker tag "adorsys/ledgers:${DOCKER_TAG}"" "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest" 
+    - docker tag "adorsys/ledgers:${DOCKER_TAG}" "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest" 
     - docker push "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest"
 
 # ------------------------------------------------------------------
@@ -95,6 +95,7 @@ PMD_CPD_Report:
   stage: "Lint"
   except:
     - schedules
+    - develop
   script:
     - mvn -Dmaven.test.skip=true package pmd:pmd pmd:cpd
   artifacts:
@@ -138,6 +139,7 @@ Sonarcube Tests:
   needs: []
   except:
     - schedules
+    - develop
   script:
     - jabba use system@1.8
     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
