@@ -91,7 +91,7 @@ Compile:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
     expire_in: "1 day"
 
-PMD_CPD_check:
+PMD_CPD_Report:
   stage: "Lint"
   except:
     - schedules
@@ -135,7 +135,7 @@ Unit Tests:
 
 Sonarcube Tests:
   stage: "Test"
-  needs: {}
+  needs: []
   except:
     - schedules
   script:
