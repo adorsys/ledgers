@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------
 
 stages:
+  - "Lint"
   - "Compile"      # build jar and provide as artifact
   - "Test"         # run tests and code quality checks
   - "Package"      # dockerize jar and push to docker registry
@@ -51,7 +52,7 @@ variables: &variables
   script:
     - docker pull adorsys/ledgers:${DOCKER_TAG}
     - docker login -u openshift -p $OPENSHIFT_TOKEN $OPENSHIFT_REGISTRY
-    - docker tag adorsys/ledgers:${DOCKER_TAG} "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest" .
+    - docker tag "adorsys/ledgers:${DOCKER_TAG}"" "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest" 
     - docker push "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest"
 
 # ------------------------------------------------------------------
@@ -90,12 +91,12 @@ Compile:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
     expire_in: "1 day"
 
-PMD Report:
-  stage: "Compile"
+PMD_CPD_check:
+  stage: "Lint"
   except:
     - schedules
   script:
-    - mvn -Dmaven.test.skip=true package pmd:pmd
+    - mvn -Dmaven.test.skip=true package pmd:pmd pmd:cpd
   artifacts:
     paths:
       - "qa/pmd/pmd-ruleset.xml"
@@ -103,13 +104,6 @@ PMD Report:
       - "**/*/pmd.xml"
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-pmd"
     expire_in: "10 day"
-
-PMD Check:
-  stage: "Test"
-  except:
-    - schedules
-  script:
-    - mvn -Dmaven.test.skip=true package pmd:check
 
 Javadoc Check:
   stage: "Test"
@@ -141,6 +135,7 @@ Unit Tests:
 
 Sonarcube Tests:
   stage: "Test"
+  needs: {}
   except:
     - schedules
   script:
