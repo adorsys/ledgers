@@ -1,11 +1,9 @@
 package de.adorsys.ledgers.util.tan.encriptor;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TanEncryptor {
@@ -16,7 +14,6 @@ public class TanEncryptor {
     }
 
     public String encryptTan(String password) {
-        log.info("TAN encryption stage, password: " + password);
         return passwordEncryptor.encrypt(password);
     }
 }
