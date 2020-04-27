@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------
 
 stages:
+  - "Lint"
   - "Compile"      # build jar and provide as artifact
   - "Test"         # run tests and code quality checks
   - "Package"      # dockerize jar and push to docker registry
@@ -49,9 +50,10 @@ variables: &variables
 
 .push_docker_openshift: &push_docker_openshift
   script:
+    - docker pull adorsys/ledgers:${DOCKER_TAG}
     - docker login -u openshift -p $OPENSHIFT_TOKEN $OPENSHIFT_REGISTRY
-    - docker build -t "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:$DOCKER_TAG" .
-    - docker push "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:$DOCKER_TAG"
+    - docker tag "adorsys/ledgers:${DOCKER_TAG}" "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest" 
+    - docker push "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest"
 
 # ------------------------------------------------------------------
 # jobs
@@ -59,6 +61,8 @@ variables: &variables
 
 Compile:
   stage: "Compile"
+  except:
+    - schedules
   script:
     - mvn -DskipTests clean install
   artifacts:
@@ -87,10 +91,13 @@ Compile:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
     expire_in: "1 day"
 
-PMD Report:
-  stage: "Compile"
+PMD_CPD_Report:
+  stage: "Lint"
+  except:
+    - schedules
+    - develop
   script:
-    - mvn -Dmaven.test.skip=true package pmd:pmd
+    - mvn -Dmaven.test.skip=true package pmd:pmd pmd:cpd
   artifacts:
     paths:
       - "qa/pmd/pmd-ruleset.xml"
@@ -99,13 +106,10 @@ PMD Report:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-pmd"
     expire_in: "10 day"
 
-PMD Check:
-  stage: "Test"
-  script:
-    - mvn -Dmaven.test.skip=true package pmd:check
-
 Javadoc Check:
   stage: "Test"
+  except:
+    - schedules
   script:
     - mvn -Dmaven.test.skip=true package javadoc:javadoc
   artifacts:
@@ -116,6 +120,8 @@ Javadoc Check:
 
 Unit Tests:
   stage: "Test"
+  except:
+    - schedules
   script:
     - mvn --fail-at-end clean install
   artifacts:
@@ -130,6 +136,10 @@ Unit Tests:
 
 Sonarcube Tests:
   stage: "Test"
+  needs: []
+  except:
+    - schedules
+    - develop
   script:
     - jabba use system@1.8
     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
@@ -139,6 +149,8 @@ Sonarcube Tests:
 
 Push to DockerHub (develop):
   stage: "Package"
+  except:
+    - schedules
   only:
     - develop
   variables:
@@ -147,6 +159,8 @@ Push to DockerHub (develop):
 
 Deploy Openshift (ledgers-dev):
   stage: Deployment
+  except:
+    - schedules
   only:
     - develop
   environment:
@@ -159,13 +173,15 @@ Deploy Openshift (ledgers-dev):
 
 Deploy Openshift (sandbox-dev):
   stage: Deployment
+  except:
+    - schedules
   only:
     - develop
   environment:
     name: dev
     url: https://dev-dynamicsandbox-ledgers.cloud.adorsys.de
   variables:
-    DOCKER_TAG: latest
+    DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_SANDBOX_DEV}
   <<: *push_docker_openshift
 
@@ -183,37 +199,41 @@ Deploy Openshift (sandbox-dev):
 
 Deploy Openshift (dxc-sandbox-dev):
   stage: Deployment
+  except:
+    - schedules
   only:
     - develop
   environment:
     name: dxc-dev
     url: https://dxc-dev-dynamicsandbox-ledgers.cloud.adorsys.de
   variables:
-    DOCKER_TAG: latest
+    DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_DXC_SANDBOX_DEV}
   <<: *push_docker_openshift
 
 Deploy Openshift (bekb-sandbox-dev):
   stage: Deployment
+  except:
+    - schedules
   only:
     - develop
   environment:
     name: bekb-dev
     url: https://bekb-dev-dynamicsandbox-ledgers.cloud.adorsys.de
   variables:
-    DOCKER_TAG: latest
+    DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_BEKB_SANDBOX_DEV}
   <<: *push_docker_openshift
 
 Deploy Openshift (sandbox-dev-e2e):
   stage: Deployment
   only:
-    - develop
+    - schedules
   environment:
     name: dev-e2e
     url: https://dev-e2e-dynamicsandbox-ledgers.cloud.adorsys.de
   variables:
-    DOCKER_TAG: latest
+    DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_DEV_E2E}
   <<: *push_docker_openshift  
 ##########
@@ -242,14 +262,3 @@ Push to DockerHub (release):
     DOCKER_TAG: $CI_COMMIT_TAG
   <<: *build_dockerhub_image
 
-###########
-# nightly #
-###########
-
-Push to DockerHub (nightly):
-  stage: "Package"
-  only:
-    - schedules
-  variables:
-    DOCKER_TAG: nightly
-  <<: *build_dockerhub_image

@@ -16,71 +16,22 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.middleware.api.domain.account.ExchangeRateTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.*;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("PMD")
 @Mapper(componentModel = "spring")
 public interface PaymentConverter {
-    PaymentResultTO toPaymentResultTO(PaymentResultBO bo);
-
-    PaymentResultBO toPaymentResultBO(PaymentResultTO to);
-
-    PaymentTypeBO toPaymentTypeBO(PaymentTypeTO paymentType);
-
-    PaymentTypeTO toPaymentTypeTO(PaymentTypeBO paymentType);
-
-    default Object toPaymentTO(PaymentBO payment) {
-        if (payment.getPaymentType() == PaymentTypeBO.SINGLE) {
-            return toSinglePaymentTO(payment, payment.getTargets().get(0));
-        } else if (payment.getPaymentType() == PaymentTypeBO.PERIODIC) {
-            return toPeriodicPaymentTO(payment, payment.getTargets().get(0));
-        } else {
-            return toBulkPaymentTO(payment, payment.getTargets().get(0));
-        }
-    }
-
-
-    @Mapping(source = "payment.paymentId", target = "paymentId")
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
-    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
-    SinglePaymentTO toSinglePaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
-
-
-    @Mapping(source = "payment.paymentId", target = "paymentId")
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
-    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
-    PeriodicPaymentTO toPeriodicPaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
-
-
-    @Mapping(source = "payment.paymentId", target = "paymentId")
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
-    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
-    @Mapping(target = "payments", expression = "java(payment.getTargets().stream().map(t -> toSingleBulkPartTO(payment, t)).collect(java.util.stream.Collectors.toList()))")
-    BulkPaymentTO toBulkPaymentTO(PaymentBO payment, PaymentTargetBO paymentTarget);
-
-    @Mapping(source = "paymentTarget.paymentId", target = "paymentId")
-    @Mapping(source = "payment.transactionStatus", target = "paymentStatus")
-    @Mapping(target = "paymentProduct", expression = "java(toPaymentProductTO(payment.getPaymentProduct()))")
-    SinglePaymentTO toSingleBulkPartTO(PaymentBO payment, PaymentTargetBO paymentTarget);
-
-    default PaymentProductTO toPaymentProductTO(String paymentProduct) {
-        Optional<PaymentProductTO> paymentProductTO = PaymentProductTO.getByValue(paymentProduct);
-        PaymentProductTO payment = null;
-        if (paymentProductTO.isPresent()) {
-            payment = paymentProductTO.get();
-        }
-        return payment;
-    }
-
     PaymentBO toPaymentBO(PaymentTO payment);
 
     @Mapping(target = "paymentType", source = "paymentType")
@@ -98,8 +49,8 @@ public interface PaymentConverter {
     TransactionDetailsBO toTransactionDetailsBO(TransactionTO transaction);
 
     default List<PaymentTO> toPaymentTOList(List<PaymentBO> payments) {
-        return payments.stream().map(this::toAbstractPaymentTO).collect(Collectors.toList());
+        return payments.stream().map(this::toPaymentTO).collect(Collectors.toList());
     }
 
-    PaymentTO toAbstractPaymentTO(PaymentBO payment);
+    PaymentTO toPaymentTO(PaymentBO payment);
 }

@@ -2,13 +2,17 @@ package de.adorsys.ledgers.deposit.api.service;
 
 import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
-import java.util.Map;
 
 public interface CurrencyExchangeRatesService {
-    Map<Currency, String> getAllRates();
+
+    /**
+     * Updates Rates whenever is called out of scheduling
+     */
+    void updateRates() throws IOException;
 
     List<ExchangeRateBO> getExchangeRates(Currency debtor, Currency amount, Currency creditor);
 

@@ -77,7 +77,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_OPERATION_FAILURE)
                           .devMsg(format("Deposited amount and account currencies are different. Requested currency: %s, Account currency: %s",
-                                  amount.getCurrency().getCurrencyCode(), accountCurrency))
+                                         amount.getCurrency().getCurrencyCode(), accountCurrency))
                           .build();
         }
         LedgerBO ledger = loadLedger();
@@ -173,10 +173,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
             PostingLineBO line = createLine(ledger, t, pstTime, rates, payment.getPaymentId(), false, true);
             creditLines.add(line);
             batchAmount = batchAmount.add(line.getCreditAmount());
-            if (additionalLinesRequired(t)) {
-                PostingLineBO additionalCreditLine = createLine(ledger, t, pstTime, rates, t.getPayment().getPaymentId(), true, false);
-                creditLines.add(additionalCreditLine);
-            }
+            addAdditionalLinesIfRequired(t, ledger, pstTime, rates, posting.getOprId(), creditLines);
         }
 
         AmountBO amount = new AmountBO(payment.getDebtorAccount().getCurrency(), batchAmount);
@@ -197,12 +194,16 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         PostingLineBO debitLine = createLine(ledger, target, pstTime, rates, posting.getOprId(), true, true);
         PostingLineBO creditLine = createLine(ledger, target, pstTime, rates, target.getPayment().getPaymentId(), false, true);
         posting.getLines().addAll(Arrays.asList(debitLine, creditLine));
-        if (additionalLinesRequired(target)) {
-            PostingLineBO additionalDebitLine = createLine(ledger, target, pstTime, rates, posting.getOprId(), true, false);
-            PostingLineBO additionalCreditLine = createLine(ledger, target, pstTime, rates, target.getPayment().getPaymentId(), false, false);
-            posting.getLines().addAll(Arrays.asList(additionalDebitLine, additionalCreditLine));
-        }
+        addAdditionalLinesIfRequired(target, ledger, pstTime, rates, posting.getOprId(), posting.getLines());
         return posting;
+    }
+
+    private void addAdditionalLinesIfRequired(PaymentTargetBO target, LedgerBO ledger, LocalDateTime pstTime, List<ExchangeRateBO> rates, String oprId, List<PostingLineBO> lines) {
+        if (additionalLinesRequired(target)) {
+            PostingLineBO additionalDebitLine = createLine(ledger, target, pstTime, rates, oprId, true, false);
+            PostingLineBO additionalCreditLine = createLine(ledger, target, pstTime, rates, target.getPayment().getPaymentId(), false, false);
+            lines.addAll(Arrays.asList(additionalDebitLine, additionalCreditLine));
+        }
     }
 
     private boolean additionalLinesRequired(PaymentTargetBO target) {

@@ -7,6 +7,7 @@ import de.adorsys.ledgers.app.mock.SinglePaymentsData;
 import de.adorsys.ledgers.deposit.api.domain.AmountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
@@ -27,13 +28,17 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -42,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+@Slf4j
 @Service
 public class BankInitService {
     private final Logger logger = LoggerFactory.getLogger(BankInitService.class);
@@ -55,6 +61,8 @@ public class BankInitService {
     private final AccountDetailsMapper accountDetailsMapper;
     private final PaymentRestInitiationService restInitiationService;
     private final CurrencyService currencyService;
+    private final CurrencyExchangeRatesService exchangeRatesService;
+    private final ApplicationContext context;
 
     private static final String ACCOUNT_NOT_FOUND_MSG = "Account {} not Found! Should never happen while initiating mock data!";
     private static final String NO_USER_BY_IBAN = "Could not get User By Iban {}! Should never happen while initiating mock data!";
@@ -64,7 +72,7 @@ public class BankInitService {
     public BankInitService(MockbankInitData mockbankInitData, UserService userService, UserMapper userMapper,
                            DepositAccountInitService depositAccountInitService, DepositAccountService depositAccountService,
                            DepositAccountTransactionService transactionService, AccountDetailsMapper accountDetailsMapper, PaymentRestInitiationService restInitiationService,
-                           CurrencyService currencyService) {
+                           CurrencyService currencyService, CurrencyExchangeRatesService exchangeRatesService, ApplicationContext context) {
         this.mockbankInitData = mockbankInitData;
         this.userService = userService;
         this.userMapper = userMapper;
@@ -74,11 +82,19 @@ public class BankInitService {
         this.accountDetailsMapper = accountDetailsMapper;
         this.restInitiationService = restInitiationService;
         this.currencyService = currencyService;
+        this.exchangeRatesService = exchangeRatesService;
+        this.context = context;
     }
 
     public void init() {
         depositAccountInitService.initConfigData();
         createAdmin();
+        try {
+            exchangeRatesService.updateRates();
+        } catch (IOException e) {
+            log.error("ExchangeRate update failed for external service and default values on: {}, service is discontinued until Rate Service is fixed!", LocalDateTime.now());
+            SpringApplication.exit(context, () -> 0);
+        }
     }
 
     public void uploadTestData() {

@@ -1,24 +1,35 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
+import feign.FeignException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 @ExtendWith(MockitoExtension.class)
 class CurrencyExchangeRatesServiceImplTest {
@@ -27,33 +38,53 @@ class CurrencyExchangeRatesServiceImplTest {
     private static final Currency GBP = Currency.getInstance("GBP");
     private static final Currency CHF = Currency.getInstance("CHF");
 
-    private static final Map<Currency, String> rates;
+
+    private static final Map<Currency, String> INTERNAL_TEST_RATES;
 
     static {
-        rates = new HashMap<>();
-        rates.put(USD, "1.1115");
-        rates.put(GBP, "0.84868");
-        rates.put(CHF, "1.0792");
-        rates.put(EUR, "1");
+        INTERNAL_TEST_RATES = new HashMap<>();
+        INTERNAL_TEST_RATES.put(USD, "1.1115");
+        INTERNAL_TEST_RATES.put(GBP, "0.84868");
+        INTERNAL_TEST_RATES.put(CHF, "1.0792");
+        INTERNAL_TEST_RATES.put(EUR, "1");
     }
 
     @InjectMocks
     private CurrencyExchangeRatesServiceImpl currencyExchangeRatesService;
 
+    @Mock
+    private ExchangeRateClient client;
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private Logger log;
+
+    @Mock
+    Map<Currency, String> rates;
+
     private JsonNode getNodes() {
-        List<RateCube> collect = rates.entrySet().stream().map(e -> new RateCube(e.getKey(), e.getValue())).collect(Collectors.toList());
-        return new ObjectMapper().valueToTree(collect);
+        List<RateCube> collect = INTERNAL_TEST_RATES.entrySet().stream().map(e -> new RateCube(e.getKey(), e.getValue())).collect(Collectors.toList());
+        return new ObjectMapper().valueToTree(new CubeEnvelope(Collections.singletonList(new Cube(collect))));
+    }
+
+    @Test
+    void updateRates() throws IOException {
+        when(client.getRatesToEur()).thenReturn(ResponseEntity.ok("<rate></rate>"));
+        when(objectMapper.readTree(anyString())).thenReturn(getNodes());
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenAnswer(a -> new ObjectMapper().readValue((String) a.getArgument(0), Currency.class));
+        currencyExchangeRatesService.updateRates();
+        assertDoesNotThrow(DepositModuleException::builder);
+    }
+
+    @Test
+    void updateRates_load_default() throws IOException {
+        when(client.getRatesToEur()).thenThrow(FeignException.class);
+        currencyExchangeRatesService.updateRates();
+        assertDoesNotThrow(DepositModuleException::builder);
     }
 
     @Test
     void getExchangeRates_all_same() {
-        // Given
-     /*   when(client.getRatesToEur()).thenReturn(ResponseEntity.ok(new CubeType()));
-        when(objectMapper.valueToTree(any())).thenReturn(getNodes());
-        List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, USD, GBP);
-        List<ExchangeRateBO> expected = getExpected(USD, EUR, USD, GBP);
-        assertThat(result).isEqualTo(expected);*/
-
         // When
         List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, EUR);
 
@@ -89,7 +120,8 @@ class CurrencyExchangeRatesServiceImplTest {
     }
 
     @Test
-    void applyRate_2() {
+    void applyRate_2() throws NoSuchFieldException {
+        setField(currencyExchangeRatesService, currencyExchangeRatesService.getClass().getDeclaredField("rates"), INTERNAL_TEST_RATES);
         // When
         BigDecimal result = currencyExchangeRatesService.applyRate(EUR, USD, BigDecimal.TEN);
 
@@ -106,18 +138,22 @@ class CurrencyExchangeRatesServiceImplTest {
         assertThat(result, Matchers.comparesEqualTo(BigDecimal.TEN));
     }
 
-    private List<ExchangeRateBO> getExpected(Currency one, Currency two, Currency three, Currency four) {
-        List<ExchangeRateBO> rates = new ArrayList<>();
-        rates.add(getRate(one, two));
-        if (three != null) {
-            ExchangeRateBO rate = getRate(three, four);
-            rates.add(rate);
-        }
-        return rates;
+    private ExchangeRateBO getRate(Currency one, Currency two) {
+        return new ExchangeRateBO(one, CurrencyExchangeRatesServiceImplTest.INTERNAL_TEST_RATES.get(one), two, CurrencyExchangeRatesServiceImplTest.INTERNAL_TEST_RATES.get(two), LocalDate.now(), "International Currency Exchange Market");
     }
 
-    private ExchangeRateBO getRate(Currency one, Currency two) {
-        return new ExchangeRateBO(one, CurrencyExchangeRatesServiceImplTest.rates.get(one), two, CurrencyExchangeRatesServiceImplTest.rates.get(two), LocalDate.now(), "International Currency Exchange Market");
+    @Data
+    @AllArgsConstructor
+    private static class CubeEnvelope {
+        @JsonProperty("Cube")
+        List<Cube> cube;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class Cube {
+        @JsonProperty("Cube")
+        List<RateCube> cube;
     }
 
     @Data
