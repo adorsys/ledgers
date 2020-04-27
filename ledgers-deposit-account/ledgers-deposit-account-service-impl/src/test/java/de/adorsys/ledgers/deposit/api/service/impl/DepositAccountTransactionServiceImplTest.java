@@ -425,11 +425,9 @@ class DepositAccountTransactionServiceImplTest {
     @Test
     void bookPayment_bulk_two_different_currency() throws IOException, NoSuchFieldException {
         // Given
-        PaymentBO payment = getPayment(BULK, EUR, USD, USD, null, true);
-
+        PaymentBO payment = getPayment(BULK, EUR, USD, USD, CHF, true);
 
         FieldSetter.setField(transactionService, transactionService.getClass().getDeclaredField("paymentMapper"), Mappers.getMapper(PaymentMapper.class));
-
 
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
@@ -441,8 +439,10 @@ class DepositAccountTransactionServiceImplTest {
         when(exchangeRatesService.getExchangeRates(any(), any(), any())).thenReturn(getRates(EUR, USD, USD));
         when(exchangeRatesService.applyRate(any(), any())).thenAnswer(i -> new CurrencyExchangeRatesServiceImpl(null, null).applyRate(i.getArgument(0), i.getArgument(1)));
 
-        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("user account", new LedgerBO()));
         when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
+        when(depositAccountConfigService.getClearingAccount(anyString())).thenReturn("some");
+        when(ledgerService.findLedgerAccount(any(),anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
 
         // When
         transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
@@ -453,24 +453,17 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(3);
+        assertThat(lines.size()).isEqualTo(7);
+        List<PostingLineBO> creditLines = lines.stream().filter(l -> l.getCreditAmount().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
+        List<PostingLineBO> debitLines = lines.stream().filter(l -> l.getDebitAmount().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
+        assertThat(creditLines.size()).isEqualTo(4);
+        assertThat(debitLines.size()).isEqualTo(3);
+        assertThat(creditLines.stream().map(PostingLineBO::getCreditAmount).reduce(BigDecimal::add).equals(debitLines.stream().map(PostingLineBO::getDebitAmount).reduce(BigDecimal::add))).isTrue();
 
-        PostingLineBO line1 = lines.get(0);
-        assertThat(line1).isEqualToIgnoringGivenFields(expectedLine(null, new LedgerAccountBO(null, new LedgerBO()), BigDecimal.valueOf(8.3333), BigDecimal.ZERO, null, null, null, posting.getOprSrc()), "id", "details");
-        assertThat(line1.getDetails()).isNotBlank();
-        List<ExchangeRateBO> exchangeRates1 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(0).getDetails(), TransactionDetailsBO.class).getExchangeRate();
+        lines.forEach(l -> checkLine(l, posting));
+    }
 
-        PostingLineBO line2 = lines.get(1);
-        assertThat(line2).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.ZERO, BigDecimal.valueOf(8.3333), null, null, null, posting.getOprSrc()), "id", "details");
-        assertThat(line2.getDetails()).isNotBlank();
-        List<ExchangeRateBO> exchangeRates2 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(1).getDetails(), TransactionDetailsBO.class).getExchangeRate();
-        assertThat(STATIC_MAPPER.readValue(line2.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line2.getId(), exchangeRates2));
-
-        PostingLineBO line3 = lines.get(2);
-        assertThat(line3).isEqualToIgnoringGivenFields(expectedLine(null, null, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, posting.getOprSrc()), "id", "details");
-        assertThat(line3.getDetails()).isNotBlank();
-        List<ExchangeRateBO> exchangeRates3 = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(lines.get(2).getDetails(), TransactionDetailsBO.class).getExchangeRate();
-        assertThat(STATIC_MAPPER.readValue(line3.getDetails(), PaymentTargetDetailsBO.class)).isEqualToIgnoringGivenFields(getExpectedDetails(payment, line3.getId(), exchangeRates3));
+    private void checkLine(PostingLineBO l, PostingBO posting) {
     }
 
     private PaymentTargetDetailsBO getExpectedDetails(PaymentBO payment, String trId, List<ExchangeRateBO> rates) {
@@ -583,14 +576,14 @@ class DepositAccountTransactionServiceImplTest {
     }
 
     private DepositAccount getDepositAccount() {
-        return new DepositAccount("id", "DE1234567890", "msisdn", "EUR",
+        return new DepositAccount("id", IBAN, "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
                                   AccountUsage.PRIV, "details");
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", "DE1234567890", null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details"),
+                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details"),
                 Collections.emptyList());
     }
 }

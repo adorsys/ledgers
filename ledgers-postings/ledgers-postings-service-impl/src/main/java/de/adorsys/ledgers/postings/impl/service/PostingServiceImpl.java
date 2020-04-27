@@ -30,7 +30,7 @@ import static de.adorsys.ledgers.util.exception.PostingErrorCode.*;
 @Service
 public class PostingServiceImpl extends AbstractServiceImpl implements PostingService {
 
-    private static final String DOBLE_ENTRY_ERROR_MSG = "Debit sums up to %s while credit sums up to %s";
+    private static final String DOUBLE_ENTRY_ERROR_MSG = "Debit sums up to %s while credit sums up to %s";
     private static final String POSTING_NF_MSG = "Posting with account id %s  and transaction id %s could not be found";
     private static final String BASE_LINE_TIME_ERROR_MSG = "posting time %s is before the last ledger closing %s";
 
@@ -183,10 +183,10 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
         }
 
         if (!sumDebit.equals(sumCredit)) {
-            log.error(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit));
+            log.error(String.format(DOUBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit));
             throw PostingModuleException.builder()
                           .errorCode(DOBLE_ENTRY_ERROR)
-                          .devMsg(String.format(DOBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit))
+                          .devMsg(String.format(DOUBLE_ENTRY_ERROR_MSG, sumDebit, sumCredit))
                           .build();
         }
     }

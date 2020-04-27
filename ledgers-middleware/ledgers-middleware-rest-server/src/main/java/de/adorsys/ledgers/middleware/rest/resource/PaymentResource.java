@@ -50,7 +50,7 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<?> getPaymentById(String paymentId) {
+    public ResponseEntity<PaymentTO> getPaymentById(String paymentId) {
         return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
     }
 

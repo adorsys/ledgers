@@ -85,7 +85,7 @@ public interface MiddlewarePaymentService {
      * @param paymentId : the payment id
      * @return the payment
      */
-    Object getPaymentById(String paymentId);
+    PaymentTO getPaymentById(String paymentId);
 
     /**
      * Checks the possibility of payment cancellation
