@@ -14,33 +14,37 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 public class DisableEndpointFilter extends OncePerRequestFilter {
-    private static final String SUFFIX = "/**";
-    private static final List<String> EXCLUDED_URLS = Collections.singletonList(DataMgmtStaffAPI.BASE_PATH + SUFFIX);
-    private static final List<String> PROFILES = Arrays.asList("develop", "sandbox");
+    private static final List<String> EXCLUDED_URLS;
+    private static final List<String> DEVELOP_PROFILES = Arrays.asList("develop", "sandbox");
     private static final AntPathMatcher matcher = new AntPathMatcher();
     private final Environment environment;
 
+    static {
+        EXCLUDED_URLS = Arrays.asList(
+                DataMgmtStaffAPI.BASE_PATH + "/currencies"
+        );
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(isNotAccessibleEndpoint(request)) {
+        if (isAccessibleEndpoint(request)) {
+            filterChain.doFilter(request, response);
+        } else {
             log.info("This endpoint is not accessible");
             response.setStatus(HttpStatus.NOT_FOUND.value());
-        } else {
-            filterChain.doFilter(request, response);
         }
     }
 
-    private boolean isNotAccessibleEndpoint(HttpServletRequest request) {
+    private boolean isAccessibleEndpoint(HttpServletRequest request) {
         List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        boolean isNoneMatchedProfile = PROFILES.stream()
-                            .noneMatch(activeProfiles::contains);
-        return isNoneMatchedProfile && isExcludedEndpoint(request);
+        boolean isDevelopProfile = DEVELOP_PROFILES.stream()
+                                           .anyMatch(activeProfiles::contains);
+        return isDevelopProfile || isExcludedEndpoint(request);
     }
 
     private boolean isExcludedEndpoint(HttpServletRequest request) {
