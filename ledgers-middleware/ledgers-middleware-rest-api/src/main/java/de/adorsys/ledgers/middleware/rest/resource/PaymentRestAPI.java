@@ -36,7 +36,7 @@ public interface PaymentRestAPI {
 
     @GetMapping(value = "/{paymentId}")
     @ApiOperation(value = "Load Payment", notes = "Returns the payment", authorizations = @Authorization(value = "apiKey"))
-    ResponseEntity<?> getPaymentById(@PathVariable(name = "paymentId") String paymentId);
+    ResponseEntity<PaymentTO> getPaymentById(@PathVariable(name = "paymentId") String paymentId);
 
     @GetMapping(value = "/pending/periodic")
     @ApiOperation(value = "Load Pending Periodic Payments", notes = "Returns a list of pending periodic payment", authorizations = @Authorization(value = "apiKey"))
