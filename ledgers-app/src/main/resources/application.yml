@@ -103,7 +103,7 @@ sca:
     path:
 
 reset-password:
-  expiration-code-minites: 5
+  expiration-code-minutes: 5
   email:
     template-message: "Please use this code %s to reset your password"
     subject: "Your code for password reset"
