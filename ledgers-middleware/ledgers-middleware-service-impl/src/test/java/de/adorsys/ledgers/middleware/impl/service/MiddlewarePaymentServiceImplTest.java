@@ -153,7 +153,7 @@ class MiddlewarePaymentServiceImplTest {
     void getPaymentById() {
         // Given
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(PaymentTO.class, SINGLE_TO));
+        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(PaymentTO.class, SINGLE_BO));
 
         // When
         PaymentTO result = middlewareService.getPaymentById(PAYMENT_ID);
