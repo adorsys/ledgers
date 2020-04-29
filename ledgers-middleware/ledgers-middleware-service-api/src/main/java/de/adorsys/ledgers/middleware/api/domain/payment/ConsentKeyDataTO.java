@@ -25,10 +25,7 @@ public class ConsentKeyDataTO {
 		if(access==null) {
 			return String.format("No account access to tpp with id: %s", consent.getTppId());
 		}
-
 		StringBuilder b = prepareTemplate(access);
-
-		b.append("TAN: %s");
 		return b.toString();
 	}
 
@@ -60,7 +57,7 @@ public class ConsentKeyDataTO {
 		if(consent.getValidUntil()!=null) {
 			b.append(String.format("- Access valid until %s.%n", formatter.format(consent.getValidUntil())));
 		}
-		b.append("Access to following accounts:.\n");
+		b.append("Access to following accounts:\n");
 		if(AisAccountAccessTypeTO.ALL_ACCOUNTS.equals(access.getAllPsd2())) {
 			b.append("All payments accounts without balances.\n");
 		} else if (AisAccountAccessTypeTO.ALL_ACCOUNTS_WITH_BALANCES.equals(access.getAllPsd2())) {

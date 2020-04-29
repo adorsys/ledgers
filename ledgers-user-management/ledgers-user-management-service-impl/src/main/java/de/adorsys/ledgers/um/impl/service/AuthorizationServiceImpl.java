@@ -56,14 +56,23 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         if (!success) {
             return null;
         }
-
         // Check user has defined role.
+        return getLoginToken(scaId, authorisationId, user, role);
+    }
+
+    @Override
+    public BearerTokenBO authorizeNewAuthorizationId(ScaInfoBO scaInfoBO, String authorizationId) {
+        UserBO user = userService.findByLogin(scaInfoBO.getUserLogin());
+        // Check user has defined role.
+        return getLoginToken(scaInfoBO.getScaId(), authorizationId, user, scaInfoBO.getUserRole());
+    }
+
+    private BearerTokenBO getLoginToken(String scaId, String authorisationId, UserBO user, UserRoleBO role) {
         UserRoleBO userRole = user.getUserRoles().stream().filter(r -> r.name().equals(role.name()))
                                       .findFirst().orElseThrow(() -> UserManagementModuleException.builder()
                                                                              .errorCode(INSUFFICIENT_PERMISSION)
                                                                              .devMsg(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), role))
                                                                              .build());
-
         String scaIdParam = scaId != null
                                     ? scaId
                                     : Ids.id();
@@ -73,31 +82,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-        return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.valueOf(userRole.name()), scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
-    }
-
-    @Override
-    public BearerTokenBO authorizeNewAuthorizationId(ScaInfoBO scaInfoBO, String authorizationId) {
-        UserBO user = userService.findByLogin(scaInfoBO.getUserLogin());
-        // Check user has defined role.
-        UserRoleBO userRole = user.getUserRoles().stream().filter(r -> r.name().equals(scaInfoBO.getUserRole().name()))
-                                      .findFirst().orElseThrow(() -> UserManagementModuleException.builder()
-                                                                             .errorCode(INSUFFICIENT_PERMISSION)
-                                                                             .devMsg(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), scaInfoBO.getUserRole()))
-                                                                             .build());
-
-        String scaIdParam = scaInfoBO.getScaId() != null
-                                    ? scaInfoBO.getScaId()
-                                    : Ids.id();
-        String authorisationIdParam = authorizationId != null
-                                              ? authorizationId
-                                              : scaIdParam;
-
-        Date issueTime = new Date();
-        Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-        return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.valueOf(userRole.name()), scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
+        return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null, null, UserRole.valueOf(userRole.name()), scaIdParam, authorisationIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
     }
 
     @Override
@@ -214,7 +199,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         UserBO user = userService.findById(scaInfoBO.getUserId());
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
-
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
                 null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
                 scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),

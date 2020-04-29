@@ -11,8 +11,7 @@ public class ScaValidationBO {
     private ScaStatusBO scaStatus;
     private int attemptsLeft;
 
-    public ScaValidationBO(boolean validAuthCode, int attemptsLeft) {
+    public ScaValidationBO(boolean validAuthCode) {
         this.validAuthCode = validAuthCode;
-        this.attemptsLeft = attemptsLeft;
     }
 }

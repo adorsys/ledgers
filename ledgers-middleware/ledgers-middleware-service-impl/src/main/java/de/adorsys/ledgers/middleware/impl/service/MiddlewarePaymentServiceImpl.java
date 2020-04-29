@@ -42,6 +42,7 @@ import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -236,11 +237,13 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
      */
 
     @Override
+    @Transactional(noRollbackFor = ScaModuleException.class)
     public SCAPaymentResponseTO authorizePayment(ScaInfoTO scaInfoTO, String paymentId) {
         return authorizeOperation(scaInfoTO, paymentId, null, PAYMENT);
     }
 
     @Override
+    @Transactional(noRollbackFor = ScaModuleException.class)
     public SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId) {
         return authorizeOperation(scaInfoTO, paymentId, cancellationId, CANCEL_PAYMENT);
     }
@@ -259,7 +262,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
         String authorisationId = opType == PAYMENT ? scaInfoTO.getAuthorisationId() : cancellationId;
         ScaValidationBO scaValidationBO = validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode(), paymentKeyData.getTanTemplate());
-        scaUtils.checkScaResult(scaValidationBO);
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
             if (opType == PAYMENT) {
                 paymentService.updatePaymentStatus(paymentId, ACTC);
