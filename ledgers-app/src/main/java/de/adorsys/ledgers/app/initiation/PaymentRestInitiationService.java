@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.app.initiation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
@@ -37,7 +38,7 @@ public class PaymentRestInitiationService {
             logger.info("Payment from: {}, successfully committed, payment ID: {}, transaction status: {}", user.getLogin(), response.getPaymentId(), response.getTransactionStatus());
             performScaIfRequired(response);
         } catch (FeignException e) {
-            logger.error("Payment from: {}, failed due to: {}", user.getLogin(), e.getMessage());
+            logger.error("Payment from: {}, failed due to: {}", user.getLogin(), e.contentUTF8());
         }
     }
 

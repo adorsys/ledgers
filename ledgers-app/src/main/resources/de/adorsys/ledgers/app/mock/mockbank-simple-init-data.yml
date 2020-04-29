@@ -476,7 +476,16 @@ bulkPayments:
           endToEndIdentification: 20180624TAAA001
           remittanceInformationUnstructured: Payment
           instructedAmount:
-            amount: 2300.00
+            amount: 2000.00
+            currency: EUR
+        - creditorAccount:
+            iban: DE69760700240340283600
+            currency: EUR
+          creditorName: Marion Mueller
+          endToEndIdentification: 20180624TAAA001
+          remittanceInformationUnstructured: Payment
+          instructedAmount:
+            amount: 300.00
             currency: EUR
     balancesList:
       - refTime: 2018-06-23T23:59:00
