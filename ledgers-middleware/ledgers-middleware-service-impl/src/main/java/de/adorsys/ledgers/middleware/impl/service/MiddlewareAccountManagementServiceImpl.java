@@ -29,6 +29,7 @@ import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -325,6 +326,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
+    @Transactional(noRollbackFor = ScaModuleException.class)
     public SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId) {
         AisConsentBO consent = userService.loadConsent(consentId);
         AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
@@ -334,7 +336,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
         ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId,
                                                                                consentKeyData.template(), scaInfoTO.getAuthCode(), scaWeight);
-        scaUtils.checkScaResult(scaValidationBO);
 
         UserTO userTO = scaUtils.user(userBO);
         SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
@@ -467,10 +468,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
             int scaWeight = accessService.resolveMinimalScaWeightForConsent(consentBO.getAccess(), user.getAccountAccesses());
 
-            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(),
-                    aisConsent.getId(), aisConsent.getId(),
-                    consentKeyDataTemplate, consentKeyDataTemplate,
-                    defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, aisConsent.getId(), consentKeyDataTemplate, consentKeyDataTemplate, defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
             // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside
             // The system. Even if a user ha only one sca method.
             SCAOperationBO scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);

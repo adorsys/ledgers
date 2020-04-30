@@ -18,6 +18,7 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -112,9 +113,10 @@ class MiddlewareOnlineBankingServiceImplTest {
         //given
         when(userService.findByLogin(any())).thenReturn(getUserBO());
         when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.FAILED));
+        when(scaOperationService.updateFailedCount(any(),anyBoolean())).thenReturn(ScaModuleException.builder().build());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> {
+        assertThrows(ScaModuleException.class, () -> {
             SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
             assertThat(response).isNotNull();
             assertEquals(getBearerTokenTO(), response.getBearerToken());
@@ -128,9 +130,10 @@ class MiddlewareOnlineBankingServiceImplTest {
         when(userService.findByLogin(any())).thenReturn(getUserBO());
         when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(null);
+        when(scaOperationService.updateFailedCount(any(),anyBoolean())).thenReturn(ScaModuleException.builder().build());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> {
+        assertThrows(ScaModuleException.class, () -> {
             SCALoginResponseTO response = onlineBankingService.authoriseForConsent(USER_LOGIN, USER_PIN, CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT);
 
             //then

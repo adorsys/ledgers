@@ -89,16 +89,5 @@ class SCAUtilsTest {
 
     private ScaInfoTO getScaInfo() {
         return new ScaInfoTO("userId", "scaId", "authId", UserRoleTO.CUSTOMER, "methodId", "authCode", TokenUsageTO.LOGIN, "login");
-
-    }
-
-    @Test
-    void checkScaResult() {
-        utils.checkScaResult(new ScaValidationBO("code", true, ScaStatusBO.RECEIVED, 3));
-    }
-
-    @Test
-    void checkScaResult_fail() {
-        assertThrows(MiddlewareModuleException.class, () -> utils.checkScaResult(new ScaValidationBO("code", false, ScaStatusBO.RECEIVED, 3)));
     }
 }

@@ -24,6 +24,7 @@ import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -96,7 +97,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Mock
     private ScaResponseResolver scaResponseResolver;
 
-    private static ObjectMapper mapper = getObjectMapper();
+    private static final ObjectMapper MAPPER = getObjectMapper();
 
     @Test
     void getAccountsByIbanAndCurrency() {
@@ -540,12 +541,11 @@ class MiddlewareAccountManagementServiceImplTest {
         when(userService.loadConsent(any())).thenReturn(getAisConsentBO());
         when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        doThrow(MiddlewareModuleException.class).when(scaUtils).checkScaResult(any());
         when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(getScaValidationBO(false));
+        when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenThrow(ScaModuleException.class);
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.authorizeConsent(buildScaInfoTO(), "consentId"));
+        assertThrows(ScaModuleException.class, () -> middlewareService.authorizeConsent(buildScaInfoTO(), "consentId"));
     }
 
     @Test
@@ -683,7 +683,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
     private static <T> T getAccount(Class<T> aClass) {
         try {
-            return mapper.readValue(PaymentConverter.class.getResourceAsStream("AccountDetails.yml"), aClass);
+            return MAPPER.readValue(PaymentConverter.class.getResourceAsStream("AccountDetails.yml"), aClass);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
@@ -716,7 +716,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
     private static <T> T readYml(Class<T> aClass, String fileName) {
         try {
-            return mapper.readValue(PaymentConverter.class.getResourceAsStream(fileName), aClass);
+            return MAPPER.readValue(PaymentConverter.class.getResourceAsStream(fileName), aClass);
         } catch (IOException e) {
             e.printStackTrace();
         }

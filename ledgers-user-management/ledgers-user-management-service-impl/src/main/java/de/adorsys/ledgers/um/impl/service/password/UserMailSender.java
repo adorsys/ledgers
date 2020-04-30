@@ -26,7 +26,6 @@ public class UserMailSender {
         } catch (MailException e) {
             log.error("Error sending email, No SMTP service configured");
             log.error(e.getMessage());
-            log.error(e.getStackTrace().toString());
             return false;
         }
         log.info("Code was successfully sent via email");

@@ -2,6 +2,7 @@ package de.adorsys.ledgers.sca.service;
 
 import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 
 public interface SCAOperationService {
 
@@ -52,14 +53,6 @@ public interface SCAOperationService {
     SCAOperationBO loadAuthCode(String authorizationId);
 
     /**
-     * load all auth code associated with the given operation id
-     *
-     * @param opId identifier of primary operation for which authorization is carried
-     * @return list of SCA operations
-     */
-    //List<SCAOperationBO> loadAuthCodesByOpId(String opId);
-
-    /**
      * Return true if all authorization instances of this operation are validated.
      *
      * @param opId   identifier of primary operation for which authorization is carried
@@ -86,5 +79,5 @@ public interface SCAOperationService {
 
     SCAOperationBO checkIfExistsOrNew(AuthCodeDataBO data);
 
-    int updateFailedCount(String authorisationId);
+    ScaModuleException updateFailedCount(String authorisationId, boolean isLoginOperation);
 }

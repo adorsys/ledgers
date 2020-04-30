@@ -8,7 +8,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.LoginKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
@@ -32,7 +31,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
 
 @Slf4j
 @Service
@@ -62,27 +62,16 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     }
 
     @Override
-    @Transactional(noRollbackFor = MiddlewareModuleException.class)
+    @Transactional(noRollbackFor = ScaModuleException.class)
     public SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId, OpTypeTO opType) {
         OpTypeBO opTypeBO = OpTypeBO.valueOf(opType.name());
         UserBO user = user(login);
+        scaOperationService.checkIfExistsOrNew(new AuthCodeDataBO(user.getLogin(), null, consentId, null, NO_USER_MESSAGE, defaultLoginTokenExpireInSeconds, opTypeBO, authorisationId, 0));
         try {
-            scaOperationService.checkIfExistsOrNew(new AuthCodeDataBO(user.getLogin(), null, consentId, null, NO_USER_MESSAGE,
-                                                                      defaultLoginTokenExpireInSeconds, opTypeBO, authorisationId, 0));
             BearerTokenBO loginTokenBO = proceedToLogin(user, pin, UserRoleTO.CUSTOMER, consentId, authorisationId);
             return resolveLoginResponseForConsentLogin(consentId, authorisationId, opTypeBO, user, loginTokenBO);
-        } catch (MiddlewareModuleException | ScaModuleException e) {
-            int attemptsLeft = scaOperationService.updateFailedCount(authorisationId);
-            String errorMsgPart = attemptsLeft > 0
-                                          ? String.format("You have %s attempts to enter valid credentials", attemptsLeft)
-                                          : "Your Login authorization is FAILED please create a new one.";
-            MiddlewareErrorCode code = attemptsLeft > 0
-                                               ? PSU_AUTH_ATTEMPT_INVALID
-                                               : AUTHENTICATION_FAILURE;
-            throw MiddlewareModuleException.builder()
-                          .devMsg("Either your login or pin is incorrect. " + errorMsgPart)
-                          .errorCode(code)
-                          .build();
+        } catch (MiddlewareModuleException e) {
+            throw scaOperationService.updateFailedCount(authorisationId, true);
         }
     }
 
