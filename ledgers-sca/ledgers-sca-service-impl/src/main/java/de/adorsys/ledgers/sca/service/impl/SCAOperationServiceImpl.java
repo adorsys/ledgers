@@ -36,6 +36,7 @@ import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +56,7 @@ import static de.adorsys.ledgers.util.exception.SCAErrorCode.*;
 
 @Slf4j
 @Service
+@Setter
 @RequiredArgsConstructor
 public class SCAOperationServiceImpl implements SCAOperationService, InitializingBean {//NOPMD //TODO REFACTOR THIS GOD CLASS
     private static final String TAN_VALIDATION_ERROR = "Can't validate client TAN";
@@ -103,6 +105,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     @Override
     public SCAOperationBO generateAuthCode(AuthCodeDataBO data, UserBO user, ScaStatusBO scaStatus) {
         SCAOperationEntity scaOperation = loadOrCreateScaOperation(data, scaStatus);
+        checkOperationAttempts(scaOperation, false);
         checkScaOperationIsValid(data, user, scaOperation);
         scaOperation.setScaStatus(ScaStatus.valueOf(scaStatus.name()));
 
@@ -133,19 +136,19 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
                                                                           .devMsg("Sca operation does not contain SCA DATA")
                                                                           .build());
         String authCodeHash = operation.getAuthCodeHash();
+        checkOperationAttempts(operation, false);
         checkOperationNotUsed(operation);
         checkOperationNotExpired(operation);
         checkSameOperation(operation, opId);
 
         String generatedHash = generateHash(operation.getId(), opId, opData, authCode);
         boolean isAuthCodeValid = StringUtils.equals(authCodeHash, generatedHash);
-        ScaValidationBO scaValidation = new ScaValidationBO(isAuthCodeValid, authCodeFailedMax - operation.getFailledCount());
+        ScaValidationBO scaValidation = new ScaValidationBO(isAuthCodeValid);
         if (isAuthCodeValid) {
             success(operation, scaWeight, scaValidation);
         } else {
-            failed(operation, false);
+            throw updateFailedCount(authorisationId, false);
         }
-        repository.save(operation);
         return scaValidation;
     }
 
@@ -211,6 +214,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     public SCAOperationBO checkIfExistsOrNew(AuthCodeDataBO data) {
         Optional<SCAOperationEntity> scaOperation = repository.findById(data.getAuthorisationId());
         scaOperation.ifPresent(o -> {
+            checkOperationAttempts(o, true);
             checkOperationNotExpired(o);
             checkOperationNotUsed(o);
         });
@@ -218,12 +222,21 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
                        .orElseGet(() -> createAuthCode(data, ScaStatusBO.RECEIVED));
     }
 
+    private void checkOperationAttempts(SCAOperationEntity operation, boolean isLoginOperation) {
+        int max = isLoginOperation
+                          ? loginFailedMax
+                          : authCodeFailedMax;
+        if (operation.getFailledCount() >= max) {
+            throw ScaModuleException.buildAttemptsException(0, isLoginOperation);
+        }
+    }
+
     @Override
-    public int updateFailedCount(String authorisationId) {
+    public ScaModuleException updateFailedCount(String authorisationId, boolean isLoginOperation) {
         SCAOperationEntity operationEntity = getScaOperationEntityById(authorisationId);
-        failed(operationEntity, true);
+        failed(operationEntity, isLoginOperation);
         repository.save(operationEntity);
-        return loginFailedMax - operationEntity.getFailledCount();
+        return ScaModuleException.buildAttemptsException(loginFailedMax - operationEntity.getFailledCount(), isLoginOperation);
     }
 
     private SCAOperationEntity getScaOperationEntityByIdAndUnconfirmed(String authorisationId) {
@@ -255,7 +268,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         if (scaOperation.getScaMethodId() == null) {
             if (data.getScaUserDataId() == null) {
                 throw ScaModuleException.builder()
-                              .errorCode(SCA_OPERATION_VALIDATION_FAILED)
+                              .errorCode(SCA_OPERATION_VALIDATION_INVALID)
                               .devMsg("Missing selected sca method.")
                               .build();
             }
@@ -264,7 +277,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
         if (CollectionUtils.isEmpty(user.getScaUserData())) {
             throw ScaModuleException.builder()
-                          .errorCode(SCA_OPERATION_VALIDATION_FAILED)
+                          .errorCode(SCA_OPERATION_VALIDATION_INVALID)
                           .devMsg(String.format("User with login %s has no sca data", user.getLogin()))
                           .build();
         }
@@ -297,6 +310,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         }
         scaValidation.setScaStatus(ScaStatusBO.valueOf(status.name()));
         updateOperationStatus(operation, VALIDATED, status, scaWeight);
+        repository.save(operation);
     }
 
     private void failed(SCAOperationEntity operation, boolean isLoginOperation) {
@@ -314,7 +328,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     private void checkSameOperation(SCAOperationEntity operation, String opId) {
         if (!StringUtils.equals(opId, operation.getOpId())) {
             throw ScaModuleException.builder()
-                          .errorCode(SCA_OPERATION_VALIDATION_FAILED)
+                          .errorCode(SCA_OPERATION_VALIDATION_INVALID)
                           .devMsg("Operation id not matching.")
                           .build();
         }
@@ -331,7 +345,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         } catch (HashGenerationException e) {
             log.error(TAN_VALIDATION_ERROR);
             throw ScaModuleException.builder()
-                          .errorCode(SCA_OPERATION_VALIDATION_FAILED)
+                          .errorCode(SCA_OPERATION_VALIDATION_INVALID)
                           .devMsg(TAN_VALIDATION_ERROR)
                           .build();
         }
@@ -430,7 +444,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
                           .devMsg("Missing authorization id.")
                           .build();
         }
-        return repository.findById(data.getAuthorisationId()).orElse(createAuthCodeInternal(data, scaStatus));
+        return repository.findById(data.getAuthorisationId()).orElseGet(() -> createAuthCodeInternal(data, scaStatus));
     }
 
     private void checkMethodSupported(ScaUserDataBO scaMethod) {
@@ -458,22 +472,6 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         operation.setStatus(status);
         operation.setScaStatus(scaStatus);
         operation.setStatusTime(LocalDateTime.now());
-    }
-
-    void setHashGenerator(HashGenerator hashGenerator) {
-        this.hashGenerator = hashGenerator;
-    }
-
-    void setSenders(Map<ScaMethodTypeBO, SCASender> senders) {
-        this.senders = senders;
-    }
-
-    void setAuthCodeValiditySeconds(int authCodeValiditySeconds) {
-        this.authCodeValiditySeconds = authCodeValiditySeconds;
-    }
-
-    void setAuthCodeEmailBody(String authCodeEmailBody) {
-        this.authCodeEmailBody = authCodeEmailBody;
     }
 
     private static final class OperationHashItem {

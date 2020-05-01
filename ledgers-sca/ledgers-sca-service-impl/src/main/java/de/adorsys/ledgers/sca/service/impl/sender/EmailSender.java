@@ -31,6 +31,7 @@ public class EmailSender {
             sender.send(message);
         } catch (MailException e) {
             log.error("Error sending email, No SMTP service configured");
+            log.error(e.getMessage());
             return false;
         }
         log.info("Auth code was successfully sent via email");

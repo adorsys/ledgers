@@ -19,6 +19,7 @@ import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,6 +92,8 @@ class SCAOperationServiceImplTest {
     void setUp() {
         LocalDateTime now = LocalDateTime.now();
         scaOperationService.setHashGenerator(hashGenerator);
+        scaOperationService.setAuthCodeFailedMax(3);
+        scaOperationService.setLoginFailedMax(3);
 
         scaOperationEntity = readFromFile("scaOperationEntity.yml", SCAOperationEntity.class);
         scaOperationEntity.setId(AUTH_ID);
@@ -424,14 +427,10 @@ class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
 
-        // When
-        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
-
         // Then
-        assertThat(scaValidationBO.isValidAuthCode(), is(Boolean.FALSE));
-        assertThat(scaOperationEntity.getStatus(), is(AuthCodeStatus.FAILED));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
 
-        verify(repository, times(1)).findById(AUTH_ID);
+        verify(repository, times(2)).findById(AUTH_ID);
         verify(hashGenerator, times(1)).hash(any());
     }
 
@@ -711,10 +710,10 @@ class SCAOperationServiceImplTest {
         when(repository.findById(anyString())).thenReturn(Optional.of(scaOperationEntity));
 
         // When
-        int result = scaOperationService.updateFailedCount(AUTH_ID);
+        ScaModuleException result = scaOperationService.updateFailedCount(AUTH_ID, true);
 
         // Then
-        assertThat(result, is(-1));
+        assertThat(result.getDevMsg().contains("2"), is(true));
     }
 
     @Test
@@ -723,7 +722,7 @@ class SCAOperationServiceImplTest {
         when(repository.findById(anyString())).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ScaModuleException.class, () -> scaOperationService.updateFailedCount(AUTH_ID));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.updateFailedCount(AUTH_ID, false));
     }
 
     private void callGenerateAuthCode(boolean usesStaticTan, boolean staticTanPresent, boolean methodIdPresent, boolean methodIsPresent, boolean methodSupported) {
@@ -738,7 +737,7 @@ class SCAOperationServiceImplTest {
         method.setStaticTan(staticTanPresent ? STATIC_TAN : TAN);
         userBO.setScaUserData(methodIsPresent ? Collections.singletonList(method) : Collections.emptyList());
 
-        when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
+//        when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
 
         codeDataBO.setAuthorisationId(AUTH_ID);

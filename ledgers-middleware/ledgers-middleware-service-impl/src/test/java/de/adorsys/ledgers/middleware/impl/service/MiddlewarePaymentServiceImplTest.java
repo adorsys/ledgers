@@ -27,6 +27,7 @@ import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
+import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -153,7 +154,7 @@ class MiddlewarePaymentServiceImplTest {
     void getPaymentById() {
         // Given
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(PaymentTO.class, SINGLE_TO));
+        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(PaymentTO.class, SINGLE_BO));
 
         // When
         PaymentTO result = middlewareService.getPaymentById(PAYMENT_ID);
@@ -384,13 +385,12 @@ class MiddlewarePaymentServiceImplTest {
         PaymentBO payment = readYml(PaymentBO.class, SINGLE_BO);
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
-        doThrow(MiddlewareModuleException.class).when(scaUtils).checkScaResult(any());
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(payment);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(payment))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(payment));
-        when(operationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(new ScaValidationBO("authCode", false, ScaStatusBO.FAILED, 0));
+        when(operationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenThrow(ScaModuleException.builder().build());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.authorizePayment(buildScaInfoTO(), PAYMENT_ID));
+        assertThrows(ScaModuleException.class, () -> middlewareService.authorizePayment(buildScaInfoTO(), PAYMENT_ID));
     }
 
     @Test

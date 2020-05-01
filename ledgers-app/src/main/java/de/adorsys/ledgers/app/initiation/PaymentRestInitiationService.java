@@ -37,7 +37,7 @@ public class PaymentRestInitiationService {
             logger.info("Payment from: {}, successfully committed, payment ID: {}, transaction status: {}", user.getLogin(), response.getPaymentId(), response.getTransactionStatus());
             performScaIfRequired(response);
         } catch (FeignException e) {
-            logger.error("Payment from: {}, failed due to: {}", user.getLogin(), e.getMessage());
+            logger.error("Payment from: {}, failed due to: {}", user.getLogin(), e.contentUTF8());
         }
     }
 

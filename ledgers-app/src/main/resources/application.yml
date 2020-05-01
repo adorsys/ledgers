@@ -84,8 +84,8 @@ default:
       seconds: 50000
 
 sca:
-  authCode.failed.max: 2
-  login.failed.max: 2
+  authCode.failed.max: 3
+  login.failed.max: 3
   authCode:
     validity.seconds: 180
     expiration:
@@ -103,7 +103,7 @@ sca:
     path:
 
 reset-password:
-  expiration-code-minites: 5
+  expiration-code-minutes: 5
   email:
     template-message: "Please use this code %s to reset your password"
     subject: "Your code for password reset"
