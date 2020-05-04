@@ -71,4 +71,6 @@ public interface DepositAccountService {
      * @deprecated shall be removed in v2.5
      */
     DepositAccountDetailsBO getDetailsByIban(String iban, LocalDateTime refTime, boolean withBalances);
+
+    Page<DepositAccountBO> getAccountByOptionalBranchPaged(String branchId, String queryParam, Pageable pageable);
 }

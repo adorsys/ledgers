@@ -16,6 +16,7 @@ import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -216,6 +217,13 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         }
         DepositAccountBO account = accounts.iterator().next();
         return new DepositAccountDetailsBO(account, getBalancesList(account, withBalances, refTime));
+    }
+
+    @Override
+    public Page<DepositAccountBO> getAccountByOptionalBranchPaged(String branchId, String queryParam, Pageable pageable) {
+        return StringUtils.isEmpty(branchId)
+                       ? depositAccountRepository.findByIbanContaining(queryParam, pageable).map(depositAccountMapper::toDepositAccountBO)
+                       : depositAccountRepository.findByBranchAndIbanContaining(branchId, queryParam, pageable).map(depositAccountMapper::toDepositAccountBO);
     }
 
     @Override

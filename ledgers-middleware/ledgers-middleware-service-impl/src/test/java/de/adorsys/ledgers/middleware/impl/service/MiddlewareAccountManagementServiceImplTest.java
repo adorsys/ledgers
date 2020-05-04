@@ -27,6 +27,7 @@ import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -412,7 +413,7 @@ class MiddlewareAccountManagementServiceImplTest {
         // Given
         when(accessService.loadCurrentUser(any())).thenReturn(buildUserBO());
         when(depositAccountService.findDetailsByBranchPaged(any(), any(), any())).thenReturn(getPage());
-        when(accountDetailsMapper.toAccountDetailsTO(any())).thenReturn(getAccountDetailsTO());
+        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getPageImpl());
 
         // When
@@ -621,7 +622,7 @@ class MiddlewareAccountManagementServiceImplTest {
         when(userMapper.toUserTOList(any())).thenReturn(Collections.singletonList(buildUserTO()));
         when(userService.findUsersByIban(any())).thenReturn(Collections.singletonList(buildUserBO()));
         when(depositAccountService.getAccountDetailsById(any(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
-        when(accountDetailsMapper.toAccountDetailsTO(any())).thenReturn(getAccountDetailsTO());
+        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
         // When
         AccountReportTO result = middlewareService.getAccountReport(ACCOUNT_ID);
@@ -633,12 +634,25 @@ class MiddlewareAccountManagementServiceImplTest {
 
     }
 
-    private CustomPageImpl<Object> getPageImpl() {
-        return new CustomPageImpl<Object>();
+    @Test
+    void getAccountsByOptionalBranchPaged() {
+        when(depositAccountService.getAccountByOptionalBranchPaged(anyString(), anyString(), any())).thenReturn(getPageWithAccount());
+        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountBO.class))).thenReturn(getAccountDetailsTO());
+        when(pageMapper.toCustomPageImpl(any())).thenReturn(new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(getAccountDetailsTO())));
+        CustomPageImpl<AccountDetailsTO> result = middlewareService.getAccountsByOptionalBranchPaged(USER_ID, IBAN, new CustomPageableImpl(0, 1));
+        assertEquals(result.getContent(), Collections.singletonList(getAccountDetailsTO()));
     }
 
-    private Page getPage() {
-        return new PageImpl(Collections.singletonList(getDepositAccountDetailsBO()));
+    private CustomPageImpl<Object> getPageImpl() {
+        return new CustomPageImpl<>();
+    }
+
+    private Page<DepositAccountDetailsBO> getPage() {
+        return new PageImpl<>(Collections.singletonList(getDepositAccountDetailsBO()));
+    }
+
+    private Page<DepositAccountBO> getPageWithAccount() {
+        return new PageImpl<>(Collections.singletonList(getDepositAccountDetailsBO().getAccount()));
     }
 
     private CustomPageableImpl getCustomPageableImpl() {

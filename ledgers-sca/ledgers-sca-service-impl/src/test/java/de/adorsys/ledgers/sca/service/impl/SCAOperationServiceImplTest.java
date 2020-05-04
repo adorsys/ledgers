@@ -737,7 +737,6 @@ class SCAOperationServiceImplTest {
         method.setStaticTan(staticTanPresent ? STATIC_TAN : TAN);
         userBO.setScaUserData(methodIsPresent ? Collections.singletonList(method) : Collections.emptyList());
 
-//        when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
 
         codeDataBO.setAuthorisationId(AUTH_ID);

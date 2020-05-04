@@ -142,6 +142,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
+    public void updatePassword(String userId, String password) {
+        userService.updatePassword(userId,password);
+    }
+
+    @Override
     public boolean checkMultilevelScaRequired(String login, String iban) {
         if (!multilevelScaEnable) {
             return false;
