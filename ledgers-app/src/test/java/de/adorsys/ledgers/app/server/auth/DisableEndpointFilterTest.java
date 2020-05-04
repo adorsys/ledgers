@@ -15,7 +15,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +31,7 @@ class DisableEndpointFilterTest {
     @Test
     void doFilterInternal_develop_should_pass() {
         List<String> servletPaths = Arrays.asList(
+                "/SomeServletPath/SomeCallUri",
                 servletPrefix + "/transactions/132",
                 servletPrefix + "/branch/132",
                 servletPrefix + "/upload",
@@ -42,7 +42,9 @@ class DisableEndpointFilterTest {
 
     @Test
     void doFilterInternal_prod_currencies_should_pass() {
-        List<String> okServletPaths = Collections.singletonList(servletPrefix + "/currencies");
+        List<String> okServletPaths = Arrays.asList(
+                "/SomeServletPath/SomeCallUri",
+                servletPrefix + "/currencies");
         List<String> nokServletPaths = Arrays.asList(
                 servletPrefix + "/transactions/132",
                 servletPrefix + "/branch/132",
