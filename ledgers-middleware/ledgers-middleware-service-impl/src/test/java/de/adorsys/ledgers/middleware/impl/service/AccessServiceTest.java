@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 
-import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
 import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
@@ -252,6 +251,6 @@ class AccessServiceTest {
     }
 
     private DepositAccountBO getDepostAccountBO() {
-        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, AccountStatusBO.ENABLED, null, null, AccountUsageBO.PRIV, "details");
+        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details",false,false);
     }
 }

@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static java.lang.String.format;
 
 @Slf4j
@@ -80,10 +81,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
         DepositAccountDetailsBO account = depositAccountService.getAccountDetailsByIbanAndCurrency(access.getIban(), access.getCurrency(), LocalDateTime.now(), false);
         if (!account.isEnabled()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(PAYMENT_PROCESSING_FAILURE)
-                          .devMsg(format("Operation is Rejected as account: %s is %s", account.getAccount().getIban(), account.getAccount().getAccountStatus()))
-                          .build();
+            throw blockedSupplier(PAYMENT_PROCESSING_FAILURE, account.getAccount().getIban(), account.getAccount().isBlocked()).get();
         }
         UserTO branch = findById(scaInfo.getUserId());
         boolean tppHasAccessToAccount = accessService.userHasAccessToAccount(branch, access.getIban());
@@ -143,7 +141,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public void updatePassword(String userId, String password) {
-        userService.updatePassword(userId,password);
+        userService.updatePassword(userId, password);
     }
 
     @Override

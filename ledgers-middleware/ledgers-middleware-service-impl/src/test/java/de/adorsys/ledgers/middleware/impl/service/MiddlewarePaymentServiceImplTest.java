@@ -182,7 +182,7 @@ class MiddlewarePaymentServiceImplTest {
         List<DepositAccountBO> accounts = Collections.singletonList(DepositAccountBO.builder()
                                                                             .iban(paymentBO.getDebtorAccount().getIban())
                                                                             .currency(paymentBO.getDebtorAccount().getCurrency())
-                                                                            .accountStatus(AccountStatusBO.ENABLED).build());
+                                                                            .build());
         when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(accounts);
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(paymentService.executePayment(any(), any())).thenReturn(ACTC);
@@ -206,7 +206,7 @@ class MiddlewarePaymentServiceImplTest {
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, AccountStatusBO.ENABLED, null, null, null, null)));
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false)));
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(paymentService.executePayment(any(), any())).thenReturn(TransactionStatusBO.ACSP);
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
@@ -228,8 +228,8 @@ class MiddlewarePaymentServiceImplTest {
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, AccountStatusBO.ENABLED, null, null, null, null)));
-        when(accountService.getAccountsByIbanAndParamCurrency(eq("DE91100000000123456709"), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getTargets().iterator().next().getCreditorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, AccountStatusBO.BLOCKED, null, null, null, null)));
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false)));
+        when(accountService.getAccountsByIbanAndParamCurrency(eq("DE91100000000123456709"), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getTargets().iterator().next().getCreditorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, true, false)));
 
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
@@ -285,7 +285,7 @@ class MiddlewarePaymentServiceImplTest {
         paymentBO.setPaymentProduct("instant-sepa-credit-transfers");
         UserBO userBO = new UserBO("Test", "", "");
 
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(AccountStatusBO.ENABLED, EUR));
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(getAccounts(false, EUR));
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
@@ -531,17 +531,17 @@ class MiddlewarePaymentServiceImplTest {
         return config;
     }
 
-    private List<DepositAccountBO> getAccounts(AccountStatusBO status, Currency... currency) {
+    private List<DepositAccountBO> getAccounts(boolean isBlocked, Currency... currency) {
         return Arrays.stream(currency)
-                       .map(c -> getAccount(c, status))
+                       .map(c -> getAccount(c, isBlocked))
                        .collect(Collectors.toList());
     }
 
-    private DepositAccountBO getAccount(Currency currency, AccountStatusBO status) {
+    private DepositAccountBO getAccount(Currency currency, boolean isBlocked) {
         return DepositAccountBO.builder()
                        .iban(IBAN)
                        .currency(currency)
-                       .accountStatus(status)
+                       .blocked(isBlocked)
                        .build();
     }
 

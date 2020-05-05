@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
@@ -160,7 +159,7 @@ class MiddlewareUserManagementServiceImplTest {
     void updateAccountAccess_accountNotEnabled() {
         // Given
         DepositAccountDetailsBO accountDetails = getDepositAccountDetailsBO();
-        accountDetails.getAccount().setAccountStatus(AccountStatusBO.BLOCKED);
+        accountDetails.getAccount().setBlocked(true);
         when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(accountDetails);
 
         // Then

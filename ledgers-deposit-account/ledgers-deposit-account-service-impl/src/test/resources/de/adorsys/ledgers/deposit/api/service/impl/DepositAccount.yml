@@ -5,7 +5,6 @@ currency: EUR
 name: NAME
 product: PRODUCT
 accountType: CASH
-accountStatus: ENABLED
 bic: BIC
 linkedAccounts: LINKED_ACCOUNT
 usageType: PRIV

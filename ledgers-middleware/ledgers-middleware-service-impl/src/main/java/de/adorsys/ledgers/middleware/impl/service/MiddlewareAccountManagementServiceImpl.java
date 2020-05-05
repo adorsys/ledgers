@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static java.lang.String.format;
 
 @Slf4j
@@ -377,10 +378,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) {
         DepositAccountDetailsBO account = depositAccountService.getAccountDetailsById(accountId, LocalDateTime.now(), false);
         if (!account.isEnabled()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(PAYMENT_PROCESSING_FAILURE)
-                          .devMsg(format("Operation is Rejected as account: %s is %s", account.getAccount().getIban(), account.getAccount().getAccountStatus()))
-                          .build();
+            throw blockedSupplier(PAYMENT_PROCESSING_FAILURE, account.getAccount().getIban(), account.getAccount().isBlocked()).get();
         }
         transactionService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
     }

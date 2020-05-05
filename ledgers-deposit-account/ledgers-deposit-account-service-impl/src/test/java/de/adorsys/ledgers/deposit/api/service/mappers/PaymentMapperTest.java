@@ -127,7 +127,7 @@ class PaymentMapperTest {
     }
 
     private DepositAccountBO getDepositAccount() {
-        return new DepositAccountBO("id", "IBAN", null, null, null, null, EUR, "Anton Brueckner", null, null, null, null, null, null, null);
+        return new DepositAccountBO("id", "IBAN", null, null, null, null, EUR, "Anton Brueckner", null, null, null, null, null, null,false,false);
     }
 
     private TransactionDetailsBO getDepositTrDetails() {

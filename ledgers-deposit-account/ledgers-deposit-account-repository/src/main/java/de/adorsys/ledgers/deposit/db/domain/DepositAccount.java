@@ -41,10 +41,6 @@ public class DepositAccount {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "account_status", nullable = false)
-    private AccountStatus accountStatus = AccountStatus.ENABLED;
-
     /*
      * SWIFT
      * 4 letters bankCode + 2 letters CountryCode + 2 symbols CityCode + 3 symbols BranchCode
@@ -70,4 +66,16 @@ public class DepositAccount {
      * - characteristics of the relevant card
      */
     private String details;
+
+    /*
+     * Is blocked by SYSTEM or STAFF
+     */
+    @Column(name = "block")
+    private boolean blocked;
+
+    /*
+     * Is blocked for technical reasons - i.e. deleting some data for this user to prevent data inconsistency
+     */
+    @Column(name = "systemBlock")
+    private boolean systemBlocked;
 }

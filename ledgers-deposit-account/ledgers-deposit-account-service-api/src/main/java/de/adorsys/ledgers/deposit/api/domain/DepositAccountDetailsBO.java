@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
-
 
 @Data
 @NoArgsConstructor
@@ -18,6 +16,6 @@ public class DepositAccountDetailsBO {
     private List<BalanceBO> balances = new ArrayList<>();
 
     public boolean isEnabled() {
-        return account.getAccountStatus() == ENABLED;
+        return !account.isBlocked() && !account.isSystemBlocked();
     }
 }
