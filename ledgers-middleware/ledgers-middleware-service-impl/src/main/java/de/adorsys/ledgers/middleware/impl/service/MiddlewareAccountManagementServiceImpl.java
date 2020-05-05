@@ -266,6 +266,12 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                                                    .map(accountDetailsMapper::toAccountDetailsTO));
     }
 
+    @Override
+    public CustomPageImpl<AccountDetailsTO> getAccountsByOptionalBranchPaged(String branchId, String queryParam, CustomPageableImpl pageable) {
+        return pageMapper.toCustomPageImpl(depositAccountService.getAccountByOptionalBranchPaged(branchId, queryParam, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                                   .map(accountDetailsMapper::toAccountDetailsTO));
+    }
+
 
     @Override
     public String iban(String id) {

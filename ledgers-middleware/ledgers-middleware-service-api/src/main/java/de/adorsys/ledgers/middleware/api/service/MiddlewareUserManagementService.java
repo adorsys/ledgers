@@ -83,6 +83,8 @@ public interface MiddlewareUserManagementService {
 
     UserTO updateUser(String branchId, UserTO user);
 
+    void updatePassword(String userId, String password);
+
     boolean checkMultilevelScaRequired(String login, String iban);
 
     boolean checkMultilevelScaRequired(String login, List<AccountReferenceTO> references);

@@ -14,6 +14,7 @@ public abstract class AccountDetailsMapper {
 
     public abstract AccountDetailsTO toAccountDetailsTO(DepositAccountBO details, List<BalanceBO> balances);
 
+    public abstract AccountDetailsTO toAccountDetailsTO(DepositAccountBO source);
 
     public abstract DepositAccountBO toDepositAccountBO(AccountDetailsTO details);
 

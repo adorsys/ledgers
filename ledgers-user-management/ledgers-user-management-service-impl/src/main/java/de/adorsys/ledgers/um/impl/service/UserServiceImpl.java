@@ -149,8 +149,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, String queryParam, Pageable pageable) {
-        Page<UserBO> users = userRepository.findByBranchAndUserRolesInAndLoginContaining(branch, userConverter.toUserRole(userRoles), queryParam, pageable)
-                                     .map(userConverter::toUserBO);
+        Page<UserBO> users = StringUtils.isBlank(branch)
+                                     ? userRepository.findByUserRolesInAndLoginContaining(userConverter.toUserRole(userRoles), queryParam, pageable).map(userConverter::toUserBO)
+                                     : userRepository.findByBranchAndUserRolesInAndLoginContaining(branch, userConverter.toUserRole(userRoles), queryParam, pageable).map(userConverter::toUserBO);
         users.forEach(this::decodeStaticTanForUser);
         return users;
     }
@@ -196,6 +197,14 @@ public class UserServiceImpl implements UserService {
                                                         .filter(accountAccess -> accountAccess.getAccountId().equals(accountId))
                                                         .collect(Collectors.toList())));
         return users;
+    }
+
+    @Override
+    public void updatePassword(String userId, String password) {
+        UserEntity user = userRepository.findById(userId)
+                                  .orElseThrow(getModuleExceptionSupplier(userId, USER_NOT_FOUND, USER_WITH_ID_NOT_FOUND));
+        user.setPin(passwordEnc.encode(userId, password));
+        userRepository.save(user);
     }
 
     private void checkDuplicateScaMethods(List<ScaUserDataBO> scaUserData) {

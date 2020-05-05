@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -269,6 +270,23 @@ class UserServiceImplTest {
         verify(converter, times(1)).toUserRole(Collections.singletonList(UserRoleBO.CUSTOMER));
     }
 
+
+    @Test
+    void findByBranchAndUserRolesIn_blank_tpp_id() {
+        // Given
+        when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
+        when(converter.toUserBO(any())).thenReturn(userBO);
+        when(repository.findByUserRolesInAndLoginContaining(any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
+
+        // When
+        Page<UserBO> user = userService.findByBranchAndUserRolesIn("", Collections.singletonList(UserRoleBO.CUSTOMER), "", null);
+
+        // Then
+        assertNotNull(user.getContent().get(0));
+        assertEquals(userBO, user.getContent().get(0));
+        verify(converter, times(1)).toUserRole(Collections.singletonList(UserRoleBO.CUSTOMER));
+    }
+
     @Test
     void countUsersByBranch() {
         // Given
@@ -343,6 +361,22 @@ class UserServiceImplTest {
 
         // Then
         assertEquals(Collections.singletonList(getUserBO()), result);
+    }
+
+    @Test
+    void updatePassword() {
+        when(repository.findById(USER_ID)).thenReturn(Optional.of(new UserEntity()));
+        when(passwordEnc.encode(any(), any())).thenReturn("encrypted");
+        userService.updatePassword(USER_ID, "password");
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository, times(1)).save(captor.capture());
+        assertThat(captor.getValue().getPin(), is("encrypted"));
+    }
+
+    @Test
+    void updatePassword_user_not_found() {
+        when(repository.findById(USER_ID)).thenReturn(Optional.empty());
+        assertThrows(UserManagementModuleException.class, () -> userService.updatePassword(USER_ID, "password"));
     }
 
     private UserBO getUserBO() {

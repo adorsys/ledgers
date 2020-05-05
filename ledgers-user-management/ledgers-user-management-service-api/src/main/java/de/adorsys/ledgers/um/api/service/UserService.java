@@ -99,13 +99,35 @@ public interface UserService {
      * Updates user
      *
      * @param userBO user to update
-     * @return
+     * @return user entity
      */
     UserBO updateUser(UserBO userBO);
 
+    /**
+     * Finds user by IBAN
+     * @param iban iban
+     * @return user Entity
+     */
     List<UserBO> findUsersByIban(String iban);
 
+    /**
+     * Finds account owners by IBAN
+     * @param iban iban
+     * @return owner of account
+     */
     List<UserBO> findOwnersByIban(String iban);
 
+    /**
+     * Finds account owners by account id
+     * @param accountId account id
+     * @return users
+     */
     List<UserBO> findOwnersByAccountId(String accountId);
+
+    /**
+     * Replaces users password
+     * @param userId user id
+     * @param password new password
+     */
+    void updatePassword(String userId, String password);
 }

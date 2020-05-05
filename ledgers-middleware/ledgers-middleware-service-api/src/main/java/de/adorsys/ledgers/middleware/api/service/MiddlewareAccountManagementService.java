@@ -61,6 +61,8 @@ public interface MiddlewareAccountManagementService {
 
     CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, CustomPageableImpl pageable);
 
+    CustomPageImpl<AccountDetailsTO> getAccountsByOptionalBranchPaged(String branchId, String queryParam, CustomPageableImpl pageable);
+
     /**
      * Retrieves AccountDetails with Balance on demand
      *
@@ -187,8 +189,8 @@ public interface MiddlewareAccountManagementService {
     /**
      * Remove all transactions for deposit account
      *
-     * @param userId id of the user
-     * @param userRole role of user initiating operation
+     * @param userId    id of the user
+     * @param userRole  role of user initiating operation
      * @param accountId the account id
      */
     void deleteTransactions(String userId, UserRoleTO userRole, String accountId);
