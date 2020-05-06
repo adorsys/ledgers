@@ -65,6 +65,19 @@ class AuthorizationServiceImplTest {
     }
 
     @Test
+    void authorizeWithBlockedUser() {
+        // Given
+        UserBO blockedUser = getUser();
+        blockedUser.setBlocked(true);
+
+        when(userService.findByLogin(USER_LOGIN)).thenReturn(blockedUser);
+        when(passwordEnc.verify(anyString(), anyString(), anyString())).thenReturn(true);
+
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> authorizationService.authorise(USER_LOGIN, USER_PIN, UserRoleBO.CUSTOMER, "TEST_SCA_ID", "TEST_AUTHORIZATION_ID"));
+    }
+
+    @Test
     void validate() {
         // Given
         when(bearerTokenService.expiresIn(any(), any())).thenReturn(600);
@@ -79,6 +92,21 @@ class AuthorizationServiceImplTest {
 
         // Then
         assertNotNull(result);
+    }
+
+    @Test
+    void validateBlockedUser() {
+        // Given
+        UserBO blockedUser = getUser();
+        blockedUser.setBlocked(true);
+
+        when(bearerTokenService.expiresIn(any(), any())).thenReturn(600);
+        when(userService.findById(any())).thenReturn(blockedUser);
+        when(secretSource.getHmacSecret()).thenReturn("6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4");
+        Date date = new Date(123456789);
+
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> authorizationService.validate(LOGIN_TOKEN, date));
     }
 
     @Test
