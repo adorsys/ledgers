@@ -34,6 +34,8 @@ public class UserManagementHttpStatusResolver {
         // 403
         container.put(OAUTH_CODE_INVALID, FORBIDDEN);
         container.put(EXPIRED_TOKEN, FORBIDDEN);
+        container.put(USER_IS_BLOCKED, FORBIDDEN);
+        container.put(USER_IS_TEMPORARY_BLOCKED_BY_SYSTEM, FORBIDDEN);
 
         //409 Block
         container.put(USER_ALREADY_EXISTS, CONFLICT);

@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.INSUFFICIENT_PERMISSION;
+import static de.adorsys.ledgers.util.exception.UserManagementModuleException.getUserBlockedSupplier;
 
 @Slf4j
 @Service
@@ -73,6 +74,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                                                                              .errorCode(INSUFFICIENT_PERMISSION)
                                                                              .devMsg(String.format(USER_DOES_NOT_HAVE_THE_ROLE_S, user.getId(), user.getLogin(), role))
                                                                              .build());
+
+        checkUserForBlocking(EnumSet.of(UserRoleBO.STAFF, UserRoleBO.SYSTEM), user);
+
         String scaIdParam = scaId != null
                                     ? scaId
                                     : Ids.id();
@@ -115,6 +119,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             // Retrieve user.
             UserBO user = userService.findById(jwtClaimsSet.getSubject());
 
+            // Check if user is blocked.
+            checkUserForBlocking(Collections.singleton(UserRoleBO.SYSTEM), user);
+
             AccessTokenBO accessTokenJWT = bearerTokenService.toAccessTokenObject(jwtClaimsSet);
 
             validateAccountAccesses(user, accessTokenJWT);
@@ -143,7 +150,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         act.put("tppId", tppId);
         UserRole userRole = UserRole.valueOf(scaInfoBO.getUserRole().name());
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(), null, aisConsent, userRole,
-                scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
+                                              scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(), issueTime, expires, TokenUsageBO.DELEGATED_ACCESS, act);
     }
 
     @Override
@@ -200,9 +207,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         Date issueTime = new Date();
         Date expires = DateUtils.addSeconds(issueTime, defaultLoginTokenExpireInSeconds);
         return bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
-                scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),
-                issueTime, expires, usageType, null);
+                                              null, null, UserRole.valueOf(scaInfoBO.getUserRole().name()),
+                                              scaInfoBO.getScaId(), scaInfoBO.getAuthorisationId(),
+                                              issueTime, expires, usageType, null);
     }
 
     private Date getExpirationDate(AisConsentBO aisConsent, Date iat) {
@@ -249,6 +256,17 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                           .errorCode(INSUFFICIENT_PERMISSION)
                           .devMsg(String.format(message, userId, copy.toString()))
                           .build();
+        }
+    }
+
+    private void checkUserForBlocking(Set<UserRoleBO> userRoles, UserBO user) {
+
+        if (user.isBlocked() &&
+                    user.getUserRoles()
+                            .stream()
+                            .noneMatch(userRoles::contains)) {
+            log.info("User with id {} is blocked by configuration", user.getId());
+            throw getUserBlockedSupplier(true).get();
         }
     }
 }
