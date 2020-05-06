@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Currency;
 
-import static de.adorsys.ledgers.deposit.api.domain.AccountStatusBO.ENABLED;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -54,8 +52,6 @@ public class DepositAccountBO {
 
     private AccountTypeBO accountType;
 
-    private AccountStatusBO accountStatus = ENABLED;
-
     /*
      * SWIFT
      * 4 letters bankCode + 2 letters CountryCode + 2 symbols CityCode + 3 symbols BranchCode
@@ -82,8 +78,12 @@ public class DepositAccountBO {
      */
     private String details;
 
+    private boolean blocked;
+
+    private boolean systemBlocked;
+
     public boolean isEnabled() {
-        return accountStatus == ENABLED;
+        return !blocked && !systemBlocked;
     }
 
     public AccountReferenceBO getReference() {

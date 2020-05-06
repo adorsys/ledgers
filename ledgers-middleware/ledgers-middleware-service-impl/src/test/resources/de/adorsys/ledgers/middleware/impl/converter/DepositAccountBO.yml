@@ -8,7 +8,6 @@ currency: EUR
 name: name
 product: product
 accountType: CASH
-accountStatus: ENABLED
 bic: bic
 linkedAccounts: account
 usageType: PRIV

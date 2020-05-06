@@ -27,7 +27,6 @@ import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -564,7 +563,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void depositCashDelegatesToDepositAccountService() {
         // Given
-        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(AccountStatusBO.ENABLED));
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(false));
         doNothing().when(transactionService).depositCash(eq(ACCOUNT_ID), any(), any());
 
         // When
@@ -577,7 +576,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void depositCashWrapsNotFoundException() {
         // Given
-        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(AccountStatusBO.BLOCKED));
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(true));
 
         // Then
         assertThrows(MiddlewareModuleException.class, () -> middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO()));
@@ -744,9 +743,9 @@ class MiddlewareAccountManagementServiceImplTest {
         return objectMapper;
     }
 
-    private DepositAccountDetailsBO getAccountDetails(AccountStatusBO status) {
+    private DepositAccountDetailsBO getAccountDetails(boolean isBlocked) {
         DepositAccountBO account = new DepositAccountBO();
-        account.setAccountStatus(status);
+        account.setBlocked(isBlocked);
         return new DepositAccountDetailsBO(account, Collections.emptyList());
     }
 
@@ -801,7 +800,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details");
+        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false);
     }
 
     private FundsConfirmationRequestBO getFundsConfirmationRequestBO() {
