@@ -73,4 +73,6 @@ public interface DepositAccountService {
     DepositAccountDetailsBO getDetailsByIban(String iban, LocalDateTime refTime, boolean withBalances);
 
     Page<DepositAccountBO> getAccountByOptionalBranchPaged(String branchId, String queryParam, Pageable pageable);
+
+    void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
 }

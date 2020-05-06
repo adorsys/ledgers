@@ -227,6 +227,15 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    public void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet) {
+        if (isSystemBlock) {
+            depositAccountRepository.updateSystemBlockedStatus(userId, lockStatusToSet);
+        } else {
+            depositAccountRepository.updateBlockedStatus(userId, lockStatusToSet);
+        }
+    }
+
+    @Override
     public DepositAccountBO createNewAccount(DepositAccountBO depositAccountBO, String userName, String branch) {
         checkDepositAccountAlreadyExist(depositAccountBO);
         DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);

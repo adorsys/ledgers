@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -16,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +31,8 @@ class AdminResourceTest {
     private MiddlewareUserManagementService middlewareUserService;
     @Mock
     private MiddlewareAccountManagementService accountManagementService;
+    @Mock
+    private AppManagementService appManagementService;
 
     @InjectMocks
     private AdminResource resource;
@@ -62,10 +64,17 @@ class AdminResourceTest {
     @Test
     void updatePassword() {
         ResponseEntity<Void> result = resource.updatePassword(TPP_ID, PIN);
-        assertEquals(ResponseEntity.accepted().build(),result);
+        assertEquals(ResponseEntity.accepted().build(), result);
     }
 
     private UserTO getUser() {
         return new UserTO(LOGIN, "", PIN);
+    }
+
+    @Test
+    void changeStatus() {
+        when(appManagementService.changeBlockedStatus(anyString(), anyBoolean())).thenReturn(true);
+        ResponseEntity<Boolean> result = resource.changeStatus(TPP_ID);
+        assertEquals(ResponseEntity.ok(true), result);
     }
 }

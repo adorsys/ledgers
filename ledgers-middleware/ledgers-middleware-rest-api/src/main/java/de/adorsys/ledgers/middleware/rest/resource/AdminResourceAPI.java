@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -42,8 +43,14 @@ public interface AdminResourceAPI {
                                                               @RequestParam(SIZE) int size);
 
     @ApiOperation(value = "Set password for Tpp",
-            notes = "Chages password for given TPP",
+            notes = "Changes password for given TPP",
             authorizations = @Authorization(value = "apiKey"))
     @PutMapping("/password")
     ResponseEntity<Void> updatePassword(@RequestParam(value = TPP_ID) String tppId, @RequestParam(PASSWORD) String password);
+
+    @ApiOperation(value = "Block/Unblock Tpp",
+            notes = "Changes system block or regular block state for given TPP, returns status being set to the block",
+            authorizations = @Authorization(value = "apiKey"))
+    @PostMapping("/status")
+    ResponseEntity<Boolean> changeStatus(@RequestParam(value = TPP_ID) String tppId);
 }

@@ -130,4 +130,6 @@ public interface UserService {
      * @param password new password
      */
     void updatePassword(String userId, String password);
+
+    void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
 }

@@ -421,4 +421,16 @@ class UserServiceImplTest {
     private ScaUserDataBO getScaUserDataBO() {
         return new ScaUserDataBO("3", ScaMethodTypeBO.EMAIL, "test@mail.de", false, "staticTan", true);
     }
+
+    @Test
+    void setBranchBlockedStatus_system_block() {
+        userService.setBranchBlockedStatus(USER_BRANCH, true, true);
+        verify(repository, times(1)).updateSystemBlockedStatus(USER_BRANCH, true);
+    }
+
+    @Test
+    void setBranchBlockedStatus_regular_block() {
+        userService.setBranchBlockedStatus(USER_BRANCH, false, true);
+        verify(repository, times(1)).updateBlockedStatus(USER_BRANCH, true);
+    }
 }
