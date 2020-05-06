@@ -8,10 +8,12 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
-import de.adorsys.ledgers.middleware.impl.service.upload.UploadPaymentService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadBalanceService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadDepositAccountService;
+import de.adorsys.ledgers.middleware.impl.service.upload.UploadPaymentService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadUserService;
+import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.UserRoleBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +73,21 @@ public class AppManagementServiceImpl implements AppManagementService {
         uploadDepositAccountService.uploadDepositAccounts(uploadedUsers, data.getDetails(), info);
         CompletableFuture.runAsync(() -> uploadBalanceService.uploadBalances(data, info), FIXED_THREAD_POOL)
                 .thenRunAsync(() -> uploadPaymentService.uploadPayments(data, info));
+    }
+
+    @Override
+    public boolean changeBlockedStatus(String userId, boolean isSystemBlock) {
+        UserBO branch = userService.findById(userId);
+        if (!branch.getUserRoles().contains(UserRoleBO.STAFF)) {
+            throw MiddlewareModuleException.builder()
+                          .devMsg("You're trying to block a user which is not STAFF!")
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .build();
+        }
+        boolean lockStatusToSet = isSystemBlock ? !branch.isSystemBlocked() : !branch.isBlocked();
+        CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(userId, isSystemBlock, lockStatusToSet), FIXED_THREAD_POOL)
+                .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(userId, isSystemBlock, lockStatusToSet));
+        return lockStatusToSet;
     }
 
     private void isPermittedToRemoveBranch(String userId, UserRoleTO userRole, String branchId) {

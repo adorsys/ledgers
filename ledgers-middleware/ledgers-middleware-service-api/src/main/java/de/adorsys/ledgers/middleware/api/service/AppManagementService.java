@@ -25,4 +25,12 @@ public interface AppManagementService {
      * @param info SCA information
      */
     void uploadData(UploadedDataTO data, ScaInfoTO info);
+
+    /**
+     *
+     * @param userId id of user to perform block on
+     * @param isSystemBlock boolean representation of choice of block (system or regular)
+     * @return boolean representation of block status
+     */
+    boolean changeBlockedStatus(String userId, boolean isSystemBlock);
 }

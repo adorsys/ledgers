@@ -57,6 +57,12 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
 
     Page<UserEntity> findByUserRolesInAndLoginContaining(List<UserRole> roles, String queryParam, Pageable pageable);
 
+    @Query("update UserEntity u set u.systemBlocked=?2 where u.branch=?1")
+    void updateSystemBlockedStatus(String branchId, boolean status);
+
+    @Query("update UserEntity u set u.blocked=?2 where u.branch=?1")
+    void updateBlockedStatus(String branchId, boolean status);
+
     /**
      * Counts amount of users for a branch
      *

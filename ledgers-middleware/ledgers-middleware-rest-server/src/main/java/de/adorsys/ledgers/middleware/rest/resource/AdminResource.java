@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
@@ -30,6 +31,7 @@ import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
 public class AdminResource implements AdminResourceAPI {
     private final MiddlewareUserManagementService middlewareUserService;
     private final MiddlewareAccountManagementService accountManagementService;
+    private final AppManagementService appManagementService;
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
@@ -51,5 +53,11 @@ public class AdminResource implements AdminResourceAPI {
     public ResponseEntity<Void> updatePassword(String tppId, String password) {
         middlewareUserService.updatePassword(tppId, password);
         return ResponseEntity.accepted().build();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('SYSTEM')")
+    public ResponseEntity<Boolean> changeStatus(String tppId) {
+        return ResponseEntity.ok(appManagementService.changeBlockedStatus(tppId, false));
     }
 }

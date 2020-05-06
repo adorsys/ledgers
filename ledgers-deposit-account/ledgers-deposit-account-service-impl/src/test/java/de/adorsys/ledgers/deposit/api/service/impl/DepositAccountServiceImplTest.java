@@ -48,13 +48,14 @@ import static de.adorsys.ledgers.util.exception.PostingErrorCode.POSTING_NOT_FOU
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DepositAccountServiceImplTest {
-    private final static String ACCOUNT_ID = "ACCOUNT_ID";
-    private final static String POSTING_ID = "posting_ID";
+    private static final String ACCOUNT_ID = "ACCOUNT_ID";
+    private static final String POSTING_ID = "posting_ID";
     private static final String SYSTEM = "System";
+    private static final String USER_ID = "123";
 
     @Mock
     private DepositAccountRepository depositAccountRepository;
@@ -463,5 +464,17 @@ class DepositAccountServiceImplTest {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
+    }
+
+    @Test
+    void changeAccountsBlockedStatus_system_block() {
+        depositAccountService.changeAccountsBlockedStatus(USER_ID, true, true);
+        verify(depositAccountRepository, times(1)).updateSystemBlockedStatus(USER_ID, true);
+    }
+
+    @Test
+    void changeAccountsBlockedStatus_regular_block() {
+        depositAccountService.changeAccountsBlockedStatus(USER_ID, false, true);
+        verify(depositAccountRepository, times(1)).updateBlockedStatus(USER_ID, true);
     }
 }
