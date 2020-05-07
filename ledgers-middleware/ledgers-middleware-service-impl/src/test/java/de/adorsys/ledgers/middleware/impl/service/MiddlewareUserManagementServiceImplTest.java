@@ -192,11 +192,11 @@ class MiddlewareUserManagementServiceImplTest {
     @Test
     void getUsersByBranchAndRoles() {
         // Given
-        when(userService.findByBranchAndUserRolesIn(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userBO)));
+        when(userService.findUsersByMultipleParamsPaged(any(), any(), any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userBO)));
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getCustomPageImpl());
 
         // When
-        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(USER_BRANCH, Collections.singletonList(UserRoleTO.CUSTOMER), "", getCustomPageableImpl());
+        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles("",USER_BRANCH, "","",Collections.singletonList(UserRoleTO.CUSTOMER), false, getCustomPageableImpl());
 
         // Then
         assertNotNull(users.getContent().get(0));

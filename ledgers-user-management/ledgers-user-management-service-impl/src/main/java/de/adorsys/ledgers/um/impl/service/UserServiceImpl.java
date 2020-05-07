@@ -38,10 +38,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.*;
@@ -148,12 +145,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, String queryParam, Pageable pageable) {
-        Page<UserBO> users = StringUtils.isBlank(branch)
-                                     ? userRepository.findByUserRolesInAndLoginContaining(userConverter.toUserRole(userRoles), queryParam, pageable).map(userConverter::toUserBO)
-                                     : userRepository.findByBranchAndUserRolesInAndLoginContaining(branch, userConverter.toUserRole(userRoles), queryParam, pageable).map(userConverter::toUserBO);
+    public Page<UserBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable) {
+        List<Boolean> blockedQueryParam = Optional.ofNullable(blocked)
+                                                  .map(Arrays::asList)
+                                                  .orElseGet(() -> Arrays.asList(true, false));
+        List<String> branchIds = findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
+        Page<UserBO> users = userRepository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(branchIds, userLogin, userConverter.toUserRole(roles), blockedQueryParam, pageable)
+                                     .map(userConverter::toUserBO);
         users.forEach(this::decodeStaticTanForUser);
         return users;
+    }
+
+    @Override
+    public List<String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin) {
+        return userRepository.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin, UserRole.STAFF);
     }
 
     @Override
@@ -210,7 +215,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet) {
         if (isSystemBlock) {
-            userRepository.updateSystemBlockedStatus(userId,statusToSet);
+            userRepository.updateSystemBlockedStatus(userId, statusToSet);
         } else {
             userRepository.updateBlockedStatus(userId, statusToSet);
         }

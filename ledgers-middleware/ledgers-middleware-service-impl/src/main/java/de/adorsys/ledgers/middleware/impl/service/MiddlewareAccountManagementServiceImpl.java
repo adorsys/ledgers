@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,9 +91,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
         if (depositAccount.getCurrency() == null) {
             throw MiddlewareModuleException.builder()
-                    .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                    .devMsg("Can not create new account without currency set! Please set currency to continue.")
-                    .build();
+                          .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                          .devMsg("Can not create new account without currency set! Please set currency to continue.")
+                          .build();
         }
         UserBO user = userService.findById(userId);
         checkPresentAccountsAndOwner(depositAccount.getIban(), user.getLogin());
@@ -268,9 +269,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public CustomPageImpl<AccountDetailsTO> getAccountsByOptionalBranchPaged(String branchId, String queryParam, CustomPageableImpl pageable) {
-        return pageMapper.toCustomPageImpl(depositAccountService.getAccountByOptionalBranchPaged(branchId, queryParam, PageRequest.of(pageable.getPage(), pageable.getSize()))
-                                                   .map(accountDetailsMapper::toAccountDetailsTO));
+    public CustomPageImpl<AccountDetailsTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable) {
+        List<String> branchIds = userService.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
+        Page<AccountDetailsTO> page = depositAccountService.findByBranchIdsAndMultipleParams(branchIds, iban, blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                              .map(accountDetailsMapper::toAccountDetailsTO);
+        return pageMapper.toCustomPageImpl(page);
     }
 
 
@@ -322,8 +325,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
 
         AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
-                consentId, template, template,
-                defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+                                              consentId, template, template,
+                                              defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
 
         SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
         SCAConsentResponseTO response = toScaConsentResponse(userMapper.toUserTO(userBO), consent, consentKeyData.template(), scaOperationBO);

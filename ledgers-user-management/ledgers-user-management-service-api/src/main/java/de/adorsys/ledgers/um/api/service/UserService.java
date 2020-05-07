@@ -79,13 +79,20 @@ public interface UserService {
     AisConsentBO loadConsent(String consentId);
 
     /**
-     * Loads users collection by branch and the given roles
      *
-     * @param branch    branch ID
-     * @param userRoles list of user roles
-     * @return List of users filtered by branch and user roles
+     *
+     * @param countryCode Country Code
+     * @param branchId id of STAFF user
+     * @param branchLogin login of STAFF user
+     * @param userLogin login of CUSTOMER user
+     * @param roles List of Roles to filter for
+     * @param blocked Boolean representation of User status
+     * @param pageable pagination info
+     * @return Page of Users
      */
-    Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, String queryParam, Pageable pageable);
+    Page<UserBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable);
+
+    List<String> findBranchIdsByMultipleParameters(String countryCode,String branchId,String branchLogin);
 
     /**
      * Counts amount of users for a branch

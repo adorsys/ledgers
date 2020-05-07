@@ -40,8 +40,8 @@ class AdminResourceTest {
     @Test
     void users() {
         CustomPageImpl<UserTO> page = getUserPage();
-        when(middlewareUserService.getUsersByBranchAndRoles(any(), any(), anyString(), any())).thenReturn(page);
-        ResponseEntity<CustomPageImpl<UserTO>> result = resource.users(TPP_ID, ROLE, LOGIN, 1, 1);
+        when(middlewareUserService.getUsersByBranchAndRoles(anyString(), anyString(), anyString(), anyString(), anyList(), anyBoolean(), any())).thenReturn(page);
+        ResponseEntity<CustomPageImpl<UserTO>> result = resource.users("DE", TPP_ID, "", LOGIN, ROLE, false, 1, 1);
         assertEquals(ResponseEntity.ok(page), result);
     }
 
@@ -52,8 +52,8 @@ class AdminResourceTest {
     @Test
     void accounts() {
         CustomPageImpl<AccountDetailsTO> account = getAccountPage();
-        when(accountManagementService.getAccountsByOptionalBranchPaged(anyString(), anyString(), any())).thenReturn(account);
-        ResponseEntity<CustomPageImpl<AccountDetailsTO>> result = resource.accounts(TPP_ID, IBAN, 0, 1);
+        when(accountManagementService.getAccountsByBranchAndMultipleParams(anyString(), anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(account);
+        ResponseEntity<CustomPageImpl<AccountDetailsTO>> result = resource.accounts("",TPP_ID,"", IBAN, false,0, 1);
         assertEquals(ResponseEntity.ok(account), result);
     }
 

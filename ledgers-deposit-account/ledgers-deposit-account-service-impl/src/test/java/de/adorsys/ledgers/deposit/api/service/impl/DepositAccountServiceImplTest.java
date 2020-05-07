@@ -32,7 +32,6 @@ import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import pro.javatar.commons.reader.YamlReader;
 
@@ -383,20 +382,6 @@ class DepositAccountServiceImplTest {
             DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
             assertEquals(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()), result);
         });
-    }
-
-    @Test
-    void getAccountByOptionalBranchPaged() {
-        when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(false))));
-        Page<DepositAccountBO> result = depositAccountService.getAccountByOptionalBranchPaged("123", "DE123", PageRequest.of(1, 1));
-        assertEquals(result.getContent(), Collections.singletonList(getDepositAccountBO()));
-    }
-
-    @Test
-    void getAccountByOptionalBranchPaged_empty_branch_id() {
-        when(depositAccountRepository.findByIbanContaining(anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(false))));
-        Page<DepositAccountBO> result = depositAccountService.getAccountByOptionalBranchPaged("", "DE123", PageRequest.of(1, 1));
-        assertEquals(result.getContent(), Collections.singletonList(getDepositAccountBO()));
     }
 
     private void confirmationOfFunds_more_than_necessary_available(long amount) throws NoSuchFieldException {

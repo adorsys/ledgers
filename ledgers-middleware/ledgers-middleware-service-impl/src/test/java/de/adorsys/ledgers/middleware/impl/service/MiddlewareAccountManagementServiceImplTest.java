@@ -635,10 +635,10 @@ class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     void getAccountsByOptionalBranchPaged() {
-        when(depositAccountService.getAccountByOptionalBranchPaged(anyString(), anyString(), any())).thenReturn(getPageWithAccount());
+        when(depositAccountService.findByBranchIdsAndMultipleParams(anyList(),anyString(), anyBoolean(), any())).thenReturn(getPageWithAccount());
         when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountBO.class))).thenReturn(getAccountDetailsTO());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(getAccountDetailsTO())));
-        CustomPageImpl<AccountDetailsTO> result = middlewareService.getAccountsByOptionalBranchPaged(USER_ID, IBAN, new CustomPageableImpl(0, 1));
+        CustomPageImpl<AccountDetailsTO> result = middlewareService.getAccountsByBranchAndMultipleParams("countryCode", "branchId", USER_ID, IBAN, false, new CustomPageableImpl(0, 1));
         assertEquals(result.getContent(), Collections.singletonList(getAccountDetailsTO()));
     }
 

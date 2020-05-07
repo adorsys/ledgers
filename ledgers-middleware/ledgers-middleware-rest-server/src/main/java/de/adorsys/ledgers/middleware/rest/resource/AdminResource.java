@@ -35,29 +35,29 @@ public class AdminResource implements AdminResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<CustomPageImpl<UserTO>> users(String tppId, UserRoleTO role, String queryParam, int page, int size) {
+    public ResponseEntity<CustomPageImpl<UserTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         List<UserRoleTO> roles = Optional.ofNullable(role).map(Collections::singletonList).orElseGet(() -> Arrays.asList(STAFF, CUSTOMER));
-        return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRoles(tppId, roles, queryParam, pageable));
+        return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRoles(countryCode, branchId, branchLogin, userLogin, roles, blocked, pageable));
     }
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> accounts(String tppId, String queryParam, int page, int size) {
+    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> accounts(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
-        return ResponseEntity.ok(accountManagementService.getAccountsByOptionalBranchPaged(tppId, queryParam, pageable));
+        return ResponseEntity.ok(accountManagementService.getAccountsByBranchAndMultipleParams(countryCode, branchId, branchLogin, iban, blocked, pageable));
     }
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<Void> updatePassword(String tppId, String password) {
-        middlewareUserService.updatePassword(tppId, password);
+    public ResponseEntity<Void> updatePassword(String branchId, String password) {
+        middlewareUserService.updatePassword(branchId, password);
         return ResponseEntity.accepted().build();
     }
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<Boolean> changeStatus(String tppId) {
-        return ResponseEntity.ok(appManagementService.changeBlockedStatus(tppId, false));
+    public ResponseEntity<Boolean> changeStatus(String branchId) {
+        return ResponseEntity.ok(appManagementService.changeBlockedStatus(branchId, false));
     }
 }
