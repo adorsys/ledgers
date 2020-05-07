@@ -17,6 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.USER_IS_BLOCKED;
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -41,6 +42,13 @@ public class ResetPasswordEmailCodeGeneratorImpl implements ResetPasswordCodeGen
 
         OffsetDateTime expiryTime = OffsetDateTime.now()
                                             .plusMinutes(expirationMinutes);
+
+        if (!user.isEnabled()) {
+            throw UserManagementModuleException.builder()
+                          .errorCode(USER_IS_BLOCKED)
+                          .devMsg("User is blocked, cannot reset password.")
+                          .build();
+        }
 
         String code = UUID.randomUUID().toString();
         Optional<ResetPasswordEntity> resetPasswordEntity = resetPasswordRepository.findByUserId(user.getId());

@@ -90,6 +90,10 @@ public class UserBO {
                        '}';
     }
 
+    public boolean isEnabled() {
+        return !isBlocked() && !isSystemBlocked();
+    }
+
     public boolean hasAccessToAccount(String iban) {
         return accountAccesses.stream()
                        .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban));
