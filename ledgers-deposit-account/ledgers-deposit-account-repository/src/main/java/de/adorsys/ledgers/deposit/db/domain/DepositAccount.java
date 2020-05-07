@@ -78,4 +78,9 @@ public class DepositAccount {
      */
     @Column(name = "systemBlock")
     private boolean systemBlocked;
+
+    public boolean isEnabled() {
+        return !blocked && !systemBlocked;
+    }
+
 }
