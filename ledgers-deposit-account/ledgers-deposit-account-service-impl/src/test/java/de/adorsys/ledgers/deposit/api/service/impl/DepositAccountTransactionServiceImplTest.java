@@ -113,6 +113,19 @@ class DepositAccountTransactionServiceImplTest {
     }
 
     @Test
+    void depositCash_blockedAccount() {
+        // Given
+        DepositAccountDetailsBO depositAccountDetailsBO = getDepositAccountBO();
+        DepositAccountBO blockedAccount = new DepositAccountBO();
+        blockedAccount.setBlocked(true);
+        depositAccountDetailsBO.setAccount(blockedAccount);
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(depositAccountDetailsBO);
+
+        // Then
+        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.valueOf(123L)), "recordUser"));
+    }
+
+    @Test
     void depositCash_differentCurrencies() {
         // Given
         when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getDepositAccountBO());

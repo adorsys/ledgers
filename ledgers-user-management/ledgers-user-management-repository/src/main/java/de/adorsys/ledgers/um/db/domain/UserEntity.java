@@ -72,6 +72,10 @@ public class UserEntity {
     @Column(name = "system_block")
     private boolean systemBlocked;
 
+    public boolean isEnabled() {
+        return !isBlocked() && !isSystemBlocked();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
