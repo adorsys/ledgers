@@ -16,7 +16,7 @@ public class UserManagementModuleException extends RuntimeException {
     public static Supplier<UserManagementModuleException> getModuleExceptionSupplier(String objectIdentifier, UserManagementErrorCode errorCode, String messagePattern) {
         return () -> UserManagementModuleException.builder()
                              .errorCode(errorCode)
-                             .devMsg(String.format(messagePattern, objectIdentifier))
+                             .devMsg(format(messagePattern, objectIdentifier))
                              .build();
     }
 

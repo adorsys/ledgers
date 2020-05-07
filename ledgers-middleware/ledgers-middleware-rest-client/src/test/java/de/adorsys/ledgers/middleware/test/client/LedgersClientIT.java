@@ -149,7 +149,7 @@ class LedgersClientIT {
 
         // When
         //Check Users Accesses and Branch Accesses are correct
-        ResponseEntity<CustomPageImpl<UserTO>> allBranchUsersResponse = userMgmtStaffRestClient.getBranchUsersByRoles(Collections.singletonList(CUSTOMER), "", 0, Integer.MAX_VALUE);
+        ResponseEntity<CustomPageImpl<UserTO>> allBranchUsersResponse = userMgmtStaffRestClient.getBranchUsersByRoles(Collections.singletonList(CUSTOMER), "", false,0, Integer.MAX_VALUE);
         checkUsersListAccesses(allBranchUsersResponse, OK, 2, 1);
 
         ResponseEntity<UserTO> branchResponse = userMgmtRestClient.getUser();
@@ -227,6 +227,7 @@ class LedgersClientIT {
 
     private static UserTO getUser(String login, UserRoleTO role) {
         UserTO user = new UserTO(login, login + "@eml.de", PIN);
+        user.setId(login);
         user.setUserRoles(Collections.singletonList(role));
         return user;
     }

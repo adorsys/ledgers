@@ -16,7 +16,6 @@ import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -220,19 +219,21 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public Page<DepositAccountBO> getAccountByOptionalBranchPaged(String branchId, String queryParam, Pageable pageable) {
-        return StringUtils.isEmpty(branchId)
-                       ? depositAccountRepository.findByIbanContaining(queryParam, pageable).map(depositAccountMapper::toDepositAccountBO)
-                       : depositAccountRepository.findByBranchAndIbanContaining(branchId, queryParam, pageable).map(depositAccountMapper::toDepositAccountBO);
-    }
-
-    @Override
     public void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet) {
         if (isSystemBlock) {
             depositAccountRepository.updateSystemBlockedStatus(userId, lockStatusToSet);
         } else {
             depositAccountRepository.updateBlockedStatus(userId, lockStatusToSet);
         }
+    }
+
+    @Override
+    public Page<DepositAccountBO> findByBranchIdsAndMultipleParams(List<String> branchIds, String iban, Boolean blocked, Pageable pageable) {
+        List<Boolean> blockedQueryParam = Optional.ofNullable(blocked)
+                                                  .map(Arrays::asList)
+                                                  .orElseGet(() -> Arrays.asList(true, false));
+        return depositAccountRepository.findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(branchIds, iban, blockedQueryParam, pageable)
+                       .map(depositAccountMapper::toDepositAccountBO);
     }
 
     @Override

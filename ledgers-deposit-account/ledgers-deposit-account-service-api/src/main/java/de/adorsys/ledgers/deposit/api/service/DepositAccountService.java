@@ -1,6 +1,9 @@
 package de.adorsys.ledgers.deposit.api.service;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -72,7 +75,7 @@ public interface DepositAccountService {
      */
     DepositAccountDetailsBO getDetailsByIban(String iban, LocalDateTime refTime, boolean withBalances);
 
-    Page<DepositAccountBO> getAccountByOptionalBranchPaged(String branchId, String queryParam, Pageable pageable);
-
     void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
+
+    Page<DepositAccountBO> findByBranchIdsAndMultipleParams(List<String> branchIds, String iban, Boolean blocked, Pageable pageable);
 }

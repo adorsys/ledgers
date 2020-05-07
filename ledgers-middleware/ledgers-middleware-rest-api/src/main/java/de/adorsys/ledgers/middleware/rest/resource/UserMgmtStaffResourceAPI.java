@@ -16,6 +16,7 @@ public interface UserMgmtStaffResourceAPI {
     String BRANCH = "branch";
     String ROLES = "roles";
     String QUERY_PARAM = "queryParam";
+    String BLOCKED = "blockedParam";
     String PAGE = "page";
     String SIZE = "size";
     String USER_ID = "userId";
@@ -111,6 +112,7 @@ public interface UserMgmtStaffResourceAPI {
     ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(
             @RequestParam(ROLES) List<UserRoleTO> roles,
             @RequestParam(value = QUERY_PARAM, defaultValue = "", required = false) String queryParam,
+            @RequestParam(value = BLOCKED, required = false) Boolean blockedParam,
             @RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
 
     /**

@@ -259,10 +259,10 @@ class UserServiceImplTest {
         // Given
         when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
         when(converter.toUserBO(any())).thenReturn(userBO);
-        when(repository.findByBranchAndUserRolesInAndLoginContaining(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
+        when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
 
         // When
-        Page<UserBO> user = userService.findByBranchAndUserRolesIn(USER_BRANCH, Collections.singletonList(UserRoleBO.CUSTOMER), "", null);
+        Page<UserBO> user = userService.findUsersByMultipleParamsPaged("", USER_BRANCH, "", "", Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
 
         // Then
         assertNotNull(user.getContent().get(0));
@@ -276,10 +276,10 @@ class UserServiceImplTest {
         // Given
         when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
         when(converter.toUserBO(any())).thenReturn(userBO);
-        when(repository.findByUserRolesInAndLoginContaining(any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
+        when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
 
         // When
-        Page<UserBO> user = userService.findByBranchAndUserRolesIn("", Collections.singletonList(UserRoleBO.CUSTOMER), "", null);
+        Page<UserBO> user = userService.findUsersByMultipleParamsPaged("", "","","",Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
 
         // Then
         assertNotNull(user.getContent().get(0));
