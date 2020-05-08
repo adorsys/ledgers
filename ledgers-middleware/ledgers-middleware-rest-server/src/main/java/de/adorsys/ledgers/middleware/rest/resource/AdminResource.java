@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
@@ -22,6 +23,8 @@ import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.CUSTOMER;
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
+import static de.adorsys.ledgers.middleware.rest.resource.UserMgmtStaffResourceAPI.USER_CANNOT_REGISTER_IN_BRANCH;
 
 
 @RestController
@@ -59,5 +62,19 @@ public class AdminResource implements AdminResourceAPI {
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Boolean> changeStatus(String branchId) {
         return ResponseEntity.ok(appManagementService.changeBlockedStatus(branchId, false));
+    }
+
+    @Override
+    @PreAuthorize("hasRole('SYSTEM')")
+    public ResponseEntity<UserTO> register(UserTO user) {
+        if (user.getUserRoles().contains(STAFF) && middlewareUserService.countUsersByBranch(user.getBranch()) > 0) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(USER_CANNOT_REGISTER_IN_BRANCH)
+                          .build();
+        }
+        UserTO createdUser = middlewareUserService.create(user);
+        createdUser.setPin(null);
+        return ResponseEntity.ok(createdUser);
     }
 }

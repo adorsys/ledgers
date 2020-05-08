@@ -8,10 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "LDG999 - Admin Management (SYSTEM access)")
 public interface AdminResourceAPI {
@@ -27,8 +24,8 @@ public interface AdminResourceAPI {
     String SIZE = "size";
     String PASSWORD = "password";
 
-    @ApiOperation(value = "Get users",
-            notes = "Retrieves Page of Users with required role and Branch id",
+    @ApiOperation(value = "Get users with filtering",
+            notes = "Retrieves Page of Users with multiple filters",
             authorizations = @Authorization(value = "apiKey"))
     @GetMapping("/users")
     ResponseEntity<CustomPageImpl<UserTO>> users(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
@@ -40,8 +37,8 @@ public interface AdminResourceAPI {
                                                  @RequestParam(PAGE) int page,
                                                  @RequestParam(SIZE) int size);
 
-    @ApiOperation(value = "Get accounts",
-            notes = "Retrieves Page of Accounts with required role and Branch id",
+    @ApiOperation(value = "Get accounts with filtering",
+            notes = "Retrieves Page of Accounts with multiple filters",
             authorizations = @Authorization(value = "apiKey"))
     @GetMapping("/accounts")
     ResponseEntity<CustomPageImpl<AccountDetailsTO>> accounts(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
@@ -63,4 +60,10 @@ public interface AdminResourceAPI {
             authorizations = @Authorization(value = "apiKey"))
     @PostMapping("/status")
     ResponseEntity<Boolean> changeStatus(@RequestParam(value = BRANCH_ID) String branchId);
+
+    @ApiOperation(value = "Create new User by Admin",
+            notes = "Can create STAFF/CUSTOMER/SYSTEM users",
+            authorizations = @Authorization(value = "apiKey"))
+    @PostMapping("/user")
+    ResponseEntity<UserTO> register(@RequestBody UserTO user);
 }
