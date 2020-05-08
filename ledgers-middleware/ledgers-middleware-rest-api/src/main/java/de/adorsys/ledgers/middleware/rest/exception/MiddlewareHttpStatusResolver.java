@@ -26,6 +26,7 @@ public class MiddlewareHttpStatusResolver {
         //403 Block
         container.put(AUTHENTICATION_FAILURE, FORBIDDEN);
         container.put(INSUFFICIENT_PERMISSION, FORBIDDEN);
+        container.put(USER_IS_BLOCKED, FORBIDDEN);
 
         //404 Block
         container.put(BRANCH_NOT_FOUND, NOT_FOUND);

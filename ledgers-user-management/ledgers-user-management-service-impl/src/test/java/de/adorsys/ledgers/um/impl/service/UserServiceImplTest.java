@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -258,10 +259,27 @@ class UserServiceImplTest {
         // Given
         when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
         when(converter.toUserBO(any())).thenReturn(userBO);
-        when(repository.findByBranchAndUserRolesInAndLoginContaining(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
+        when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
 
         // When
-        Page<UserBO> user = userService.findByBranchAndUserRolesIn(USER_BRANCH, Collections.singletonList(UserRoleBO.CUSTOMER), "", null);
+        Page<UserBO> user = userService.findUsersByMultipleParamsPaged("", USER_BRANCH, "", "", Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
+
+        // Then
+        assertNotNull(user.getContent().get(0));
+        assertEquals(userBO, user.getContent().get(0));
+        verify(converter, times(1)).toUserRole(Collections.singletonList(UserRoleBO.CUSTOMER));
+    }
+
+
+    @Test
+    void findByBranchAndUserRolesIn_blank_tpp_id() {
+        // Given
+        when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
+        when(converter.toUserBO(any())).thenReturn(userBO);
+        when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
+
+        // When
+        Page<UserBO> user = userService.findUsersByMultipleParamsPaged("", "","","",Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
 
         // Then
         assertNotNull(user.getContent().get(0));
@@ -345,6 +363,22 @@ class UserServiceImplTest {
         assertEquals(Collections.singletonList(getUserBO()), result);
     }
 
+    @Test
+    void updatePassword() {
+        when(repository.findById(USER_ID)).thenReturn(Optional.of(new UserEntity()));
+        when(passwordEnc.encode(any(), any())).thenReturn("encrypted");
+        userService.updatePassword(USER_ID, "password");
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository, times(1)).save(captor.capture());
+        assertThat(captor.getValue().getPin(), is("encrypted"));
+    }
+
+    @Test
+    void updatePassword_user_not_found() {
+        when(repository.findById(USER_ID)).thenReturn(Optional.empty());
+        assertThrows(UserManagementModuleException.class, () -> userService.updatePassword(USER_ID, "password"));
+    }
+
     private UserBO getUserBO() {
         return new UserBO("login", "email", "pin");
     }
@@ -386,5 +420,17 @@ class UserServiceImplTest {
 
     private ScaUserDataBO getScaUserDataBO() {
         return new ScaUserDataBO("3", ScaMethodTypeBO.EMAIL, "test@mail.de", false, "staticTan", true);
+    }
+
+    @Test
+    void setBranchBlockedStatus_system_block() {
+        userService.setBranchBlockedStatus(USER_BRANCH, true, true);
+        verify(repository, times(1)).updateSystemBlockedStatus(USER_BRANCH, true);
+    }
+
+    @Test
+    void setBranchBlockedStatus_regular_block() {
+        userService.setBranchBlockedStatus(USER_BRANCH, false, true);
+        verify(repository, times(1)).updateBlockedStatus(USER_BRANCH, true);
     }
 }

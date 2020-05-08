@@ -51,7 +51,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
         middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
         return ResponseEntity.ok().build();

@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.AccountStatusBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
@@ -160,7 +159,7 @@ class MiddlewareUserManagementServiceImplTest {
     void updateAccountAccess_accountNotEnabled() {
         // Given
         DepositAccountDetailsBO accountDetails = getDepositAccountDetailsBO();
-        accountDetails.getAccount().setAccountStatus(AccountStatusBO.BLOCKED);
+        accountDetails.getAccount().setBlocked(true);
         when(depositAccountService.getAccountDetailsByIbanAndCurrency(any(), any(), any(), anyBoolean())).thenReturn(accountDetails);
 
         // Then
@@ -193,11 +192,11 @@ class MiddlewareUserManagementServiceImplTest {
     @Test
     void getUsersByBranchAndRoles() {
         // Given
-        when(userService.findByBranchAndUserRolesIn(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userBO)));
+        when(userService.findUsersByMultipleParamsPaged(any(), any(), any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userBO)));
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getCustomPageImpl());
 
         // When
-        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(USER_BRANCH, Collections.singletonList(UserRoleTO.CUSTOMER), "", getCustomPageableImpl());
+        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles("",USER_BRANCH, "","",Collections.singletonList(UserRoleTO.CUSTOMER), false, getCustomPageableImpl());
 
         // Then
         assertNotNull(users.getContent().get(0));

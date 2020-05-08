@@ -58,6 +58,7 @@ import java.util.*;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.*;
 import static de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO.SCAMETHODSELECTED;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.CANCEL_PAYMENT;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.PAYMENT;
 
@@ -374,10 +375,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
                                            .orElseGet(() -> getAccountByIbanAndParamCurrencyErrorIfNotSingle(reference.getIban(), isDebtor, currency));
 
         if (!account.isEnabled()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(ACCOUNT_DISABLED)
-                          .devMsg(String.format("Account with IBAN: %s is %s", reference.getIban(), account.getAccountStatus()))
-                          .build();
+            throw blockedSupplier(ACCOUNT_DISABLED, reference.getIban(), account.isBlocked()).get();
         }
         return account;
     }
@@ -385,7 +383,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban, boolean isDebtor, Currency currency) {
         List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
         if (CollectionUtils.isEmpty(accounts) && !isDebtor) {
-            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, AccountStatusBO.ENABLED, null, null, null, null);
+            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false);
         }
         if (accounts.size() != 1) {
             String msg = CollectionUtils.isEmpty(accounts)

@@ -71,6 +71,14 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         }
 
         DepositAccountDetailsBO depositAccount = depositAccountService.getAccountDetailsById(accountId, LocalDateTime.now(), true);
+
+        if (!depositAccount.isEnabled()) {
+            throw DepositModuleException.builder()
+                          .errorCode(DEPOSIT_OPERATION_FAILURE)
+                          .devMsg("Deposit account is blocked, cannot deposit cash.")
+                          .build();
+        }
+
         Currency accountCurrency = depositAccount.getAccount().getCurrency();
 
         if (!accountCurrency.equals(amount.getCurrency())) {

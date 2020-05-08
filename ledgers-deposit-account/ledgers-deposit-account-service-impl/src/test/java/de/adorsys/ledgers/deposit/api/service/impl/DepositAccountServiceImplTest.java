@@ -11,7 +11,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
-import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
@@ -44,18 +43,18 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.deposit.db.domain.AccountStatus.*;
 import static de.adorsys.ledgers.util.exception.PostingErrorCode.POSTING_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DepositAccountServiceImplTest {
-    private final static String ACCOUNT_ID = "ACCOUNT_ID";
-    private final static String POSTING_ID = "posting_ID";
+    private static final String ACCOUNT_ID = "ACCOUNT_ID";
+    private static final String POSTING_ID = "posting_ID";
     private static final String SYSTEM = "System";
+    private static final String USER_ID = "123";
 
     @Mock
     private DepositAccountRepository depositAccountRepository;
@@ -88,7 +87,7 @@ class DepositAccountServiceImplTest {
         // Given
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(getLedgerAccountBO().getName());
         when(ledgerService.newLedgerAccount(any(), anyString())).thenReturn(getLedgerAccountBO());
-        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(ENABLED));
+        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(false));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
         // When
@@ -102,7 +101,7 @@ class DepositAccountServiceImplTest {
     @Test
     void createDepositAccount_account_already_exist() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // Then
         assertThrows(DepositModuleException.class, () -> {
@@ -115,7 +114,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getDepositAccountById() {
         // Given
-        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
         DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getAccountDetailsById("id", LocalDateTime.now(), false);
@@ -136,7 +135,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getDepositAccountByIBANAndCurrency() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
@@ -148,7 +147,7 @@ class DepositAccountServiceImplTest {
     @Test
     void checkAccountStatus_enabled() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
@@ -163,7 +162,7 @@ class DepositAccountServiceImplTest {
     @Test
     void checkAccountStatus_blocked() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(BLOCKED)));
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true)));
 
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
@@ -178,7 +177,7 @@ class DepositAccountServiceImplTest {
     @Test
     void checkAccountStatus_deleted() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(DELETED)));
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true)));
 
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
@@ -193,7 +192,7 @@ class DepositAccountServiceImplTest {
     @Test
     void findDepositAccountsByBranch() {
         // Given
-        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount(false)));
 
         // When
         List<DepositAccountDetailsBO> accounts = depositAccountService.findDetailsByBranch(anyString());
@@ -260,7 +259,7 @@ class DepositAccountServiceImplTest {
 
     @Test
     void getAccountsByIbanAndParamCurrency() {
-        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(false)));
         List<DepositAccountBO> result = depositAccountService.getAccountsByIbanAndParamCurrency("iban", "EUR");
         assertEquals(Collections.singletonList(getDepositAccountBO()), result);
     }
@@ -268,7 +267,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getAccountByIbanAndCurrency() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
         DepositAccountBO result = depositAccountService.getAccountByIbanAndCurrency("iban", Currency.getInstance("EUR"));
@@ -289,7 +288,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getAccountById() {
         // Given
-        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
         DepositAccountBO result = depositAccountService.getAccountById("accountId");
@@ -310,7 +309,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getTransactionsByDatesPaged() throws JsonProcessingException {
         // Given
-        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(false)));
         when(postingService.findPostingsByDatesPaged(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(newPostingLineBO())));
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
@@ -324,7 +323,7 @@ class DepositAccountServiceImplTest {
     @Test
     void findDetailsByBranchPaged() {
         // Given
-        when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(ENABLED))));
+        when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(false))));
 
         // When
         Page<DepositAccountDetailsBO> result = depositAccountService.findDetailsByBranchPaged("branchId", "someParam", Pageable.unpaged());
@@ -352,7 +351,6 @@ class DepositAccountServiceImplTest {
         // Given
         when(depositAccountRepository.findByIbanStartingWith(anyString())).thenReturn(Collections.singletonList(new DepositAccount()));
         DepositAccountBO expected = new DepositAccountBO();
-        expected.setAccountStatus(AccountStatusBO.ENABLED);
 
         // When
         List<DepositAccountBO> result = depositAccountService.findByAccountNumberPrefix("DE123");
@@ -364,7 +362,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getDetailsByIban() {
         // Given
-        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(false)));
 
         // When
         DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
@@ -387,7 +385,7 @@ class DepositAccountServiceImplTest {
     }
 
     private void confirmationOfFunds_more_than_necessary_available(long amount) throws NoSuchFieldException {
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(ENABLED)));
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
@@ -404,10 +402,10 @@ class DepositAccountServiceImplTest {
         return pl;
     }
 
-    private DepositAccount getDepositAccount(AccountStatus status) {
+    private DepositAccount getDepositAccount(boolean status) {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                                  "name", "product", null, AccountType.CASH, status, "bic", "linked",
-                                  AccountUsage.PRIV, "details");
+                                  "name", "product", null, AccountType.CASH, "bic", "linked",
+                                  AccountUsage.PRIV, "details", status, false);
     }
 
     private DepositAccountBO getDepositAccountBO() {
@@ -416,7 +414,7 @@ class DepositAccountServiceImplTest {
                        .currency(Currency.getInstance("EUR"))
                        .name("name").product("product")
                        .accountType(AccountTypeBO.CASH)
-                       .accountStatus(AccountStatusBO.ENABLED).bic("bic")
+                       .bic("bic")
                        .usageType(AccountUsageBO.PRIV).details("details")
                        .linkedAccounts("linked").build();
     }
@@ -451,5 +449,17 @@ class DepositAccountServiceImplTest {
             e.printStackTrace();
             throw new IllegalStateException("Resource file not found", e);
         }
+    }
+
+    @Test
+    void changeAccountsBlockedStatus_system_block() {
+        depositAccountService.changeAccountsBlockedStatus(USER_ID, true, true);
+        verify(depositAccountRepository, times(1)).updateSystemBlockedStatus(USER_ID, true);
+    }
+
+    @Test
+    void changeAccountsBlockedStatus_regular_block() {
+        depositAccountService.changeAccountsBlockedStatus(USER_ID, false, true);
+        verify(depositAccountRepository, times(1)).updateBlockedStatus(USER_ID, true);
     }
 }

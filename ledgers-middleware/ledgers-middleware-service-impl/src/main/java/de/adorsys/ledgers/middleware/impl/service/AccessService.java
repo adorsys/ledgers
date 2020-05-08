@@ -23,14 +23,13 @@ import java.util.stream.Stream;
 public class AccessService {
     private final UserService userService;
 
-    public void updateAccountAccessNewAccount(DepositAccountBO createdAccount, UserBO user, String operationInitiator) {
+    public void updateAccountAccessNewAccount(DepositAccountBO createdAccount, UserBO user) {
         AccountAccessBO accountAccess = createAccountAccess(createdAccount.getIban(), createdAccount.getCurrency(), AccessTypeBO.OWNER, createdAccount.getId());
         updateAccountAccess(user, accountAccess);
-
-        //Check if the account is created by Branch and if so add access to this account to Branch
-        if (!user.getLogin().equals(operationInitiator)) {
-            UserBO userBO = userService.findByLogin(operationInitiator);
-            updateAccountAccess(userBO, accountAccess);
+        //Check account is created for a User who is part of a Branch and if so add access to the branch
+        if (StringUtils.isNotBlank(user.getBranch())) {
+            UserBO branch = userService.findByLogin(user.getBranch());
+            updateAccountAccess(branch, accountAccess);
         }
     }
 
@@ -70,7 +69,7 @@ public class AccessService {
                                  .collect(Collectors.toList());
     }
 
-    public AccountAccessBO createAccountAccess(String accNbr, Currency currency, AccessTypeBO accessType , String accountId) {
+    public AccountAccessBO createAccountAccess(String accNbr, Currency currency, AccessTypeBO accessType, String accountId) {
         AccountAccessBO accountAccess = new AccountAccessBO();
         accountAccess.setAccessType(accessType);
         accountAccess.setIban(accNbr);

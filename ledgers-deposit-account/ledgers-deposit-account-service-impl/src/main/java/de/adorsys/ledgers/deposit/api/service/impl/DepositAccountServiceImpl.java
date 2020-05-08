@@ -219,18 +219,36 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    public void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet) {
+        if (isSystemBlock) {
+            depositAccountRepository.updateSystemBlockedStatus(userId, lockStatusToSet);
+        } else {
+            depositAccountRepository.updateBlockedStatus(userId, lockStatusToSet);
+        }
+    }
+
+    @Override
+    public Page<DepositAccountBO> findByBranchIdsAndMultipleParams(List<String> branchIds, String iban, Boolean blocked, Pageable pageable) {
+        List<Boolean> blockedQueryParam = Optional.ofNullable(blocked)
+                                                  .map(Arrays::asList)
+                                                  .orElseGet(() -> Arrays.asList(true, false));
+        return depositAccountRepository.findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(branchIds, iban, blockedQueryParam, pageable)
+                       .map(depositAccountMapper::toDepositAccountBO);
+    }
+
+    @Override
     public DepositAccountBO createNewAccount(DepositAccountBO depositAccountBO, String userName, String branch) {
         checkDepositAccountAlreadyExist(depositAccountBO);
         DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
-        LedgerBO ledgerBO = loadLedger();
-        String depositParentAccountNbr = depositAccountConfigService.getDepositParentAccount();
-        LedgerAccountBO parentLedgerAccount = new LedgerAccountBO(depositParentAccountNbr, ledgerBO);
-        LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), parentLedgerAccount);
-        LedgerAccountBO newLedgerAccount = ledgerService.newLedgerAccount(ledgerAccount, userName);
-
         depositAccount.setId(Ids.id());
         depositAccount.setName(userName);
-        depositAccount.setLinkedAccounts(newLedgerAccount.getId());
+
+        LedgerAccountBO parentLedgerAccount = new LedgerAccountBO(depositAccountConfigService.getDepositParentAccount(), loadLedger());
+        LedgerAccountBO ledgerAccount = new LedgerAccountBO(depositAccount.getIban(), parentLedgerAccount);
+
+        String accountId = ledgerService.newLedgerAccount(ledgerAccount, userName).getId();
+        depositAccount.setLinkedAccounts(accountId);
+
         Optional.ofNullable(branch).ifPresent(depositAccount::setBranch);
         DepositAccount saved = depositAccountRepository.save(depositAccount);
         return depositAccountMapper.toDepositAccountBO(saved);

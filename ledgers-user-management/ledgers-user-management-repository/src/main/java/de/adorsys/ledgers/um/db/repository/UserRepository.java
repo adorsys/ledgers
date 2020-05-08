@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,25 +46,16 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
      */
     Optional<UserEntity> findByEmailOrLogin(String email, String login);
 
+    @Query("update UserEntity u set u.systemBlocked=?2 where u.branch=?1")
+    void updateSystemBlockedStatus(String branchId, boolean status);
 
-    /**
-     * Finds all users of the branch with the given roles
-     *
-     * @param branch branch
-     * @param roles  user roles
-     * @return list pf users
-     */
-    Page<UserEntity> findByBranchAndUserRolesIn(String branch, List<UserRole> roles, Pageable pageable);
+    @Query("update UserEntity u set u.blocked=?2 where u.branch=?1")
+    void updateBlockedStatus(String branchId, boolean status);
 
-    /**
-     * Finds all users of the branch with the given roles
-     *
-     * @param branch branch
-     * @param roles  user roles
-     * @return list pf users
-     */
-    //@Query("select distinct u from UserEntity u join u.userRoles r where branch = ?1 and r in ?2 and login like concat('%',?3,'%')")
-    Page<UserEntity> findByBranchAndUserRolesInAndLoginContaining(String branch, List<UserRole> roles, String queryParam, Pageable pageable);
+    @Query("select distinct u.id from UserEntity u where u.branch like ?1% and u.branch like  %?2% and u.login like %?3% and ?4 member of u.userRoles and u.systemBlocked=false ")
+    List<String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin, UserRole role);
+
+    Page<UserEntity> findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(Collection<String> branch, String login, Collection<UserRole> userRoles, Collection<Boolean> blocked, Pageable pageable);
 
     /**
      * Counts amount of users for a branch

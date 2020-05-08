@@ -48,7 +48,8 @@ public class DisableEndpointFilter extends OncePerRequestFilter {
     }
 
     private boolean isExcludedEndpoint(HttpServletRequest request) {
-        return EXCLUDED_URLS.stream()
-                       .anyMatch(p -> matcher.match(p, request.getServletPath()));
+        return !matcher.matchStart(request.getServletPath(), DataMgmtStaffAPI.BASE_PATH)
+                       || EXCLUDED_URLS.stream()
+                                  .anyMatch(p -> matcher.match(request.getServletPath(), p));
     }
 }

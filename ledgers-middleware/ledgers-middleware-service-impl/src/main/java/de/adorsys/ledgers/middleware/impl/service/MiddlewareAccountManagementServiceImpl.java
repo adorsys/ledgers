@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static java.lang.String.format;
 
 @Slf4j
@@ -89,26 +91,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
         if (depositAccount.getCurrency() == null) {
             throw MiddlewareModuleException.builder()
-                    .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                    .devMsg("Can not create new account without currency set! Please set currency to continue.")
-                    .build();
-        }
-        UserBO user = userService.findById(userId);
-        checkPresentAccountsAndOwner(depositAccount.getIban(), user.getLogin());
-        DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
-        DepositAccountBO createdAccount = depositAccountService.createNewAccount(accountToCreate, user.getLogin(), user.getBranch());
-        accessService.updateAccountAccessNewAccount(createdAccount, user, scaInfoTO.getUserLogin());
-    }
-
-    private void checkPresentAccountsAndOwner(String iban, String userLogin) {
-        List<DepositAccountBO> accountsPresentByIban = depositAccountService.getAccountsByIbanAndParamCurrency(iban, "");
-
-        if (CollectionUtils.isNotEmpty(accountsPresentByIban) && !userLogin.equals(accountsPresentByIban.get(0).getName())) {
-            throw MiddlewareModuleException.builder()
                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                          .devMsg("The IBAN you''e trying to create account for is already busy by another user")
+                          .devMsg("Can not create new account without currency set! Please set currency to continue.")
                           .build();
         }
+        UserBO user = userService.findById(userId);
+
+        checkPresentAccountsAndOwner(depositAccount.getIban(), user);
+        DepositAccountBO accountToCreate = accountDetailsMapper.toDepositAccountBO(depositAccount);
+        DepositAccountBO createdAccount = depositAccountService.createNewAccount(accountToCreate, user.getLogin(), user.getBranch());
+        accessService.updateAccountAccessNewAccount(createdAccount, user);
     }
 
     @Override
@@ -266,6 +258,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                                                    .map(accountDetailsMapper::toAccountDetailsTO));
     }
 
+    @Override
+    public CustomPageImpl<AccountDetailsTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable) {
+        List<String> branchIds = userService.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
+        Page<AccountDetailsTO> page = depositAccountService.findByBranchIdsAndMultipleParams(branchIds, iban, blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                              .map(accountDetailsMapper::toAccountDetailsTO);
+        return pageMapper.toCustomPageImpl(page);
+    }
+
 
     @Override
     public String iban(String id) {
@@ -315,8 +315,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
 
         AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
-                consentId, template, template,
-                defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
+                                              consentId, template, template,
+                                              defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
 
         SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
         SCAConsentResponseTO response = toScaConsentResponse(userMapper.toUserTO(userBO), consent, consentKeyData.template(), scaOperationBO);
@@ -371,10 +371,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) {
         DepositAccountDetailsBO account = depositAccountService.getAccountDetailsById(accountId, LocalDateTime.now(), false);
         if (!account.isEnabled()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(PAYMENT_PROCESSING_FAILURE)
-                          .devMsg(format("Operation is Rejected as account: %s is %s", account.getAccount().getIban(), account.getAccount().getAccountStatus()))
-                          .build();
+            throw blockedSupplier(PAYMENT_PROCESSING_FAILURE, account.getAccount().getIban(), account.getAccount().isBlocked()).get();
         }
         transactionService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
     }
@@ -413,6 +410,24 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         List<UserTO> users = userMapper.toUserTOList(userService.findUsersByIban(details.getIban()));
         log.info("Loaded users in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
         return new AccountReportTO(details, users);
+    }
+
+    private void checkPresentAccountsAndOwner(String iban, UserBO user) {
+        if (!user.isEnabled()) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(USER_IS_BLOCKED)
+                          .devMsg("User is blocked, cannot create new account.")
+                          .build();
+        }
+
+        List<DepositAccountBO> accountsPresentByIban = depositAccountService.getAccountsByIbanAndParamCurrency(iban, "");
+
+        if (CollectionUtils.isNotEmpty(accountsPresentByIban) && !user.getLogin().equals(accountsPresentByIban.get(0).getName())) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
+                          .devMsg("The IBAN you''e trying to create account for is already busy by another user")
+                          .build();
+        }
     }
 
     /*

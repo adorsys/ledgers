@@ -15,7 +15,6 @@ import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PaymentMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.PostingMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.SerializeService;
-import de.adorsys.ledgers.deposit.db.domain.AccountStatus;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
@@ -111,6 +110,19 @@ class DepositAccountTransactionServiceImplTest {
     void depositCash_amountLessThanZero() {
         // Then
         assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.valueOf(-123L)), "recordUser"));
+    }
+
+    @Test
+    void depositCash_blockedAccount() {
+        // Given
+        DepositAccountDetailsBO depositAccountDetailsBO = getDepositAccountBO();
+        DepositAccountBO blockedAccount = new DepositAccountBO();
+        blockedAccount.setBlocked(true);
+        depositAccountDetailsBO.setAccount(blockedAccount);
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(depositAccountDetailsBO);
+
+        // Then
+        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.valueOf(123L)), "recordUser"));
     }
 
     @Test
@@ -442,7 +454,7 @@ class DepositAccountTransactionServiceImplTest {
         when(ledgerService.findLedgerAccountById(anyString())).thenReturn(new LedgerAccountBO("user account", new LedgerBO()));
         when(depositAccountService.getOptionalAccountByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccountBO().getAccount()));
         when(depositAccountConfigService.getClearingAccount(anyString())).thenReturn("some");
-        when(ledgerService.findLedgerAccount(any(),anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
+        when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO("clearing", new LedgerBO()));
 
         // When
         transactionService.bookPayment(payment, REQUEST_TIME, "TEST");
@@ -577,13 +589,13 @@ class DepositAccountTransactionServiceImplTest {
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", IBAN, "msisdn", "EUR",
-                                  "name", "product", null, AccountType.CASH, AccountStatus.ENABLED, "bic", null,
-                                  AccountUsage.PRIV, "details");
+                                  "name", "product", null, AccountType.CASH, "bic", null,
+                                  AccountUsage.PRIV, "details", false, false);
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details"),
+                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false),
                 Collections.emptyList());
     }
 }

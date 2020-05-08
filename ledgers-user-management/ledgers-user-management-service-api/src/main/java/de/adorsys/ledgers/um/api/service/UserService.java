@@ -79,13 +79,20 @@ public interface UserService {
     AisConsentBO loadConsent(String consentId);
 
     /**
-     * Loads users collection by branch and the given roles
      *
-     * @param branch    branch ID
-     * @param userRoles list of user roles
-     * @return List of users filtered by branch and user roles
+     *
+     * @param countryCode Country Code
+     * @param branchId id of STAFF user
+     * @param branchLogin login of STAFF user
+     * @param userLogin login of CUSTOMER user
+     * @param roles List of Roles to filter for
+     * @param blocked Boolean representation of User status
+     * @param pageable pagination info
+     * @return Page of Users
      */
-    Page<UserBO> findByBranchAndUserRolesIn(String branch, List<UserRoleBO> userRoles, String queryParam, Pageable pageable);
+    Page<UserBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable);
+
+    List<String> findBranchIdsByMultipleParameters(String countryCode,String branchId,String branchLogin);
 
     /**
      * Counts amount of users for a branch
@@ -99,13 +106,37 @@ public interface UserService {
      * Updates user
      *
      * @param userBO user to update
-     * @return
+     * @return user entity
      */
     UserBO updateUser(UserBO userBO);
 
+    /**
+     * Finds user by IBAN
+     * @param iban iban
+     * @return user Entity
+     */
     List<UserBO> findUsersByIban(String iban);
 
+    /**
+     * Finds account owners by IBAN
+     * @param iban iban
+     * @return owner of account
+     */
     List<UserBO> findOwnersByIban(String iban);
 
+    /**
+     * Finds account owners by account id
+     * @param accountId account id
+     * @return users
+     */
     List<UserBO> findOwnersByAccountId(String accountId);
+
+    /**
+     * Replaces users password
+     * @param userId user id
+     * @param password new password
+     */
+    void updatePassword(String userId, String password);
+
+    void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
 }

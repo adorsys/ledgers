@@ -75,4 +75,7 @@ public class AccountDetailsTO {
     private String details;
 
     private List<AccountBalanceTO> balances;
+
+    private boolean blocked;
+    private boolean systemBlocked;
 }

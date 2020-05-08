@@ -15,7 +15,4 @@ public interface LedgerAccountRepository extends NamedEntityRepository<LedgerAcc
     //TODO Shall be removed in v2.5
     @Query(value = "select distinct a from  LedgerAccount a where a.ledger=?2 and a.name in ?1")
     List<LedgerAccount> getAccountsByIbans(Set<String> ibans, Ledger ledger);
-
-    @Query(value = "select distinct a from LedgerAccount  a where a.id in ?1")
-    List<LedgerAccount> getAccountsByIds(List<String> ids);
 }

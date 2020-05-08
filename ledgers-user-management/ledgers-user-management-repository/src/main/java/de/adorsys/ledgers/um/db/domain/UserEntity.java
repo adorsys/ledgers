@@ -19,12 +19,11 @@ package de.adorsys.ledgers.um.db.domain;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
-import javax.persistence.*;
 
 @Entity
 @Getter
@@ -67,6 +66,16 @@ public class UserEntity {
 
     private String branch;
 
+    @Column(name = "block")
+    private boolean blocked;
+
+    @Column(name = "system_block")
+    private boolean systemBlocked;
+
+    public boolean isEnabled() {
+        return !isBlocked() && !isSystemBlocked();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -83,11 +92,13 @@ public class UserEntity {
                        Objects.equals(getScaUserData(), that.getScaUserData()) &&
                        Objects.equals(getAccountAccesses(), that.getAccountAccesses()) &&
                        Objects.equals(getUserRoles(), that.getUserRoles()) &&
-                       Objects.equals(getBranch(), that.getBranch());
+                       Objects.equals(getBranch(), that.getBranch()) &&
+                       Objects.equals(isBlocked(), that.isBlocked()) &&
+                       Objects.equals(isSystemBlocked(), that.isSystemBlocked());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch());
+        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch(), isBlocked(), isSystemBlocked());
     }
 }

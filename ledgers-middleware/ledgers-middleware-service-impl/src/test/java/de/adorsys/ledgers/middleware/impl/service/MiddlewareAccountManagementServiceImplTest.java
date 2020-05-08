@@ -412,7 +412,7 @@ class MiddlewareAccountManagementServiceImplTest {
         // Given
         when(accessService.loadCurrentUser(any())).thenReturn(buildUserBO());
         when(depositAccountService.findDetailsByBranchPaged(any(), any(), any())).thenReturn(getPage());
-        when(accountDetailsMapper.toAccountDetailsTO(any())).thenReturn(getAccountDetailsTO());
+        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getPageImpl());
 
         // When
@@ -563,7 +563,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void depositCashDelegatesToDepositAccountService() {
         // Given
-        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(AccountStatusBO.ENABLED));
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(false));
         doNothing().when(transactionService).depositCash(eq(ACCOUNT_ID), any(), any());
 
         // When
@@ -576,7 +576,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void depositCashWrapsNotFoundException() {
         // Given
-        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(AccountStatusBO.BLOCKED));
+        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(true));
 
         // Then
         assertThrows(MiddlewareModuleException.class, () -> middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO()));
@@ -621,7 +621,7 @@ class MiddlewareAccountManagementServiceImplTest {
         when(userMapper.toUserTOList(any())).thenReturn(Collections.singletonList(buildUserTO()));
         when(userService.findUsersByIban(any())).thenReturn(Collections.singletonList(buildUserBO()));
         when(depositAccountService.getAccountDetailsById(any(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
-        when(accountDetailsMapper.toAccountDetailsTO(any())).thenReturn(getAccountDetailsTO());
+        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
 
         // When
         AccountReportTO result = middlewareService.getAccountReport(ACCOUNT_ID);
@@ -633,12 +633,25 @@ class MiddlewareAccountManagementServiceImplTest {
 
     }
 
-    private CustomPageImpl<Object> getPageImpl() {
-        return new CustomPageImpl<Object>();
+    @Test
+    void getAccountsByOptionalBranchPaged() {
+        when(depositAccountService.findByBranchIdsAndMultipleParams(anyList(),anyString(), anyBoolean(), any())).thenReturn(getPageWithAccount());
+        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountBO.class))).thenReturn(getAccountDetailsTO());
+        when(pageMapper.toCustomPageImpl(any())).thenReturn(new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(getAccountDetailsTO())));
+        CustomPageImpl<AccountDetailsTO> result = middlewareService.getAccountsByBranchAndMultipleParams("countryCode", "branchId", USER_ID, IBAN, false, new CustomPageableImpl(0, 1));
+        assertEquals(result.getContent(), Collections.singletonList(getAccountDetailsTO()));
     }
 
-    private Page getPage() {
-        return new PageImpl(Collections.singletonList(getDepositAccountDetailsBO()));
+    private CustomPageImpl<Object> getPageImpl() {
+        return new CustomPageImpl<>();
+    }
+
+    private Page<DepositAccountDetailsBO> getPage() {
+        return new PageImpl<>(Collections.singletonList(getDepositAccountDetailsBO()));
+    }
+
+    private Page<DepositAccountBO> getPageWithAccount() {
+        return new PageImpl<>(Collections.singletonList(getDepositAccountDetailsBO().getAccount()));
     }
 
     private CustomPageableImpl getCustomPageableImpl() {
@@ -730,9 +743,9 @@ class MiddlewareAccountManagementServiceImplTest {
         return objectMapper;
     }
 
-    private DepositAccountDetailsBO getAccountDetails(AccountStatusBO status) {
+    private DepositAccountDetailsBO getAccountDetails(boolean isBlocked) {
         DepositAccountBO account = new DepositAccountBO();
-        account.setAccountStatus(status);
+        account.setBlocked(isBlocked);
         return new DepositAccountDetailsBO(account, Collections.emptyList());
     }
 
@@ -787,7 +800,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, AccountStatusBO.ENABLED, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details");
+        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false);
     }
 
     private FundsConfirmationRequestBO getFundsConfirmationRequestBO() {

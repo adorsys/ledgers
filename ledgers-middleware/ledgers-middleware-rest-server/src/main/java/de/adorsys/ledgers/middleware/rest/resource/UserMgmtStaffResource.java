@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
@@ -7,10 +8,10 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
-
 
 @RestController
 @MiddlewareUserResource
@@ -65,7 +66,11 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) {
-        return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
+        try{
+            return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.SYSTEM));
+        } catch (UserManagementModuleException e){
+            return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
+        }
     }
 
     @Override
@@ -77,8 +82,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
         user.setBranch(branchStaff.getBranch());
 
         // Assert that the role is neither system nor technical
-        user.getUserRoles().remove(UserRoleTO.SYSTEM);
-        user.getUserRoles().remove(UserRoleTO.TECHNICAL);
+        user.getUserRoles().removeAll(Arrays.asList(UserRoleTO.SYSTEM,UserRoleTO.TECHNICAL));
 
         UserTO newUser = middlewareUserService.create(user);
         newUser.setPin(null);
@@ -88,10 +92,10 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, String queryParam, int page, int size) {
+    public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, String queryParam, Boolean blockedParam, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
-        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles(branchStaff.getBranch(), roles, queryParam, pageable);
+        CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles("", branchStaff.getBranch(), "", queryParam, roles, blockedParam, pageable);
         return ResponseEntity.ok(users);
     }
 
