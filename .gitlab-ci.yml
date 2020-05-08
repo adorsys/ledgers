@@ -64,7 +64,7 @@ Compile:
   except:
     - schedules
   script:
-    - mvn -DskipTests clean install
+    - mvn -DskipTests clean install -Dci.build.number=Build\:${CI_PIPELINE_ID}
   artifacts:
     paths:
       - "ledgers-app/target/ledgers-app*jar"
@@ -98,6 +98,21 @@ PMD_CPD_Report:
     - develop
   script:
     - mvn -Dmaven.test.skip=true package pmd:pmd pmd:cpd
+  artifacts:
+    paths:
+      - "qa/pmd/pmd-ruleset.xml"
+      - "**/**/*/pmd.html"
+      - "**/*/pmd.xml"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-pmd"
+    expire_in: "10 day"
+
+PMD_CPD_Check:
+  stage: "Lint"
+  except:
+    - schedules
+    - develop
+  script:
+    - mvn -Dmaven.test.skip=true package pmd:check pmd:cpd-check
   artifacts:
     paths:
       - "qa/pmd/pmd-ruleset.xml"

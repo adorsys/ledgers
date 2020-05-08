@@ -83,7 +83,7 @@ public class SwaggerConfig {
 
         return new ApiInfo(
                 "Ledgers", fileReader.getStringFromFile(API_INFO),
-                buildProperties.getVersion(),
+                buildProperties.getVersion() + " " + buildProperties.get("build.number"),
                 "Terms of Service: to be edited...",
                 contact,
                 "Apache License Version 2.0",
