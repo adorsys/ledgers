@@ -40,9 +40,6 @@ public class ResetPasswordEmailCodeGeneratorImpl implements ResetPasswordCodeGen
                                                              .devMsg(String.format(USER_WITH_LOGIN_AND_EMAIL_NOT_FOUND, source.getLogin(), source.getEmail()))
                                                              .build());
 
-        OffsetDateTime expiryTime = OffsetDateTime.now()
-                                            .plusMinutes(expirationMinutes);
-
         if (!user.isEnabled()) {
             throw UserManagementModuleException.builder()
                           .errorCode(USER_IS_BLOCKED)
@@ -53,6 +50,8 @@ public class ResetPasswordEmailCodeGeneratorImpl implements ResetPasswordCodeGen
         String code = UUID.randomUUID().toString();
         Optional<ResetPasswordEntity> resetPasswordEntity = resetPasswordRepository.findByUserId(user.getId());
 
+        OffsetDateTime expiryTime = OffsetDateTime.now()
+                                            .plusMinutes(expirationMinutes);
         if (!resetPasswordEntity.isPresent()) {
             return new GenerateCode(resetPasswordRepository.save(new ResetPasswordEntity(user.getId(), code, expiryTime))
                                             .getCode());
