@@ -30,7 +30,7 @@ import static de.adorsys.ledgers.middleware.rest.resource.UserMgmtStaffResourceA
 @RestController
 @MiddlewareResetResource
 @RequiredArgsConstructor
-@RequestMapping("/admin" + AdminResourceAPI.BASE_PATH)
+@RequestMapping(AdminResourceAPI.BASE_PATH)
 public class AdminResource implements AdminResourceAPI {
     private final MiddlewareUserManagementService middlewareUserService;
     private final MiddlewareAccountManagementService accountManagementService;
