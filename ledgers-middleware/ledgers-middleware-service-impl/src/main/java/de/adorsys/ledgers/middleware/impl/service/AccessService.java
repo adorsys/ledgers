@@ -28,7 +28,7 @@ public class AccessService {
         updateAccountAccess(user, accountAccess);
         //Check account is created for a User who is part of a Branch and if so add access to the branch
         if (StringUtils.isNotBlank(user.getBranch())) {
-            UserBO branch = userService.findByLogin(user.getBranch());
+            UserBO branch = userService.findById(user.getBranch());
             updateAccountAccess(branch, accountAccess);
         }
     }

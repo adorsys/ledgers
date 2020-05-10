@@ -85,7 +85,7 @@ class AccessServiceTest {
         // Given
         UserBO initialUser = getUserBO(new ArrayList<>(), USER_LOGIN, TPP_LOGIN);
         UserBO tppUser = getUserBO(new ArrayList<>(singletonList(getAccessBO(IBAN, USD, 100))), TPP_LOGIN, null);
-        when(userService.findByLogin(eq(TPP_LOGIN))).thenReturn(tppUser);
+        when(userService.findById(eq(TPP_LOGIN))).thenReturn(tppUser);
 
         // When
         service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser);
