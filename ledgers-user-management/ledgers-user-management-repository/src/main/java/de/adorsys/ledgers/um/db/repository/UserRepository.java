@@ -21,8 +21,10 @@ import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,6 +51,8 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     @Query("update UserEntity u set u.systemBlocked=?2 where u.branch=?1")
     void updateSystemBlockedStatus(String branchId, boolean status);
 
+    @Transactional
+    @Modifying
     @Query("update UserEntity u set u.blocked=?2 where u.branch=?1")
     void updateBlockedStatus(String branchId, boolean status);
 
