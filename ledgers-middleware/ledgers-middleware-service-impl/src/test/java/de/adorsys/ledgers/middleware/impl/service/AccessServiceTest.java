@@ -85,7 +85,7 @@ class AccessServiceTest {
         // Given
         UserBO initialUser = getUserBO(new ArrayList<>(), USER_LOGIN, TPP_LOGIN);
         UserBO tppUser = getUserBO(new ArrayList<>(singletonList(getAccessBO(IBAN, USD, 100))), TPP_LOGIN, null);
-        when(userService.findByLogin(eq(TPP_LOGIN))).thenReturn(tppUser);
+        when(userService.findById(eq(TPP_LOGIN))).thenReturn(tppUser);
 
         // When
         service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser);
@@ -252,6 +252,6 @@ class AccessServiceTest {
     }
 
     private DepositAccountBO getDepostAccountBO() {
-        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false);
+        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch");
     }
 }
