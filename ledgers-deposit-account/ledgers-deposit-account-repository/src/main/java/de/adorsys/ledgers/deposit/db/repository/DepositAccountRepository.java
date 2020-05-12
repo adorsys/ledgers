@@ -3,6 +3,7 @@ package de.adorsys.ledgers.deposit.db.repository;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -16,8 +17,6 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
 
     Page<DepositAccount> findByBranchAndIbanContaining(String branch, String queryParam, Pageable pageable);
 
-    Page<DepositAccount> findByIbanContaining(String queryParam, Pageable pageable);
-
     Page<DepositAccount> findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(List<String> branchIds, String iban, List<Boolean> blocked, Pageable pageable);
 
     Optional<DepositAccount> findByIbanAndCurrency(String iban, String currency);
@@ -27,6 +26,7 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
     @Query("update DepositAccount a set a.systemBlocked=?2 where a.branch=?1")
     void updateSystemBlockedStatus(String userId, boolean lockStatusToSet);
 
+    @Modifying
     @Query("update DepositAccount a set a.blocked=?2 where a.branch=?1")
     void updateBlockedStatus(String userId, boolean lockStatusToSet);
 }

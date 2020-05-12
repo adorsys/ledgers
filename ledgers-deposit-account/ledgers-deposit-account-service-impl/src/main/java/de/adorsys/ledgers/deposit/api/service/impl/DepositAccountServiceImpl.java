@@ -21,6 +21,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -219,6 +220,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    @Transactional
     public void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet) {
         if (isSystemBlock) {
             depositAccountRepository.updateSystemBlockedStatus(userId, lockStatusToSet);
