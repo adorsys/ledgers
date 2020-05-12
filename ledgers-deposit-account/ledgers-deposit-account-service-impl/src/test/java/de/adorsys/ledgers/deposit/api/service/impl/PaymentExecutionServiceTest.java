@@ -278,7 +278,7 @@ class PaymentExecutionServiceTest {
     }
 
     private DepositAccountBO getDepositAccountBO(Currency currency) {
-        return new DepositAccountBO("id", "iban", "bban", "pan", "maskedPan", "msisdn", currency, "name", "product", AccountTypeBO.CASH, "bic", null, AccountUsageBO.PRIV, "details", false, false);
+        return new DepositAccountBO("id", "iban", "bban", "pan", "maskedPan", "msisdn", currency, "name", "product", AccountTypeBO.CASH, "bic", null, AccountUsageBO.PRIV, "details", false, false, "branch");
     }
 
     private DepositAccountDetailsBO getDepositAccountDetailsBO(Currency currency) {

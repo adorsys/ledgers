@@ -82,6 +82,8 @@ public class DepositAccountBO {
 
     private boolean systemBlocked;
 
+    private String branch;
+
     public boolean isEnabled() {
         return !blocked && !systemBlocked;
     }
