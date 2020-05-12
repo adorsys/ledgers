@@ -78,4 +78,6 @@ public class AccountDetailsTO {
 
     private boolean blocked;
     private boolean systemBlocked;
+
+    private String branch;
 }

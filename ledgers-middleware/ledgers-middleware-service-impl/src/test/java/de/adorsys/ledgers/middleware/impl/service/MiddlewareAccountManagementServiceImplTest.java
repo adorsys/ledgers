@@ -800,7 +800,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false);
+        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch");
     }
 
     private FundsConfirmationRequestBO getFundsConfirmationRequestBO() {
