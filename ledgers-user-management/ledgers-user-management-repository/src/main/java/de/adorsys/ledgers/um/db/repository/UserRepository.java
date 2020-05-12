@@ -50,7 +50,6 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     @Query("update UserEntity u set u.systemBlocked=?2 where u.branch=?1")
     void updateSystemBlockedStatus(String branchId, boolean status);
 
-
     @Modifying
     @Query("update UserEntity u set u.blocked=?2 where u.branch=?1")
     void updateBlockedStatus(String branchId, boolean status);

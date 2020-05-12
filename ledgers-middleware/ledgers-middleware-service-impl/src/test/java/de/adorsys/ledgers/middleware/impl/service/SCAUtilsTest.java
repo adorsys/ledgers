@@ -44,7 +44,7 @@ class SCAUtilsTest {
     }
 
     private UserTO getUserTO() {
-        return new UserTO("id", "login", "email", "pin", Collections.singletonList(getScaUserDataTO()), Collections.singletonList(getAccess()), Collections.singletonList(UserRoleTO.CUSTOMER), "branch");
+        return new UserTO("id", "login", "email", "pin", Collections.singletonList(getScaUserDataTO()), Collections.singletonList(getAccess()), Collections.singletonList(UserRoleTO.CUSTOMER), "branch",false,false);
     }
 
     private AccountAccessTO getAccess() {
