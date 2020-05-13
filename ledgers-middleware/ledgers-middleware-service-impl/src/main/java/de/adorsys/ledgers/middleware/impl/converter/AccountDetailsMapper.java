@@ -36,6 +36,8 @@ public abstract class AccountDetailsMapper {
     public abstract AccountReferenceBO toAccountReference(AccountAccessBO access);
 
     protected AccountStatusTO toAccountStatusTO(DepositAccountBO details) {
-        return details.isBlocked() && details.isSystemBlocked() ? AccountStatusTO.BLOCKED : AccountStatusTO.ENABLED;
+        return details.isEnabled()
+                       ? AccountStatusTO.ENABLED
+                       : AccountStatusTO.BLOCKED;
     }
 }
