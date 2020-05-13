@@ -20,7 +20,7 @@
     <parent>
         <groupId>de.adorsys.ledgers</groupId>
         <artifactId>ledgers-deposit-account</artifactId>
-        <version>3.4-SNAPSHOT</version>
+        <version>3.4</version>
         <relativePath>..</relativePath>
     </parent>
 
