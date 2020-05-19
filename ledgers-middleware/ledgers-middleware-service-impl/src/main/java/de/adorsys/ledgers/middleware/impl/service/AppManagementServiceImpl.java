@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -88,6 +89,15 @@ public class AppManagementServiceImpl implements AppManagementService {
         CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(userId, isSystemBlock, lockStatusToSet), FIXED_THREAD_POOL)
                 .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(userId, isSystemBlock, lockStatusToSet));
         return lockStatusToSet;
+    }
+
+    @Override
+    public String generateNextBban(BbanStructure structure) {
+        String bban = structure.generateRandomBban();
+        while (userService.isPresentBranchCode(structure.getCountryPrefix() + "_" + bban)) {
+            bban = structure.generateRandomBban();
+        }
+        return bban;
     }
 
     private void isPermittedToRemoveBranch(String userId, UserRoleTO userRole, String branchId) {

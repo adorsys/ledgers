@@ -139,4 +139,6 @@ public interface UserService {
     void updatePassword(String userId, String password);
 
     void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
+
+    boolean isPresentBranchCode(String bban);
 }
