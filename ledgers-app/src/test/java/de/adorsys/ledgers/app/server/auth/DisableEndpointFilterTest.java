@@ -44,7 +44,8 @@ class DisableEndpointFilterTest {
     void doFilterInternal_prod_currencies_should_pass() {
         List<String> okServletPaths = Arrays.asList(
                 "/SomeServletPath/SomeCallUri",
-                servletPrefix + "/currencies");
+                servletPrefix + "/currencies",
+                servletPrefix + "/branch");
         List<String> nokServletPaths = Arrays.asList(
                 servletPrefix + "/transactions/132",
                 servletPrefix + "/branch/132",

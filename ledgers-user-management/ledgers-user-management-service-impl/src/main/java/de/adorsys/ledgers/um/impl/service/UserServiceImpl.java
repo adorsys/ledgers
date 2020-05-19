@@ -221,6 +221,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public boolean isPresentBranchCode(String bban) {
+        return userRepository.existsById(bban);
+    }
+
     private void checkDuplicateScaMethods(List<ScaUserDataBO> scaUserData) {
         List<ScaUserDataBO> checkedData = Optional.ofNullable(scaUserData).orElse(Collections.emptyList());
         if (new HashSet<>(checkedData).size() != checkedData.size()) {

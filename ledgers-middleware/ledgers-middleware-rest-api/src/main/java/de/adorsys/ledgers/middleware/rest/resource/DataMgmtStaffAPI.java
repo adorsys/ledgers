@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -39,4 +40,8 @@ public interface DataMgmtStaffAPI {
     @ApiOperation(value = "Retrieve the currencies list supported by ASPSP", authorizations = @Authorization(value = "apiKey"))
     @GetMapping(value = "/currencies")
     ResponseEntity<Set<Currency>> currencies();
+
+    @ApiOperation(value = "Get next free branch id for country")
+    @PostMapping(value = "/branch")
+    ResponseEntity<String> branchId(@RequestBody BbanStructure bbanStructure);
 }

@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.CurrencyService;
@@ -50,5 +51,10 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Set<Currency>> currencies() {
         return ResponseEntity.ok(currencyService.getSupportedCurrencies());
+    }
+
+    @Override
+    public ResponseEntity<String> branchId(BbanStructure bbanStructure) {
+        return ResponseEntity.ok(appManagementService.generateNextBban(bbanStructure));
     }
 }
