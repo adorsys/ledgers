@@ -108,7 +108,7 @@ public class AdminResource implements AdminResourceAPI {
                           .build();
         }
         if (!StringUtils.equals(userStored.getBranch(), user.getBranch())
-                    || !StringUtils.equals(user.getBranch(), user.getId())
+                    || user.getUserRoles().contains(STAFF) && !StringUtils.equals(user.getBranch(), user.getId())
                     || !StringUtils.equals(user.getId(), userStored.getId())) {
             throw MiddlewareModuleException.builder()
                           .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
