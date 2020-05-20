@@ -412,6 +412,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         return new AccountReportTO(details, users);
     }
 
+    @Override
+    public boolean changeStatus(String accountId, boolean isSystemBlock) {
+        DepositAccountBO account = depositAccountService.getAccountById(accountId);
+
+        boolean lockStatusToSet = isSystemBlock ? !account.isSystemBlocked() : !account.isBlocked();
+        depositAccountService.changeAccountsBlockedStatus(Collections.singleton(accountId), isSystemBlock, lockStatusToSet);
+
+        return lockStatusToSet;
+    }
+
     private void checkPresentAccountsAndOwner(String iban, UserBO user) {
         if (!user.isEnabled()) {
             throw MiddlewareModuleException.builder()

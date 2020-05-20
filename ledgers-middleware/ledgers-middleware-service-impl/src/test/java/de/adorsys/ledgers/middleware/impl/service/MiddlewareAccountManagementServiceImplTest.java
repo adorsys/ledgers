@@ -642,6 +642,32 @@ class MiddlewareAccountManagementServiceImplTest {
         assertEquals(result.getContent(), Collections.singletonList(getAccountDetailsTO()));
     }
 
+    @Test
+    void changeAccountsBlockedStatus_list_system_block() {
+        // Given
+        when(depositAccountService.getAccountById(ACCOUNT_ID))
+                .thenReturn(getDepositAccountBO());
+
+        // When
+        middlewareService.changeStatus(ACCOUNT_ID, true);
+
+        // Then
+        verify(depositAccountService, times(1)).changeAccountsBlockedStatus(Collections.singleton(ACCOUNT_ID), true, true);
+    }
+
+    @Test
+    void changeAccountsBlockedStatus_list_regular_block() {
+        // Given
+        when(depositAccountService.getAccountById(ACCOUNT_ID))
+                .thenReturn(getDepositAccountBO());
+
+        // When
+        middlewareService.changeStatus(ACCOUNT_ID, false);
+
+        // Then
+        verify(depositAccountService, times(1)).changeAccountsBlockedStatus(Collections.singleton(ACCOUNT_ID), false, true);
+    }
+
     private CustomPageImpl<Object> getPageImpl() {
         return new CustomPageImpl<>();
     }

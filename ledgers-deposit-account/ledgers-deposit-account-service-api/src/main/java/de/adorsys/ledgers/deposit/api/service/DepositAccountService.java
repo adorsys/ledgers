@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface DepositAccountService {
 
@@ -78,4 +79,6 @@ public interface DepositAccountService {
     void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
 
     Page<DepositAccountBO> findByBranchIdsAndMultipleParams(List<String> branchIds, String iban, Boolean blocked, Pageable pageable);
+
+    void changeAccountsBlockedStatus(Set<String> accountIds, boolean systemBlock, boolean lockStatusToSet);
 }

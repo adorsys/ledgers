@@ -123,4 +123,11 @@ public interface AccountMgmStaffResourceAPI {
     })
     @GetMapping("/{accountId}/extended")
     ResponseEntity<AccountReportTO> getExtendedAccountDetailsById(@ApiParam(ACCOUNT_ID) @PathVariable(ACCOUNT_ID) String accountId);
+
+    @ApiOperation(value = "Block/Unblock account",
+            notes = "Changes block state for given account, returns status being set to the block",
+            authorizations = @Authorization(value = "apiKey"))
+    @PostMapping("/{accountId}/status")
+    ResponseEntity<Boolean> changeStatus(@PathVariable(ACCOUNT_ID) String accountId);
+
 }
