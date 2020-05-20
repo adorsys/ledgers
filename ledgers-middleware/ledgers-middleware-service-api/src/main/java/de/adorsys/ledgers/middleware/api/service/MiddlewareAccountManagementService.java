@@ -195,6 +195,10 @@ public interface MiddlewareAccountManagementService {
      */
     void deleteTransactions(String userId, UserRoleTO userRole, String accountId);
 
+    void deleteAccount(String userId, UserRoleTO userRole, String accountId);
+
+    void deleteUser(String userId, UserRoleTO userRole, String userToDeleteId);
+
     AccountReportTO getAccountReport(String accountId);
 
     boolean changeStatus(String accountId, boolean systemBlock);
