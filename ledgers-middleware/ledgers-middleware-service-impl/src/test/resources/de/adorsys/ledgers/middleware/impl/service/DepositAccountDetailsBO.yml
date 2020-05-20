@@ -13,5 +13,6 @@ account:
   linkedAccounts: account
   usageType: PRIV
   details: details
+  branch: Nuremberg
   
 balances:
