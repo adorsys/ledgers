@@ -462,4 +462,23 @@ class DepositAccountServiceImplTest {
         depositAccountService.changeAccountsBlockedStatus(USER_ID, false, true);
         verify(depositAccountRepository, times(1)).updateBlockedStatus(USER_ID, true);
     }
+
+    @Test
+    void changeAccountsBlockedStatus_list_system_block() {
+        // When
+        depositAccountService.changeAccountsBlockedStatus(Collections.singleton(USER_ID), true, true);
+
+        // Then
+        verify(depositAccountRepository, times(1)).updateSystemBlockedStatus(Collections.singleton(USER_ID), true);
+    }
+
+    @Test
+    void changeAccountsBlockedStatus_list_regular_block() {
+        // When
+        depositAccountService.changeAccountsBlockedStatus(Collections.singleton(USER_ID), false, true);
+
+        // Then
+        verify(depositAccountRepository, times(1)).updateBlockedStatus(Collections.singleton(USER_ID), true);
+    }
+
 }
