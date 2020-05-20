@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
@@ -25,17 +25,18 @@ import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static java.lang.String.format;
 
@@ -79,29 +80,67 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
-        DepositAccountDetailsBO account = depositAccountService.getAccountDetailsByIbanAndCurrency(access.getIban(), access.getCurrency(), LocalDateTime.now(), false);
-        if (!account.isEnabled()) {
-            throw blockedSupplier(PAYMENT_PROCESSING_FAILURE, account.getAccount().getIban(), account.getAccount().isBlocked()).get();
+        DepositAccountBO account = depositAccountService.getAccountById(access.getAccountId());
+        checkAccountIsEnabled(account);
+        UserTO initiator = findById(scaInfo.getUserId());
+        checkInitiatorIsPermittedToOperateAccount(access, initiator);
+        UserTO user = findById(userId);
+        checkUserIsNotABranchAndIsSameBranchAsAccount(user, account);
+        checkInitiatorIsPermittedToOperateUser(scaInfo, initiator, user);
+        updateAccessFields(access, account);
+        accessService.updateAccountAccess(userTOMapper.toUserBO(user), userTOMapper.toAccountAccessBO(access));
+        if (initiator.getUserRoles().contains(UserRoleTO.SYSTEM) && StringUtils.isNotBlank(user.getBranch())) {
+            UserBO branch = userService.findById(user.getBranch());
+            accessService.updateAccountAccess(branch, userTOMapper.toAccountAccessBO(access));
         }
-        UserTO branch = findById(scaInfo.getUserId());
-        boolean tppHasAccessToAccount = accessService.userHasAccessToAccount(branch, access.getIban());
-        if (!tppHasAccessToAccount) {
-            log.error("Branch: {} has no access to account: {}", branch.getLogin(), access.getIban());
+    }
+
+    private void updateAccessFields(AccountAccessTO access, DepositAccountBO account) {
+        access.setCurrency(account.getCurrency());
+        access.setIban(account.getIban());
+    }
+
+    private void checkUserIsNotABranchAndIsSameBranchAsAccount(UserTO user, DepositAccountBO account) {
+        String devMsg = null;
+        if (user.getUserRoles().contains(UserRoleTO.STAFF)) {
+            devMsg = format("Requested user: %s is a TPP, thus can not possess access on account that does not belong to one of its users!", user.getLogin());
+        }
+        if (!user.getBranch().equals(account.getBranch())) {
+            devMsg = format("Requested user: %s is from different branch than account: %s!", user.getLogin(), account.getIban());
+        }
+        if (devMsg != null) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(devMsg)
+                          .build();
+        }
+    }
+
+    private void checkInitiatorIsPermittedToOperateUser(ScaInfoTO scaInfo, UserTO initiator, UserTO user) {
+        if (initiator.getUserRoles().contains(UserRoleTO.STAFF) && !initiator.getBranch().equals(user.getBranch())) {
+            log.error("User id: {} with Branch: {} is not from initiator: {}", user.getId(), user.getBranch(), initiator.getLogin());
+
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(format("Requested user: %s is not a part of the initiator: %s", user.getLogin(), scaInfo.getUserLogin()))
+                          .build();
+        }
+    }
+
+    private void checkInitiatorIsPermittedToOperateAccount(AccountAccessTO access, UserTO initiator) {
+        if (initiator.getUserRoles().contains(UserRoleTO.STAFF) && !accessService.userHasAccessToAccount(initiator, access.getIban())) {
+            log.error("Branch: {} has no access to account: {}", initiator.getLogin(), access.getIban());
             throw MiddlewareModuleException.builder()
                           .errorCode(INSUFFICIENT_PERMISSION)
                           .devMsg(format("Current Branch does have no access to the requested account: %s", access.getIban()))
                           .build();
         }
-        UserTO user = findById(userId);
-        if (!branch.getBranch().equals(user.getBranch())) {
-            log.error("User id: {} with Branch: {} is not from branch: {}", user.getId(), user.getBranch(), branch.getLogin());
+    }
 
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(format("Requested user: %s is not a part of the branch: %s", user.getLogin(), scaInfo.getUserLogin()))
-                          .build();
+    private void checkAccountIsEnabled(DepositAccountBO account) {
+        if (!account.isEnabled()) {
+            throw blockedSupplier(INSUFFICIENT_PERMISSION, account.getIban(), account.isBlocked()).get();
         }
-        accessService.updateAccountAccess(userTOMapper.toUserBO(user), userTOMapper.toAccountAccessBO(access));
     }
 
     @Override
