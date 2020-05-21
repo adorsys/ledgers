@@ -66,8 +66,8 @@ public class AdminResource implements AdminResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<Boolean> changeStatus(String branchId) {
-        return ResponseEntity.ok(appManagementService.changeBlockedStatus(branchId, false));
+    public ResponseEntity<Boolean> changeStatus(String userId) {
+        return ResponseEntity.ok(appManagementService.changeBlockedStatus(userId, false));
     }
 
     @Override

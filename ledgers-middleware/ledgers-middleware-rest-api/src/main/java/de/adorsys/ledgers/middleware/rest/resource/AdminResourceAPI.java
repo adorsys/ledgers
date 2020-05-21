@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public interface AdminResourceAPI {
     String BASE_PATH = "/admin";
     String BRANCH_ID = "branchId";
+    String USER_ID = "userId";
     String BRANCH_LOGIN = "branchLogin";
     String COUNTRY_CODE = "country";
     String USER_LOGIN = "userLogin";
@@ -55,11 +56,11 @@ public interface AdminResourceAPI {
     @PutMapping("/password")
     ResponseEntity<Void> updatePassword(@RequestParam(value = BRANCH_ID) String branchId, @RequestParam(PASSWORD) String password);
 
-    @ApiOperation(value = "Block/Unblock Branch",
-            notes = "Changes system block or regular block state for given Branch, returns status being set to the block",
+    @ApiOperation(value = "Block/Unblock user",
+            notes = "Changes system block or regular block state for given user, returns status being set to the block",
             authorizations = @Authorization(value = "apiKey"))
     @PostMapping("/status")
-    ResponseEntity<Boolean> changeStatus(@RequestParam(value = BRANCH_ID) String branchId);
+    ResponseEntity<Boolean> changeStatus(@RequestParam(value = USER_ID) String userId);
 
     @ApiOperation(value = "Create new User by Admin",
             notes = "Can create STAFF/CUSTOMER/SYSTEM users",

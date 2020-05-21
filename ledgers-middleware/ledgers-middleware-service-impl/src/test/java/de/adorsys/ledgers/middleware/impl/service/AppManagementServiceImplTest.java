@@ -40,12 +40,6 @@ class AppManagementServiceImplTest {
     }
 
     @Test
-    void changeBlockedStatus_wrong_role() {
-        when(userService.findById(anyString())).thenReturn(getUser(UserRoleBO.SYSTEM));
-        assertThrows(MiddlewareModuleException.class, () -> service.changeBlockedStatus(TPP_ID, true));
-    }
-
-    @Test
     void changeBlockedStatus_user_nf() {
         when(userService.findById(anyString())).thenThrow(UserManagementModuleException.class);
         assertThrows(UserManagementModuleException.class, () -> service.changeBlockedStatus(TPP_ID, true));

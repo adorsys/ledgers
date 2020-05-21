@@ -124,6 +124,12 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Override
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<Boolean> changeStatus(String userId) {
+        return ResponseEntity.ok(middlewareUserService.changeStatus(userId, false));
+    }
+
     private UserTO findUserForBranch(String userId) {
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
         UserTO user = middlewareUserService.findById(userId);

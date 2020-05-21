@@ -400,6 +400,37 @@ class MiddlewareUserManagementServiceImplTest {
         assertThat(result).isEqualTo(Collections.singletonList(getAdditionalInfo()));
     }
 
+    @Test
+    void changeBlockedStatus() {
+        // Given
+        when(userService.findById(anyString())).thenReturn(getUser("", UserRoleBO.CUSTOMER));
+
+        // When
+        boolean result = middlewareUserService.changeStatus(USER_ID, false);
+
+        // Then
+        assertTrue(result);
+    }
+
+    @Test
+    void changeBlockedStatus_wrong_role() {
+        // Given
+        when(userService.findById(anyString())).thenReturn(getUser("", UserRoleBO.SYSTEM));
+
+        // Then
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.changeStatus(USER_ID, false));
+    }
+
+    @Test
+    void changeBlockedStatus_wrong_user() {
+        // Given
+        when(userService.findById(anyString())).thenThrow(UserManagementModuleException.class);
+
+        // Then
+        assertThrows(UserManagementModuleException.class, () -> middlewareUserService.changeStatus(USER_ID, false));
+    }
+
+
     private AdditionalAccountInformationTO getAdditionalInfo() {
         AdditionalAccountInformationTO to = new AdditionalAccountInformationTO();
         to.setAccountOwnerName(USER_LOGIN);
