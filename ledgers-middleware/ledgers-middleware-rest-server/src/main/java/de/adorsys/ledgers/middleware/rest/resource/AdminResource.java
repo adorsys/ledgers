@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsExtendedTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
@@ -44,15 +45,15 @@ public class AdminResource implements AdminResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<CustomPageImpl<UserTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
+    public ResponseEntity<CustomPageImpl<UserExtendedTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         List<UserRoleTO> roles = Optional.ofNullable(role).map(Collections::singletonList).orElseGet(() -> Arrays.asList(STAFF, CUSTOMER));
-        return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRoles(countryCode, branchId, branchLogin, userLogin, roles, blocked, pageable));
+        return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRolesExtended(countryCode, branchId, branchLogin, userLogin, roles, blocked, pageable));
     }
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> accounts(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, int page, int size) {
+    public ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> accounts(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         return ResponseEntity.ok(accountManagementService.getAccountsByBranchAndMultipleParams(countryCode, branchId, branchLogin, iban, blocked, pageable));
     }

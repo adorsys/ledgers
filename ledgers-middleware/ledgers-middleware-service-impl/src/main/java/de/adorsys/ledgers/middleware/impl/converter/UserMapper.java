@@ -16,14 +16,8 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.um.api.domain.*;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -32,6 +26,8 @@ import java.util.List;
 public interface UserMapper {
 
     UserTO toUserTO(UserBO user);
+
+    UserExtendedTO toUserExtendedTO(UserExtendedBO user);
 
     UserBO toUserBO(UserTO user);
 

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +19,7 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
 
     Page<DepositAccount> findByBranchAndIbanContaining(String branch, String queryParam, Pageable pageable);
 
-    Page<DepositAccount> findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(List<String> branchIds, String iban, List<Boolean> blocked, Pageable pageable);
+    Page<DepositAccount> findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(Collection<String> branchIds, String iban, List<Boolean> blocked, Pageable pageable);
 
     Optional<DepositAccount> findByIbanAndCurrency(String iban, String currency);
 

@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsExtendedTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
@@ -50,26 +51,26 @@ class AdminResourceTest {
 
     @Test
     void users() {
-        CustomPageImpl<UserTO> page = getUserPage();
-        when(middlewareUserService.getUsersByBranchAndRoles(anyString(), anyString(), anyString(), anyString(), anyList(), anyBoolean(), any())).thenReturn(page);
-        ResponseEntity<CustomPageImpl<UserTO>> result = resource.users("DE", TPP_ID, "", LOGIN, ROLE, false, 1, 1);
+        CustomPageImpl<UserExtendedTO> page = getUserPage();
+        when(middlewareUserService.getUsersByBranchAndRolesExtended(anyString(), anyString(), anyString(), anyString(), anyList(), anyBoolean(), any())).thenReturn(page);
+        ResponseEntity<CustomPageImpl<UserExtendedTO>> result = resource.users("DE", TPP_ID, "", LOGIN, ROLE, false, 1, 1);
         assertEquals(ResponseEntity.ok(page), result);
     }
 
-    private CustomPageImpl<UserTO> getUserPage() {
-        return new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(getUser()));
+    private CustomPageImpl<UserExtendedTO> getUserPage() {
+        return new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(getUserExtended()));
     }
 
     @Test
     void accounts() {
-        CustomPageImpl<AccountDetailsTO> account = getAccountPage();
+        CustomPageImpl<AccountDetailsExtendedTO> account = getAccountPage();
         when(accountManagementService.getAccountsByBranchAndMultipleParams(anyString(), anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(account);
-        ResponseEntity<CustomPageImpl<AccountDetailsTO>> result = resource.accounts("", TPP_ID, "", IBAN, false, 0, 1);
+        ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> result = resource.accounts("", TPP_ID, "", IBAN, false, 0, 1);
         assertEquals(ResponseEntity.ok(account), result);
     }
 
-    private CustomPageImpl<AccountDetailsTO> getAccountPage() {
-        return new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(new AccountDetailsTO()));
+    private CustomPageImpl<AccountDetailsExtendedTO> getAccountPage() {
+        return new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(new AccountDetailsExtendedTO()));
     }
 
     @Test
@@ -80,6 +81,13 @@ class AdminResourceTest {
 
     private UserTO getUser() {
         return new UserTO(LOGIN, "", PIN);
+    }
+
+    private UserExtendedTO getUserExtended() {
+        UserExtendedTO to = new UserExtendedTO();
+        to.setLogin(LOGIN);
+        to.setPin(PIN);
+        return to;
     }
 
     @Test
@@ -121,10 +129,10 @@ class AdminResourceTest {
 
     @Test
     void user_diff_in_branch() {
-        when(userService.findById(any())).thenReturn(getUserBO(TPP_ID,TPP_ID+1,UserRoleBO.STAFF));
+        when(userService.findById(any())).thenReturn(getUserBO(TPP_ID, TPP_ID + 1, UserRoleBO.STAFF));
         ReflectionTestUtils.setField(resource, "userMapper", Mappers.getMapper(UserMapper.class));
 
-        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID,TPP_ID,UserRoleTO.STAFF)));
+        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF)));
     }
 
     @Test
@@ -134,7 +142,7 @@ class AdminResourceTest {
         when(userService.findById(any())).thenReturn(userFromDb);
         ReflectionTestUtils.setField(resource, "userMapper", Mappers.getMapper(UserMapper.class));
 
-        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID,TPP_ID,UserRoleTO.STAFF)));
+        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF)));
     }
 
     private UserBO getUserBO(String id, String branch, UserRoleBO role) {

@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -51,6 +52,10 @@ class UserServiceImplTest {
     private static final String USER_BRANCH = "userBranch";
     private static final String USER_IBAN = "DE12345678";
     private static final String THE_ENCODED_VALUE = "25d55ad283aa400af464c76d713c07ad";
+
+    private static final ResourceReader reader = YamlReader.getInstance();
+    private static final UserConverter LOCAL_CONVERTER = Mappers.getMapper(UserConverter.class);
+
     private UserEntity userEntity;
     private UserBO userBO;
 
@@ -69,7 +74,6 @@ class UserServiceImplTest {
     @Mock
     private AisConsentRepository consentRepository;
 
-    private ResourceReader reader = YamlReader.getInstance();
 
     @BeforeEach
     void setUp() {
@@ -257,34 +261,27 @@ class UserServiceImplTest {
     @Test
     void findByBranchAndUserRolesIn() {
         // Given
+        when(repository.findBranchIdsByMultipleParameters(any(), any(), any(), eq(UserRole.STAFF))).thenReturn(Collections.singletonList(getBranchEntity()));
+        when(converter.toUserBOList(any())).thenAnswer(a -> LOCAL_CONVERTER.toUserBOList(a.getArgument(0)));
         when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
-        when(converter.toUserBO(any())).thenReturn(userBO);
+        when(converter.toUserExtendedBO(any(), anyString())).thenAnswer(a->LOCAL_CONVERTER.toUserExtendedBO(a.getArgument(0), a.getArgument(1)));
         when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
 
         // When
-        Page<UserBO> user = userService.findUsersByMultipleParamsPaged("", USER_BRANCH, "", "", Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
+        Page<UserExtendedBO> user = userService.findUsersByMultipleParamsPaged("", USER_BRANCH, "", "", Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
 
         // Then
         assertNotNull(user.getContent().get(0));
-        assertEquals(userBO, user.getContent().get(0));
+        assertEquals(USER_BRANCH, user.getContent().get(0).getBranchLogin());
         verify(converter, times(1)).toUserRole(Collections.singletonList(UserRoleBO.CUSTOMER));
     }
 
-
-    @Test
-    void findByBranchAndUserRolesIn_blank_tpp_id() {
-        // Given
-        when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
-        when(converter.toUserBO(any())).thenReturn(userBO);
-        when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
-
-        // When
-        Page<UserBO> user = userService.findUsersByMultipleParamsPaged("", "","","",Collections.singletonList(UserRoleBO.CUSTOMER), false, null);
-
-        // Then
-        assertNotNull(user.getContent().get(0));
-        assertEquals(userBO, user.getContent().get(0));
-        verify(converter, times(1)).toUserRole(Collections.singletonList(UserRoleBO.CUSTOMER));
+    private UserEntity getBranchEntity() {
+        UserEntity entity = new UserEntity();
+        entity.setId(USER_BRANCH);
+        entity.setBranch(USER_BRANCH);
+        entity.setLogin(USER_BRANCH);
+        return entity;
     }
 
     @Test

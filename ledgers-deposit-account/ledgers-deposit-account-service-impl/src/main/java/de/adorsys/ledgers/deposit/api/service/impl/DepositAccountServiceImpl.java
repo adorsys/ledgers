@@ -244,7 +244,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public Page<DepositAccountBO> findByBranchIdsAndMultipleParams(List<String> branchIds, String iban, Boolean blocked, Pageable pageable) {
+    public Page<DepositAccountBO> findByBranchIdsAndMultipleParams(Collection<String> branchIds, String iban, Boolean blocked, Pageable pageable) {
         List<Boolean> blockedQueryParam = Optional.ofNullable(blocked)
                                                   .map(Arrays::asList)
                                                   .orElseGet(() -> Arrays.asList(true, false));

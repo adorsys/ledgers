@@ -37,10 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,6 +58,7 @@ class MiddlewareAccountManagementServiceImplTest {
     private static final String SCA_METHOD_ID = "scaMethodId";
     private static final String AUTH_CODE = "123456";
     private static final String AUTHORISATION_ID = "authorisationId";
+    private static final String BRANCH = "branch";
 
     @InjectMocks
     private MiddlewareAccountManagementServiceImpl middlewareService;
@@ -635,10 +633,12 @@ class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     void getAccountsByOptionalBranchPaged() {
-        when(depositAccountService.findByBranchIdsAndMultipleParams(anyList(),anyString(), anyBoolean(), any())).thenReturn(getPageWithAccount());
-        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountBO.class))).thenReturn(getAccountDetailsTO());
+        Map<String, String> map = new HashMap<>();
+        map.put(BRANCH, BRANCH);
+        when(userService.findBranchIdsByMultipleParameters(anyString(), anyString(), anyString())).thenReturn(map);
+        when(depositAccountService.findByBranchIdsAndMultipleParams(anySet(), anyString(), anyBoolean(), any())).thenReturn(getPageWithAccount());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(new CustomPageImpl<>(1, 1, 1, 1, 1L, false, true, false, true, Collections.singletonList(getAccountDetailsTO())));
-        CustomPageImpl<AccountDetailsTO> result = middlewareService.getAccountsByBranchAndMultipleParams("countryCode", "branchId", USER_ID, IBAN, false, new CustomPageableImpl(0, 1));
+        CustomPageImpl<AccountDetailsExtendedTO> result = middlewareService.getAccountsByBranchAndMultipleParams("countryCode", "branchId", USER_ID, IBAN, false, new CustomPageableImpl(0, 1));
         assertEquals(result.getContent(), Collections.singletonList(getAccountDetailsTO()));
     }
 

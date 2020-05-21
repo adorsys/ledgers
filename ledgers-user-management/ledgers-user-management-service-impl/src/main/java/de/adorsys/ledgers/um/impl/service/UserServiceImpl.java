@@ -145,20 +145,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable) {
+    public Page<UserExtendedBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable) {
         List<Boolean> blockedQueryParam = Optional.ofNullable(blocked)
                                                   .map(Arrays::asList)
                                                   .orElseGet(() -> Arrays.asList(true, false));
-        List<String> branchIds = findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
-        Page<UserBO> users = userRepository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(branchIds, userLogin, userConverter.toUserRole(roles), blockedQueryParam, pageable)
-                                     .map(userConverter::toUserBO);
+        Map<String, String> branchIds = findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
+        Page<UserExtendedBO> users = userRepository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(branchIds.keySet(), userLogin, userConverter.toUserRole(roles), blockedQueryParam, pageable)
+                                             .map(u -> userConverter.toUserExtendedBO(u, branchIds.get(u.getBranch())));
         users.forEach(this::decodeStaticTanForUser);
         return users;
     }
 
     @Override
-    public List<String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin) {
-        return userRepository.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin, UserRole.STAFF);
+    public Map<String, String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin) {
+        return userConverter.toUserBOList(userRepository.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin, UserRole.STAFF)).stream()
+                       .collect(Collectors.toMap(UserBO::getId, UserBO::getLogin));
     }
 
     @Override
@@ -268,7 +269,7 @@ public class UserServiceImpl implements UserService {
         return userBO;
     }
 
-    private void decodeStaticTanForUser(UserBO user) {
+    private <T extends UserBO> void decodeStaticTanForUser(T user) {
         Optional.ofNullable(user.getScaUserData())
                 .ifPresent(d -> d.forEach(this::decodeStaticTan));
     }
