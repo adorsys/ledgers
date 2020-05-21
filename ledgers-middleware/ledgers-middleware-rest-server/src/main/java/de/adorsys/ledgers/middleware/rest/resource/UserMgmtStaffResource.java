@@ -66,9 +66,9 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) {
-        try{
+        try {
             return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.SYSTEM));
-        } catch (UserManagementModuleException e){
+        } catch (UserManagementModuleException e) {
             return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
         }
     }
@@ -82,7 +82,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
         user.setBranch(branchStaff.getBranch());
 
         // Assert that the role is neither system nor technical
-        user.getUserRoles().removeAll(Arrays.asList(UserRoleTO.SYSTEM,UserRoleTO.TECHNICAL));
+        user.getUserRoles().removeAll(Arrays.asList(UserRoleTO.SYSTEM, UserRoleTO.TECHNICAL));
 
         UserTO newUser = middlewareUserService.create(user);
         newUser.setPin(null);
@@ -117,11 +117,17 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> updateAccountAccessForUser(String userId, AccountAccessTO access) {
         ScaInfoTO scaInfo = scaInfoHolder.getScaInfo();
         middlewareUserService.updateAccountAccess(scaInfo, userId, access);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<Boolean> changeStatus(String userId) {
+        return ResponseEntity.ok(middlewareUserService.changeStatus(userId, false));
     }
 
     private UserTO findUserForBranch(String userId) {

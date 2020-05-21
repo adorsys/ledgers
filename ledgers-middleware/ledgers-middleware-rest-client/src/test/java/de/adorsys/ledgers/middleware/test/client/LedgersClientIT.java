@@ -24,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.List;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO.OWNER;
@@ -149,11 +150,16 @@ class LedgersClientIT {
 
         // When
         //Check Users Accesses and Branch Accesses are correct
-        ResponseEntity<CustomPageImpl<UserTO>> allBranchUsersResponse = userMgmtStaffRestClient.getBranchUsersByRoles(Collections.singletonList(CUSTOMER), "", false,0, Integer.MAX_VALUE);
+        ResponseEntity<CustomPageImpl<UserTO>> allBranchUsersResponse = userMgmtStaffRestClient.getBranchUsersByRoles(Collections.singletonList(CUSTOMER), "", false, 0, Integer.MAX_VALUE);
         checkUsersListAccesses(allBranchUsersResponse, OK, 2, 1);
 
         ResponseEntity<UserTO> branchResponse = userMgmtRestClient.getUser();
         checkUserResponse(branchResponse, OK, 2);
+
+        //refresh accounts
+        List<AccountDetailsTO> accounts = accountMgmtStaffRestClient.getListOfAccounts().getBody();
+        ACCOUNT_1 = accounts.get(0);
+        ACCOUNT_2 = accounts.get(1);
     }
 
     @Test

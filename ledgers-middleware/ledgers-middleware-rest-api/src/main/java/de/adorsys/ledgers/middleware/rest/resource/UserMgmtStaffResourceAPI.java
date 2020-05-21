@@ -165,4 +165,10 @@ public interface UserMgmtStaffResourceAPI {
     })
     @PutMapping("/access/{userId}")
     ResponseEntity<Void> updateAccountAccessForUser(@PathVariable(USER_ID) String userId, @RequestBody AccountAccessTO access);
+
+    @ApiOperation(value = "Block/Unblock user",
+            notes = "Changes block state for given user, returns status being set to the block",
+            authorizations = @Authorization(value = "apiKey"))
+    @PostMapping("/{userId}/status")
+    ResponseEntity<Boolean> changeStatus(@PathVariable(USER_ID) String userId);
 }

@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface DepositAccountRepository extends PagingAndSortingRepository<DepositAccount, String> {
     List<DepositAccount> findByIbanStartingWith(String iban);  //TODO fix this!
@@ -17,7 +19,7 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
 
     Page<DepositAccount> findByBranchAndIbanContaining(String branch, String queryParam, Pageable pageable);
 
-    Page<DepositAccount> findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(List<String> branchIds, String iban, List<Boolean> blocked, Pageable pageable);
+    Page<DepositAccount> findByBranchInAndIbanContainingAndBlockedInAndSystemBlockedFalse(Collection<String> branchIds, String iban, List<Boolean> blocked, Pageable pageable);
 
     Optional<DepositAccount> findByIbanAndCurrency(String iban, String currency);
 
@@ -29,4 +31,11 @@ public interface DepositAccountRepository extends PagingAndSortingRepository<Dep
     @Modifying
     @Query("update DepositAccount a set a.blocked=?2 where a.branch=?1")
     void updateBlockedStatus(String userId, boolean lockStatusToSet);
+
+    @Query("update DepositAccount da set da.systemBlocked=?2 where da.id in ?1")
+    void updateSystemBlockedStatus(Set<String> accountIds, boolean lockStatusToSet);
+
+    @Modifying
+    @Query("update DepositAccount da set da.blocked=?2 where da.id in ?1")
+    void updateBlockedStatus(Set<String> accountIds, boolean lockStatusToSet);
 }

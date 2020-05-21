@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsExtendedTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
@@ -8,12 +9,14 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,18 +41,19 @@ public class AdminResource implements AdminResourceAPI {
     private final MiddlewareAccountManagementService accountManagementService;
     private final AppManagementService appManagementService;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<CustomPageImpl<UserTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
+    public ResponseEntity<CustomPageImpl<UserExtendedTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         List<UserRoleTO> roles = Optional.ofNullable(role).map(Collections::singletonList).orElseGet(() -> Arrays.asList(STAFF, CUSTOMER));
-        return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRoles(countryCode, branchId, branchLogin, userLogin, roles, blocked, pageable));
+        return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRolesExtended(countryCode, branchId, branchLogin, userLogin, roles, blocked, pageable));
     }
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> accounts(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, int page, int size) {
+    public ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> accounts(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         return ResponseEntity.ok(accountManagementService.getAccountsByBranchAndMultipleParams(countryCode, branchId, branchLogin, iban, blocked, pageable));
     }
@@ -63,8 +67,8 @@ public class AdminResource implements AdminResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
-    public ResponseEntity<Boolean> changeStatus(String branchId) {
-        return ResponseEntity.ok(appManagementService.changeBlockedStatus(branchId, false));
+    public ResponseEntity<Boolean> changeStatus(String userId) {
+        return ResponseEntity.ok(appManagementService.changeBlockedStatus(userId, false));
     }
 
     @Override
@@ -89,6 +93,7 @@ public class AdminResource implements AdminResourceAPI {
         return ResponseEntity.accepted().build();
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private void checkUpdateData(UserTO user) {
         UserBO userStored = userService.findById(user.getId());
         if (userStored.isBlocked() || userStored.isSystemBlocked()) {
@@ -97,18 +102,19 @@ public class AdminResource implements AdminResourceAPI {
                           .devMsg("You are not allowed to modify a blocked user!")
                           .build();
         }
-        if (!userStored.getUserRoles().containsAll(user.getUserRoles())) {
+        if (!userStored.getUserRoles().containsAll(userMapper.toUserBO(user).getUserRoles())) {
             throw MiddlewareModuleException.builder()
                           .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
                           .devMsg("You are not allowed to modify users roles!")
                           .build();
         }
-        if (!userStored.getBranch().equals(user.getBranch())) {
+        if (!StringUtils.equals(userStored.getBranch(), user.getBranch())
+                    || user.getUserRoles().contains(STAFF) && !StringUtils.equals(user.getBranch(), user.getId())
+                    || !StringUtils.equals(user.getId(), userStored.getId())) {
             throw MiddlewareModuleException.builder()
                           .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
                           .devMsg("User are not allowed to modify users TPP relation!")
                           .build();
         }
     }
-
 }

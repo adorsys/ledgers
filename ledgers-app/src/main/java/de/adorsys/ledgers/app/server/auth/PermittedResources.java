@@ -28,6 +28,7 @@ public class PermittedResources {
             "/staff-access/users/register",
             "/staff-access/users/login",
             "/staff-access/users/admin/authorize/user",
+            "/staff-access/data/branch",
             "/password",
             "/users/validate",
             "/oauth/**",

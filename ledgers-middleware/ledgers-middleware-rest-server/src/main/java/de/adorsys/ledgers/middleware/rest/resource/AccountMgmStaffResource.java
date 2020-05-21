@@ -92,4 +92,10 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
         log.info("Loaded report in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
         return ResponseEntity.ok(accountReport);
     }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    public ResponseEntity<Boolean> changeStatus(String accountId) {
+        return ResponseEntity.ok(middlewareAccountService.changeStatus(accountId, false));
+    }
 }

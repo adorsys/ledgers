@@ -26,7 +26,8 @@ public class DisableEndpointFilter extends OncePerRequestFilter {
 
     static {
         EXCLUDED_URLS = Arrays.asList(
-                DataMgmtStaffAPI.BASE_PATH + "/currencies"
+                DataMgmtStaffAPI.BASE_PATH + "/currencies",
+                DataMgmtStaffAPI.BASE_PATH + "/branch"
         );
     }
 

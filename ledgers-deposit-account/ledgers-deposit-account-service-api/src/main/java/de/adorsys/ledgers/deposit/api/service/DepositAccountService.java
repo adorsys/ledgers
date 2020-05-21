@@ -8,9 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.Currency;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public interface DepositAccountService {
 
@@ -70,6 +68,10 @@ public interface DepositAccountService {
 
     void deleteBranch(String branchId);
 
+    void deleteUser(String userId);
+
+    void deleteAccount(String accountId);
+
     /**
      * @deprecated shall be removed in v2.5
      */
@@ -77,5 +79,7 @@ public interface DepositAccountService {
 
     void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
 
-    Page<DepositAccountBO> findByBranchIdsAndMultipleParams(List<String> branchIds, String iban, Boolean blocked, Pageable pageable);
+    Page<DepositAccountBO> findByBranchIdsAndMultipleParams(Collection<String> branchIds, String iban, Boolean blocked, Pageable pageable);
+
+    void changeAccountsBlockedStatus(Set<String> accountIds, boolean systemBlock, boolean lockStatusToSet);
 }

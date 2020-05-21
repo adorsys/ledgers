@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.um.impl.converter;
 
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
@@ -170,6 +167,22 @@ public class UserConverterTest {
         assertEquals(USER_EMAIL, po.getEmail());
         assertEquals(USER_LOGIN, po.getLogin());
         assertEquals(USER_PIN, po.getPin());
+    }
+
+    @Test
+    void toExtendedUserBO() {
+        UserExtendedBO result = converter.toUserExtendedBO(buildUserPO(), "BRANCH_LOGIN");
+        assertEquals(getExpectedExtendedUser(), result);
+    }
+
+    private UserExtendedBO getExpectedExtendedUser() {
+        UserExtendedBO bo = new UserExtendedBO();
+        bo.setId(USER_ID);
+        bo.setLogin(USER_LOGIN);
+        bo.setEmail(USER_EMAIL);
+        bo.setPin(USER_PIN);
+        bo.setBranchLogin("BRANCH_LOGIN");
+        return bo;
     }
 
     private ScaUserDataBO getScaUserDataBO(String id) {

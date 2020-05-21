@@ -1,41 +1,38 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AccountIdentifierTypeBO;
-import de.adorsys.ledgers.um.api.domain.AdditionalAccountInfoBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
+import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static java.lang.String.format;
 
@@ -79,29 +76,67 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
-        DepositAccountDetailsBO account = depositAccountService.getAccountDetailsByIbanAndCurrency(access.getIban(), access.getCurrency(), LocalDateTime.now(), false);
-        if (!account.isEnabled()) {
-            throw blockedSupplier(PAYMENT_PROCESSING_FAILURE, account.getAccount().getIban(), account.getAccount().isBlocked()).get();
+        DepositAccountBO account = depositAccountService.getAccountById(access.getAccountId());
+        checkAccountIsEnabled(account);
+        UserTO initiator = findById(scaInfo.getUserId());
+        checkInitiatorIsPermittedToOperateAccount(access, initiator);
+        UserTO user = findById(userId);
+        checkUserIsNotABranchAndIsSameBranchAsAccount(user, account);
+        checkInitiatorIsPermittedToOperateUser(scaInfo, initiator, user);
+        updateAccessFields(access, account);
+        accessService.updateAccountAccess(userTOMapper.toUserBO(user), userTOMapper.toAccountAccessBO(access));
+        if (initiator.getUserRoles().contains(UserRoleTO.SYSTEM) && StringUtils.isNotBlank(user.getBranch())) {
+            UserBO branch = userService.findById(user.getBranch());
+            accessService.updateAccountAccess(branch, userTOMapper.toAccountAccessBO(access));
         }
-        UserTO branch = findById(scaInfo.getUserId());
-        boolean tppHasAccessToAccount = accessService.userHasAccessToAccount(branch, access.getIban());
-        if (!tppHasAccessToAccount) {
-            log.error("Branch: {} has no access to account: {}", branch.getLogin(), access.getIban());
+    }
+
+    private void updateAccessFields(AccountAccessTO access, DepositAccountBO account) {
+        access.setCurrency(account.getCurrency());
+        access.setIban(account.getIban());
+    }
+
+    private void checkUserIsNotABranchAndIsSameBranchAsAccount(UserTO user, DepositAccountBO account) {
+        String devMsg = null;
+        if (user.getUserRoles().contains(UserRoleTO.STAFF)) {
+            devMsg = format("Requested user: %s is a TPP, thus can not possess access on account that does not belong to one of its users!", user.getLogin());
+        }
+        if (!user.getBranch().equals(account.getBranch())) {
+            devMsg = format("Requested user: %s is from different branch than account: %s!", user.getLogin(), account.getIban());
+        }
+        if (devMsg != null) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(devMsg)
+                          .build();
+        }
+    }
+
+    private void checkInitiatorIsPermittedToOperateUser(ScaInfoTO scaInfo, UserTO initiator, UserTO user) {
+        if (initiator.getUserRoles().contains(UserRoleTO.STAFF) && !initiator.getBranch().equals(user.getBranch())) {
+            log.error("User id: {} with Branch: {} is not from initiator: {}", user.getId(), user.getBranch(), initiator.getLogin());
+
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(format("Requested user: %s is not a part of the initiator: %s", user.getLogin(), scaInfo.getUserLogin()))
+                          .build();
+        }
+    }
+
+    private void checkInitiatorIsPermittedToOperateAccount(AccountAccessTO access, UserTO initiator) {
+        if (initiator.getUserRoles().contains(UserRoleTO.STAFF) && !accessService.userHasAccessToAccount(initiator, access.getIban())) {
+            log.error("Branch: {} has no access to account: {}", initiator.getLogin(), access.getIban());
             throw MiddlewareModuleException.builder()
                           .errorCode(INSUFFICIENT_PERMISSION)
                           .devMsg(format("Current Branch does have no access to the requested account: %s", access.getIban()))
                           .build();
         }
-        UserTO user = findById(userId);
-        if (!branch.getBranch().equals(user.getBranch())) {
-            log.error("User id: {} with Branch: {} is not from branch: {}", user.getId(), user.getBranch(), branch.getLogin());
+    }
 
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(format("Requested user: %s is not a part of the branch: %s", user.getLogin(), scaInfo.getUserLogin()))
-                          .build();
+    private void checkAccountIsEnabled(DepositAccountBO account) {
+        if (!account.isEnabled()) {
+            throw blockedSupplier(INSUFFICIENT_PERMISSION, account.getIban(), account.isBlocked()).get();
         }
-        accessService.updateAccountAccess(userTOMapper.toUserBO(user), userTOMapper.toAccountAccessBO(access));
     }
 
     @Override
@@ -116,6 +151,12 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public CustomPageImpl<UserTO> getUsersByBranchAndRoles(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleTO> roles, Boolean blocked, CustomPageableImpl pageable) {
         return pageMapper.toCustomPageImpl(userService.findUsersByMultipleParamsPaged(countryCode, branchId, branchLogin, userLogin, userTOMapper.toUserRoleBO(roles), blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
                                                    .map(userTOMapper::toUserTO));
+    }
+
+    @Override
+    public CustomPageImpl<UserExtendedTO> getUsersByBranchAndRolesExtended(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleTO> roles, Boolean blocked, CustomPageableImpl pageable) {
+        return pageMapper.toCustomPageImpl(userService.findUsersByMultipleParamsPaged(countryCode, branchId, branchLogin, userLogin, userTOMapper.toUserRoleBO(roles), blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                                   .map(userTOMapper::toUserExtendedTO));
     }
 
     @Override
@@ -192,6 +233,30 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public List<AdditionalAccountInformationTO> getAdditionalInformation(ScaInfoTO scaInfoHolder, AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier) {
         List<AdditionalAccountInfoBO> info = AccountIdentifierTypeBO.valueOf(accountIdentifierType.name()).getAdditionalAccountInfo(accountIdentifier, userService::findOwnersByIban, userService::findOwnersByAccountId);
         return additionalInfoMapper.toAdditionalAccountInformationTOs(info);
+    }
+
+    @Override
+    public boolean changeStatus(String userId, boolean isSystemBlock) {
+        UserBO user = userService.findById(userId);
+
+        if (!user.getUserRoles().contains(UserRoleBO.CUSTOMER)) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg("Only customers can be blocked or unblocked.")
+                          .build();
+        }
+
+        boolean lockStatusToSet = isSystemBlock ? !user.isSystemBlocked() : !user.isBlocked();
+
+        userService.setUserBlockedStatus(userId, isSystemBlock, lockStatusToSet);
+
+        Set<String> depositAccountIdsToChangeStatus = user.getAccountAccesses().stream()
+                                                              .map(AccountAccessBO::getAccountId)
+                                                              .collect(Collectors.toSet());
+
+        depositAccountService.changeAccountsBlockedStatus(depositAccountIdsToChangeStatus, isSystemBlock, lockStatusToSet);
+
+        return lockStatusToSet;
     }
 
     private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {

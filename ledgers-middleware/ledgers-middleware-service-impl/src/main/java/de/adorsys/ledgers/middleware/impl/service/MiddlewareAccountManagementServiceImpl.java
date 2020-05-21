@@ -6,10 +6,7 @@ import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
@@ -43,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -259,10 +257,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public CustomPageImpl<AccountDetailsTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable) {
-        List<String> branchIds = userService.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
-        Page<AccountDetailsTO> page = depositAccountService.findByBranchIdsAndMultipleParams(branchIds, iban, blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
-                                              .map(accountDetailsMapper::toAccountDetailsTO);
+    public CustomPageImpl<AccountDetailsExtendedTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable) {
+        Map<String, String> branchIds = userService.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
+        Page<AccountDetailsExtendedTO> page = depositAccountService.findByBranchIdsAndMultipleParams(branchIds.keySet(), iban, blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                                      .map(d -> accountDetailsMapper.toAccountDetailsExtendedTO(d, branchIds.get(d.getBranch())));
         return pageMapper.toCustomPageImpl(page);
     }
 
@@ -386,19 +384,46 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public void deleteTransactions(String userId, UserRoleTO userRole, String accountId) {
         log.info("User {} attempting delete postings for account: {}", userId, accountId);
-        long start = System.nanoTime();
-        AccountAccessBO account = new AccountAccessBO();
-        if (userRole == STAFF) {
-            account = userService.findById(userId).getAccountAccesses().stream()
-                              .filter(a -> a.getAccountId().equals(accountId)).findAny()
-                              .orElseThrow(() -> MiddlewareModuleException.builder()
-                                                         .devMsg("You dont have permission to modify this account")
-                                                         .errorCode(INSUFFICIENT_PERMISSION)
-                                                         .build());
-        }
-        log.info("Permission checked for account {} -> OK", account.getAccountId());
+        long start = checkPermissionAndStartCount(userId, userRole, accountId);
         depositAccountService.deleteTransactions(accountId);
         log.info("Deleting postings for account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+    }
+
+    @Override
+    public void deleteAccount(String userId, UserRoleTO userRole, String accountId) {
+        log.info("User {} attempting delete account: {}", userId, accountId);
+        long start = checkPermissionAndStartCount(userId, userRole, accountId);
+        depositAccountService.deleteAccount(accountId);
+        log.info("Deleting account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+    }
+
+    private long checkPermissionAndStartCount(String userId, UserRoleTO userRole, String accountId) {
+        long start = System.nanoTime();
+        if (userRole == STAFF) {
+            userService.findById(userId).getAccountAccesses().stream()
+                    .filter(a -> a.getAccountId().equals(accountId)).findAny()
+                    .orElseThrow(() -> MiddlewareModuleException.builder()
+                                               .devMsg("You dont have permission to modify this account")
+                                               .errorCode(INSUFFICIENT_PERMISSION)
+                                               .build());
+        }
+        log.info("Permission checked for account {} -> OK", accountId);
+        return start;
+    }
+
+    @Override
+    @SuppressWarnings("PMD.PrematureDeclaration")
+    public void deleteUser(String userId, UserRoleTO userRole, String userToDeleteId) {
+        log.info("User {} attempting delete user: {}", userId, userToDeleteId);
+        long start = System.nanoTime();
+        if (userRole == STAFF && !userService.findById(userToDeleteId).getBranch().equals(userId)) {
+            throw MiddlewareModuleException.builder()
+                          .devMsg("You dont have permission to modify this user")
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .build();
+        }
+        depositAccountService.deleteUser(userToDeleteId);
+        log.info("Deleting user: {} Successful, in {} seconds", userToDeleteId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     @Override
@@ -410,6 +435,16 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         List<UserTO> users = userMapper.toUserTOList(userService.findUsersByIban(details.getIban()));
         log.info("Loaded users in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
         return new AccountReportTO(details, users);
+    }
+
+    @Override
+    public boolean changeStatus(String accountId, boolean isSystemBlock) {
+        DepositAccountBO account = depositAccountService.getAccountById(accountId);
+
+        boolean lockStatusToSet = isSystemBlock ? !account.isSystemBlocked() : !account.isBlocked();
+        depositAccountService.changeAccountsBlockedStatus(Collections.singleton(accountId), isSystemBlock, lockStatusToSet);
+
+        return lockStatusToSet;
     }
 
     private void checkPresentAccountsAndOwner(String iban, UserBO user) {

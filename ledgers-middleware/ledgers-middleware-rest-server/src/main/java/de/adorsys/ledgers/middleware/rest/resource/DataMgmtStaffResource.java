@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.CurrencyService;
@@ -34,6 +35,20 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    public ResponseEntity<Void> depositAccount(String accountId) {
+        accountManagementService.deleteAccount(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    public ResponseEntity<Void> user(String userId) {
+        accountManagementService.deleteUser(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> branch(String branchId) {
         appManagementService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
         return ResponseEntity.ok().build();
@@ -50,5 +65,10 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Set<Currency>> currencies() {
         return ResponseEntity.ok(currencyService.getSupportedCurrencies());
+    }
+
+    @Override
+    public ResponseEntity<String> branchId(BbanStructure bbanStructure) {
+        return ResponseEntity.ok(appManagementService.generateNextBban(bbanStructure));
     }
 }

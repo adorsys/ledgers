@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -79,20 +80,18 @@ public interface UserService {
     AisConsentBO loadConsent(String consentId);
 
     /**
-     *
-     *
      * @param countryCode Country Code
-     * @param branchId id of STAFF user
+     * @param branchId    id of STAFF user
      * @param branchLogin login of STAFF user
-     * @param userLogin login of CUSTOMER user
-     * @param roles List of Roles to filter for
-     * @param blocked Boolean representation of User status
-     * @param pageable pagination info
+     * @param userLogin   login of CUSTOMER user
+     * @param roles       List of Roles to filter for
+     * @param blocked     Boolean representation of User status
+     * @param pageable    pagination info
      * @return Page of Users
      */
-    Page<UserBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable);
+    Page<UserExtendedBO> findUsersByMultipleParamsPaged(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleBO> roles, Boolean blocked, Pageable pageable);
 
-    List<String> findBranchIdsByMultipleParameters(String countryCode,String branchId,String branchLogin);
+    Map<String, String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin);
 
     /**
      * Counts amount of users for a branch
@@ -112,6 +111,7 @@ public interface UserService {
 
     /**
      * Finds user by IBAN
+     *
      * @param iban iban
      * @return user Entity
      */
@@ -119,6 +119,7 @@ public interface UserService {
 
     /**
      * Finds account owners by IBAN
+     *
      * @param iban iban
      * @return owner of account
      */
@@ -126,6 +127,7 @@ public interface UserService {
 
     /**
      * Finds account owners by account id
+     *
      * @param accountId account id
      * @return users
      */
@@ -133,10 +135,15 @@ public interface UserService {
 
     /**
      * Replaces users password
-     * @param userId user id
+     *
+     * @param userId   user id
      * @param password new password
      */
     void updatePassword(String userId, String password);
 
     void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
+
+    void setUserBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
+
+    boolean isPresentBranchCode(String bban);
 }

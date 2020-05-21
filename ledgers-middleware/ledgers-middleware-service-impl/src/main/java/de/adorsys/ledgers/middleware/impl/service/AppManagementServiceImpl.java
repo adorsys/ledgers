@@ -2,12 +2,14 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadBalanceService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadDepositAccountService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadPaymentService;
@@ -43,6 +45,7 @@ public class AppManagementServiceImpl implements AppManagementService {
     private final UploadDepositAccountService uploadDepositAccountService;
     private final UploadBalanceService uploadBalanceService;
     private final UploadPaymentService uploadPaymentService;
+    private final MiddlewareUserManagementService middlewareUserManagementService;
 
     @Override
     @Transactional
@@ -77,17 +80,27 @@ public class AppManagementServiceImpl implements AppManagementService {
 
     @Override
     public boolean changeBlockedStatus(String userId, boolean isSystemBlock) {
-        UserBO branch = userService.findById(userId);
-        if (!branch.getUserRoles().contains(UserRoleBO.STAFF)) {
-            throw MiddlewareModuleException.builder()
-                          .devMsg("You're trying to block a user which is not STAFF!")
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .build();
+        UserBO user = userService.findById(userId);
+        boolean lockStatusToSet = isSystemBlock ? !user.isSystemBlocked() : !user.isBlocked();
+
+        // TPP cases.
+        if (user.getUserRoles().contains(UserRoleBO.STAFF)) {
+            CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(userId, isSystemBlock, lockStatusToSet), FIXED_THREAD_POOL)
+                    .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(userId, isSystemBlock, lockStatusToSet));
+            return lockStatusToSet;
         }
-        boolean lockStatusToSet = isSystemBlock ? !branch.isSystemBlocked() : !branch.isBlocked();
-        CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(userId, isSystemBlock, lockStatusToSet), FIXED_THREAD_POOL)
-                .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(userId, isSystemBlock, lockStatusToSet));
-        return lockStatusToSet;
+
+        // Cases for customers and admins
+        return middlewareUserManagementService.changeStatus(userId, isSystemBlock);
+    }
+
+    @Override
+    public String generateNextBban(BbanStructure structure) {
+        String bban = structure.generateRandomBban();
+        while (userService.isPresentBranchCode(structure.getCountryPrefix() + "_" + bban)) {
+            bban = structure.generateRandomBban();
+        }
+        return bban;
     }
 
     private void isPermittedToRemoveBranch(String userId, UserRoleTO userRole, String branchId) {
