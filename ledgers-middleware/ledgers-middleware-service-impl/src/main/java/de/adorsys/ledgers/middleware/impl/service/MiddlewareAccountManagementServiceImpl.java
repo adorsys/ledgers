@@ -386,19 +386,46 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public void deleteTransactions(String userId, UserRoleTO userRole, String accountId) {
         log.info("User {} attempting delete postings for account: {}", userId, accountId);
-        long start = System.nanoTime();
-        AccountAccessBO account = new AccountAccessBO();
-        if (userRole == STAFF) {
-            account = userService.findById(userId).getAccountAccesses().stream()
-                              .filter(a -> a.getAccountId().equals(accountId)).findAny()
-                              .orElseThrow(() -> MiddlewareModuleException.builder()
-                                                         .devMsg("You dont have permission to modify this account")
-                                                         .errorCode(INSUFFICIENT_PERMISSION)
-                                                         .build());
-        }
-        log.info("Permission checked for account {} -> OK", account.getAccountId());
+        long start = checkPermissionAndStartCount(userId, userRole, accountId);
         depositAccountService.deleteTransactions(accountId);
         log.info("Deleting postings for account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+    }
+
+    @Override
+    public void deleteAccount(String userId, UserRoleTO userRole, String accountId) {
+        log.info("User {} attempting delete account: {}", userId, accountId);
+        long start = checkPermissionAndStartCount(userId, userRole, accountId);
+        depositAccountService.deleteAccount(accountId);
+        log.info("Deleting account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+    }
+
+    private long checkPermissionAndStartCount(String userId, UserRoleTO userRole, String accountId) {
+        long start = System.nanoTime();
+        if (userRole == STAFF) {
+            userService.findById(userId).getAccountAccesses().stream()
+                    .filter(a -> a.getAccountId().equals(accountId)).findAny()
+                    .orElseThrow(() -> MiddlewareModuleException.builder()
+                                               .devMsg("You dont have permission to modify this account")
+                                               .errorCode(INSUFFICIENT_PERMISSION)
+                                               .build());
+        }
+        log.info("Permission checked for account {} -> OK", accountId);
+        return start;
+    }
+
+    @Override
+    @SuppressWarnings("PMD.PrematureDeclaration")
+    public void deleteUser(String userId, UserRoleTO userRole, String userToDeleteId) {
+        log.info("User {} attempting delete user: {}", userId, userToDeleteId);
+        long start = System.nanoTime();
+        if (userRole == STAFF && !userService.findById(userToDeleteId).getBranch().equals(userId)) {
+            throw MiddlewareModuleException.builder()
+                          .devMsg("You dont have permission to modify this user")
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .build();
+        }
+        depositAccountService.deleteUser(userToDeleteId);
+        log.info("Deleting user: {} Successful, in {} seconds", userToDeleteId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     @Override

@@ -15,22 +15,18 @@ public interface DataMgmtStaffAPI {
 
     @DeleteMapping(value = "/transactions/{accountId}")
     @ApiOperation(value = "Removes all transactions for account", authorizations = @Authorization(value = "apiKey"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The user data record without the user pin."),
-            @ApiResponse(code = 401, message = "Provided bearer token could not be verified."),
-            @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
-            @ApiResponse(code = 404, message = "Account not found.")
-    })
     ResponseEntity<Void> account(@PathVariable("accountId") String accountId);
+
+    @DeleteMapping(value = "/account/{accountId}")
+    @ApiOperation(value = "Removes account", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<Void> depositAccount(@PathVariable("accountId") String accountId);
+
+    @DeleteMapping(value = "/user/{userId}")
+    @ApiOperation(value = "Removes user", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<Void> user(@PathVariable("userId") String userId);
 
     @DeleteMapping(value = "/branch/{branchId}")
     @ApiOperation(value = "Removes all data related to TPP", authorizations = @Authorization(value = "apiKey"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The user data record without the user pin."),
-            @ApiResponse(code = 401, message = "Provided bearer token could not be verified."),
-            @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
-            @ApiResponse(code = 404, message = "Tpp not found.")
-    })
     ResponseEntity<Void> branch(@PathVariable("branchId") String branchId);
 
     @ApiOperation(value = "Upload data to Ledgers (users, accounts, transactions, balances)", authorizations = @Authorization(value = "apiKey"))

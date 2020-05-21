@@ -71,6 +71,10 @@ public interface DepositAccountService {
 
     void deleteBranch(String branchId);
 
+    void deleteUser(String userId);
+
+    void deleteAccount(String accountId);
+
     /**
      * @deprecated shall be removed in v2.5
      */
