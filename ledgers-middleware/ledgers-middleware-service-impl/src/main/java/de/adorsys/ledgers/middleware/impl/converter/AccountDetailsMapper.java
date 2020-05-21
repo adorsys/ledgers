@@ -1,10 +1,7 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
 import de.adorsys.ledgers.deposit.api.domain.*;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
+import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,6 +15,8 @@ public abstract class AccountDetailsMapper {
     public abstract AccountDetailsTO toAccountDetailsTO(DepositAccountBO details, List<BalanceBO> balances);
 
     public abstract AccountDetailsTO toAccountDetailsTO(DepositAccountBO source);
+
+    public abstract AccountDetailsExtendedTO toAccountDetailsExtendedTO(DepositAccountBO source, String branchLogin);
 
     public abstract DepositAccountBO toDepositAccountBO(AccountDetailsTO details);
 

@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsExtendedTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -29,26 +30,26 @@ public interface AdminResourceAPI {
             notes = "Retrieves Page of Users with multiple filters",
             authorizations = @Authorization(value = "apiKey"))
     @GetMapping("/users")
-    ResponseEntity<CustomPageImpl<UserTO>> users(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
-                                                 @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
-                                                 @RequestParam(value = BRANCH_LOGIN, defaultValue = "", required = false) String branchLogin,
-                                                 @RequestParam(value = USER_LOGIN, defaultValue = "", required = false) String userLogin,
-                                                 @RequestParam(value = ROLE, required = false) UserRoleTO role,
-                                                 @RequestParam(value = BLOCKED, required = false) Boolean blocked,
-                                                 @RequestParam(PAGE) int page,
-                                                 @RequestParam(SIZE) int size);
+    ResponseEntity<CustomPageImpl<UserExtendedTO>> users(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
+                                                         @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
+                                                         @RequestParam(value = BRANCH_LOGIN, defaultValue = "", required = false) String branchLogin,
+                                                         @RequestParam(value = USER_LOGIN, defaultValue = "", required = false) String userLogin,
+                                                         @RequestParam(value = ROLE, required = false) UserRoleTO role,
+                                                         @RequestParam(value = BLOCKED, required = false) Boolean blocked,
+                                                         @RequestParam(PAGE) int page,
+                                                         @RequestParam(SIZE) int size);
 
     @ApiOperation(value = "Get accounts with filtering",
             notes = "Retrieves Page of Accounts with multiple filters",
             authorizations = @Authorization(value = "apiKey"))
     @GetMapping("/accounts")
-    ResponseEntity<CustomPageImpl<AccountDetailsTO>> accounts(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
-                                                              @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
-                                                              @RequestParam(value = BRANCH_LOGIN, defaultValue = "", required = false) String branchLogin,
-                                                              @RequestParam(value = IBAN, required = false, defaultValue = "") String iban,
-                                                              @RequestParam(value = BLOCKED, required = false) Boolean blocked,
-                                                              @RequestParam(PAGE) int page,
-                                                              @RequestParam(SIZE) int size);
+    ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> accounts(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
+                                                                      @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
+                                                                      @RequestParam(value = BRANCH_LOGIN, defaultValue = "", required = false) String branchLogin,
+                                                                      @RequestParam(value = IBAN, required = false, defaultValue = "") String iban,
+                                                                      @RequestParam(value = BLOCKED, required = false) Boolean blocked,
+                                                                      @RequestParam(PAGE) int page,
+                                                                      @RequestParam(SIZE) int size);
 
     @ApiOperation(value = "Set password for Branch",
             notes = "Changes password for given Branch",

@@ -6,10 +6,7 @@ import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
@@ -43,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -259,10 +257,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public CustomPageImpl<AccountDetailsTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable) {
-        List<String> branchIds = userService.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
-        Page<AccountDetailsTO> page = depositAccountService.findByBranchIdsAndMultipleParams(branchIds, iban, blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
-                                              .map(accountDetailsMapper::toAccountDetailsTO);
+    public CustomPageImpl<AccountDetailsExtendedTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable) {
+        Map<String, String> branchIds = userService.findBranchIdsByMultipleParameters(countryCode, branchId, branchLogin);
+        Page<AccountDetailsExtendedTO> page = depositAccountService.findByBranchIdsAndMultipleParams(branchIds.keySet(), iban, blocked, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                                                      .map(d -> accountDetailsMapper.toAccountDetailsExtendedTO(d, branchIds.get(d.getBranch())));
         return pageMapper.toCustomPageImpl(page);
     }
 

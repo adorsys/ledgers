@@ -62,8 +62,8 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     @Query("update UserEntity u set u.blocked=?2 where u.id=?1")
     void updateUserBlockedStatus(String userId, boolean status);
 
-    @Query("select distinct u.id from UserEntity u where u.branch like ?1% and u.branch like  %?2% and u.login like %?3% and ?4 member of u.userRoles and u.systemBlocked=false ")
-    List<String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin, UserRole role);
+    @Query("select distinct u from UserEntity u where u.branch like ?1% and u.branch like  %?2% and u.login like %?3% and ?4 member of u.userRoles and u.systemBlocked=false ")
+    List<UserEntity> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin, UserRole role);
 
     Page<UserEntity> findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(Collection<String> branch, String login, Collection<UserRole> userRoles, Collection<Boolean> blocked, Pageable pageable);
 

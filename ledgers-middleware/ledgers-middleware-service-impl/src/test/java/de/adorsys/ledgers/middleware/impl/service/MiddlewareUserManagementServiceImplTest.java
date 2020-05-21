@@ -11,10 +11,7 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
@@ -70,10 +67,15 @@ class MiddlewareUserManagementServiceImplTest {
     private static UserBO userBO = null;
     private static UserTO userTO = null;
 
+    private static UserExtendedBO userExtendedBO = null;
+    private static UserExtendedTO userExtendedTO = null;
+
     @BeforeAll
     static void before() {
         userBO = readYml(UserBO.class, "user.yml");
         userTO = readYml(UserTO.class, "user.yml");
+        userExtendedBO = readYml(UserExtendedBO.class, "user.yml");
+        userExtendedTO = readYml(UserExtendedTO.class, "user.yml");
     }
 
     @Test
@@ -207,7 +209,7 @@ class MiddlewareUserManagementServiceImplTest {
     @Test
     void getUsersByBranchAndRoles() {
         // Given
-        when(userService.findUsersByMultipleParamsPaged(any(), any(), any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userBO)));
+        when(userService.findUsersByMultipleParamsPaged(any(), any(), any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userExtendedBO)));
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getCustomPageImpl());
 
         // When
