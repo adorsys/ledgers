@@ -92,4 +92,6 @@ public interface MiddlewareUserManagementService {
     boolean checkMultilevelScaRequired(String login, List<AccountReferenceTO> references);
 
     List<AdditionalAccountInformationTO> getAdditionalInformation(ScaInfoTO scaInfoHolder, AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier);
+
+    boolean changeStatus(String userId, boolean systemBlock);
 }

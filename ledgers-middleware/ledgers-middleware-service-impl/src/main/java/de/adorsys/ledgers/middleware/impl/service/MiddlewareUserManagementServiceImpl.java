@@ -15,10 +15,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AccountIdentifierTypeBO;
-import de.adorsys.ledgers.um.api.domain.AdditionalAccountInfoBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
@@ -34,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
@@ -231,6 +230,30 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public List<AdditionalAccountInformationTO> getAdditionalInformation(ScaInfoTO scaInfoHolder, AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier) {
         List<AdditionalAccountInfoBO> info = AccountIdentifierTypeBO.valueOf(accountIdentifierType.name()).getAdditionalAccountInfo(accountIdentifier, userService::findOwnersByIban, userService::findOwnersByAccountId);
         return additionalInfoMapper.toAdditionalAccountInformationTOs(info);
+    }
+
+    @Override
+    public boolean changeStatus(String userId, boolean isSystemBlock) {
+        UserBO user = userService.findById(userId);
+
+        if (!user.getUserRoles().contains(UserRoleBO.CUSTOMER)) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg("Only customers can be blocked or unblocked.")
+                          .build();
+        }
+
+        boolean lockStatusToSet = isSystemBlock ? !user.isSystemBlocked() : !user.isBlocked();
+
+        userService.setUserBlockedStatus(userId, isSystemBlock, lockStatusToSet);
+
+        Set<String> depositAccountIdsToChangeStatus = user.getAccountAccesses().stream()
+                                                              .map(AccountAccessBO::getAccountId)
+                                                              .collect(Collectors.toSet());
+
+        depositAccountService.changeAccountsBlockedStatus(depositAccountIdsToChangeStatus, isSystemBlock, lockStatusToSet);
+
+        return lockStatusToSet;
     }
 
     private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {

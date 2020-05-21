@@ -226,6 +226,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(bban);
     }
 
+    @Override
+    public void setUserBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet) {
+        if (isSystemBlock) {
+            userRepository.updateUserSystemBlockedStatus(userId, statusToSet);
+        } else {
+            userRepository.updateUserBlockedStatus(userId, statusToSet);
+        }
+    }
+
     private void checkDuplicateScaMethods(List<ScaUserDataBO> scaUserData) {
         List<ScaUserDataBO> checkedData = Optional.ofNullable(scaUserData).orElse(Collections.emptyList());
         if (new HashSet<>(checkedData).size() != checkedData.size()) {

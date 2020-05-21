@@ -140,5 +140,7 @@ public interface UserService {
 
     void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
 
+    void setUserBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
+
     boolean isPresentBranchCode(String bban);
 }
