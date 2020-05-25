@@ -27,8 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.CUSTOMER;
-import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
+import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.*;
 import static de.adorsys.ledgers.middleware.rest.resource.UserMgmtStaffResourceAPI.USER_CANNOT_REGISTER_IN_BRANCH;
 
 
@@ -49,6 +48,12 @@ public class AdminResource implements AdminResourceAPI {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         List<UserRoleTO> roles = Optional.ofNullable(role).map(Collections::singletonList).orElseGet(() -> Arrays.asList(STAFF, CUSTOMER));
         return ResponseEntity.ok(middlewareUserService.getUsersByBranchAndRolesExtended(countryCode, branchId, branchLogin, userLogin, roles, blocked, pageable));
+    }
+
+    @Override
+    public ResponseEntity<CustomPageImpl<UserTO>> admins(int page, int size) {
+        CustomPageableImpl pageable = new CustomPageableImpl(page, size);
+        return ResponseEntity.ok(middlewareUserService.getUsersByRoles(Collections.singletonList(SYSTEM), pageable));
     }
 
     @Override

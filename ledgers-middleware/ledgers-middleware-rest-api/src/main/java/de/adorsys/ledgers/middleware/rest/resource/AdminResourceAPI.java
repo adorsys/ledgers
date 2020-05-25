@@ -39,6 +39,13 @@ public interface AdminResourceAPI {
                                                          @RequestParam(PAGE) int page,
                                                          @RequestParam(SIZE) int size);
 
+    @ApiOperation(value = "Get users with System role",
+            notes = "Retrieves Page of Users with System role",
+            authorizations = @Authorization(value = "apiKey"))
+    @GetMapping("/admins")
+    ResponseEntity<CustomPageImpl<UserTO>> admins(@RequestParam(PAGE) int page,
+                                                  @RequestParam(SIZE) int size);
+
     @ApiOperation(value = "Get accounts with filtering",
             notes = "Retrieves Page of Accounts with multiple filters",
             authorizations = @Authorization(value = "apiKey"))

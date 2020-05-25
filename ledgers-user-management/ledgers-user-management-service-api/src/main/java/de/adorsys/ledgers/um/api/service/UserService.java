@@ -146,4 +146,6 @@ public interface UserService {
     void setUserBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
 
     boolean isPresentBranchCode(String bban);
+
+    Page<UserBO> getUsersByRoles(List<UserRoleBO> roles, Pageable pageable);
 }
