@@ -228,6 +228,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserBO> getUsersByRoles(List<UserRoleBO> roles, Pageable pageable) {
+        return userRepository.findByUserRolesIn(userConverter.toUserRole(roles), pageable)
+                       .map(userConverter::toUserBO);
+    }
+
+    @Override
     public void setUserBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet) {
         if (isSystemBlock) {
             userRepository.updateUserSystemBlockedStatus(userId, statusToSet);

@@ -67,6 +67,8 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
 
     Page<UserEntity> findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(Collection<String> branch, String login, Collection<UserRole> userRoles, Collection<Boolean> blocked, Pageable pageable);
 
+    Page<UserEntity> findByUserRolesIn(Collection<UserRole> userRoles, Pageable pageable);
+
     /**
      * Counts amount of users for a branch
      *

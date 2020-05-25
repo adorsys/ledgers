@@ -71,6 +71,8 @@ public interface MiddlewareUserManagementService {
      */
     CustomPageImpl<UserTO> getUsersByBranchAndRoles(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleTO> roles, Boolean blocked, CustomPageableImpl pageable);
 
+    CustomPageImpl<UserTO> getUsersByRoles(List<UserRoleTO> roles, CustomPageableImpl pageable);
+
     /**
      * Loads list of users by branch and role
      *
