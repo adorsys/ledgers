@@ -242,15 +242,18 @@ Deploy Openshift (bekb-sandbox-dev):
 
 Deploy Openshift (sandbox-dev-e2e):
   stage: Deployment
-  only:
+  except:
     - schedules
+  only:
+    - develop
   environment:
     name: dev-e2e
     url: https://dev-e2e-dynamicsandbox-ledgers.cloud.adorsys.de
   variables:
     DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_DEV_E2E}
-  <<: *push_docker_openshift  
+  <<: *push_docker_openshift
+  
 ##########
 # master #
 ##########
