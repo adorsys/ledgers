@@ -397,18 +397,22 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         log.info("Deleting account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
+    @SuppressWarnings("PMD.PrematureDeclaration")
     private long checkPermissionAndStartCount(String userId, UserRoleTO userRole, String accountId) {
         long start = System.nanoTime();
-        if (userRole == STAFF) {
-            userService.findById(userId).getAccountAccesses().stream()
-                    .filter(a -> a.getAccountId().equals(accountId)).findAny()
-                    .orElseThrow(() -> MiddlewareModuleException.builder()
-                                               .devMsg("You dont have permission to modify this account")
-                                               .errorCode(INSUFFICIENT_PERMISSION)
-                                               .build());
+        if (userRole == STAFF && !hasAccess(userId, accountId)) {
+            throw MiddlewareModuleException.builder()
+                          .devMsg("You dont have permission to modify this account")
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .build();
         }
         log.info("Permission checked for account {} -> OK", accountId);
         return start;
+    }
+
+    private boolean hasAccess(String userId, String accountId) {
+        return userService.findById(userId).getAccountAccesses().stream()
+                       .anyMatch(a -> a.getAccountId().equals(accountId));
     }
 
     @Override
@@ -460,7 +464,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         if (CollectionUtils.isNotEmpty(accountsPresentByIban) && !user.getLogin().equals(accountsPresentByIban.get(0).getName())) {
             throw MiddlewareModuleException.builder()
                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
-                          .devMsg("The IBAN you''e trying to create account for is already busy by another user")
+                          .devMsg("The IBAN you're trying to create account for is already busy by another user")
                           .build();
         }
     }

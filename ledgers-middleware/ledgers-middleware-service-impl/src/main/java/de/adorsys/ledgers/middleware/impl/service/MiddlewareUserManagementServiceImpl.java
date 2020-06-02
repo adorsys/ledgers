@@ -265,6 +265,21 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         return lockStatusToSet;
     }
 
+    @Override
+    public void editBasicSelf(String userId, UserTO user) {
+        if (!user.getId().equals(userId)) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg("You are not allowed to perform operations on different users!")
+                          .build();
+        }
+        UserBO storedUser = userService.findById(userId);
+        storedUser.setLogin(user.getLogin());
+        storedUser.setEmail(user.getEmail());
+        storedUser.setPin(user.getPin());
+        userService.updateUser(storedUser);
+    }
+
     private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {
         return references.stream()
                        .anyMatch(r -> Optional.ofNullable(r.getCurrency())

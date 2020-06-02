@@ -2,19 +2,18 @@ package de.adorsys.ledgers.um.impl.service.password;
 
 import de.adorsys.ledgers.security.GenerateCode;
 import de.adorsys.ledgers.security.ResetPassword;
-import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.um.api.service.ResetPasswordCodeGenerator;
 import de.adorsys.ledgers.um.db.domain.ResetPasswordEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
 import de.adorsys.ledgers.um.db.repository.ResetPasswordRepository;
 import de.adorsys.ledgers.um.db.repository.UserRepository;
+import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.USER_IS_BLOCKED;
@@ -48,17 +47,15 @@ public class ResetPasswordEmailCodeGeneratorImpl implements ResetPasswordCodeGen
         }
 
         String code = UUID.randomUUID().toString();
-        Optional<ResetPasswordEntity> resetPasswordEntity = resetPasswordRepository.findByUserId(user.getId());
 
         OffsetDateTime expiryTime = OffsetDateTime.now()
                                             .plusMinutes(expirationMinutes);
-        if (!resetPasswordEntity.isPresent()) {
-            return new GenerateCode(resetPasswordRepository.save(new ResetPasswordEntity(user.getId(), code, expiryTime))
-                                            .getCode());
-        }
-        ResetPasswordEntity existed = resetPasswordEntity.get();
-        existed.setCode(code);
-        existed.setExpiryTime(expiryTime);
-        return new GenerateCode(code);
+
+        return resetPasswordRepository.findByUserId(user.getId())
+                       .map(e -> {
+                           e.setCode(code);
+                           e.setExpiryTime(expiryTime);
+                           return new GenerateCode(code);
+                       }).orElseGet(() -> new GenerateCode(resetPasswordRepository.save(new ResetPasswordEntity(user.getId(), code, expiryTime)).getCode()));
     }
 }
