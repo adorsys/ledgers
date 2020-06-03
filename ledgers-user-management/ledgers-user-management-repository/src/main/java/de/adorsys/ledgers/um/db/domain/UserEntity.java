@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -71,6 +72,9 @@ public class UserEntity {
 
     @Column(name = "system_block")
     private boolean systemBlocked;
+
+    @Column
+    private LocalDateTime created;
 
     public boolean isEnabled() {
         return !isBlocked() && !isSystemBlocked();

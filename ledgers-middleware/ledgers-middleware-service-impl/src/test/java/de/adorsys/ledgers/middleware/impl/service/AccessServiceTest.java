@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
@@ -39,6 +40,7 @@ class AccessServiceTest {
     private static final String IBAN_NOT_OWNED = "DE987654321";
     private static final String ACCOUNT_ID = "account id";
     private static final Currency USD = Currency.getInstance("USD");
+    private static final LocalDateTime CREATED = LocalDateTime.now();
 
     @InjectMocks
     private AccessService service;
@@ -252,6 +254,6 @@ class AccessServiceTest {
     }
 
     private DepositAccountBO getDepostAccountBO() {
-        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch");
+        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch", CREATED);
     }
 }

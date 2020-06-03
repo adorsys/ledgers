@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -113,9 +114,13 @@ public class UserConverterTest {
     void toAccountAccessEntity() {
         // When
         AccountAccess result = converter.toAccountAccessEntity(accountAccessBOList.get(0));
+        result.setCreated(null);
+
+        AccountAccess expected = accountAccessList.get(0);
+        expected.setCreated(null);
 
         // Then
-        assertEquals(accountAccessList.get(0), result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -131,6 +136,9 @@ public class UserConverterTest {
     void toAccountAccessListEntity() {
         // When
         List<AccountAccess> result = converter.toAccountAccessListEntity(accountAccessBOList);
+
+        result.forEach(accountAccess -> accountAccess.setCreated(null));
+        accountAccessList.forEach(accountAccess -> accountAccess.setCreated(null));
 
         // Then
         assertEquals(new HashSet<>(accountAccessList), new HashSet<>(result));

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -78,6 +79,9 @@ public class DepositAccount {
      */
     @Column(name = "systemBlock")
     private boolean systemBlocked;
+
+    @Column
+    private LocalDateTime created;
 
     public boolean isEnabled() {
         return !blocked && !systemBlocked;

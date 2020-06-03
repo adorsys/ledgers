@@ -11,12 +11,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class DepositAccountMapperTest {
+
+    private static final LocalDateTime CREATED = LocalDateTime.now();
 
     @InjectMocks
     private DepositAccountMapperImpl depositAccountMapper;
@@ -42,7 +45,7 @@ class DepositAccountMapperTest {
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic",
-                                  "Some linked account", AccountUsage.PRIV, "details",false,false);
+                                  "Some linked account", AccountUsage.PRIV, "details", false, false, CREATED);
     }
 
     private DepositAccountBO getDepositAccountBO() {
@@ -58,6 +61,7 @@ class DepositAccountMapperTest {
         bo.setLinkedAccounts("Some linked account");
         bo.setUsageType(AccountUsageBO.PRIV);
         bo.setDetails("details");
+        bo.setCreated(CREATED);
         return bo;
     }
 }

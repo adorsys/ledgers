@@ -8,11 +8,14 @@ import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Api(tags = "LDG007 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
+    String DATABASE_STATE_DATE_TIME = "dateTime";
+
     String BRANCH = "branch";
     String ROLES = "roles";
     String QUERY_PARAM = "queryParam";
@@ -171,4 +174,10 @@ public interface UserMgmtStaffResourceAPI {
             authorizations = @Authorization(value = "apiKey"))
     @PostMapping("/{userId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(USER_ID) String userId);
+
+
+    @PostMapping("{userId}/revert")
+    @ApiOperation("Reverts DB state for given user to the given date and time.")
+    ResponseEntity<Void> revertDatabase(@PathVariable(USER_ID) String userId, @RequestParam(name = DATABASE_STATE_DATE_TIME) LocalDateTime databaseStateDateTime);
+
 }
