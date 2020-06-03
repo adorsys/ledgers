@@ -134,7 +134,8 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> revertDatabase(String userId, LocalDateTime databaseStateDateTime) {
-        return null;
+        middlewareUserService.revertDatabase(userId, databaseStateDateTime);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private UserTO findUserForBranch(String userId) {

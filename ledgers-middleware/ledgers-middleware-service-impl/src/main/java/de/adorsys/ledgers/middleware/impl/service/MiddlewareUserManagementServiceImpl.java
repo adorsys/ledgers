@@ -26,9 +26,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
@@ -278,6 +280,17 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         storedUser.setEmail(user.getEmail());
         storedUser.setPin(user.getPin());
         userService.updateUser(storedUser);
+    }
+
+    @Override
+    public void revertDatabase(String userId, LocalDateTime databaseStateDateTime) {
+        // First, all users for this branch should be technically blocked.
+        userService.setBranchBlockedStatus(userId, true, true);
+
+        // Then, after revert process succeeded, users should be unblocked back.
+        // TODO: replace valueOf with real method.
+        CompletableFuture.runAsync(() -> String.valueOf(10))
+                .thenRunAsync(() -> userService.setBranchBlockedStatus(userId, true, false));
     }
 
     private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {
