@@ -103,6 +103,9 @@ public class SCAOperationEntity {
 	@Column(nullable = false)
 	private int scaWeight;
 
+	@Column
+	private LocalDateTime updated;
+
 	@PrePersist
 	public void prePersist() {
 		if(created==null) {

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -128,6 +129,12 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Boolean> changeStatus(String userId) {
         return ResponseEntity.ok(middlewareUserService.changeStatus(userId, false));
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    public ResponseEntity<Void> revertDatabase(String userId, LocalDateTime databaseStateDateTime) {
+        return null;
     }
 
     private UserTO findUserForBranch(String userId) {

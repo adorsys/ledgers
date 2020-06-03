@@ -52,6 +52,7 @@ class MiddlewareAccountManagementServiceImplTest {
     private static final String CORRECT_USER_ID = "kjk345knkj45";
     private static final Currency EUR = Currency.getInstance("EUR");
     private static final LocalDateTime TIME = LocalDateTime.MIN;
+    private static final LocalDateTime CREATED = LocalDateTime.MIN;
     private static final String USER_LOGIN = "userLogin";
     private static final String USER_ID = "kjk345knkj45";
     private static final String SCA_ID = "scaId";
@@ -861,7 +862,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch");
+        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", CREATED);
     }
 
     private FundsConfirmationRequestBO getFundsConfirmationRequestBO() {

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="hhe@adorsys.com.ua" id="01-06-2020-01">
+        <comment>Set timestamps in account_access table (where they are null)</comment>
+        <update tableName="account_accesses">
+            <column name="created" value="now()"/>
+            <where>created IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="hhe@adorsys.com.ua" id="01-06-2020-02">
+        <comment>Set timestamps in deposit_account table (where they are null)</comment>
+        <update tableName="deposit_account">
+            <column name="created" value="now()"/>
+            <where>created IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="hhe@adorsys.com.ua" id="01-06-2020-03">
+        <comment>Set timestamps in payment table (where they are null)</comment>
+        <update tableName="payment">
+            <column name="updated" value="now()"/>
+            <where>updated IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="hhe@adorsys.com.ua" id="01-06-2020-04">
+        <comment>Set timestamps in sca_operation table (where they are null)</comment>
+        <update tableName="sca_operation">
+            <column name="updated" value="now()"/>
+            <where>updated IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="hhe@adorsys.com.ua" id="01-06-2020-05">
+        <comment>Set timestamps in users table (where they are null)</comment>
+        <update tableName="users">
+            <column name="created" value="now()"/>
+            <where>created IS NULL</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

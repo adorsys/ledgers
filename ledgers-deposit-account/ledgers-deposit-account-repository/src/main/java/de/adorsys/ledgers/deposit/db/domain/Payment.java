@@ -118,7 +118,32 @@ public class Payment {
     @Column(nullable = false)
     private String accountId;
 
-    public boolean isLastExecuted(LocalDate nextPossibleExecutionDate){
+    @Column
+    private LocalDateTime updated;
+
+    @Transient
+    private TransactionStatus previousTransactionStatus;
+
+    public boolean isLastExecuted(LocalDate nextPossibleExecutionDate) {
         return endDate != null && nextPossibleExecutionDate.isAfter(endDate);
+    }
+
+    @PostLoad
+    public void paymentPostLoad() {
+        previousTransactionStatus = transactionStatus;
+    }
+
+    @PreUpdate
+    public void paymentPreUpdate() {
+        if (previousTransactionStatus != transactionStatus) {
+            updated = LocalDateTime.now();
+        }
+    }
+
+    @PrePersist
+    public void paymentPrePersist() {
+        if (updated == null) {
+            updated = LocalDateTime.now();
+        }
     }
 }

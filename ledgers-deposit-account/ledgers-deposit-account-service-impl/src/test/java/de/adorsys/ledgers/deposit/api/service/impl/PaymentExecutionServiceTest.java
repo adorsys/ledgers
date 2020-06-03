@@ -274,11 +274,11 @@ class PaymentExecutionServiceTest {
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic", null,
-                                  AccountUsage.PRIV, "details", false, false);
+                                  AccountUsage.PRIV, "details", false, false, LocalDateTime.now());
     }
 
     private DepositAccountBO getDepositAccountBO(Currency currency) {
-        return new DepositAccountBO("id", "iban", "bban", "pan", "maskedPan", "msisdn", currency, "name", "product", AccountTypeBO.CASH, "bic", null, AccountUsageBO.PRIV, "details", false, false, "branch");
+        return new DepositAccountBO("id", "iban", "bban", "pan", "maskedPan", "msisdn", currency, "name", "product", AccountTypeBO.CASH, "bic", null, AccountUsageBO.PRIV, "details", false, false, "branch", null);
     }
 
     private DepositAccountDetailsBO getDepositAccountDetailsBO(Currency currency) {

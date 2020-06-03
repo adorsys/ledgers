@@ -590,12 +590,12 @@ class DepositAccountTransactionServiceImplTest {
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", IBAN, "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic", null,
-                                  AccountUsage.PRIV, "details", false, false);
+                                  AccountUsage.PRIV, "details", false, false, LocalDateTime.now());
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch"),
+                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null),
                 Collections.emptyList());
     }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 //Todo clarify unique constrains iban & access_type
 @Entity
@@ -34,6 +35,9 @@ public class AccountAccess {
 
     @Column(nullable = false)
     private String accountId;
+
+    @Column
+    private LocalDateTime created = LocalDateTime.now();
 
     @PrePersist
     public void prePersist() {
