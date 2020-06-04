@@ -8,6 +8,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MiddlewareUserManagementService {
@@ -103,4 +104,6 @@ public interface MiddlewareUserManagementService {
     boolean changeStatus(String userId, boolean systemBlock);
 
     void editBasicSelf(String userId, UserTO user);
+
+    void revertDatabase(String userId, LocalDateTime databaseStateDateTime);
 }
