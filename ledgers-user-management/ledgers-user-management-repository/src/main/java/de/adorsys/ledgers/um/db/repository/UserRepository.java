@@ -47,6 +47,7 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
      */
     Optional<UserEntity> findByEmailOrLogin(String email, String login);
 
+    @Modifying
     @Query("update UserEntity u set u.systemBlocked=?2 where u.branch=?1")
     void updateSystemBlockedStatus(String branchId, boolean status);
 

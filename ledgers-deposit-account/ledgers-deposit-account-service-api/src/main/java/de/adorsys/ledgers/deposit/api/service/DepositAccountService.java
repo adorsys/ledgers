@@ -72,6 +72,8 @@ public interface DepositAccountService {
 
     void deleteAccount(String accountId);
 
+    void rollBackBranch(String branch, LocalDateTime revertTimestamp);
+
     /**
      * @deprecated shall be removed in v2.5
      */

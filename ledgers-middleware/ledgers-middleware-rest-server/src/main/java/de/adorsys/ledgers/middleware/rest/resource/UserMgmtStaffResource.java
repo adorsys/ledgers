@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.RevertRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -133,8 +133,8 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
-    public ResponseEntity<Void> revertDatabase(String userId, LocalDateTime databaseStateDateTime) {
-        middlewareUserService.revertDatabase(userId, databaseStateDateTime);
+    public ResponseEntity<Void> revertDatabase(RevertRequestTO request) {
+        middlewareUserService.revertDatabase(request.getBranchId(), request.getTimestampToRevert());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

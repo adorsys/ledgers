@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
@@ -44,6 +46,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
     private static final int NANO_TO_SECOND = 1000000000;
+    private static final ExecutorService FIXED_THREAD_POOL = Executors.newFixedThreadPool(20);
     private final UserService userService;
     private final DepositAccountService depositAccountService;
     private final AccessService accessService;
@@ -85,17 +88,13 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         UserTO user = findById(userId);
         checkUserIsNotABranchAndIsSameBranchAsAccount(user, account);
         checkInitiatorIsPermittedToOperateUser(scaInfo, initiator, user);
-        updateAccessFields(access, account);
-        accessService.updateAccountAccess(userTOMapper.toUserBO(user), userTOMapper.toAccountAccessBO(access));
+        AccountAccessBO newAccess = userTOMapper.toAccountAccessBO(access);
+        newAccess.updateAccessFields(account.getIban(), account.getCurrency());
+        accessService.updateAccountAccess(userTOMapper.toUserBO(user), newAccess);
         if (initiator.getUserRoles().contains(UserRoleTO.SYSTEM) && StringUtils.isNotBlank(user.getBranch())) {
             UserBO branch = userService.findById(user.getBranch());
-            accessService.updateAccountAccess(branch, userTOMapper.toAccountAccessBO(access));
+            accessService.updateAccountAccess(branch, newAccess);
         }
-    }
-
-    private void updateAccessFields(AccountAccessTO access, DepositAccountBO account) {
-        access.setCurrency(account.getCurrency());
-        access.setIban(account.getIban());
     }
 
     private void checkUserIsNotABranchAndIsSameBranchAsAccount(UserTO user, DepositAccountBO account) {
@@ -285,12 +284,22 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     @Override
     public void revertDatabase(String userId, LocalDateTime databaseStateDateTime) {
         // First, all users for this branch should be technically blocked.
-        userService.setBranchBlockedStatus(userId, true, true);
+        long start = System.nanoTime();
+        log.info("Started reverting state for {}", userId);
 
-        // Then, after revert process succeeded, users should be unblocked back.
-        // TODO: replace valueOf with real method.
-        CompletableFuture.runAsync(() -> String.valueOf(10))
-                .thenRunAsync(() -> userService.setBranchBlockedStatus(userId, true, false));
+        systemBlockBranch(userId, true);
+        log.info("All branch data is LOCKED in {}seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+
+        depositAccountService.rollBackBranch(userId, databaseStateDateTime);
+
+        systemBlockBranch(userId, false);
+        log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+
+    }
+
+    private void systemBlockBranch(String branchId, boolean statusToSet) {
+        CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(branchId, true, statusToSet), FIXED_THREAD_POOL)
+                .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(branchId, true, statusToSet));
     }
 
     private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {

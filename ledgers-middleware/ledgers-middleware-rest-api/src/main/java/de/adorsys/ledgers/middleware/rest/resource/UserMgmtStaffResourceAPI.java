@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.RevertRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
@@ -8,14 +9,11 @@ import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Api(tags = "LDG007 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
-    String DATABASE_STATE_DATE_TIME = "dateTime";
-
     String BRANCH = "branch";
     String ROLES = "roles";
     String QUERY_PARAM = "queryParam";
@@ -176,8 +174,8 @@ public interface UserMgmtStaffResourceAPI {
     ResponseEntity<Boolean> changeStatus(@PathVariable(USER_ID) String userId);
 
 
-    @PostMapping("{userId}/revert")
-    @ApiOperation("Reverts DB state for given user to the given date and time.")
-    ResponseEntity<Void> revertDatabase(@PathVariable(USER_ID) String userId, @RequestParam(name = DATABASE_STATE_DATE_TIME) LocalDateTime databaseStateDateTime);
+    @PostMapping("/revert")
+    @ApiOperation(value = "Reverts DB state for given user to the given date and time.", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<Void> revertDatabase(@RequestBody RevertRequestTO revertRequest);
 
 }
