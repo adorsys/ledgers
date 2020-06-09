@@ -44,10 +44,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s and currency %s not found";
     private static final String MSG_ACCOUNT_NOT_FOUND = "Account with id %s not found";
     private static final String BRANCH_SQL = "classpath:deleteBranch.sql";
+    private static final String ROLL_BACK_BRANCH_SQL = "classpath:rollBackBranch.sql";
     private static final String POSTING_SQL = "classpath:deletePostings.sql";
     private static final String USER_SQL = "classpath:deleteUser.sql";
     private static final String ACCOUNT_SQL = "classpath:deleteAccount.sql";
     private static final String DELETE_BRANCH_ERROR_MSG = "Something went wrong during deletion of branch: %s, msg: %s";
+    private static final String ROLL_BACK_BRANCH_ERROR_MSG = "Something went wrong during rollback of branch: %s, msg: %s";
     private static final String DELETE_POSTINGS_ERROR_MSG = "Something went wrong during deletion of postings for iban: %s, msg: %s";
     private static final String DELETE_USER_ERROR_MSG = "Something went wrong during deletion of user: %s, msg: %s";
     private static final String DELETE_ACCOUNT_ERROR_MSG = "Something went wrong during deletion of account: %s, msg: %s";
@@ -218,6 +220,27 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public void deleteAccount(String accountId) {
         executeNativeQuery(ACCOUNT_SQL, accountId, DELETE_ACCOUNT_ERROR_MSG);
+    }
+
+    @Override
+    public void rollBackBranch(String branch, LocalDateTime revertTimestamp) {
+        executeNativeQuery(ROLL_BACK_BRANCH_SQL, branch, revertTimestamp, ROLL_BACK_BRANCH_ERROR_MSG);
+    }
+
+    private void executeNativeQuery(String queryFilePath, String parameter, LocalDateTime timestampParameter, String errorMsg) {
+        try {
+            InputStream stream = loader.getResource(queryFilePath).getInputStream();
+            String query = IOUtils.toString(stream, StandardCharsets.UTF_8);
+            entityManager.createNativeQuery(query)
+                    .setParameter(1, parameter)
+                    .setParameter(2, timestampParameter)
+                    .executeUpdate();
+        } catch (IOException e) {
+            throw DepositModuleException.builder()
+                          .devMsg(format(errorMsg, parameter, e.getMessage()))
+                          .errorCode(COULD_NOT_EXECUTE_STATEMENT)
+                          .build();
+        }
     }
 
     @Override

@@ -18,6 +18,7 @@ package de.adorsys.ledgers.um.db.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -74,6 +75,7 @@ public class UserEntity {
     private boolean systemBlocked;
 
     @Column
+    @CreationTimestamp
     private LocalDateTime created;
 
     public boolean isEnabled() {

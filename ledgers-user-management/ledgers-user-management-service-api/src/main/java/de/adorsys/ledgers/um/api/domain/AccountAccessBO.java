@@ -23,4 +23,9 @@ public class AccountAccessBO {
 
     public AccountAccessBO() {
     }
+
+    public void updateAccessFields(String iban, Currency currency) {
+        this.setIban(iban);
+        this.setCurrency(currency);
+    }
 }

@@ -2,6 +2,7 @@ package de.adorsys.ledgers.um.db.domain;
 
 import de.adorsys.ledgers.util.Ids;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
@@ -37,7 +38,8 @@ public class AccountAccess {
     private String accountId;
 
     @Column
-    private LocalDateTime created = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime created;
 
     @PrePersist
     public void prePersist() {

@@ -3,6 +3,7 @@ package de.adorsys.ledgers.deposit.db.domain;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateConverter;
 
@@ -119,6 +120,7 @@ public class Payment {
     private String accountId;
 
     @Column
+    @UpdateTimestamp
     private LocalDateTime updated;
 
     @Transient

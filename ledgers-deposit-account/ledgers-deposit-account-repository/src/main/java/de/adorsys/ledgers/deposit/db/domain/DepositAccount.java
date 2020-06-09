@@ -3,6 +3,7 @@ package de.adorsys.ledgers.deposit.db.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -81,6 +82,7 @@ public class DepositAccount {
     private boolean systemBlocked;
 
     @Column
+    @CreationTimestamp
     private LocalDateTime created;
 
     public boolean isEnabled() {
