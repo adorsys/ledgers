@@ -3,6 +3,7 @@ package de.adorsys.ledgers.deposit.db.domain;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateConverter;
 
@@ -118,7 +119,33 @@ public class Payment {
     @Column(nullable = false)
     private String accountId;
 
-    public boolean isLastExecuted(LocalDate nextPossibleExecutionDate){
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime updated;
+
+    @Transient
+    private TransactionStatus previousTransactionStatus;
+
+    public boolean isLastExecuted(LocalDate nextPossibleExecutionDate) {
         return endDate != null && nextPossibleExecutionDate.isAfter(endDate);
+    }
+
+    @PostLoad
+    public void paymentPostLoad() {
+        previousTransactionStatus = transactionStatus;
+    }
+
+    @PreUpdate
+    public void paymentPreUpdate() {
+        if (previousTransactionStatus != transactionStatus) {
+            updated = LocalDateTime.now();
+        }
+    }
+
+    @PrePersist
+    public void paymentPrePersist() {
+        if (updated == null) {
+            updated = LocalDateTime.now();
+        }
     }
 }

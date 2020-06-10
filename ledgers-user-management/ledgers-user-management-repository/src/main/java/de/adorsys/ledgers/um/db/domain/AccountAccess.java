@@ -2,9 +2,11 @@ package de.adorsys.ledgers.um.db.domain;
 
 import de.adorsys.ledgers.util.Ids;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 //Todo clarify unique constrains iban & access_type
 @Entity
@@ -34,6 +36,10 @@ public class AccountAccess {
 
     @Column(nullable = false)
     private String accountId;
+
+    @Column
+    @CreationTimestamp
+    private LocalDateTime created;
 
     @PrePersist
     public void prePersist() {

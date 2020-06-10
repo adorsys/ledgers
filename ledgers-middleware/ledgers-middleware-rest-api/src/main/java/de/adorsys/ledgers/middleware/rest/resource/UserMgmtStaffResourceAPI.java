@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.RevertRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
@@ -171,4 +172,10 @@ public interface UserMgmtStaffResourceAPI {
             authorizations = @Authorization(value = "apiKey"))
     @PostMapping("/{userId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(USER_ID) String userId);
+
+
+    @PostMapping("/revert")
+    @ApiOperation(value = "Reverts DB state for given user to the given date and time.", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<Void> revertDatabase(@RequestBody RevertRequestTO revertRequest);
+
 }

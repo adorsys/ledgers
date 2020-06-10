@@ -6,6 +6,7 @@ import de.adorsys.ledgers.app.mock.MockbankInitData;
 import de.adorsys.ledgers.app.mock.SinglePaymentsData;
 import de.adorsys.ledgers.deposit.api.domain.AmountBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
@@ -108,7 +109,7 @@ public class BankInitService {
             userService.findByLogin("admin");
             logger.info("Admin user is already present. Skipping creation");
         } catch (UserManagementModuleException e) {
-            UserTO admin = new UserTO("admin", "admin@mail.de", "admin123");
+            UserTO admin = new UserTO("admin", "admin@example.com", "admin123");
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
         }
@@ -188,21 +189,28 @@ public class BankInitService {
             if (!currencyService.isCurrencyValid(details.getCurrency())) {
                 throw new IllegalArgumentException("Currency is not supported: " + details.getCurrency());
             }
-            DepositAccountBO account = depositAccountService.getOptionalAccountByIbanAndCurrency(details.getIban(), details.getCurrency())
-                                               .orElseGet(() -> createAccount(details));
+            DepositAccountDetailsBO account;
+            try {
+                account = depositAccountService.getAccountDetailsByIbanAndCurrency(details.getIban(), details.getCurrency(), LocalDateTime.now(), true);
+
+            } catch (DepositModuleException e) {
+                account = createAccount(details);
+            }
             updateBalanceIfRequired(details, account);
         }
     }
 
-    private void updateBalanceIfRequired(AccountDetailsTO details, DepositAccountBO account) {
+    private void updateBalanceIfRequired(AccountDetailsTO details, DepositAccountDetailsBO account) {
         getBalanceFromInitData(details)
-                .ifPresent(b -> updateBalance(details, account, b));
+                .ifPresent(b -> checkAndUpdateBalance(details, account, b));
     }
 
-    private void updateBalance(AccountDetailsTO details, DepositAccountBO account, BigDecimal balanceValue) {
+    private void checkAndUpdateBalance(AccountDetailsTO details, DepositAccountDetailsBO account, BigDecimal balanceValue) {
         AmountBO amount = new AmountBO(details.getCurrency(), balanceValue);
         try {
-            transactionService.depositCash(account.getId(), amount, "SYSTEM");
+            if (account.getBalances().iterator().next().getAmount().getAmount().compareTo(amount.getAmount()) < 0) {
+                transactionService.depositCash(account.getAccount().getId(), amount, "SYSTEM");
+            }
         } catch (DepositModuleException e) {
             logger.error("Unable to deposit cash to account: {} {}", details.getIban(), details.getCurrency());
         }
@@ -220,13 +228,13 @@ public class BankInitService {
         return b -> StringUtils.equals(b.getAccNbr(), details.getIban()) && b.getCurrency().equals(details.getCurrency());
     }
 
-    private DepositAccountBO createAccount(AccountDetailsTO details) {
+    private DepositAccountDetailsBO createAccount(AccountDetailsTO details) {
         String userName = getUserNameByIban(details.getIban());
         DepositAccountBO accountBO = accountDetailsMapper.toDepositAccountBO(details);
         DepositAccountBO account = depositAccountService.createNewAccount(accountBO, userName, "");
         userService.findUsersByIban(details.getIban())
                 .forEach(u -> updateAccess(u, account.getIban(), account.getId()));
-        return account;
+        return depositAccountService.getAccountDetailsById(account.getId(), LocalDateTime.now(), true);
     }
 
     private void updateAccess(UserBO user, String iban, String accountId) {

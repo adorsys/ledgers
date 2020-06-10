@@ -40,5 +40,4 @@ public interface AppMgmtRestAPI {
     @PostMapping("/admin")
     @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
     ResponseEntity<BearerTokenTO> admin(@RequestBody(required = true) UserTO adminUser);
-
 }

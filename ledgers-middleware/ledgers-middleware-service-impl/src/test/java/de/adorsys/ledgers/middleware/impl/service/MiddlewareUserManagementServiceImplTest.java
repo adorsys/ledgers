@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.util.reflection.FieldSetter;
@@ -432,6 +433,27 @@ class MiddlewareUserManagementServiceImplTest {
         assertThrows(UserManagementModuleException.class, () -> middlewareUserService.changeStatus(USER_ID, false));
     }
 
+    @Test
+    void editBasicSelf() {
+        when(userService.findById(USER_ID)).thenReturn(getUser(null, UserRoleBO.CUSTOMER));
+        UserTO request = new UserTO(USER_LOGIN, "email", "PIN");
+        request.setId(USER_ID);
+        middlewareUserService.editBasicSelf(USER_ID, request);
+
+        ArgumentCaptor<UserBO> captor = ArgumentCaptor.forClass(UserBO.class);
+        verify(userService, times(1)).updateUser(captor.capture());
+        UserBO result = captor.getValue();
+        assertEquals(USER_LOGIN, result.getLogin());
+        assertEquals("email", result.getEmail());
+        assertEquals("PIN", result.getPin());
+    }
+
+    @Test
+    void editBasicSelf_fail_token_differs_from_user() {
+        UserTO request = new UserTO(USER_LOGIN, "email", "PIN");
+        request.setId(USER_ID);
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.editBasicSelf("some other id", request));
+    }
 
     private AdditionalAccountInformationTO getAdditionalInfo() {
         AdditionalAccountInformationTO to = new AdditionalAccountInformationTO();

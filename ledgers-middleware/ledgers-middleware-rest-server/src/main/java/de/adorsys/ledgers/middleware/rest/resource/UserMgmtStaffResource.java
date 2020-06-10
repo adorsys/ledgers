@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
+import de.adorsys.ledgers.middleware.api.domain.general.RevertRequestTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
@@ -128,6 +129,13 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Boolean> changeStatus(String userId) {
         return ResponseEntity.ok(middlewareUserService.changeStatus(userId, false));
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    public ResponseEntity<Void> revertDatabase(RevertRequestTO request) {
+        middlewareUserService.revertDatabase(request.getBranchId(), request.getTimestampToRevert());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private UserTO findUserForBranch(String userId) {

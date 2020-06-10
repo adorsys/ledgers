@@ -52,6 +52,7 @@ class MiddlewareAccountManagementServiceImplTest {
     private static final String CORRECT_USER_ID = "kjk345knkj45";
     private static final Currency EUR = Currency.getInstance("EUR");
     private static final LocalDateTime TIME = LocalDateTime.MIN;
+    private static final LocalDateTime CREATED = LocalDateTime.MIN;
     private static final String USER_LOGIN = "userLogin";
     private static final String USER_ID = "kjk345knkj45";
     private static final String SCA_ID = "scaId";
@@ -668,6 +669,42 @@ class MiddlewareAccountManagementServiceImplTest {
         verify(depositAccountService, times(1)).changeAccountsBlockedStatus(Collections.singleton(ACCOUNT_ID), false, true);
     }
 
+    @Test
+    void deleteAccount() {
+        when(userService.findById(USER_ID)).thenReturn(getUserBO());
+        middlewareService.deleteAccount(USER_ID, UserRoleTO.STAFF, ACCOUNT_ID);
+
+        verify(depositAccountService, times(1)).deleteAccount(ACCOUNT_ID);
+    }
+
+    @Test
+    void deleteAccount_fail_no_access() {
+        UserBO userBO = getUserBO();
+        userBO.getAccountAccesses().get(0).setAccountId("WRONG ACCOUNT ID");
+        when(userService.findById(USER_ID)).thenReturn(userBO);
+
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.deleteAccount(USER_ID, UserRoleTO.STAFF, ACCOUNT_ID));
+    }
+
+    @Test
+    void deleteUser() {
+        UserBO userBO = getUserBO();
+        userBO.setBranch(BRANCH);
+        when(userService.findById(USER_ID)).thenReturn(userBO);
+        middlewareService.deleteUser(BRANCH, UserRoleTO.STAFF, USER_ID);
+
+        verify(depositAccountService, times(1)).deleteUser(USER_ID);
+    }
+
+    @Test
+    void deleteUser_fail_wrong_branch() {
+        UserBO userBO = getUserBO();
+        userBO.setBranch("another branch");
+        when(userService.findById(USER_ID)).thenReturn(userBO);
+
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.deleteUser(BRANCH, UserRoleTO.STAFF, USER_ID));
+    }
+
     private CustomPageImpl<Object> getPageImpl() {
         return new CustomPageImpl<>();
     }
@@ -741,7 +778,6 @@ class MiddlewareAccountManagementServiceImplTest {
         return accountAccesses.get(0);
     }
 
-    //    todo: replace by javatar-commons version 0.7
     private <T> T getDataFromFile(String fileName, TypeReference<T> typeReference) {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         objectMapper.findAndRegisterModules();
@@ -826,7 +862,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     private DepositAccountBO getDepositAccountBO() {
-        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch");
+        return new DepositAccountBO("id", IBAN, "bban", "pan", "maskedPan", "msisdn", EUR, USER_LOGIN, "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", CREATED);
     }
 
     private FundsConfirmationRequestBO getFundsConfirmationRequestBO() {

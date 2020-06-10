@@ -17,6 +17,7 @@
 package de.adorsys.ledgers.sca.db.domain;
 
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
 import javax.persistence.*;
@@ -30,93 +31,96 @@ import java.time.LocalDateTime;
  * authorisationId is a generated number. - Payment: A single payment might need
  * multiple authorisations. - the opId is the paymentId - the authorisationId is
  * a generated number.
- *
+ * <p>
  * We can create an SCA without have sent out the code. This is generally the
  * case when a business operation (login, consent, payment) is initiated.
  *
  * @author fpo
- *
  */
 @Entity
 @Data
 @Table(name = "sca_operation")
 public class SCAOperationEntity {
 
-	/**
-	 * The id of this authorization instance. This will generally match the
-	 * authorization id.
-	 */
-	@Id
-	private String id;
+    /**
+     * The id of this authorization instance. This will generally match the
+     * authorization id.
+     */
+    @Id
+    private String id;
 
-	/**
-	 * The id of the business operation being authorized.
-	 */
-	@Column(name = "op_id", nullable = false, updatable = false)
-	private String opId;
+    /**
+     * The id of the business operation being authorized.
+     */
+    @Column(name = "op_id", nullable = false, updatable = false)
+    private String opId;
 
-	@Column(name = "validity_seconds", nullable = false, updatable = false)
-	private int validitySeconds;
+    @Column(name = "validity_seconds", nullable = false, updatable = false)
+    private int validitySeconds;
 
-	/* The hash of auth code and opData */
-	@Column(name = "auth_code_hash")
-	private String authCodeHash;
+    /* The hash of auth code and opData */
+    @Column(name = "auth_code_hash")
+    private String authCodeHash;
 
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private AuthCodeStatus status;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthCodeStatus status;
 
-	@Column(name = "hash_alg")
-	private String hashAlg;
+    @Column(name = "hash_alg")
+    private String hashAlg;
 
-	@Column(nullable = false, updatable = false)
-	@Convert(converter = LocalDateTimeConverter.class)
-	private LocalDateTime created;
+    @Column(nullable = false, updatable = false)
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime created;
 
-	@Column(name = "status_time", nullable = false)
-	@Convert(converter = LocalDateTimeConverter.class)
-	private LocalDateTime statusTime;
+    @Column(name = "status_time", nullable = false)
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime statusTime;
 
-	/* The operation type. Could be login, consent, payment. */
-	@Column(name = "op_type")
-	@Enumerated(EnumType.STRING)
-	private OpType opType;
+    /* The operation type. Could be login, consent, payment. */
+    @Column(name = "op_type")
+    @Enumerated(EnumType.STRING)
+    private OpType opType;
 
-	/*
-	 * Stores the sca method is associated with this authorization. The sca method
-	 * id is not supposed to change after the code was sent out.
-	 */
-	@Column(name = "sca_method_id")
-	private String scaMethodId;
+    /*
+     * Stores the sca method is associated with this authorization. The sca method
+     * id is not supposed to change after the code was sent out.
+     */
+    @Column(name = "sca_method_id")
+    private String scaMethodId;
 
-	/*
-	 * Records the number of failed attempts.
-	 *
-	 */
-	@Column(name = "failled_count")
-	private int failledCount;
+    /*
+     * Records the number of failed attempts.
+     *
+     */
+    @Column(name = "failled_count")
+    private int failledCount;
 
-	@Column(name = "sca_status")
-	@Enumerated(EnumType.STRING)
-	private ScaStatus scaStatus;
+    @Column(name = "sca_status")
+    @Enumerated(EnumType.STRING)
+    private ScaStatus scaStatus;
 
-	@Column(nullable = false)
-	private int scaWeight;
+    @Column(nullable = false)
+    private int scaWeight;
 
-	@PrePersist
-	public void prePersist() {
-		if(created==null) {
-			created = LocalDateTime.now();
-		}
-	}
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime updated;
 
-	public SCAOperationEntity updateStatuses(boolean isCodeConfirmValid) {
-		this.status = AuthCodeStatus.VALIDATED;
-		this.scaStatus = ScaStatus.FINALISED;
-		if (!isCodeConfirmValid) {
-			this.status = AuthCodeStatus.FAILED;
-			this.scaStatus = ScaStatus.FAILED;
-		}
-		return this;
-	}
+    @PrePersist
+    public void prePersist() {
+        if (created == null) {
+            created = LocalDateTime.now();
+        }
+    }
+
+    public SCAOperationEntity updateStatuses(boolean isCodeConfirmValid) {
+        this.status = AuthCodeStatus.VALIDATED;
+        this.scaStatus = ScaStatus.FINALISED;
+        if (!isCodeConfirmValid) {
+            this.status = AuthCodeStatus.FAILED;
+            this.scaStatus = ScaStatus.FAILED;
+        }
+        return this;
+    }
 }

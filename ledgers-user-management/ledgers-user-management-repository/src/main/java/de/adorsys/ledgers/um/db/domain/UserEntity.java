@@ -18,8 +18,10 @@ package de.adorsys.ledgers.um.db.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -71,6 +73,10 @@ public class UserEntity {
 
     @Column(name = "system_block")
     private boolean systemBlocked;
+
+    @Column
+    @CreationTimestamp
+    private LocalDateTime created;
 
     public boolean isEnabled() {
         return !isBlocked() && !isSystemBlocked();

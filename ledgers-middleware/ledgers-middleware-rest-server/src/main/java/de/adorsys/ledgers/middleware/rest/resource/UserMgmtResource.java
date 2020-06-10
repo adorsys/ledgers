@@ -130,6 +130,13 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 
     @Override
     @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    public ResponseEntity<Void> editSelf(UserTO user) {
+        middlewareUserService.editBasicSelf(scaInfoHolder.getUserId(), user);
+        return ResponseEntity.accepted().build();
+    }
+
+    @Override
+    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
         UserTO userTO = middlewareUserService.findById(scaInfoHolder.getUserId());
         UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);

@@ -383,7 +383,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban, boolean isDebtor, Currency currency) {
         List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
         if (CollectionUtils.isEmpty(accounts) && !isDebtor) {
-            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false, null);
+            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false, null, null);
         }
         if (accounts.size() != 1) {
             String msg = CollectionUtils.isEmpty(accounts)

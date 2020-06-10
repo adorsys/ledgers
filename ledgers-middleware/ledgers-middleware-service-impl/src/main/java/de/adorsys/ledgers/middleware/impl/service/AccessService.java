@@ -34,23 +34,23 @@ public class AccessService {
     }
 
     public void updateAccountAccess(UserBO user, AccountAccessBO access) {
-        if (!containsAccess(user.getAccountAccesses(), access.getIban(), access.getCurrency())) {
+        if (!containsAccess(user.getAccountAccesses(), access.getAccountId())) {
             user.getAccountAccesses().add(access);
         } else {
-            user.getAccountAccesses().forEach(a -> {
-                if (a.getIban().equals(access.getIban())) {
-                    a.setAccessType(access.getAccessType());
-                    a.setScaWeight(access.getScaWeight());
-                    a.setAccountId(access.getAccountId());
-                }
-            });
+            user.getAccountAccesses().stream()
+                    .filter(a -> a.getAccountId().equals(access.getAccountId())).findFirst()
+                    .ifPresent(a -> {
+                        a.setAccessType(access.getAccessType());
+                        a.setScaWeight(access.getScaWeight());
+                        a.setAccountId(access.getAccountId());
+                    });
         }
         userService.updateAccountAccess(user.getLogin(), user.getAccountAccesses());
     }
 
-    private boolean containsAccess(List<AccountAccessBO> accesses, String iban, Currency currency) {
+    private boolean containsAccess(List<AccountAccessBO> accesses, String accountId) {
         return accesses.stream()
-                       .anyMatch(a -> a.getIban().equals(iban) && a.getCurrency().equals(currency));
+                       .anyMatch(a -> a.getAccountId().equals(accountId));
     }
 
     public UserBO loadCurrentUser(String userId) {

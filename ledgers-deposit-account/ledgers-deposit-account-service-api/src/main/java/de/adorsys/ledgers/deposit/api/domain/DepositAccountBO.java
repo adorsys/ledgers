@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Currency;
 
 @Data
@@ -83,6 +84,8 @@ public class DepositAccountBO {
     private boolean systemBlocked;
 
     private String branch;
+
+    private LocalDateTime created;
 
     public boolean isEnabled() {
         return !blocked && !systemBlocked;

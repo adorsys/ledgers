@@ -55,6 +55,7 @@ class DepositAccountServiceImplTest {
     private static final String POSTING_ID = "posting_ID";
     private static final String SYSTEM = "System";
     private static final String USER_ID = "123";
+    private static final LocalDateTime CREATED = LocalDateTime.now();
 
     @Mock
     private DepositAccountRepository depositAccountRepository;
@@ -405,7 +406,7 @@ class DepositAccountServiceImplTest {
     private DepositAccount getDepositAccount(boolean status) {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic", "linked",
-                                  AccountUsage.PRIV, "details", status, false);
+                                  AccountUsage.PRIV, "details", status, false, CREATED);
     }
 
     private DepositAccountBO getDepositAccountBO() {
@@ -416,7 +417,9 @@ class DepositAccountServiceImplTest {
                        .accountType(AccountTypeBO.CASH)
                        .bic("bic")
                        .usageType(AccountUsageBO.PRIV).details("details")
-                       .linkedAccounts("linked").build();
+                       .linkedAccounts("linked")
+                       .created(CREATED)
+                       .build();
     }
 
     private LedgerAccountBO getLedgerAccountBO() {

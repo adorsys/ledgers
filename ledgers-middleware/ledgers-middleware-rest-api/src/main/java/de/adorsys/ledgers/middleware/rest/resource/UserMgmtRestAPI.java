@@ -21,7 +21,10 @@ import de.adorsys.ledgers.middleware.api.domain.sca.AuthConfirmationTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -297,6 +300,10 @@ public interface UserMgmtRestAPI {
             @ApiResponse(code = 401, message = "Provided bearer token could not be verified.")
     })
     ResponseEntity<UserTO> getUser();
+
+    @PutMapping("/me")
+    @ApiOperation(value = "Edit current User", authorizations = @Authorization(value = "apiKey"))
+    ResponseEntity<Void> editSelf(@RequestBody UserTO user);
 
     @PutMapping("/sca-data")
     @ApiOperation(value = "Updates user SCA", notes = "Updates user authentication methods."
