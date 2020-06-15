@@ -163,6 +163,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<String> findUserLoginsByBranch(String branchId) {
+        List<UserLogin> logins = userRepository.findUserLoginsByBranch(branchId);
+
+        return logins.stream()
+                       .map(UserLogin::getLogin)
+                       .collect(Collectors.toList());
+    }
+
+    @Override
     public int countUsersByBranch(String branch) {
         return userRepository.countByBranch(branch);
     }

@@ -264,7 +264,7 @@ class UserServiceImplTest {
         when(repository.findBranchIdsByMultipleParameters(any(), any(), any(), eq(UserRole.STAFF))).thenReturn(Collections.singletonList(getBranchEntity()));
         when(converter.toUserBOList(any())).thenAnswer(a -> LOCAL_CONVERTER.toUserBOList(a.getArgument(0)));
         when(converter.toUserRole(any())).thenReturn(Collections.singletonList(UserRole.CUSTOMER));
-        when(converter.toUserExtendedBO(any(), anyString())).thenAnswer(a->LOCAL_CONVERTER.toUserExtendedBO(a.getArgument(0), a.getArgument(1)));
+        when(converter.toUserExtendedBO(any(), anyString())).thenAnswer(a -> LOCAL_CONVERTER.toUserExtendedBO(a.getArgument(0), a.getArgument(1)));
         when(repository.findByBranchInAndLoginContainingAndUserRolesInAndBlockedInAndSystemBlockedFalse(any(), any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(userEntity)));
 
         // When
@@ -374,6 +374,18 @@ class UserServiceImplTest {
     void updatePassword_user_not_found() {
         when(repository.findById(USER_ID)).thenReturn(Optional.empty());
         assertThrows(UserManagementModuleException.class, () -> userService.updatePassword(USER_ID, "password"));
+    }
+
+    @Test
+    void findUserLoginsByBranch() {
+        // Given
+        when(repository.findUserLoginsByBranch(USER_BRANCH))
+                .thenReturn(Collections.singletonList(() -> USER_LOGIN));
+        // When
+        List<String> logins = userService.findUserLoginsByBranch(USER_BRANCH);
+
+        // Then
+        assertEquals(USER_LOGIN, logins.get(0));
     }
 
     private UserBO getUserBO() {
