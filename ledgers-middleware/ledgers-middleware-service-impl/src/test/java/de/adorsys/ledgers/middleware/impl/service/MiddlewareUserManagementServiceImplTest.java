@@ -455,6 +455,19 @@ class MiddlewareUserManagementServiceImplTest {
         assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.editBasicSelf("some other id", request));
     }
 
+    @Test
+    void getBranchUserLogins() {
+        // Given
+        when(userService.findUserLoginsByBranch(USER_BRANCH))
+                .thenReturn(Arrays.asList("anton.brueckner", "max.musterman"));
+
+        // When
+        List<String> actual = middlewareUserService.getBranchUserLogins(USER_BRANCH);
+
+        // Then
+        assertEquals(Arrays.asList("anton.brueckner", "max.musterman"), actual);
+    }
+
     private AdditionalAccountInformationTO getAdditionalInfo() {
         AdditionalAccountInformationTO to = new AdditionalAccountInformationTO();
         to.setAccountOwnerName(USER_LOGIN);

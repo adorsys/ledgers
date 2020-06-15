@@ -117,6 +117,22 @@ public interface UserMgmtStaffResourceAPI {
             @RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
 
     /**
+     * Get list of user logins within the branch.
+     *
+     * @return list of user logins.
+     */
+    @ApiOperation(value = "Lists user logins by branch",
+            notes = "Lists user logins by branch.",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, response = UserTO.class, message = "Success. List of logins received."),
+            @ApiResponse(code = 401, message = "Wrong authentication credential."),
+            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+    })
+    @GetMapping("/logins")
+    ResponseEntity<List<String>> getBranchUserLogins();
+
+    /**
      * Gets user by ID if it's within the branch
      *
      * @param userId user ID
