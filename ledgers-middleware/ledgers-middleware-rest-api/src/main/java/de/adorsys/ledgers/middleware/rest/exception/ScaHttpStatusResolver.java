@@ -31,6 +31,9 @@ public class ScaHttpStatusResolver {
         container.put(PSU_AUTH_ATTEMPT_INVALID, FORBIDDEN);
         container.put(AUTHENTICATION_FAILURE, FORBIDDEN);
 
+        //404 Block
+        container.put(RECOVERY_POINT_NOT_FOUND, NOT_FOUND);
+
         //501 Block
         container.put(SCA_METHOD_NOT_SUPPORTED, NOT_IMPLEMENTED);
     }

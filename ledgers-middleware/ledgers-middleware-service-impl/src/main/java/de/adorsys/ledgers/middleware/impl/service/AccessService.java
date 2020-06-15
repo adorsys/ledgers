@@ -50,7 +50,7 @@ public class AccessService {
 
     private boolean containsAccess(List<AccountAccessBO> accesses, String accountId) {
         return accesses.stream()
-                       .anyMatch(a -> a.getAccountId().equals(accountId));
+                       .anyMatch(a -> accountId.equals(a.getAccountId()));
     }
 
     public UserBO loadCurrentUser(String userId) {

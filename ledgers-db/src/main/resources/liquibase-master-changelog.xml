@@ -64,4 +64,5 @@
     <include file="migration/0029-add-timestamps.xml" relativeToChangelogFile="true" />
     <include file="migration/0030-set-timestamps.xml" relativeToChangelogFile="true" />
     <include file="migration/0031-update-admin-email.xml" relativeToChangelogFile="true" />
+    <include file="migration/0032-create-table-recovery-point.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
