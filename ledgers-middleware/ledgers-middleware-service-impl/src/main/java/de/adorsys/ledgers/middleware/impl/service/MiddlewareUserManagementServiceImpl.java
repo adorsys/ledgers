@@ -307,7 +307,6 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         depositAccountService.rollBackBranch(userId, point.getRollBackTime());
 
         systemBlockBranch(userId, false);
-        recoveryService.deleteById(userId, recoveryPointId);
         log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 

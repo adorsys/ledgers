@@ -21,7 +21,7 @@
     <parent>
         <groupId>de.adorsys.ledgers</groupId>
         <artifactId>ledgers-deposit-account</artifactId>
-        <version>3.7</version>
+        <version>3.7.1</version>
         <relativePath>..</relativePath>
     </parent>
 
