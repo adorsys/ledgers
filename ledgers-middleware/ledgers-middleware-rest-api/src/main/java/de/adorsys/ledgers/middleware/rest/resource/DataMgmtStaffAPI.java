@@ -59,5 +59,5 @@ public interface DataMgmtStaffAPI {
 
     @ApiOperation(value = "Deletes Recovery point by id related to current branch", authorizations = @Authorization(value = "apiKey"))
     @DeleteMapping(value = "/point/{id}")
-    ResponseEntity<String> deletePoint(@PathVariable("id") Long id);
+    ResponseEntity<Void> deletePoint(@PathVariable("id") Long id);
 }
