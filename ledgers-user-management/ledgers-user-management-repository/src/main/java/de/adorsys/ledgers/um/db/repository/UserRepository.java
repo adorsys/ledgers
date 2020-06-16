@@ -18,7 +18,6 @@ package de.adorsys.ledgers.um.db.repository;
 
 import de.adorsys.ledgers.um.db.domain.AccessType;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
-import de.adorsys.ledgers.um.db.domain.UserLogin;
 import de.adorsys.ledgers.um.db.domain.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -90,6 +89,5 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     @Query(value = "select distinct u from UserEntity u join u.accountAccesses a where a.accountId = ?1 and a.accessType = ?2")
     List<UserEntity> findOwnersByAccountId(String accountId, AccessType accessType);
 
-    @Query(value = "select u.login from UserEntity u where u.branch=?1")
-    List<UserLogin> findUserLoginsByBranch(String branchId);
+    List<UserEntity> findByBranch(String branchId);
 }

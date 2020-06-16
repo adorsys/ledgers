@@ -379,13 +379,13 @@ class UserServiceImplTest {
     @Test
     void findUserLoginsByBranch() {
         // Given
-        when(repository.findUserLoginsByBranch(USER_BRANCH))
-                .thenReturn(Collections.singletonList(() -> USER_LOGIN));
+        when(repository.findByBranch(USER_BRANCH))
+                .thenReturn(Collections.singletonList(getBranchEntity()));
         // When
         List<String> logins = userService.findUserLoginsByBranch(USER_BRANCH);
 
         // Then
-        assertEquals(USER_LOGIN, logins.get(0));
+        assertEquals(USER_BRANCH, logins.get(0));
     }
 
     private UserBO getUserBO() {
