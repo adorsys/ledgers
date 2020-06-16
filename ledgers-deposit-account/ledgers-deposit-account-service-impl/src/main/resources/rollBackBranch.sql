@@ -47,7 +47,7 @@ with depAccIds as (
          as (delete from ledger_account where id in (select linked_accounts from depAccIds) and created > ?2),
      deleteDepAccounts as (delete from deposit_account where branch = ?1 and created > ?2),
      deleteUsers as (delete from users where branch = ?1 and created > ?2),
-     deletePoints as(delete from recovery_point where branch_id =?1 and roll_back_time after ?2)
+     deletePoints as(delete from recovery_point where branch_id = ?1 and roll_back_time > ?2)
 delete
 from account_accesses
 where account_id in (select id from depAccIds)

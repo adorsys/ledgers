@@ -99,7 +99,7 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<String> deletePoint(Long id) {
+    public ResponseEntity<Void> deletePoint(Long id) {
         recoveryService.deleteById(scaInfoHolder.getUserId(), id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
