@@ -8,7 +8,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MiddlewareUserManagementService {
@@ -72,6 +71,14 @@ public interface MiddlewareUserManagementService {
      */
     CustomPageImpl<UserTO> getUsersByBranchAndRoles(String countryCode, String branchId, String branchLogin, String userLogin, List<UserRoleTO> roles, Boolean blocked, CustomPageableImpl pageable);
 
+    /**
+     * Returns list of logins for users (role = CUSTOMER) within the given branch.
+     *
+     * @param branch branch ID.
+     * @return list of logins.
+     */
+    List<String> getBranchUserLogins(String branch);
+
     CustomPageImpl<UserTO> getUsersByRoles(List<UserRoleTO> roles, CustomPageableImpl pageable);
 
     /**
@@ -105,5 +112,5 @@ public interface MiddlewareUserManagementService {
 
     void editBasicSelf(String userId, UserTO user);
 
-    void revertDatabase(String userId, LocalDateTime databaseStateDateTime);
+    void revertDatabase(String userId, long recoveryPointId);
 }

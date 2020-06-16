@@ -94,6 +94,14 @@ public interface UserService {
     Map<String, String> findBranchIdsByMultipleParameters(String countryCode, String branchId, String branchLogin);
 
     /**
+     * Returns list of user logins for given branch.
+     *
+     * @param branchId branch identifier.
+     * @return list of logins.
+     */
+    List<String> findUserLoginsByBranch(String branchId);
+
+    /**
      * Counts amount of users for a branch
      *
      * @param branch branch

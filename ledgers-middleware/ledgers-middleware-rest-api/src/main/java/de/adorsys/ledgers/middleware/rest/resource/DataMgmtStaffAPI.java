@@ -1,12 +1,16 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
+import de.adorsys.ledgers.middleware.api.domain.general.RecoveryPointTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Currency;
+import java.util.List;
 import java.util.Set;
 
 @Api(tags = "LDG011 - Data management (STAFF access)")
@@ -40,4 +44,20 @@ public interface DataMgmtStaffAPI {
     @ApiOperation(value = "Get next free branch id for country")
     @PostMapping(value = "/branch")
     ResponseEntity<String> branchId(@RequestBody BbanStructure bbanStructure);
+
+    @ApiOperation(value = "Create Recovery point", authorizations = @Authorization(value = "apiKey"))
+    @PostMapping(value = "/point")
+    ResponseEntity<Void> createPoint(@RequestBody RecoveryPointTO recoveryPoint);
+
+    @ApiOperation(value = "Get all Recovery points related to current branch", authorizations = @Authorization(value = "apiKey"))
+    @GetMapping(value = "/point/all")
+    ResponseEntity<List<RecoveryPointTO>> getAllPoints();
+
+    @ApiOperation(value = "Get Recovery point by id related to current branch", authorizations = @Authorization(value = "apiKey"))
+    @GetMapping(value = "/point/{id}")
+    ResponseEntity<RecoveryPointTO> getPoint(@PathVariable("id") Long id);
+
+    @ApiOperation(value = "Deletes Recovery point by id related to current branch", authorizations = @Authorization(value = "apiKey"))
+    @DeleteMapping(value = "/point/{id}")
+    ResponseEntity<String> deletePoint(@PathVariable("id") Long id);
 }

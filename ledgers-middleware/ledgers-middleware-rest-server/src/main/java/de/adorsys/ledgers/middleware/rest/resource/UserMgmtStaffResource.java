@@ -102,6 +102,14 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<List<String>> getBranchUserLogins() {
+        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
+        List<String> users = middlewareUserService.getBranchUserLogins(branchStaff.getBranch());
+        return ResponseEntity.ok(users);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<UserTO> getBranchUserById(String userId) {
         UserTO user = findUserForBranch(userId);
         return ResponseEntity.ok(user);
@@ -132,9 +140,15 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasAnyRole('STAFF')")
     public ResponseEntity<Void> revertDatabase(RevertRequestTO request) {
-        middlewareUserService.revertDatabase(request.getBranchId(), request.getTimestampToRevert());
+        if (!scaInfoHolder.getUserId().equals(request.getBranchId())) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg("You're trying to revert data for another branch!")
+                          .build();
+        }
+        middlewareUserService.revertDatabase(request.getBranchId(), request.getRecoveryPointId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

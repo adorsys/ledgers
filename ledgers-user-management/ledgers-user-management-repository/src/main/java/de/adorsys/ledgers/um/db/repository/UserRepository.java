@@ -88,4 +88,6 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
 
     @Query(value = "select distinct u from UserEntity u join u.accountAccesses a where a.accountId = ?1 and a.accessType = ?2")
     List<UserEntity> findOwnersByAccountId(String accountId, AccessType accessType);
+
+    List<UserEntity> findByBranch(String branchId);
 }
