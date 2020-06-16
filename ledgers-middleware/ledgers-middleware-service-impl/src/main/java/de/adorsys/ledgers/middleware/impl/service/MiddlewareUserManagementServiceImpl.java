@@ -5,9 +5,11 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
+import de.adorsys.ledgers.middleware.api.domain.general.RecoveryPointTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRecoveryService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
@@ -26,7 +28,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -53,14 +54,20 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private final UserMapper userTOMapper = Mappers.getMapper(UserMapper.class);
     private final PageMapper pageMapper;
     private final AdditionalAccountInformationMapper additionalInfoMapper;
+    private final MiddlewareRecoveryService recoveryService;
 
     @Value("${sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     @Override
     public UserTO create(UserTO user) {
-        UserBO userBO = userTOMapper.toUserBO(user);
-        return userTOMapper.toUserTO(userService.create(userBO));
+        UserBO createdUser = userService.create(userTOMapper.toUserBO(user));
+        if (createdUser.getUserRoles().contains(UserRoleBO.STAFF)) {
+            RecoveryPointTO point = new RecoveryPointTO();
+            point.setDescription(format("Registered %s user", user.getLogin()));
+            recoveryService.createRecoveryPoint(createdUser.getBranch(), point);
+        }
+        return userTOMapper.toUserTO(createdUser);
     }
 
     @Override
@@ -287,19 +294,21 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
-    public void revertDatabase(String userId, LocalDateTime databaseStateDateTime) {
+    @SuppressWarnings("PMD:PrematureDeclaration")
+    public void revertDatabase(String userId, long recoveryPointId) {
         // First, all users for this branch should be technically blocked.
         long start = System.nanoTime();
         log.info("Started reverting state for {}", userId);
+        RecoveryPointTO point = recoveryService.getPointById(userId, recoveryPointId);
 
         systemBlockBranch(userId, true);
         log.info("All branch data is LOCKED in {}seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
 
-        depositAccountService.rollBackBranch(userId, databaseStateDateTime);
+        depositAccountService.rollBackBranch(userId, point.getRollBackTime());
 
         systemBlockBranch(userId, false);
+        recoveryService.deleteById(userId, recoveryPointId);
         log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
-
     }
 
     private void systemBlockBranch(String branchId, boolean statusToSet) {

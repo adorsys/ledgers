@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="15-06-2020-01">
+        <comment>Create sequence for recovery point id</comment>
+        <createSequence sequenceName="recovery_point_id_seq"/>
+    </changeSet>
+
+    <changeSet author="dmi@adorsys.com.ua" id="15-06-2020-02">
+        <comment>Create table recovery_point</comment>
+
+        <createTable tableName="recovery_point">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="description" type="VARCHAR(225)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="roll_back_time" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="branch_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
