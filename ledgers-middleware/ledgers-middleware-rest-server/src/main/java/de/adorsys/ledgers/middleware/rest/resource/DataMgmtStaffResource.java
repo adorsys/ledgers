@@ -73,7 +73,6 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> branchId(BbanStructure bbanStructure) {
         return ResponseEntity.ok(appManagementService.generateNextBban(bbanStructure));
     }
