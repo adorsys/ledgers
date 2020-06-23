@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "LDG007 - Reset password for user")
+@Api(tags = "LDG008 - Reset password for user")
 public interface ResetPasswordRestAPI {
     String BASE_PATH = "/password";
 

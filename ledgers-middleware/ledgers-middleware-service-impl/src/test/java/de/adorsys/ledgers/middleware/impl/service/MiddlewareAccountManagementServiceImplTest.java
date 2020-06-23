@@ -521,7 +521,7 @@ class MiddlewareAccountManagementServiceImplTest {
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
         when(scaUtils.user((UserBO) any())).thenReturn(buildUserTO());
         when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(getScaValidationBO(true));
+        when(scaOperationService.validateAuthCode(any(), any(), any(), anyInt())).thenReturn(getScaValidationBO(true));
         when(scaUtils.loadAuthCode(any())).thenReturn(getSCAOperationBO());
         when(scaOperationService.authenticationCompleted(any(), any())).thenReturn(false);
         when(authorizationService.consentToken(any(), any())).thenReturn(getBearerTokenBO());
@@ -541,7 +541,7 @@ class MiddlewareAccountManagementServiceImplTest {
         when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
         when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenThrow(ScaModuleException.class);
+        when(scaOperationService.validateAuthCode(any(), any(), any(), anyInt())).thenThrow(ScaModuleException.class);
 
         // Then
         assertThrows(ScaModuleException.class, () -> middlewareService.authorizeConsent(buildScaInfoTO(), "consentId"));

@@ -363,7 +363,7 @@ class MiddlewarePaymentServiceImplTest {
         BearerTokenBO bearerTokenBO = new BearerTokenBO();
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
-        when(operationService.validateAuthCode(anyString(), anyString(), anyString(), anyString(), anyInt())).thenReturn(new ScaValidationBO("authCode", true, ScaStatusBO.FINALISED, 0));
+        when(operationService.validateAuthCode(anyString(), anyString(), anyString(), anyInt())).thenReturn(new ScaValidationBO("authCode", true, ScaStatusBO.FINALISED, 0));
         when(authorizationService.consentToken(any(), any())).thenReturn(bearerTokenBO);
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.TRUE);
         when(bearerTokenMapper.toBearerTokenTO(bearerTokenBO)).thenReturn(new BearerTokenTO());
@@ -387,7 +387,7 @@ class MiddlewarePaymentServiceImplTest {
         when(scaUtils.userBO(USER_ID)).thenReturn(userBO);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(payment);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(payment))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(payment));
-        when(operationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenThrow(ScaModuleException.builder().build());
+        when(operationService.validateAuthCode(any(), any(), any(), anyInt())).thenThrow(ScaModuleException.builder().build());
 
         // Then
         assertThrows(ScaModuleException.class, () -> middlewareService.authorizePayment(buildScaInfoTO(), PAYMENT_ID));

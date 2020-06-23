@@ -112,7 +112,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         ScaUserDataBO scaUserData = getScaUserData(user.getScaUserData(), scaOperation.getScaMethodId());
         checkMethodSupported(scaUserData);
         String tan = getTanDependingOnStrategy(scaUserData);
-        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(scaOperation.getId(), scaOperation.getOpId(), data.getOpData(), tan));
+        BaseHashItem<OperationHashItem> hashItem = new BaseHashItem<>(new OperationHashItem(scaOperation.getId(), scaOperation.getOpId(), tan));
         updateSCAOperation(scaOperation, hashItem);
 
         repository.save(scaOperation);
@@ -129,7 +129,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     @Override
-    public ScaValidationBO validateAuthCode(String authorisationId, String opId, String opData, String authCode, int scaWeight) {
+    public ScaValidationBO validateAuthCode(String authorisationId, String opId, String authCode, int scaWeight) {
         SCAOperationEntity operation = repository.findById(authorisationId)
                                                .orElseThrow(() -> ScaModuleException.builder()
                                                                           .errorCode(SCA_OPERATION_NOT_FOUND)
@@ -141,7 +141,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         checkOperationNotExpired(operation);
         checkSameOperation(operation, opId);
 
-        String generatedHash = generateHash(operation.getId(), opId, opData, authCode);
+        String generatedHash = generateHash(operation.getId(), opId, authCode);
         boolean isAuthCodeValid = StringUtils.equals(authCodeHash, generatedHash);
         ScaValidationBO scaValidation = new ScaValidationBO(isAuthCodeValid);
         if (isAuthCodeValid) {
@@ -335,13 +335,13 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     private String generateHash(String id, String confirmationCode) {
-        return generateHash(id, null, null, confirmationCode);
+        return generateHash(id, null, confirmationCode);
     }
 
-    private String generateHash(String id, String opId, String opData, String authCode) {
+    private String generateHash(String id, String opId, String authCode) {
         String hash;
         try {
-            hash = hashGenerator.hash(new BaseHashItem<>(new OperationHashItem(id, opId, opData, authCode)));
+            hash = hashGenerator.hash(new BaseHashItem<>(new OperationHashItem(id, opId, authCode)));
         } catch (HashGenerationException e) {
             log.error(TAN_VALIDATION_ERROR);
             throw ScaModuleException.builder()
@@ -480,14 +480,11 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         @JsonProperty
         private String opId;// attach to the business operation. Pinning!!!
         @JsonProperty
-        private String opData;
-        @JsonProperty
         private String tan;
 
-        public OperationHashItem(String id, String opId, String opData, String tan) {
+        public OperationHashItem(String id, String opId, String tan) {
             this.id = id;
             this.opId = opId;
-            this.opData = opData;
             this.tan = tan;
         }
     }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG007 - User Management (STAFF access)")
+@Api(tags = "LDG010 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
     String BRANCH = "branch";

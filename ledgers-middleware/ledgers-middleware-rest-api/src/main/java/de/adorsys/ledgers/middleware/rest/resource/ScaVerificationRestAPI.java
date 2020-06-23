@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Api(tags = "LDG013 - Email verification", description = "Provides endpoint for sending mail with verification link and email confirmation.")
+@Api(tags = "LDG009 - Email verification", description = "Provides endpoint for sending mail with verification link and email confirmation.")
 public interface ScaVerificationRestAPI {
     String BASE_PATH = "/emails";
 

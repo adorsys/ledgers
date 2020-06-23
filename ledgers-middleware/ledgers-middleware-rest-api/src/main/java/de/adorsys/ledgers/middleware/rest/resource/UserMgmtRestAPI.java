@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG001 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
+@Api(tags = "LDG002 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
 public interface UserMgmtRestAPI {
     String BASE_PATH = "/users";
 
