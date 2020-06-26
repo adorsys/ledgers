@@ -32,7 +32,7 @@ public class BbanStructure {
 
             @Override
             String bban(int length) {
-                return RandomStringUtils.random(length, true, true);
+                return RandomStringUtils.random(length, true, true).toUpperCase();
             }
         };
 
