@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@Api(tags = "LDG002 - Accounts", description = "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
+@Api(tags = "LDG003 - Accounts", description = "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 public interface AccountRestAPI {
     String BASE_PATH = "/accounts";
     String IBAN_QUERY_PARAM = "iban";

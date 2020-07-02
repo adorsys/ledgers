@@ -11,7 +11,7 @@ import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "LDG999 - Admin Management (SYSTEM access)")
+@Api(tags = "LDG013 - Admin Management (SYSTEM access)")
 public interface AdminResourceAPI {
     String BASE_PATH = "/admin";
     String BRANCH_ID = "branchId";

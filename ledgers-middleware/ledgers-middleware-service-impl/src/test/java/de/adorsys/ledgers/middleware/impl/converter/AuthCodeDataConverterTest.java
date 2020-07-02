@@ -25,7 +25,6 @@ class AuthCodeDataConverterTest {
         // Then
         assertEquals(to.getOpId(), bo.getOpId());
         assertEquals(to.getUserLogin(), bo.getUserLogin());
-        assertEquals(to.getOpData(), bo.getOpData());
         assertEquals(to.getScaUserDataId(), bo.getScaUserDataId());
     }
 

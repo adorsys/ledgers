@@ -19,7 +19,6 @@ import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
 import de.adorsys.ledgers.util.hash.HashGeneratorImpl;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +55,6 @@ class SCAOperationServiceImplTest {
     private static final String SCA_USER_DATA_ID = "sca_user_data_id";
     private static final String PAYMENT_ID = "payment_id";
     private static final String OP_ID = "opId";
-    private static final String OP_DATA = "opData";
     private static final int VALIDITY_SECONDS = 3 * 60;
     private static final String TAN = "my tan";
     private static final String STATIC_TAN = "my static tan";
@@ -110,7 +108,6 @@ class SCAOperationServiceImplTest {
 
         codeDataBO = new AuthCodeDataBO();
         codeDataBO.setAuthorisationId(AUTH_ID);
-        codeDataBO.setOpData(OP_DATA);
         codeDataBO.setOpId(PAYMENT_ID);
         codeDataBO.setScaUserDataId(SCA_USER_DATA_ID);
         codeDataBO.setUserLogin(USER_LOGIN);
@@ -372,7 +369,7 @@ class SCAOperationServiceImplTest {
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
         // When
-        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0);
 
         // Then
         assertThat(scaValidationBO.isValidAuthCode(), is(Boolean.TRUE));
@@ -397,7 +394,7 @@ class SCAOperationServiceImplTest {
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
 
         // When
-        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0);
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0);
 
         // Then
         assertThat(scaValidationBO.isValidAuthCode(), is(Boolean.TRUE));
@@ -418,7 +415,7 @@ class SCAOperationServiceImplTest {
         scaOperationEntity.setOpId("wrong id");
 
         // Then
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
@@ -428,7 +425,7 @@ class SCAOperationServiceImplTest {
         when(hashGenerator.hash(any())).thenReturn("wrong hash");
 
         // Then
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
 
         verify(repository, times(2)).findById(AUTH_ID);
         verify(hashGenerator, times(1)).hash(any());
@@ -437,7 +434,7 @@ class SCAOperationServiceImplTest {
     @Test
     void validateAuthCodeOperationNotFound() {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.empty());
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
@@ -447,7 +444,7 @@ class SCAOperationServiceImplTest {
         when(hashGenerator.hash(any())).thenThrow(new HashGenerationException());
 
         // Then
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
@@ -458,7 +455,7 @@ class SCAOperationServiceImplTest {
         // Force validated status to trigger expected exception
         scaOperationEntity.setStatus(AuthCodeStatus.VALIDATED);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
@@ -470,7 +467,7 @@ class SCAOperationServiceImplTest {
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(repository.save(any())).thenReturn(scaOperationEntity);
 
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
@@ -478,14 +475,14 @@ class SCAOperationServiceImplTest {
         scaOperationEntity.setStatus(EXPIRED);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
 
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
     void validateAuthCode_operation_is_used_done() {
         scaOperationEntity.setStatus(DONE);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
 
     }
 
@@ -493,14 +490,14 @@ class SCAOperationServiceImplTest {
     void validateAuthCode_operation_is_used_sca_failed() {
         scaOperationEntity.setScaStatus(FAILED);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @Test
     void validateAuthCode_operation_is_used_sca_finalized() {
         scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
-        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, OP_DATA, TAN, 0));
+        assertThrows(ScaModuleException.class, () -> scaOperationService.validateAuthCode(AUTH_ID, OP_ID, TAN, 0));
     }
 
     @SuppressWarnings("unchecked")

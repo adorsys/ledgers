@@ -19,6 +19,7 @@ package de.adorsys.ledgers.um.api.domain;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -102,5 +103,9 @@ public class UserBO {
     public boolean hasAccessToAccount(String iban, Currency currency) {
         return accountAccesses.stream()
                        .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban) && a.getCurrency().equals(currency));
+    }
+
+    public boolean hasSCA() {
+        return CollectionUtils.isNotEmpty(this.scaUserData);
     }
 }

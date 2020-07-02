@@ -32,7 +32,8 @@ public class PermittedResources {
             "/password",
             "/users/validate",
             "/oauth/**",
-            "/emails/email"
+            "/emails/email",
+            "/sca/login"
     };
 
     protected static final String[] CONSOLE_WHITELIST = {

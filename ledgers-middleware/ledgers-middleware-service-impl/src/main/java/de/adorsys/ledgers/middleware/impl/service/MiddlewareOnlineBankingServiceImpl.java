@@ -66,7 +66,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     public SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId, OpTypeTO opType) {
         OpTypeBO opTypeBO = OpTypeBO.valueOf(opType.name());
         UserBO user = user(login);
-        scaOperationService.checkIfExistsOrNew(new AuthCodeDataBO(user.getLogin(), null, consentId, null, NO_USER_MESSAGE, defaultLoginTokenExpireInSeconds, opTypeBO, authorisationId, 0));
+        scaOperationService.checkIfExistsOrNew(new AuthCodeDataBO(user.getLogin(), null, consentId, NO_USER_MESSAGE, defaultLoginTokenExpireInSeconds, opTypeBO, authorisationId, 0));
         try {
             BearerTokenBO loginTokenBO = proceedToLogin(user, pin, UserRoleTO.CUSTOMER, consentId, authorisationId);
             return resolveLoginResponseForConsentLogin(consentId, authorisationId, opTypeBO, user, loginTokenBO);
@@ -89,7 +89,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         if (!scaRequired(user)) {
             return authorizeResponse(loginTokenBO);
         } else {
-            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, consentId, null, NO_USER_MESSAGE,
+            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, consentId, NO_USER_MESSAGE,
                                                              defaultLoginTokenExpireInSeconds, opTypeBO, authorisationId, 0);
             SCAOperationBO scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUIDENTIFIED);
             SCALoginResponseTO response = toScaResponse(user, NO_USER_MESSAGE, scaOperationBO);
@@ -127,7 +127,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
         String opId = scaOperationBO.getOpId();
         AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaInfoTO.getScaMethodId(),
-                                                         opId, opId, userMessage, validitySeconds,
+                                                         opId, userMessage, validitySeconds,
                                                          OpTypeBO.LOGIN, scaInfoTO.getAuthorisationId(), 0);
         scaOperationBO = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
         SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
@@ -142,7 +142,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         SCAOperationBO scaOperationBO = scaOperationService.loadAuthCode(scaInfoTO.getAuthorisationId());
         LoginKeyDataTO keyData = LoginKeyDataTO.fromOpId(scaOperationBO.getOpId());
         String authorisationId = scaInfoTO.getAuthorisationId();
-        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(authorisationId, authorisationId, authorisationId, scaInfoTO.getAuthCode(), 0);
+        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(authorisationId, authorisationId, scaInfoTO.getAuthCode(), 0);
         SCALoginResponseTO scaResponse = toScaResponse(user, keyData.messageTemplate(), scaOperationBO);
         if (scaValidationBO.isValidAuthCode()) {
             BearerTokenBO scaToken = authorizationService.scaToken(scaInfoMapper.toScaInfoBO(scaInfoTO));

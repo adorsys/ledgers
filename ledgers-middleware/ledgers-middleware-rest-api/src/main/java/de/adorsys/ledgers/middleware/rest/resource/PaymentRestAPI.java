@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG003 - Payment", description = "Provide endpoint for initiating and executing payment.")
+@Api(tags = "LDG004 - Payment", description = "Provide endpoint for initiating and executing payment.")
 public interface PaymentRestAPI {
     String BASE_PATH = "/payments";
 
