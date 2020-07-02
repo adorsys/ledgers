@@ -22,11 +22,10 @@ public interface SCAOperationService {
      *
      * @param authorisationId : the id of this authorization instance.
      * @param opId            : This is the id of the operation like provided by the consuming module.
-     * @param opData          : This are data to be linked to the generated One Time Password.
      * @param authCode        : This auth code was generated at previous step @see #generateAuthCode(String opId, String opData, int validitySeconds)
      * @return SCA validation object
      */
-    ScaValidationBO validateAuthCode(String authorisationId, String opId, String opData, String authCode, int scaWeight);
+    ScaValidationBO validateAuthCode(String authorisationId, String opId, String authCode, int scaWeight);
 
 
     /**

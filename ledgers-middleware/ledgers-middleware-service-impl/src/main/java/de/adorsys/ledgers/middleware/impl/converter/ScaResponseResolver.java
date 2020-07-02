@@ -63,13 +63,13 @@ public class ScaResponseResolver {
     }
 
     public void prepareScaAndUpdateResponse(String paymentId, SCAPaymentResponseTO response, String authorisationId, String psuMessage, int scaWeight, UserBO user, OpTypeBO opType) {
-        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, paymentId, psuMessage, psuMessage, defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
+        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, paymentId, psuMessage, defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
         SCAOperationBO operation = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.valueOf(response.getScaStatus().name()));
         updateScaUserDataInResponse(user, operation, response);
     }
 
     public void generateCodeAndUpdateResponse(String paymentId, SCAPaymentResponseTO response, String authorisationId, String psuMessage, int scaWeight, UserBO user, OpTypeBO opType, String scaMethodId) {
-        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaMethodId, paymentId, psuMessage, psuMessage, defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
+        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaMethodId, paymentId, psuMessage, defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
         SCAOperationBO operation = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
         updateScaUserDataInResponse(user, operation, response);
     }
@@ -101,4 +101,5 @@ public class ScaResponseResolver {
         response.setPaymentProduct(payment.getPaymentProduct());
         return response;
     }
+
 }

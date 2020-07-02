@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG008 - Accounts (STAFF access)", description = "Provides access to the deposit account resource for staff members.")
+@Api(tags = "LDG011 - Accounts (STAFF access)", description = "Provides access to the deposit account resource for staff members.")
 public interface AccountMgmStaffResourceAPI {
     String BASE_PATH = "/staff-access" + AccountRestAPI.BASE_PATH;
     String ACCOUNT_ID = "accountId";

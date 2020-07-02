@@ -1,6 +1,5 @@
 userLogin: spe
 scaUserDataId: 1111
 opId: 2222
-opData: some_operation_data
 userMessage: message_to_user
 validitySeconds: 180

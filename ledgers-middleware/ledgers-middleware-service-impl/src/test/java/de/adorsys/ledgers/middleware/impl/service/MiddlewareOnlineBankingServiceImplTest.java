@@ -226,7 +226,7 @@ class MiddlewareOnlineBankingServiceImplTest {
         // Given
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
         when(scaOperationService.loadAuthCode(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
-        when(scaOperationService.validateAuthCode(any(), any(), any(), any(), anyInt())).thenReturn(getScaValidationBO());
+        when(scaOperationService.validateAuthCode(any(), any(), any(), anyInt())).thenReturn(getScaValidationBO());
         when(scaUtils.user((UserBO) any())).thenReturn(getUserTO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());

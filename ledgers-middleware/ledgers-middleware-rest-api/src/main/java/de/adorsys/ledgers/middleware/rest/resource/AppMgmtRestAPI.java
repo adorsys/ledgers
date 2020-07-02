@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Api(tags = "LDG005 - Application Management", description = "Application management")
+@Api(tags = "LDG001 - Application Management", description = "Application management")
 public interface AppMgmtRestAPI {
     String BASE_PATH = "/management/app";
 

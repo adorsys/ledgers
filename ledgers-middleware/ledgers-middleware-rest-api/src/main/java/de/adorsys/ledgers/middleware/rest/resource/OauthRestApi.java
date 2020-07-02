@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Api(tags = "LDG012 - Oauth authorisation")
+@Api(tags = "LDG06 - Oauth authorisation")
 public interface OauthRestApi {
     String BASE_PATH = "/oauth";
 

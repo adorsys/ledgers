@@ -24,7 +24,7 @@ import io.swagger.annotations.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "LDG004 - Consent", description = "Provide an API to manage consent at the core banking level.")
+@Api(tags = "LDG005 - Consent", description = "Provide an API to manage consent at the core banking level.")
 public interface ConsentRestAPI {
     String BASE_PATH = "/consents";
 

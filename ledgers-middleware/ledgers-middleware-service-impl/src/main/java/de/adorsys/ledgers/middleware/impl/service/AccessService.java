@@ -109,6 +109,14 @@ public class AccessService {
                        .orElse(0);
     }
 
+    public int resolveScaWeightCommon(Set<String> ibans, List<AccountAccessBO> accountAccesses) {
+        return accountAccesses.stream()
+                       .filter(ac -> ibans.contains(ac.getIban()))
+                       .min(Comparator.comparing(AccountAccessBO::getScaWeight))
+                       .map(AccountAccessBO::getScaWeight)
+                       .orElse(0);
+    }
+
     public boolean userHasAccessToAccount(UserTO user, String iban) {
         return user.getAccountAccesses().stream()
                        .anyMatch(a -> a.getIban().equals(iban));

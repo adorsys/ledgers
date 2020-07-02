@@ -262,7 +262,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(opType, payment);
 
         String authorisationId = opType == PAYMENT ? scaInfoTO.getAuthorisationId() : cancellationId;
-        ScaValidationBO scaValidationBO = validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode(), paymentKeyData.getTanTemplate());
+        ScaValidationBO scaValidationBO = validateAuthCode(scaInfoTO.getUserId(), payment, authorisationId, scaInfoTO.getAuthCode());
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
             if (opType == PAYMENT) {
                 paymentService.updatePaymentStatus(paymentId, ACTC);
@@ -348,10 +348,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return bearerTokenMapper.toBearerTokenTO(authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), aisConsent));
     }
 
-    private ScaValidationBO validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode, String template) {
+    private ScaValidationBO validateAuthCode(String userId, PaymentBO payment, String authorisationId, String authCode) {
         UserBO userBO = scaUtils.userBO(userId);
         int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
-        return scaOperationService.validateAuthCode(authorisationId, payment.getPaymentId(), template, authCode, scaWeight);
+        return scaOperationService.validateAuthCode(authorisationId, payment.getPaymentId(), authCode, scaWeight);
     }
 
     private PaymentBO loadPayment(String paymentId) {

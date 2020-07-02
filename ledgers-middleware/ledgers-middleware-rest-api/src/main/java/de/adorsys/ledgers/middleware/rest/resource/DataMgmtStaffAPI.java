@@ -13,7 +13,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Set;
 
-@Api(tags = "LDG011 - Data management (STAFF access)")
+@Api(tags = "LDG012 - Data management (STAFF access)")
 public interface DataMgmtStaffAPI {
     String BASE_PATH = "/staff-access/data";
 
