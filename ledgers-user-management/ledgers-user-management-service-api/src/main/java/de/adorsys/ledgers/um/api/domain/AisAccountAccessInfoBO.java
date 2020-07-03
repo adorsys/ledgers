@@ -21,6 +21,7 @@ import lombok.Data;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,6 +38,7 @@ public class AisAccountAccessInfoBO {
 
     public Set<String> getAllAccounts() {
         return Stream.of(accounts, balances, transactions)
+                       .filter(Objects::nonNull)
                        .flatMap(Collection::stream)
                        .collect(Collectors.toSet());
     }
