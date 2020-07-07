@@ -15,13 +15,13 @@ import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.RESET_PA
 public class ResetPasswordEmailCodeSenderImpl implements ResetPasswordCodeSender {
     private static final String CAN_NOT_SEND_EMAIL_CODE = "Can't send email with code";
 
-    @Value("${reset-password.email.subject}")
+    @Value("${ledgers.reset-password.email.subject}")
     private String subject;
 
-    @Value("${reset-password.email.from}")
+    @Value("${ledgers.reset-password.email.from}")
     private String from;
 
-    @Value("${reset-password.email.template-message}")
+    @Value("${ledgers.reset-password.email.template-message}")
     private String templateMessage;
 
     private final UserMailSender userMailSender;

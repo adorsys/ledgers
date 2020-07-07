@@ -8,7 +8,7 @@ import java.util.*;
 
 @Getter
 @Configuration
-@ConfigurationProperties(prefix = "currency")
+@ConfigurationProperties(prefix = "ledgers.currency")
 public class CurrencyConfigurationProperties {
-    private Set<Currency> currencies = new HashSet<>();
+    private final Set<Currency> currencies = new HashSet<>();
 }

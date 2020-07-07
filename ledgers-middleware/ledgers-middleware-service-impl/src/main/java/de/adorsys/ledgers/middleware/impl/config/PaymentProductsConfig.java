@@ -11,7 +11,7 @@ import java.util.Set;
 @Setter
 @Getter
 @Configuration
-@ConfigurationProperties(prefix = "payment-products")
+@ConfigurationProperties(prefix = "ledgers.payment-products")
 public class PaymentProductsConfig {
     private Set<String> instant = new HashSet<>();
     private Set<String> regular = new HashSet<>();

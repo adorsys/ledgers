@@ -23,7 +23,7 @@ public class PaymentMapperConfiguration {
     private static final ResourceLoader resourceLoader = new DefaultResourceLoader();
     private final ObjectMapper objectMapper;
 
-    @Value("${payment_mapping.path:}")
+    @Value("${ledgers.payment_mapping.path:}")
     private String paymentMapping;
 
     @Bean

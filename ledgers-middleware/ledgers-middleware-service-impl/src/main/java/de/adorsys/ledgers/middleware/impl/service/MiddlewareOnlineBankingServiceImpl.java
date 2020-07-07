@@ -49,7 +49,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
     @Override

@@ -24,7 +24,7 @@ import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.USER_NOT
 public class ResetPasswordEmailCodeGeneratorImpl implements ResetPasswordCodeGenerator {
     private static final String USER_WITH_LOGIN_AND_EMAIL_NOT_FOUND = "User with login=%s and email=%s not found";
 
-    @Value("${reset-password.expiration-code-minutes:2}")
+    @Value("${ledgers.reset-password.expiration-code-minutes:2}")
     private int expirationMinutes;
 
     private final UserRepository userRepository;

@@ -31,10 +31,10 @@ public class ScaResponseResolver {
     private final UserMapper userMapper;
     private final SCAOperationService scaOperationService;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
     public <T extends SCAResponseTO> void completeResponse(T response, SCAOperationBO operation, UserTO user, String template, BearerTokenTO token) {

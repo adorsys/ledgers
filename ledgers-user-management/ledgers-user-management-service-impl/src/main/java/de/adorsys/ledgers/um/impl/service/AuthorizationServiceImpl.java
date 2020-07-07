@@ -42,7 +42,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     private static final String WRONG_JWS_ALGO_FOR_TOKEN_WITH_SUBJECT = "Wrong jws algo for token with subject : {}";
     private static final String USER_DOES_NOT_HAVE_THE_ROLE_S = "User with id %s and login %s does not have the role %s";
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
     private final HashMacSecretSource secretSource;
