@@ -74,25 +74,25 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     //Use property config instead
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int authCodeValiditySeconds;
 
-    @Value("${sca.authCode.email.body}")
+    @Value("${ledgers.sca.authCode.email.body}")
     private String authCodeEmailBody;
 
-    @Value("${sca.authCode.failed.max:5}")
+    @Value("${ledgers.sca.authCode.failed.max:5}")
     private int authCodeFailedMax;
 
-    @Value("${sca.login.failed.max:3}")
+    @Value("${ledgers.sca.login.failed.max:3}")
     private int loginFailedMax;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
-    @Value("${sca.final.weight:100}")
+    @Value("${ledgers.sca.final.weight:100}")
     private int finalWeight;
 
-    @Value("${sca.authorisation_confirmation_enabled:false}")
+    @Value("${ledgers.sca.authorisation_confirmation_enabled:false}")
     private boolean authConfirmationEnabled;
 
     @Override
@@ -117,9 +117,9 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
         repository.save(scaOperation);
         if (scaUserData.isEmailValid()) {
-            String userMessageTemplate = StringUtils.isBlank(data.getUserMessage())
-                                                 ? authCodeEmailBody
-                                                 : data.getUserMessage();
+            String userMessageTemplate = StringUtils.isBlank(authCodeEmailBody)
+                                                 ? data.getUserMessage()
+                                                 : authCodeEmailBody;
             String message = String.format(userMessageTemplate, tan);
             senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
         }

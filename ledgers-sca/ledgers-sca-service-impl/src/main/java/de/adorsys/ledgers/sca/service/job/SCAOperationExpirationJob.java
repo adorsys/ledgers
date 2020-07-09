@@ -32,7 +32,7 @@ public class SCAOperationExpirationJob {
     }
 
 
-    @Scheduled(cron = "${sca.authCode.expiration.cron}")
+    @Scheduled(cron = "${ledgers.sca.authCode.expiration.cron}")
     public void checkOperationExpiration(){
         log.info("Start job of processing expired operations");
         scaOperationService.processExpiredOperations();

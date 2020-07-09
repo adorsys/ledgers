@@ -49,6 +49,8 @@ public interface UserService {
      */
     UserBO findByLogin(String login);
 
+    UserBO findByLoginOrEmail(String loginOrEmail);
+
     /**
      * Update SCA methods by user login
      *

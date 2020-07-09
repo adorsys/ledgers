@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "oauth")
+@ConfigurationProperties(prefix = "ledgers.oauth")
 public class OauthConfigurationProperties {
     private String authorizationEndpoint;
     private String tokenEndpoint;

@@ -299,7 +299,7 @@ class SCAOperationServiceImplTest {
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
-        when(emailSender.send(email, TAN)).thenReturn(true);
+        when(emailSender.send(email, "TAN: my tan")).thenReturn(true);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(scaOperationMapper.toBO(scaOperationEntity)).thenReturn(scaOperationBO);

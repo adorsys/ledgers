@@ -44,8 +44,8 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     private static final String PAYMENT_EXECUTION_FAILED = "Payment execution failed due to: %s, payment id: %s";
     private static final String PAYMENT_CANCELLATION_FAILED = "Can`t cancel payment id:%s, as it is already executed";
 
-    @Value("${payment-products.instant: instant-sepa-credit-transfers,target-2-payments}")
-    private Set<String> instantPayments = new HashSet<>();
+    @Value("${ledgers.payment-products.instant: instant-sepa-credit-transfers,target-2-payments}")
+    private final Set<String> instantPayments = new HashSet<>();
 
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;

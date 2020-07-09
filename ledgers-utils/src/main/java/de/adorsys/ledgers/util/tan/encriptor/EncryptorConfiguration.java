@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class EncryptorConfiguration {
-    @Value("${application.security.encryptorAlgorithm}")
+    @Value("${ledgers.application.security.encryptorAlgorithm}")
     private String encryptorAlgorithm;
-    @Value("${application.security.masterPassword}")
+    @Value("${ledgers.application.security.masterPassword}")
     private String masterPassword;
 
     @Bean

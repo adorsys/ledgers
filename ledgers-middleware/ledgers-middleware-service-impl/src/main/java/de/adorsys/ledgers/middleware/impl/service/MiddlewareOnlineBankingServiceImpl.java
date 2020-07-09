@@ -49,12 +49,12 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     private final ScaInfoMapper scaInfoMapper;
     private final AuthorizationService authorizationService;
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
     @Override
     public SCALoginResponseTO authorise(String login, String pin, UserRoleTO role) {
-        UserBO user = user(login);
+        UserBO user = getUserByLoginOrEmail(login);
         LoginKeyDataTO keyData = new LoginKeyDataTO(user.getId(), LocalDateTime.now());
         String opId = keyData.toOpId();
         BearerTokenBO loginTokenBO = proceedToLogin(user, pin, role, opId, opId);
@@ -65,7 +65,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     @Transactional(noRollbackFor = ScaModuleException.class)
     public SCALoginResponseTO authoriseForConsent(String login, String pin, String consentId, String authorisationId, OpTypeTO opType) {
         OpTypeBO opTypeBO = OpTypeBO.valueOf(opType.name());
-        UserBO user = user(login);
+        UserBO user = getUserByLoginOrEmail(login);
         scaOperationService.checkIfExistsOrNew(new AuthCodeDataBO(user.getLogin(), null, consentId, NO_USER_MESSAGE, defaultLoginTokenExpireInSeconds, opTypeBO, authorisationId, 0));
         try {
             BearerTokenBO loginTokenBO = proceedToLogin(user, pin, UserRoleTO.CUSTOMER, consentId, authorisationId);
@@ -78,7 +78,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
     @Override
     public SCALoginResponseTO authoriseForConsentWithToken(ScaInfoTO scaInfo, String consentId, String authorisationId, OpTypeTO opType) {
         OpTypeBO opTypeBO = OpTypeBO.valueOf(opType.name());
-        UserBO user = user(scaInfo.getUserLogin());
+        UserBO user = getUserByLoginOrEmail(scaInfo.getUserLogin());
 
         BearerTokenBO loginTokenBO = proceedToLogin(scaInfoMapper.toScaInfoBO(scaInfo), authorisationId);
         return resolveLoginResponseForConsentLogin(consentId, authorisationId, opTypeBO, user, loginTokenBO);
@@ -164,7 +164,7 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
 
         SCALoginResponseTO response = new SCALoginResponseTO();
         response.setScaStatus(ScaStatusTO.EXEMPTED);
-        UserBO user = user(userLogin);
+        UserBO user = getUserByLoginOrEmail(userLogin);
         BearerTokenBO scaTokenBO = authorizationService.scaToken(new ScaInfoBO(user.getId(), null, null, UserRoleBO.CUSTOMER, null, null, TokenUsageBO.DIRECT_ACCESS, user.getLogin()));
         response.setBearerToken(bearerTokenMapper.toBearerTokenTO(scaTokenBO));
         response.setScaId(scaTokenBO.getAccessTokenObject().getScaId());
@@ -205,8 +205,8 @@ public class MiddlewareOnlineBankingServiceImpl implements MiddlewareOnlineBanki
         return response;
     }
 
-    private UserBO user(String login) {
-        return userService.findByLogin(login);
+    private UserBO getUserByLoginOrEmail(String login) {
+        return userService.findByLoginOrEmail(login);
     }
 
     private BearerTokenBO proceedToLogin(UserBO user, String pin, UserRoleTO role, String scaId, String authorisationId) {
