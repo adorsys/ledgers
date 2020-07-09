@@ -90,4 +90,7 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     List<UserEntity> findOwnersByAccountId(String accountId, AccessType accessType);
 
     List<UserEntity> findByBranch(String branchId);
+
+    @Query(value = "select u from UserEntity u where u.login=?1 or u.email=?1")
+    Optional<UserEntity> findByLoginOrEmail(String loginOrEmail);
 }

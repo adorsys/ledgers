@@ -99,6 +99,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserBO findByLoginOrEmail(String loginOrEmail) {
+        return userRepository.findByLoginOrEmail(loginOrEmail)
+                       .map(userConverter::toUserBO)
+                       .orElseThrow(getModuleExceptionSupplier(loginOrEmail, USER_NOT_FOUND, USER_WITH_LOGIN_NOT_FOUND));
+    }
+
+    @Override
     public UserBO updateScaData(List<ScaUserDataBO> scaDataList, String userLogin) {
         log.info("Retrieving user by login={}", userLogin);
         UserEntity user = userRepository.findFirstByLogin(userLogin)
