@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 @Getter
 public class HashMacSecretSource {
 
-    @Value("${user-service.jwt.hs256.secret}")
+    @Value("${ledgers.user-service.jwt.hs256.secret}")
     private String hmacSecret;
 }

@@ -24,7 +24,7 @@ public class PaymentExecutionScheduler {
 
     private final PaymentExecutionService executionService;
 
-    @Scheduled(initialDelayString = "${paymentScheduler.initialDelay}", fixedDelayString = "${paymentScheduler.delay}")
+    @Scheduled(initialDelayString = "${ledgers.paymentScheduler.initialDelay}", fixedDelayString = "${ledgers.paymentScheduler.delay}")
     public void scheduler() {
         log.info("Payment Execution Scheduler started at {}", LocalDateTime.now());
         List<Payment> payments = paymentRepository.getAllDuePayments();

@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "verify")
+@ConfigurationProperties(prefix = "ledgers.verify")
 public class EmailVerificationProperties {
-    private String basePath;
+    private String extBasePath;
     private String endPoint;
     private EmailTemplate template;
 

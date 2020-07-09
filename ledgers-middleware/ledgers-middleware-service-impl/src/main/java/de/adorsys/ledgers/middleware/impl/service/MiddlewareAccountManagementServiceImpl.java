@@ -74,10 +74,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final PageMapper pageMapper;
     private final ScaResponseResolver scaResponseResolver;
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     @Override

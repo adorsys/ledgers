@@ -41,53 +41,53 @@ spring:
           auth: true
           starttls:
             enable: true
+ledgers:
+  paymentScheduler:
+    initialDelay: 3000
+    delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
 
-paymentScheduler:
-  initialDelay: 3000
-  delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations
+  sca:
+    authCode:
+      validity.seconds: 180
+      expiration:
+        cron: "*/5 * * * * *" # every 5 seconds
+      email:
+        subject: "Your TAN from MockBank"
+        body: "TAN: %s"
+        from: noreply@adorsys.de
+      phone:
+        subject: "Your TAN from MockBank"
 
-sca:
-  authCode:
-    validity.seconds: 180
-    expiration:
-      cron: "*/5 * * * * *" # every 5 seconds
+  reset-password:
+    expiration-code-minutes: 5
     email:
-      subject: "Your TAN from MockBank"
-      body: "TAN: %s"
+      template-message: "Please use this code %s to reset your password"
+      subject: "Your code for password reset"
       from: noreply@adorsys.de
-    phone:
-      subject: "Your TAN from MockBank"
 
-user-service:
-  jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
+  user-service:
+    jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
-reset-password:
-  expiration-code-minutes: 5
-  email:
-    template-message: "Please use this code %s to reset your password"
-    subject: "Your code for password reset"
-    from: noreply@adorsys.de
-
-verify:
-  template:
-    subject: "Please verify your email address"
-    from: noreply@adorsys.de
-    message:
-      "Hello,
-      Please verify your email address by clicking the following link: %s
-      Please note that the above link is only valid until %s.
-      This is an automatically generated email – please do not reply to it. If you have any queries regarding your order, please email us at info@tpp.com.
-      %s
-      Best wishes,
-      Dynamic Sandbox team"
-  base_path: http://localhost:8088
-  endpoint: /emails/email
+  verify:
+    template:
+      subject: "Please verify your email address"
+      from: noreply@adorsys.de
+      message:
+        "Hello,
+        Please verify your email address by clicking the following link: %s
+        Please note that the above link is only valid until %s.
+        This is an automatically generated email – please do not reply to it. If you have any queries regarding your order, please email us at info@tpp.com.
+        %s
+        Best wishes,
+        Dynamic Sandbox team"
+    ext_base_path: http://localhost:8088
+    endpoint: /emails/email
 
 #TanEncryption
-application:
-  security:
-    masterPassword: $VoL973@sd
-    encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
+  application:
+    security:
+      masterPassword: $VoL973@sd
+      encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
 
 
 logging.level.org.hibernate: WARN

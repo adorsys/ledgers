@@ -34,10 +34,10 @@ import static de.adorsys.ledgers.sca.domain.OpTypeBO.*;
 public class MiddlewareScaServiceImpl implements MiddlewareScaService {
     private static final String NO_USER_MESSAGE = "No user message";
 
-    @Value("${default.token.lifetime.seconds:600}")
+    @Value("${ledgers.default.token.lifetime.seconds:600}")
     private int defaultLoginTokenExpireInSeconds;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     private final UserService userService;
