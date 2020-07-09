@@ -66,7 +66,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authorise() {
         // Given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(getBearerTokenBO());
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
@@ -83,7 +83,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authorise_unknownCredentials() {
         // Given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
 
         // Then
         assertThrows(MiddlewareModuleException.class, () -> onlineBankingService.authorise(USER_LOGIN, USER_PIN, USER_ROLE_TO_CUSTOMER));
@@ -92,7 +92,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authoriseForConsent() {
         // Given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
         when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(getBearerTokenBO());
         when(scaUtils.hasSCA(any())).thenReturn(false);
@@ -111,7 +111,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authoriseForConsent_failed_authorization() {
         //given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
         when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.FAILED));
         when(scaOperationService.updateFailedCount(any(),anyBoolean())).thenReturn(ScaModuleException.builder().build());
 
@@ -127,7 +127,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authoriseForConsent_failed_cred_validation() {
         //given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
         when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(getSCAOperationBO(ScaStatusBO.EXEMPTED));
         when(authorizationService.authorise(any(), any(), any(), any(), any())).thenReturn(null);
         when(scaOperationService.updateFailedCount(any(),anyBoolean())).thenReturn(ScaModuleException.builder().build());
@@ -146,7 +146,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authoriseForConsentWithToken() {
         // Given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
         when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(authorizationService.authorizeNewAuthorizationId(any(), any())).thenReturn(getBearerTokenBO());
         when(scaUtils.hasSCA(any())).thenReturn(true);
@@ -168,7 +168,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     @Test
     void authoriseForConsentWithToken_unknownCredentials() {
         // Given
-        when(userService.findByLogin(any())).thenReturn(getUserBO());
+        when(userService.findByLoginOrEmail(any())).thenReturn(getUserBO());
 
         // Then
         assertThrows(MiddlewareModuleException.class, () -> onlineBankingService.authoriseForConsentWithToken(buildScaInfoTO(), CONSENT_ID, AUTHORIZATION_ID, OpTypeTO.CONSENT));
@@ -243,7 +243,7 @@ class MiddlewareOnlineBankingServiceImplTest {
     void authorizeForUser() {
         // Given
         when(authorizationService.validateCredentials(anyString(), anyString(), any())).thenReturn(true);
-        when(userService.findByLogin(anyString())).thenReturn(new UserBO("anton.brueckner", null, null));
+        when(userService.findByLoginOrEmail(anyString())).thenReturn(new UserBO("anton.brueckner", null, null));
         when(authorizationService.scaToken(any())).thenReturn(getBearerTokenBO());
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(new BearerTokenTO());
 
