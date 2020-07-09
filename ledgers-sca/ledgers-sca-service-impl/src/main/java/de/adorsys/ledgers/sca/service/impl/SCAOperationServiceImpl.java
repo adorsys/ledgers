@@ -117,9 +117,9 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
         repository.save(scaOperation);
         if (scaUserData.isEmailValid()) {
-            String userMessageTemplate = StringUtils.isBlank(data.getUserMessage())
-                                                 ? authCodeEmailBody
-                                                 : data.getUserMessage();
+            String userMessageTemplate = StringUtils.isBlank(authCodeEmailBody)
+                                                 ? data.getUserMessage()
+                                                 : authCodeEmailBody;
             String message = String.format(userMessageTemplate, tan);
             senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
         }
