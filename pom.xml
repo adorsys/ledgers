@@ -17,6 +17,15 @@
 	<artifactId>ledgers</artifactId>
 	<version>3.10-SNAPSHOT</version>
 
+	<!--TODO: Add necessary dependencies here-->
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.3.1.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
 	<modules>
 		<module>ledgers-app</module>
 		<module>ledgers-postings</module>
@@ -99,7 +108,8 @@
 		<dbunit.version>2.5.1</dbunit.version>
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
 		<spring-security.version>5.2.2.RELEASE</spring-security.version>
-		<springfox-swagger2.version>2.8.0</springfox-swagger2.version>
+		<keycloak-adapter-bom.version>10.0.2</keycloak-adapter-bom.version>
+		<springfox-swagger2.version>3.0.0</springfox-swagger2.version>
 		<swagger-annotations.version>1.5.17</swagger-annotations.version>
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
 		<maven.surefire.plugin.version>3.0.0-M4</maven.surefire.plugin.version>
@@ -117,8 +127,8 @@
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<slf4j.version>1.7.25</slf4j.version>
 		<nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
-		<liquibase.version>3.6.2</liquibase.version>
-		<spring-boot-dependencies.version>2.2.4.RELEASE</spring-boot-dependencies.version>
+		<liquibase.version>4.0.0</liquibase.version>
+		<spring-boot-dependencies.version>2.3.1.RELEASE</spring-boot-dependencies.version>
 		<spring-cloud-feign.version>2.1.1.RELEASE</spring-cloud-feign.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
 		<jackson.version>2.9.10</jackson.version>
@@ -186,6 +196,18 @@
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-core</artifactId>
 				<version>${spring-security.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-spring-boot-starter</artifactId>
+				<version>${keycloak-adapter-bom.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-spring-security-adapter</artifactId>
+				<version>${keycloak-adapter-bom.version}</version>
 			</dependency>
 
 			<!-- swagger -->
@@ -290,6 +312,14 @@
 				<artifactId>spring-test-dbunit</artifactId>
 				<version>${spring-test-dbunit.version}</version>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.keycloak.bom</groupId>
+				<artifactId>keycloak-adapter-bom</artifactId>
+				<version>${keycloak-adapter-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 		</dependencies>

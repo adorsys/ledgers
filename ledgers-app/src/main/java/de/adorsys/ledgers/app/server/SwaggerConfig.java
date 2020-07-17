@@ -1,7 +1,5 @@
 package de.adorsys.ledgers.app.server;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Configuration
 @EnableSwagger2
@@ -55,8 +54,8 @@ public class SwaggerConfig {
     private Predicate<RequestHandler> resolvePredicates() {
         List<String> profiles = Arrays.asList(env.getActiveProfiles());
         return profiles.contains("develop") || profiles.contains("sandbox")
-                       ? Predicates.or(RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class),
-                                       RequestHandlerSelectors.withClassAnnotation(MiddlewareResetResource.class))
+                       ? (RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class)
+                                  .or(RequestHandlerSelectors.withClassAnnotation(MiddlewareResetResource.class)))
                        : RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class);
     }
 

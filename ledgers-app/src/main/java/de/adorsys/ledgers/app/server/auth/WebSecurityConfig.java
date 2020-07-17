@@ -22,8 +22,8 @@ import java.util.Optional;
 
 import static de.adorsys.ledgers.app.server.auth.PermittedResources.*;
 
-@Configuration
-@EnableWebSecurity
+//@Configuration
+//@EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final Environment environment;

@@ -17,6 +17,14 @@ server:
   max-http-header-size: 65000
   port: 8088
 
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: ledgers
+  resource: ledgers-client
+  public-client: true
+  security-constraints[0].authRoles[0]: customer
+  security-constraints[0].securityCollections[0].patterns[0]: /*
+
 spring:
   application.name: ledgers
   servlet.multipart.enabled: true
