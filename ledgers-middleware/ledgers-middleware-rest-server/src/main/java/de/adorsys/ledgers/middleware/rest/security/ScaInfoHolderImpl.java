@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.security;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
+import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ScaInfoHolderImpl implements ScaInfoHolder {
     private final AccessTokenTO accessTokenTO;
+    private final UserService userService;
 
     @Override
     public String getUserId() {
-        return accessTokenTO.getSub();
+        return userService.findByLogin(accessTokenTO.getLogin()/*getSub()*/).getId();
     }
 
     @Override

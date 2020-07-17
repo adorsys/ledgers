@@ -17,15 +17,6 @@
 	<artifactId>ledgers</artifactId>
 	<version>3.10-SNAPSHOT</version>
 
-	<!--TODO: Add necessary dependencies here-->
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.1.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-
 	<modules>
 		<module>ledgers-app</module>
 		<module>ledgers-postings</module>
@@ -109,7 +100,7 @@
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
 		<spring-security.version>5.2.2.RELEASE</spring-security.version>
 		<keycloak-adapter-bom.version>10.0.2</keycloak-adapter-bom.version>
-		<springfox-swagger2.version>3.0.0</springfox-swagger2.version>
+		<springfox-swagger2.version>2.9.2</springfox-swagger2.version>
 		<swagger-annotations.version>1.5.17</swagger-annotations.version>
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
 		<maven.surefire.plugin.version>3.0.0-M4</maven.surefire.plugin.version>
@@ -203,13 +194,6 @@
 				<artifactId>keycloak-spring-boot-starter</artifactId>
 				<version>${keycloak-adapter-bom.version}</version>
 			</dependency>
-
-			<dependency>
-				<groupId>org.keycloak</groupId>
-				<artifactId>keycloak-spring-security-adapter</artifactId>
-				<version>${keycloak-adapter-bom.version}</version>
-			</dependency>
-
 			<!-- swagger -->
 
 			<dependency>
@@ -313,15 +297,6 @@
 				<version>${spring-test-dbunit.version}</version>
 				<scope>test</scope>
 			</dependency>
-
-			<dependency>
-				<groupId>org.keycloak.bom</groupId>
-				<artifactId>keycloak-adapter-bom</artifactId>
-				<version>${keycloak-adapter-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 

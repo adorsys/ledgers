@@ -16,6 +16,20 @@ public class PermittedResources {
     };
 
     protected static final String[] APP_WHITELIST = {
+            "/swagger-resources/**",
+            "/swagger-resources",
+            "/swagger-ui.html**",
+            "/swagger-ui.html",
+            "/v2/api-docs",
+            "/webjars/**",
+            "favicon.ico",
+            "/error",
+            "/*.js", "/*.css", "/*.ico", "/*.json", "/webjars/**", "/lib/*",
+
+            "/auth/**",
+            "/sso/**",
+            "/csrf/**",
+
             "/",
             "/management/app/admin",
             "/management/app/ping",
