@@ -44,6 +44,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
     @Bean
     public Docket apiDocket() {
         return new Docket(SWAGGER_2)
+                       .groupName("001 - LEDGERS API")
                        .apiInfo(apiInfo())
                        .select()
                        .apis(resolvePredicates())
