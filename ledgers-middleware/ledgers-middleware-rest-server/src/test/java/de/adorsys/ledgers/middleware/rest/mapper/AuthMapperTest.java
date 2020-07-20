@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.app.server.auth;
+package de.adorsys.ledgers.middleware.rest.mapper;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;

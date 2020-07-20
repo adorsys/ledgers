@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.app.server.auth;
+package de.adorsys.ledgers.middleware.rest.mapper;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -29,15 +29,13 @@ public interface AuthMapper {
 
     default UserRoleTO getLedgersUserRoles(AccessToken token) {
 
-        Collection roles = CollectionUtils.intersection(
+        Collection<UserRoleBO> roles = CollectionUtils.intersection(
                 token.getRealmAccess().getRoles()
                         .stream()
                         .map(UserRoleBO::getByValue)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .collect(Collectors.toList()),
-
-                Arrays.asList(UserRoleBO.values()));
+                        .collect(Collectors.toList()), Arrays.asList(UserRoleBO.values()));
 
         return roles.isEmpty()
                        ? null

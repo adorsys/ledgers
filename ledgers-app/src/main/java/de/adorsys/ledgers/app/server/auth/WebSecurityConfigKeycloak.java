@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.app.server.auth;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.rest.mapper.AuthMapper;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -13,6 +14,7 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -29,10 +32,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.Optional;
 
+import static de.adorsys.ledgers.app.server.auth.PermittedResources.*;
+
 @KeycloakConfiguration
 @RequiredArgsConstructor
 public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdapter {
     private final AuthMapper authMapper;
+    private final Environment environment;
 
     @Bean
     public KeycloakSpringBootConfigResolver getResolver() {
@@ -59,9 +65,18 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
                 .csrf().disable()
                 .cors()
                 .and()
-                .authorizeRequests().antMatchers(PermittedResources.APP_WHITELIST).permitAll()
+                .authorizeRequests().antMatchers(APP_WHITELIST).permitAll()
+                .and()
+                .authorizeRequests().antMatchers(INDEX_WHITELIST).permitAll()
+                .and()
+                .authorizeRequests().antMatchers(SWAGGER_WHITELIST).permitAll()
+                .and()
+                .authorizeRequests().antMatchers(CONSOLE_WHITELIST).permitAll()
+                .and()
+                .authorizeRequests().antMatchers(ACTUATOR_WHITELIST).permitAll()
                 .anyRequest()
                 .authenticated();
+        http.addFilterBefore(new DisableEndpointFilter(environment), BasicAuthenticationFilter.class);
     }
 
 
@@ -105,6 +120,4 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
         AccessToken token = credentials.getToken();
         return authMapper.toAccessToken(token);
     }
-
-
 }
