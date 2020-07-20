@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface AuthMapper {
     @Mapping(target = "sub", source = "subject")
-    @Mapping(target = "tokenUsage", defaultValue = "DIRECT_ACCESS")
+    @Mapping(target = "tokenUsage", expression = "java(de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO.DIRECT_ACCESS)")
     @Mapping(target = "login", source = "preferredUsername")
     @Mapping(target = "role", expression = "java(getLedgersUserRoles(source))")
     @Mapping(target = "jti", source = "id")

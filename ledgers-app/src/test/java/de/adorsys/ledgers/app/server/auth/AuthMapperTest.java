@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.app.server.auth;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ class AuthMapperTest {
         assertEquals(UserRoleTO.CUSTOMER, accessToken.getRole());
         assertEquals(PREFERRED_USERNAME, accessToken.getLogin());
         assertEquals(SUBJECT, accessToken.getSub());
+        assertEquals(TokenUsageTO.DIRECT_ACCESS, accessToken.getTokenUsage());
     }
 
     @Test
@@ -43,6 +45,7 @@ class AuthMapperTest {
         assertEquals(UserRoleTO.CUSTOMER, accessToken.getRole());
         assertEquals(PREFERRED_USERNAME, accessToken.getLogin());
         assertEquals(SUBJECT, accessToken.getSub());
+        assertEquals(TokenUsageTO.DIRECT_ACCESS, accessToken.getTokenUsage());
     }
 
     @Test
@@ -54,6 +57,7 @@ class AuthMapperTest {
         assertNull(accessToken.getRole());
         assertEquals(PREFERRED_USERNAME, accessToken.getLogin());
         assertEquals(SUBJECT, accessToken.getSub());
+        assertEquals(TokenUsageTO.DIRECT_ACCESS, accessToken.getTokenUsage());
     }
 
     private AccessToken getAccessToken(List<String> roles) {
