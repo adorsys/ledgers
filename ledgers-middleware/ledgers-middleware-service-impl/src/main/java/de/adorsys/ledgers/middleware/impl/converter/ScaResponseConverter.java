@@ -27,7 +27,7 @@ public class ScaResponseConverter {
     private final SCAOperationService scaOperationService;
     private final BearerTokenMapper tokenMapper;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     public GlobalScaResponseTO mapResponse(SCAOperationBO operation, List<ScaUserDataBO> methods, TransactionStatusBO transactionStatus,
