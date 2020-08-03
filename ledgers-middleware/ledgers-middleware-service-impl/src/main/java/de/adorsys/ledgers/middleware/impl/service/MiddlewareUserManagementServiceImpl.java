@@ -56,7 +56,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private final AdditionalAccountInformationMapper additionalInfoMapper;
     private final MiddlewareRecoveryService recoveryService;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     @Override

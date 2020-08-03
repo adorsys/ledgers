@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.ledgers</groupId>
 	<artifactId>ledgers</artifactId>
-	<version>3.10-SNAPSHOT</version>
+	<version>3.11-SNAPSHOT</version>
 
 	<modules>
 		<module>ledgers-app</module>
@@ -559,6 +559,12 @@
 								<goals>
 									<goal>sign</goal>
 								</goals>
+								<configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
 							</execution>
 						</executions>
 					</plugin>
