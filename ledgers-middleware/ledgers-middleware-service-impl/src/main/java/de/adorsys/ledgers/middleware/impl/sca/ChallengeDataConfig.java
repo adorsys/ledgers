@@ -28,7 +28,7 @@ public class ChallengeDataConfig {
     private static final String CLASSPATH_PREFIX = "classpath:";
     private static final String FILE_PREFIX = "file:";
 
-    @Value("${sca.challenge_data.path:}")
+    @Value("${ledgers.sca.challenge_data.path:}")
     private String customChallengeDataPath;
 
     @JsonAnySetter

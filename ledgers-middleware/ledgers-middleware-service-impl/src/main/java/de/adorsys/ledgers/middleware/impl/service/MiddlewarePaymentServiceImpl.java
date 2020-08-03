@@ -82,7 +82,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final PaymentProductsConfig paymentProductsConfig;
     private final AccountDetailsMapper detailsMapper;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     @Override

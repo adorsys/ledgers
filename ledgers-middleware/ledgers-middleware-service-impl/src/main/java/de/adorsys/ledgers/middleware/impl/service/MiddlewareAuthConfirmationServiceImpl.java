@@ -23,7 +23,7 @@ public class MiddlewareAuthConfirmationServiceImpl implements MiddlewareAuthConf
     private final SCAOperationService scaOperationService;
     private final DepositAccountPaymentService depositAccountPaymentService;
 
-    @Value("${sca.multilevel.enabled:false}")
+    @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     @Override
