@@ -1,5 +1,9 @@
 package de.adorsys.ledgers.rest.config;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -17,6 +21,20 @@ import java.util.ArrayList;
 @Configuration
 //@EnableSwagger2
 public class SwaggerConfig extends WebMvcConfigurationSupport {
+
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                       .info(new Info().title("Simple ledger")
+                                     .contact(new Contact()
+                                                      .name("Adorsys GmbH")
+                                                      .url("https://www.adorsys.de")
+                                                      .email("fpo@adorsys.de"))
+                                     .description("Implementation of a simple double entry bookkeeping module.")
+                                     .version("0.5.0") //todo set correct version
+                                     .termsOfService("Terms of Service: to be edited...")
+                                     .license(new License().name("Apache License Version 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")));
+    }
 //    @Bean
 //    public Docket productApi() {
 //        return new Docket(DocumentationType.SWAGGER_2)

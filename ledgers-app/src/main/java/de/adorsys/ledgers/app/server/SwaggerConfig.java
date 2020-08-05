@@ -1,16 +1,15 @@
 package de.adorsys.ledgers.app.server;
 
-import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
-import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+
 //import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 //import springfox.documentation.RequestHandler;
 //import springfox.documentation.builders.PathSelectors;
@@ -20,24 +19,35 @@ import org.springframework.core.env.Environment;
 //import springfox.documentation.spi.service.contexts.SecurityContext;
 //import springfox.documentation.spring.web.plugins.Docket;
 //import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 //import java.util.function.Predicate;
 
 @Configuration
 //@EnableSwagger2
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 //@Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
     private static final String API_KEY = "apiKey";
     private static final String API_INFO = "api_info.txt";
 
-//    private final FileReader fileReader;
-//    private final BuildProperties buildProperties;
-//    private final Environment env;
+    private final FileReader fileReader;
+    private final BuildProperties buildProperties;
+    private final Environment env;
+
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                       .info(new Info().title("Ledgers")
+                                     .contact(new Contact()
+                                                      .name("Adorsys GmbH")
+                                                      .url("https://www.adorsys.de")
+                                                      .email("fpo@adorsys.de"))
+                                     .description(fileReader.getStringFromFile(API_INFO))
+                                     .termsOfService("Terms of Service: to be edited...")
+                                     .version(buildProperties.getVersion() + " " + buildProperties.get("build.number"))
+                                     .license(new License()
+                                                      .name("Apache License Version 2.0")
+                                                      .url("https://www.apache.org/licenses/LICENSE-2.0")));
+    }
 
 //    @Bean
 //    public Docket productApi() {
