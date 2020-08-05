@@ -32,10 +32,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @Tag(name = "LDG002 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
@@ -193,7 +197,8 @@ public interface UserMgmtRestAPI {
             @RequestParam("opType") OpTypeTO opType);
 
     @PostMapping("/loginForConsent/oauth")
-    @Operation(summary = "Login for consent operation with bearer token"/*, authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Login for consent operation with bearer token")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SCALoginResponseTO.class)), description = "Success. LoginToken contained in the returned response object."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -239,8 +244,8 @@ public interface UserMgmtRestAPI {
                             + "<li>The call requires a JWT login token with matching scaId and authorisationId.</li>"
                             + "<li>The result of a sucessfull execution must be an SCALoginResponseTO object containing an scaStatus SCAMETHODSELECTED, indicating that an auth code has been generated and sent to the user.</li>"
                             + "<li>Caller must proceed with the authCode endpoint: /{scaId}/authorisations/{authorisationId}/authCode</li>"
-                            + "</ul>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "</ul>")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SCALoginResponseTO.class)), description = "Authentication Code generated and sent through the selected method"),
             @ApiResponse(responseCode = "422", description = "Wrong authorization code"),
@@ -275,8 +280,8 @@ public interface UserMgmtRestAPI {
                             + "<li>The call requires a JWT login token with matching scaId and authorisationId.</li>"
                             + "<li>The result of a sucessfull execution must be an SCALoginResponseTO object containing an scaStatus SCAMETHODSELECTED, indicating that an auth code has been generated and sent to the user.</li>"
                             + "<li>Caller must proceed with the authCode endpoint: /{scaId}/authorisations/{authorisationId}/authCode</li>"
-                            + "</ul>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "</ul>")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SCALoginResponseTO.class)), description = "Authentication complete. Returned access token can be used for further operations."),
             @ApiResponse(responseCode = "410", description = "The provided authorization id is already consumed. Restart authentication."),
@@ -300,16 +305,17 @@ public interface UserMgmtRestAPI {
                                                           + "<ul>"
                                                           + "<li>The idetifying information (userId=accessToken.sub) is implied from the security context information</li>"
                                                           + "<li>Will send back a 500 if the token is valid and the user is not found. This rather means that the user has been deleted since producing this token in a preceeding step might have implied the existence of the user.</li>"
-                                                          + "</ul>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                                                          + "</ul>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "The user data record without the user pin."),
             @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified.")
     })
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<UserTO> getUser();
 
     @PutMapping("/me")
-    @Operation(summary = "Edit current User"/*, authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Edit current User")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<Void> editSelf(@RequestBody UserTO user);
 
     @PutMapping("/sca-data")
@@ -317,14 +323,28 @@ public interface UserMgmtRestAPI {
                                                               + "<lu>"
                                                               + "<li>User is implied from the provided access token.</li>"
                                                               + "<li>Actor token (delegation token like ais cosent token) can not be used to execute this operation</li>"
-                                                              + "</ul>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                                                              + "</ul>")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The user data record without the user pin."),
             @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified."),
             @ApiResponse(responseCode = "403", description = "Provided bearer token not qualified for this operation."),
     })
     ResponseEntity<Void> updateUserScaData(@RequestBody List<ScaUserDataTO> data);
+
+    @PutMapping("/{userId}/sca-data")
+    @Operation(summary = "Updates user SCA", description = "Updates user authentication methods."
+                                                                   + "<lu>"
+                                                                   + "<li>User is implied from the provided access token.</li>"
+                                                                   + "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
+                                                                   + "</ul>")
+    @SecurityRequirement(name = "Authorization")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The user data record without the user pin."),
+            @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified."),
+            @ApiResponse(responseCode = "403", description = "Provided bearer token not qualified for this operation."),
+    })
+    public ResponseEntity<Void> updateScaDataByUserId(@PathVariable("userId") String userId, @RequestBody List<ScaUserDataTO> data);
 
     //==========================================================================================================================
     //
@@ -336,8 +356,8 @@ public interface UserMgmtRestAPI {
                                                                   + "<lu>"
                                                                   + "<li>This can only be called by either SYSTEM or STAFF members.</li>"
                                                                   + "<li>Will be moved to a management interface in the future.</li>"
-                                                                  + "</lu>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                                                                  + "</lu>")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<UserTO> getUserById(@PathVariable("userId") String userId);
 
     @GetMapping
@@ -345,17 +365,19 @@ public interface UserMgmtRestAPI {
                                                                     + "<lu>"
                                                                     + "<li>This can only be called by either SYSTEM or STAFF members.</li>"
                                                                     + "<li>Will be changed to include pagination and moved to a management interface in the future.</li>"
-                                                                    + "</lu>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                                                                    + "</lu>")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<List<UserTO>> getAllUsers();
 
     @PutMapping("/authorisations/{authorisationId}/confirmation/{authConfirmCode}")
-    @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code"/*, authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(@PathVariable("authorisationId") String authorisationId,
                                                                   @PathVariable(name = "authConfirmCode") String authConfirmCode);
 
     @PutMapping("/authorisations/{authorisationId}/confirmation")
-    @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code"/*, authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(@PathVariable("authorisationId") String authorisationId,
                                                                 @RequestParam(value = "authCodeConfirmed", defaultValue = "false") boolean authCodeConfirmed);
 }

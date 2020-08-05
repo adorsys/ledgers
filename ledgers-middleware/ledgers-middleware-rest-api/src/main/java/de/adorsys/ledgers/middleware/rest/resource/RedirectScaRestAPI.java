@@ -19,6 +19,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaLoginOprTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,18 +34,19 @@ public interface RedirectScaRestAPI {
     ResponseEntity<GlobalScaResponseTO> authoriseForConsent(@RequestBody ScaLoginOprTO loginOpr);
 
     @GetMapping(value = "/authorisations/{authorisationId}")
-    @Operation(summary = "Get SCA", description = "Get the authorization response object eventually containing the list of selected sca methods."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Get SCA", description = "Get the authorization response object eventually containing the list of selected sca methods.")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<GlobalScaResponseTO> getSCA(@PathVariable("authorisationId") String authorisationId);
 
     @PutMapping(value = "/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
-    @Operation(summary = "Select SCA Method", description = "Select teh given sca method and request for authentication code generation."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Select SCA Method", description = "Select teh given sca method and request for authentication code generation.")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<GlobalScaResponseTO> selectMethod(@PathVariable("authorisationId") String authorisationId,
                                                      @PathVariable("scaMethodId") String scaMethodId);
 
     @PutMapping(value = "/authorisations/{authorisationId}/authCode")
-    @Operation(summary = "Validate authorization code", description = "Validate an authentication code and returns the token"/*, authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Validate authorization code", description = "Validate an authentication code and returns the token")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<GlobalScaResponseTO> authorize(@PathVariable("authorisationId") String authorisationId,
                                                   @RequestParam(name = "authCode") String authCode);
 }

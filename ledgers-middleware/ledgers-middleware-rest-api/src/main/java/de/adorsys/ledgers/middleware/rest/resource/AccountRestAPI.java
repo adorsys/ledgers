@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -51,9 +52,10 @@ public interface AccountRestAPI {
      * @return : the list of accounts linked with the current customer.
      */
     @GetMapping
-    @Operation(summary = "List fo Accessible Accounts"/*, authorizations = @Authorization(value = "apiKey")*/,
+    @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user. "
                             + "Call only available to role CUSTOMER.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)),
                     description = "List of accounts accessible to the user.")
@@ -70,8 +72,8 @@ public interface AccountRestAPI {
                             + "<li>The current access token of the user does not include the newly registered account. User must reauthenticate to obtain an updated access token.</li>"
                             + "<li>Nevertheless the Endpoint '/accounts' returns all accounts of the user.</li>"
                             + "<li>Endpoint for granting account access to another user is scheduled but not yet implemented.</li>"
-                            + "</ul>"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "</ul>")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Account creation successful. Still planing to work with 201 here."),
             @ApiResponse(responseCode = "409", description = "Account with given IBAN already exists.")
@@ -81,8 +83,8 @@ public interface AccountRestAPI {
     @GetMapping("/{accountId}")
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)),
                     description = "Account details.")
@@ -92,16 +94,16 @@ public interface AccountRestAPI {
     @GetMapping("/{accountId}/balances")
     @Operation(summary = "Read balances",
             description = "Returns balances of the deposit account with the given accountId. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountBalanceTO.class)), description = "List of accounts balances for the given account.")
     })
     ResponseEntity<List<AccountBalanceTO>> getBalances(@Parameter(name = ACCOUNT_ID) @PathVariable(name = "accountId") String accountId);
 
     @GetMapping(path = "/{accountId}/transactions", params = {DATE_FROM_QUERY_PARAM, DATE_TO_QUERY_PARAM})
-    @Operation(summary = "Find Transactions By Date", description = "Returns all transactions for the given account id"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Find Transactions By Date", description = "Returns all transactions for the given account id")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<List<TransactionTO>> getTransactionByDates(
             @Parameter(name = ACCOUNT_ID)
             @PathVariable(name = "accountId") String accountId,
@@ -109,8 +111,8 @@ public interface AccountRestAPI {
             @RequestParam(name = DATE_TO_QUERY_PARAM) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo);
 
     @GetMapping(path = "/{accountId}/transactions/page", params = {DATE_FROM_QUERY_PARAM, DATE_TO_QUERY_PARAM, PAGE, SIZE})
-    @Operation(summary = "Find Transactions By Date", description = "Returns transactions for the given account id for certain dates, paged view"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Find Transactions By Date", description = "Returns transactions for the given account id for certain dates, paged view")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<CustomPageImpl<TransactionTO>> getTransactionByDatesPaged(
             @Parameter(name = ACCOUNT_ID)
             @PathVariable(name = "accountId") String accountId,
@@ -120,8 +122,8 @@ public interface AccountRestAPI {
             @RequestParam(SIZE) int size);
 
     @GetMapping("/{accountId}/transactions/{transactionId}")
-    @Operation(summary = "Load Transaction", description = "Returns the transaction with the given account id and transaction id."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Load Transaction", description = "Returns the transaction with the given account id and transaction id.")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<TransactionTO> getTransactionById(
             @Parameter(name = ACCOUNT_ID)
             @PathVariable(name = "accountId") String accountId,
@@ -134,22 +136,26 @@ public interface AccountRestAPI {
      * @deprecated: user request param instead
      */
     @GetMapping(path = "/query", params = {IBAN_QUERY_PARAM})
-    @Operation(summary = "Load Account Details By IBAN"/*, authorizations = @Authorization(value = "apiKey")*/, description = "Returns account details information given the account IBAN")
+    @Operation(summary = "Load Account Details By IBAN", description = "Returns account details information given the account IBAN")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
             @Parameter(description = "The IBAN of the requested account: e.g.: DE69760700240340283600", example = "DE69760700240340283600")
             @RequestParam(name = IBAN_QUERY_PARAM) String iban);
 
-    @Operation(summary = "Fund Confirmation"/*, authorizations = @Authorization(value = "apiKey")*/, description = "Returns account details information given the account IBAN")
+    @Operation(summary = "Fund Confirmation", description = "Returns account details information given the account IBAN")
+    @SecurityRequirement(name = "Authorization")
     @PostMapping(value = "/funds-confirmation")
     ResponseEntity<Boolean> fundsConfirmation(
             @RequestBody FundsConfirmationRequestTO request);
 
     @PostMapping("/{accountId}/cash")
-    @Operation(summary = "Deposit Cash"/*, authorizations = @Authorization(value = "apiKey")*/, description = "Only technical users are authorized to perform this operation")
+    @Operation(summary = "Deposit Cash", description = "Only technical users are authorized to perform this operation")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<Void> depositCash(@PathVariable(name = "accountId") String accountId, @RequestBody AmountTO amount);
 
     @GetMapping(path = "/info/{accountIdentifierType}/{accountIdentifier}")
-    @Operation(summary = "Load Account Owner Additional information"/*, authorizations = @Authorization(value = "apiKey")*/, description = "Returns Additional Account Information by Account Identifier")
+    @Operation(summary = "Load Account Owner Additional information", description = "Returns Additional Account Information by Account Identifier")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<List<AdditionalAccountInformationTO>> getAdditionalAccountInfo(
             @Parameter(description = "Account identifier type i.e. ACCOUNT_ID / IBAN")
             @PathVariable(name = "accountIdentifierType") AccountIdentifierTypeTO accountIdentifierType,

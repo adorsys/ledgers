@@ -1,5 +1,8 @@
 package de.adorsys.ledgers.app.server;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -9,6 +12,8 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+
+import static io.swagger.v3.oas.annotations.enums.SecuritySchemeType.APIKEY;
 
 //import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 //import springfox.documentation.RequestHandler;
@@ -24,11 +29,15 @@ import org.springframework.core.env.Environment;
 @Configuration
 //@EnableSwagger2
 @RequiredArgsConstructor
+@SecurityScheme(
+        type = APIKEY,
+        name = "Authorization",
+        scheme = "Bearer",
+        in = SecuritySchemeIn.HEADER)
 //@Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
     private static final String API_KEY = "apiKey";
     private static final String API_INFO = "api_info.txt";
-
     private final FileReader fileReader;
     private final BuildProperties buildProperties;
     private final Environment env;

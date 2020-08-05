@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +57,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return user object without pin
      */
     @Operation(summary = "Modify user",
-            description = "Modify existing user within the same branch as creator."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Modify existing user within the same branch as creator.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Updated user is provided in the response."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -89,8 +90,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return created user
      */
     @Operation(summary = "Create user",
-            description = "Create new user with the same branch as creator."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Create new user with the same branch as creator.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -106,8 +107,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return list of users for the branch with roles
      */
     @Operation(summary = "Lists users by branch and role",
-            description = "Lists users by branch and roles."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Lists users by branch and roles.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -127,8 +128,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return list of user logins.
      */
     @Operation(summary = "Lists user logins by branch",
-            description = "Lists user logins by branch."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Lists user logins by branch.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. List of logins received."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -144,8 +145,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return user
      */
     @Operation(summary = "Gets user by ID if it's within the branch",
-            description = "Gets user by ID if it's within the branch."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Gets user by ID if it's within the branch.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -162,8 +163,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return updated user
      */
     @Operation(summary = "Updates SCA Data for user if it's within the branch.",
-            description = "Updates SCA Data for user if it's within the branch."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Updates SCA Data for user if it's within the branch.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -178,8 +179,8 @@ public interface UserMgmtStaffResourceAPI {
      * @return nothing
      */
     @Operation(summary = "Grants/Updates Account Access for user.",
-            description = "Grants/Updates Account Access for user."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Grants/Updates Account Access for user.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success. Account Access Successfully updated."),
             @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
@@ -189,14 +190,15 @@ public interface UserMgmtStaffResourceAPI {
     ResponseEntity<Void> updateAccountAccessForUser(@PathVariable(USER_ID) String userId, @RequestBody AccountAccessTO access);
 
     @Operation(summary = "Block/Unblock user",
-            description = "Changes block state for given user, returns status being set to the block"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Changes block state for given user, returns status being set to the block")
+    @SecurityRequirement(name = "Authorization")
     @PostMapping("/{userId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(USER_ID) String userId);
 
 
     @PostMapping("/revert")
-    @Operation(summary = "Reverts DB state for given user to the given date and time."/*, authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Reverts DB state for given user to the given date and time.")
+    @SecurityRequirement(name = "Authorization")
     ResponseEntity<Void> revertDatabase(@RequestBody RevertRequestTO revertRequest);
 
 }

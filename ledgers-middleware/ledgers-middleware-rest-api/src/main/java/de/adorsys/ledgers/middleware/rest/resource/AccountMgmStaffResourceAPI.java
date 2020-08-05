@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +42,8 @@ public interface AccountMgmStaffResourceAPI {
     String PAGE = "page";
     String SIZE = "size";
 
-    @Operation(summary = "Retrieves account by iban and Currency"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+    @Operation(summary = "Retrieves account by iban and Currency")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode ="200", description = "Account creation successful"),
             @ApiResponse(responseCode ="404", description = "User with this ID not found"),
@@ -60,8 +61,8 @@ public interface AccountMgmStaffResourceAPI {
      * @return Void
      */
     @Operation(summary = "Registers a new Deposit Account for a user with specified ID",
-            description = "Registers a new deposit account and assigns account access OWNER to the current user."/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Registers a new deposit account and assigns account access OWNER to the current user.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode ="200", description = "Account creation successful"),
             @ApiResponse(responseCode ="404", description = "User with this ID not found"),
@@ -75,18 +76,20 @@ public interface AccountMgmStaffResourceAPI {
      *
      * @return list of accounts that belongs to the same branch as staff user.
      */
-    @Operation(summary = "List fo Accessible Accounts"/*/*, authorizations = @Authorization(value = "apiKey")*/,
+    @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user. "
                             + "Call only available to role CUSTOMER.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO[].class)), description = "List of accounts accessible to the user.")
     })
     @GetMapping
     ResponseEntity<List<AccountDetailsTO>> getListOfAccounts();
 
-    @Operation(summary = "List fo Accessible Accounts"/*, authorizations = @Authorization(value = "apiKey")*/,
+    @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user, paged view. "
                             + "Call only available to role CUSTOMER.")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO[].class)), description = "List of accounts accessible to the user.")
     })
@@ -97,8 +100,8 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)), description = "Account details.")
     })
@@ -112,8 +115,9 @@ public interface AccountMgmStaffResourceAPI {
      * @param amount    Amount to be deposited
      * @return Void
      */
-    @Operation(summary = "Deposit Cash"/*, authorizations = @Authorization(value = "apiKey")*/,
+    @Operation(summary = "Deposit Cash",
             description = "Operation for staff member to register cash in the deposit account")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Operation was successful")
     })
@@ -122,8 +126,8 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "Load Extended Account Details by AccountId",
             description = "Returns extended account details information for the given account id. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+    @SecurityRequirement(name = "Authorization")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = AccountReportTO.class)),
@@ -133,8 +137,8 @@ public interface AccountMgmStaffResourceAPI {
     ResponseEntity<AccountReportTO> getExtendedAccountDetailsById(@Parameter(name = ACCOUNT_ID) @PathVariable(ACCOUNT_ID) String accountId);
 
     @Operation(summary = "Block/Unblock account",
-            description = "Changes block state for given account, returns status being set to the block"/*,
-            authorizations = @Authorization(value = "apiKey")*/)
+            description = "Changes block state for given account, returns status being set to the block")
+    @SecurityRequirement(name = "Authorization")
     @PostMapping("/{accountId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(ACCOUNT_ID) String accountId);
 
