@@ -33,18 +33,18 @@ public interface RedirectScaRestAPI {
     ResponseEntity<GlobalScaResponseTO> authoriseForConsent(@RequestBody ScaLoginOprTO loginOpr);
 
     @GetMapping(value = "/authorisations/{authorisationId}")
-    @Operation(summary = "Get SCA", description = "Get the authorization response object eventually containing the list of selected sca methods.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Get SCA", description = "Get the authorization response object eventually containing the list of selected sca methods."/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     ResponseEntity<GlobalScaResponseTO> getSCA(@PathVariable("authorisationId") String authorisationId);
 
     @PutMapping(value = "/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
-    @Operation(summary = "Select SCA Method", description = "Select teh given sca method and request for authentication code generation.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Select SCA Method", description = "Select teh given sca method and request for authentication code generation."/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     ResponseEntity<GlobalScaResponseTO> selectMethod(@PathVariable("authorisationId") String authorisationId,
                                                      @PathVariable("scaMethodId") String scaMethodId);
 
     @PutMapping(value = "/authorisations/{authorisationId}/authCode")
-    @Operation(summary = "Validate authorization code", description = "Validate an authentication code and returns the token", authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Validate authorization code", description = "Validate an authentication code and returns the token"/*, authorizations = @Authorization(value = "apiKey")*/)
     ResponseEntity<GlobalScaResponseTO> authorize(@PathVariable("authorisationId") String authorisationId,
                                                   @RequestParam(name = "authCode") String authCode);
 }

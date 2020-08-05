@@ -17,8 +17,7 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +28,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(description = "Ais account access information", value = "AisAccountAccessInfo")
+@Schema(description = "Ais account access information", name = "AisAccountAccessInfo")
 public class AisAccountAccessInfoTO {
 
     @Schema(description = "Access to accounts")

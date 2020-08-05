@@ -30,10 +30,13 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
+//import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiResponse;
+//import io.swagger.annotations.ApiResponses;
+//import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -148,16 +151,16 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @PutMapping("/{userId}/sca-data")
-    @Operation(value = "Updates user SCA", notes = "Updates user authentication methods."
+    @Operation(summary = "Updates user SCA", description = "Updates user authentication methods."
                                                               + "<lu>"
                                                               + "<li>User is implied from the provided access token.</li>"
                                                               + "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
-                                                              + "</ul>",
-            authorizations = @Authorization(value = "apiKey"))
+                                                              + "</ul>"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The user data record without the user pin."),
-            @ApiResponse(code = 401, message = "Provided bearer token could not be verified."),
-            @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
+            @ApiResponse(responseCode = "200", description = "The user data record without the user pin."),
+            @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified."),
+            @ApiResponse(responseCode = "403", description = "Provided bearer token not qualified for this operation."),
     })
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> updateScaDataByUserId(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) {

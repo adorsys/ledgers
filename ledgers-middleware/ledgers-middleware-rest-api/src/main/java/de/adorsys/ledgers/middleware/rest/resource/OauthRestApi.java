@@ -20,7 +20,7 @@ public interface OauthRestApi {
     ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("login") String login, @RequestParam("pin") String pin, @RequestParam("redirect_uri") String redirectUri);
 
     @PostMapping("/authorise/oauth")
-    @Operation(summary = "Get authorisation code, with token", authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Get authorisation code, with token"/*, authorizations = @Authorization(value = "apiKey")*/)
     ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("redirect_uri") String redirectUri);
 
     @PostMapping("/token")

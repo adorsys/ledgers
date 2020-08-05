@@ -5,11 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +26,8 @@ public interface AdminResourceAPI {
     String PASSWORD = "password";
 
     @Operation(summary = "Get users with filtering",
-            description = "Retrieves Page of Users with multiple filters",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Retrieves Page of Users with multiple filters"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @GetMapping("/users")
     ResponseEntity<CustomPageImpl<UserExtendedTO>> users(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
                                                          @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
@@ -43,15 +39,15 @@ public interface AdminResourceAPI {
                                                          @RequestParam(SIZE) int size);
 
     @Operation(summary = "Get users with System role",
-            description = "Retrieves Page of Users with System role",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Retrieves Page of Users with System role"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @GetMapping("/admins")
     ResponseEntity<CustomPageImpl<UserTO>> admins(@RequestParam(PAGE) int page,
                                                   @RequestParam(SIZE) int size);
 
     @Operation(summary = "Get accounts with filtering",
-            description = "Retrieves Page of Accounts with multiple filters",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Retrieves Page of Accounts with multiple filters"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @GetMapping("/accounts")
     ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> accounts(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
                                                                       @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
@@ -62,26 +58,26 @@ public interface AdminResourceAPI {
                                                                       @RequestParam(SIZE) int size);
 
     @Operation(summary = "Set password for Branch",
-            description = "Changes password for given Branch",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Changes password for given Branch"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @PutMapping("/password")
     ResponseEntity<Void> updatePassword(@RequestParam(value = BRANCH_ID) String branchId, @RequestParam(PASSWORD) String password);
 
     @Operation(summary = "Block/Unblock user",
-            description = "Changes system block or regular block state for given user, returns status being set to the block",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Changes system block or regular block state for given user, returns status being set to the block"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @PostMapping("/status")
     ResponseEntity<Boolean> changeStatus(@RequestParam(value = USER_ID) String userId);
 
     @Operation(summary = "Create new User by Admin",
-            description = "Can create STAFF/CUSTOMER/SYSTEM users",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Can create STAFF/CUSTOMER/SYSTEM users"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @PostMapping("/user")
     ResponseEntity<UserTO> register(@RequestBody UserTO user);
 
     @Operation(summary = "Update user",
-            description = "Update user",
-            authorizations = @Authorization(value = "apiKey"))
+            description = "Update user"/*,
+            authorizations = @Authorization(value = "apiKey")*/)
     @PutMapping("/users")
     ResponseEntity<Void> user(@RequestBody UserTO user);
 
