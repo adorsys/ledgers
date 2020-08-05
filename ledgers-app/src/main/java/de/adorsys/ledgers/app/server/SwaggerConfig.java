@@ -1,9 +1,9 @@
 package de.adorsys.ledgers.app.server;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Configuration
 @EnableSwagger2
@@ -55,13 +56,21 @@ public class SwaggerConfig {
     private Predicate<RequestHandler> resolvePredicates() {
         List<String> profiles = Arrays.asList(env.getActiveProfiles());
         return profiles.contains("develop") || profiles.contains("sandbox")
-                       ? Predicates.or(RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class),
+                       ? RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class).or(
                                        RequestHandlerSelectors.withClassAnnotation(MiddlewareResetResource.class))
                        : RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class);
     }
 
     private ApiKey apiKey() {
         return new ApiKey(API_KEY, "Authorization", "header");
+    }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                       .components(new Components()
+                                           .addSecuritySchemes("bearer-key",
+                                                               new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
     }
 
     private SecurityContext securityContext() {

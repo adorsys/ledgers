@@ -18,34 +18,33 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaLoginOprTO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "LDG007 - Redirect SCA", description = "Provide an API to preform SCA process for any kind of banking operation")
+@Tag(name = "LDG007 - Redirect SCA", description = "Provide an API to preform SCA process for any kind of banking operation")
 public interface RedirectScaRestAPI {
     String BASE_PATH = "/sca";
 
 
     @PostMapping("/login")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login For Consent")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Login For Consent")
     ResponseEntity<GlobalScaResponseTO> authoriseForConsent(@RequestBody ScaLoginOprTO loginOpr);
 
     @GetMapping(value = "/authorisations/{authorisationId}")
-    @ApiOperation(value = "Get SCA", notes = "Get the authorization response object eventually containing the list of selected sca methods.",
+    @Operation(summary = "Get SCA", description = "Get the authorization response object eventually containing the list of selected sca methods.",
             authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<GlobalScaResponseTO> getSCA(@PathVariable("authorisationId") String authorisationId);
 
     @PutMapping(value = "/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
-    @ApiOperation(value = "Select SCA Method", notes = "Select teh given sca method and request for authentication code generation.",
+    @Operation(summary = "Select SCA Method", description = "Select teh given sca method and request for authentication code generation.",
             authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<GlobalScaResponseTO> selectMethod(@PathVariable("authorisationId") String authorisationId,
                                                      @PathVariable("scaMethodId") String scaMethodId);
 
     @PutMapping(value = "/authorisations/{authorisationId}/authCode")
-    @ApiOperation(value = "Validate authorization code", notes = "Validate an authentication code and returns the token", authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Validate authorization code", description = "Validate an authentication code and returns the token", authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<GlobalScaResponseTO> authorize(@PathVariable("authorisationId") String authorisationId,
                                                   @RequestParam(name = "authCode") String authCode);
 }

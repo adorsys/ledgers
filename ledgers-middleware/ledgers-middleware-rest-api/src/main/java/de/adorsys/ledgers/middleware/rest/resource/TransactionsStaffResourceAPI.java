@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = "LDG014 - Transactions Mock Upload (STAFF access)")
+//@Api(tags = "LDG014 - Transactions Mock Upload (STAFF access)")
 public interface TransactionsStaffResourceAPI {
     String BASE_PATH = "/staff-access/transactions";
 
@@ -20,7 +20,7 @@ public interface TransactionsStaffResourceAPI {
      *
      * @return user object without pin
      */
-    @ApiOperation(value = "Posts transactions to Ledgers", authorizations = @Authorization(value = "apiKey"))
+    @Operation(value = "Posts transactions to Ledgers", authorizations = @Authorization(value = "apiKey"))
     @PostMapping
     ResponseEntity<Map<String, String>> transactions(@RequestBody List<MockBookingDetails> data);
 }

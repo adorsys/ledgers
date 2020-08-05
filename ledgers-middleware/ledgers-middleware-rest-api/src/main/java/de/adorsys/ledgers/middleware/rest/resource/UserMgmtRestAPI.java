@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG002 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
+//@Api(tags = "LDG002 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
 public interface UserMgmtRestAPI {
     String BASE_PATH = "/users";
 
@@ -42,14 +42,14 @@ public interface UserMgmtRestAPI {
     //==========================================================================================================================
 
     @GetMapping("/multilevel")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Check if multilevel SCA required for certain user")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Check if multilevel SCA required for certain user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = boolean.class, message = "Boolean representation of requirement for multi-level sca")
     })
     ResponseEntity<Boolean> multilevel(@RequestParam("login") String login, @RequestParam("iban") String iban);
 
     @PostMapping("/multilevel")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Check if multilevel SCA required for certain user")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Check if multilevel SCA required for certain user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = boolean.class, message = "Boolean representation of requirement for multi-level sca")
     })
@@ -67,7 +67,7 @@ public interface UserMgmtRestAPI {
      * @return User object with erased pin
      */
     @PostMapping("/register")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Register", notes = "Registers a user."
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Register", notes = "Registers a user."
                                                                                                        + "<ul>"
                                                                                                        + "<li>A user is always registered as customer and is activated by default.</li>"
                                                                                                        + "<li>A user can only be given another role by an administrating STAFF member.</li>"
@@ -100,7 +100,7 @@ public interface UserMgmtRestAPI {
      * @return Login response containing a bearer token in case of success with some additional info if further SCA is required
      */
     @PostMapping("/login")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login",
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login",
             notes = "Initiates the user login process. Returns a login response object describing how to proceed. "
                             + "This response object contains both an scaId and an authorizationId that must be used to identify this login process.<br/>"
                             + "This response also contains an scaStatus that indicates the next stept to take."
@@ -157,7 +157,7 @@ public interface UserMgmtRestAPI {
      * @return ScaLoginResponse object containing information for further SCA validation if required and a valid access token
      */
     @PostMapping("/loginForConsent")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login For Consent",
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login For Consent",
             notes = "Initiates the user login process for a payment or account information process. "
                             + "Returns a login response object describing how to proceed. "
                             + "This response object contains both an paymentId (consentId) and an authorizationId that must be used to identify this corresponding process.<br/>"
@@ -186,7 +186,7 @@ public interface UserMgmtRestAPI {
             @RequestParam("opType") OpTypeTO opType);
 
     @PostMapping("/loginForConsent/oauth")
-    @ApiOperation(value = "Login for consent operation with bearer token", authorizations = @Authorization(value = "apiKey"))
+    @Operation(value = "Login for consent operation with bearer token", authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = SCALoginResponseTO.class, message = "Success. LoginToken contained in the returned response object."),
             @ApiResponse(code = 401, message = "Wrong authentication credential."),
@@ -198,7 +198,7 @@ public interface UserMgmtRestAPI {
             @RequestParam("opType") OpTypeTO opType);
 
     @PostMapping("/validate")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Introspect Token", nickname = "IntrospectToken",
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Introspect Token", nickname = "IntrospectToken",
             notes = "Validates a JWT access token and make sure permissions contained in this token are still in synch with the state of permission associated with the underlying user."
                             + "<ul>"
                             + "<li>This endpoint can optionaly be used by a presentation layer to revalidate a long living token like an AIS Consent token that can last up to 90 days.</li>"
@@ -225,7 +225,7 @@ public interface UserMgmtRestAPI {
      * @return ScaLoginResponse object containing information for further SCA validation if required and an Access token
      */
     @PutMapping(value = "/{scaId}/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
-    @ApiOperation(value = "Select Sca Method",
+    @Operation(value = "Select Sca Method",
             notes = "Selects the scaMethod to use for sending a an auth code to the user. "
                             + "<ul>"
                             + "<li>This endpoint is only valid for the login (can not be used for payment or account access).</li>"
@@ -260,7 +260,7 @@ public interface UserMgmtRestAPI {
      * @return ScaLoginResponse with a valid Access Token to fulfill the requested operation
      */
     @PutMapping(value = "/{scaId}/authorisations/{authorisationId}/authCode")
-    @ApiOperation(value = "Authorize Login",
+    @Operation(value = "Authorize Login",
             notes = "Sends the auth code for two factor login. The returned response contains a bearer "
                             + "token that can be used to authenticate further operations."
                             + "<ul>"
@@ -289,7 +289,7 @@ public interface UserMgmtRestAPI {
     //
     //==========================================================================================================================
     @GetMapping("/me")
-    @ApiOperation(value = "Current User", notes = "Retrieves the current usder."
+    @Operation(value = "Current User", notes = "Retrieves the current usder."
                                                           + "<ul>"
                                                           + "<li>The idetifying information (userId=accessToken.sub) is implied from the security context information</li>"
                                                           + "<li>Will send back a 500 if the token is valid and the user is not found. This rather means that the user has been deleted since producing this token in a preceeding step might have implied the existence of the user.</li>"
@@ -302,11 +302,11 @@ public interface UserMgmtRestAPI {
     ResponseEntity<UserTO> getUser();
 
     @PutMapping("/me")
-    @ApiOperation(value = "Edit current User", authorizations = @Authorization(value = "apiKey"))
+    @Operation(value = "Edit current User", authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<Void> editSelf(@RequestBody UserTO user);
 
     @PutMapping("/sca-data")
-    @ApiOperation(value = "Updates user SCA", notes = "Updates user authentication methods."
+    @Operation(value = "Updates user SCA", notes = "Updates user authentication methods."
                                                               + "<lu>"
                                                               + "<li>User is implied from the provided access token.</li>"
                                                               + "<li>Actor token (delegation token like ais cosent token) can not be used to execute this operation</li>"
@@ -325,7 +325,7 @@ public interface UserMgmtRestAPI {
     //
     //==========================================================================================================================
     @GetMapping("/{userId}")
-    @ApiOperation(value = "Retrieves User by ID", notes = "Retrieves User by ID"
+    @Operation(value = "Retrieves User by ID", notes = "Retrieves User by ID"
                                                                   + "<lu>"
                                                                   + "<li>This can only be called by either SYSTEM or STAFF members.</li>"
                                                                   + "<li>Will be moved to a management interface in the future.</li>"
@@ -334,7 +334,7 @@ public interface UserMgmtRestAPI {
     ResponseEntity<UserTO> getUserById(@PathVariable("userId") String userId);
 
     @GetMapping
-    @ApiOperation(value = "Lists users collection", notes = "Lists users collection."
+    @Operation(value = "Lists users collection", notes = "Lists users collection."
                                                                     + "<lu>"
                                                                     + "<li>This can only be called by either SYSTEM or STAFF members.</li>"
                                                                     + "<li>Will be changed to include pagination and moved to a management interface in the future.</li>"
@@ -343,12 +343,12 @@ public interface UserMgmtRestAPI {
     ResponseEntity<List<UserTO>> getAllUsers();
 
     @PutMapping("/authorisations/{authorisationId}/confirmation/{authConfirmCode}")
-    @ApiOperation(value = "Send an authentication confirmation code for validation", notes = "Validate an authentication code", authorizations = @Authorization(value = "apiKey"))
+    @Operation(value = "Send an authentication confirmation code for validation", notes = "Validate an authentication code", authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(@PathVariable("authorisationId") String authorisationId,
                                                                   @PathVariable(name = "authConfirmCode") String authConfirmCode);
 
     @PutMapping("/authorisations/{authorisationId}/confirmation")
-    @ApiOperation(value = "Send an authentication confirmation code for validation", notes = "Validate an authentication code", authorizations = @Authorization(value = "apiKey"))
+    @Operation(value = "Send an authentication confirmation code for validation", notes = "Validate an authentication code", authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(@PathVariable("authorisationId") String authorisationId,
                                                                 @RequestParam(value = "authCodeConfirmed", defaultValue = "false") boolean authCodeConfirmed);
 }

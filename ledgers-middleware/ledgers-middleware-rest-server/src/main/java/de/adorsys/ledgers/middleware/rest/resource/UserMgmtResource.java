@@ -148,7 +148,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @PutMapping("/{userId}/sca-data")
-    @ApiOperation(value = "Updates user SCA", notes = "Updates user authentication methods."
+    @Operation(value = "Updates user SCA", notes = "Updates user authentication methods."
                                                               + "<lu>"
                                                               + "<li>User is implied from the provided access token.</li>"
                                                               + "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"

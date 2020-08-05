@@ -67,11 +67,11 @@ public class LedgersApplication implements ApplicationListener<ApplicationReadyE
 
     @Override
     public void onApplicationEvent(@NotNull ApplicationReadyEvent event) {
-        bankInitService.init();
-        if (Arrays.asList(this.env.getActiveProfiles()).contains("develop")
-                    || Arrays.asList(this.env.getActiveProfiles()).contains("sandbox")) {
-            bankInitService.uploadTestData();
-        }
+//        bankInitService.init();
+//        if (Arrays.asList(this.env.getActiveProfiles()).contains("develop")
+//                    || Arrays.asList(this.env.getActiveProfiles()).contains("sandbox")) {
+//            bankInitService.uploadTestData();
+//        }
     }
 
     // enabled when mock-smtp maven profile is active

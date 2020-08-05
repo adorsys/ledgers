@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG010 - User Management (STAFF access)")
+//@Api(tags = "LDG010 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
     String BRANCH = "branch";
@@ -29,7 +29,7 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return user object without pin
      */
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Register", notes = "Registers a new user for a given branch.")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Register", notes = "Registers a new user for a given branch.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the pin."),
             @ApiResponse(code = 409, message = "Conflict. A record with the given email or login already exists.")
@@ -37,7 +37,7 @@ public interface UserMgmtStaffResourceAPI {
     @PostMapping("/register")
     ResponseEntity<UserTO> register(@RequestParam(BRANCH) String branch, @RequestBody UserTO branchStaff);
 
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login fo user")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login fo user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the pin."),
             @ApiResponse(code = 404, message = "User not found.")
@@ -50,7 +50,7 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return user object without pin
      */
-    @ApiOperation(value = "Modify user",
+    @Operation(value = "Modify user",
             notes = "Modify existing user within the same branch as creator.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -67,7 +67,7 @@ public interface UserMgmtStaffResourceAPI {
      * @param userCredentials tpp login and tpp pin
      * @return JWT token and user info
      */
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login",
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login",
             notes = "Initiates the user login process. Returns a login response object describing how to proceed.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response = SCALoginResponseTO.class, message = "Success. LoginToken contained in the returned response object."),
@@ -83,7 +83,7 @@ public interface UserMgmtStaffResourceAPI {
      * @param user user to be created
      * @return created user
      */
-    @ApiOperation(value = "Create user",
+    @Operation(value = "Create user",
             notes = "Create new user with the same branch as creator.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -100,7 +100,7 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return list of users for the branch with roles
      */
-    @ApiOperation(value = "Lists users by branch and role",
+    @Operation(value = "Lists users by branch and role",
             notes = "Lists users by branch and roles.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -121,7 +121,7 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return list of user logins.
      */
-    @ApiOperation(value = "Lists user logins by branch",
+    @Operation(value = "Lists user logins by branch",
             notes = "Lists user logins by branch.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -138,7 +138,7 @@ public interface UserMgmtStaffResourceAPI {
      * @param userId user ID
      * @return user
      */
-    @ApiOperation(value = "Gets user by ID if it's within the branch",
+    @Operation(value = "Gets user by ID if it's within the branch",
             notes = "Gets user by ID if it's within the branch.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -156,7 +156,7 @@ public interface UserMgmtStaffResourceAPI {
      * @param data   user SCA data
      * @return updated user
      */
-    @ApiOperation(value = "Updates SCA Data for user if it's within the branch.",
+    @Operation(value = "Updates SCA Data for user if it's within the branch.",
             notes = "Updates SCA Data for user if it's within the branch.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -172,7 +172,7 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return nothing
      */
-    @ApiOperation(value = "Grants/Updates Account Access for user.",
+    @Operation(value = "Grants/Updates Account Access for user.",
             notes = "Grants/Updates Account Access for user.",
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
@@ -183,7 +183,7 @@ public interface UserMgmtStaffResourceAPI {
     @PutMapping("/access/{userId}")
     ResponseEntity<Void> updateAccountAccessForUser(@PathVariable(USER_ID) String userId, @RequestBody AccountAccessTO access);
 
-    @ApiOperation(value = "Block/Unblock user",
+    @Operation(value = "Block/Unblock user",
             notes = "Changes block state for given user, returns status being set to the block",
             authorizations = @Authorization(value = "apiKey"))
     @PostMapping("/{userId}/status")
@@ -191,7 +191,7 @@ public interface UserMgmtStaffResourceAPI {
 
 
     @PostMapping("/revert")
-    @ApiOperation(value = "Reverts DB state for given user to the given date and time.", authorizations = @Authorization(value = "apiKey"))
+    @Operation(value = "Reverts DB state for given user to the given date and time.", authorizations = @Authorization(value = "apiKey"))
     ResponseEntity<Void> revertDatabase(@RequestBody RevertRequestTO revertRequest);
 
 }

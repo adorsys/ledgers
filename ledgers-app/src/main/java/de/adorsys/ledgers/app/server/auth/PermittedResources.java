@@ -5,7 +5,11 @@ public class PermittedResources {
     protected static final String[] SWAGGER_WHITELIST = {
             "/swagger-resources",
             "/swagger-ui.html",
+            "/swagger-ui/**",
             "/v2/api-docs",
+            "/v3/api-docs",
+            "/api-docs",
+            "/api-docs/swagger-config",
             "/webjars/**"
     };
 

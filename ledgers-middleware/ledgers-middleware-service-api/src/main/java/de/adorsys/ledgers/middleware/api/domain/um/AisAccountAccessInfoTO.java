@@ -32,19 +32,19 @@ import java.util.List;
 @ApiModel(description = "Ais account access information", value = "AisAccountAccessInfo")
 public class AisAccountAccessInfoTO {
 
-    @ApiModelProperty(value = "Access to accounts")
+    @Schema(description = "Access to accounts")
     private List<String> accounts;
 
-    @ApiModelProperty(value = "Access to balances")
+    @Schema(description = "Access to balances")
     private List<String> balances;
 
-    @ApiModelProperty(value = "Access to transactions")
+    @Schema(description = "Access to transactions")
     private List<String> transactions;
 
-    @ApiModelProperty(value = "Consent on all available accounts of psu", example = "ALL_ACCOUNTS")
+    @Schema(description = "Consent on all available accounts of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO availableAccounts;
 
-    @ApiModelProperty(value = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
+    @Schema(description = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO allPsd2;
 
     public boolean hasIbanInAccess(String iban) {

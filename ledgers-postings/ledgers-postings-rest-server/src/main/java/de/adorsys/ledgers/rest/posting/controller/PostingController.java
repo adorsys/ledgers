@@ -25,7 +25,7 @@ public class PostingController {
      * @param posting posting to create
      * @return persisted posting
      */
-    @ApiOperation(value = "Creates a new Posting.",
+    @Operation(value = "Creates a new Posting.",
             notes = "- If there is another posting with the same operation id\n" +
                             "- The new posting can only be stored is the oldest is not part of a closed accounting period.\n" +
                             "- A posting time can not be older than a closed accounting period. ")
@@ -39,7 +39,7 @@ public class PostingController {
      * @param oprId operation identifier
      * @return a list of postings
      */
-    @ApiOperation(value = "Listing all postings associated with this operation id.")
+    @Operation(value = "Listing all postings associated with this operation id.")
     @GetMapping(path = "postings", params = {"oprId"})
     public ResponseEntity<List<PostingBO>> findPostingsByOperationId(@RequestParam(name = "oprId") String oprId) {
         List<PostingBO> list = postingService.findPostingsByOperationId(oprId);

@@ -17,6 +17,12 @@ server:
   max-http-header-size: 65000
   port: 8088
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 spring:
   application.name: ledgers
   servlet.multipart.enabled: true
