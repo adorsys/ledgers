@@ -7,7 +7,10 @@ public class PermittedResources {
             "/swagger-resources",
             "/swagger-ui.html**",
             "/swagger-ui.html",
+            "/swagger-ui/**",
             "/v2/api-docs",
+            "/api-docs",
+            "/api-docs/swagger-config",
             "/error",
             "/webjars/**"
     };

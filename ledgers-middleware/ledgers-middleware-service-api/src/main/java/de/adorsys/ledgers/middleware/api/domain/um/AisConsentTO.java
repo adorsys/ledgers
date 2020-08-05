@@ -17,8 +17,7 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,28 +27,28 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "Ais consent request", value = "AisConsentRequest")
+@Schema(description = "Ais consent request", name = "AisConsentRequest")
 public class AisConsentTO {
 
-    @ApiModelProperty(value = "The consent id", required = true)
+    @Schema(description = "The consent id", required = true)
     private String id;
 
-    @ApiModelProperty(value = "Corresponding PSU", required = true)
+    @Schema(description = "Corresponding PSU", required = true)
     private String userId;
 
-    @ApiModelProperty(value = "ID of the corresponding TPP.", required = true, example = "testTPP")
+    @Schema(description = "ID of the corresponding TPP.", required = true, example = "testTPP")
     private String tppId;
 
-    @ApiModelProperty(value = "Maximum frequency for an access per day. For a once-off access, this attribute is set to 1", required = true, example = "4")
+    @Schema(description = "Maximum frequency for an access per day. For a once-off access, this attribute is set to 1", required = true, example = "4")
     private int frequencyPerDay;
 
-    @ApiModelProperty(value = "Set of accesses given by psu for this account", required = true)
+    @Schema(description = "Set of accesses given by psu for this account", required = true)
     private AisAccountAccessInfoTO access;
 
-    @ApiModelProperty(value = "Consent`s expiration date. The content is the local ASPSP date in ISODate Format", required = true, example = "2020-10-10")
+    @Schema(description = "Consent`s expiration date. The content is the local ASPSP date in ISODate Format", required = true, example = "2020-10-10")
     private LocalDate validUntil;
 
-    @ApiModelProperty(value = "'true', if the consent is for recurring access to the account data , 'false', if the consent is for one access to the account data", required = true, example = "false")
+    @Schema(description = "'true', if the consent is for recurring access to the account data , 'false', if the consent is for one access to the account data", required = true, example = "false")
     private boolean recurringIndicator;
 
     @JsonIgnore

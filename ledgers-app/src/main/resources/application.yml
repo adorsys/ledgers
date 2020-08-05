@@ -26,6 +26,12 @@ keycloak:
   credentials:
     secret: e9e1f3ca-98a4-45be-82ac-7d4acd0d53b0 #Here should be personal generated secret for client (swap public to 'private?' generate secret, swap to public again)
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 spring:
   application.name: ledgers
   servlet.multipart.enabled: true

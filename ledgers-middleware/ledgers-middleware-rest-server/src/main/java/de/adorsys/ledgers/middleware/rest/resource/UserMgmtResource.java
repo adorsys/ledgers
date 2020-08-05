@@ -30,21 +30,23 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
+
+//import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiResponse;
+//import io.swagger.annotations.ApiResponses;
+//import io.swagger.annotations.Authorization;
 
 @Slf4j
 @RestController
@@ -147,20 +149,9 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         return ResponseEntity.created(uri).build();
     }
 
-    @PutMapping("/{userId}/sca-data")
-    @ApiOperation(value = "Updates user SCA", notes = "Updates user authentication methods."
-                                                              + "<lu>"
-                                                              + "<li>User is implied from the provided access token.</li>"
-                                                              + "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
-                                                              + "</ul>",
-            authorizations = @Authorization(value = "apiKey"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The user data record without the user pin."),
-            @ApiResponse(code = 401, message = "Provided bearer token could not be verified."),
-            @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
-    })
+    @Override
     @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
-    public ResponseEntity<Void> updateScaDataByUserId(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) {
+    public ResponseEntity<Void> updateScaDataByUserId(String userId, List<ScaUserDataTO> data) {
         UserTO userTO = middlewareUserService.findById(userId);
         UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 

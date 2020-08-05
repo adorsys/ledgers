@@ -5,13 +5,13 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "LDG013 - Admin Management (SYSTEM access)")
+@Tag(name = "LDG013 - Admin Management (SYSTEM access)")
 public interface AdminResourceAPI {
     String BASE_PATH = "/admin";
     String BRANCH_ID = "branchId";
@@ -26,9 +26,9 @@ public interface AdminResourceAPI {
     String SIZE = "size";
     String PASSWORD = "password";
 
-    @ApiOperation(value = "Get users with filtering",
-            notes = "Retrieves Page of Users with multiple filters",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Get users with filtering",
+            description = "Retrieves Page of Users with multiple filters")
+    @SecurityRequirement(name = "Authorization")
     @GetMapping("/users")
     ResponseEntity<CustomPageImpl<UserExtendedTO>> users(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
                                                          @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
@@ -39,16 +39,16 @@ public interface AdminResourceAPI {
                                                          @RequestParam(PAGE) int page,
                                                          @RequestParam(SIZE) int size);
 
-    @ApiOperation(value = "Get users with System role",
-            notes = "Retrieves Page of Users with System role",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Get users with System role",
+            description = "Retrieves Page of Users with System role")
+    @SecurityRequirement(name = "Authorization")
     @GetMapping("/admins")
     ResponseEntity<CustomPageImpl<UserTO>> admins(@RequestParam(PAGE) int page,
                                                   @RequestParam(SIZE) int size);
 
-    @ApiOperation(value = "Get accounts with filtering",
-            notes = "Retrieves Page of Accounts with multiple filters",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Get accounts with filtering",
+            description = "Retrieves Page of Accounts with multiple filters")
+    @SecurityRequirement(name = "Authorization")
     @GetMapping("/accounts")
     ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> accounts(@RequestParam(value = COUNTRY_CODE, defaultValue = "", required = false) String countryCode,
                                                                       @RequestParam(value = BRANCH_ID, defaultValue = "", required = false) String branchId,
@@ -58,27 +58,26 @@ public interface AdminResourceAPI {
                                                                       @RequestParam(PAGE) int page,
                                                                       @RequestParam(SIZE) int size);
 
-    @ApiOperation(value = "Set password for Branch",
-            notes = "Changes password for given Branch",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Set password for Branch",
+            description = "Changes password for given Branch")
+    @SecurityRequirement(name = "Authorization")
     @PutMapping("/password")
     ResponseEntity<Void> updatePassword(@RequestParam(value = BRANCH_ID) String branchId, @RequestParam(PASSWORD) String password);
 
-    @ApiOperation(value = "Block/Unblock user",
-            notes = "Changes system block or regular block state for given user, returns status being set to the block",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Block/Unblock user",
+            description = "Changes system block or regular block state for given user, returns status being set to the block")
+    @SecurityRequirement(name = "Authorization")
     @PostMapping("/status")
     ResponseEntity<Boolean> changeStatus(@RequestParam(value = USER_ID) String userId);
 
-    @ApiOperation(value = "Create new User by Admin",
-            notes = "Can create STAFF/CUSTOMER/SYSTEM users",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Create new User by Admin",
+            description = "Can create STAFF/CUSTOMER/SYSTEM users")
+    @SecurityRequirement(name = "Authorization")
     @PostMapping("/user")
     ResponseEntity<UserTO> register(@RequestBody UserTO user);
 
-    @ApiOperation(value = "Update user",
-            notes = "Update user",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Update user",
+            description = "Update user")
     @PutMapping("/users")
     ResponseEntity<Void> user(@RequestBody UserTO user);
 

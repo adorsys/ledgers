@@ -17,8 +17,7 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,22 +28,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(description = "Ais account access information", value = "AisAccountAccessInfo")
+@Schema(description = "Ais account access information", name = "AisAccountAccessInfo")
 public class AisAccountAccessInfoTO {
 
-    @ApiModelProperty(value = "Access to accounts")
+    @Schema(description = "Access to accounts")
     private List<String> accounts;
 
-    @ApiModelProperty(value = "Access to balances")
+    @Schema(description = "Access to balances")
     private List<String> balances;
 
-    @ApiModelProperty(value = "Access to transactions")
+    @Schema(description = "Access to transactions")
     private List<String> transactions;
 
-    @ApiModelProperty(value = "Consent on all available accounts of psu", example = "ALL_ACCOUNTS")
+    @Schema(description = "Consent on all available accounts of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO availableAccounts;
 
-    @ApiModelProperty(value = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
+    @Schema(description = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO allPsd2;
 
     public boolean hasIbanInAccess(String iban) {
