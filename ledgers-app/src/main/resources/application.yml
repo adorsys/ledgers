@@ -17,6 +17,9 @@ server:
   max-http-header-size: 65000
   port: 8088
 
+springdoc.swagger-ui.oauth.clientId: ${keycloak.resource}
+springdoc.swagger-ui.oauth.clientSecret: ${keycloak.credentials.secret}
+
 keycloak:
   auth-server-url: http://localhost:8080/auth
   realm: ledgers
@@ -24,7 +27,7 @@ keycloak:
   public-client: true
   principal-attribute: preferred_username
   credentials:
-    secret: e9e1f3ca-98a4-45be-82ac-7d4acd0d53b0 #Here should be personal generated secret for client (swap public to 'private?' generate secret, swap to public again)
+    secret: a61a81cd-7178-40d8-8386-ed02791e6592 #Here should be personal generated secret for client (swap public to 'private?' generate secret, swap to public again)
 
 springdoc:
   api-docs:
