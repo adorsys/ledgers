@@ -102,7 +102,7 @@ Lint:Ci_file:
     - develop
     - master
   script:
-    - apt-get update && apt-get install yamllint -yq
+    - apt-get update && apt-get install yamllint python3-pkg-resources -yq
     - echo "Run Gitlab ci file lint"
     - yamllint .gitlab-ci.yml -d "{extends:relaxed}"
 
