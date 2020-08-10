@@ -104,7 +104,7 @@ Lint:Ci_file:
   script:
     - apt-get update && apt-get install yamllint python3-pkg-resources -yq
     - echo "Run Gitlab ci file lint"
-    - yamllint .gitlab-ci.yml -d "{extends:relaxed}"
+    - yamllint -d relaxed .gitlab-ci.yml
 
 Lint:Ledgers:
   image: debian:stretch-slim
