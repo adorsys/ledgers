@@ -125,7 +125,7 @@ Lint:Ledgers:
     - docker run --rm -i hadolint/hadolint < Dockerfile
 
 Lint:PMD_CPD_Report:
-  image: maven:3.6-jdk-11-slim
+  image: maven:3.6-jdk-8-slim
   stage: "Lint"
   except:
     - schedules
