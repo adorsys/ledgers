@@ -92,7 +92,6 @@ Lint:Docker_compose:
     - apt update && apt install yamllint docker-compose make -yq
     - echo "Run Docker compose lint"
     - docker-compose -f docker-compose.yml config  -q
-    - mvn validate
 
 Lint:Ci_file:
   image: debian:stretch-slim
@@ -106,7 +105,7 @@ Lint:Ci_file:
     - echo "Run Gitlab ci file lint"
     - yamllint -d relaxed .gitlab-ci.yml
 
-Lint:Ledgers:
+Lint:Ledgers_yaml_json_xml:
   image: debian:stretch-slim
   stage: "Lint"
   except:
