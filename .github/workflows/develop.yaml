@@ -53,7 +53,7 @@ jobs:
       - name: Generate javadocs 
         run: mvn -ntp javadoc:javadoc 
 
-    pmdCheck:
+  pmdCheck:
     needs: build
     name: Run code analyser PMD
     runs-on: ubuntu-latest
