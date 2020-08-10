@@ -23,6 +23,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Build Ledgers 
         run: mvn -DskipTests -Dmaven.javadoc.skip=true clean install
