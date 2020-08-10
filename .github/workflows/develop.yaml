@@ -77,7 +77,6 @@ jobs:
       - name: Check pmd  
         run: mvn -ntp pmd:check
 
-
   # test:
 
   # sonar:
