@@ -176,7 +176,7 @@ jobs:
       
       - name: Publish to Maven Central
         run: |
-          echo $GPG_SECRET_KEY | base64 --decode | gpg --import --batch
-          echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust --batch
+          echo ${{ secrets.GPG_SECRET_KEY }}  | base64 --decode | gpg --import --batch
+          echo ${{ secrets.GPG_OWNERTRUST }} | base64 --decode | gpg --import-ownertrust --batch
           mvn -ntp --settings scripts/mvn-release-settings.xml -Prelease -DskipTests -U deploy
         shell: bash
