@@ -1,9 +1,12 @@
-name: Develop CI
+name: Release CI
 
 on: 
   push:
-    branches:
-      - develop   
+    tags:
+      - '*.*.*'
+      - '*.*.*-RC*'
+      - '*.*'
+      - '*.*-RC*'
 
 env:
   SONAR_PRJ_KEY: adorsys_ledgers
