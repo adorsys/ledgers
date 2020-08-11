@@ -27,7 +27,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build Ledgers 
-        run: mvn -ntp -DskipTests -Dmaven.javadoc.skip=true clean install
+        run: mvn -ntp -DskipTests -DskipITs -Dmaven.javadoc.skip=true clean install
 
   javaDoc:
     needs: build
@@ -49,6 +49,9 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      - name: Compile before generate Javadocs
+        run: mvn -ntp -DskipTests -DskipITs -Dmaven.javadoc.skip=true clean install
 
       - name: Generate javadocs 
         run: mvn -ntp javadoc:javadoc 
@@ -73,6 +76,9 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      
+      - name: build project before check
+        run: mvn -ntp -DskipTests -DskipITs -Dmaven.javadoc.skip=true clean install
 
       - name: Check pmd  
         run: mvn -ntp pmd:check
