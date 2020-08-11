@@ -133,7 +133,7 @@ Lint:PMD_CPD_Report:
   script:
     - apt update && apt install make -yq
     - echo "Test java code for PMD and CPD"
-    - mvn -ntp -Dmaven.test.skip=true package pmd:pmd pmd:cpd
+    - mvn -ntp -Dmaven.test.skip=true package pmd:check pmd:cpd-check
   cache: {}
   artifacts:
     paths:
@@ -179,36 +179,6 @@ Build:Ledgers:
       - "ledgers-utils/target/ledgers-utils*jar"
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
     expire_in: "1 day"
-
-# PMD_CPD_Report:
-#   stage: "Lint"
-#   except:
-#     - schedules
-#     - develop
-#   script:
-#     - mvn -Dmaven.test.skip=true package pmd:pmd pmd:cpd
-#   artifacts:
-#     paths:
-#       - "qa/pmd/pmd-ruleset.xml"
-#       - "**/**/*/pmd.html"
-#       - "**/*/pmd.xml"
-#     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-pmd"
-#     expire_in: "10 day"
-
-# PMD_CPD_Check:
-#   stage: "Lint"
-#   except:
-#     - schedules
-#     - develop
-#   script:
-#     - mvn -Dmaven.test.skip=true package pmd:check pmd:cpd-check
-#   artifacts:
-#     paths:
-#       - "qa/pmd/pmd-ruleset.xml"
-#       - "**/**/*/pmd.html"
-#       - "**/*/pmd.xml"
-#     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-pmd"
-#     expire_in: "10 day"
 
 #-------------------------------------------------------------------
 # Test
