@@ -155,7 +155,7 @@ jobs:
 
   deployMavenCentral:
     name: Publish ledgers artifacts to Maven Central
-    needs: [ build, UItests ]
+    needs: [build, UItests]
     runs-on: ubuntu-latest
     steps:
       - name: Clone ledgers develop repository
