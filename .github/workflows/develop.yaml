@@ -9,8 +9,6 @@ env:
   SONAR_PRJ_KEY: adorsys_ledgers
   SONAR_ORG: adorsys
   SONAR_HOST: https://sonarcloud.io
-  GPG_EXECUTABLE: ${{ secrets.GPG_EXECUTABLE }}
-  GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
   SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
@@ -176,7 +174,6 @@ jobs:
       
       - name: Publish to Maven Central
         run: |
-          echo ${{ secrets.GPG_SECRET_KEY }}  | base64 --decode | gpg --import --batch
+          echo ${{ secrets.GPG_SECRET_KEY }} | base64 --decode | gpg --import --batch 
           echo ${{ secrets.GPG_OWNERTRUST }} | base64 --decode | gpg --import-ownertrust --batch
           mvn -ntp --settings scripts/mvn-release-settings.xml -Prelease -DskipTests -U deploy
-        shell: bash
