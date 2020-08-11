@@ -174,6 +174,7 @@ jobs:
       
       - name: Publish to Maven Central
         run: |
-          eval $(gpg-agent --daemon --quiet --allow-preset-passphrase)
-          echo -n "${{ secrets.GPG_SECRET_KEY }}" | gpg --quiet --batch --import
+          export GPG_TTY="$( tty )"
+          echo ${{ secrets.GPG_SECRET_KEY }} | base64 --decode | gpg --import --batch --yes
+          echo ${{ secrets.GPG_OWNERTRUST }} | base64 --decode | gpg --batch --import-ownertrust --ues
           mvn -ntp --settings scripts/mvn-release-settings.xml -Prelease -DskipTests -U deploy
