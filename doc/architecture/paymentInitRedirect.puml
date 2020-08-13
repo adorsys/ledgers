@@ -7,6 +7,7 @@ entity SPI
 entity CMS
 entity Online_banking
 entity Core_banking
+entity Keycloak
 note right of CMS
 For an Authorisation Call
 CMS-PSU-API is used
@@ -38,46 +39,83 @@ deactivate XS2A
 TPP-->PSU: Feedback to the customer\nAuthorise the transaction
 deactivate TPP
 |||
+group Authorisation process
 PSU->Online_banking: PSU re-direct to an authorisation webpage of the ASPSP
-deactivate PSU
 activate Online_banking
 |||
+Online_banking-->PSU: Display Login webpage
+deactivate Online_banking
+PSU->Online_banking: Pass user Credentials (login/email and password)
+activate Online_banking
+|||
+Online_banking->Keycloak: Perform user login (grant_type: password)
+activate Keycloak
+|||
+Keycloak-->Online_banking: Login Token Response
+deactivate Keycloak
 Online_banking->CMS: REST Call GetPaymentByRedirectId\n"GET/psu-api/v1/payment/redirect/{redirect-id}"
 activate CMS
-|||
 CMS-->Online_banking: CmsPaymentResponse
-|||
-Online_banking->CMS: REST Call UpdatePsuIdPayment\n"PUT/psu-api/v1/payment/authorisation/\n{authorisation-id}/psu-data"
-|||
-CMS-->Online_banking: Response "http Codes: 200 successful or 400 error"
 deactivate CMS
-|||
-Online_banking-->PSU: Authorisation Process Response
-deactivate Online_banking
-activate PSU
-|||
-PSU->Online_banking: The PSU Authorises the Payment
-activate Online_banking
-|||
-Online_banking->CMS: REST Call UpdateAuthorisationStatus\n"PUT/psu-api/v1/payment/{payment-id}/authorisation/\n{authorisation-id}/status/{status}"
-activate CMS
-|||
-CMS-->Online_banking: Response "http Codes: 200 successful or 400 error"
-deactivate CMS
-Online_banking->Core_banking: Execute Payment
+Online_banking->Core_banking: Initiate Payment call using Login Token
 activate Core_banking
-|||
-Core_banking-->Online_banking: Response PaymentStatus
+Core_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Core_banking: OK/NOK
+deactivate Keycloak
+Core_banking-->Online_banking: Initiate Payment Response (Listing SCA Methods)
 deactivate Core_banking
-Online_banking->CMS: REST Call UpdatePaymentStatus\n"PUT/psu-api/v1/payment/{payment-id}/status/{status}"
-activate CMS
-|||
-CMS-->Online_banking: Response "http Codes: 200 successful or 400 error"
-deactivate CMS
-|||
-Online_banking-->PSU: Payment confirmed
+Online_banking-->PSU: Display webpage with payment initiation \nStart Authorisation button \nDisplay SCA Methods to select from
 deactivate Online_banking
 |||
+PSU->Online_banking: Select method
+activate Online_banking
+Online_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Online_banking: OK/NOK
+deactivate Keycloak
+Online_banking->CMS: REST Call GetPaymentByRedirectId\n"GET/psu-api/v1/payment/redirect/{redirect-id}"
+activate CMS
+CMS-->Online_banking: CmsPaymentResponse
+deactivate CMS
+Online_banking->Core_banking:Select Method Rest call
+activate Core_banking
+Core_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Core_banking: OK/NOK
+deactivate Keycloak
+Core_banking-->PSU: Send SCA data (TAN)
+Core_banking-->Online_banking: SCAResponse
+deactivate Core_banking
+Online_banking-->CMS: Push UpdateAuthorisationStatus
+Online_banking-->PSU: Display validate TAN webpage
+deactivate Online_banking
+|||
+PSU->Online_banking: Validate TAN Request
+activate Online_banking
+Online_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Online_banking: OK/NOK
+deactivate Keycloak
+Online_banking->CMS: REST Call GetPaymentByRedirectId\n"GET/psu-api/v1/payment/redirect/{redirect-id}"
+activate CMS
+CMS-->Online_banking: CmsPaymentResponse
+deactivate CMS
+Online_banking->Core_banking: Validate TAN and confirm Payment
+activate Core_banking
+Core_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Core_banking: OK/NOK
+Core_banking->Keycloak: Exchange LoginToken for FullAccess Token
+Keycloak-->Core_banking: FullAccess Token Response
+deactivate Keycloak
+Core_banking-->Online_banking: SCAResponse with confirming payment is executed/scheduled \nincluding fullAccessToken
+deactivate Core_banking
+Online_banking-->CMS: Push UpdatePaymentStatus
+Online_banking-->CMS: Push Update ASPSP ConsentData containing FullAccess Token
+Online_banking-->PSU: Display Return to TPP / Developer Portal webpage
+deactivate Online_banking
+end
 PSU->TPP: Redirect back to TPP
 deactivate PSU
 activate TPP
@@ -93,9 +131,18 @@ deactivate CMS
 |||
 XS2A->SPI: Java Call SPI GetPaymentStatusByid
 activate SPI
+SPI->CMS: Get ASPSP ConsentData
+activate CMS
+CMS-->SPI: ASPSP ConsentData Response
+deactivate CMS
 |||
-SPI->Core_banking: GetPaymentStatusById
+SPI->Core_banking: GetPaymentStatusById using Token stored in ASPSP ConsentData
 activate Core_banking
+|||
+Core_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Core_banking: OK/NOK
+deactivate Keycloak
 |||
 Core_banking-->SPI: Transaction Status Response
 deactivate Core_banking
@@ -124,8 +171,17 @@ deactivate CMS
 XS2A->SPI: Java Call SPIGetPaymentbyId
 activate SPI
 |||
-SPI->Core_banking: GetPaymentById
+SPI->CMS: Get ASPSP ConsentData
+activate CMS
+CMS-->SPI: ASPSP ConsentData Response
+deactivate CMS
+SPI->Core_banking: GetPaymentById using Token stored in ASPSP ConsentData
 activate Core_banking
+|||
+Core_banking->Keycloak: validate Token
+activate Keycloak
+Keycloak-->Core_banking: OK/NOK
+deactivate Keycloak
 |||
 Core_banking-->SPI: Payment Object Response
 deactivate Core_banking
@@ -162,4 +218,3 @@ XS2A-->TPP: Sca Status
 deactivate XS2A
 deactivate TPP
 @enduml
-
