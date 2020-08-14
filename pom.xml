@@ -530,7 +530,7 @@
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>sonatype</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<nexusUrl>https://dxc-nexus.cloud.adorsys.de/</nexusUrl>
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
 					</plugin>
@@ -544,28 +544,6 @@
 								<goals>
 									<goal>jar-no-fork</goal>
 								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<configuration>
-						</configuration>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                    </gpgArguments>
-                                </configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -593,11 +571,11 @@
 	<distributionManagement>
 		<repository>
 			<id>sonatype</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+			<url>https://dxc-nexus.cloud.adorsys.de/repository/ledgers-keycloak-release/</url>
 		</repository>
 		<snapshotRepository>
 			<id>sonatype</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<url>https://dxc-nexus.cloud.adorsys.de/repository/ledgers-keycloak-snapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

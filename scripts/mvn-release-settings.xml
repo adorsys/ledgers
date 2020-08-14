@@ -20,10 +20,10 @@
   http://maven.apache.org/xsd/settings-1.0.0.xsd">
     <servers>
         <server>
-            <!-- Maven Central Deployment -->
+            <!-- Local sonatype deployment -->
             <id>sonatype</id>
-            <username>${env.SONATYPE_USERNAME}</username>
-            <password>${env.SONATYPE_PASSWORD}</password>
+            <username>${env.LOCAL_SONATYPE_USERNAME}</username>
+            <password>${env.LOCAL_SONATYPE_PASSWORD}</password>
         </server>
     </servers>
     <profiles>
@@ -32,10 +32,6 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <properties>
-                <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
-                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
-            </properties>
         </profile>
     </profiles>
 </settings>
