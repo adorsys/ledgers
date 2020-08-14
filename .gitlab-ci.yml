@@ -186,17 +186,17 @@ Build:Ledgers:
 # Test
 #-------------------------------------------------------------------
 
-Javadoc Check:
-  stage: "Test"
-  except:
-    - schedules
-  script:
-    - mvn -Dmaven.test.skip=true package javadoc:javadoc
-  artifacts:
-    paths:
-      - "**/target/site/*"
-    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
-    expire_in: "10 day"
+# Javadoc Check:
+#   stage: "Test"
+#   except:
+#     - schedules
+#   script:
+#     - mvn -Dmaven.test.skip=true package javadoc:javadoc
+#   artifacts:
+#     paths:
+#       - "**/target/site/*"
+#     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
+#     expire_in: "10 day"
 
 Unit Tests:
   stage: "Test"
