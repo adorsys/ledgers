@@ -42,26 +42,23 @@ activate XS2A
 XS2A->SPI: Java Call PaymentAuthorisationSpi
 activate SPI
 |||
-SPI->Keycloak: AuthorisedPsu
+SPI->Keycloak: AuthorisedPsu (grant_type password)
 activate Keycloak
 |||
 Keycloak-->SPI: AuthorisedPsu Response (login token)
 deactivate Keycloak
 |||
-SPI->Core_banking: Is SCA required?
+SPI->Core_banking: Is SCA required? (using login token)
 activate Core_banking
 |||
-Core_banking-->SPI: scaExempted response (Boolean)
-deactivate Core_banking
-|||
 group scaExempted = TRUE
-SPI->Keycloak: Exchange token
+Core_banking->Keycloak: Exchange Token to full_access token
 activate Keycloak
-|||
-Keycloak-->SPI: New full-access token
+Keycloak-->Core_banking: full_access token + refresh token
 deactivate Keycloak
-|||
 end
+Core_banking-->SPI: scaExempted response (with full_access and refresh tokens if scaExempted)
+deactivate Core_banking
 |||
 SPI->CMS: Push token to ASPSP consent data
 |||
@@ -95,19 +92,20 @@ activate SPI
 SPI->CMS: Get ASPSP consent data
 activate CMS
 |||
-CMS-->SPI: ASPSP consent data response
-deactivate CMS
-SPI->Keycloak: Validate token from ASPSP consent data
-activate Keycloak
-Keycloak-->SPI: Validation response
-deactivate Keycloak
+return ASPSP consent data response
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
 |||
-SPI->Core_banking: SelectScaMethod
-activate Core_banking
+SPI->Core_banking +: SelectScaMethod using AccessToken
+Core_banking->Keycloak+: Validate Token
+return Validation result
+Core_banking-[#blue]>PSU: ScaAuthenticationData
 |||
-Core_banking-->PSU: ScaAuthenticationData
-|||
-Core_banking-->SPI: SelectScaMethod Respons
+Core_banking-->SPI: SelectScaMethod Response
 deactivate Core_banking
 |||
 SPI-->XS2A: SpiAuthorisationCodeResult\nwith scaExempted (TRUE or FALSE)
@@ -136,24 +134,25 @@ activate CMS
 |||
 CMS-->SPI: ASPSP consent data response
 deactivate CMS
-SPI->Keycloak: Validate token from ASPSP consent data
-activate Keycloak
-Keycloak-->SPI: Validation response
-deactivate Keycloak
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
 |||
 SPI-->Core_banking: Authorised Payment
 activate Core_banking
 |||
-Core_banking->Keycloak: Exchange token
-activate Keycloak
-|||
-Keycloak-->Core_banking: New full-access token
-deactivate Keycloak
+Core_banking->Keycloak +: Validate Token
+return Token validation result
+Core_banking->Keycloak+: Exchange token
+return New full-access token
 |||
 Core_banking-->SPI: Authorised Payment Response
+deactivate Core_banking
 |||
 SPI->CMS: Push token to ASPSP consent data
-deactivate Core_banking
 |||
 SPI-->XS2A: SpiPaymentExecution Response
 deactivate SPI
@@ -187,14 +186,18 @@ activate CMS
 |||
 CMS-->SPI: ASPSP consent data response
 deactivate CMS
-SPI->Keycloak: Validate token from ASPSP consent data
-activate Keycloak
-Keycloak-->SPI: Validation response
-deactivate Keycloak
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
 |||
-SPI->Core_banking: GetPaymentStatusById
+SPI->Core_banking: GetPaymentStatusById with token from ASPSP consent data
 activate Core_banking
 |||
+Core_banking->Keycloak +: Validate token
+return Token validation result
 Core_banking-->SPI: Transaction Status Response
 deactivate Core_banking
 |||
@@ -225,14 +228,17 @@ activate CMS
 |||
 CMS-->SPI: ASPSP consent data response
 deactivate CMS
-SPI->Keycloak: Validate token from ASPSP consent data
-activate Keycloak
-Keycloak-->SPI: Validation response
-deactivate Keycloak
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
 |||
-SPI->Core_banking: GetPaymentById
+SPI->Core_banking: GetPaymentById using token from ASPSP consent data
 activate Core_banking
-|||
+Core_banking->Keycloak +: Validate token
+return Token validation result
 Core_banking-->SPI: Payment Object Response
 deactivate Core_banking
 |||
