@@ -70,10 +70,6 @@ deactivate Online_banking
 |||
 PSU->Online_banking: Select method
 activate Online_banking
-Online_banking->Keycloak: validate Token
-activate Keycloak
-Keycloak-->Online_banking: OK/NOK
-deactivate Keycloak
 Online_banking->CMS: REST Call GetPaymentByRedirectId\n"GET/psu-api/v1/payment/redirect/{redirect-id}"
 activate CMS
 CMS-->Online_banking: CmsPaymentResponse
@@ -93,10 +89,6 @@ deactivate Online_banking
 |||
 PSU->Online_banking: Validate TAN Request
 activate Online_banking
-Online_banking->Keycloak: validate Token
-activate Keycloak
-Keycloak-->Online_banking: OK/NOK
-deactivate Keycloak
 Online_banking->CMS: REST Call GetPaymentByRedirectId\n"GET/psu-api/v1/payment/redirect/{redirect-id}"
 activate CMS
 CMS-->Online_banking: CmsPaymentResponse
