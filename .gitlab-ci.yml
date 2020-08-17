@@ -255,7 +255,6 @@ Deploy Openshift (modelbank-keycloak-dev):
     - schedules
   only:
     - ledgers_keycloak
-    - KOA_add_deploy_to_openshift_keycloak
   environment:
     name: dev
     url: https://dev-modelbank-keycloak-ledgers.adorsys.de
