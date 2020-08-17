@@ -99,8 +99,8 @@ public class BankInitService {
     }
 
     public void uploadTestData() {
-        createUsers();
         createAccounts();
+        createUsers();
         performTransactions();
     }
 
@@ -271,7 +271,18 @@ public class BankInitService {
 
     private void createUser(UserTO user) {
         try {
-            userService.create(userMapper.toUserBO(user));
+            UserBO userBO = userMapper.toUserBO(user);
+
+            userBO.getAccountAccesses().stream()
+                    .filter(a -> a.getAccountId() == null)
+                    .forEach(a -> {
+                        DepositAccountBO depositAccountBO = depositAccountService.getAccountByIbanAndCurrency(a.getIban(), a.getCurrency());
+                        if (depositAccountBO != null) {
+                            a.setAccountId(depositAccountBO.getId());
+                        }
+                    });
+
+            userService.create(userBO);
         } catch (UserManagementModuleException e1) {
             logger.error("User already exists! Should never happen while initiating mock data!");
         }
