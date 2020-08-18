@@ -1,5 +1,6 @@
 package mapper;
 
+import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapperImpl;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -16,13 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
-class AuthMapperTest {
+class KeycloakAuthMapperTest {
 
     private static final String SUBJECT = "Token subject";
     private static final String PREFERRED_USERNAME = "anton.brueckner";
 
     @InjectMocks
-    private AuthMapperImpl mapper;
+    private KeycloakAuthMapperImpl mapper;
 
     @Test
     void toAccessToken_ledgersRolesPresent() {

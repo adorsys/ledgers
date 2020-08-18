@@ -1,4 +1,4 @@
-package mapper;
+package de.adorsys.ledgers.keycloak.client.mapper;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
-public interface AuthMapper {
+public interface KeycloakAuthMapper {
     @Mapping(target = "sub", source = "subject")
     @Mapping(target = "tokenUsage", expression = "java(de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO.DIRECT_ACCESS)")
     @Mapping(target = "login", source = "preferredUsername")
