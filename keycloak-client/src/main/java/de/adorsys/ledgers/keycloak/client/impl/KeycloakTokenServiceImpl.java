@@ -1,6 +1,6 @@
-package impl;
+package de.adorsys.ledgers.keycloak.client.impl;
 
-import api.KeycloakTokenService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 
 public class KeycloakTokenServiceImpl implements KeycloakTokenService {

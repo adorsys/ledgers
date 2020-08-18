@@ -1,4 +1,4 @@
-package api;
+package de.adorsys.ledgers.keycloak.client.api;
 
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 
