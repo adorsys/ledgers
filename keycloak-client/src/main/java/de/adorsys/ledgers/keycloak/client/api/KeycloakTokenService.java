@@ -8,5 +8,5 @@ public interface KeycloakTokenService {
 
     BearerTokenTO exchangeToken(BearerTokenTO oldToken);
 
-    BearerTokenTO validateToken(BearerTokenTO token);
+    boolean validate(BearerTokenTO token);
 }
