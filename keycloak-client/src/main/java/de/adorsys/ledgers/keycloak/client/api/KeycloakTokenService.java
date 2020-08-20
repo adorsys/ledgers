@@ -6,7 +6,7 @@ public interface KeycloakTokenService {
 
     BearerTokenBO login(String login, String password);
 
-    BearerTokenBO exchangeToken(String oldToken, Integer timeToLive);
+    BearerTokenBO exchangeToken(String oldToken, Integer timeToLive, String scope);
 
     boolean validate(BearerTokenBO token);
 }
