@@ -52,9 +52,9 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     }
 
     @Override
-    public BearerTokenBO exchangeToken(String oldToken, Integer timeToLive) {
+    public BearerTokenBO exchangeToken(String oldToken, Integer timeToLive, String scope) {
         return authMapper.toBearerTokenBO(
-                keycloakTokenRestClient.exchangeToken("Bearer " + oldToken, new TokenConfiguration(timeToLive)).getBody()
+                keycloakTokenRestClient.exchangeToken("Bearer " + oldToken, new TokenConfiguration(timeToLive, scope)).getBody()
         );
     }
 

@@ -9,4 +9,6 @@ public class TokenConfiguration {
 
     private int tokenLifespanInSeconds;
 
+    private String scope;
+
 }
