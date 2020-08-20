@@ -18,6 +18,13 @@ server:
   port: 11324
 ledgers.url: http://localhost:${server.port}
 
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: ledgers
+  resource: ledgers-client
+  public-client: true
+  principal-attribute: preferred_username
+
 spring:
   application.name: ledgers
   datasource:
