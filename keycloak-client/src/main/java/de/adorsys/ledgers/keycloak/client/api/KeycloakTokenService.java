@@ -1,12 +1,12 @@
 package de.adorsys.ledgers.keycloak.client.api;
 
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 
 public interface KeycloakTokenService {
 
-    BearerTokenTO login(String login, String password);
+    BearerTokenBO login(String login, String password);
 
-    BearerTokenTO exchangeToken(BearerTokenTO oldToken);
+    BearerTokenBO exchangeToken(String oldToken, Integer timeToLive);
 
-    boolean validate(BearerTokenTO token);
+    boolean validate(BearerTokenBO token);
 }

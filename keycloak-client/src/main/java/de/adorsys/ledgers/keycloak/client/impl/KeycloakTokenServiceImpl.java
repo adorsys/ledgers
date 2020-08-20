@@ -1,11 +1,13 @@
 package de.adorsys.ledgers.keycloak.client.impl;
 
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
+import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapper;
+import de.adorsys.ledgers.keycloak.client.model.TokenConfiguration;
 import de.adorsys.ledgers.keycloak.client.rest.KeycloakTokenRestClient;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.Objects;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class KeycloakTokenServiceImpl implements KeycloakTokenService {
 
     @Value("${keycloak.resource:}")
@@ -25,15 +28,11 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     @Value("${keycloak.credentials.secret:}")
     private String clientSecret;
 
-    private KeycloakTokenRestClient keycloakTokenRestClient;
-
-    @Autowired
-    public KeycloakTokenServiceImpl(KeycloakTokenRestClient keycloakTokenRestClient) {
-        this.keycloakTokenRestClient = keycloakTokenRestClient;
-    }
+    private final KeycloakTokenRestClient keycloakTokenRestClient;
+    private final KeycloakAuthMapper authMapper;
 
     @Override
-    public BearerTokenTO login(String username, String password) {
+    public BearerTokenBO login(String username, String password) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
         formParams.add("grant_type", "password");
         formParams.add("username", username);
@@ -47,18 +46,20 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
             log.error("Could not obtain token by user credentials [{}]", username); //todo: throw specific exception
         }
         Map<String, ?> body = Objects.requireNonNull(resp).getBody();
-        BearerTokenTO bearerTokenTO = new BearerTokenTO();
-        bearerTokenTO.setAccess_token((String) Objects.requireNonNull(body).get("access_token"));
-        return bearerTokenTO;
+        BearerTokenBO bearerTokenBO = new BearerTokenBO();
+        bearerTokenBO.setAccess_token((String) Objects.requireNonNull(body).get("access_token"));
+        return bearerTokenBO;
     }
 
     @Override
-    public BearerTokenTO exchangeToken(BearerTokenTO oldToken) {
-        return null;
+    public BearerTokenBO exchangeToken(String oldToken, Integer timeToLive) {
+        return authMapper.toBearerTokenBO(
+                keycloakTokenRestClient.exchangeToken("Bearer " + oldToken, new TokenConfiguration(timeToLive)).getBody()
+        );
     }
 
     @Override
-    public boolean validate(BearerTokenTO token) {
+    public boolean validate(BearerTokenBO token) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
         formParams.add("username", token.getAccessTokenObject().getLogin());
         formParams.add("token", token.getAccess_token());
