@@ -3,13 +3,9 @@ package utils;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 public class TestKeycloakService {
     private final Keycloak keycloak;
@@ -32,6 +28,10 @@ public class TestKeycloakService {
         keycloak.realm(realm).clients().create(createClientRepresentation(clientName, clientSecret));
     }
 
+    public void createClientScope(String realm, String clientScope) {
+        keycloak.realm(realm).clientScopes().create(createClientScopeRepresentation(clientScope));
+    }
+
     public void createUser(String realm, String login, String password) {
         keycloak.realm(realm).users().create(createUserRepresentation(login, password));
     }
@@ -44,6 +44,8 @@ public class TestKeycloakService {
 //        client.setPublicClient(true);
         client.setDirectAccessGrantsEnabled(true);
         client.setSecret(clientSecret);
+        client.setFullScopeAllowed(true);
+        client.setOptionalClientScopes(Arrays.asList("offline_access", "partial_access", "openid"));
         return client;
     }
 
@@ -73,6 +75,18 @@ public class TestKeycloakService {
         rr.setDisplayName(realm);
         rr.setEnabled(true);
         return rr;
+    }
+
+    private ClientScopeRepresentation createClientScopeRepresentation(String name) {
+        ClientScopeRepresentation clientScope = new ClientScopeRepresentation();
+        clientScope.setName(name);
+        clientScope.setDescription(name + " description");
+        clientScope.setProtocol("openid-connect");
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("display.on.consent.screen", "true");
+        attributes.put("include.in.token.scope", "true");
+        clientScope.setAttributes(attributes);
+        return clientScope;
     }
 
 }

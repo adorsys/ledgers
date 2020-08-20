@@ -8,6 +8,7 @@ import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
+import org.keycloak.OAuth2Constants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +35,12 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     @Override
     public BearerTokenBO login(String username, String password) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-        formParams.add("grant_type", "password");
-        formParams.add("username", username);
-        formParams.add("password", password);
-        formParams.add("client_id", clientId);
-        formParams.add("client_secret", clientSecret);
+        formParams.add(OAuth2Constants.GRANT_TYPE, "password");
+        formParams.add(OAuth2Constants.USERNAME, username);
+        formParams.add(OAuth2Constants.PASSWORD, password);
+        formParams.add(OAuth2Constants.CLIENT_ID, clientId);
+        formParams.add(OAuth2Constants.CLIENT_SECRET, clientSecret);
+        formParams.add(OAuth2Constants.SCOPE, "offline_access openid partial_access");
         ResponseEntity<Map<String, ?>> resp = keycloakTokenRestClient.login(formParams);
 
         HttpStatus statusCode = resp.getStatusCode();
@@ -61,10 +63,10 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     @Override
     public boolean validate(BearerTokenBO token) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-        formParams.add("username", token.getAccessTokenObject().getLogin());
+        formParams.add(OAuth2Constants.USERNAME, token.getAccessTokenObject().getLogin());
         formParams.add("token", token.getAccess_token());
-        formParams.add("client_id", clientId);
-        formParams.add("client_secret", clientSecret);
+        formParams.add(OAuth2Constants.CLIENT_ID, clientId);
+        formParams.add(OAuth2Constants.CLIENT_SECRET, clientSecret);
         ResponseEntity<Map<String, ?>> resp = keycloakTokenRestClient.validate(formParams);
 
         HttpStatus statusCode = resp.getStatusCode();
