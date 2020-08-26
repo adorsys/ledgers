@@ -82,7 +82,6 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     @Override
     public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String login, String pin,
                                                                   String consentId, String authorisationId, OpTypeTO opType) {
-        log.info("Started login for {}, oprId {}, authrizationId {}", opType,consentId, authorisationId);
         return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
     }
 

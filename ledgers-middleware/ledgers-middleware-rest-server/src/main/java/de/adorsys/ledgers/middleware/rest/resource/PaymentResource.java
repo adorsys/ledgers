@@ -61,10 +61,7 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
-        log.info("Called initiate for payment {}", payment.getPaymentId());
-        SCAPaymentResponseTO response = paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment, paymentType);
-        log.info("Result for payment {}, authorizationId {}, ScaStatus {}", response.getPaymentId(), response.getAuthorisationId(), response.getScaStatus());
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment, paymentType), HttpStatus.CREATED);
     }
 
     @Override
@@ -81,19 +78,13 @@ public class PaymentResource implements PaymentRestAPI {
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, String authorisationId, String scaMethodId) {
-        log.info("Called select method for payment {}, authorizationId {}", paymentId, authorisationId);
-        SCAPaymentResponseTO response = paymentService.selectSCAMethodForPayment(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), paymentId);
-        log.info("Result for payment {}, authorizationId {}, ScaStatus {}", response.getPaymentId(), response.getAuthorisationId(), response.getScaStatus());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), paymentId));
     }
 
     @Override
     @PreAuthorize("paymentInfoById(#paymentId)")
     public ResponseEntity<SCAPaymentResponseTO> authorizePayment(String paymentId, String authorisationId, String authCode) {
-        log.info("Called validate TAN for payment {}, authorizationId {}", paymentId, authorisationId);
-        SCAPaymentResponseTO response = paymentService.authorizePayment(scaInfoHolder.getScaInfoWithAuthCode(authCode), paymentId);
-        log.info("Result for payment {}, authorizationId {}, ScaStatus {}", response.getPaymentId(), response.getAuthorisationId(), response.getScaStatus());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentService.authorizePayment(scaInfoHolder.getScaInfoWithAuthCode(authCode), paymentId));
     }
 
     @Override
