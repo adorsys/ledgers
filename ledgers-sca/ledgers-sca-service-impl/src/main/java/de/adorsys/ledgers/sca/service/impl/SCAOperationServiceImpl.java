@@ -301,13 +301,11 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     private boolean isCompletedByAllUsers(List<SCAOperationEntity> found) {
         log.info("Final weight set to: {}", finalWeight);
-        log.info("Sca Operations found:");
-        found.forEach(f -> log.info("OprId {}, ObjId {}, ScaStatus {}, ScaWeight {}", f.getId(), f.getOpId(), f.getScaStatus(), f.getScaWeight()));
         long sum = found.stream()
                            .filter(op -> op.getScaStatus() == ScaStatus.FINALISED)
                            .collect(Collectors.summarizingInt(SCAOperationEntity::getScaWeight))
                            .getSum();
-        log.info("Sum of SCAs is : {}, no multilevel required? {}", sum, sum >= finalWeight);
+        log.info("Sum of SCAs is : {}, further SCA required? {}", sum, sum >= finalWeight);
         return sum >= finalWeight;
     }
 
