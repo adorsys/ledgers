@@ -289,13 +289,10 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     private boolean isCompletedByAllUsers(List<SCAOperationEntity> found) {
-        log.info("Final weight set to: {}", finalWeight);
-        long sum = found.stream()
-                           .filter(op -> op.getScaStatus() == ScaStatus.FINALISED)
-                           .collect(Collectors.summarizingInt(SCAOperationEntity::getScaWeight))
-                           .getSum();
-        log.info("Sum of SCAs is : {}, further SCA required? {}", sum, sum >= finalWeight);
-        return sum >= finalWeight;
+        return found.stream()
+                       .filter(op -> op.getScaStatus() == ScaStatus.FINALISED)
+                       .collect(Collectors.summarizingInt(SCAOperationEntity::getScaWeight))
+                       .getSum() >= finalWeight;
     }
 
     private boolean isAnyScaCompleted(List<SCAOperationEntity> found) {
