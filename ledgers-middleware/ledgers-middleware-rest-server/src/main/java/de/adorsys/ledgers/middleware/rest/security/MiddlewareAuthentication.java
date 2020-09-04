@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
+//TODO REMOVE ME!
 public class MiddlewareAuthentication extends UsernamePasswordAuthenticationToken {
 
     private static final long serialVersionUID = -778888356552035882L;

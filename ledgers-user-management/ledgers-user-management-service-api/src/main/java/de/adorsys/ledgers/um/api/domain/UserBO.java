@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -47,6 +48,12 @@ public class UserBO {
         this.login = login;
         this.email = email;
         this.pin = pin;
+    }
+
+    public List<String> getRolesAsString() {
+        return this.userRoles.stream()
+                       .map(Enum::name)
+                       .collect(Collectors.toList());
     }
 
     @Override

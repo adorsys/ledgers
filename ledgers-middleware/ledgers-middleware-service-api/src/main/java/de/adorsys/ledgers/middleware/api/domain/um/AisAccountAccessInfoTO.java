@@ -21,8 +21,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
@@ -52,5 +56,21 @@ public class AisAccountAccessInfoTO {
                        accounts != null && accounts.contains(iban) ||
                        balances != null && balances.contains(iban) ||
                        transactions != null && transactions.contains(iban);
+    }
+
+    public Set<String> getListedAccounts() {
+        return Stream.concat(
+                Stream.concat(
+                        checkAndTransform(this.accounts),
+                        checkAndTransform(this.balances)),
+                checkAndTransform(this.transactions))
+                       .collect(Collectors.toSet());
+    }
+
+    private Stream<String> checkAndTransform(List<String> collection) {
+        if (CollectionUtils.isNotEmpty(collection)) {
+            return collection.stream();
+        }
+        return Stream.of();
     }
 }

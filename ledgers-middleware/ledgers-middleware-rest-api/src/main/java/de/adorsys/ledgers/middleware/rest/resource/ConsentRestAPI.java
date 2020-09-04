@@ -28,43 +28,15 @@ import org.springframework.web.bind.annotation.*;
 public interface ConsentRestAPI {
     String BASE_PATH = "/consents";
 
-    /**
-     * Initiates an sca process. The result of this initiation is the user's authorization id.
-     *
-     * @param consentId  : identifies the sca id among the users from which authorization is expected.
-     * @param aisConsent : The ais consent target of the authorization. If the authorisation was started
-     *                   by another user, this ais consent must match the one stored in the authorization object.
-     * @return the authorization id. Might send the
-     */
-    // TODO: valid login for customer.
-    @PostMapping(value = "/{consentId}/authorisations")
-    @Operation(summary = "Start SCA", description = "Starts an authorisation process for establishing account information consent data on the server.")
-    @SecurityRequirement(name = "Authorization")
-    ResponseEntity<SCAConsentResponseTO> startSCA(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent);
-
-    @GetMapping(value = "/{consentId}/authorisations/{authorisationId}")
-    @Operation(summary = "Get SCA", description = "Get the authorization response object eventually containing the list of selected sca methods.")
-    @SecurityRequirement(name = "Authorization")
-    ResponseEntity<SCAConsentResponseTO> getSCA(@PathVariable("consentId") String consentId,
-                                                @PathVariable("authorisationId") String authorisationId);
-
-    @PutMapping(value = "/{consentId}/authorisations/{authorisationId}/scaMethods/{scaMethodId}")
-    @Operation(summary = "Select SCA Method", description = "Select teh given sca method and request for authentication code generation.")
-    @SecurityRequirement(name = "Authorization")
-    ResponseEntity<SCAConsentResponseTO> selectMethod(@PathVariable("consentId") String consentId,
-                                                      @PathVariable("authorisationId") String authorisationId,
-                                                      @PathVariable("scaMethodId") String scaMethodId);
-
-    @PutMapping(value = "/{consentId}/authorisations/{authorisationId}/authCode")
-    @Operation(summary = "Send an authentication code for validation", description = "Validate an authetication code and returns the cosent token")
-    @SecurityRequirement(name = "Authorization")
-    ResponseEntity<SCAConsentResponseTO> authorizeConsent(@PathVariable("consentId") String consentId,
-                                                          @PathVariable("authorisationId") String authorisationId,
-                                                          @RequestParam(name = "authCode") String authCode);
-
+    @PostMapping(value = "/{consentId}")
+    @Operation(summary = "Initiate AIS consent", description = "Validates AIS consent and stores consent initiation to DB")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
+    ResponseEntity<SCAConsentResponseTO> initiateAisConsent(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent);
 
     @PostMapping(value = "/piis")
     @Operation(summary = "Generate a consent token for CiF", description = "Generate a consent token for CiF. There is no sca process need as we assume the caller is fully authenticated.")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     ResponseEntity<SCAConsentResponseTO> grantPIISConsent(@RequestBody AisConsentTO piisConsent);
 }

@@ -1,0 +1,21 @@
+{
+  "realm": "test-realm",
+  "scopes": [
+    "sca",
+    "partial_access"
+  ],
+  "realmRoles": [
+    "STAFF",
+    "CUSTOMER"
+  ],
+  "client": {
+    "clientId": "ledgers-client",
+    "clientSecret": "279976b2-1794-437f-9467-8ad8401f1c51",
+    "redirectUrls": [
+      "adorsys.de"
+    ],
+    "scopes": [
+      "sca"
+    ]
+  }
+}

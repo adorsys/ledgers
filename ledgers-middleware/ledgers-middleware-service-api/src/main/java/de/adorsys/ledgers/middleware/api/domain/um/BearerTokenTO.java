@@ -4,18 +4,23 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class BearerTokenTO {
 
-	private String access_token;
-	
-	private String token_type = "Bearer";
-	
-	private int expires_in;
-	
-	private String refresh_token;
-	
-	private AccessTokenTO accessTokenObject;
+    private String access_token;
+
+    private String token_type = "Bearer";
+
+    private int expires_in;
+
+    private String refresh_token;
+
+    private AccessTokenTO accessTokenObject;
+
+    private Set<String> scopes;
+
 }

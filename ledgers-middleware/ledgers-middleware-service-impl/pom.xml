@@ -164,7 +164,13 @@
             <scope>test</scope>
         </dependency>
 
-	</dependencies>
+        <dependency>
+            <groupId>de.adorsys.ledgers</groupId>
+            <artifactId>keycloak-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
 
 	<build>
 		<plugins>

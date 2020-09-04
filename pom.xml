@@ -28,8 +28,7 @@
 		<module>ledgers-db</module>
         <module>ledgers-security</module>
 		<module>ledgers-jaxb-api</module>
-		<module>keycloak-client</module>
-        <module>keycloak-token-exchange</module>
+		<module>keycloak</module>
     </modules>
 
 	<packaging>pom</packaging>
@@ -109,7 +108,7 @@
 		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
 		<lombok-plugin.version>1.16.22</lombok-plugin.version>
 		<hamcrest-library.version>1.3</hamcrest-library.version>
-		<javatar-commons.version>0.6</javatar-commons.version>
+		<javatar-commons.version>0.7</javatar-commons.version>
 
 		<junit-jupiter.version>5.6.2</junit-jupiter.version>
 		<mockito.version>3.2.4</mockito.version>
@@ -123,6 +122,7 @@
 		<liquibase.version>4.0.0</liquibase.version>
 		<spring-boot-dependencies.version>2.3.1.RELEASE</spring-boot-dependencies.version>
 		<spring-cloud-feign.version>2.1.1.RELEASE</spring-cloud-feign.version>
+		<feign-core.version>10.8</feign-core.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
 		<jackson.version>2.9.10</jackson.version>
 		<lombok.version>1.18.8</lombok.version>
@@ -186,6 +186,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>io.github.openfeign</groupId>
+				<artifactId>feign-core</artifactId>
+				<version>${feign-core.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-core</artifactId>
@@ -403,6 +410,9 @@
 					</rulesets>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
+					<excludes>
+						<exclude>**/*MapperImpl.java</exclude>
+					</excludes>
 					<excludeRoots>
 						<excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
 						</excludeRoot>

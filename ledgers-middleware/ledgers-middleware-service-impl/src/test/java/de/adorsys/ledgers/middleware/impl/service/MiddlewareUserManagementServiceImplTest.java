@@ -2,6 +2,8 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
+import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
@@ -9,6 +11,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
+import de.adorsys.ledgers.middleware.impl.converter.KeycloakUserMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.*;
@@ -64,6 +67,10 @@ class MiddlewareUserManagementServiceImplTest {
     private UserMapper userTOMapper;
     @Mock
     private PageMapper pageMapper;
+    @Mock
+    private KeycloakUserMapper keycloakUserMapper;
+    @Mock
+    private KeycloakDataService dataService;
 
     private static UserBO userBO = null;
     private static UserTO userTO = null;
@@ -83,6 +90,7 @@ class MiddlewareUserManagementServiceImplTest {
     void create() {
         // Given
         when(userService.create(any())).thenReturn(userBO);
+        when(keycloakUserMapper.toKeycloakUser(any())).thenReturn(new KeycloakUser());
 
         // When
         UserTO user = middlewareUserService.create(userTO);
@@ -522,7 +530,7 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     private ScaInfoTO buildScaInfoTO(UserRoleTO role) {
-        return new ScaInfoTO(USER_ID, SCA_ID, AUTHORIZATION_ID, role, SCA_METHOD_ID, AUTH_CODE, TokenUsageTO.DELEGATED_ACCESS, USER_LOGIN);
+        return new ScaInfoTO(USER_ID, SCA_ID, AUTHORIZATION_ID, role, SCA_METHOD_ID, AUTH_CODE, TokenUsageTO.DELEGATED_ACCESS, USER_LOGIN, null, null);
     }
 
     private DepositAccountDetailsBO getDepositAccountDetailsBO() {

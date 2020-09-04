@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import lombok.Data;
@@ -12,8 +11,6 @@ import java.util.List;
 public class GlobalScaResponseTO {
     private OpTypeTO opType;
     private String operationObjectId;
-    //The below mentioned only applies to Payments
-    private TransactionStatusTO transactionStatus;
     private String authorisationId;
     private ScaStatusTO scaStatus;
     private List<ScaUserDataTO> scaMethods;

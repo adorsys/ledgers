@@ -1,8 +1,7 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public enum UserRoleTO {
 
@@ -11,15 +10,19 @@ public enum UserRoleTO {
     TECHNICAL("technical"), // a technical user. No SCA
     SYSTEM("system"); // A system user. FOr application management tasks
 
-    private final static Map<String, UserRoleTO> container = new HashMap<>();
+    public static final List<String> ALL_ROLES = Arrays.stream(UserRoleTO.values())
+                                                         .map(Enum::name)
+                                                         .collect(Collectors.toList());
+    private static final Map<String, UserRoleTO> container = new HashMap<>();
+
 
     static {
         for (UserRoleTO role : values()) {
             container.put(role.getValue(), role);
         }
     }
-
     private String value;
+
 
     UserRoleTO(String value) {
         this.value = value;

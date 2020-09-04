@@ -49,8 +49,8 @@ public class SCAUtils {
         return userMapper.toUserTO(userBO);
     }
 
-    public UserBO userBO(String userId) {
-        return userService.findById(userId);
+    public UserBO userBO(String login) {
+        return userService.findByLogin(login);
     }
 
     public SCAOperationBO loadAuthCode(String authorisationId) {

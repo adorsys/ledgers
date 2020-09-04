@@ -8,6 +8,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Data
 public class AccessTokenTO {
@@ -69,6 +70,12 @@ public class AccessTokenTO {
     @Schema(description = "The usage of this token.")
     @JsonProperty("token_usage")
     private TokenUsageTO tokenUsage;
+
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("scopes")
+    private Set<String> scopes;
 
     @JsonIgnore
     public boolean hasValidConsent() {

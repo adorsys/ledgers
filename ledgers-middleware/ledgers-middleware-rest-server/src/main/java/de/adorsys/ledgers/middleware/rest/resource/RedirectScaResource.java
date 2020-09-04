@@ -17,13 +17,14 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.ScaLoginOprTO;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareScaService;
+import de.adorsys.ledgers.middleware.api.domain.sca.StartScaOprTO;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,25 +35,29 @@ import org.springframework.web.bind.annotation.RestController;
 @MiddlewareUserResource
 public class RedirectScaResource implements RedirectScaRestAPI {
     private final ScaInfoHolder scaInfoHolder;
-    private final MiddlewareScaService scaService;
+    private final MiddlewareRedirectScaService scaService;
 
     @Override
-    public ResponseEntity<GlobalScaResponseTO> authoriseForConsent(ScaLoginOprTO loginOpr) {
-        return ResponseEntity.ok(scaService.loginForOperation(loginOpr));
+    @PreAuthorize("hasScaScope()")
+    public ResponseEntity<GlobalScaResponseTO> startSca(StartScaOprTO startScaOpr) {
+        return ResponseEntity.ok(scaService.startScaOperation(startScaOpr, scaInfoHolder.getScaInfo()));
     }
 
     @Override
+    @PreAuthorize("hasScaScope()")
     public ResponseEntity<GlobalScaResponseTO> getSCA(String authorisationId) {
-        return ResponseEntity.ok(scaService.getMethods(authorisationId, scaInfoHolder.getUserId()));
+        return ResponseEntity.ok(scaService.getMethods(authorisationId, scaInfoHolder.getScaInfo()));
     }
 
     @Override
+    @PreAuthorize("hasScaScope()")
     public ResponseEntity<GlobalScaResponseTO> selectMethod(String authorisationId, String scaMethodId) {
         return ResponseEntity.ok(scaService.selectMethod(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId)));
     }
 
     @Override
-    public ResponseEntity<GlobalScaResponseTO> authorize(String authorisationId, String authCode) {
-        return ResponseEntity.ok(scaService.confirmAuthorization(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
+    @PreAuthorize("hasScaScope()")
+    public ResponseEntity<GlobalScaResponseTO> validateScaCode(String authorisationId, String authCode) {
+        return ResponseEntity.ok(scaService.confirmAuthorization(scaInfoHolder.getScaInfoWithAuthCodeAndAuthorisationId(authCode, authorisationId)));
     }
 }

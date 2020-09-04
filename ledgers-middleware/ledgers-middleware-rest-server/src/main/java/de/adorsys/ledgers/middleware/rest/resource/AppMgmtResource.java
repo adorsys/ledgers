@@ -16,17 +16,16 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +46,7 @@ public class AppMgmtResource implements AppMgmtRestAPI {
 
     private final AppManagementService appManagementService;
     private final MiddlewareUserManagementService userManagementService;
-    private final MiddlewareOnlineBankingService middlewareUserService;
+    private final KeycloakTokenService tokenService;
 
     @Override
     public ResponseEntity<String> ping() {
@@ -62,7 +61,7 @@ public class AppMgmtResource implements AppMgmtRestAPI {
     }
 
     @Override
-    public ResponseEntity<BearerTokenTO> admin(@RequestBody(required = true) UserTO adminUser) {
+    public ResponseEntity<Void> admin(@RequestBody UserTO adminUser) {
         List<UserTO> users = userManagementService.listUsers(0, 1);
         if (!users.isEmpty()) {
             log.error(ADMIN_FIRST);
@@ -77,8 +76,6 @@ public class AppMgmtResource implements AppMgmtRestAPI {
         user.setEmail(adminUser.getEmail());
         user.getUserRoles().add(UserRoleTO.SYSTEM);
         userManagementService.create(user);
-
-        SCALoginResponseTO scaLoginResponseTO = middlewareUserService.authorise(adminUser.getLogin(), adminUser.getPin(), UserRoleTO.SYSTEM);
-        return ResponseEntity.ok(scaLoginResponseTO.getBearerToken());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

@@ -53,16 +53,6 @@
 
 		<!-- Sprinfox and swagger UI -->
 
-<!--		<dependency>-->
-<!--			<groupId>io.swagger</groupId>-->
-<!--			<artifactId>swagger-annotations</artifactId>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>io.springfox</groupId>-->
-<!--			<artifactId>springfox-swagger2</artifactId>-->
-<!--		</dependency>-->
-
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
@@ -73,6 +63,12 @@
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Other dependencies -->
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-core</artifactId>
 		</dependency>
     </dependencies>
 

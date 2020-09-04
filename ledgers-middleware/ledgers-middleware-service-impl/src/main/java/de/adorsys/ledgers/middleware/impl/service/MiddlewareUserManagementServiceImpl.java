@@ -2,6 +2,8 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
+import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
@@ -12,6 +14,7 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareRecoveryService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
+import de.adorsys.ledgers.middleware.impl.converter.KeycloakUserMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.*;
@@ -55,13 +58,31 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private final PageMapper pageMapper;
     private final AdditionalAccountInformationMapper additionalInfoMapper;
     private final MiddlewareRecoveryService recoveryService;
+    private final KeycloakDataService dataService;
+    private final KeycloakUserMapper keycloakUserMapper;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
     @Override
+    @Transactional
     public UserTO create(UserTO user) {
         UserBO createdUser = userService.create(userTOMapper.toUserBO(user));
+        try {
+            KeycloakUser keycloakUser = keycloakUserMapper.toKeycloakUser(createdUser);
+            keycloakUser.setPassword(user.getPin());
+
+            dataService.createUser(keycloakUser);
+        } catch (Exception e) {
+            if (createdUser.getRolesAsString().contains("SYSTEM") && createdUser.getLogin().equals("admin")) {
+                log.info("Initial Admin user is already present in IDP");
+            } else {
+                throw MiddlewareModuleException.builder()
+                              .errorCode(INSUFFICIENT_PERMISSION)
+                              .devMsg(format("Could not register user at IDP msg: %s", e.getMessage()))
+                              .build();
+            }
+        }
         if (createdUser.getUserRoles().contains(UserRoleBO.STAFF)) {
             RecoveryPointTO point = new RecoveryPointTO();
             point.setDescription(format("Registered %s user", user.getLogin()));

@@ -1,0 +1,11 @@
+{
+  "login": "babyuk",
+  "firstName": "Semen",
+  "lastName": "Babyuk",
+  "email": "babyuk@email.net",
+  "enabled": true,
+  "emailVerified": true,
+  "realmRoles": [
+    "STAFF"
+  ]
+}

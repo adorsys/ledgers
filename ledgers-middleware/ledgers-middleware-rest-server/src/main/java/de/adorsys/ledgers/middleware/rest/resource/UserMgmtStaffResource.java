@@ -1,18 +1,17 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.general.RevertRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
-import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,6 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.IN
 @RequiredArgsConstructor
 @RequestMapping("/staff-access" + UserMgmtRestAPI.BASE_PATH)
 public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
-    private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final ScaInfoHolder scaInfoHolder;
 
@@ -56,22 +54,8 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    public ResponseEntity<SCALoginResponseTO> authoriseForUser(AuthoriseForUserTO authorise) {
-        return ResponseEntity.ok(onlineBankingService.authorizeForUser(authorise.getLogin(), authorise.getPin(), authorise.getUserLogin()));
-    }
-
-    @Override
     public ResponseEntity<UserTO> modifyUser(String branch, UserTO user) {
         return ResponseEntity.ok(middlewareUserService.updateUser(branch, user));
-    }
-
-    @Override
-    public ResponseEntity<SCALoginResponseTO> login(UserCredentialsTO userCredentials) {
-        try {
-            return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.SYSTEM));
-        } catch (UserManagementModuleException e) {
-            return ResponseEntity.ok(onlineBankingService.authorise(userCredentials.getLogin(), userCredentials.getPin(), UserRoleTO.STAFF));
-        }
     }
 
     @Override

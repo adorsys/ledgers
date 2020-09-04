@@ -3,6 +3,10 @@ package de.adorsys.ledgers.middleware.impl.mockbank;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import de.adorsys.ledgers.keycloak.client.impl.KeycloakDataServiceImpl;
+import de.adorsys.ledgers.keycloak.client.impl.KeycloakTokenServiceImpl;
+import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapperImpl;
+import de.adorsys.ledgers.keycloak.client.rest.KeycloakTokenRestClient;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.impl.test.MiddlewareServiceApplication;
 import de.adorsys.ledgers.postings.db.repository.LedgerAccountRepository;
@@ -20,7 +24,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = MiddlewareServiceApplication.class)
+@SpringBootTest(classes = {MiddlewareServiceApplication.class, KeycloakTokenServiceImpl.class, KeycloakTokenRestClient.class, KeycloakAuthMapperImpl.class, KeycloakDataServiceImpl.class})
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class, TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
 @ActiveProfiles("h2")

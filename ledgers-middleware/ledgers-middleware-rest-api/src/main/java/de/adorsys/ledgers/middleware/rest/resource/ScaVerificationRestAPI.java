@@ -16,7 +16,8 @@ public interface ScaVerificationRestAPI {
 
     @PostMapping("/email-verification")
     @Operation(summary = "Send email for verification")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email was successfully send."),
             @ApiResponse(responseCode = "404", description = "Error sending email: verification token or sca data not found.")

@@ -1,0 +1,14 @@
+keycloak:
+  auth-server-url: change.me
+  realm: test-realm
+  resource: test-client
+  public-client: true
+
+keycloak-sync:
+  admin:
+    username: admin
+    password: admin
+
+springdoc:
+  api-docs:
+    enabled: false

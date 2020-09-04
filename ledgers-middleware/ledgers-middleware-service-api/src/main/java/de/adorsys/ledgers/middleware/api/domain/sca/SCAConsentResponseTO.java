@@ -4,10 +4,14 @@ import lombok.Data;
 
 @Data
 public class SCAConsentResponseTO extends SCAResponseTO {
-	private String consentId;
-	private boolean partiallyAuthorised;
+    private String consentId;
+    private boolean partiallyAuthorised;
 
-	public SCAConsentResponseTO() {
-		super(SCAConsentResponseTO.class.getSimpleName());
-	}
+    public SCAConsentResponseTO(String consentId) {
+        this.consentId = consentId;
+    }
+
+    public SCAConsentResponseTO() {
+        super(SCAConsentResponseTO.class.getSimpleName());
+    }
 }
