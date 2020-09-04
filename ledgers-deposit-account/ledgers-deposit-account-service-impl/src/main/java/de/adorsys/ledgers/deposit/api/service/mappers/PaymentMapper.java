@@ -97,7 +97,6 @@ public interface PaymentMapper {
     @Mapping(target = "purposeCode", defaultExpression = "java(null)")
     @Mapping(target = "remittanceInformationUnstructured", constant = "Cash deposit through Bank ATM")
     @Mapping(target = "exchangeRate", defaultExpression = "java(null)")
-    //TODO In future maybe need to deposit cash in different currency
     @Mapping(target = "debtorName", source = "depositAccount.name")
     @Mapping(target = "debtorAccount", source = "depositAccount.reference")
     @Mapping(target = "creditorName", source = "depositAccount.name")

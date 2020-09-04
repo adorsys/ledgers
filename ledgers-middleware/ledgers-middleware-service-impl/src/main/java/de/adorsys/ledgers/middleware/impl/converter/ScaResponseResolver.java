@@ -13,11 +13,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.ScaChallengeDataResolver;
 import de.adorsys.ledgers.middleware.impl.service.SCAUtils;
-import de.adorsys.ledgers.sca.domain.AuthCodeDataBO;
-import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,13 +25,9 @@ public class ScaResponseResolver {
     private final SCAUtils scaUtils;
     private final ScaChallengeDataResolver scaChallengeDataResolver;
     private final UserMapper userMapper;
-    private final SCAOperationService scaOperationService;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
-
-    @Value("${ledgers.default.token.lifetime.seconds:600}")
-    private int defaultLoginTokenExpireInSeconds;
 
     public <T extends SCAResponseTO> void completeResponse(T response, SCAOperationBO operation, UserTO user, String template, BearerTokenTO token) {
         response.setScaStatus(ScaStatusTO.valueOf(operation.getScaStatus().name()));
@@ -62,30 +54,7 @@ public class ScaResponseResolver {
         return ScaStatusTO.EXEMPTED;
     }
 
-    public void prepareScaAndUpdateResponse(String paymentId, SCAPaymentResponseTO response, String authorisationId, String psuMessage, int scaWeight, UserBO user, OpTypeBO opType) {
-        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, paymentId, psuMessage, defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
-        SCAOperationBO operation = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.valueOf(response.getScaStatus().name()));
-        updateScaUserDataInResponse(user, operation, response);
-    }
-
-    public void generateCodeAndUpdateResponse(String paymentId, SCAPaymentResponseTO response, String authorisationId, String psuMessage, int scaWeight, UserBO user, OpTypeBO opType, String scaMethodId) {
-        AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), scaMethodId, paymentId, psuMessage, defaultLoginTokenExpireInSeconds, opType, authorisationId, scaWeight);
-        SCAOperationBO operation = scaOperationService.generateAuthCode(authCodeData, user, ScaStatusBO.SCAMETHODSELECTED);
-        updateScaUserDataInResponse(user, operation, response);
-    }
-
-    public void updateScaUserDataInResponse(UserBO user, SCAOperationBO operation, SCAResponseTO response) {
-        ScaUserDataTO userData = scaUtils.getScaMethod(user, operation.getScaMethodId());
-        response.setChosenScaMethod(userData);
-        response.setStatusDate(operation.getStatusTime());
-        response.setExpiresInSeconds(operation.getValiditySeconds());
-        if (userData != null) {
-            response.setChallengeData(scaChallengeDataResolver.resolveScaChallengeData(userData.getScaMethod())
-                                              .getChallengeData(new ScaDataInfoTO(userData, operation.getTan())));
-        }
-    }
-
-    public void updateScaResponseFields(UserBO user, SCAPaymentResponseTO response, String authorisationId, String psuMessage, BearerTokenTO token, ScaStatusTO scaStatus, int scaWeight) {
+    public <T extends SCAResponseTO> void updateScaResponseFields(UserBO user, T response, String authorisationId, String psuMessage, BearerTokenTO token, ScaStatusTO scaStatus, int scaWeight) {
         response.setScaStatus(scaStatus);
         response.setAuthorisationId(authorisationId);
         response.setScaMethods(userMapper.toScaUserDataListTO(user.getScaUserData()));

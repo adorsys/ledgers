@@ -21,6 +21,7 @@ import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -90,6 +91,14 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map> handleDepositModuleException(DepositModuleException ex) {
         HttpStatus status = DepositHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
+        return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<Map> handleFeignException(FeignException ex) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        Map<String, String> body = getHandlerContent(status, "Internal Rest Exception!", null, "Something went wrong during server internal interaction. \nPlease consult your bank for details.");
+        log.error(ex.contentUTF8());
         return new ResponseEntity<>(body, status);
     }
 

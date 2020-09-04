@@ -21,7 +21,8 @@ public interface TransactionsStaffResourceAPI {
      * @return user object without pin
      */
     @Operation(summary = "Posts transactions to Ledgers")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @PostMapping
     ResponseEntity<Map<String, String>> transactions(@RequestBody List<MockBookingDetails> data);
 }

@@ -1,26 +1,50 @@
 package de.adorsys.ledgers.middleware.rest.security;
 
+import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapper;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
-import de.adorsys.ledgers.middleware.rest.mapper.AuthMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
 import org.springframework.security.core.Authentication;
 
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
+import static de.adorsys.ledgers.middleware.api.domain.Constants.*;
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.*;
 
 public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionAdapter {
 
-    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService, AuthMapper authMapper, MiddlewareUserManagementService userManagementService) {
+    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService, KeycloakAuthMapper authMapper, MiddlewareUserManagementService userManagementService) {
         super(authentication, accountService, paymentService, userManagementService, authMapper);
+    }
+
+    public boolean hasFullAccessScope() {
+        return hasAnyScope(SCOPE_FULL_ACCESS);
+    }
+
+    public boolean hasScaScope() {
+        return hasAnyScope(SCOPE_SCA, SCOPE_PARTIAL_ACCESS, SCOPE_FULL_ACCESS);
+    }
+
+    public boolean hasPartialScope() {
+        return hasAnyScope(SCOPE_PARTIAL_ACCESS, SCOPE_FULL_ACCESS);
+    }
+
+    private boolean hasAnyScope(String... scopes) {
+        Set<String> scopesInToken = getScopes();
+        return Arrays.stream(scopes)
+                       .anyMatch(scopesInToken::contains);
+    }
+
+    private Set<String> getScopes() {
+        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
+        return new HashSet<>(Arrays.asList(credentials.getToken()
+                                                   .getScope()
+                                                   .split(" ")));
     }
 
     public boolean accountInfoByIdentifier(AccountIdentifierTypeTO type, String accountIdentifier) {
@@ -88,7 +112,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return userManagementService.findByUserLogin(login).getAccountAccesses();
     }
 
-    private boolean checkAccountInfoAccess(String iban) {
+    private boolean checkAccountInfoAccess(String iban) { //TODO fix me or remove me!
         if (StringUtils.isBlank(iban)) {
             return false;
         }
@@ -134,8 +158,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     private AccessTokenTO getAccessTokenTO() {
-        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext)authentication.getCredentials();
-        AccessToken token = credentials.getToken();
-        return authMapper.toAccessToken(token);
+        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
+        return authMapper.toAccessToken(credentials);
     }
 }

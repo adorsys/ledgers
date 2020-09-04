@@ -6,27 +6,22 @@ import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
+import de.adorsys.ledgers.middleware.api.domain.Constants;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
-import de.adorsys.ledgers.sca.domain.*;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
-import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -65,20 +60,17 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final UserService userService;
     private final AisConsentBOMapper aisConsentMapper;
     private final BearerTokenMapper bearerTokenMapper;
-    private final SCAOperationService scaOperationService;
     private final SCAUtils scaUtils;
     private final AccessService accessService;
     private final AmountMapper amountMapper;
-    private final ScaInfoMapper scaInfoMapper;
-    private final AuthorizationService authorizationService;
     private final PageMapper pageMapper;
     private final ScaResponseResolver scaResponseResolver;
+    private final KeycloakTokenService tokenService;
 
-    @Value("${ledgers.default.token.lifetime.seconds:600}")
-    private int defaultLoginTokenExpireInSeconds;
-
-    @Value("${ledgers.sca.multilevel.enabled:false}")
-    private boolean multilevelScaEnable;
+    @Value("${ledgers.token.lifetime.seconds.sca:10800}")
+    private int scaTokenLifeTime;
+    @Value("${ledgers.token.lifetime.seconds.full:7776000}")
+    private int fullTokenLifeTime;
 
     @Override
     public List<AccountDetailsTO> getAccountsByIbanAndCurrency(String iban, String currency) {
@@ -271,92 +263,39 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     // ======================= CONSENT ======================//
-
-    /*
-     * Starts the SCA process. Might directly produce the consent token if
-     * sca is not needed.
-     *
-     * (non-Javadoc)
-     * @see de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService#startSCA(java.lang.String, de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO)
-     */
     @Override
-    public SCAConsentResponseTO startSCA(ScaInfoTO scaInfoTO, String consentId, AisConsentTO aisConsent) {
-        BearerTokenBO bearerToken = checkAisConsent(scaInfoMapper.toScaInfoBO(scaInfoTO), aisConsent);
-        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
-        SCAConsentResponseTO response = prepareSCA(scaInfoTO, scaUtils.userBO(scaInfoTO.getUserId()), aisConsent, consentKeyData);
-        if (ScaStatusTO.EXEMPTED.equals(response.getScaStatus())) {
-            response.setBearerToken(bearerTokenMapper.toBearerTokenTO(bearerToken));
+    public SCAConsentResponseTO startAisConsent(ScaInfoTO scaInfoTO, String consentId, AisConsentTO aisConsent) {
+        UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
+        if (!aisConsent.getAccess().getListedAccounts().stream().allMatch(user::hasAccessToAccount)) {
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg("You can not Grant Access to Accounts you do not have access to!")
+                          .build();
         }
+
+        boolean isScaRequired = user.hasSCA();
+        String psuMessage = new ConsentKeyDataTO(aisConsent).template();
+        BearerTokenTO token = isScaRequired
+                                      ? tokenService.exchangeToken(scaInfoTO.getAccessToken(), scaTokenLifeTime, Constants.SCOPE_SCA)
+                                      : tokenService.exchangeToken(scaInfoTO.getAccessToken(), fullTokenLifeTime, Constants.SCOPE_FULL_ACCESS);
+        ScaStatusTO scaStatus = isScaRequired
+                                        ? ScaStatusTO.PSUAUTHENTICATED
+                                        : ScaStatusTO.EXEMPTED;
+        int scaWeight = accessService.resolveMinimalScaWeightForConsent(aisConsentMapper.toAisConsentBO(aisConsent).getAccess(), user.getAccountAccesses());
+        SCAConsentResponseTO response = new SCAConsentResponseTO(consentId);
+        scaResponseResolver.updateScaResponseFields(user, response, null, psuMessage, token, scaStatus, scaWeight);
         return response;
     }
 
     @Override
-    public SCAConsentResponseTO loadSCAForAisConsent(String userId, String consentId, String authorisationId) {
-        UserBO user = scaUtils.userBO(userId);
-        AisConsentBO consent = userService.loadConsent(consentId);
-        AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
-        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-        SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(authorisationId);
-        int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), user.getAccountAccesses());
-        SCAConsentResponseTO response = toScaConsentResponse(userMapper.toUserTO(user), consent, consentKeyData.template(), scaOperationBO);
-        response.setMultilevelScaRequired(multilevelScaEnable && scaWeight < 100);
-        return response;
-    }
-
-    @Override
-    public SCAConsentResponseTO selectSCAMethodForAisConsent(String userId, String consentId, String authorisationId, String scaMethodId) {
-        UserBO userBO = scaUtils.userBO(userId);
-        AisConsentBO consent = userService.loadConsent(consentId);
-        AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
-        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-        String template = consentKeyData.template();
-        int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
-
-        AuthCodeDataBO a = new AuthCodeDataBO(userBO.getLogin(), scaMethodId,
-                                              consentId, template,
-                                              defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
-
-        SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(a, userBO, ScaStatusBO.SCAMETHODSELECTED);
-        SCAConsentResponseTO response = toScaConsentResponse(userMapper.toUserTO(userBO), consent, consentKeyData.template(), scaOperationBO);
-        response.setMultilevelScaRequired(multilevelScaEnable && scaWeight < 100);
-        return response;
-    }
-
-    @Override
-    @SuppressWarnings("PMD.CyclomaticComplexity")
-    @Transactional(noRollbackFor = ScaModuleException.class)
-    public SCAConsentResponseTO authorizeConsent(ScaInfoTO scaInfoTO, String consentId) {
-        AisConsentBO consent = userService.loadConsent(consentId);
-        AisConsentTO aisConsentTO = aisConsentMapper.toAisConsentTO(consent);
-        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsentTO);
-
-        UserBO userBO = scaUtils.userBO(scaInfoTO.getUserId());
-        int scaWeight = accessService.resolveMinimalScaWeightForConsent(consent.getAccess(), userBO.getAccountAccesses());
-        ScaValidationBO scaValidationBO = scaOperationService.validateAuthCode(scaInfoTO.getAuthorisationId(), consentId, scaInfoTO.getAuthCode(), scaWeight);
-
-        UserTO userTO = scaUtils.user(userBO);
-        SCAOperationBO scaOperationBO = scaUtils.loadAuthCode(scaInfoTO.getAuthorisationId());
-        SCAConsentResponseTO response = toScaConsentResponse(userTO, consent, consentKeyData.template(), scaOperationBO);
-        response.setAuthConfirmationCode(scaValidationBO.getAuthConfirmationCode());
-        if (!scaOperationService.authenticationCompleted(consentId, OpTypeBO.CONSENT)) {
-            response.setPartiallyAuthorised(multilevelScaEnable);
-            response.setMultilevelScaRequired(multilevelScaEnable);
-        }
-        BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consent);
-        response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-        return response;
-    }
-
-    @Override
-    public SCAConsentResponseTO grantAisConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent) {
+    public SCAConsentResponseTO grantPIISConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent) {
         AisConsentTO piisConsentTO = cleanupForPIIS(aisConsent);
         ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(piisConsentTO);
-        AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(piisConsentTO);
+        //AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(piisConsentTO);
 
-        BearerTokenBO consentToken = authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consentBO);
+        BearerTokenBO consentToken = null/*authorizationService.consentToken(scaInfoMapper.toScaInfoBO(scaInfoTO), consentBO)*/;// TODO FIXME FOR KEYCLOAK!!! DMI
         SCAConsentResponseTO response = new SCAConsentResponseTO();
         response.setBearerToken(bearerTokenMapper.toBearerTokenTO(consentToken));
-        response.setAuthorisationId(scaUtils.authorisationId(scaInfoTO));
         response.setConsentId(aisConsent.getId());
         response.setPsuMessage(consentKeyData.exemptedTemplate());
         response.setScaStatus(ScaStatusTO.EXEMPTED);
@@ -479,62 +418,5 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         aisConsentTo.getAccess().setAccounts(Collections.emptyList());
         aisConsentTo.getAccess().setTransactions(Collections.emptyList());
         return aisConsentTo;
-    }
-
-    /*
-     * Returns a bearer token matching the consent if user has enougth permission
-     * to execute the operation.
-     */
-
-    private BearerTokenBO checkAisConsent(ScaInfoBO scaInfoBO, AisConsentTO aisConsent) {
-        AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
-        return authorizationService.consentToken(scaInfoBO, consentBO);
-
-    }
-    /*
-     * The SCA requirement shall be added as property of a deposit account permission.
-     *
-     * For now we will assume there is no sca requirement, when the user having access
-     * to the account does not habe any sca data configured.
-     */
-
-    private boolean scaRequired(UserBO user) {
-        return scaUtils.hasSCA(user);
-    }
-
-    private SCAConsentResponseTO prepareSCA(ScaInfoTO scaInfoTO, UserBO user, AisConsentTO aisConsent, ConsentKeyDataTO consentKeyData) {
-        String consentKeyDataTemplate = consentKeyData.template();
-        UserTO userTo = scaUtils.user(user);
-        String authorisationId = scaUtils.authorisationId(scaInfoTO);
-        if (!scaRequired(user)) {
-            SCAConsentResponseTO response = new SCAConsentResponseTO();
-            response.setAuthorisationId(authorisationId);
-            response.setConsentId(aisConsent.getId());
-            response.setPsuMessage(consentKeyData.exemptedTemplate());
-            response.setScaStatus(ScaStatusTO.EXEMPTED);
-            response.setStatusDate(LocalDateTime.now());
-            return response;
-        } else {
-            // start SCA
-            AisConsentBO consentBO = aisConsentMapper.toAisConsentBO(aisConsent);
-            consentBO = userService.storeConsent(consentBO);
-
-            int scaWeight = accessService.resolveMinimalScaWeightForConsent(consentBO.getAccess(), user.getAccountAccesses());
-
-            AuthCodeDataBO authCodeData = new AuthCodeDataBO(user.getLogin(), null, aisConsent.getId(), consentKeyDataTemplate, defaultLoginTokenExpireInSeconds, OpTypeBO.CONSENT, authorisationId, scaWeight);
-            // FPO no auto generation of SCA AutCode. Process shall always be triggered from outside
-            // The system. Even if a user ha only one sca method.
-            SCAOperationBO scaOperationBO = scaOperationService.createAuthCode(authCodeData, ScaStatusBO.PSUAUTHENTICATED);
-            SCAConsentResponseTO response = toScaConsentResponse(userTo, consentBO, consentKeyDataTemplate, scaOperationBO);
-            response.setMultilevelScaRequired(multilevelScaEnable && scaWeight < 100);
-            return response;
-        }
-    }
-
-    private SCAConsentResponseTO toScaConsentResponse(UserTO user, AisConsentBO consent, String messageTemplate, SCAOperationBO operation) {
-        SCAConsentResponseTO response = new SCAConsentResponseTO();
-        scaResponseResolver.completeResponse(response, operation, user, messageTemplate, null);
-        response.setConsentId(consent.getId());
-        return response;
     }
 }

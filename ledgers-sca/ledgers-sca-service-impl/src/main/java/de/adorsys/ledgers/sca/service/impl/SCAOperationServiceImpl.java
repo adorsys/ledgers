@@ -74,7 +74,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     //Use property config instead
 
-    @Value("${ledgers.default.token.lifetime.seconds:600}")
+    @Value("${ledgers.sca.authCode.validity.seconds:600}")
     private int authCodeValiditySeconds;
 
     @Value("${ledgers.sca.authCode.email.body}")
@@ -174,6 +174,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     @Override
     public SCAOperationBO createAuthCode(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus) {
+        checkAuthIdPresent(authCodeData);
         return scaOperationMapper.toBO(createAuthCodeInternal(authCodeData, scaStatus));
     }
 
@@ -212,6 +213,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     @Override
     public SCAOperationBO checkIfExistsOrNew(AuthCodeDataBO data) {
+        checkAuthIdPresent(data);
         Optional<SCAOperationEntity> scaOperation = repository.findById(data.getAuthorisationId());
         scaOperation.ifPresent(o -> {
             checkOperationAttempts(o, true);
@@ -219,7 +221,16 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
             checkOperationNotUsed(o);
         });
         return scaOperation.map(scaOperationMapper::toBO)
-                       .orElseGet(() -> createAuthCode(data, ScaStatusBO.RECEIVED));
+                       .orElseGet(() -> createAuthCode(data, ScaStatusBO.PSUAUTHENTICATED));
+    }
+
+    private void checkAuthIdPresent(AuthCodeDataBO data) {
+        if (StringUtils.isBlank(data.getAuthorisationId())) {
+            throw ScaModuleException.builder()
+                          .errorCode(AUTH_CODE_GENERATION_FAILURE)
+                          .devMsg("Missing authorization id.")
+                          .build();
+        }
     }
 
     private void checkOperationAttempts(SCAOperationEntity operation, boolean isLoginOperation) {
@@ -375,12 +386,6 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     }
 
     private SCAOperationEntity createAuthCodeInternal(AuthCodeDataBO authCodeData, ScaStatusBO scaStatus) {
-        if (authCodeData.getAuthorisationId() == null) {
-            throw ScaModuleException.builder()
-                          .errorCode(AUTH_CODE_GENERATION_FAILURE)
-                          .devMsg("Missing authorization id.")
-                          .build();
-        }
         SCAOperationEntity scaOp = new SCAOperationEntity();
         scaOp.setId(authCodeData.getAuthorisationId());
         scaOp.setOpId(authCodeData.getOpId());

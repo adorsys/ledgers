@@ -1,7 +1,6 @@
 package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
-import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthServerInfoBO;
@@ -9,21 +8,17 @@ import de.adorsys.ledgers.um.api.domain.oauth.OauthTokenResponseBO;
 import de.adorsys.ledgers.um.api.service.OauthAuthorisationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.OauthCodeEntity;
-import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.um.db.repository.OauthCodeRepository;
 import de.adorsys.ledgers.um.impl.service.config.OauthConfigurationProperties;
-import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.INVALID_CREDENTIAL;
@@ -36,7 +31,7 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
     private final UserService userService;
     private final PasswordEnc passwordEnc;
     private final OauthCodeRepository oauthCodeRepository;
-    private final BearerTokenService bearerTokenService;
+    //private final BearerTokenService bearerTokenService; //TODO Replace with keycloak if necessary
     private final OauthConfigurationProperties oauthConfigProp;
 
     @Override
@@ -91,14 +86,14 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
                           .devMsg("Oauth code is expired").build();
         }
         oauthCodeEntity.setUsed(true);
-        UserBO user = userService.findById(oauthCodeEntity.getUserId());
+       /* UserBO user = userService.findById(oauthCodeEntity.getUserId());
         String scaIdParam = Ids.id();
 
         Date issueTime = new Date();
-        Date expires = DateUtils.addMinutes(issueTime, oauthConfigProp.getLifeTime().getAccessToken());
+        Date expires = DateUtils.addMinutes(issueTime, oauthConfigProp.getLifeTime().getAccessToken());*/ //TODO Fixme or Remove me!
 
-        BearerTokenBO token = bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.CUSTOMER, scaIdParam, scaIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
+        BearerTokenBO token = null; /*bearerTokenService.bearerToken(user.getId(), user.getLogin(),
+                null, null, UserRole.CUSTOMER, scaIdParam, scaIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);*/
         return new OauthTokenResponseBO(token);
     }
 

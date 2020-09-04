@@ -1,7 +1,0 @@
-keycloak:
-  auth-server-url: change.me
-  realm: test-realm
-
-springdoc:
-  api-docs:
-    enabled: false

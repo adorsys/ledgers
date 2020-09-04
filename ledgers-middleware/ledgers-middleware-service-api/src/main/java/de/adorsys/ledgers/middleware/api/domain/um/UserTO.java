@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -36,6 +37,13 @@ public class UserTO {
         this.login = login;
         this.email = email;
         this.pin = pin;
+    }
+
+    public UserTO(String login, String email, String pin, UserRoleTO role) {
+        this.login = login;
+        this.email = email;
+        this.pin = pin;
+        this.userRoles = Collections.singletonList(role);
     }
 
     @JsonIgnore

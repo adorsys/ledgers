@@ -65,26 +65,9 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    public ResponseEntity<SCAPaymentResponseTO> executePayment(PaymentTO payment) {
-        return ResponseEntity.accepted().body(paymentService.executePayment(scaInfoHolder.getScaInfo(), payment));
-    }
-
-    @Override
-    @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> getSCA(String paymentId, String authorisationId) {
-        return ResponseEntity.ok(paymentService.loadSCAForPaymentData(scaInfoHolder.getScaInfo(), paymentId));
-    }
-
-    @Override
-    @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> selectMethod(String paymentId, String authorisationId, String scaMethodId) {
-        return ResponseEntity.ok(paymentService.selectSCAMethodForPayment(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), paymentId));
-    }
-
-    @Override
-    @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> authorizePayment(String paymentId, String authorisationId, String authCode) {
-        return ResponseEntity.ok(paymentService.authorizePayment(scaInfoHolder.getScaInfoWithAuthCode(authCode), paymentId));
+    @PreAuthorize("hasPartialScope() || hasFullAccessScope()")
+    public ResponseEntity<SCAPaymentResponseTO> executePayment(String paymentId) {
+        return ResponseEntity.accepted().body(paymentService.executePayment(scaInfoHolder.getScaInfo(), paymentId));
     }
 
     @Override
@@ -94,20 +77,8 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> getCancelSCA(String paymentId, String cancellationId) {
-        return ResponseEntity.ok(paymentService.loadSCAForCancelPaymentData(scaInfoHolder.getScaInfo(), paymentId, cancellationId));
-    }
-
-    @Override
-    @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> selecCancelPaymentSCAtMethod(String paymentId, String cancellationId, String scaMethodId) {
-        return ResponseEntity.ok(paymentService.selectSCAMethodForCancelPayment(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, cancellationId), paymentId, cancellationId));
-    }
-
-    @Override
-    @PreAuthorize("paymentInfoById(#paymentId)")
-    public ResponseEntity<SCAPaymentResponseTO> authorizeCancelPayment(String paymentId, String cancellationId, String authCode) {
-        return ResponseEntity.ok(paymentService.authorizeCancelPayment(scaInfoHolder.getScaInfoWithAuthCode(authCode), paymentId, cancellationId));
+    @PreAuthorize("paymentInfoById(#paymentId)&&(hasPartialScope() || hasFullAccessScope())")
+    public ResponseEntity<SCAPaymentResponseTO> executeCancelPayment(String paymentId) {
+        return ResponseEntity.ok(paymentService.authorizeCancelPayment(scaInfoHolder.getScaInfo(), paymentId));
     }
 }

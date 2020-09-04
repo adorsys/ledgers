@@ -7,7 +7,7 @@ public class AdminPayload {
 		UserTO admin = new UserTO();
 		admin.setEmail("admin@admin.me");
 		admin.setLogin("admin");
-		admin.setPin("admin123");
+		admin.setPin("admin");
 		return admin;
 	}
 }

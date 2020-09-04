@@ -22,7 +22,8 @@ public interface OauthRestApi {
 
     @PostMapping("/authorise/oauth")
     @Operation(summary = "Get authorisation code, with token")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("redirect_uri") String redirectUri);
 
     @PostMapping("/token")

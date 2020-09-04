@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
@@ -19,12 +20,10 @@ import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.domain.ScaValidationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
-import de.adorsys.ledgers.um.api.service.AuthorizationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
-import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -90,11 +89,11 @@ class MiddlewareAccountManagementServiceImplTest {
     @Mock
     private AisConsentBOMapper aisConsentMapper;
     @Mock
-    private AuthorizationService authorizationService;
-    @Mock
     private SCAOperationService scaOperationService;
     @Mock
     private ScaResponseResolver scaResponseResolver;
+    @Mock
+    private KeycloakTokenService tokenService;
 
     private static final ObjectMapper MAPPER = getObjectMapper();
 
@@ -437,114 +436,35 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    void startSCA() {
+    void initAisConsent() {
         // Given
-        when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(scaUtils.user((UserBO) any())).thenReturn(buildUserTO());
-        when(scaUtils.authorisationId(any())).thenReturn("id");
-        when(scaUtils.hasSCA(any())).thenReturn(false);
-        when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
+        when(tokenService.exchangeToken(any(),any(),any())).thenReturn(getBearerTokenTO());
+        when(accessService.resolveMinimalScaWeightForConsent(any(),any())).thenReturn(0);
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
         // When
-        SCAConsentResponseTO result = middlewareService.startSCA(buildScaInfoTO(), "consentId", getAisConsentTO());
+        SCAConsentResponseTO result = middlewareService.startAisConsent(buildScaInfoTO(), "consentId", getAisConsentTO());
 
         // Then
         assertNotNull(result);
-        verify(scaInfoMapper, times(1)).toScaInfoBO(buildScaInfoTO());
         verify(aisConsentMapper, times(1)).toAisConsentBO(getAisConsentTO());
     }
 
     @Test
-    void startSCA_scaNotRequired() {
+    void initAisConsent_scaNotRequired() {
         // Given
-        when(scaInfoMapper.toScaInfoBO(any())).thenReturn(buildScaInfoBO());
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(scaUtils.user((UserBO) any())).thenReturn(buildUserTO());
-        when(scaUtils.authorisationId(any())).thenReturn("id");
-        when(scaUtils.hasSCA(any())).thenReturn(true);
+        when(tokenService.exchangeToken(any(),any(),any())).thenReturn(getBearerTokenTO());
+        when(accessService.resolveMinimalScaWeightForConsent(any(),any())).thenReturn(0);
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
-        when(userService.storeConsent(any())).thenReturn(getAisConsentBO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(scaOperationService.createAuthCode(any(), any())).thenReturn(getSCAOperationBO());
 
         // When
-        SCAConsentResponseTO result = middlewareService.startSCA(buildScaInfoTO(), "consentId", getAisConsentTO());
+        SCAConsentResponseTO result = middlewareService.startAisConsent(buildScaInfoTO(), "consentId", getAisConsentTO());
 
         // Then
         assertNotNull(result);
-        verify(scaInfoMapper, times(1)).toScaInfoBO(buildScaInfoTO());
-        verify(aisConsentMapper, times(2)).toAisConsentBO(getAisConsentTO());
-    }
-
-    @Test
-    void loadSCAForAisConsent() {
-        // Given
-        when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(userService.loadConsent(any())).thenReturn(getAisConsentBO());
-        when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
-        when(scaUtils.loadAuthCode(any())).thenReturn(getSCAOperationBO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(userMapper.toUserTO(any())).thenReturn(buildUserTO());
-
-        // When
-        SCAConsentResponseTO result = middlewareService.loadSCAForAisConsent(CORRECT_USER_ID, "consentId", "authorisationId");
-
-        // Then
-        assertNotNull(result);
-        verify(userMapper, times(1)).toUserTO(buildUserBO());
-    }
-
-    @Test
-    void selectSCAMethodForAisConsent() {
-        // Given
-        when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(userService.loadConsent(any())).thenReturn(getAisConsentBO());
-        when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(userMapper.toUserTO(any())).thenReturn(buildUserTO());
-
-        // When
-        SCAConsentResponseTO result = middlewareService.selectSCAMethodForAisConsent(CORRECT_USER_ID, "consentId", "authorisationId", "scaMethodId");
-
-        // Then
-        assertNotNull(result);
-        verify(userMapper, times(1)).toUserTO(buildUserBO());
-    }
-
-    @Test
-    void authorizeConsent() {
-        // Given
-        when(userService.loadConsent(any())).thenReturn(getAisConsentBO());
-        when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
-        when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(scaUtils.user((UserBO) any())).thenReturn(buildUserTO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(scaOperationService.validateAuthCode(any(), any(), any(), anyInt())).thenReturn(getScaValidationBO(true));
-        when(scaUtils.loadAuthCode(any())).thenReturn(getSCAOperationBO());
-        when(scaOperationService.authenticationCompleted(any(), any())).thenReturn(false);
-        when(authorizationService.consentToken(any(), any())).thenReturn(getBearerTokenBO());
-        when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
-
-        // When
-        SCAConsentResponseTO result = middlewareService.authorizeConsent(buildScaInfoTO(), "consentId");
-
-        // Then
-        assertNotNull(result);
-    }
-
-    @Test
-    void authorizeConsent_wrongAuthCode() {
-        // Given
-        when(userService.loadConsent(any())).thenReturn(getAisConsentBO());
-        when(aisConsentMapper.toAisConsentTO(any())).thenReturn(getAisConsentTO());
-        when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(10);
-        when(scaOperationService.validateAuthCode(any(), any(), any(), anyInt())).thenThrow(ScaModuleException.class);
-
-        // Then
-        assertThrows(ScaModuleException.class, () -> middlewareService.authorizeConsent(buildScaInfoTO(), "consentId"));
+        verify(aisConsentMapper, times(1)).toAisConsentBO(getAisConsentTO());
     }
 
     @Test
@@ -553,7 +473,7 @@ class MiddlewareAccountManagementServiceImplTest {
         when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
         // When
-        SCAConsentResponseTO result = middlewareService.grantAisConsent(buildScaInfoTO(), getAisConsentTO());
+        SCAConsentResponseTO result = middlewareService.grantPIISConsent(buildScaInfoTO(), getAisConsentTO());
 
         // Then
         assertNotNull(result);
@@ -754,7 +674,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     private BearerTokenTO getBearerTokenTO() {
-        return new BearerTokenTO("access_token", "Bearer", 30, "refresh_token", new AccessTokenTO());
+        return new BearerTokenTO("access_token", "Bearer", 30, "refresh_token", new AccessTokenTO(), Collections.emptySet());
     }
 
     private static <T> T getAccount(Class<T> aClass) {

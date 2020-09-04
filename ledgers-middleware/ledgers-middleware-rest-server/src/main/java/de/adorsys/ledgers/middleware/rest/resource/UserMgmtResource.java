@@ -18,15 +18,10 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthConfirmationTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAuthConfirmationService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
@@ -41,20 +36,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
-
-//import io.swagger.annotations.ApiOperation;
-//import io.swagger.annotations.ApiResponse;
-//import io.swagger.annotations.ApiResponses;
-//import io.swagger.annotations.Authorization;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class UserMgmtResource implements UserMgmtRestAPI {
-    private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final MiddlewareAuthConfirmationService authConfirmationService;
     private final ScaInfoHolder scaInfoHolder;
@@ -71,51 +58,9 @@ public class UserMgmtResource implements UserMgmtRestAPI {
 
     @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
-        UserTO user = onlineBankingService.register(login, email, pin, role);
-        user.setPin(null);
-        return ResponseEntity.ok(user);
-    }
-
-    @Override
-    public ResponseEntity<SCALoginResponseTO> authorise(String login, String pin, UserRoleTO role) {
-        return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
-    }
-
-    @Override
-    public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String login, String pin,
-                                                                  String consentId, String authorisationId, OpTypeTO opType) {
-        return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
-    }
-
-    @Override
-    public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String consentId, String authorisationId, OpTypeTO opType) {
-        return ResponseEntity.ok(onlineBankingService.authoriseForConsentWithToken(scaInfoHolder.getScaInfo(), consentId, authorisationId, opType));
-    }
-
-    @Override
-    @PreAuthorize("loginToken(#scaId,#authorisationId)")
-    public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId) {
-        return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), null, 1800));
-    }
-
-    @Override
-    @PreAuthorize("loginToken(#scaId,#authorisationId)")
-    public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode) {
-        return ResponseEntity.ok(onlineBankingService.authenticateForLogin(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
-    }
-
-    @Override
-    public ResponseEntity<BearerTokenTO> validate(String token) {
-        BearerTokenTO tokenTO = onlineBankingService.validate(token);
-        if (tokenTO != null) {
-            return ResponseEntity.ok(tokenTO);
-        } else {
-            log.error("Token is null !!!");
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Token invalid")
-                          .build();
-        }
+        UserTO created = middlewareUserService.create(new UserTO(login, email, pin, role));
+        created.setPin(null);
+        return ResponseEntity.ok(created);
     }
 
     @Override

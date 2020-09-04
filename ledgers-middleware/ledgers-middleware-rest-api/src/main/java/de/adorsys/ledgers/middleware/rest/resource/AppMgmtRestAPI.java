@@ -16,7 +16,6 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,5 +38,5 @@ public interface AppMgmtRestAPI {
 
     @PostMapping("/admin")
     @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
-    ResponseEntity<BearerTokenTO> admin(@RequestBody(required = true) UserTO adminUser);
+    ResponseEntity<Void> admin(@RequestBody UserTO adminUser);
 }

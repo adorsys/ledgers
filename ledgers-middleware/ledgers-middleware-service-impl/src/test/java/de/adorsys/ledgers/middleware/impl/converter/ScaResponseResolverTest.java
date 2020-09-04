@@ -37,7 +37,7 @@ class ScaResponseResolverTest {
     private static final String AUTH_ID = "auth id";
     private static final String PSU_MSG = "user msg";
     private static final String SCA_METHOD = "MAIL";
-
+//TODO Review this test!
     @InjectMocks
     ScaResponseResolver service;
 
@@ -89,32 +89,10 @@ class ScaResponseResolverTest {
         assertEquals(ScaStatusTO.PSUIDENTIFIED, result);
     }
 
-    @Test
-    void prepareScaAndUpdateResponse() {
-        // Given
-        SCAPaymentResponseTO response = getPaymentResponse();
-        when(scaOperationService.createAuthCode(any(), any())).thenReturn(new SCAOperationBO());
-
-        // When
-        service.prepareScaAndUpdateResponse(PAYMENT_ID, response, AUTH_ID, PSU_MSG, 100, new UserBO(), OpTypeBO.PAYMENT);
-
-        // Then
-        assertEquals(getPaymentResponse(), response);
-    }
-
     private SCAPaymentResponseTO getPaymentResponse() {
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         response.setScaStatus(ScaStatusTO.PSUIDENTIFIED);
         return response;
-    }
-
-    @Test
-    void generateCodeAndUpdateResponse() {
-        // Given
-        when(scaOperationService.generateAuthCode(any(), any(), any())).thenReturn(new SCAOperationBO());
-        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
-        service.generateCodeAndUpdateResponse(PAYMENT_ID, response, AUTH_ID, PSU_MSG, 100, new UserBO(), OpTypeBO.PAYMENT, SCA_METHOD);
-        assertEquals(new SCAPaymentResponseTO(), response);
     }
 
     @Test

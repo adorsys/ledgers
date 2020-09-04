@@ -1,0 +1,55 @@
+@startuml
+actor PSU
+entity External_Service
+entity Ledgers
+entity Keycloak
+
+PSU->External_Service+: Login
+External_Service -> Keycloak+: Abstract Login
+return AccessToken scope: login
+
+External_Service -> Ledgers+: Initiate operation
+note right: Validates payment/consent \nPersist to DB \nCheck if Sca is required
+Ledgers->Keycloak+: Exchange AccessToken with TTL and scope \n dependant on Sca requirement
+return AccessToken with predefined scope and TTL
+return ScaResponse containing ScaStatus \n+ \nAccessToken (scope: full_access / sca)
+return Response with redirect \nto perform Sca / Confirm payment/consent
+
+group Sca Required Flow
+PSU->External_Service+:Initiate Sca Flow
+External_Service->Ledgers+: StartSca + AccessToken (scope: sca)
+Ledgers->Keycloak+: Validate AccessToken
+return OK/NOK + AccessToken description
+note right: Validate AccessToken to comply targeted scope \nCreate new ScaOperation, store it \nand update Payment/Consent status
+return ScaResponse with List ScaMethods + ScaStatus
+return List ScaMethods
+
+PSU->External_Service+:Select ScaMethod
+External_Service->Ledgers+: Select ScaMethod + AccessToken (scope: sca)
+Ledgers->Keycloak+: Validate AccessToken
+return OK/NOK + AccessToken description
+note right: Validate AccessToken to comply targeted scope \nUpdate ScaStatus \nExecute ScaSender
+Ledgers->PSU: Push TAN
+return ScaResponse + ScaStatus
+return Notice to check app/email etc for TAN
+
+PSU->External_Service+: Validate TAN
+External_Service->Ledgers+: Validate TAN + AccessToken (scope: sca)
+Ledgers->Keycloak+: Validate AccessToken
+return OK/NOK + AccessToken description
+note right: Validate AccessToken to comply targeted scope \nUpdate ScaStatus
+Ledgers->Keycloak+: Exchange AccessToken with TTL and scope: full_access
+return AccessToken with full_access scope and TTL
+return ScaResponse containing ScaStatus: FINALIZED \n+ \nAccessToken (scope: full_access)
+return Sca Successful
+
+PSU->External_Service+: Confirm Payment/Consent
+group operation=Payment
+External_Service->Ledgers+: Confirm Payment (obsolete for consent)
+note right: Execute Payment
+return PaymentResponse
+end
+return OK + redirect
+note right: Update ASPSPConsentData and Payment/ConsentStatus at CMS
+end
+@enduml

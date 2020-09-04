@@ -43,7 +43,8 @@ public interface AccountMgmStaffResourceAPI {
     String SIZE = "size";
 
     @Operation(summary = "Retrieves account by iban and Currency")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode ="200", description = "Account creation successful"),
             @ApiResponse(responseCode ="404", description = "User with this ID not found"),
@@ -62,7 +63,8 @@ public interface AccountMgmStaffResourceAPI {
      */
     @Operation(summary = "Registers a new Deposit Account for a user with specified ID",
             description = "Registers a new deposit account and assigns account access OWNER to the current user.")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode ="200", description = "Account creation successful"),
             @ApiResponse(responseCode ="404", description = "User with this ID not found"),
@@ -79,7 +81,8 @@ public interface AccountMgmStaffResourceAPI {
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user. "
                             + "Call only available to role CUSTOMER.")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO[].class)), description = "List of accounts accessible to the user.")
     })
@@ -89,7 +92,8 @@ public interface AccountMgmStaffResourceAPI {
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user, paged view. "
                             + "Call only available to role CUSTOMER.")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO[].class)), description = "List of accounts accessible to the user.")
     })
@@ -101,7 +105,8 @@ public interface AccountMgmStaffResourceAPI {
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "
                             + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)), description = "Account details.")
     })
@@ -117,7 +122,8 @@ public interface AccountMgmStaffResourceAPI {
      */
     @Operation(summary = "Deposit Cash",
             description = "Operation for staff member to register cash in the deposit account")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Operation was successful")
     })
@@ -127,7 +133,8 @@ public interface AccountMgmStaffResourceAPI {
     @Operation(summary = "Load Extended Account Details by AccountId",
             description = "Returns extended account details information for the given account id. "
                             + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = AccountReportTO.class)),
@@ -138,7 +145,8 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "Block/Unblock account",
             description = "Changes block state for given account, returns status being set to the block")
-    @SecurityRequirement(name = "Authorization")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @PostMapping("/{accountId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(ACCOUNT_ID) String accountId);
 

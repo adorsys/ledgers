@@ -79,7 +79,6 @@ class ScaResponseConverterTest {
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
                                                              Collections.singletonList(getScaUserDataBO()),
-                                                             null,
                                                              PSU_MESSAGE,
                                                              getBearerTokenBO(),
                                                              10, null);
@@ -99,7 +98,6 @@ class ScaResponseConverterTest {
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
                                                              Collections.singletonList(getScaUserDataBO()),
-                                                             null,
                                                              PSU_MESSAGE,
                                                              getBearerTokenBO(),
                                                              10, null);
@@ -135,7 +133,6 @@ class ScaResponseConverterTest {
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.SCAMETHODSELECTED),
                                                              Collections.singletonList(getScaUserDataBO()),
-                                                             null,
                                                              PSU_MESSAGE,
                                                              getBearerTokenBO(),
                                                              10, null);
@@ -153,7 +150,6 @@ class ScaResponseConverterTest {
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
                                                              Collections.singletonList(getScaUserDataBO()),
-                                                             TransactionStatusBO.RCVD,
                                                              PSU_MESSAGE,
                                                              getBearerTokenBO(),
                                                              10, null);
@@ -161,7 +157,6 @@ class ScaResponseConverterTest {
         // Then
         basicFieldsAssert(scaUserDataTO, response);
         assertFalse(response.isMultilevelScaRequired());
-        assertEquals(TransactionStatusTO.RCVD, response.getTransactionStatus());
     }
 
     @Test
@@ -174,7 +169,6 @@ class ScaResponseConverterTest {
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
                                                              Collections.singletonList(getScaUserDataBO()),
-                                                             TransactionStatusBO.RCVD,
                                                              PSU_MESSAGE,
                                                              getBearerTokenBO(),
                                                              10, null);
@@ -183,7 +177,6 @@ class ScaResponseConverterTest {
         basicFieldsAssert(scaUserDataTO, response);
         assertTrue(response.isMultilevelScaRequired());
         assertFalse(response.isPartiallyAuthorised());
-        assertEquals(TransactionStatusTO.RCVD, response.getTransactionStatus());
     }
 
     @Test
@@ -210,7 +203,6 @@ class ScaResponseConverterTest {
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.SCAMETHODSELECTED),
                                                              Collections.singletonList(getScaUserDataBO()),
-                                                             TransactionStatusBO.RCVD,
                                                              PSU_MESSAGE,
                                                              getBearerTokenBO(),
                                                              10, null);
@@ -218,7 +210,6 @@ class ScaResponseConverterTest {
         basicFieldsAssert(scaUserDataTO, response);
         assertNotNull(response.getChallengeData());
         assertEquals(challengeDataTO, response.getChallengeData());
-        assertEquals(TransactionStatusTO.RCVD, response.getTransactionStatus());
     }
 
     private void basicFieldsAssert(ScaUserDataTO scaUserDataTO, GlobalScaResponseTO response) {

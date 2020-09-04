@@ -2,10 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.domain.ScaValidationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -20,7 +17,6 @@ import java.util.Collections;
 import java.util.Currency;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -44,7 +40,7 @@ class SCAUtilsTest {
     }
 
     private UserTO getUserTO() {
-        return new UserTO("id", "login", "email", "pin", Collections.singletonList(getScaUserDataTO()), Collections.singletonList(getAccess()), Collections.singletonList(UserRoleTO.CUSTOMER), "branch",false,false);
+        return new UserTO("id", "login", "email", "pin", Collections.singletonList(getScaUserDataTO()), Collections.singletonList(getAccess()), Collections.singletonList(UserRoleTO.CUSTOMER), "branch", false, false);
     }
 
     private AccountAccessTO getAccess() {
@@ -56,14 +52,14 @@ class SCAUtilsTest {
     }
 
     @Test
-    public void getScaMethod_BO_null_sca_method() {
+    void getScaMethod_BO_null_sca_method() {
         ScaUserDataTO result = utils.getScaMethod(new UserBO(), null);
         assertThat(result).isNull();
     }
 
     @Test
-    public void user() {
-        when(userService.findById(anyString())).thenReturn(new UserBO());
+    void user() {
+        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
         when(userMapper.toUserTO(any())).thenReturn(getUserTO());
         UserTO result = utils.user("id");
         assertThat(result).isEqualToComparingFieldByFieldRecursively(getUserTO());
@@ -88,6 +84,6 @@ class SCAUtilsTest {
     }
 
     private ScaInfoTO getScaInfo() {
-        return new ScaInfoTO("userId", "scaId", "authId", UserRoleTO.CUSTOMER, "methodId", "authCode", TokenUsageTO.LOGIN, "login");
+        return new ScaInfoTO("userId", "scaId", "authId", UserRoleTO.CUSTOMER, "methodId", "authCode", TokenUsageTO.LOGIN, "login", null, null);
     }
 }

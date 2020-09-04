@@ -44,10 +44,10 @@ public interface MiddlewarePaymentService {
      * Executes a payment
      *
      * @param scaInfoTO   : SCA information
-     * @param payment     : the payment object
+     * @param paymentId     : payment identifier
      * @return : the sca response object.
      */
-    SCAPaymentResponseTO executePayment(ScaInfoTO scaInfoTO, PaymentTO payment);
+    SCAPaymentResponseTO executePayment(ScaInfoTO scaInfoTO, String paymentId);
 
     // ================= SCA =======================================//
 
@@ -98,16 +98,7 @@ public interface MiddlewarePaymentService {
 
     String iban(String paymentId);
 
-
-    SCAPaymentResponseTO loadSCAForPaymentData(ScaInfoTO scaInfoTO, String paymentId);
-
-    SCAPaymentResponseTO selectSCAMethodForPayment(ScaInfoTO scaInfoTO, String paymentId);
-
-    SCAPaymentResponseTO loadSCAForCancelPaymentData(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
-
-    SCAPaymentResponseTO selectSCAMethodForCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
-
-    SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId, String cancellationId);
+    SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId);
 
     List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO);
 }
