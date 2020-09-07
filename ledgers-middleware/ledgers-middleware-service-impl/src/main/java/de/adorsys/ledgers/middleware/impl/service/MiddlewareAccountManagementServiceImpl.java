@@ -284,6 +284,9 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         int scaWeight = accessService.resolveMinimalScaWeightForConsent(aisConsentMapper.toAisConsentBO(aisConsent).getAccess(), user.getAccountAccesses());
         SCAConsentResponseTO response = new SCAConsentResponseTO(consentId);
         scaResponseResolver.updateScaResponseFields(user, response, null, psuMessage, token, scaStatus, scaWeight);
+
+        userService.storeConsent(aisConsentMapper.toAisConsentBO(aisConsent));
+
         return response;
     }
 
