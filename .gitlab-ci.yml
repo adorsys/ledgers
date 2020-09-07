@@ -22,7 +22,21 @@ stages:
 # ------------------------------------------------------------------
 
 variables: &variables
+
+  ###########################
+  # Docker images variables #
+  ###########################
+
+  DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS: "keycloak-ledgers"
+
   SONAR_HOST: "https://psd2-quality.cloud.adorsys.de"
+
+  ###########################
+  # Private Dockerhub Images #
+  ###########################
+
+  GITLAB_REGISTRY: "gitlab-registry.adorsys.de"
+  GITLAB_NAMESPACE: "adorsys/xs2a/ledgers"
 
   ############################
   # Private Openshift Images #
@@ -66,6 +80,14 @@ variables: &variables
     - docker login -u $DOCKER_HUB_LOGIN -p $DOCKER_HUB_PASS
     - docker build -t "adorsys/ledgers:$DOCKER_TAG" .
     - docker push "adorsys/ledgers:$DOCKER_TAG"
+    - docker logout
+
+# Build docker images and put them to DOCKER HUB repo
+.build_github_registry_image: &build_github_registry_image
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t "${DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS}:$DOCKER_TAG" .
+    - docker push "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}/${DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS}:$DOCKER_TAG"
     - docker logout
 
 # Push docker images from dockehub to openshift
@@ -248,6 +270,16 @@ Push to DockerHub (develop):
   variables:
     DOCKER_TAG: develop-keycloak
   <<: *build_dockerhub_image
+
+Push to Github keycloak-ledgers:
+  stage: "Package"
+  except:
+    - schedules
+  only:
+    - ledgers_keycloak
+  variables:
+    DOCKER_TAG: dev
+  <<: *build_github_registry_image
 
 Deploy Openshift (modelbank-keycloak-dev):
   stage: Deploy
