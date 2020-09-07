@@ -79,7 +79,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, String queryParam, Boolean blockedParam, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
-        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
+        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getUserId());
         CustomPageImpl<UserTO> users = middlewareUserService.getUsersByBranchAndRoles("", branchStaff.getBranch(), "", queryParam, roles, blockedParam, pageable);
         return ResponseEntity.ok(users);
     }
@@ -87,7 +87,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @Override
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<String>> getBranchUserLogins() {
-        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
+        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getUserId());
         List<String> users = middlewareUserService.getBranchUserLogins(branchStaff.getBranch());
         return ResponseEntity.ok(users);
     }
@@ -137,7 +137,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     private UserTO findUserForBranch(String userId) {
-        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
+        UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getUserId());
         UserTO user = middlewareUserService.findById(userId);
 
         if (!branchStaff.getBranch().equals(user.getBranch())) {

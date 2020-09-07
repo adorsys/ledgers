@@ -48,7 +48,7 @@ public class ScaInfoHolderImpl implements ScaInfoHolder {
 
     private ScaInfoTO buildScaInfo() {
         ScaInfoTO info = new ScaInfoTO();
-        info.setUserId(accessTokenTO.getSub());
+        info.setUserId(getUserId());
         info.setAuthorisationId(accessTokenTO.getAuthorisationId());
         info.setScaId(accessTokenTO.getScaId());
         info.setUserRole(accessTokenTO.getRole());
