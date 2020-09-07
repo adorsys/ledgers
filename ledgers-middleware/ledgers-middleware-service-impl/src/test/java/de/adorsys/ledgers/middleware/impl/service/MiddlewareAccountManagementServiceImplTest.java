@@ -448,7 +448,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
-        verify(aisConsentMapper, times(1)).toAisConsentBO(getAisConsentTO());
+        verify(aisConsentMapper, times(2)).toAisConsentBO(getAisConsentTO());
     }
 
     @Test
@@ -464,7 +464,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
-        verify(aisConsentMapper, times(1)).toAisConsentBO(getAisConsentTO());
+        verify(aisConsentMapper, times(2)).toAisConsentBO(getAisConsentTO());
     }
 
     @Test
