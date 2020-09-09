@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
@@ -94,6 +95,8 @@ class MiddlewareAccountManagementServiceImplTest {
     private ScaResponseResolver scaResponseResolver;
     @Mock
     private KeycloakTokenService tokenService;
+    @Mock
+    private KeycloakDataService keycloakDataService;
 
     private static final ObjectMapper MAPPER = getObjectMapper();
 
@@ -439,8 +442,8 @@ class MiddlewareAccountManagementServiceImplTest {
     void initAisConsent() {
         // Given
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(tokenService.exchangeToken(any(),any(),any())).thenReturn(getBearerTokenTO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(),any())).thenReturn(0);
+        when(tokenService.exchangeToken(any(), any(), any())).thenReturn(getBearerTokenTO());
+        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(0);
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
         // When
@@ -455,8 +458,8 @@ class MiddlewareAccountManagementServiceImplTest {
     void initAisConsent_scaNotRequired() {
         // Given
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
-        when(tokenService.exchangeToken(any(),any(),any())).thenReturn(getBearerTokenTO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(),any())).thenReturn(0);
+        when(tokenService.exchangeToken(any(), any(), any())).thenReturn(getBearerTokenTO());
+        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(0);
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
         // When
@@ -614,6 +617,7 @@ class MiddlewareAccountManagementServiceImplTest {
         middlewareService.deleteUser(BRANCH, UserRoleTO.STAFF, USER_ID);
 
         verify(depositAccountService, times(1)).deleteUser(USER_ID);
+        verify(keycloakDataService, times(1)).deleteUser(userBO.getLogin());
     }
 
     @Test
@@ -763,18 +767,6 @@ class MiddlewareAccountManagementServiceImplTest {
         info.setAuthorisationId(AUTHORISATION_ID);
         info.setScaId(SCA_ID);
         info.setUserRole(UserRoleTO.CUSTOMER);
-        info.setAuthCode(AUTH_CODE);
-        info.setScaMethodId(SCA_METHOD_ID);
-        info.setUserLogin(USER_LOGIN);
-        return info;
-    }
-
-    private static ScaInfoBO buildScaInfoBO() {
-        ScaInfoBO info = new ScaInfoBO();
-        info.setUserId(USER_ID);
-        info.setAuthorisationId(AUTHORISATION_ID);
-        info.setScaId(SCA_ID);
-        info.setUserRole(UserRoleBO.CUSTOMER);
         info.setAuthCode(AUTH_CODE);
         info.setScaMethodId(SCA_METHOD_ID);
         info.setUserLogin(USER_LOGIN);

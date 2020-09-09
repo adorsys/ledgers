@@ -6,6 +6,7 @@ import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.Constants;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
@@ -66,6 +67,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final PageMapper pageMapper;
     private final ScaResponseResolver scaResponseResolver;
     private final KeycloakTokenService tokenService;
+    private final KeycloakDataService keycloakDataService;
 
     @Value("${ledgers.token.lifetime.seconds.sca:10800}")
     private int scaTokenLifeTime;
@@ -361,13 +363,15 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public void deleteUser(String userId, UserRoleTO userRole, String userToDeleteId) {
         log.info("User {} attempting delete user: {}", userId, userToDeleteId);
         long start = System.nanoTime();
-        if (userRole == STAFF && !userService.findById(userToDeleteId).getBranch().equals(userId)) {
+        UserBO userToDelete = userService.findById(userToDeleteId);
+        if (userRole == STAFF && !userToDelete.getBranch().equals(userId)) {
             throw MiddlewareModuleException.builder()
                           .devMsg("You dont have permission to modify this user")
                           .errorCode(INSUFFICIENT_PERMISSION)
                           .build();
         }
         depositAccountService.deleteUser(userToDeleteId);
+        keycloakDataService.deleteUser(userToDelete.getLogin());
         log.info("Deleting user: {} Successful, in {} seconds", userToDeleteId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
