@@ -9,6 +9,7 @@ endDate:
 executionRule:
 frequency:
 dayOfExecution:
+accountId: 123
 debtorAccount:
   {
     iban: DE91100000000123456789,

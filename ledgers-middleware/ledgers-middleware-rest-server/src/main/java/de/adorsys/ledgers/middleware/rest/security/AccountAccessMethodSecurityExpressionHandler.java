@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.security;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapper;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import lombok.RequiredArgsConstructor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -20,10 +21,11 @@ public class AccountAccessMethodSecurityExpressionHandler extends DefaultMethodS
     private final MiddlewarePaymentService middlewareService;
     private final MiddlewareUserManagementService userManagementService;
     private final KeycloakAuthMapper authMapper;
+    private final MiddlewareRedirectScaService scaService;
 
     @Override
     protected MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, MethodInvocation invocation) {
-        AccountAccessMethodSecurityExpressionRoot root = new AccountAccessMethodSecurityExpressionRoot(authentication, middlewareAccountService, middlewareService, authMapper, userManagementService);
+        AccountAccessMethodSecurityExpressionRoot root = new AccountAccessMethodSecurityExpressionRoot(authentication, middlewareAccountService, middlewareService, authMapper, userManagementService, scaService);
         root.setPermissionEvaluator(getPermissionEvaluator());
         root.setTrustResolver(this.trustResolver);
         root.setRoleHierarchy(getRoleHierarchy());

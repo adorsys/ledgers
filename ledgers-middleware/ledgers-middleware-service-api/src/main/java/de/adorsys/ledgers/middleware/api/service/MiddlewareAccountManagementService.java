@@ -4,7 +4,6 @@ import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -13,6 +12,7 @@ import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public interface MiddlewareAccountManagementService {
 
@@ -28,16 +28,6 @@ public interface MiddlewareAccountManagementService {
      * @param depositAccount : the deposit account to be crated.
      */
     void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount);
-
-    /**
-     * Creates a new DepositAccount for the connected user.
-     *
-     * @param scaInfoTO           : SCA information
-     * @param accountNumberPrefix : the account number prefix : the account number prefix
-     * @param accountNumberSuffix : th eaccount number suffix
-     * @param accDetails          : account to create.
-     */
-    void createDepositAccount(ScaInfoTO scaInfoTO, String accountNumberPrefix, String accountNumberSuffix, AccountDetailsTO accDetails);
 
     /**
      * Retrieve the list of account viewable by the connected user.
@@ -69,26 +59,7 @@ public interface MiddlewareAccountManagementService {
      */
     AccountDetailsTO getDepositAccountById(String id, LocalDateTime time, boolean withBalance);
 
-    /**
-     * Retrieves AccountDetails with Balance on demand
-     *
-     * @param iban        DepositAccount iban
-     * @param time        the reference time.
-     * @param withBalance boolean specifying if Balances has to be added to AccountDetails
-     * @return account details.
-     * @deprecated shall be removed in v2.5
-     */
-    AccountDetailsTO getDepositAccountByIban(String iban, LocalDateTime time, boolean withBalance);
-
     //============================ Account Details ==============================//
-
-    /**
-     * Retrieves a List of AccountDetails by user login (psuId)
-     *
-     * @param userLogin the user login
-     * @return list of account details.
-     */
-    List<AccountDetailsTO> getAllAccountDetailsByUserLogin(String userLogin);
 
     /**
      * Retrieves transaction by accountId and transactionId
@@ -151,6 +122,8 @@ public interface MiddlewareAccountManagementService {
      */
     SCAConsentResponseTO grantPIISConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent);
 
+    Set<String> getAccountsFromConsent(String consentId);
+
     /**
      * Deposits given amount in cash into specified account.
      * On the bank's books, the bank debits its cash account for the given amount in cash,
@@ -161,13 +134,6 @@ public interface MiddlewareAccountManagementService {
      * @param amount    amount of cash deposited
      */
     void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount);
-
-    /**
-     * Retrieves a List of AccountAccessTO by userId
-     *
-     * @param userId id of the user
-     */
-    List<AccountAccessTO> getAccountAccesses(String userId);
 
     /**
      * Remove all transactions for deposit account

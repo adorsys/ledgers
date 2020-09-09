@@ -347,44 +347,6 @@ class DepositAccountServiceImplTest {
         assertEquals("DE123456789", result);
     }
 
-    @Test
-    void findByAccountNumberPrefix() {
-        // Given
-        when(depositAccountRepository.findByIbanStartingWith(anyString())).thenReturn(Collections.singletonList(new DepositAccount()));
-        DepositAccountBO expected = new DepositAccountBO();
-
-        // When
-        List<DepositAccountBO> result = depositAccountService.findByAccountNumberPrefix("DE123");
-
-        // Then
-        assertEquals(Collections.singletonList(expected), result);
-    }
-
-    @Test
-    void getDetailsByIban() {
-        // Given
-        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(false)));
-
-        // When
-        DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
-
-        // Then
-        assertEquals(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()), result);
-
-    }
-
-    @Test
-    void getDetailsByIban_no_accounts_found() {
-        // Given
-        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.emptyList());
-
-        // Then
-        assertThrows(DepositModuleException.class, () -> {
-            DepositAccountDetailsBO result = depositAccountService.getDetailsByIban("DE123456789", LocalDateTime.now(), false);
-            assertEquals(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()), result);
-        });
-    }
-
     private void confirmationOfFunds_more_than_necessary_available(long amount) throws NoSuchFieldException {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));

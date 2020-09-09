@@ -11,12 +11,14 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.*;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
-import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.config.PaymentProductsConfig;
-import de.adorsys.ledgers.middleware.impl.converter.*;
+import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
+import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
+import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
+import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
 import de.adorsys.ledgers.middleware.impl.sca.EmailScaChallengeData;
@@ -24,7 +26,6 @@ import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,25 +75,11 @@ class MiddlewarePaymentServiceImplTest {
     @Mock
     private DepositAccountService accountService;
     @Mock
-    private AuthCodeDataConverter codeDataConverter;
-    @Mock
-    private MiddlewareUserManagementServiceImpl userManagementService;
-    @Mock
-    private AccessTokenTO accessToken;
-    @Mock
     private SCAUtils scaUtils;
-    @Mock
-    private UserService userService;
-    @Mock
-    private BearerTokenMapper bearerTokenMapper;
     @Mock
     private PaymentCoreDataPolicy coreDataPolicy;
     @Mock
-    private AccessTokenMapper accessTokenMapper;
-    @Mock
     private AccessService accessService;
-    @Mock
-    private ScaInfoMapper scaInfoMapper;
     @Mock
     private ScaResponseResolver scaResponseResolver;
     @Mock
@@ -163,8 +150,6 @@ class MiddlewarePaymentServiceImplTest {
                 .thenReturn(ACTC);
         when(paymentService.executePayment(any(), any()))
                 .thenReturn(ACTC);
-        when(scaUtils.userBO(anyString()))
-                .thenReturn(userBO);
 
         // When
         SCAPaymentResponseTO response = middlewareService.executePayment(buildScaInfoTO(), PAYMENT_ID);
@@ -200,6 +185,7 @@ class MiddlewarePaymentServiceImplTest {
     void initiatePayment_creditor_account_disabled() throws NoSuchFieldException {
         // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
         when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false, null, null)));
@@ -265,7 +251,6 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
-        when(tokenService.exchangeToken(any(), anyInt(), anyString())).thenReturn(new BearerTokenTO());
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // When

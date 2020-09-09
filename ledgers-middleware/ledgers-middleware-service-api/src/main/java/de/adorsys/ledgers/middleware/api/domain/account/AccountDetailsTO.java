@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.api.domain.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -80,4 +81,9 @@ public class AccountDetailsTO {
     private boolean systemBlocked;
 
     private String branch;
+
+    @JsonIgnore
+    public boolean isEnabled() {
+        return !blocked && !systemBlocked;
+    }
 }

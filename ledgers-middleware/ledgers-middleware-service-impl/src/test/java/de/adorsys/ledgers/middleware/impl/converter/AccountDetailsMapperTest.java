@@ -44,22 +44,6 @@ class AccountDetailsMapperTest {
         assertThat(details).isEqualToComparingFieldByFieldRecursively(getAccount(DepositAccountBO.class));
     }
 
-    @Test
-    void toAccountBalancesTO() throws IOException {
-        // Given
-        List<AccountBalanceTO> expected = getBalances(AccountBalanceTO.class);
-
-        // When
-        List<AccountBalanceTO> balances = mapper.toAccountBalancesTO(getBalances(BalanceBO.class));
-
-        // Then
-        assertThat(balances).isNotEmpty();
-        assertThat(balances.size()).isEqualTo(2);
-        assertThat(balances.get(0)).isEqualToComparingFieldByFieldRecursively(expected.get(0));
-        assertThat(balances.get(1)).isEqualToComparingFieldByFieldRecursively(expected.get(1));
-    }
-
-
     private static <T> T getAccount(Class<T> aClass) throws IOException {
         return aClass.equals(AccountDetailsTO.class)
                        ? YamlReader.getInstance().getObjectFromResource(AccountDetailsMapper.class, "AccountDetailsTO.yml", aClass)

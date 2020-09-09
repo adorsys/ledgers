@@ -91,7 +91,7 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user, paged view. "
-                            + "Call only available to role CUSTOMER.")
+                            + "Query param represents full or partial IBAN")
     @SecurityRequirement(name = "apiKey")
     @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {

@@ -53,4 +53,10 @@ public class PaymentCoreDataTO {
                        ? String.format(EXEMPTED_MESSAGE_TEMPLATE, paymentTyp, operationType, paymentId)
                        : String.format(TAN_MESSAGE_TEMPLATE, paymentTyp, operationType, paymentId) + "%s";
     }
+
+    public String resolveMessage(boolean isScaRequired) {
+        return isScaRequired
+                       ? this.getTanTemplate()
+                       : this.getExemptedTemplate();
+    }
 }

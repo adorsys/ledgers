@@ -46,12 +46,10 @@ import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Currency;
 import java.util.EnumSet;
@@ -59,7 +57,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.*;
-import static de.adorsys.ledgers.middleware.api.domain.Constants.*;
+import static de.adorsys.ledgers.middleware.api.domain.Constants.SCOPE_FULL_ACCESS;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.CANCEL_PAYMENT;
@@ -85,10 +83,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
-    @Value("${ledgers.token.lifetime.seconds.sca:10800}")
-    private int scaTokenLifeTime;
-    @Value("${ledgers.token.lifetime.seconds.full:7776000}")
-    private int fullTokenLifeTime;
 
     @Override
     public TransactionStatusTO getPaymentStatusById(String paymentId) {
@@ -99,10 +93,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     @Override
     public SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId) {
         UserBO userBO = scaUtils.userBO(scaInfoTO.getUserLogin());
-        PaymentBO paymentBO = loadPayment(paymentId);
-        paymentBO.setRequestedExecutionTime(LocalTime.now().plusMinutes(10));
-        PaymentCancelPolicy.onCancel(paymentId, paymentBO.getTransactionStatus());
-        return prepareScaAndResolveResponse(scaInfoTO, paymentBO, userBO, CANCEL_PAYMENT);
+        PaymentBO payment = paymentService.getPaymentById(paymentId);
+        payment.setRequestedExecutionTime(LocalTime.now().plusMinutes(10));
+        PaymentCancelPolicy.onCancel(paymentId, payment.getTransactionStatus());
+        return prepareScaAndResolveResponse(scaInfoTO, payment, userBO, CANCEL_PAYMENT);
     }
 
     @Override
@@ -114,7 +108,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         validatePayment(paymentBO);
         paymentBO.updateDebtorAccountCurrency(getCheckedAccount(paymentBO).getCurrency());
         UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
-        TransactionStatusBO status = scaUtils.hasSCA(user)
+        TransactionStatusBO status = user.hasSCA()
                                              ? ACCP
                                              : ACTC;
         return prepareScaAndResolveResponse(scaInfoTO, persist(paymentBO, status), user, PAYMENT);
@@ -122,23 +116,15 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     @Override
     public SCAPaymentResponseTO executePayment(ScaInfoTO scaInfoTO, String paymentId) {
-        PaymentBO paymentBO = paymentService.getPaymentById(paymentId);
-        UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
+        PaymentBO payment = paymentService.getPaymentById(paymentId);
         TransactionStatusBO status = paymentService.updatePaymentStatus(paymentId, scaInfoTO.hasScope(SCOPE_FULL_ACCESS) ? ACTC : PATC);
         if (status == ACTC) {
-            status = paymentService.executePayment(paymentBO.getPaymentId(), user.getLogin());
+            status = paymentService.executePayment(payment.getPaymentId(), scaInfoTO.getUserLogin());
         }
-        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
-        response.setPaymentId(paymentBO.getPaymentId());
-        response.setTransactionStatus(TransactionStatusTO.valueOf(status.name()));
-        response.setPaymentType(PaymentTypeTO.valueOf(paymentBO.getPaymentType().name()));
-        response.setPaymentProduct(paymentBO.getPaymentProduct());
-        response.setStatusDate(LocalDateTime.now());
-        return response;
+        return new SCAPaymentResponseTO(payment.getPaymentId(), status.name(), payment.getPaymentType().name(), payment.getPaymentProduct());
     }
 
-    @NotNull
-    private DepositAccountBO getCheckedAccount(PaymentBO paymentBO) {
+    private DepositAccountBO getCheckedAccount(PaymentBO paymentBO) { //TODO move to RequestValidationFilter
         DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount(), true, null);
         paymentBO.setAccountId(debtorAccount.getId());
         paymentBO.getTargets()
@@ -158,7 +144,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return debtorAccount;
     }
 
-    private void validatePayment(PaymentBO paymentBO) {
+    private void validatePayment(PaymentBO paymentBO) { //TODO move to RequestValidationFilter
         String msg = null;
         if (!paymentBO.isValidAmount()) {
             msg = "Instructed amount is invalid.";
@@ -177,24 +163,15 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     private SCAPaymentResponseTO prepareScaAndResolveResponse(ScaInfoTO scaInfoTO, PaymentBO payment, UserBO user, OpTypeBO opType) {
         boolean isScaRequired = user.hasSCA();
-        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
-        String psuMessage = resolvePsuMessage(isScaRequired, payment, opType);
-        BearerTokenTO token = isScaRequired
-                                      ? tokenService.exchangeToken(scaInfoTO.getAccessToken(), scaTokenLifeTime, SCOPE_SCA)
-                                      : tokenService.exchangeToken(scaInfoTO.getAccessToken(), fullTokenLifeTime, SCOPE_FULL_ACCESS);
+        String psuMessage = coreDataPolicy.getPaymentCoreData(opType, payment).resolveMessage(isScaRequired);
+        BearerTokenTO token = accessService.exchangeTokenStartSca(isScaRequired, scaInfoTO.getAccessToken());
         ScaStatusTO scaStatus = isScaRequired
                                         ? ScaStatusTO.PSUAUTHENTICATED
                                         : ScaStatusTO.EXEMPTED;
-        int scaWeight = accessService.resolveScaWeightByDebtorAccount(user.getAccountAccesses(), payment.getDebtorAccount().getIban());
+        int scaWeight = user.resolveWeightForAccount(payment.getAccountId());
+        SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         scaResponseResolver.updateScaResponseFields(user, response, null, psuMessage, token, scaStatus, scaWeight);
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
-    }
-
-    private String resolvePsuMessage(boolean isScaRequired, PaymentBO payment, OpTypeBO opType) {
-        PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(opType, payment);
-        return isScaRequired
-                       ? paymentKeyData.getTanTemplate()
-                       : paymentKeyData.getExemptedTemplate();
     }
 
     private PaymentBO persist(PaymentBO paymentBO, TransactionStatusBO status) {
@@ -211,7 +188,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @Override
-    public String iban(String paymentId) {
+    public String iban(String paymentId) { //TODO Consider removing!
         return paymentService.readIbanByPaymentId(paymentId);
     }
 
@@ -236,39 +213,37 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     public List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO) {
         List<AccountReferenceBO> referenceList = detailsMapper.toAccountReferenceList(scaUtils.userBO(scaInfoTO.getUserLogin()).getAccountAccesses());
         List<PaymentBO> payments = paymentService.getPaymentsByTypeStatusAndDebtor(PaymentTypeBO.PERIODIC, ACSP, referenceList);
-
         return paymentConverter.toPaymentTOList(payments);
     }
 
     private SCAPaymentResponseTO authorizeOperation(ScaInfoTO scaInfoTO, String paymentId, OpTypeBO opType) {
-        PaymentBO payment = loadPayment(paymentId);
+        PaymentBO payment = paymentService.getPaymentById(paymentId);
         PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(opType, payment);
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
-            if (opType == PAYMENT) {
-                paymentService.updatePaymentStatus(paymentId, ACTC);
-                payment.setTransactionStatus(paymentService.executePayment(paymentId, scaInfoTO.getUserLogin()));
-            } else {
-                payment.setTransactionStatus(paymentService.cancelPayment(paymentId));
-            }
+            performExecuteOrCancelOperation(scaInfoTO, paymentId, opType, payment);
         } else if (multilevelScaEnable) {
             payment.setTransactionStatus(paymentService.updatePaymentStatus(paymentId, PATC));
         }
-        UserBO userBO = scaUtils.userBO(scaInfoTO.getUserLogin());
+        UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
-        int scaWeight = accessService.resolveScaWeightByDebtorAccount(userBO.getAccountAccesses(), payment.getDebtorAccount().getIban());
-        scaResponseResolver.updateScaResponseFields(userBO, response, null, paymentKeyData.getTanTemplate(), null, ScaStatusTO.FINALISED, scaWeight);
+        int scaWeight = user.resolveWeightForAccount(payment.getAccountId());
+        scaResponseResolver.updateScaResponseFields(user, response, null, paymentKeyData.getTanTemplate(), null, ScaStatusTO.FINALISED, scaWeight);
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
     }
 
-    private PaymentBO loadPayment(String paymentId) {
-        return paymentService.getPaymentById(paymentId);
+    private void performExecuteOrCancelOperation(ScaInfoTO scaInfoTO, String paymentId, OpTypeBO opType, PaymentBO payment) {
+        if (opType == PAYMENT) {
+            paymentService.updatePaymentStatus(paymentId, ACTC);
+            payment.setTransactionStatus(paymentService.executePayment(paymentId, scaInfoTO.getUserLogin()));
+        } else {
+            payment.setTransactionStatus(paymentService.cancelPayment(paymentId));
+        }
     }
 
-    private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference, boolean isDebtor, Currency currency) {
+    private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference, boolean isDebtor, Currency currency) {//TODO move to ValidationFilter
         DepositAccountBO account = Optional.ofNullable(reference.getCurrency())
                                            .map(c -> accountService.getAccountByIbanAndCurrency(reference.getIban(), c))
                                            .orElseGet(() -> getAccountByIbanAndParamCurrencyErrorIfNotSingle(reference.getIban(), isDebtor, currency));
-
         if (!account.isEnabled()) {
             throw blockedSupplier(ACCOUNT_DISABLED, reference.getIban(), account.isBlocked()).get();
         }

@@ -22,8 +22,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Getter
@@ -39,14 +40,10 @@ public class AisConsentBO {
     private LocalDate validUntil;
     private boolean recurringIndicator;
 
-    public AisConsentBO(String ibanForAccess, int frequencyPerDay, boolean recurringIndicator, String userId) {
-        this.access = new AisAccountAccessInfoBO();
-        List<String> list = Collections.singletonList(ibanForAccess);
-        this.access.setAccounts(list);
-        this.access.setTransactions(list);
-        this.access.setBalances(list);
-        this.frequencyPerDay = frequencyPerDay;
-        this.recurringIndicator = recurringIndicator;
-        this.userId = userId;
+    public Set<String> getUniqueIbans() {
+        return Stream.of(access.getAccounts(), access.getBalances(), access.getTransactions())
+                       .filter(Objects::nonNull)
+                       .flatMap(Collection::stream)
+                       .collect(Collectors.toSet());
     }
 }

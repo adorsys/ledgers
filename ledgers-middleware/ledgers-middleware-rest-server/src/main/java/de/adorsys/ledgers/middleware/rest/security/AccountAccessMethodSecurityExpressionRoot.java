@@ -1,37 +1,142 @@
 package de.adorsys.ledgers.middleware.rest.security;
 
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapper;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.StartScaOprTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.springframework.security.core.Authentication;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static de.adorsys.ledgers.middleware.api.domain.Constants.*;
-import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.*;
+import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
+import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.SYSTEM;
 
 public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionAdapter {
 
-    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService, KeycloakAuthMapper authMapper, MiddlewareUserManagementService userManagementService) {
-        super(authentication, accountService, paymentService, userManagementService, authMapper);
+    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService, KeycloakAuthMapper authMapper, MiddlewareUserManagementService userManagementService, MiddlewareRedirectScaService scaService) {
+        super(authentication, accountService, paymentService, userManagementService, authMapper, scaService);
     }
 
-    public boolean hasFullAccessScope() {
-        return hasAnyScope(SCOPE_FULL_ACCESS);
+    //-- Account Related SYSTEM & STAFF checks --//
+    public boolean isNewStaffUser(UserTO user) {
+        return user.getUserRoles().contains(STAFF) && userManagementService.countUsersByBranch(user.getBranch()) == 0;
     }
 
+    public boolean hasManagerAccessToAccountIban(String iban) { //TODO Used
+        UserTO user = user();
+        return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasManagerAccessIban(iban, user);
+    }
+
+    public boolean hasManagerAccessToAccountId(String accountId) { //TODO Used
+        UserTO user = user();
+        return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasManagerAccessId(accountId, user);
+    }
+
+    public boolean isNewAccountAndCanBeCreatedForUser(AccountDetailsTO account, String userId) { //TODO Used
+        boolean isExisting = accountService.getAccountsByIbanAndCurrency(account.getIban(), account.getCurrency().getCurrencyCode()).stream()
+                                     .anyMatch(d -> d.getCurrency().equals(account.getCurrency()));
+        boolean hasAccessToSameIban = userManagementService.findById(userId).hasAccessToAccountWithIban(account.getIban());
+        return !isExisting && hasAccessToSameIban;
+    }
+
+    //-- Manager User checks --//
+    public boolean hasManagerAccessToUser(String userId) { //TODO Used
+        UserTO user = user();
+        return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasAccessToUser(user, userId);
+    }
+
+    public boolean isSameUser(String userId) { //TODO Used
+        return user().getId().equals(userId);
+    }
+
+    //--General Payment checks --//
+    public boolean hasAccessToAccountByPaymentId(String paymentId) { //TODO Used
+        return hasAccessToAccount(getAccountIdFromPayment(paymentId));
+    }
+
+    //-- General Account checks --//
+    public boolean hasAccessToAccountsWithIbans(Collection<String> ibans) { //TODO Used
+        UserTO user = user();
+        return user.getUserRoles().contains(SYSTEM)
+                       || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountsWithIbans(ibans)
+                       || user.hasAccessToAccountsWithIbans(ibans) && ibans.stream().allMatch(this::isEnabledAccount);
+    }
+
+    //System retrieves regardless of status, STAFF & CUSTOMER if has access, CUSTOMER if accountEnabled
+    public boolean hasAccessToAccount(String accountId) { //TODO Used
+        UserTO user = user();
+        return user.getUserRoles().contains(SYSTEM)
+                       || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountWithId(accountId)
+                       || user.hasAccessToAccountWithId(accountId) && isEnabledAccount(accountId);
+    }
+
+    public boolean hasAccessToAccountWithIban(String iban) { //TODO used
+        UserTO user = user();
+        return user.getUserRoles().contains(SYSTEM)
+                       || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountWithIban(iban)
+                       || user.hasAccessToAccountWithIban(iban) && isEnabledAccountIban(iban);
+    }
+
+    public boolean accountInfoByIdentifier(AccountIdentifierTypeTO type, String accountIdentifier) { //TODO used
+        return type == AccountIdentifierTypeTO.IBAN
+                       ? hasAccessToAccountWithIban(accountIdentifier)
+                       : hasAccessToAccount(accountIdentifier);
+    }
+
+    public boolean isEnabledAccount(String accountId) { //TODO Used
+        return accountService.getDepositAccountById(accountId, LocalDateTime.now(), false).isEnabled();
+    }
+
+    public boolean hasAccessToAccountByLogin(String login, String iban) { //TODO Used
+        return userManagementService.findByUserLogin(login).hasAccessToAccountWithIban(iban);
+    }
+
+    public boolean hasAccessToAccountsByLogin(String login, List<String> ibans) {  //TODO Used
+        return userManagementService.findByUserLogin(login).hasAccessToAccountsWithIbans(ibans);
+    }
+
+    //-- General User checks --//
+    public boolean isEnabledUser(String userId) {
+        return userManagementService.findById(userId).isEnabled();
+    }
+
+    //-- Scope Related checks --//
     public boolean hasScaScope() {
         return hasAnyScope(SCOPE_SCA, SCOPE_PARTIAL_ACCESS, SCOPE_FULL_ACCESS);
     }
 
     public boolean hasPartialScope() {
         return hasAnyScope(SCOPE_PARTIAL_ACCESS, SCOPE_FULL_ACCESS);
+    }
+
+    public boolean hasAccessToAccountByScaOperation(StartScaOprTO opr) { //TODO Used
+        return opr.getOpType() == OpTypeTO.PAYMENT
+                       ? hasAccessToAccountByPaymentId(opr.getOprId())
+                       : hasAccessToAccountsWithIbans(accountService.getAccountsFromConsent(opr.getOprId()));
+    }
+
+    public boolean hasAccessToAccountByAuthorizationId(String authorizationId) { //TODO Used
+        return hasAccessToAccountByScaOperation(scaService.loadScaInformation(authorizationId));
+    }
+
+    //-- -- --//
+    private AccessTokenTO getAccessTokenTO() {
+        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
+        return authMapper.toAccessToken(credentials);
+    }
+
+    private UserTO user() {
+        return userManagementService.findByUserLogin(getAccessTokenTO().getLogin());
     }
 
     private boolean hasAnyScope(String... scopes) {
@@ -47,118 +152,23 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
                                                    .split(" ")));
     }
 
-    public boolean accountInfoByIdentifier(AccountIdentifierTypeTO type, String accountIdentifier) {
-        return type == AccountIdentifierTypeTO.IBAN
-                       ? accountInfoByIban(accountIdentifier)
-                       : accountInfoById(accountIdentifier);
+    private boolean isEnabledAccountIban(String iban) {
+        return accountService.getAccountsByIbanAndCurrency(iban, "").stream().allMatch(AccountDetailsTO::isEnabled);
     }
 
-    public boolean accountInfoById(String id) {
-        // Load iban
-        String iban = accountService.iban(id);
-        return checkAccountInfoAccess(iban);
+    private String getAccountIdFromPayment(String paymentId) {
+        return paymentService.getPaymentById(paymentId).getAccountId();
     }
 
-    public boolean accountInfoByIban(String iban) {
-        return checkAccountInfoAccess(iban);
+    private boolean hasAccessToUser(UserTO initiator, String userId) {
+        return !initiator.getUserRoles().contains(STAFF) || userManagementService.findById(userId).getBranch().equals(initiator.getId());
     }
 
-    public boolean accountInfoFor(AisConsentTO consent) {
-        AisAccountAccessInfoTO access = consent.getAccess();
-        return access != null &&
-                       accountInfoByIbanList(access.getAccounts()) &&
-                       accountInfoByIbanList(access.getTransactions()) &&
-                       accountInfoByIbanList(access.getBalances());
+    private boolean hasManagerAccessIban(String iban, UserTO user) {
+        return user.getUserRoles().contains(SYSTEM) || user.hasAccessToAccountWithIban(iban);
     }
 
-    public boolean tokenUsage(String usageType) {
-        return checkTokenUsage(usageType);
-    }
-
-    public boolean tokenUsages(String usageTypeFirst, String usageTypeSecond) {
-        return checkTokenUsage(usageTypeFirst) || checkTokenUsage(usageTypeSecond);
-    }
-
-    public boolean loginToken(String scaId, String authorizationId) {
-        AccessTokenTO token = getAccessTokenTO();
-        return checkTokenUsage(TokenUsageTO.LOGIN.name())
-                       && scaId.equals(token.getScaId())
-                       && authorizationId.equals(token.getAuthorisationId());
-    }
-
-    public boolean paymentInitById(String paymentId) {
-        // load iban
-        String iban = paymentService.iban(paymentId);
-        return checkPaymentInitAccess(iban);
-    }
-
-    public boolean paymentInfoById(String paymentId) {
-        // load iban
-        String iban = paymentService.iban(paymentId);
-        return checkAccountInfoAccess(iban) || checkPaymentInitAccess(iban);
-    }
-
-    private boolean checkPaymentInitAccess(String iban) {
-        AccessTokenTO token = getAccessTokenTO();
-        // Customer must have explicit permission
-        if (EnumSet.of(CUSTOMER, STAFF).contains(token.getRole())) {
-            return getAccountAccesses(token.getLogin()).stream()
-                           .anyMatch(a -> a.hasPaymentAccess(iban));
-        }
-        return SYSTEM == token.getRole();
-    }
-
-    private List<AccountAccessTO> getAccountAccesses(String login) {
-        return userManagementService.findByUserLogin(login).getAccountAccesses();
-    }
-
-    private boolean checkAccountInfoAccess(String iban) { //TODO fix me or remove me!
-        if (StringUtils.isBlank(iban)) {
-            return false;
-        }
-        AccessTokenTO token = getAccessTokenTO();
-
-        // System always have account access
-        if (SYSTEM == token.getRole()) {
-            return true;
-        }
-        // Customer and Staff must have explicit permission
-        if (EnumSet.of(CUSTOMER, STAFF).contains(token.getRole())) {
-            return getAccountAccesses(token.getLogin()).stream()
-                           .anyMatch(a -> a.hasIban(iban));
-        }
-        return false;
-    }
-
-   /* private boolean checkConsentAccess(AccessTokenTO token, String iban) {
-
-        return token.hasValidConsent() && checkConsentAccess(iban, token.getConsent().getAccess());
-    }*/
-
-   /* private boolean checkConsentAccess(String iban, AisAccountAccessInfoTO access) {
-        return access != null && access.hasIbanInAccess(iban);
-    }*/
-
-    private boolean accountInfoByIbanList(List<String> ibanList) {
-        if (CollectionUtils.isEmpty(ibanList)) {
-            return true;
-        }
-        for (String iban : ibanList) {
-            if (!checkAccountInfoAccess(iban)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean checkTokenUsage(String usageType) {
-        AccessTokenTO token = getAccessTokenTO();
-        return token.getTokenUsage() != null &&
-                       token.getTokenUsage().name().equals(usageType);
-    }
-
-    private AccessTokenTO getAccessTokenTO() {
-        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
-        return authMapper.toAccessToken(credentials);
+    private boolean hasManagerAccessId(String accountId, UserTO user) {
+        return user.getUserRoles().contains(SYSTEM) || user.hasAccessToAccountWithId(accountId);
     }
 }

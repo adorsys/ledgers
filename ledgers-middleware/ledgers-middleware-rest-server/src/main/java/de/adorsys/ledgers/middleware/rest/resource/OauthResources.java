@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @MiddlewareResetResource
 @RequiredArgsConstructor
 @RequestMapping(OauthRestApi.BASE_PATH)
-public class OauthResources implements OauthRestApi {
+public class OauthResources implements OauthRestApi { //TODO matter of removal
     private final MiddlewareOauthService middlewareOauthService;
     private final ScaInfoHolder scaInfoHolder;
 

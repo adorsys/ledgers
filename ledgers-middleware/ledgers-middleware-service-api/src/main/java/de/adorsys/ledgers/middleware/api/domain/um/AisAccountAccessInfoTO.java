@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.middleware.api.domain.um;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -50,15 +51,8 @@ public class AisAccountAccessInfoTO {
     @Schema(description = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO allPsd2;
 
-    public boolean hasIbanInAccess(String iban) {
-        return availableAccounts != null ||
-                       allPsd2 != null ||
-                       accounts != null && accounts.contains(iban) ||
-                       balances != null && balances.contains(iban) ||
-                       transactions != null && transactions.contains(iban);
-    }
-
-    public Set<String> getListedAccounts() {
+    @JsonIgnore
+    public Set<String> getListedAccountsIbans() {
         return Stream.concat(
                 Stream.concat(
                         checkAndTransform(this.accounts),

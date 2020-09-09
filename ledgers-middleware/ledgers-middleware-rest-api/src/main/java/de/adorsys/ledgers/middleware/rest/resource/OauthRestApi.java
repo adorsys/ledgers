@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "LDG06 - Oauth authorisation")
-public interface OauthRestApi {
+public interface OauthRestApi { //TODO Shall be removed after final migration to Keycloak
     String BASE_PATH = "/oauth";
 
     @PostMapping("/authorise")

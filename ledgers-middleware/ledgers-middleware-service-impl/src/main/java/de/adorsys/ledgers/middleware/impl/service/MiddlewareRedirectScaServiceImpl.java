@@ -1,8 +1,8 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
+import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.StartScaOprTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -19,11 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Set;
-
-import static de.adorsys.ledgers.middleware.api.domain.Constants.SCOPE_FULL_ACCESS;
-import static de.adorsys.ledgers.middleware.api.domain.Constants.SCOPE_PARTIAL_ACCESS;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.CONSENT;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.valueOf;
 
@@ -32,20 +27,17 @@ import static de.adorsys.ledgers.sca.domain.OpTypeBO.valueOf;
 public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaService {
     private static final String NO_USER_MESSAGE = "No user message";
 
-    @Value("${ledgers.token.lifetime.seconds.full:7776000}")
-    private int fullTokenLifeTime;
     @Value("${ledgers.sca.authCode.validity.seconds:180}")
     private int authCodeLifetime;
-    @Value("${ledgers.sca.multilevel.enabled:false}")
-    private boolean multilevelScaEnable;
+    @Value("${ledgers.sca.final.weight:100}")
+    private int finalWeight;
 
     private final UserService userService;
     private final DepositAccountPaymentService paymentService;
     private final SCAOperationService scaOperationService;
-    private final AccessService accessService;
     private final ScaResponseConverter scaResponseConverter;
     private final ScaResponseMessageResolver messageResolver;
-    private final KeycloakTokenService tokenService;
+    private final AccessService accessService;
     private final BearerTokenMapper bearerTokenMapper;
 
     @Override
@@ -58,7 +50,7 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
                           .build();
         }
         AuthCodeDataBO codeData = new AuthCodeDataBO(user.getLogin(), null, scaOpr.getOprId(), NO_USER_MESSAGE, authCodeLifetime,
-                                                     valueOf(scaOpr.getOpType().name()), scaOpr.getAuthorisationId(), 100);
+                                                     valueOf(scaOpr.getOpType().name()), scaOpr.getAuthorisationId(), finalWeight);
         SCAOperationBO operation = scaOperationService.checkIfExistsOrNew(codeData);
 
         try {
@@ -88,13 +80,6 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
         return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(psuMessage, operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), scaWeight, null);
     }
 
-    private int resolveWeightForOperation(OpTypeBO opType, String oprId, UserBO user) {
-        Set<String> ibans = opType == CONSENT
-                                    ? userService.loadConsent(oprId).getAccess().getAllAccounts()
-                                    : Collections.singleton(paymentService.getPaymentById(oprId).getDebtorAccount().getIban());
-        return accessService.resolveScaWeightCommon(ibans, user.getAccountAccesses());
-    }
-
     @Override
     public GlobalScaResponseTO confirmAuthorization(ScaInfoTO scaInfo) {
         SCAOperationBO operation = scaOperationService.loadAuthCode(scaInfo.getAuthorisationId());
@@ -105,10 +90,20 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
         ScaValidationBO scaValidation = scaOperationService.validateAuthCode(scaInfo.getAuthorisationId(), operation.getOpId(), scaInfo.getAuthCode(), scaWeight);
         operation.setScaStatus(scaValidation.getScaStatus());
         boolean authenticationCompleted = scaOperationService.authenticationCompleted(operation.getOpId(), operation.getOpType());
-        String scope = multilevelScaEnable && !authenticationCompleted
-                               ? SCOPE_PARTIAL_ACCESS
-                               : SCOPE_FULL_ACCESS;
-        BearerTokenTO exchangeToken = tokenService.exchangeToken(scaInfo.getAccessToken(), fullTokenLifeTime, scope);
+
+        BearerTokenTO exchangeToken = accessService.exchangeTokenEndSca(authenticationCompleted, scaInfo.getAccessToken());
         return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(psuMessage, operation), bearerTokenMapper.toBearerTokenBO(exchangeToken), scaWeight, scaValidation.getAuthConfirmationCode());
+    }
+
+    @Override
+    public StartScaOprTO loadScaInformation(String authorizationId) {
+        SCAOperationBO operation = scaOperationService.loadAuthCode(authorizationId);
+        return new StartScaOprTO(operation.getOpId(), OpTypeTO.valueOf(operation.getOpType().name()));
+    }
+
+    private int resolveWeightForOperation(OpTypeBO opType, String oprId, UserBO user) {
+        return opType == CONSENT
+                       ? user.resolveMinimalWeightForIbanSet(userService.loadConsent(oprId).getUniqueIbans())
+                       : user.resolveWeightForAccount(paymentService.getPaymentById(oprId).getAccountId());
     }
 }

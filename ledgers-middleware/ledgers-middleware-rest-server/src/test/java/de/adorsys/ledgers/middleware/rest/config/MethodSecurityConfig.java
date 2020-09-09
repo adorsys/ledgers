@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.config;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapper;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.security.AccountAccessMethodSecurityExpressionHandler;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,10 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
     private final MiddlewarePaymentService middlewareService;
     private final KeycloakAuthMapper authMapper;
     private final MiddlewareUserManagementService userManagementService;
+    private final MiddlewareRedirectScaService scaService;
 
     @Override
     protected MethodSecurityExpressionHandler createExpressionHandler() {
-        return new AccountAccessMethodSecurityExpressionHandler(middlewareAccountService, middlewareService, userManagementService, authMapper);
+        return new AccountAccessMethodSecurityExpressionHandler(middlewareAccountService, middlewareService, userManagementService, authMapper, scaService);
     }
 }

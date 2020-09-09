@@ -29,11 +29,9 @@ public class MiddlewareAuthConfirmationServiceImpl implements MiddlewareAuthConf
     @Override
     public AuthConfirmationTO verifyAuthConfirmationCode(String authorisationId, String authConfirmCode, String userLogin) {
         ScaAuthConfirmationBO authConfirmationBO = scaOperationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode);
-        if (authConfirmationBO.isConfirm()) {
-            return buildAuthConfirmationTO(userLogin, authConfirmationBO);
-        }
-        return new AuthConfirmationTO()
-                       .success(authConfirmationBO.isConfirm());
+        return authConfirmationBO.isConfirm()
+                       ? buildAuthConfirmationTO(userLogin, authConfirmationBO)
+                       : new AuthConfirmationTO().success(false);
     }
 
     @Override
