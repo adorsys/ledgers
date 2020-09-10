@@ -1,0 +1,30 @@
+{
+  "paymentId": "BIPI-123456789RI-123456789",
+  "paymentType": "PERIODIC",
+  "paymentProduct": "sepa-credit-transfers-xml",
+  "dayOfExecution": "1",
+  "debtorName": "PSU Name",
+  "debtorAccount": {
+    "iban": "DE80760700240271232400"
+  },
+  "endDate": "2025-03-01",
+  "executionRule": "preceding",
+  "frequency": "MONTHLY",
+
+  "startDate": "2023-03-01",
+  "requestedExecutionDate": "2017-02-15",
+  "targets": [
+    {
+      "endToEndIdentification": "RI-123456789",
+      "instructedAmount": {
+        "amount": "123",
+        "currency": "EUR"
+      },
+      "creditorAccount": {
+        "iban": "DE80760700240271232400"
+      },
+      "creditorName": "Merchant123",
+      "remittanceInformationUnstructured": "Ref. Number Merchant-123456"
+    }
+  ]
+}

@@ -7,10 +7,12 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.general.AddressTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.*;
+import de.adorsys.ledgers.middleware.client.util.MultiPartContentUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.json.XML;
 
@@ -43,10 +45,54 @@ public class PaymentMapperTO {
 
     @JsonIgnore
     public PaymentTO toAbstractPayment(String payment, String paymentType, String paymentProduct) {
+        if (isMultiPartPeriodicPayment(paymentType, paymentProduct)) {
+            MultiPartContentUtils.MultiPartContent multiPartContent = MultiPartContentUtils.parse(payment);
+            JsonNode node = readTree(multiPartContent.getXmlSct(), paymentProduct);
+            PaymentTO paymentTO = fillPaymentTO(paymentType, paymentProduct, node);
+            return fillPeriodicData(paymentTO, multiPartContent.getJsonStandingOrderType());
+        }
+
         JsonNode node = readTree(payment, paymentProduct);
+        return fillPaymentTO(paymentType, paymentProduct, node);
+    }
+
+    private boolean isMultiPartPeriodicPayment(String paymentType, String paymentProduct) {
+        return PaymentTypeTO.PERIODIC.name().equals(paymentType) &&
+                       (paymentProduct.contains("pain") || paymentProduct.contains("xml"));
+    }
+
+    @NotNull
+    private PaymentTO fillPaymentTO(String paymentType, String paymentProduct, JsonNode node) {
         PaymentTO paymentTO = parseDebtorPart(paymentType, paymentProduct, node);
         List<PaymentTargetTO> parts = parseCreditorParts(node, paymentTO.getPaymentType());
         paymentTO.setTargets(parts);
+        return paymentTO;
+    }
+
+    private PaymentTO fillPeriodicData(PaymentTO paymentTO, String content) {
+        try {
+            JsonNode node = mapper.readTree(content);
+            return fillPeriodicData(paymentTO, node);
+        } catch (IOException e) {
+            log.error("Read tree exception {}, {}", e.getCause(), e.getMessage());
+            throw new IllegalArgumentException("Could not parse payment!");
+        }
+    }
+
+    private PaymentTO fillPeriodicData(PaymentTO paymentTO, JsonNode node) {
+        mapProperties(debtorPart, "startDate", node, paymentTO::setStartDate, LocalDate.class);
+        mapProperties(debtorPart, "endDate", node, paymentTO::setEndDate, LocalDate.class);
+        mapProperties(debtorPart, "executionRule", node, paymentTO::setExecutionRule, String.class);
+        mapProperties(debtorPart, "dayOfExecution", node, paymentTO::setDayOfExecution, Integer.class);
+        debtorPart.get("frequency").stream()
+                .map(node::findValue)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(JsonNode::asText)
+                .map(String::toUpperCase)
+                .map(FrequencyCodeTO::valueOf)
+                .ifPresent(paymentTO::setFrequency);
+
         return paymentTO;
     }
 
@@ -90,23 +136,10 @@ public class PaymentMapperTO {
         mapProperties(debtorPart, "batchBookingPreferred", node, paymentTO::setBatchBookingPreferred, boolean.class);
         mapProperties(debtorPart, "requestedExecutionDate", node, paymentTO::setRequestedExecutionDate, LocalDate.class);
         mapProperties(debtorPart, "requestedExecutionTime", node, paymentTO::setRequestedExecutionTime, LocalTime.class);
-        mapProperties(debtorPart, "startDate", node, paymentTO::setStartDate, LocalDate.class);
-        mapProperties(debtorPart, "endDate", node, paymentTO::setEndDate, LocalDate.class);
-        mapProperties(debtorPart, "executionRule", node, paymentTO::setExecutionRule, String.class);
-
-        debtorPart.get("frequency").stream()
-                .map(node::findValue)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .map(JsonNode::asText)
-                .map(String::toUpperCase)
-                .map(FrequencyCodeTO::valueOf)
-                .ifPresent(paymentTO::setFrequency);
-
-        mapProperties(debtorPart, "dayOfExecution", node, paymentTO::setDayOfExecution, Integer.class);
         mapProperties(debtorPart, "debtorAgent", node, paymentTO::setDebtorAgent, String.class);
         mapProperties(debtorPart, "debtorName", node, paymentTO::setDebtorName, String.class);
         mapProperties(debtorPart, "transactionStatus", node, paymentTO::setTransactionStatus, TransactionStatusTO.class);
+        fillPeriodicData(paymentTO, node);
 
         fillEmbeddedProperty(debtorPart, "debtorAccount", node, this::mapReference, paymentTO::setDebtorAccount);
         return paymentTO;
