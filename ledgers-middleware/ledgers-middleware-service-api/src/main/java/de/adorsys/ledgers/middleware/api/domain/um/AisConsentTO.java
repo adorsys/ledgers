@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 @Data
 @NoArgsConstructor
@@ -54,5 +55,14 @@ public class AisConsentTO {
     @JsonIgnore
     public boolean isValidConsent() {
         return validUntil == null || validUntil.isAfter(LocalDate.now());
+    }
+
+    @JsonIgnore
+    public void cleanupForPIIS() {
+        // Remove all but balances from accesses.
+        access.setAllPsd2(null);
+        access.setAvailableAccounts(null);
+        access.setAccounts(Collections.emptyList());
+        access.setTransactions(Collections.emptyList());
     }
 }

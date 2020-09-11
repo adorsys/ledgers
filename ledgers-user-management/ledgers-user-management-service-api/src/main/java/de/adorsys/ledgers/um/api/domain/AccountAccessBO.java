@@ -1,12 +1,21 @@
 package de.adorsys.ledgers.um.api.domain;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.Currency;
 
-@Data
+import static de.adorsys.ledgers.um.api.domain.AccessTypeBO.OWNER;
+
+@Getter
+@Setter
+@EqualsAndHashCode
+@NoArgsConstructor
 public class AccountAccessBO {
     private String id;
     private String iban;
@@ -21,11 +30,17 @@ public class AccountAccessBO {
         this.accessType = accessType;
     }
 
-    public AccountAccessBO() {
+    public AccountAccessBO(String accNbr, Currency currency, String accountId, int scaWeight) {
+        this.accessType = OWNER;
+        this.iban = accNbr;
+        this.currency = currency;
+        this.accountId = accountId;
+        this.scaWeight = scaWeight;
     }
 
-    public void updateAccessFields(String iban, Currency currency) {
-        this.setIban(iban);
-        this.setCurrency(currency);
+    @JsonIgnore
+    public AccountAccessBO setWeight(int scaWeight) {
+        this.scaWeight = scaWeight;
+        return this;
     }
 }

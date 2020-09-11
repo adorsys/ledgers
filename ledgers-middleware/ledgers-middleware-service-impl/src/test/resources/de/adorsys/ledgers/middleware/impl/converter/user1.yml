@@ -12,6 +12,10 @@ accountAccesses:
   - id: 1
     accessType: OWNER
     iban: 1234567
+    accountId: 123
+    scaWeight: 100
   - id: 2
     accessType: READ
     iban: DE91100000000123456789
+    accountId: 321
+    scaWeight: 50

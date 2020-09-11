@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.*;
-import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,7 +36,6 @@ import java.util.List;
 @Tag(name = "LDG003 - Accounts", description = "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 public interface AccountRestAPI {
     String BASE_PATH = "/accounts";
-    String IBAN_QUERY_PARAM = "iban";
     String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
     String DATE_TO_QUERY_PARAM = "dateTo";
     String DATE_FROM_QUERY_PARAM = "dateFrom";
@@ -54,7 +52,7 @@ public interface AccountRestAPI {
     @GetMapping
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user. "
-                            + "Call only available to role CUSTOMER.")
+                                  + "Call only available to role CUSTOMER.")
     @SecurityRequirement(name = "apiKey")
     @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
@@ -63,29 +61,10 @@ public interface AccountRestAPI {
     })
     ResponseEntity<List<AccountDetailsTO>> getListOfAccounts();
 
-    @PostMapping
-    @Operation(summary = "Registers a new Deposit Account",
-            description = "Registers a new deposit account and assigns account access OWNER to the current user."
-                            + "Following rules apply during and after registration of a new account:"
-                            + "<ul>"
-                            + "<li>Caller must have a role <b>CUSTOMER</b> this means STAFF and SYSTEM can not use this endpoint.</li>"
-                            + "<li>Caller must have a valid <b>DIRECT_ACCESS</b> token. Means this can not be called using a LOGIN or a DELEGATED_ACCESS (tpp) token.</li>"
-                            + "<li>The current access token of the user does not include the newly registered account. User must reauthenticate to obtain an updated access token.</li>"
-                            + "<li>Nevertheless the Endpoint '/accounts' returns all accounts of the user.</li>"
-                            + "<li>Endpoint for granting account access to another user is scheduled but not yet implemented.</li>"
-                            + "</ul>")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Account creation successful. Still planing to work with 201 here."),
-            @ApiResponse(responseCode = "409", description = "Account with given IBAN already exists.")
-    })
-    ResponseEntity<Void> createDepositAccount(@RequestBody AccountDetailsTO accountDetailsTO);
-
     @GetMapping("/{accountId}")
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+                                  + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
     @SecurityRequirement(name = "apiKey")
     @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
@@ -97,7 +76,7 @@ public interface AccountRestAPI {
     @GetMapping("/{accountId}/balances")
     @Operation(summary = "Read balances",
             description = "Returns balances of the deposit account with the given accountId. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+                                  + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
     @SecurityRequirement(name = "apiKey")
     @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
@@ -137,31 +116,12 @@ public interface AccountRestAPI {
             @Parameter(name = TRANSACTION_ID)
             @PathVariable(name = "transactionId") String transactionId);
 
-    /**
-     * @param iban : the iban
-     * @return : account details
-     * @deprecated: user request param instead
-     */
-    @GetMapping(path = "/query", params = {IBAN_QUERY_PARAM})
-    @Operation(summary = "Load Account Details By IBAN", description = "Returns account details information given the account IBAN")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(
-            @Parameter(description = "The IBAN of the requested account: e.g.: DE69760700240340283600", example = "DE69760700240340283600")
-            @RequestParam(name = IBAN_QUERY_PARAM) String iban);
-
     @Operation(summary = "Fund Confirmation", description = "Returns account details information given the account IBAN")
     @SecurityRequirement(name = "apiKey")
     @SecurityRequirement(name = "oAuth2")
     @PostMapping(value = "/funds-confirmation")
     ResponseEntity<Boolean> fundsConfirmation(
             @RequestBody FundsConfirmationRequestTO request);
-
-    @PostMapping("/{accountId}/cash")
-    @Operation(summary = "Deposit Cash", description = "Only technical users are authorized to perform this operation")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<Void> depositCash(@PathVariable(name = "accountId") String accountId, @RequestBody AmountTO amount);
 
     @GetMapping(path = "/info/{accountIdentifierType}/{accountIdentifier}")
     @Operation(summary = "Load Account Owner Additional information", description = "Returns Additional Account Information by Account Identifier")

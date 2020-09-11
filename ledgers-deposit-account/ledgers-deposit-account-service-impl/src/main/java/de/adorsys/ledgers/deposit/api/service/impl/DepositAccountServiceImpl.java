@@ -176,12 +176,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix) {
-        List<DepositAccount> accounts = depositAccountRepository.findByIbanStartingWith(accountNumberPrefix);
-        return depositAccountMapper.toDepositAccountListBO(accounts);
-    }
-
-    @Override
     public List<DepositAccountDetailsBO> findDetailsByBranch(String branch) {
         List<DepositAccount> accounts = depositAccountRepository.findByBranch(branch);
         List<DepositAccountBO> accountsBO = depositAccountMapper.toDepositAccountListBO(accounts);
@@ -241,19 +235,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
                           .errorCode(COULD_NOT_EXECUTE_STATEMENT)
                           .build();
         }
-    }
-
-    @Override
-    public DepositAccountDetailsBO getDetailsByIban(String iban, LocalDateTime refTime, boolean withBalances) { //TODO This is a temporary workaround should be DELETED!!!!
-        List<DepositAccountBO> accounts = getAccountsByIbanAndParamCurrency(iban, "");
-        if (accounts.size() != 1) {
-            throw DepositModuleException.builder()
-                          .errorCode(DEPOSIT_ACCOUNT_NOT_FOUND)
-                          .devMsg(format(MSG_IBAN_NOT_FOUND, iban, "EMPTY"))
-                          .build();
-        }
-        DepositAccountBO account = accounts.iterator().next();
-        return new DepositAccountDetailsBO(account, getBalancesList(account, withBalances, refTime));
     }
 
     @Override

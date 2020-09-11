@@ -12,4 +12,6 @@ public interface MiddlewareRedirectScaService {
     GlobalScaResponseTO selectMethod(ScaInfoTO scaInfo);
 
     GlobalScaResponseTO confirmAuthorization(ScaInfoTO scaInfo);
+
+    StartScaOprTO loadScaInformation(String authorizationId);
 }

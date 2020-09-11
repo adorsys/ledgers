@@ -74,7 +74,7 @@ public class ConsentKeyDataTO {
 		return b;
 	}
 
-	private void checkNullConsent() {
+	private void checkNullConsent() { //TODO Get rid of internal validations! Should be done on request level!
 		if(consent==null) {
 			throw new IllegalStateException("Not expecting consent to be null.");
 		}

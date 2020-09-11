@@ -1,6 +1,11 @@
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
+import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.util.Ids;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDateTime;
 
 @Data
 public class SCAConsentResponseTO extends SCAResponseTO {
@@ -13,5 +18,13 @@ public class SCAConsentResponseTO extends SCAResponseTO {
 
     public SCAConsentResponseTO() {
         super(SCAConsentResponseTO.class.getSimpleName());
+    }
+
+    public SCAConsentResponseTO(BearerTokenTO token, String consentId, String template) {
+        this.setBearerToken(token);
+        this.consentId = StringUtils.isBlank(consentId) ? Ids.id() : consentId;
+        this.setPsuMessage(template);
+        this.setScaStatus(ScaStatusTO.EXEMPTED);
+        this.setStatusDate(LocalDateTime.now());
     }
 }

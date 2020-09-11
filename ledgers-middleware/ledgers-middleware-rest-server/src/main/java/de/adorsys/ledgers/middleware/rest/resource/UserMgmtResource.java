@@ -47,11 +47,13 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
+    @PreAuthorize("hasAccessToAccountByLogin(#login, #iban)")
     public ResponseEntity<Boolean> multilevel(String login, String iban) {
         return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, iban));
     }
 
     @Override
+    @PreAuthorize("hasAccessToAccountsByLogin(#login, #references)")
     public ResponseEntity<Boolean> multilevelAccounts(String login, List<AccountReferenceTO> references) {
         return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, references));
     }
@@ -64,29 +66,27 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToUser(#userId)") //TODO move to UserMgmgtStaffResource
     public ResponseEntity<UserTO> getUserById(String userId) {
         return ResponseEntity.ok(middlewareUserService.findById(userId));
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<UserTO> getUser() {
         return ResponseEntity.ok(middlewareUserService.findById(scaInfoHolder.getUserId()));
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    @PreAuthorize("isSameUser(#user.id)")
     public ResponseEntity<Void> editSelf(UserTO user) {
         middlewareUserService.editBasicSelf(scaInfoHolder.getUserId(), user);
         return ResponseEntity.accepted().build();
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
-        UserTO userTO = middlewareUserService.findById(scaInfoHolder.getUserId());
-        UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
+        UserTO initiator = middlewareUserService.findById(scaInfoHolder.getUserId());
+        UserTO user = middlewareUserService.updateScaData(initiator.getLogin(), data);
 
         URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
                           .build().toUri();
@@ -95,7 +95,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToUser(#userId)") //TODO move to UserMgmtStaffResource
     public ResponseEntity<Void> updateScaDataByUserId(String userId, List<ScaUserDataTO> data) {
         UserTO userTO = middlewareUserService.findById(userId);
         UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
@@ -107,19 +107,19 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasAnyRole('SYSTEM')") //TODO move to AdminResource
     public ResponseEntity<List<UserTO>> getAllUsers() {
-        return ResponseEntity.ok(middlewareUserService.listUsers(0, 1000));
+        return ResponseEntity.ok(middlewareUserService.listUsers(0, Integer.MAX_VALUE));
     }
 
     @Override
-    @PreAuthorize("tokenUsages('DIRECT_ACCESS','DELEGATED_ACCESS')")
+     //TODO To be refactored when Oauth Flow enabled
     public ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
         return ResponseEntity.ok(authConfirmationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode, scaInfoHolder.getScaInfo().getUserLogin()));
     }
 
     @Override
-    @PreAuthorize("tokenUsages('DIRECT_ACCESS','DELEGATED_ACCESS')")
+    //TODO To be refactored when Oauth Flow enabled
     public ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed) {
         return ResponseEntity.ok(authConfirmationService.completeAuthConfirmation(authorisationId, authCodeConfirmed, scaInfoHolder.getScaInfo().getUserLogin()));
     }

@@ -16,10 +16,6 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.*;
-import de.adorsys.ledgers.sca.domain.SCAOperationBO;
-import de.adorsys.ledgers.sca.domain.ScaStatusBO;
-import de.adorsys.ledgers.sca.domain.ScaValidationBO;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -63,34 +59,29 @@ class MiddlewareAccountManagementServiceImplTest {
 
     @InjectMocks
     private MiddlewareAccountManagementServiceImpl middlewareService;
+
     @Mock
-    private PaymentConverter paymentConverter;
+    private UserMapper userMapper;
     @Mock
     private DepositAccountService depositAccountService;
     @Mock
-    DepositAccountTransactionService transactionService;
+    private DepositAccountTransactionService transactionService;
     @Mock
     private AccountDetailsMapper accountDetailsMapper;
     @Mock
+    private PaymentConverter paymentConverter;
+    @Mock
     private UserService userService;
+    @Mock
+    private AisConsentBOMapper aisConsentMapper;
+    @Mock
+    private SCAUtils scaUtils;
     @Mock
     private AccessService accessService;
     @Mock
     private AmountMapper amountMapper;
     @Mock
-    private UserMapper userMapper;
-    @Mock
     private PageMapper pageMapper;
-    @Mock
-    private ScaInfoMapper scaInfoMapper;
-    @Mock
-    private SCAUtils scaUtils;
-    @Mock
-    private BearerTokenMapper bearerTokenMapper;
-    @Mock
-    private AisConsentBOMapper aisConsentMapper;
-    @Mock
-    private SCAOperationService scaOperationService;
     @Mock
     private ScaResponseResolver scaResponseResolver;
     @Mock
@@ -184,56 +175,6 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    void getDepositAccountByIban() {
-        // Given
-        DepositAccountDetailsBO accountBO = getDepositAccountDetailsBO();
-        AccountDetailsTO accountDetailsTO = getAccount(AccountDetailsTO.class);
-        when(depositAccountService.getDetailsByIban(any(), any(), anyBoolean())).thenReturn(accountBO);
-        when(accountDetailsMapper.toAccountDetailsTO(accountBO)).thenReturn(accountDetailsTO);
-
-        // When
-        AccountDetailsTO details = middlewareService.getDepositAccountByIban(IBAN, TIME, false);
-
-        // Then
-        assertNotNull(details);
-        assertEquals(accountDetailsTO, details);
-        verify(depositAccountService, times(1)).getDetailsByIban(IBAN, TIME, false);
-        verify(accountDetailsMapper, times(1)).toAccountDetailsTO(accountBO);
-    }
-
-    @Test
-    void getDepositAccountByIban_depositAccountNotFoundException() {
-        // Given
-        when(depositAccountService.getDetailsByIban(IBAN, TIME, false)).thenThrow(DepositModuleException.class);
-
-        // When
-        assertThrows(DepositModuleException.class, () -> middlewareService.getDepositAccountByIban(IBAN, TIME, false));
-    }
-
-    @Test
-    void getAllAccountDetailsByUserLogin() {
-        // Given
-        String userLogin = "spe";
-        AccountDetailsTO account = new AccountDetailsTO();
-        List<AccountAccessBO> accessBOList = getDataFromFile("account-access-bo-list.yml", new TypeReference<List<AccountAccessBO>>() {
-        });
-        UserBO userBO = new UserBO();
-        userBO.getAccountAccesses().addAll(accessBOList);
-        when(userService.findByLogin(userLogin)).thenReturn(userBO);
-        when(accountDetailsMapper.toAccountDetailsList(any())).thenReturn(Collections.singletonList(account));
-
-        // When
-        List<AccountDetailsTO> details = middlewareService.getAllAccountDetailsByUserLogin(userLogin);
-
-        // Then
-        assertEquals(1, details.size());
-        assertEquals(account, details.get(0));
-        verify(userService, times(1)).findByLogin(userLogin);
-        verify(depositAccountService, times(1)).getAccountByIbanAndCurrency(any(), any());
-        verify(accountDetailsMapper, times(1)).toAccountDetailsList(any());
-    }
-
-    @Test
     void getTransactionById() {
         // Given
         when(depositAccountService.getTransactionById(anyString(), anyString())).thenReturn(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
@@ -259,8 +200,6 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void getTransactionsByDates() {
         // Given
-        when(accessService.getTimeAtEndOfTheDay(any())).thenReturn(LocalDateTime.now().minusDays(1));
-        when(accessService.getTimeAtEndOfTheDay(any())).thenReturn(LocalDateTime.now());
         when(depositAccountService.getTransactionsByDates(any(), any(), any())).thenAnswer(i -> Collections.singletonList(readYml(TransactionDetailsBO.class, "TransactionBO.yml")));
         when(paymentConverter.toTransactionTOList(any())).thenReturn(Collections.singletonList(readYml(TransactionTO.class, "TransactionTO.yml")));
 
@@ -275,8 +214,6 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void getTransactionsByDatesPaged() {
         // Given
-        when(accessService.getTimeAtEndOfTheDay(any())).thenReturn(LocalDateTime.now().minusDays(1));
-        when(accessService.getTimeAtEndOfTheDay(any())).thenReturn(LocalDateTime.now());
         when(depositAccountService.getTransactionsByDatesPaged(any(), any(), any(), any())).thenReturn(Page.empty());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(new CustomPageImpl<>());
 
@@ -304,73 +241,10 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    void createAccount() {
-        // Given
-        when(depositAccountService.findByAccountNumberPrefix(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
-        when(userMapper.toAccountAccessListTO(any())).thenReturn(Collections.EMPTY_LIST);
-        when(userService.findById(any())).thenReturn(buildUserBO());
-        when(accessService.filterOwnedAccounts(any())).thenReturn(Collections.EMPTY_LIST);
-
-        // When
-        middlewareService.createDepositAccount(buildScaInfoTO(), "06", "07", getAccountDetailsTO());
-
-        // Then
-        verify(depositAccountService, times(1)).findByAccountNumberPrefix("06");
-        verify(userService, times(2)).findById(CORRECT_USER_ID);
-    }
-
-    // TODO: to be fixed: https://git.adorsys.de/adorsys/xs2a/ledgers/-/issues/237
-    @Test
-    void createDepositAccount_emptyAccount() {
-        // Given
-        when(depositAccountService.findByAccountNumberPrefix(any())).thenReturn(Collections.EMPTY_LIST);
-
-        // Then
-        assertThrows(NullPointerException.class, () -> middlewareService.createDepositAccount(buildScaInfoTO(), "accountNumberPrefix", "accountNumberSuffix", getAccountDetailsTO()));
-    }
-
-    @Test
-    void createDepositAccount_accountCreationFailure() {
-        // Given
-        when(depositAccountService.findByAccountNumberPrefix(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
-        when(userMapper.toAccountAccessListTO(any())).thenReturn(buildAccountAccessesTO());
-        when(userService.findById(any())).thenReturn(buildUserBO());
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(buildScaInfoTO(), "accountNumberPrefix", "accountNumberSuffix", getAccountDetailsTO()));
-    }
-
-    @Test
-    void createDepositAccount_accountSuffixAndPrefixExists() {
-        // Given
-        when(depositAccountService.findByAccountNumberPrefix(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
-        when(userMapper.toAccountAccessListTO(any())).thenReturn(Collections.EMPTY_LIST);
-        when(userService.findById(any())).thenReturn(buildUserBO());
-        when(accessService.filterOwnedAccounts(any())).thenReturn(Collections.singletonList("0102"));
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(buildScaInfoTO(), "01", "02", getAccountDetailsTO()));
-    }
-
-    @Test
-    void createDepositAccount_userNotOwner() {
-        // Given
-        when(depositAccountService.findByAccountNumberPrefix(any())).thenReturn(Collections.singletonList(getDepositAccountBO()));
-        when(userMapper.toAccountAccessListTO(any())).thenReturn(Collections.EMPTY_LIST);
-        when(userService.findById(any())).thenReturn(buildUserBO());
-        when(accessService.filterOwnedAccounts(any())).thenReturn(Collections.singletonList(IBAN));
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(buildScaInfoTO(), "accountNumberPrefix", "accountNumberSuffix", getAccountDetailsTO()));
-    }
-
-    @Test
     void listDepositAccounts() {
         // Given
-        when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(buildUserBO());
-        when(userMapper.toUserTO(buildUserBO())).thenReturn(buildUserTO());
-        when(depositAccountService.getAccountDetailsByIbanAndCurrency(anyString(), any(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
-        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
+        when(userService.findById(CORRECT_USER_ID)).thenReturn(buildUserBO());
+        when(depositAccountService.getAccountDetailsById(any(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
 
         // When
         List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccounts(CORRECT_USER_ID);
@@ -378,8 +252,8 @@ class MiddlewareAccountManagementServiceImplTest {
         // Then
         assertNotNull(accountsToBeTested);
         assertThat(accountsToBeTested).isNotEmpty();
-        verify(accessService, times(1)).loadCurrentUser(CORRECT_USER_ID);
-        verify(depositAccountService, times(1)).getAccountDetailsByIbanAndCurrency(anyString(), any(), any(LocalDateTime.class), anyBoolean());
+        verify(userService, times(1)).findById(CORRECT_USER_ID);
+        verify(depositAccountService, times(1)).getAccountDetailsById(any(), any(LocalDateTime.class), anyBoolean());
         verify(accountDetailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
     }
 
@@ -393,9 +267,9 @@ class MiddlewareAccountManagementServiceImplTest {
         accounts.add(getDepositAccountDetailsBO());
 
         // Given
-        when(accessService.loadCurrentUser(CORRECT_USER_ID)).thenReturn(user);
+        when(userService.findById(CORRECT_USER_ID)).thenReturn(user);
         when(depositAccountService.findDetailsByBranch(anyString())).thenReturn(accounts);
-        when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
+        when(accountDetailsMapper.toAccountDetailsTOList(any())).thenReturn(Collections.singletonList(getAccountDetailsTO()));
 
         // When
         List<AccountDetailsTO> accountsToBeTested = middlewareService.listDepositAccountsByBranch(CORRECT_USER_ID);
@@ -403,15 +277,15 @@ class MiddlewareAccountManagementServiceImplTest {
         // Then
         assertNotNull(accountsToBeTested);
         assertThat(accountsToBeTested).isNotEmpty();
-        verify(accessService, times(1)).loadCurrentUser(CORRECT_USER_ID);
+        verify(userService, times(1)).findById(CORRECT_USER_ID);
         verify(depositAccountService, times(1)).findDetailsByBranch(anyString());
-        verify(accountDetailsMapper, times(1)).toAccountDetailsTO(any(DepositAccountDetailsBO.class)); // only one element in the list
+        verify(accountDetailsMapper, times(1)).toAccountDetailsTOList(any()); // only one element in the list
     }
 
     @Test
     void listDepositAccountsByBranchPaged() {
         // Given
-        when(accessService.loadCurrentUser(any())).thenReturn(buildUserBO());
+        when(userService.findById(any())).thenReturn(buildUserBO());
         when(depositAccountService.findDetailsByBranchPaged(any(), any(), any())).thenReturn(getPage());
         when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getPageImpl());
@@ -443,7 +317,6 @@ class MiddlewareAccountManagementServiceImplTest {
         // Given
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
         when(tokenService.exchangeToken(any(), any(), any())).thenReturn(getBearerTokenTO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(0);
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
         // When
@@ -459,7 +332,6 @@ class MiddlewareAccountManagementServiceImplTest {
         // Given
         when(scaUtils.userBO(any())).thenReturn(buildUserBO());
         when(tokenService.exchangeToken(any(), any(), any())).thenReturn(getBearerTokenTO());
-        when(accessService.resolveMinimalScaWeightForConsent(any(), any())).thenReturn(0);
         when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
 
         // When
@@ -473,7 +345,6 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void grantAisConsent() {
         // Given
-        when(bearerTokenMapper.toBearerTokenTO(any())).thenReturn(getBearerTokenTO());
 
         // When
         SCAConsentResponseTO result = middlewareService.grantPIISConsent(buildScaInfoTO(), getAisConsentTO());
@@ -485,7 +356,6 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void depositCashDelegatesToDepositAccountService() {
         // Given
-        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(false));
         doNothing().when(transactionService).depositCash(eq(ACCOUNT_ID), any(), any());
 
         // When
@@ -493,48 +363,6 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         verify(transactionService, times(1)).depositCash(eq(ACCOUNT_ID), any(), any());
-    }
-
-    @Test
-    void depositCashWrapsNotFoundException() {
-        // Given
-        when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getAccountDetails(true));
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.depositCash(buildScaInfoTO(), ACCOUNT_ID, new AmountTO()));
-    }
-
-    @Test
-    void shouldReturnUserAccountAccess() {
-        // Given
-        when(userService.findById(CORRECT_USER_ID)).thenReturn(buildUserBO());
-        when(userMapper.toUserTO(buildUserBO())).thenReturn(buildUserTO());
-
-        // When
-        List<AccountAccessTO> accountAccesses = middlewareService.getAccountAccesses(CORRECT_USER_ID);
-
-        // Then
-        assertThat(accountAccesses).isNotEmpty();
-        assertEquals(1, accountAccesses.size());
-
-        AccountAccessTO accountAccess = getFirstAccountAccess(accountAccesses);
-
-        assertEquals(IBAN, accountAccess.getIban());
-        assertEquals(AccessTypeTO.OWNER, accountAccess.getAccessType());
-    }
-
-    @Test
-    void deleteTransactions_userRoleCustomer() {
-        // When
-        middlewareService.deleteTransactions(CORRECT_USER_ID, UserRoleTO.CUSTOMER, ACCOUNT_ID);
-    }
-
-    @Test
-    void deleteTransactions_userRoleStaff() {
-        // Given
-        when(userService.findById(any())).thenReturn(getUserBO());
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.deleteTransactions(CORRECT_USER_ID, UserRoleTO.STAFF, null));
     }
 
     @Test
@@ -594,19 +422,9 @@ class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     void deleteAccount() {
-        when(userService.findById(USER_ID)).thenReturn(getUserBO());
         middlewareService.deleteAccount(USER_ID, UserRoleTO.STAFF, ACCOUNT_ID);
 
         verify(depositAccountService, times(1)).deleteAccount(ACCOUNT_ID);
-    }
-
-    @Test
-    void deleteAccount_fail_no_access() {
-        UserBO userBO = getUserBO();
-        userBO.getAccountAccesses().get(0).setAccountId("WRONG ACCOUNT ID");
-        when(userService.findById(USER_ID)).thenReturn(userBO);
-
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.deleteAccount(USER_ID, UserRoleTO.STAFF, ACCOUNT_ID));
     }
 
     @Test
@@ -618,15 +436,6 @@ class MiddlewareAccountManagementServiceImplTest {
 
         verify(depositAccountService, times(1)).deleteUser(USER_ID);
         verify(keycloakDataService, times(1)).deleteUser(userBO.getLogin());
-    }
-
-    @Test
-    void deleteUser_fail_wrong_branch() {
-        UserBO userBO = getUserBO();
-        userBO.setBranch("another branch");
-        when(userService.findById(USER_ID)).thenReturn(userBO);
-
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.deleteUser(BRANCH, UserRoleTO.STAFF, USER_ID));
     }
 
     private CustomPageImpl<Object> getPageImpl() {
@@ -651,14 +460,6 @@ class MiddlewareAccountManagementServiceImplTest {
         return user;
     }
 
-    private ScaValidationBO getScaValidationBO(boolean validAuthCode) {
-        return new ScaValidationBO("authConfirmationCode", validAuthCode, ScaStatusBO.FINALISED, 0);
-    }
-
-    private SCAOperationBO getSCAOperationBO() {
-        return new SCAOperationBO();
-    }
-
     private AisConsentBO getAisConsentBO() {
         return new AisConsentBO("id", "userId", "tppId", 4, new AisAccountAccessInfoBO(), LocalDate.now().plusDays(5), false);
     }
@@ -667,27 +468,8 @@ class MiddlewareAccountManagementServiceImplTest {
         return new AisConsentTO("id", "userId", "tppId", 4, new AisAccountAccessInfoTO(), LocalDate.now().plusDays(5), false);
     }
 
-    private BearerTokenBO getBearerTokenBO() {
-        BearerTokenBO token = new BearerTokenBO();
-        token.setAccess_token("access_token");
-        token.setAccessTokenObject(new AccessTokenBO());
-        token.setExpires_in(30);
-        token.setRefresh_token("refresh_token");
-        token.setToken_type("Bearer");
-        return token;
-    }
-
     private BearerTokenTO getBearerTokenTO() {
         return new BearerTokenTO("access_token", "Bearer", 30, "refresh_token", new AccessTokenTO(), Collections.emptySet());
-    }
-
-    private static <T> T getAccount(Class<T> aClass) {
-        try {
-            return MAPPER.readValue(PaymentConverter.class.getResourceAsStream("AccountDetails.yml"), aClass);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Resource file not found", e);
-        }
     }
 
     private DepositAccountDetailsBO getDepositAccountDetailsBO() {
@@ -696,10 +478,6 @@ class MiddlewareAccountManagementServiceImplTest {
 
     private AccountDetailsTO getAccountDetailsTO() {
         return readYml(AccountDetailsTO.class, "AccountDetailsTO.yml");
-    }
-
-    private AccountAccessTO getFirstAccountAccess(List<AccountAccessTO> accountAccesses) {
-        return accountAccesses.get(0);
     }
 
     private <T> T getDataFromFile(String fileName, TypeReference<T> typeReference) {
@@ -727,12 +505,6 @@ class MiddlewareAccountManagementServiceImplTest {
         objectMapper.findAndRegisterModules();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return objectMapper;
-    }
-
-    private DepositAccountDetailsBO getAccountDetails(boolean isBlocked) {
-        DepositAccountBO account = new DepositAccountBO();
-        account.setBlocked(isBlocked);
-        return new DepositAccountDetailsBO(account, Collections.emptyList());
     }
 
     private static UserBO buildUserBO() {

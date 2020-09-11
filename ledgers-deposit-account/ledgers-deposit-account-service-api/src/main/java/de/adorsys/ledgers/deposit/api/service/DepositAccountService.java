@@ -58,8 +58,6 @@ public interface DepositAccountService {
 
     String readIbanById(String id);
 
-    List<DepositAccountBO> findByAccountNumberPrefix(String accountNumberPrefix);
-
     List<DepositAccountDetailsBO> findDetailsByBranch(String branch);
 
     Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, Pageable pageable);
@@ -73,11 +71,6 @@ public interface DepositAccountService {
     void deleteAccount(String accountId);
 
     void rollBackBranch(String branch, LocalDateTime revertTimestamp);
-
-    /**
-     * @deprecated shall be removed in v2.5
-     */
-    DepositAccountDetailsBO getDetailsByIban(String iban, LocalDateTime refTime, boolean withBalances);
 
     void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
 

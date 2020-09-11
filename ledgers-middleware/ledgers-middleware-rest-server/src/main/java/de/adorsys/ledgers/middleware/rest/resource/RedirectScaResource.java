@@ -38,25 +38,25 @@ public class RedirectScaResource implements RedirectScaRestAPI {
     private final MiddlewareRedirectScaService scaService;
 
     @Override
-    @PreAuthorize("hasScaScope()")
+    @PreAuthorize("hasScaScope() and hasAccessToAccountByScaOperation(#startScaOpr)")
     public ResponseEntity<GlobalScaResponseTO> startSca(StartScaOprTO startScaOpr) {
         return ResponseEntity.ok(scaService.startScaOperation(startScaOpr, scaInfoHolder.getScaInfo()));
     }
 
     @Override
-    @PreAuthorize("hasScaScope()")
+    @PreAuthorize("hasScaScope() and hasAccessToAccountByAuthorizationId(#authorisationId)")
     public ResponseEntity<GlobalScaResponseTO> getSCA(String authorisationId) {
         return ResponseEntity.ok(scaService.getMethods(authorisationId, scaInfoHolder.getScaInfo()));
     }
 
     @Override
-    @PreAuthorize("hasScaScope()")
+    @PreAuthorize("hasScaScope() and hasAccessToAccountByAuthorizationId(#authorisationId)")
     public ResponseEntity<GlobalScaResponseTO> selectMethod(String authorisationId, String scaMethodId) {
         return ResponseEntity.ok(scaService.selectMethod(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId)));
     }
 
     @Override
-    @PreAuthorize("hasScaScope()")
+    @PreAuthorize("hasScaScope() and hasAccessToAccountByAuthorizationId(#authorisationId)")
     public ResponseEntity<GlobalScaResponseTO> validateScaCode(String authorisationId, String authCode) {
         return ResponseEntity.ok(scaService.confirmAuthorization(scaInfoHolder.getScaInfoWithAuthCodeAndAuthorisationId(authCode, authorisationId)));
     }

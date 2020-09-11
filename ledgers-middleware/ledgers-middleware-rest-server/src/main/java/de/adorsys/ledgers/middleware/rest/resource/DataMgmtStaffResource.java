@@ -32,28 +32,28 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     private final MiddlewareRecoveryService recoveryService;
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> account(String accountId) {
         accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> depositAccount(String accountId) {
         accountManagementService.deleteAccount(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<Void> user(String userId) {
         accountManagementService.deleteUser(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), userId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToUser(#branchId)")
     public ResponseEntity<Void> branch(String branchId) {
         appManagementService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
         return ResponseEntity.ok().build();
