@@ -234,18 +234,18 @@ Unit Tests:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
     expire_in: "10 day"
 
-Sonarcube Tests:
-   stage: "Test"
-   needs: []
-   except:
-     - schedules
-     - develop
-   script:
-     - jabba use system@1.8
-     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-     - mvn -ntp --fail-at-end clean install
-     - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
+# Sonarcube Tests:
+#   stage: "Test"
+#   needs: []
+#   except:
+#     - schedules
+#     - develop
+#   script:
+#     - jabba use system@1.8
+#     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+#     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+#     - mvn -ntp --fail-at-end clean install
+#     - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
 
 Nexus:Local_deploy:
   stage: Nexus

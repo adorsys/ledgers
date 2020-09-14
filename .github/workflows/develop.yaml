@@ -3,7 +3,8 @@ name: Develop CI
 on: 
   push:
     branches:
-      - develop   
+      - develop
+      - ledgers-keycloak
 
 env:
   SONAR_PRJ_KEY: adorsys_ledgers
