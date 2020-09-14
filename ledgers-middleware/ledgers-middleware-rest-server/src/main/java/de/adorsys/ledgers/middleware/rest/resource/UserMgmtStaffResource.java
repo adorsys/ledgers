@@ -33,7 +33,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
-    @PreAuthorize("isNewStaffUser(#branch)")
+    @PreAuthorize("isNewStaffUser(#branchStaff)")
     public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) {
         branchStaff.setBranch(branch);
         branchStaff.setUserRoles(Collections.singletonList(UserRoleTO.STAFF));
