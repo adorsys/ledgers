@@ -2,21 +2,23 @@ package de.adorsys.ledgers.deposit.api.service.impl;
 
 import de.adorsys.ledgers.deposit.db.domain.FrequencyCode;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
+import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
+@UtilityClass
+@SuppressWarnings("PMD.FinalFieldCouldBeStatic")
 public class ExecutionTimeHolder {
-    private static Map<FrequencyCode, Function<Payment, LocalDate>> holder = new HashMap<>();
-    private final static int ONE = 1;
-    private final static int TWO = 2;
-    private final static int THREE = 3;
-    private final static int SIX = 6;
-    private final static int TWELVE = 12;
+    private final EnumMap<FrequencyCode, Function<Payment, LocalDate>> holder = new EnumMap<>(FrequencyCode.class);
+    private final int ONE = 1;
+    private final int TWO = 2;
+    private final int THREE = 3;
+    private final int SIX = 6;
+    private final int TWELVE = 12;
 
     static {
         holder.put(FrequencyCode.DAILY, p -> p.getExecutedDate().plusDays(ONE).toLocalDate());
@@ -29,7 +31,7 @@ public class ExecutionTimeHolder {
         holder.put(FrequencyCode.ANNUAL, p -> getDateForMonths(p, TWELVE));
     }
 
-    public static LocalDate getExecutionDate(Payment payment) {
+    public LocalDate getExecutionDate(Payment payment) {
         LocalDate nextExecution = holder.get(payment.getFrequency()).apply(payment);
         return payment.getDayOfExecution() == null ||
                        EnumSet.of(FrequencyCode.DAILY, FrequencyCode.WEEKLY, FrequencyCode.EVERYTWOWEEKS).contains(payment.getFrequency())
@@ -37,15 +39,15 @@ public class ExecutionTimeHolder {
                        : LocalDate.of(nextExecution.getYear(), nextExecution.getMonth(), payment.getDayOfExecution());
     }
 
-    private static LocalDate getDateForWeeks(Payment payment, int weeksToAdd) {
-            return payment.getExecutedDate().toLocalDate().plusWeeks(weeksToAdd);
+    private LocalDate getDateForWeeks(Payment payment, int weeksToAdd) {
+        return payment.getExecutedDate().toLocalDate().plusWeeks(weeksToAdd);
     }
 
-    private static LocalDate getDateForMonths(Payment payment, int monthsToAdd) {
+    private LocalDate getDateForMonths(Payment payment, int monthsToAdd) {
         return payment.getStartDate().plusMonths(getMonthDifference(payment) + monthsToAdd);
     }
 
-    private static long getMonthDifference(Payment payment) {
+    private long getMonthDifference(Payment payment) {
         return ChronoUnit.MONTHS.between(payment.getStartDate(), payment.getExecutedDate().toLocalDate());
     }
 }

@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.rest.security;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapper;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.StartScaOprTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
@@ -11,11 +12,13 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementServ
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.domain.Constants.*;
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
@@ -43,10 +46,12 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     public boolean isNewAccountAndCanBeCreatedForUser(AccountDetailsTO account, String userId) { //TODO Used
-        boolean isExisting = accountService.getAccountsByIbanAndCurrency(account.getIban(), account.getCurrency().getCurrencyCode()).stream()
-                                     .anyMatch(d -> d.getCurrency().equals(account.getCurrency()));
-        boolean hasAccessToSameIban = userManagementService.findById(userId).hasAccessToAccountWithIban(account.getIban());
-        return !isExisting && hasAccessToSameIban;
+        List<AccountDetailsTO> accounts = accountService.getAccountsByIbanAndCurrency(account.getIban(), "");
+        return CollectionUtils.isEmpty(accounts) || accounts.stream()
+                                                            .map(AccountDetailsTO::getCurrency)
+                                                            .noneMatch(c -> account.getCurrency() == c)
+                                                            && userManagementService.findById(userId)
+                                                                       .hasAccessToAccountWithIban(account.getIban());
     }
 
     //-- Manager User checks --//
@@ -69,7 +74,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         UserTO user = user();
         return user.getUserRoles().contains(SYSTEM)
                        || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountsWithIbans(ibans)
-                       || user.hasAccessToAccountsWithIbans(ibans) && ibans.stream().allMatch(this::isEnabledAccount);
+                       || user.hasAccessToAccountsWithIbans(ibans) && ibans.stream().allMatch(this::isEnabledAccountIban);
     }
 
     //System retrieves regardless of status, STAFF & CUSTOMER if has access, CUSTOMER if accountEnabled
@@ -101,7 +106,8 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return userManagementService.findByUserLogin(login).hasAccessToAccountWithIban(iban);
     }
 
-    public boolean hasAccessToAccountsByLogin(String login, List<String> ibans) {  //TODO Used
+    public boolean hasAccessToAccountsByLogin(String login, List<AccountReferenceTO> references) {  //TODO Used
+        Set<String> ibans = references.stream().map(AccountReferenceTO::getIban).collect(Collectors.toSet());
         return userManagementService.findByUserLogin(login).hasAccessToAccountsWithIbans(ibans);
     }
 
