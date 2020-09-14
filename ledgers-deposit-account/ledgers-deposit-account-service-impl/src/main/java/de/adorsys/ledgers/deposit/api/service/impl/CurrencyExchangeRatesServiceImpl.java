@@ -68,7 +68,7 @@ public class CurrencyExchangeRatesServiceImpl implements CurrencyExchangeRatesSe
         consumer.accept(currencyValue, rate.asText());
     }
 
-    private void loadDefaultRates() throws IOException {
+    private static void loadDefaultRates() throws IOException {
         Resource resource = new DefaultResourceLoader().getResource("rates.yml");
         rates = new ObjectMapper(new YAMLFactory()).readValue(resource.getInputStream(), new TypeReference<Map<Currency, String>>() {
         });

@@ -61,7 +61,7 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccount(#payment.getAccountId())")
+    @PreAuthorize("hasAccessToAccountWithIban(#payment.debtorAccount.iban)")
     public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
         return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment, paymentType), HttpStatus.CREATED);
     }
