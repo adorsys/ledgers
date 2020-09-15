@@ -77,7 +77,7 @@ public class AdminResource implements AdminResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM') and isNewStaffUser(#user)")
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<UserTO> register(UserTO user) {
         UserTO createdUser = middlewareUserService.create(user);
         createdUser.setPin(null);
