@@ -155,6 +155,8 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
                                                                                     .build());
         if (userService.findById(userId).getBranch().equals(branchId)) {
             UserBO userBO = userTOMapper.toUserBO(user);
+            dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO));
+            updatePassword(userId, userBO.getPin());
             return userTOMapper.toUserTO(userService.updateUser(userBO));
         }
         throw MiddlewareModuleException.builder() //TODO Think of this stuff should be rewritten
@@ -166,6 +168,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     @Override
     public void updatePassword(String userId, String password) {
         userService.updatePassword(userId, password);
+        dataService.resetPassword(userService.findById(userId).getLogin(), password);
     }
 
     @Override
