@@ -5,6 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import static de.adorsys.ledgers.middleware.impl.service.upload.ExpressionExecutionWrapper.execute;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UploadDepositAccountService {
@@ -25,10 +27,16 @@ public class UploadDepositAccountService {
         users.forEach(u -> createDepositAccount(u, details, info));
     }
 
-    private void createDepositAccount(UserTO user, Map<String, AccountDetailsTO> details, ScaInfoTO info)  {
+    private void createDepositAccount(UserTO user, Map<String, AccountDetailsTO> details, ScaInfoTO info) {
         user.getAccountAccesses().stream()
                 .filter(a -> details.containsKey(a.getIban()))
                 .map(a -> details.get(a.getIban()))
-                .forEach(a -> execute(() -> middlewareAccountService.createDepositAccount(user.getId(), info, a)));
+                .forEach(a -> execute(() -> {
+                    try {
+                        middlewareAccountService.createDepositAccount(user.getId(), info, a);
+                    } catch (Exception e) {
+                        log.info("Seems account is already present, skipping creation. {}", e.getMessage());
+                    }
+                }));
     }
 }
