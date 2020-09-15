@@ -32,7 +32,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
 
     //-- Account Related SYSTEM & STAFF checks --//
     public boolean isNewStaffUser(UserTO user) {
-        return user.getUserRoles().contains(STAFF) && userManagementService.countUsersByBranch(user.getBranch()) == 0;
+        return userManagementService.countUsersByBranch(user.getId()) == 0;
     }
 
     public boolean hasManagerAccessToAccountIban(String iban) { //TODO Used
