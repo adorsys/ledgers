@@ -3,6 +3,7 @@ package de.adorsys.ledgers.um.impl.service;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthServerInfoBO;
+import de.adorsys.ledgers.um.api.domain.oauth.OauthTokenHolder;
 import de.adorsys.ledgers.um.api.service.OauthAuthorisationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.OauthCodeEntity;
@@ -30,12 +31,12 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
 
     @Override
     @Transactional
-    public OauthCodeResponseBO oauthCode(String userId, String accessToken) {
+    public OauthCodeResponseBO oauthCode(String userId, String accessToken, boolean finalStage) {
         UserBO user = userService.findById(userId);
-        return resolveOauthCode(user, accessToken);
+        return resolveOauthCode(user, accessToken, finalStage);
     }
 
-    private OauthCodeResponseBO resolveOauthCode(UserBO user, String accessToken) {
+    private OauthCodeResponseBO resolveOauthCode(UserBO user, String accessToken, boolean finalStage) {
         OffsetDateTime expiryTime = OffsetDateTime.now().plusMinutes(oauthConfigProp.getLifeTime().getAuthCode());
 
         String code = RandomStringUtils.random(24, true, true);
@@ -47,15 +48,16 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
             existed.setExpiryTime(expiryTime);
             existed.setUsed(false);
             existed.setToken(accessToken);
+            existed.setFinalStage(finalStage);
             return new OauthCodeResponseBO(code);
         }
-        OauthCodeEntity saved = oauthCodeRepository.save(new OauthCodeEntity(user.getId(), code, expiryTime, accessToken));
+        OauthCodeEntity saved = oauthCodeRepository.save(new OauthCodeEntity(user.getId(), code, expiryTime, accessToken, finalStage));
         return new OauthCodeResponseBO(saved.getCode());
     }
 
     @Override
     @Transactional
-    public String oauthToken(String code) {
+    public OauthTokenHolder oauthToken(String code) {
         OauthCodeEntity oauthCodeEntity = oauthCodeRepository.findByCodeAndUsed(code, false)
                                                   .orElseThrow(() -> UserManagementModuleException.builder()
                                                                              .errorCode(OAUTH_CODE_INVALID)
@@ -66,7 +68,7 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
                           .devMsg("Oauth code is expired").build();
         }
         oauthCodeEntity.setUsed(true);
-        return oauthCodeEntity.getToken();
+        return new OauthTokenHolder(oauthCodeEntity.getToken(), oauthCodeEntity.isFinalStage());
     }
 
     @Override

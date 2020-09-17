@@ -1,10 +1,7 @@
 package de.adorsys.ledgers.um.impl.service;
 
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.oauth.GrantTypeBO;
-import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
-import de.adorsys.ledgers.um.api.domain.oauth.OauthServerInfoBO;
-import de.adorsys.ledgers.um.api.domain.oauth.ResponseTypeBO;
+import de.adorsys.ledgers.um.api.domain.oauth.*;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.OauthCodeEntity;
 import de.adorsys.ledgers.um.db.repository.OauthCodeRepository;
@@ -50,10 +47,10 @@ class OauthAuthorisationServiceImplTest {
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX, "token")));
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX, "token", true)));
 
         // When
-        OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN);
+        OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN, false);
 
         // Then
         assertNotNull(result);
@@ -70,7 +67,7 @@ class OauthAuthorisationServiceImplTest {
         when(oauthCodeRepository.save(any())).then(a -> a.getArgument(0));
 
         // When
-        OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN);
+        OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN, false);
 
         // Then
         assertNotNull(result);
@@ -83,10 +80,10 @@ class OauthAuthorisationServiceImplTest {
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX, "token")));
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX, "token", true)));
 
         // When
-        OauthCodeResponseBO result = service.oauthCode(USER_ID, "token");
+        OauthCodeResponseBO result = service.oauthCode(USER_ID, "token", true);
 
         // Then
         assertNotNull(result);
@@ -101,10 +98,10 @@ class OauthAuthorisationServiceImplTest {
         when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.of(codeEntity));
 
         // When
-        String result = service.oauthToken(CODE);
+        OauthTokenHolder result = service.oauthToken(CODE);
 
         // Then
-        assertEquals("token", result);
+        assertEquals(new OauthTokenHolder("token", false), result);
     }
 
     @Test

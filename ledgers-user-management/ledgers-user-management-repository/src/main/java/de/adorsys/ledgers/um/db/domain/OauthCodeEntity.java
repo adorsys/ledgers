@@ -33,11 +33,15 @@ public class OauthCodeEntity {
     @Column(name = "token", nullable = false)
     private String token;
 
-    public OauthCodeEntity(String userId, String code, OffsetDateTime expiryTime, String token) {
+    @Column(name = "final_stage")
+    private boolean finalStage;
+
+    public OauthCodeEntity(String userId, String code, OffsetDateTime expiryTime, String token, boolean finalStage) {
         this.userId = userId;
         this.code = code;
         this.expiryTime = expiryTime;
         this.token = token;
+        this.finalStage = finalStage;
     }
 
     public boolean isExpired() {
