@@ -18,7 +18,7 @@ public class ConfigurableTokenResourceProviderFactory implements RealmResourcePr
     public RealmResourceProvider create(KeycloakSession session) {
         ConfigurationTokenResourceConfiguration configuration = ConfigurationTokenResourceConfiguration.readFromEnvironment();
         LOG.infof("Keycloak-ConfigurableToken is configured with: %s", configuration);
-        return new ConfigurableTokenResourceProvider(session, configuration);
+        return new ConfigurableTokenResourceProvider(session);
     }
 
     @Override

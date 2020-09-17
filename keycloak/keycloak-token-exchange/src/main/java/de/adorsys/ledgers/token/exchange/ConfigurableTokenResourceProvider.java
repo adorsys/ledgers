@@ -45,12 +45,10 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
 
     private final KeycloakSession session;
     private final TokenManager tokenManager;
-    private final ConfigurationTokenResourceConfiguration configuration;
 
-    ConfigurableTokenResourceProvider(KeycloakSession session, ConfigurationTokenResourceConfiguration configuration) {
+    ConfigurableTokenResourceProvider(KeycloakSession session) {
         this.session = session;
         this.tokenManager = new TokenManager();
-        this.configuration = configuration;
     }
 
     @Override
@@ -92,7 +90,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
         ClientSessionContext clientSessionContext = fromClientSessionScopeParameter(clientSession, session);
 
         AccessToken newToken = tokenManager.createClientAccessToken(session, realm, client, userSession.getUser(), userSession, clientSessionContext);
-        updateTokenExpiration(newToken, tokenConfiguration, userSession.getUser());
+        updateTokenExpiration(newToken, tokenConfiguration);
         updateScope(newToken, tokenConfiguration);
         return buildResponse(realm, userSession, client, clientSession, newToken);
     }
@@ -127,7 +125,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
             throw new ConfigurableTokenException("bearer_token_missing_in_authorization_header");
         }
         String token = authorization.substring(7);
-        if (token == null || token.isEmpty()) {
+        if (token.isEmpty()) {
             LOG.warn("Keycloak-ConfigurableToken: empty access token");
             throw new ConfigurableTokenException("missing_access_token");
         }
@@ -187,15 +185,13 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
                        .build();
     }
 
-    private void updateTokenExpiration(AccessToken token, TokenConfiguration tokenConfiguration, UserModel user) {
-//        boolean longLivedTokenAllowed = ofNullable(session.getContext().getRealm().getRole(this.configuration.getLongLivedTokenRole()))
-//                                                .map(user::hasRole)
-//                                                .orElse(false);
+    private void updateTokenExpiration(AccessToken token, TokenConfiguration tokenConfiguration) {
         token.expiration(tokenConfiguration.computeTokenExpiration(token.getExpiration(), true));
     }
 
     private void updateScope(AccessToken token, TokenConfiguration tokenConfiguration) {
-        String updatedScope = token.getScope() + " " + tokenConfiguration.getScope();
+        String offlineAccess = token.getScope().contains("offline_access") ? " offline_access" : "";
+        String updatedScope = token.getScope() + " " + tokenConfiguration.getScope() + offlineAccess;
         token.setScope(updatedScope.trim());
     }
 

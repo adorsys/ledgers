@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.oauth.GrantTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.OauthCodeResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.OauthServerInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -28,7 +27,7 @@ public interface OauthRestApi { //TODO Shall be removed after final migration to
 
     @PostMapping("/token")
     @Operation(summary = "Get/refresh access token")
-    ResponseEntity<BearerTokenTO> oauthToken(@RequestParam("grant_type") GrantTypeTO grantType, @RequestParam("code") String code);
+    ResponseEntity<BearerTokenTO> oauthToken(@RequestParam("code") String code);
 
     @GetMapping("/authorization-server")
     @Operation(summary = "Authorization server metadata request")

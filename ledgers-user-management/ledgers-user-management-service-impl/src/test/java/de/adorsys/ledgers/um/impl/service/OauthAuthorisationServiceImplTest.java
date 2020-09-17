@@ -1,13 +1,14 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.um.api.domain.oauth.*;
+import de.adorsys.ledgers.um.api.domain.oauth.GrantTypeBO;
+import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
+import de.adorsys.ledgers.um.api.domain.oauth.OauthServerInfoBO;
+import de.adorsys.ledgers.um.api.domain.oauth.ResponseTypeBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.OauthCodeEntity;
 import de.adorsys.ledgers.um.db.repository.OauthCodeRepository;
 import de.adorsys.ledgers.um.impl.service.config.OauthConfigurationProperties;
-import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +39,6 @@ class OauthAuthorisationServiceImplTest {
     @Mock
     private UserService userService;
     @Mock
-    private PasswordEnc passwordEnc;
-    @Mock
     private OauthCodeRepository oauthCodeRepository;
     @Mock
     private OauthConfigurationProperties oauthConfigProp;
@@ -47,12 +46,11 @@ class OauthAuthorisationServiceImplTest {
     @Test
     void oauthCode_code_present() {
         // Given
-        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(null, PIN, null)).thenReturn(true);
+        when(userService.findById(anyString())).thenReturn(new UserBO());
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX)));
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX, "token")));
 
         // When
         OauthCodeResponseBO result = service.oauthCode(LOGIN, PIN);
@@ -64,8 +62,7 @@ class OauthAuthorisationServiceImplTest {
     @Test
     void oauthCode_new_code() {
         // Given
-        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(null, PIN, null)).thenReturn(true);
+        when(userService.findById(anyString())).thenReturn(new UserBO());
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
@@ -80,49 +77,35 @@ class OauthAuthorisationServiceImplTest {
     }
 
     @Test
-    void oauthCode_not_successful() {
-        // Given
-        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
-        when(passwordEnc.verify(null, PIN, null)).thenReturn(false);
-
-        // Then
-        assertThrows(UserManagementModuleException.class, () -> service.oauthCode(LOGIN, PIN));
-    }
-
-    @Test
     void testOauthCode() {
         // Given
         when(userService.findById(anyString())).thenReturn(new UserBO());
         OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
         time.setAuthCode(1);
         when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX)));
+        when(oauthCodeRepository.findByUserId(null)).thenReturn(Optional.of(new OauthCodeEntity(USER_ID, CODE, OffsetDateTime.MAX, "token")));
 
         // When
-        OauthCodeResponseBO result = service.oauthCode(USER_ID);
+        OauthCodeResponseBO result = service.oauthCode(USER_ID, "token");
 
         // Then
         assertNotNull(result);
     }
 
-    /*@Test
+    @Test
     void oauthToken() {
         // Given
         OauthCodeEntity codeEntity = new OauthCodeEntity();
         codeEntity.setExpiryTime(OffsetDateTime.MAX);
+        codeEntity.setToken("token");
         when(oauthCodeRepository.findByCodeAndUsed(anyString(), eq(false))).thenReturn(Optional.of(codeEntity));
-        when(userService.findById(null)).thenReturn(new UserBO());
-        OauthConfigurationProperties.OauthLifeTime time = new OauthConfigurationProperties.OauthLifeTime();
-        time.setAuthCode(1);
-        when(oauthConfigProp.getLifeTime()).thenReturn(time);
-        //when(bearerTokenService.bearerToken(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new BearerTokenBO());
 
         // When
-        OauthTokenResponseBO result = service.oauthToken(CODE);
+        String result = service.oauthToken(CODE);
 
         // Then
-        assertEquals(new OauthTokenResponseBO(new BearerTokenBO()), result);
-    }*/ //TODO Fixme if needed
+        assertEquals("token", result);
+    }
 
     @Test
     void oauthToken_nf() {

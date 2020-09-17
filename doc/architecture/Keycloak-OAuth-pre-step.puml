@@ -1,0 +1,28 @@
+@startuml
+actor PSU
+entity TPP
+entity XS2A
+entity OBA
+entity Ledgers
+entity Keycloak
+PSU->TPP+: Initiate Payment
+TPP->XS2A+: Initiate Payment OAuth pre-step
+return 401 + ServerInfo link
+return link for Login
+PSU->Keycloak+: tokenEndpoint pass credentials oauthcode flow
+return redirect+code
+PSU->TPP+: redirected with code
+TPP->Keycloak+: tokenEndpoint + code
+return token
+TPP->XS2A+: Initiate payment with token
+return PaymentInitiationResponse + scaRedirectLink to OBA for SCA
+return scaRedirectLink
+PSU->OBA+: Perform SCA
+OBA->Keycloak+: exchange token
+return Full_Access_Token
+group after sca success
+OBA->CMS: store token in aspsp consent data
+OBA->Ledgers: Execute payment with Full_Access_Token
+end group
+return redirect to TPP
+@enduml

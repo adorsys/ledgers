@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.oauth.GrantTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.OauthCodeResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.oauth.OauthServerInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -27,11 +26,11 @@ public class OauthResources implements OauthRestApi { //TODO matter of removal
 
     @Override
     public ResponseEntity<OauthCodeResponseTO> oauthCode(String redirectUri) {
-        return ResponseEntity.ok(middlewareOauthService.oauthCode(scaInfoHolder.getUserId(), redirectUri));
+        return ResponseEntity.ok(middlewareOauthService.oauthCode(scaInfoHolder.getScaInfo(), redirectUri));
     }
 
     @Override
-    public ResponseEntity<BearerTokenTO> oauthToken(GrantTypeTO grantType, String code) {
+    public ResponseEntity<BearerTokenTO> oauthToken(String code) {
         return ResponseEntity.ok(middlewareOauthService.oauthToken(code));
     }
 

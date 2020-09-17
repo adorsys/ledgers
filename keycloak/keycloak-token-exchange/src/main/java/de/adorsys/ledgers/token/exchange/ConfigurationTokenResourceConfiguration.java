@@ -4,6 +4,7 @@ import static java.lang.System.getenv;
 
 /**
  * Configures this API.
+ *
  * @author Lorent Lempereur
  */
 public class ConfigurationTokenResourceConfiguration {
@@ -20,10 +21,6 @@ public class ConfigurationTokenResourceConfiguration {
 
     public ConfigurationTokenResourceConfiguration(String longLivedTokenRole) {
         this.longLivedTokenRole = longLivedTokenRole;
-    }
-
-    public String getLongLivedTokenRole() {
-        return longLivedTokenRole;
     }
 
     @Override

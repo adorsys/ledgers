@@ -29,10 +29,15 @@ public class OauthCodeEntity {
     @Column(name = "is_used", nullable = false)
     private boolean used;
 
-    public OauthCodeEntity(String userId, String code, OffsetDateTime expiryTime) {
+    @Lob
+    @Column(name = "token", nullable = false)
+    private String token;
+
+    public OauthCodeEntity(String userId, String code, OffsetDateTime expiryTime, String token) {
         this.userId = userId;
         this.code = code;
         this.expiryTime = expiryTime;
+        this.token = token;
     }
 
     public boolean isExpired() {
