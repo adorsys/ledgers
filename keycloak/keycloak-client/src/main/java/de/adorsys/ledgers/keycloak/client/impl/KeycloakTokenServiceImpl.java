@@ -12,6 +12,7 @@ import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -65,6 +66,9 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
         HttpStatus statusCode = resp.getStatusCode();
         if (HttpStatus.OK != statusCode) {
             log.error("Could not validate token"); //todo: throw specific exception
+        }
+        if (resp.getBody().getOtherClaims().get("active").equals(false)){
+            throw new AccessDeniedException("Token Expired!");
         }
         return authMapper.toBearer(resp.getBody(), token);
     }
