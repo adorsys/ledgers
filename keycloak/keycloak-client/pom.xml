@@ -26,13 +26,12 @@
             <artifactId>ledgers-middleware-service-api</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>ledgers-user-management-service-api</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springdoc</groupId>
+                    <artifactId>springdoc-openapi-ui</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--Other-->

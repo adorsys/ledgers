@@ -3,7 +3,6 @@ package de.adorsys.ledgers.keycloak.client.mapper;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
-import de.adorsys.ledgers.um.api.domain.UserRoleBO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
@@ -75,13 +74,13 @@ public interface KeycloakAuthMapper {
         Set<String> tokenizedRoles = Optional.ofNullable(token.getRealmAccess())
                                              .map(AccessToken.Access::getRoles)
                                              .orElseGet(Collections::emptySet);
-        Collection<UserRoleBO> roles = CollectionUtils.intersection(
+        Collection<UserRoleTO> roles = CollectionUtils.intersection(
                 tokenizedRoles
                         .stream()
-                        .map(UserRoleBO::getByValue)
+                        .map(UserRoleTO::getByValue)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .collect(Collectors.toList()), Arrays.asList(UserRoleBO.values())
+                        .collect(Collectors.toList()), Arrays.asList(UserRoleTO.values())
         );
 
         return roles.isEmpty()
