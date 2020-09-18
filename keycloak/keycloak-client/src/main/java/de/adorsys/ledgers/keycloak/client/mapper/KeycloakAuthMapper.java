@@ -42,7 +42,9 @@ public interface KeycloakAuthMapper {
     BearerTokenTO toBearerTokenTO(AccessTokenResponse source);
 
     default Set<String> toScopes(String scope) {
-        return Optional.ofNullable(scope).map(s -> new HashSet<>(Arrays.asList(s.split(" ")))).orElse((new HashSet<>()));
+        return Optional.ofNullable(scope)
+                       .map(s -> new HashSet<>(Arrays.asList(s.split(" "))))
+                       .orElse(new HashSet<>());
     }
 
     default BearerTokenTO toBearer(AccessToken source, String token) {
