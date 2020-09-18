@@ -8,14 +8,14 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
+/*import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigData;
 import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
-import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;
+import de.adorsys.ledgers.deposit.api.service.domain.LedgerAccountModel;*/
 
-public class SampleConfigSource implements ASPSPConfigSource {
+public class SampleConfigSource /*implements ASPSPConfigSource */{ //TODO REMOVE ME
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    @Override
+   /* @Override
     public ASPSPConfigData aspspConfigData() {
         InputStream inputStream = SampleConfigSource.class.getResourceAsStream("aspsps-config.yml");
         try {
@@ -35,6 +35,6 @@ public class SampleConfigSource implements ASPSPConfigSource {
             throw new IllegalStateException(e);
         }
         return Arrays.asList(ledgerAccounts);
-    }
+    }*/
 
 }

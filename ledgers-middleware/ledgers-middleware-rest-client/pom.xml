@@ -24,6 +24,12 @@
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-middleware-rest-api</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springdoc</groupId>
+					<artifactId>springdoc-openapi-ui</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- spring dependencies -->
@@ -66,10 +72,10 @@
 <!--			<artifactId>springfox-swagger2</artifactId>-->
 <!--		</dependency>-->
 
-		<dependency>
+		<!--dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-		</dependency>
+		</dependency-->
 
 <!--		<dependency>-->
 <!--			<groupId>io.springfox</groupId>-->
@@ -90,42 +96,42 @@
 		</dependency>
 
 		<!-- Need these service because we are activating the module from their implementation packages. -->
-		<dependency>
+		<!--dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-user-management-service-impl</artifactId>
 			<version>${project.version}</version>
             <scope>test</scope>
-		</dependency>
-        <dependency>
+		</dependency-->
+        <!--dependency>
             <groupId>de.adorsys.ledgers</groupId>
             <artifactId>ledgers-sca-service-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-		<dependency>
+        </dependency-->
+		<!--dependency>
             <groupId>de.adorsys.ledgers</groupId>
             <artifactId>ledgers-postings-service-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-		<dependency>
+        </dependency-->
+		<!--dependency>
             <groupId>de.adorsys.ledgers</groupId>
             <artifactId>ledgers-deposit-account-service-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-		<dependency>
+        </dependency-->
+		<!--dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-middleware-service-impl</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
+		</dependency-->
+		<!--dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-middleware-rest-server</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency-->
 
 		<!-- other dependencies. -->
 		<dependency>

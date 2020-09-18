@@ -3,13 +3,13 @@ package de.adorsys.ledgers.middleware.test.client;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
+//import de.adorsys.ledgers.deposit.api.service.domain.ASPSPConfigSource;
 
-@Configuration
+//@Configuration TODO REMOVE ME
 public class DepositAccountConfig {
 
-    @Bean
+   /* @Bean
     public ASPSPConfigSource configSource() {
         return new SampleConfigSource();
-    }
+    }*/
 }

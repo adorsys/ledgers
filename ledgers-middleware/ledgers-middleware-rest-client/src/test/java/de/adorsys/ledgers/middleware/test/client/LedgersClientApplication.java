@@ -16,21 +16,21 @@
 
 package de.adorsys.ledgers.middleware.test.client;
 
-import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
+/*import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
 import de.adorsys.ledgers.postings.impl.EnablePostingService;
 import de.adorsys.ledgers.sca.service.EnableSCAService;
-import de.adorsys.ledgers.um.impl.EnableUserManagementService;
+import de.adorsys.ledgers.um.impl.EnableUserManagementService;*/
 import de.adorsys.ledgers.util.EnableUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableScheduling
+/*@EnableScheduling
 @SpringBootApplication
 @EnableUtils
 @EnableUserManagementService
@@ -39,10 +39,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDepositAccountService
 @EnableLedgersMiddlewareService
 @EnableLedgersMiddlewareRest
-@EnableFeignClients(basePackageClasses = {AccountRestClient.class, ExchangeRateClient.class})
-public class LedgersClientApplication {
+@EnableFeignClients(basePackageClasses = {AccountRestClient.class, ExchangeRateClient.class})*/
+public class LedgersClientApplication { //TODO REMOVE ME!!!
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         new SpringApplicationBuilder(LedgersClientApplication.class).run(args);
-    }
+    }*/
 }

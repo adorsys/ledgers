@@ -1,9 +1,9 @@
 package de.adorsys.ledgers.middleware.test.client;
 
-import io.swagger.v3.oas.models.OpenAPI;
+/*import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.info.License;*/
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 //import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
@@ -21,12 +21,12 @@ import org.springframework.context.annotation.Configuration;
 //import springfox.documentation.swagger.web.SecurityConfiguration;
 //import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@Configuration
+//@Configuration
 //@EnableSwagger2
 //@Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
 
-    @Bean
+   /* @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
                        .info(new Info().title("Ledgers")
@@ -41,7 +41,7 @@ public class SwaggerConfig {
                                      .version("0.5.0") //todo set correct version
                                      .termsOfService("Terms of Service: to be edited...")
                                      .license(new License().name("Apache License Version 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")));
-    }
+    }*/
 
 	/*@Bean
 	public Docket productApi() {

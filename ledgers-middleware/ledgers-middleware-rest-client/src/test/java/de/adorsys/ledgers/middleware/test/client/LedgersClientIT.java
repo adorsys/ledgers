@@ -1,6 +1,6 @@
 package de.adorsys.ledgers.middleware.test.client;
 
-import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
+//import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountTypeTO;
@@ -30,14 +30,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpStatus.OK;
 
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = LedgersClientApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT) //TODO Remove or refactor this!
-@ActiveProfiles("h2")
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
-@Disabled("Use WebSecurityConfigKeycloak")
+//@ExtendWith(SpringExtension.class)
+//@SpringBootTest(classes = LedgersClientApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT) //TODO Remove or refactor this!
+//@ActiveProfiles("h2")
+//@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+//@Disabled("Use WebSecurityConfigKeycloak")
 class LedgersClientIT {
 
-    @Autowired
+   /* @Autowired TODO REMOVE ME AS ILLEGAL! RestClient should not depend on services!
     private AccountRestClient accountRestClient;
     @Autowired
     private UserMgmtRestClient userMgmtRestClient;
@@ -92,9 +92,9 @@ class LedgersClientIT {
         a.setUsageType(UsageTypeTO.PRIV);
         a.setName("Francis Pouatcha");
 
-        /*ResponseEntity<SCALoginResponseTO> response = userMgmtRestClient.authorise("francis.pouatcha", "12345", CUSTOMER);
+        *//*ResponseEntity<SCALoginResponseTO> response = userMgmtRestClient.authorise("francis.pouatcha", "12345", CUSTOMER);
         SCALoginResponseTO scaLoginResponseTO = response.getBody();
-        BearerTokenTO token = scaLoginResponseTO.getBearerToken();*/ //TODO FIX ME!!!
+        BearerTokenTO token = scaLoginResponseTO.getBearerToken();*//* //TODO FIX ME!!!
 
         //authHeader.setAccessToken(token.getAccess_token());
         //ResponseEntity<Void> createDepositAccountResponse = accountRestClient.createDepositAccount(a);
@@ -112,13 +112,13 @@ class LedgersClientIT {
         assertFalse(responseBranchCreation.getBody().getId().isEmpty());
     }
 
-    /*@Test
+    *//*@Test
     void d_loginAsBranch() {
         // When
         ResponseEntity<SCALoginResponseTO> branchLogin = userMgmtStaffRestClient.login(new UserCredentialsTO(BRANCH.getLogin(), PIN, UserRoleTO.STAFF));
         assertEquals(OK, branchLogin.getStatusCode());
         authHeader.setAccessToken(branchLogin.getBody().getBearerToken().getAccess_token());
-    }*/
+    }*//*
 
     @Test
     void e_createTwoUsersAsBranch() {
@@ -248,5 +248,5 @@ class LedgersClientIT {
     private static boolean isDigitsAndSize(String toCheck, int size) {
         String regex = "\\d+";
         return toCheck.matches(regex) && toCheck.length() == size;
-    }
+    }*/
 }
