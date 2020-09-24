@@ -25,6 +25,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -90,6 +91,8 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, S
     List<UserEntity> findOwnersByAccountId(String accountId, AccessType accessType);
 
     List<UserEntity> findByBranch(String branchId);
+
+    List<UserEntity> findByBranchAndCreatedAfter(String branchId, LocalDateTime created);
 
     @Query(value = "select u from UserEntity u where u.login=?1 or u.email=?1")
     Optional<UserEntity> findByLoginOrEmail(String loginOrEmail);

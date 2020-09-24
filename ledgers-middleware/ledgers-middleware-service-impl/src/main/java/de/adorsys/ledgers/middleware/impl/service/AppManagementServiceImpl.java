@@ -2,6 +2,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
@@ -41,6 +42,7 @@ public class AppManagementServiceImpl implements AppManagementService {
     private final UploadBalanceService uploadBalanceService;
     private final UploadPaymentService uploadPaymentService;
     private final MiddlewareUserManagementService middlewareUserManagementService;
+    private final KeycloakDataService keycloakDataService;
 
     @Override
     @Transactional
@@ -57,7 +59,14 @@ public class AppManagementServiceImpl implements AppManagementService {
     public void removeBranch(String userId, UserRoleTO userRole, String branchId) {
         log.info("User {} attempting delete branch {}", userId, branchId);
         long start = System.nanoTime();
+
+        // Remove data in Keycloak.
+        userService.findUserLoginsByBranch(branchId)
+                .forEach(keycloakDataService::deleteUser);
+
+        // Remove data in Ledgers.
         depositAccountService.deleteBranch(branchId);
+
         log.info("Deleting branch {} Successful, in {} seconds", branchId, TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start));
     }
 
