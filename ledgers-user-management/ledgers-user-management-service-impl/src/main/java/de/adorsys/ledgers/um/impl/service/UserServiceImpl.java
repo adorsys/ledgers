@@ -38,6 +38,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -176,6 +177,11 @@ public class UserServiceImpl implements UserService {
         return logins.stream()
                        .map(UserEntity::getLogin)
                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserBO> findUsersByBranchAndCreatedAfter(String branchId, LocalDateTime created) {
+        return userConverter.toUserBOList(userRepository.findByBranchAndCreatedAfter(branchId, created));
     }
 
     @Override

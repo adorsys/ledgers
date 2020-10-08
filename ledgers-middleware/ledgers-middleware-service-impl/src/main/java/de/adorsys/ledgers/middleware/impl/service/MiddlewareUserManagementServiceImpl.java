@@ -56,6 +56,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private final MiddlewareRecoveryService recoveryService;
     private final KeycloakDataService dataService;
     private final KeycloakUserMapper keycloakUserMapper;
+    private final KeycloakDataService keycloakDataService;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -226,10 +227,14 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         RecoveryPointTO point = recoveryService.getPointById(userId, recoveryPointId);
 
         systemBlockBranch(userId, true);
-        log.info("All branch data is LOCKED in {}seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+        log.info("All branch data is LOCKED in {} seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
 
+        // Delete data in Keycloak.
+        userService.findUsersByBranchAndCreatedAfter(userId, point.getRollBackTime())
+                .forEach(user -> keycloakDataService.deleteUser(user.getLogin()));
+
+        // Delete data in Ledgers.
         depositAccountService.rollBackBranch(userId, point.getRollBackTime());
-
         systemBlockBranch(userId, false);
         log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }

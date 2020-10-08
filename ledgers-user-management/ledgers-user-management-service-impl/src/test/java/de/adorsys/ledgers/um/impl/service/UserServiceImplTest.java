@@ -30,6 +30,7 @@ import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -386,6 +387,22 @@ class UserServiceImplTest {
 
         // Then
         assertEquals(USER_BRANCH, logins.get(0));
+    }
+
+    @Test
+    void findUsersByBranchAndCreatedAfter() {
+        // Given
+        List<UserEntity> userEntities = Collections.singletonList(readUserEntity());
+        when(repository.findByBranchAndCreatedAfter(USER_BRANCH, LocalDateTime.MIN))
+                .thenReturn(userEntities);
+        when(converter.toUserBOList(userEntities))
+                .thenReturn(Collections.singletonList(getUserBO()));
+        // When
+        List<UserBO> actual = userService.findUsersByBranchAndCreatedAfter(USER_BRANCH, LocalDateTime.MIN);
+
+        // Then
+        assertNotNull(actual);
+        assertEquals(getUserBO(), actual.get(0));
     }
 
     private UserBO getUserBO() {
