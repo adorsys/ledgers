@@ -65,13 +65,6 @@ ledgers:
       phone:
         subject: "Your TAN from MockBank"
 
-  reset-password:
-    expiration-code-minutes: 5
-    email:
-      template-message: "Please use this code %s to reset your password"
-      subject: "Your code for password reset"
-      from: noreply@adorsys.de
-
   user-service:
     jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
