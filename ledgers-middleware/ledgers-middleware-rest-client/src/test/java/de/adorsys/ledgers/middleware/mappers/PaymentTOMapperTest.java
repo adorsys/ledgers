@@ -149,6 +149,19 @@ class PaymentTOMapperTest {
         //TODO not implemented yet!  see task : https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/589
     }
 
+    @Test
+    void multiPartPayment() throws IOException {
+        //Given
+        PaymentMapperTO mapper = configuration.paymentMapperTO();
+        String payment = readPayment("rawMixedPaymentPeriodic.txt");
+
+        // When
+        PaymentTO result = mapper.toAbstractPayment(payment, "PERIODIC", "sepa-credit-transfers-xml");
+
+        // Then
+        assertEquals(readPaymentTO("XmlPeriodicPaymentTO.json"), result);
+    }
+
     private PaymentTO getSinglePmt() {
         PaymentTO payment = new PaymentTO();
         payment.setPaymentType(SINGLE);
