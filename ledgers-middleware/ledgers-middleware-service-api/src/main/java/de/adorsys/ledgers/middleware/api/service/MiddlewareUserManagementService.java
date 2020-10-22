@@ -113,4 +113,6 @@ public interface MiddlewareUserManagementService {
     void editBasicSelf(String userId, UserTO user);
 
     void revertDatabase(String userId, long recoveryPointId);
+
+    void resetPasswordViaEmail(String login);
 }

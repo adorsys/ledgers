@@ -23,6 +23,8 @@ public interface KeycloakDataService {
 
     void resetPassword(String login, String password);
 
+    void resetPasswordViaEmail(String login);
+
     void assignRealmRoleToUser(String login, List<String> realmRoles);
 
     void removeRealmRoleFromUser(String login, List<String> realmRoles);

@@ -6,6 +6,8 @@ import de.adorsys.ledgers.keycloak.client.mapper.KeycloakDataMapper;
 import de.adorsys.ledgers.keycloak.client.model.KeycloakClient;
 import de.adorsys.ledgers.keycloak.client.model.KeycloakRealm;
 import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
+import de.adorsys.ledgers.keycloak.client.model.RequiredAction;
+import de.adorsys.ledgers.keycloak.client.rest.KeycloakTokenRestClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +23,10 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,6 +36,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
     private final Keycloak keycloak;
     private final KeycloakDataMapper mapper;
     private final KeycloakClientConfig configuration;
+    private final KeycloakTokenRestClient keycloakTokenRestClient;
 
     @Value("${local.server.port:8088}")
     private int port;
@@ -42,7 +48,8 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
 
     @Override
     public void createDefaultSchema() {
-        KeycloakRealm realm = new KeycloakRealm(configuration.getClientRealm(), loginTokenTTL, fullTokenTTL, new HashMap<>()); //TODO Consider adding SMTP properties from application.yml (new Hashmap())
+        KeycloakRealm realm = new KeycloakRealm(configuration.getClientRealm(), loginTokenTTL, fullTokenTTL,
+                                                configuration.getSmtpServer());
         createRealm(realm);
         createRealmScopes(realm);
         createRealmRoles(realm);
@@ -179,6 +186,20 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
             userResource.resetPassword(passwordCred);
 
             log.info("User[{}] was password reset.", login);
+        }
+        log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
+    }
+
+    @Override
+    public void resetPasswordViaEmail(String login) {
+        Optional<KeycloakUser> user = getUser(configuration.getClientRealm(), login);
+        if (user.isPresent()) {
+            String accessToken = keycloak.tokenManager().getAccessToken().getToken();
+            keycloakTokenRestClient.executeActionsEmail("Bearer " + accessToken,
+                                                        user.get().getId(),
+                                                        Collections.singletonList(RequiredAction.UPDATE_PASSWORD.name()));
+
+            log.info("User[{}] email for updating password was sent", login);
         }
         log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
     }

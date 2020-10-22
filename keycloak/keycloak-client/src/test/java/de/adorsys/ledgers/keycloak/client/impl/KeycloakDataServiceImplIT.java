@@ -5,6 +5,7 @@ import de.adorsys.ledgers.keycloak.client.config.KeycloakClientConfig;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakDataMapper;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakDataMapperImpl;
 import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
+import de.adorsys.ledgers.keycloak.client.rest.KeycloakTokenRestClient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,12 +43,16 @@ public class KeycloakDataServiceImplIT extends KeycloakContainerTest {
     @Autowired
     private KeycloakClientConfig config;
 
+    @Autowired
+    private KeycloakTokenRestClient keycloakTokenRestClient;
+
     private KeycloakDataService keycloakDataService;
     private final ResourceReader jsonReader = JsonReader.getInstance();
 
     @Before
     public void setUp() {
-        keycloakDataService = new KeycloakDataServiceImpl(getKeycloakClient(), keycloakDataMapper, config);
+        keycloakDataService = new KeycloakDataServiceImpl(getKeycloakClient(), keycloakDataMapper, config,
+                                                          keycloakTokenRestClient);
         keycloakDataService.createDefaultSchema();
     }
 

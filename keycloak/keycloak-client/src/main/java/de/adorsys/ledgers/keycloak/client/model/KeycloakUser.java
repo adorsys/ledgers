@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KeycloakUser {
+    private String id;
     private String login;
     private String password;
     private Boolean enabled;

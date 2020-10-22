@@ -239,6 +239,12 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
+    @Override
+    public void resetPasswordViaEmail(String login) {
+        keycloakDataService.resetPasswordViaEmail(login);
+        log.info("Link for password reset was sent to user [{}] email", login);
+    }
+
     private void systemBlockBranch(String branchId, boolean statusToSet) {
         CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(branchId, true, statusToSet), FIXED_THREAD_POOL)
                 .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(branchId, true, statusToSet));
