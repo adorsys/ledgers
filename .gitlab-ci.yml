@@ -1,5 +1,5 @@
 ---
-# ledgers_keycloak branch
+# develop branch
 # yamllint disable rule:line-length
 # ------------------------------------------------------------------
 # Global settings
@@ -250,7 +250,7 @@ Unit Tests:
 Nexus:Local_deploy:
   stage: Nexus
   only:
-    - ledgers_keycloak
+    - develop
   script:
     - jabba use system@1.8
     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
@@ -259,7 +259,7 @@ Nexus:Local_deploy:
 
 
 ###########
-# ledgers_keycloak branch #
+# develop branch #
 ###########
 
 Push to DockerHub (develop):
@@ -267,9 +267,9 @@ Push to DockerHub (develop):
   except:
     - schedules
   only:
-    - ledgers_keycloak
+    - develop
   variables:
-    DOCKER_TAG: develop-keycloak
+    DOCKER_TAG: develop
   <<: *build_dockerhub_image
 
 Push to Github keycloak-ledgers:
@@ -277,7 +277,7 @@ Push to Github keycloak-ledgers:
   except:
     - schedules
   only:
-    - ledgers_keycloak
+    - develop
   variables:
     DOCKER_TAG: dev
   <<: *build_github_registry_image
@@ -287,12 +287,12 @@ Deploy Openshift (modelbank-keycloak-dev):
   except:
     - schedules
   only:
-    - ledgers_keycloak
+    - develop
   environment:
     name: dev
     url: https://dev-modelbank-keycloak-ledgers.adorsys.de
   variables:
-    DOCKER_TAG: develop-keycloak
+    DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_MODELBANK_KEYCLOAK_DEV}
   <<: *push_docker_openshift
 
