@@ -33,6 +33,7 @@ public class PermittedResources {
             "/users/register",
             "/users/loginForConsent",
             "/users/multilevel",
+            "/users/reset/password/**",
             "/data-test/upload-mockbank-data",
             "/data-test/db-flush",
             "/staff-access/users/register",

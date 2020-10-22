@@ -71,10 +71,14 @@ spring:
     default-encoding: UTF-8
     host: localhost
     port: 2500
-#    properties:
-#      mail:
-#        smtp:
-#          auth: false
+    username: login
+    password: pass
+    properties:
+      mail:
+        smtp:
+          auth: false
+          ssl: true
+          from: changeme
 
 logging:
   level:

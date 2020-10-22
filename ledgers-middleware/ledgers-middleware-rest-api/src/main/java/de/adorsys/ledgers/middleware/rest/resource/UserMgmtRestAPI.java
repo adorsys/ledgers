@@ -177,4 +177,12 @@ public interface UserMgmtRestAPI {
     @SecurityRequirement(name = "oAuth2")
     ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(@PathVariable("authorisationId") String authorisationId,
                                                                 @RequestParam(value = "authCodeConfirmed", defaultValue = "false") boolean authCodeConfirmed);
+
+    @PostMapping("/reset/password/{login}")
+    @Operation(summary = "Reset password via email", description = "Send link for password reset to user email.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Send link to user email for password reset."),
+            @ApiResponse(responseCode = "404", description = "Conflict. A user with email not found.")
+    })
+    ResponseEntity<Void> resetPasswordViaEmail(@PathVariable("login") String login);
 }

@@ -123,4 +123,10 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     public ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed) {
         return ResponseEntity.ok(authConfirmationService.completeAuthConfirmation(authorisationId, authCodeConfirmed, scaInfoHolder.getScaInfo().getUserLogin()));
     }
+
+    @Override
+    public ResponseEntity<Void> resetPasswordViaEmail(String login) {
+        middlewareUserService.resetPasswordViaEmail(login);
+        return ResponseEntity.noContent().build();
+    }
 }

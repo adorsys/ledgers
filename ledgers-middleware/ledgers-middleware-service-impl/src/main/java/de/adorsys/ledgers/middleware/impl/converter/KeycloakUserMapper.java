@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class KeycloakUserMapper {
     public KeycloakUser toKeycloakUser(UserBO source) {
-        return new KeycloakUser(source.getLogin(),
+        return new KeycloakUser(null,
+                                source.getLogin(),
                                 source.getPin(),
                                 true,
                                 source.getLogin(),

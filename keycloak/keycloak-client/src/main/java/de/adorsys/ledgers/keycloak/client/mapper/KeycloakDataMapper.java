@@ -14,6 +14,7 @@ public interface KeycloakDataMapper {
 
     default KeycloakUser toKeycloakUser(UserRepresentation userRepresentation) {
         return new KeycloakUser(
+                userRepresentation.getId(),
                 userRepresentation.getUsername(),
                 null,
                 userRepresentation.isEnabled(),
