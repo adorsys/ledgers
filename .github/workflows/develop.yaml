@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - ledgers_keycloak
 
 env:
   SONAR_PRJ_KEY: adorsys_ledgers
