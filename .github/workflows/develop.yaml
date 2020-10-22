@@ -1,9 +1,9 @@
-name: Develop CI
+name: Develop support-3.x CI
 
 on: 
   push:
     branches:
-      - develop   
+      - support-3.x
 
 env:
   SONAR_PRJ_KEY: adorsys_ledgers
@@ -19,7 +19,7 @@ jobs:
     name: Build Ledgers (openjdk 1.8)
     runs-on: ubuntu-latest
     steps:
-      - name: Clone ledgers develop repository
+      - name: Clone ledgers support-3.x repository
         uses: actions/checkout@v2
 
       - name: Set up JDK 8 for x64
@@ -43,7 +43,7 @@ jobs:
     name: Generate Javadocs
     runs-on: ubuntu-latest
     steps:
-      - name: Clone ledgers develop repository
+      - name: Clone ledgers support-3.x repository
         uses: actions/checkout@v2
 
       - name: Set up JDK 8 for x64
@@ -70,7 +70,7 @@ jobs:
     name: Run code analyser PMD
     runs-on: ubuntu-latest
     steps:
-      - name: Clone ledgers develop repository
+      - name: Clone ledgers support-3.x repository
         uses: actions/checkout@v2
 
       - name: Set up JDK 8 for x64
@@ -97,7 +97,7 @@ jobs:
     name: Run UI tests
     runs-on: ubuntu-latest
     steps:
-      - name: Clone ledgers develop repository
+      - name: Clone ledgers support-3.x repository
         uses: actions/checkout@v2
 
       - name: Set up JDK 8 for x64
@@ -121,7 +121,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Clone ledgers develop repository
+      - name: Clone ledgers support-3.x repository
         uses: actions/checkout@v2
 
       - name: Set up JDK 8 for x64
@@ -158,7 +158,7 @@ jobs:
     needs: [build, UItests]
     runs-on: ubuntu-latest
     steps:
-      - name: Clone ledgers develop repository
+      - name: Clone ledgers support-3.x repository
         uses: actions/checkout@v2
 
       - name: Set up JDK 8 for x64
