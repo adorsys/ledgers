@@ -83,12 +83,12 @@ variables: &variables
     - docker logout
 
 # Build docker images and put them to DOCKER HUB repo
-.build_github_registry_image: &build_github_registry_image
-  script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}/${DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS}:$DOCKER_TAG" keycloak
-    - docker push "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}/${DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS}:$DOCKER_TAG"
-    - docker logout
+# .build_github_registry_image: &build_github_registry_image
+#   script:
+#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#     - docker build -t "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}/${DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS}:$DOCKER_TAG" keycloak
+#     - docker push "${GITLAB_REGISTRY}/${GITLAB_NAMESPACE}/${DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS}:$DOCKER_TAG"
+#     - docker logout
 
 # Push docker images from dockehub to openshift
 .push_docker_openshift: &push_docker_openshift
@@ -247,15 +247,15 @@ Unit Tests:
 #     - mvn -ntp --fail-at-end clean install
 #     - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
 
-Nexus:Local_deploy:
-  stage: Nexus
-  only:
-    - develop
-  script:
-    - jabba use system@1.8
-    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-    - mvn -ntp --settings scripts/mvn-release-settings.xml -Prelease -Dmaven.javadoc.skip=true -DskipTests -U deploy
+# Nexus:Local_deploy:
+#   stage: Nexus
+#   only:
+#     - develop
+#   script:
+#     - jabba use system@1.8
+#     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+#     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+#     - mvn -ntp --settings scripts/mvn-release-settings.xml -Prelease -Dmaven.javadoc.skip=true -DskipTests -U deploy
 
 
 ###########
@@ -272,15 +272,15 @@ Push to DockerHub (develop):
     DOCKER_TAG: develop
   <<: *build_dockerhub_image
 
-Push to Github keycloak-ledgers:
-  stage: "Package"
-  except:
-    - schedules
-  only:
-    - develop
-  variables:
-    DOCKER_TAG: dev
-  <<: *build_github_registry_image
+# Push to Github keycloak-ledgers:
+#   stage: "Package"
+#   except:
+#     - schedules
+#   only:
+#     - develop
+#   variables:
+#     DOCKER_TAG: dev
+#   <<: *build_github_registry_image
 
 Deploy Openshift (modelbank-keycloak-dev):
   stage: Deploy
