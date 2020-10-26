@@ -99,10 +99,9 @@
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
 		<dbunit.version>2.5.1</dbunit.version>
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
-		<spring-security.version>5.2.2.RELEASE</spring-security.version>
+		<spring-security.version>5.2.7.RELEASE</spring-security.version>
 		<keycloak-adapter-bom.version>11.0.0</keycloak-adapter-bom.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
 		<maven.surefire.plugin.version>3.0.0-M4</maven.surefire.plugin.version>
 		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
@@ -112,6 +111,7 @@
 
 		<junit-jupiter.version>5.6.2</junit-jupiter.version>
 		<mockito.version>3.2.4</mockito.version>
+		<guava.version>29.0-jre</guava.version>
 
 		<powermock.version>2.0.5</powermock.version>
 		<commons-validator.version>1.6</commons-validator.version>
@@ -214,34 +214,11 @@
 
 			<!-- swagger -->
 
-<!--			<dependency>-->
-<!--				<groupId>io.swagger</groupId>-->
-<!--				<artifactId>swagger-annotations</artifactId>-->
-<!--				<version>${swagger-annotations.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>io.springfox</groupId>-->
-<!--				<artifactId>springfox-swagger2</artifactId>-->
-<!--				<version>${springfox-swagger2.version}</version>-->
-<!--			</dependency>-->
-
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
 				<version>1.4.3</version>
 			</dependency>
-
-<!--			<dependency>-->
-<!--				<groupId>io.springfox</groupId>-->
-<!--				<artifactId>springfox-swagger-ui</artifactId>-->
-<!--				<version>${springfox-swagger2.version}</version>-->
-<!--			</dependency>-->
-
-<!--			<dependency>-->
-<!--				<groupId>io.springfox</groupId>-->
-<!--				<artifactId>springfox-bean-validators</artifactId>-->
-<!--				<version>${springfox-swagger2.version}</version>-->
-<!--			</dependency>-->
 
 			<!-- logging dependencies -->
 
@@ -262,6 +239,12 @@
 				<groupId>commons-validator</groupId>
 				<artifactId>commons-validator</artifactId>
 				<version>${commons-validator.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
 			</dependency>
 
 			<dependency>

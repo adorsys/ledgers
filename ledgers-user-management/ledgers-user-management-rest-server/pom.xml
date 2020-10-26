@@ -51,12 +51,6 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>io.springfox</groupId>-->
-<!--			<artifactId>springfox-swagger2</artifactId>-->
-<!--			<scope>compile</scope>-->
-<!--		</dependency>-->
-
 		<!-- other dependencies -->
 
 		<dependency>

@@ -96,7 +96,9 @@ ledgers:
       target-2-payments,
       domestic-swiss-credit-transfers-isr,
       domestic-swiss-foreign-credit-transfers,
-      pain.001-swiss-six-credit-transfers
+      pain.001-swiss-six-credit-transfers,
+      pain.001-instant-sepa-credit-transfers,
+      pain.001-target-2-payments,
     regular:
       sepa-credit-transfers,
       cross-border-credit-transfers,
