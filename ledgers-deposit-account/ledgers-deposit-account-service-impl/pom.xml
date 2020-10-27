@@ -21,7 +21,7 @@
     <parent>
         <groupId>de.adorsys.ledgers</groupId>
         <artifactId>ledgers-deposit-account</artifactId>
-        <version>3.11</version>
+        <version>4.0</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -55,7 +55,7 @@
 
         <dependency>
             <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-jdk8</artifactId>
+            <artifactId>mapstruct</artifactId>
         </dependency>
 
         <dependency>
@@ -77,12 +77,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${apache.commons.collections}</version>
         </dependency>
 
         <!-- test dependencies -->

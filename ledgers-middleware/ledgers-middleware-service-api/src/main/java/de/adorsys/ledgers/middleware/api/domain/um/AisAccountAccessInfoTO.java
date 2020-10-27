@@ -16,42 +16,55 @@
 
 package de.adorsys.ledgers.middleware.api.domain.um;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(description = "Ais account access information", value = "AisAccountAccessInfo")
+@Schema(description = "Ais account access information", name = "AisAccountAccessInfo")
 public class AisAccountAccessInfoTO {
 
-    @ApiModelProperty(value = "Access to accounts")
+    @Schema(description = "Access to accounts")
     private List<String> accounts;
 
-    @ApiModelProperty(value = "Access to balances")
+    @Schema(description = "Access to balances")
     private List<String> balances;
 
-    @ApiModelProperty(value = "Access to transactions")
+    @Schema(description = "Access to transactions")
     private List<String> transactions;
 
-    @ApiModelProperty(value = "Consent on all available accounts of psu", example = "ALL_ACCOUNTS")
+    @Schema(description = "Consent on all available accounts of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO availableAccounts;
 
-    @ApiModelProperty(value = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
+    @Schema(description = "Consent on all accounts, balances and transactions of psu", example = "ALL_ACCOUNTS")
     private AisAccountAccessTypeTO allPsd2;
 
-    public boolean hasIbanInAccess(String iban) {
-        return availableAccounts != null ||
-                       allPsd2 != null ||
-                       accounts != null && accounts.contains(iban) ||
-                       balances != null && balances.contains(iban) ||
-                       transactions != null && transactions.contains(iban);
+    @JsonIgnore
+    public Set<String> getListedAccountsIbans() {
+        return Stream.concat(
+                Stream.concat(
+                        checkAndTransform(this.accounts),
+                        checkAndTransform(this.balances)),
+                checkAndTransform(this.transactions))
+                       .collect(Collectors.toSet());
+    }
+
+    private Stream<String> checkAndTransform(List<String> collection) {
+        if (CollectionUtils.isNotEmpty(collection)) {
+            return collection.stream();
+        }
+        return Stream.of();
     }
 }

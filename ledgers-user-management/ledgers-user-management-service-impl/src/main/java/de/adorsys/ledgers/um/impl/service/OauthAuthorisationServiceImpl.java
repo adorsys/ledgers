@@ -1,32 +1,24 @@
 package de.adorsys.ledgers.um.impl.service;
 
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
-import de.adorsys.ledgers.um.api.domain.TokenUsageBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthCodeResponseBO;
 import de.adorsys.ledgers.um.api.domain.oauth.OauthServerInfoBO;
-import de.adorsys.ledgers.um.api.domain.oauth.OauthTokenResponseBO;
+import de.adorsys.ledgers.um.api.domain.oauth.OauthTokenHolder;
 import de.adorsys.ledgers.um.api.service.OauthAuthorisationService;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.um.db.domain.OauthCodeEntity;
-import de.adorsys.ledgers.um.db.domain.UserRole;
 import de.adorsys.ledgers.um.db.repository.OauthCodeRepository;
 import de.adorsys.ledgers.um.impl.service.config.OauthConfigurationProperties;
-import de.adorsys.ledgers.util.Ids;
-import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.Optional;
 
-import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.INVALID_CREDENTIAL;
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.OAUTH_CODE_INVALID;
 
 @Slf4j
@@ -34,35 +26,18 @@ import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.OAUTH_CO
 @RequiredArgsConstructor
 public class OauthAuthorisationServiceImpl implements OauthAuthorisationService {
     private final UserService userService;
-    private final PasswordEnc passwordEnc;
     private final OauthCodeRepository oauthCodeRepository;
-    private final BearerTokenService bearerTokenService;
     private final OauthConfigurationProperties oauthConfigProp;
 
     @Override
     @Transactional
-    public OauthCodeResponseBO oauthCode(String login, String pin) {
-        UserBO user = userService.findByLogin(login);
-        boolean success = passwordEnc.verify(user.getId(), pin, user.getPin());
-        if (!success) {
-            throw UserManagementModuleException.builder()
-                          .errorCode(INVALID_CREDENTIAL)
-                          .devMsg("Invalid credentials")
-                          .build();
-        }
-        return resolveOauthCode(user);
-    }
-
-    @Override
-    @Transactional
-    public OauthCodeResponseBO oauthCode(String userId) {
+    public OauthCodeResponseBO oauthCode(String userId, String accessToken, boolean finalStage) {
         UserBO user = userService.findById(userId);
-        return resolveOauthCode(user);
+        return resolveOauthCode(user, accessToken, finalStage);
     }
 
-    private OauthCodeResponseBO resolveOauthCode(UserBO user) {
-        OffsetDateTime expiryTime = OffsetDateTime.now()
-                                            .plusMinutes(oauthConfigProp.getLifeTime().getAuthCode());
+    private OauthCodeResponseBO resolveOauthCode(UserBO user, String accessToken, boolean finalStage) {
+        OffsetDateTime expiryTime = OffsetDateTime.now().plusMinutes(oauthConfigProp.getLifeTime().getAuthCode());
 
         String code = RandomStringUtils.random(24, true, true);
         Optional<OauthCodeEntity> oauthCodeEntity = oauthCodeRepository.findByUserId(user.getId());
@@ -72,15 +47,17 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
             existed.setCode(code);
             existed.setExpiryTime(expiryTime);
             existed.setUsed(false);
+            existed.setToken(accessToken);
+            existed.setFinalStage(finalStage);
             return new OauthCodeResponseBO(code);
         }
-        OauthCodeEntity saved = oauthCodeRepository.save(new OauthCodeEntity(user.getId(), code, expiryTime));
+        OauthCodeEntity saved = oauthCodeRepository.save(new OauthCodeEntity(user.getId(), code, expiryTime, accessToken, finalStage));
         return new OauthCodeResponseBO(saved.getCode());
     }
 
     @Override
     @Transactional
-    public OauthTokenResponseBO oauthToken(String code) {
+    public OauthTokenHolder oauthToken(String code) {
         OauthCodeEntity oauthCodeEntity = oauthCodeRepository.findByCodeAndUsed(code, false)
                                                   .orElseThrow(() -> UserManagementModuleException.builder()
                                                                              .errorCode(OAUTH_CODE_INVALID)
@@ -91,15 +68,7 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
                           .devMsg("Oauth code is expired").build();
         }
         oauthCodeEntity.setUsed(true);
-        UserBO user = userService.findById(oauthCodeEntity.getUserId());
-        String scaIdParam = Ids.id();
-
-        Date issueTime = new Date();
-        Date expires = DateUtils.addMinutes(issueTime, oauthConfigProp.getLifeTime().getAccessToken());
-
-        BearerTokenBO token = bearerTokenService.bearerToken(user.getId(), user.getLogin(),
-                null, null, UserRole.CUSTOMER, scaIdParam, scaIdParam, issueTime, expires, TokenUsageBO.LOGIN, null);
-        return new OauthTokenResponseBO(token);
+        return new OauthTokenHolder(oauthCodeEntity.getToken(), oauthCodeEntity.isFinalStage());
     }
 
     @Override

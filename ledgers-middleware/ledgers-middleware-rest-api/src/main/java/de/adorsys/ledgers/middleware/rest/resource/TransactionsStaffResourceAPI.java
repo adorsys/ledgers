@@ -1,9 +1,9 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.MockBookingDetails;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = "LDG014 - Transactions Mock Upload (STAFF access)")
+@Tag(name = "LDG014 - Transactions Mock Upload (STAFF access)")
 public interface TransactionsStaffResourceAPI {
     String BASE_PATH = "/staff-access/transactions";
 
@@ -20,7 +20,9 @@ public interface TransactionsStaffResourceAPI {
      *
      * @return user object without pin
      */
-    @ApiOperation(value = "Posts transactions to Ledgers", authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Posts transactions to Ledgers")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @PostMapping
     ResponseEntity<Map<String, String>> transactions(@RequestBody List<MockBookingDetails> data);
 }

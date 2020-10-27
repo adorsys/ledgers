@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface DepositAccountRepository extends PagingAndSortingRepository<DepositAccount, String> {
-    List<DepositAccount> findByIbanStartingWith(String iban);  //TODO fix this!
-
     List<DepositAccount> findByBranch(String branch);
 
     Page<DepositAccount> findByBranchAndIbanContaining(String branch, String queryParam, Pageable pageable);

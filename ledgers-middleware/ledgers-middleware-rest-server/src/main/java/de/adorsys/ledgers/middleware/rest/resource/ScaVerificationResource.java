@@ -5,7 +5,6 @@ import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +17,6 @@ public class ScaVerificationResource implements ScaVerificationRestAPI {
     private final EmailVerificationService emailVerificationService;
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> sendEmailVerification(String email) {
         String token = emailVerificationService.createVerificationToken(email);
         emailVerificationService.sendVerificationEmail(token);

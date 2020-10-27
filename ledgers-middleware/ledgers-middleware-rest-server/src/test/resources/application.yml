@@ -3,6 +3,13 @@ server:
   max-http-header-size: 65000
   port: 8088
 
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: ledgers
+  resource: ledgers-client
+  public-client: true
+  principal-attribute: preferred_username
+
 db:
   host: localhost
   user: ledgers
@@ -57,13 +64,6 @@ ledgers:
         from: noreply@adorsys.de
       phone:
         subject: "Your TAN from MockBank"
-
-  reset-password:
-    expiration-code-minutes: 5
-    email:
-      template-message: "Please use this code %s to reset your password"
-      subject: "Your code for password reset"
-      from: noreply@adorsys.de
 
   user-service:
     jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4

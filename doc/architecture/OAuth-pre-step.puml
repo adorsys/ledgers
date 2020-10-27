@@ -1,0 +1,30 @@
+@startuml
+actor PSU
+entity TPP
+entity XS2A
+entity OBA
+entity Ledgers
+entity Keycloak
+
+PSU->TPP+: Initiate payment
+TPP->XS2A +: same
+return 401 + ServerInfo link
+return link for Login
+PSU->OBA +: Perform login
+return redirect to TPP + code
+PSU-> TPP+: code
+TPP->OBA+: exchange code for token
+return token
+TPP->XS2A+: Initiate payment with token
+return PaymentInitiationResponse + scaRedirectLink to OBA for SCA
+return scaRedirectLink
+PSU->OBA+: Perform SCA
+return Full_Access_Token
+PSU->TPP+: Confirm Payment
+TPP->XS2A+: Confirm payment with Full_Access_Token
+XS2A->Ledgers+: Execute Payment
+return 200
+return PaymentConfirmationResponse
+return 200 OK
+
+@enduml

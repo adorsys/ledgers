@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -47,6 +48,12 @@ public class UserBO {
         this.login = login;
         this.email = email;
         this.pin = pin;
+    }
+
+    public List<String> getRolesAsString() {
+        return this.userRoles.stream()
+                       .map(Enum::name)
+                       .collect(Collectors.toList());
     }
 
     @Override
@@ -95,17 +102,73 @@ public class UserBO {
         return !isBlocked() && !isSystemBlocked();
     }
 
-    public boolean hasAccessToAccount(String iban) {
+    public boolean hasAccessToAccountWithId(String accountId) {
         return accountAccesses.stream()
-                       .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban));
+                       .anyMatch(a -> accountId.equals(a.getAccountId()));
     }
 
-    public boolean hasAccessToAccount(String iban, Currency currency) {
-        return accountAccesses.stream()
-                       .anyMatch(a -> StringUtils.equalsIgnoreCase(a.getIban(), iban) && a.getCurrency().equals(currency));
+    public void addNewAccess(AccountAccessBO access) {
+        accountAccesses.add(access);
+    }
+
+    public void updateExistingAccess(AccountAccessBO access) {
+        accountAccesses.stream()
+                .filter(a -> a.getAccountId().equals(access.getAccountId())).findFirst()
+                .ifPresent(a -> {
+                    a.setAccessType(access.getAccessType());
+                    a.setScaWeight(access.getScaWeight());
+                    a.setAccountId(access.getAccountId());
+                });
     }
 
     public boolean hasSCA() {
         return CollectionUtils.isNotEmpty(this.scaUserData);
+    }
+
+    public int resolveWeightForAccount(String accountId) {
+        return accountAccesses.stream()
+                       .filter(a -> a.getAccountId().equals(accountId)).findFirst()
+                       .map(AccountAccessBO::getScaWeight)
+                       .orElse(0);
+    }
+
+    public int resolveScaWeightByIban(String iban) {
+        return accountAccesses.stream()
+                       .filter(ac -> StringUtils.equalsIgnoreCase(ac.getIban(), iban))
+                       .map(AccountAccessBO::getScaWeight)
+                       .min(Comparator.comparingInt(Integer::intValue))
+                       .orElse(0);
+    }
+
+    public int resolveMinimalWeightForIbanSet(Set<String> uniqueIbans) {
+        return accountAccesses.stream()
+                       .filter(ac -> uniqueIbans.contains(ac.getIban()))
+                       .min(Comparator.comparing(AccountAccessBO::getScaWeight))
+                       .map(AccountAccessBO::getScaWeight)
+                       .orElse(0);
+    }
+
+    public Set<String> getAccountIds() {
+        return accountAccesses == null
+                       ? new HashSet<>()
+                       : accountAccesses.stream()
+                                 .map(AccountAccessBO::getAccountId)
+                                 .collect(Collectors.toSet());
+    }
+
+    public int resolveMinimalWeightForReferences(List<AccountAccessBO> references) {
+        return accountAccesses.stream()
+                       .filter(a -> containedIn(a, references))
+                       .min(Comparator.comparing(AccountAccessBO::getScaWeight))
+                       .map(AccountAccessBO::getScaWeight)
+                       .orElse(0);
+    }
+
+    private boolean containedIn(AccountAccessBO access, List<AccountAccessBO> references) {
+        return references.stream()
+                       .anyMatch(r -> r.getIban().equals(access.getIban())
+                                              && Optional.ofNullable(r.getCurrency())
+                                                         .map(c -> c.equals(r.getCurrency()))
+                                                         .orElse(true));
     }
 }

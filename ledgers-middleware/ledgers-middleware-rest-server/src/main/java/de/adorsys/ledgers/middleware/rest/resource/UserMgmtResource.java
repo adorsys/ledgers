@@ -18,33 +18,23 @@ package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.AuthConfirmationTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAuthConfirmationService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareOnlineBankingService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AUTHENTICATION_FAILURE;
 
 @Slf4j
 @RestController
@@ -52,94 +42,51 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.AU
 @RequestMapping(UserMgmtRestAPI.BASE_PATH)
 @MiddlewareUserResource
 public class UserMgmtResource implements UserMgmtRestAPI {
-    private final MiddlewareOnlineBankingService onlineBankingService;
     private final MiddlewareUserManagementService middlewareUserService;
     private final MiddlewareAuthConfirmationService authConfirmationService;
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
+    @PreAuthorize("hasAccessToAccountByLogin(#login, #iban)")
     public ResponseEntity<Boolean> multilevel(String login, String iban) {
         return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, iban));
     }
 
     @Override
+    @PreAuthorize("hasAccessToAccountsByLogin(#login, #references)")
     public ResponseEntity<Boolean> multilevelAccounts(String login, List<AccountReferenceTO> references) {
         return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, references));
     }
 
     @Override
     public ResponseEntity<UserTO> register(String login, String email, String pin, UserRoleTO role) {
-        UserTO user = onlineBankingService.register(login, email, pin, role);
-        user.setPin(null);
-        return ResponseEntity.ok(user);
+        UserTO created = middlewareUserService.create(new UserTO(login, email, pin, role));
+        created.setPin(null);
+        return ResponseEntity.ok(created);
     }
 
     @Override
-    public ResponseEntity<SCALoginResponseTO> authorise(String login, String pin, UserRoleTO role) {
-        return ResponseEntity.ok(onlineBankingService.authorise(login, pin, role));
-    }
-
-    @Override
-    public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String login, String pin,
-                                                                  String consentId, String authorisationId, OpTypeTO opType) {
-        return ResponseEntity.ok(onlineBankingService.authoriseForConsent(login, pin, consentId, authorisationId, opType));
-    }
-
-    @Override
-    public ResponseEntity<SCALoginResponseTO> authoriseForConsent(String consentId, String authorisationId, OpTypeTO opType) {
-        return ResponseEntity.ok(onlineBankingService.authoriseForConsentWithToken(scaInfoHolder.getScaInfo(), consentId, authorisationId, opType));
-    }
-
-    @Override
-    @PreAuthorize("loginToken(#scaId,#authorisationId)")
-    public ResponseEntity<SCALoginResponseTO> selectMethod(String scaId, String authorisationId, String scaMethodId) {
-        return ResponseEntity.ok(onlineBankingService.generateLoginAuthCode(scaInfoHolder.getScaInfoWithScaMethodIdAndAuthorisationId(scaMethodId, authorisationId), null, 1800));
-    }
-
-    @Override
-    @PreAuthorize("loginToken(#scaId,#authorisationId)")
-    public ResponseEntity<SCALoginResponseTO> authorizeLogin(String scaId, String authorisationId, String authCode) {
-        return ResponseEntity.ok(onlineBankingService.authenticateForLogin(scaInfoHolder.getScaInfoWithAuthCode(authCode)));
-    }
-
-    @Override
-    public ResponseEntity<BearerTokenTO> validate(String token) {
-        BearerTokenTO tokenTO = onlineBankingService.validate(token);
-        if (tokenTO != null) {
-            return ResponseEntity.ok(tokenTO);
-        } else {
-            log.error("Token is null !!!");
-            throw MiddlewareModuleException.builder()
-                          .errorCode(AUTHENTICATION_FAILURE)
-                          .devMsg("Token invalid")
-                          .build();
-        }
-    }
-
-    @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToUser(#userId)") //TODO move to UserMgmgtStaffResource
     public ResponseEntity<UserTO> getUserById(String userId) {
         return ResponseEntity.ok(middlewareUserService.findById(userId));
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<UserTO> getUser() {
         return ResponseEntity.ok(middlewareUserService.findById(scaInfoHolder.getUserId()));
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
+    @PreAuthorize("isSameUser(#user.id)")
     public ResponseEntity<Void> editSelf(UserTO user) {
         middlewareUserService.editBasicSelf(scaInfoHolder.getUserId(), user);
         return ResponseEntity.accepted().build();
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS')")
     public ResponseEntity<Void> updateUserScaData(List<ScaUserDataTO> data) {
-        UserTO userTO = middlewareUserService.findById(scaInfoHolder.getUserId());
-        UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
+        UserTO initiator = middlewareUserService.findById(scaInfoHolder.getUserId());
+        UserTO user = middlewareUserService.updateScaData(initiator.getLogin(), data);
 
         URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
                           .build().toUri();
@@ -147,20 +94,9 @@ public class UserMgmtResource implements UserMgmtRestAPI {
         return ResponseEntity.created(uri).build();
     }
 
-    @PutMapping("/{userId}/sca-data")
-    @ApiOperation(value = "Updates user SCA", notes = "Updates user authentication methods."
-                                                              + "<lu>"
-                                                              + "<li>User is implied from the provided access token.</li>"
-                                                              + "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
-                                                              + "</ul>",
-            authorizations = @Authorization(value = "apiKey"))
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The user data record without the user pin."),
-            @ApiResponse(code = 401, message = "Provided bearer token could not be verified."),
-            @ApiResponse(code = 403, message = "Provided bearer token not qualified for this operation."),
-    })
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
-    public ResponseEntity<Void> updateScaDataByUserId(@PathVariable String userId, @RequestBody List<ScaUserDataTO> data) {
+    @Override
+    @PreAuthorize("hasManagerAccessToUser(#userId)") //TODO move to UserMgmtStaffResource
+    public ResponseEntity<Void> updateScaDataByUserId(String userId, List<ScaUserDataTO> data) {
         UserTO userTO = middlewareUserService.findById(userId);
         UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
 
@@ -171,20 +107,26 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasAnyRole('SYSTEM')") //TODO move to AdminResource
     public ResponseEntity<List<UserTO>> getAllUsers() {
-        return ResponseEntity.ok(middlewareUserService.listUsers(0, 1000));
+        return ResponseEntity.ok(middlewareUserService.listUsers(0, Integer.MAX_VALUE));
     }
 
     @Override
-    @PreAuthorize("tokenUsages('DIRECT_ACCESS','DELEGATED_ACCESS')")
+     //TODO To be refactored when Oauth Flow enabled
     public ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
         return ResponseEntity.ok(authConfirmationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode, scaInfoHolder.getScaInfo().getUserLogin()));
     }
 
     @Override
-    @PreAuthorize("tokenUsages('DIRECT_ACCESS','DELEGATED_ACCESS')")
+    //TODO To be refactored when Oauth Flow enabled
     public ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed) {
         return ResponseEntity.ok(authConfirmationService.completeAuthConfirmation(authorisationId, authCodeConfirmed, scaInfoHolder.getScaInfo().getUserLogin()));
+    }
+
+    @Override
+    public ResponseEntity<Void> resetPasswordViaEmail(String login) {
+        middlewareUserService.resetPasswordViaEmail(login);
+        return ResponseEntity.noContent().build();
     }
 }

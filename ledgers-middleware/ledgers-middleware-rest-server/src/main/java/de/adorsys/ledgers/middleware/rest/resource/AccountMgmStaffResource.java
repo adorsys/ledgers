@@ -44,14 +44,14 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     private final MiddlewareAccountManagementService middlewareAccountService;
     private final ScaInfoHolder scaInfoHolder;
 
-
     @Override
+    @PreAuthorize("hasManagerAccessToAccountIban(#iban)")
     public ResponseEntity<List<AccountDetailsTO>> getAccountsByIbanAndCurrency(String iban, String currency) {
         return ResponseEntity.ok(middlewareAccountService.getAccountsByIbanAndCurrency(iban, currency));
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToUser(#userId)  and isNewAccountAndCanBeCreatedForUser(#accountDetailsTO, #userId)")
     public ResponseEntity<Void> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
         middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
         return ResponseEntity.ok().build();
@@ -72,20 +72,20 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')&&accountInfoById(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId) && isEnabledAccount(#accountId)")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
         return ResponseEntity.accepted().build();
     }
 
     @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<AccountReportTO> getExtendedAccountDetailsById(String accountId) {
         long start = System.nanoTime();
         AccountReportTO accountReport = middlewareAccountService.getAccountReport(accountId);
@@ -94,7 +94,7 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Boolean> changeStatus(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.changeStatus(accountId, false));
     }

@@ -65,4 +65,7 @@
     <include file="migration/0030-set-timestamps.xml" relativeToChangelogFile="true" />
     <include file="migration/0031-update-admin-email.xml" relativeToChangelogFile="true" />
     <include file="migration/0032-create-table-recovery-point.xml" relativeToChangelogFile="true" />
+    <include file="migration/0033-add-token-to-oauth-code.xml" relativeToChangelogFile="true" />
+    <include file="migration/0034-add-stage-to-oauth-code.xml" relativeToChangelogFile="true" />
+    <include file="migration/0035-default-value-for-oauth-code.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

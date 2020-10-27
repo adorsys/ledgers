@@ -2,6 +2,8 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
+import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
@@ -9,6 +11,7 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
+import de.adorsys.ledgers.middleware.impl.converter.KeycloakUserMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.*;
@@ -64,25 +67,28 @@ class MiddlewareUserManagementServiceImplTest {
     private UserMapper userTOMapper;
     @Mock
     private PageMapper pageMapper;
+    @Mock
+    private KeycloakUserMapper keycloakUserMapper;
+    @Mock
+    private KeycloakDataService dataService;
 
     private static UserBO userBO = null;
     private static UserTO userTO = null;
 
     private static UserExtendedBO userExtendedBO = null;
-    private static UserExtendedTO userExtendedTO = null;
 
     @BeforeAll
     static void before() {
         userBO = readYml(UserBO.class, "user.yml");
         userTO = readYml(UserTO.class, "user.yml");
         userExtendedBO = readYml(UserExtendedBO.class, "user.yml");
-        userExtendedTO = readYml(UserExtendedTO.class, "user.yml");
     }
 
     @Test
     void create() {
         // Given
         when(userService.create(any())).thenReturn(userBO);
+        when(keycloakUserMapper.toKeycloakUser(any())).thenReturn(new KeycloakUser());
 
         // When
         UserTO user = middlewareUserService.create(userTO);
@@ -135,64 +141,12 @@ class MiddlewareUserManagementServiceImplTest {
         // Given
         when(depositAccountService.getAccountById(any())).thenReturn(getDepositAccountDetailsBO().getAccount());
         when(userService.findById(ANOTHER_USER_ID)).thenReturn(userBO);
-        when(userService.findById(USER_ID)).thenReturn(getUser(BRANCH_ID, UserRoleBO.SYSTEM));
 
         // When
-        middlewareUserService.updateAccountAccess(buildScaInfoTO(UserRoleTO.SYSTEM), ANOTHER_USER_ID, getAccessTO());
+        middlewareUserService.updateAccountAccess(buildScaInfoTO(), ANOTHER_USER_ID, getAccessTO());
 
         // Then
-        verify(accessService, times(2)).updateAccountAccess(any(), any());
-    }
-
-    @Test
-    void updateAccountAccess_wrong_branch_access() {
-        // Given
-        when(depositAccountService.getAccountById(any())).thenReturn(getDepositAccountDetailsBO().getAccount());
-        when(userService.findById(ANOTHER_USER_ID)).thenReturn(getUser(ANOTHER_USER_ID, UserRoleBO.STAFF));
-        when(userService.findById(USER_ID)).thenReturn(userBO);
-
-        // When
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(UserRoleTO.STAFF), ANOTHER_USER_ID, getAccessTO()));
-
-        // Then
-        verify(userService, times(1)).findById(USER_ID);
-    }
-
-    @Test
-    void updateAccountAccess_accountNotEnabled() {
-        // Given
-        DepositAccountDetailsBO accountDetails = getDepositAccountDetailsBO();
-        accountDetails.getAccount().setBlocked(true);
-        when(depositAccountService.getAccountById(anyString())).thenReturn(accountDetails.getAccount());
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(UserRoleTO.STAFF), USER_ID, getAccessTO()));
-    }
-
-    @Test
-    void updateAccountAccess_noAccessToAccount() {
-        // Given
-        when(depositAccountService.getAccountById(any())).thenReturn(getDepositAccountDetailsBO().getAccount());
-        when(userService.findById(USER_ID)).thenReturn(getUser(BRANCH_ID, UserRoleBO.STAFF));
-        when(accessService.userHasAccessToAccount(any(), any())).thenReturn(false);
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(UserRoleTO.STAFF), ANOTHER_USER_ID, getAccessTO()));
-    }
-
-    @Test
-    void updateAccountAccess_noAccessToUser() {
-        // Given
-        when(depositAccountService.getAccountById(any())).thenReturn(getDepositAccountDetailsBO().getAccount());
-        UserBO branch = getUser(BRANCH_ID, UserRoleBO.STAFF);
-        branch.setBranch("TEST");
-        branch.setId("TEST");
-        when(userService.findById(USER_ID)).thenReturn(branch);
-        when(userService.findById(ANOTHER_USER_ID)).thenReturn(getUser(BRANCH_ID, UserRoleBO.CUSTOMER));
-        when(accessService.userHasAccessToAccount(any(), any())).thenReturn(true);
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateAccountAccess(buildScaInfoTO(UserRoleTO.STAFF), ANOTHER_USER_ID, getAccessTO()));
+        verify(accessService, times(1)).updateAccountAccessNewAccount(any(), any(), any());
     }
 
     @Test
@@ -247,7 +201,7 @@ class MiddlewareUserManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
-        verify(userService, times(1)).findById(USER_ID);
+        verify(userService, times(2)).findById(USER_ID);
     }
 
     @Test
@@ -298,21 +252,10 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_noAccess() throws NoSuchFieldException {
-        // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        when(userService.findByLogin(any())).thenReturn(userBO);
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, ""));
-    }
-
-    @Test
     void checkMultilevelScaRequired() throws NoSuchFieldException {
         // Given
         FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
         when(userService.findByLogin(any())).thenReturn(userBO);
-        when(accessService.resolveScaWeightByDebtorAccount(any(), any())).thenReturn(100);
 
         // When
         boolean result = middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, "1234567");
@@ -338,6 +281,7 @@ class MiddlewareUserManagementServiceImplTest {
     void checkMultilevelScaRequired_empty_list() throws NoSuchFieldException {
         // Given
         FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("finalWeight"), 100);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -351,6 +295,7 @@ class MiddlewareUserManagementServiceImplTest {
     void checkMultilevelScaRequired_2_acc_with_mlsca() throws NoSuchFieldException {
         // Given
         FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("finalWeight"), 100);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -364,6 +309,7 @@ class MiddlewareUserManagementServiceImplTest {
     void checkMultilevelScaRequired_1_acc_no_curr_with_mlsca() throws NoSuchFieldException {
         // Given
         FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("finalWeight"), 100);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -371,16 +317,6 @@ class MiddlewareUserManagementServiceImplTest {
 
         // Then
         assertTrue(response);
-    }
-
-    @Test
-    void checkMultilevelScaRequired_acc_not_match() throws NoSuchFieldException {
-        // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "3")));
     }
 
     @Test
@@ -416,15 +352,6 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void changeBlockedStatus_wrong_role() {
-        // Given
-        when(userService.findById(anyString())).thenReturn(getUser("", UserRoleBO.SYSTEM));
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.changeStatus(USER_ID, false));
-    }
-
-    @Test
     void changeBlockedStatus_wrong_user() {
         // Given
         when(userService.findById(anyString())).thenThrow(UserManagementModuleException.class);
@@ -446,13 +373,6 @@ class MiddlewareUserManagementServiceImplTest {
         assertEquals(USER_LOGIN, result.getLogin());
         assertEquals("email", result.getEmail());
         assertEquals("PIN", result.getPin());
-    }
-
-    @Test
-    void editBasicSelf_fail_token_differs_from_user() {
-        UserTO request = new UserTO(USER_LOGIN, "email", "PIN");
-        request.setId(USER_ID);
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.editBasicSelf("some other id", request));
     }
 
     @Test
@@ -521,8 +441,8 @@ class MiddlewareUserManagementServiceImplTest {
         return new AccountAccessTO("id", USER_IBAN, EUR, AccessTypeTO.OWNER, 100, ACCOUNT_ID);
     }
 
-    private ScaInfoTO buildScaInfoTO(UserRoleTO role) {
-        return new ScaInfoTO(USER_ID, SCA_ID, AUTHORIZATION_ID, role, SCA_METHOD_ID, AUTH_CODE, TokenUsageTO.DELEGATED_ACCESS, USER_LOGIN);
+    private ScaInfoTO buildScaInfoTO() {
+        return new ScaInfoTO(USER_ID, SCA_ID, AUTHORIZATION_ID, UserRoleTO.SYSTEM, SCA_METHOD_ID, AUTH_CODE, TokenUsageTO.DELEGATED_ACCESS, USER_LOGIN, null, null);
     }
 
     private DepositAccountDetailsBO getDepositAccountDetailsBO() {

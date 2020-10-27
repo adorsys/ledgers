@@ -167,7 +167,7 @@ public class TransactionServiceImpl implements TransactionService {
         posting.setOprType(MOCK_DATA_IMPORT);
         posting.setOprSrc(MOCK_DATA_IMPORT);
 
-        posting.setRecordUser(details.getCrDrName()); //TODO to be discussed not sure it is appropriate
+        posting.setRecordUser(details.getCrDrName());
         posting.setPstTime(details.getBookingDate().atTime(LocalTime.now()));
         posting.setPstType(BUSI_TX);
         posting.setPstStatus(POSTED);

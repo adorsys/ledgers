@@ -1,7 +1,9 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
+import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.domain.UserRoleBO;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -13,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
@@ -25,6 +28,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AppManagementServiceImplTest {
     private static final String TPP_ID = "tppId";
+    private static final String USER_ID = "3gk5CDq4gkj63K";
+    private static final String BRANCH_ID = "branch ID";
+
+    @Mock
+    private DepositAccountService depositAccountService;
+
+    @Mock
+    private KeycloakDataService keycloakDataService;
 
     @Mock
     private UserService userService;
@@ -43,6 +54,19 @@ class AppManagementServiceImplTest {
     void changeBlockedStatus_user_nf() {
         when(userService.findById(anyString())).thenThrow(UserManagementModuleException.class);
         assertThrows(UserManagementModuleException.class, () -> service.changeBlockedStatus(TPP_ID, true));
+    }
+
+    @Test
+    void removeBranch() {
+        // Given
+        when(userService.findUserLoginsByBranch(BRANCH_ID))
+                .thenReturn(Arrays.asList("anton.brueckner", "max.musterman"));
+
+        // When
+        service.removeBranch(USER_ID, UserRoleTO.CUSTOMER, BRANCH_ID);
+
+        // Then
+        verify(keycloakDataService, times(2)).deleteUser(any());
     }
 
     private UserBO getUser(UserRoleBO role) {

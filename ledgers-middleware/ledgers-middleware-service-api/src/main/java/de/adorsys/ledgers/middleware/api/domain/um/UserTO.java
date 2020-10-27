@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -38,9 +37,47 @@ public class UserTO {
         this.pin = pin;
     }
 
+    public UserTO(String login, String email, String pin, UserRoleTO role) {
+        this.login = login;
+        this.email = email;
+        this.pin = pin;
+        this.userRoles = Collections.singletonList(role);
+    }
+
     @JsonIgnore
     public UserTO updateUserBranch(String newBranch) {
         this.branch = newBranch;
         return this;
+    }
+
+    @JsonIgnore
+    public boolean hasAccessToAccountWithIban(String iban) {
+        return getIbansFromAccess().contains(iban);
+    }
+
+    @JsonIgnore
+    public boolean hasAccessToAccountsWithIbans(Collection<String> ibans) {
+        return getIbansFromAccess().containsAll(ibans);
+    }
+
+    private Set<String> getIbansFromAccess() {
+        return accountAccesses.stream()
+                       .map(AccountAccessTO::getIban)
+                       .collect(Collectors.toSet());
+    }
+
+    @JsonIgnore
+    public boolean isEnabled() {
+        return !blocked && !systemBlocked;
+    }
+
+    public boolean hasAccessToAccountWithId(String accountId) {
+        return getIdsFromAccess().contains(accountId);
+    }
+
+    private Set<String> getIdsFromAccess() {
+        return accountAccesses.stream()
+                       .map(AccountAccessTO::getAccountId)
+                       .collect(Collectors.toSet());
     }
 }

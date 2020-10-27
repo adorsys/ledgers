@@ -16,9 +16,14 @@
 
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserExtendedTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.um.api.domain.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -33,25 +38,21 @@ public interface UserMapper {
 
     List<UserTO> toUserTOList(List<UserBO> listUsers);
 
-    List<UserBO> toUserBOList(List<UserTO> listUsers);
-
-    ScaUserDataBO toScaUserDataBO(ScaUserDataTO userData);
-
     ScaUserDataTO toScaUserDataTO(ScaUserDataBO bo);
 
     List<ScaUserDataBO> toScaUserDataListBO(List<ScaUserDataTO> list);
 
     List<ScaUserDataTO> toScaUserDataListTO(List<ScaUserDataBO> bos);
 
-    AccountAccessBO toAccountAccessBO(AccountAccessTO userData);
-
-    AccountAccessTO toAccountAccessTO(AccountAccessBO bo);
-
-    List<AccountAccessBO> toAccountAccessListBO(List<AccountAccessTO> list);
-
-    List<AccountAccessTO> toAccountAccessListTO(List<AccountAccessBO> bos);
-
-    List<UserRoleTO> toUserRoleTO(List<UserRoleBO> userRoles);
-
     List<UserRoleBO> toUserRoleBO(List<UserRoleTO> userRoles);
+
+    @Mapping(target = "scaWeight", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "accountId", ignore = true)
+    @Mapping(target = "accessType", ignore = true)
+    @Mapping(target = "weight", ignore = true)
+    AccountAccessBO toAccountAccessFromReference(AccountReferenceTO source);
+
+    List<AccountAccessBO> toAccountAccessFromReferenceList(List<AccountReferenceTO> source);
 }

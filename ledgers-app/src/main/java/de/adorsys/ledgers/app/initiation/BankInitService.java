@@ -12,6 +12,8 @@ import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
+import de.adorsys.ledgers.keycloak.client.config.KeycloakClientConfig;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
@@ -22,19 +24,18 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.CurrencyService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
-import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.middleware.impl.converter.KeycloakUserMapper;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -50,12 +51,11 @@ import java.util.function.Predicate;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BankInitService {
-    private final Logger logger = LoggerFactory.getLogger(BankInitService.class);
-
     private final MockbankInitData mockbankInitData;
     private final UserService userService;
-    private final UserMapper userMapper;
+    private final MiddlewareUserManagementService middlewareUserService;
     private final DepositAccountInitService depositAccountInitService;
     private final DepositAccountService depositAccountService;
     private final DepositAccountTransactionService transactionService;
@@ -63,32 +63,19 @@ public class BankInitService {
     private final PaymentRestInitiationService restInitiationService;
     private final CurrencyService currencyService;
     private final CurrencyExchangeRatesService exchangeRatesService;
+    private final KeycloakDataService dataService;
     private final ApplicationContext context;
+    private final KeycloakClientConfig keycloakConfig;
+    private final KeycloakUserMapper keycloakUserMapper;
 
+    private static final String ADMIN = "admin";
     private static final String ACCOUNT_NOT_FOUND_MSG = "Account {} not Found! Should never happen while initiating mock data!";
     private static final String NO_USER_BY_IBAN = "Could not get User By Iban {}! Should never happen while initiating mock data!";
     private static final LocalDateTime START_DATE = LocalDateTime.of(2018, 1, 1, 1, 1);
 
-    @Autowired
-    public BankInitService(MockbankInitData mockbankInitData, UserService userService, UserMapper userMapper,
-                           DepositAccountInitService depositAccountInitService, DepositAccountService depositAccountService,
-                           DepositAccountTransactionService transactionService, AccountDetailsMapper accountDetailsMapper, PaymentRestInitiationService restInitiationService,
-                           CurrencyService currencyService, CurrencyExchangeRatesService exchangeRatesService, ApplicationContext context) {
-        this.mockbankInitData = mockbankInitData;
-        this.userService = userService;
-        this.userMapper = userMapper;
-        this.depositAccountInitService = depositAccountInitService;
-        this.depositAccountService = depositAccountService;
-        this.transactionService = transactionService;
-        this.accountDetailsMapper = accountDetailsMapper;
-        this.restInitiationService = restInitiationService;
-        this.currencyService = currencyService;
-        this.exchangeRatesService = exchangeRatesService;
-        this.context = context;
-    }
-
     public void init() {
         depositAccountInitService.initConfigData();
+        configureIDP();
         createAdmin();
         try {
             exchangeRatesService.updateRates();
@@ -98,18 +85,37 @@ public class BankInitService {
         }
     }
 
+    private void configureIDP() {
+        if (!dataService.clientExists()) {
+            dataService.createDefaultSchema();
+            copyUsers();
+        }
+    }
+
+    private void copyUsers() {
+        List<UserBO> users = userService.listUsers(0, Integer.MAX_VALUE);
+        users.stream()
+                .map(u -> {
+                    u.setPin("12345");
+                    return u;
+                })
+                .map(keycloakUserMapper::toKeycloakUser)
+                .forEach(dataService::createUser);
+        log.info("All users passwords are RESET to 12345 due to migration to new IDP");
+    }
+
     public void uploadTestData() {
-        createUsers();
         createAccounts();
+        createUsers();
         performTransactions();
     }
 
     private void createAdmin() {
         try {
-            userService.findByLogin("admin");
-            logger.info("Admin user is already present. Skipping creation");
+            userService.findByLogin(ADMIN);
+            log.info("Admin user is already present. Skipping creation");
         } catch (UserManagementModuleException e) {
-            UserTO admin = new UserTO("admin", "admin@example.com", "admin123");
+            UserTO admin = new UserTO(ADMIN, "admin@example.com", ADMIN);
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
         }
@@ -130,9 +136,9 @@ public class BankInitService {
                     restInitiationService.executePayment(user, PaymentTypeTO.SINGLE, payment);
                 }
             } catch (DepositModuleException e) {
-                logger.error(ACCOUNT_NOT_FOUND_MSG, payment.getDebtorAccount().getIban());
+                log.error(ACCOUNT_NOT_FOUND_MSG, payment.getDebtorAccount().getIban());
             } catch (UserManagementModuleException e) {
-                logger.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
+                log.error(NO_USER_BY_IBAN, payment.getDebtorAccount().getIban());
             }
         }
     }
@@ -153,9 +159,9 @@ public class BankInitService {
                     restInitiationService.executePayment(user, PaymentTypeTO.BULK, payment);
                 }
             } catch (DepositModuleException e) {
-                logger.error(ACCOUNT_NOT_FOUND_MSG, debtorAccount.getIban());
+                log.error(ACCOUNT_NOT_FOUND_MSG, debtorAccount.getIban());
             } catch (UserManagementModuleException e) {
-                logger.error(NO_USER_BY_IBAN, debtorAccount.getIban());
+                log.error(NO_USER_BY_IBAN, debtorAccount.getIban());
             }
         }
     }
@@ -212,7 +218,7 @@ public class BankInitService {
                 transactionService.depositCash(account.getAccount().getId(), amount, "SYSTEM");
             }
         } catch (DepositModuleException e) {
-            logger.error("Unable to deposit cash to account: {} {}", details.getIban(), details.getCurrency());
+            log.error("Unable to deposit cash to account: {} {}", details.getIban(), details.getCurrency());
         }
     }
 
@@ -271,9 +277,18 @@ public class BankInitService {
 
     private void createUser(UserTO user) {
         try {
-            userService.create(userMapper.toUserBO(user));
+            user.getAccountAccesses().stream()
+                    .filter(a -> a.getAccountId() == null)
+                    .forEach(a -> {
+                        DepositAccountBO depositAccountBO = depositAccountService.getAccountByIbanAndCurrency(a.getIban(), a.getCurrency());
+                        if (depositAccountBO != null) {
+                            a.setAccountId(depositAccountBO.getId());
+                        }
+                    });
+
+            middlewareUserService.create(user);
         } catch (UserManagementModuleException e1) {
-            logger.error("User already exists! Should never happen while initiating mock data!");
+            log.error("User already exists! Should never happen while initiating mock data!");
         }
     }
 }

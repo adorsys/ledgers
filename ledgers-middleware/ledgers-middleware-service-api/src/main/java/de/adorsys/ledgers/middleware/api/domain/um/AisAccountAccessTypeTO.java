@@ -16,9 +16,9 @@
 
 package de.adorsys.ledgers.middleware.api.domain.um;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = "AccountAccess type", value = "AisAccountAccessType")
+@Schema(description = "AccountAccess type", name = "AisAccountAccessType")
 public enum AisAccountAccessTypeTO {
     ALL_ACCOUNTS,
     ALL_ACCOUNTS_WITH_BALANCES

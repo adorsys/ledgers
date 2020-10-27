@@ -4,6 +4,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.impl.service.upload.ExpressionExecutionWrapper.execute;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UploadUserService {
@@ -24,9 +26,14 @@ public class UploadUserService {
                        .map(u -> execute(() -> {
                            List<AccountAccessTO> temp = u.getAccountAccesses();
                            u.setAccountAccesses(Collections.emptyList());
-                           UserTO to = middlewareUserService.create(u);
-                           to.setAccountAccesses(temp);
-                           return to;
+                           try {
+                               UserTO to = middlewareUserService.create(u);
+                               to.setAccountAccesses(temp);
+                               return to;
+                           } catch (Exception e) {
+                               log.info("Seems user already present, skipping creation, {}", e.getMessage());
+                               return u;
+                           }
                        }))
                        .filter(Objects::nonNull)
                        .collect(Collectors.toList());

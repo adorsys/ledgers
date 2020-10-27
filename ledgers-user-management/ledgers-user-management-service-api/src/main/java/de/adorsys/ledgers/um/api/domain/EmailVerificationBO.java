@@ -20,18 +20,25 @@ public class EmailVerificationBO {
     private LocalDateTime confirmedDateTime;
     private ScaUserDataBO scaUserData;
 
-    public void createToken() {
+    public EmailVerificationBO(ScaUserDataBO scaUserData) {
         LocalDateTime now = LocalDateTime.now();
-        setToken(Ids.id());
-        setExpiredDateTime(now.plusWeeks(1));
-        setStatus(EmailVerificationStatusBO.PENDING);
-        setIssuedDateTime(now);
+        this.token = Ids.id();
+        this.expiredDateTime = now.plusWeeks(1);
+        this.status = EmailVerificationStatusBO.PENDING;
+        this.issuedDateTime = now;
+        this.scaUserData = scaUserData;
     }
 
-    public void updateToken() {
+    public EmailVerificationBO updateExpiration() {
         LocalDateTime now = LocalDateTime.now();
-        setExpiredDateTime(now.plusWeeks(1));
-        setIssuedDateTime(now);
+        expiredDateTime = now.plusWeeks(1);
+        issuedDateTime = now;
+        return this;
+    }
+
+    public void confirmVerification() {
+        confirmedDateTime = LocalDateTime.now();
+        status = EmailVerificationStatusBO.VERIFIED;
     }
 
     public boolean isExpired() {

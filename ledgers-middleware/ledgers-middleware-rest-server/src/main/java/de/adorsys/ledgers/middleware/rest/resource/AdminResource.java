@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.*;
-import static de.adorsys.ledgers.middleware.rest.resource.UserMgmtStaffResourceAPI.USER_CANNOT_REGISTER_IN_BRANCH;
 
 
 @RestController
@@ -51,6 +50,7 @@ public class AdminResource implements AdminResourceAPI {
     }
 
     @Override
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<CustomPageImpl<UserTO>> admins(int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         return ResponseEntity.ok(middlewareUserService.getUsersByRoles(Collections.singletonList(SYSTEM), pageable));
@@ -79,19 +79,13 @@ public class AdminResource implements AdminResourceAPI {
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<UserTO> register(UserTO user) {
-        if (user.getUserRoles().contains(STAFF) && middlewareUserService.countUsersByBranch(user.getBranch()) > 0) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)
-                          .devMsg(USER_CANNOT_REGISTER_IN_BRANCH)
-                          .build();
-        }
         UserTO createdUser = middlewareUserService.create(user);
         createdUser.setPin(null);
         return ResponseEntity.ok(createdUser);
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("hasRole('SYSTEM') and isEnabledUser(#user.id)")
     public ResponseEntity<Void> user(UserTO user) {
         checkUpdateData(user);
         middlewareUserService.updateUser(user.getBranch(), user);
@@ -99,14 +93,8 @@ public class AdminResource implements AdminResourceAPI {
     }
 
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    private void checkUpdateData(UserTO user) {
+    private void checkUpdateData(UserTO user) { //TODO move to validation filter
         UserBO userStored = userService.findById(user.getId());
-        if (userStored.isBlocked() || userStored.isSystemBlocked()) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(MiddlewareErrorCode.USER_IS_BLOCKED)
-                          .devMsg("You are not allowed to modify a blocked user!")
-                          .build();
-        }
         if (!userStored.getUserRoles().containsAll(userMapper.toUserBO(user).getUserRoles())) {
             throw MiddlewareModuleException.builder()
                           .errorCode(MiddlewareErrorCode.INSUFFICIENT_PERMISSION)

@@ -76,7 +76,7 @@ public class Payment {
      * Represents the frequency for Periodic payment (weekly/two weeks/monthly etc.)
      */
     @Enumerated(EnumType.STRING)
-    private FrequencyCode frequency; // TODO consider using an enum similar to FrequencyCode based on the the "EventFrequency7Code" of ISO 20022
+    private FrequencyCode frequency;
 
     /**
      * Day of execution for Periodic Payments if it is necessary to execute a payment on certain dates

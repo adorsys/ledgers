@@ -1,0 +1,12 @@
+{
+  "login": "babyuk",
+  "password": "SDFDFGHFGHJHKJJL#@",
+  "firstName": "Eugen",
+  "lastName": "Babyuk",
+  "email": "babyuk@email.net",
+  "enabled": true,
+  "emailVerified": true,
+  "realmRoles": [
+    "CUSTOMER"
+  ]
+}

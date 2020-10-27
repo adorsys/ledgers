@@ -17,6 +17,29 @@ server:
   max-http-header-size: 65000
   port: 8088
 
+springdoc.swagger-ui.oauth.clientId: ${keycloak.resource}
+springdoc.swagger-ui.oauth.clientSecret: ${keycloak.credentials.secret}
+
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: ledgers
+  resource: ledgers-client
+  public-client: false
+  principal-attribute: preferred_username
+  credentials:
+    secret: a61a81cd-7178-40d8-8386-ed02791e6592 #Here should be personal generated secret for client (swap public to 'private?' generate secret, swap to public again)
+
+keycloak-sync:
+  admin:
+    username: admin
+    password: admin
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 spring:
   application.name: ledgers
   servlet.multipart.enabled: true
@@ -48,10 +71,14 @@ spring:
     default-encoding: UTF-8
     host: localhost
     port: 2500
-#    properties:
-#      mail:
-#        smtp:
-#          auth: false
+    username: login
+    password: pass
+    properties:
+      mail:
+        smtp:
+          auth: false
+          ssl: true
+          from: changeme
 
 logging:
   level:
@@ -81,10 +108,11 @@ ledgers:
 
   payment_mapping.path:
 
-  default:
-    token:
-      lifetime:
-        seconds: 50000
+  token:
+    lifetime:
+      seconds:
+        sca: 10800
+        full: 7776000
 
   sca:
     authCode.failed.max: 3
@@ -104,13 +132,6 @@ ledgers:
     final.weight: 100
     challenge_data:
       path:
-
-  reset-password:
-    expiration-code-minutes: 5
-    email:
-      template-message: "Please use this code %s to reset your password"
-      subject: "Your code for password reset"
-      from: noreply@adorsys.de
 
   user-service:
     jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4

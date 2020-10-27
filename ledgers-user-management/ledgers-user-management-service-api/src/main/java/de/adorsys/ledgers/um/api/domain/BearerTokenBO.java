@@ -3,6 +3,8 @@ package de.adorsys.ledgers.um.api.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 public class BearerTokenBO {
@@ -12,4 +14,5 @@ public class BearerTokenBO {
     private int expires_in;
     private String refresh_token;
     private AccessTokenBO accessTokenObject;
+    private Set<String> scopes;
 }

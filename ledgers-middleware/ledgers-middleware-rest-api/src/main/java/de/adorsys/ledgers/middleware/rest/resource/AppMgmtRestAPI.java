@@ -16,28 +16,27 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Api(tags = "LDG001 - Application Management", description = "Application management")
+@Tag(name = "LDG001 - Application Management", description = "Application management")
 public interface AppMgmtRestAPI {
     String BASE_PATH = "/management/app";
 
     @GetMapping("/ping")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Echo the server")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Echo the server")
     ResponseEntity<String> ping();
 
     @PostMapping("/init")
-    @ApiOperation("Initializes the deposit account module.")
+    @Operation(summary = "Initializes the deposit account module.")
     ResponseEntity<Void> initApp();
 
     @PostMapping("/admin")
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
-    ResponseEntity<BearerTokenTO> admin(@RequestBody(required = true) UserTO adminUser);
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Creates the admin account. This is only done if the application has no account yet. Returns a bearer token admin can use to proceed with further operations.")
+    ResponseEntity<Void> admin(@RequestBody UserTO adminUser);
 }

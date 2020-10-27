@@ -16,7 +16,7 @@
     <parent>
         <groupId>de.adorsys.ledgers</groupId>
         <artifactId>ledgers</artifactId>
-        <version>3.11</version>
+        <version>4.0</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -162,6 +162,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-boot-starter</artifactId>
+        </dependency>
+
         <!-- db dependencies -->
 
         <dependency>
@@ -186,6 +191,12 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
 

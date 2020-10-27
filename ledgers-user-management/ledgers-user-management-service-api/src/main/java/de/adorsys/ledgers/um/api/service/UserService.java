@@ -20,6 +20,7 @@ import de.adorsys.ledgers.um.api.domain.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -102,6 +103,15 @@ public interface UserService {
      * @return list of logins.
      */
     List<String> findUserLoginsByBranch(String branchId);
+
+    /**
+     * Returns list of users for given branch, which were created after the given date and time.
+     *
+     * @param branchId branch identifier.
+     * @param created  date and time.
+     * @return list of users.
+     */
+    List<UserBO> findUsersByBranchAndCreatedAfter(String branchId, LocalDateTime created);
 
     /**
      * Counts amount of users for a branch

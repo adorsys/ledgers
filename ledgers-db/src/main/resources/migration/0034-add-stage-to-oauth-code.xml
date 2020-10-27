@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="17-09-2020-01">
+        <comment>Add column stage to oauth_code table</comment>
+        <addColumn tableName="oauth_code">
+            <column name="final_stage" type="BOOLEAN"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

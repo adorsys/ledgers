@@ -79,10 +79,6 @@ class AdminResourceTest {
         assertEquals(ResponseEntity.accepted().build(), result);
     }
 
-    private UserTO getUser() {
-        return new UserTO(LOGIN, "", PIN);
-    }
-
     private UserExtendedTO getUserExtended() {
         UserExtendedTO to = new UserExtendedTO();
         to.setLogin(LOGIN);
@@ -111,12 +107,6 @@ class AdminResourceTest {
         when(middlewareUserService.create(any())).thenReturn(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF));
         ResponseEntity<UserTO> result = resource.register(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF));
         assertEquals(HttpStatus.OK, result.getStatusCode());
-    }
-
-    @Test
-    void register_already_present() {
-        when(middlewareUserService.countUsersByBranch(any())).thenReturn(1);
-        assertThrows(MiddlewareModuleException.class, () -> resource.register(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF)));
     }
 
     @Test

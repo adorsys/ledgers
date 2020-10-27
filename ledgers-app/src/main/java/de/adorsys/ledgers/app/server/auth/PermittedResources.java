@@ -3,9 +3,15 @@ package de.adorsys.ledgers.app.server.auth;
 public class PermittedResources {
 
     protected static final String[] SWAGGER_WHITELIST = {
+            "/swagger-resources/**",
             "/swagger-resources",
+            "/swagger-ui.html**",
             "/swagger-ui.html",
+            "/swagger-ui/**",
             "/v2/api-docs",
+            "/api-docs",
+            "/api-docs/swagger-config",
+            "/error",
             "/webjars/**"
     };
 
@@ -16,6 +22,10 @@ public class PermittedResources {
     };
 
     protected static final String[] APP_WHITELIST = {
+            "/auth/**",
+            "/sso/**",
+            "/csrf/**",
+
             "/",
             "/management/app/admin",
             "/management/app/ping",
@@ -23,6 +33,7 @@ public class PermittedResources {
             "/users/register",
             "/users/loginForConsent",
             "/users/multilevel",
+            "/users/reset/password/**",
             "/data-test/upload-mockbank-data",
             "/data-test/db-flush",
             "/staff-access/users/register",

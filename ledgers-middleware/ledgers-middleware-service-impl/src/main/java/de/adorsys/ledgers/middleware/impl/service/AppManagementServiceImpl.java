@@ -2,12 +2,12 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountInitService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.AppManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.service.upload.UploadBalanceService;
@@ -28,10 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.BRANCH_NOT_FOUND;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -46,6 +42,7 @@ public class AppManagementServiceImpl implements AppManagementService {
     private final UploadBalanceService uploadBalanceService;
     private final UploadPaymentService uploadPaymentService;
     private final MiddlewareUserManagementService middlewareUserManagementService;
+    private final KeycloakDataService keycloakDataService;
 
     @Override
     @Transactional
@@ -62,10 +59,14 @@ public class AppManagementServiceImpl implements AppManagementService {
     public void removeBranch(String userId, UserRoleTO userRole, String branchId) {
         log.info("User {} attempting delete branch {}", userId, branchId);
         long start = System.nanoTime();
-        isExistingBranch(branchId);
-        isPermittedToRemoveBranch(userId, userRole, branchId);
-        log.info("Permission checked -> OK");
+
+        // Remove data in Keycloak.
+        userService.findUserLoginsByBranch(branchId)
+                .forEach(keycloakDataService::deleteUser);
+
+        // Remove data in Ledgers.
         depositAccountService.deleteBranch(branchId);
+
         log.info("Deleting branch {} Successful, in {} seconds", branchId, TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start));
     }
 
@@ -84,7 +85,7 @@ public class AppManagementServiceImpl implements AppManagementService {
         boolean lockStatusToSet = isSystemBlock ? !user.isSystemBlocked() : !user.isBlocked();
 
         // TPP cases.
-        if (user.getUserRoles().contains(UserRoleBO.STAFF)) {
+        if (user.getUserRoles().contains(UserRoleBO.STAFF)) { //TODO See MiddlewareUserManagementServiceImpl::234 for DUPE!
             CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(userId, isSystemBlock, lockStatusToSet), FIXED_THREAD_POOL)
                     .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(userId, isSystemBlock, lockStatusToSet));
             return lockStatusToSet;
@@ -101,23 +102,5 @@ public class AppManagementServiceImpl implements AppManagementService {
             bban = structure.generateRandomBban();
         }
         return bban;
-    }
-
-    private void isPermittedToRemoveBranch(String userId, UserRoleTO userRole, String branchId) {
-        if (userRole == STAFF && !userService.findById(userId).getBranch().equals(branchId)) {
-            throw MiddlewareModuleException.builder()
-                          .devMsg("Insufficient permission to remove branch!")
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .build();
-        }
-    }
-
-    private void isExistingBranch(String branchId) {
-        if (userService.countUsersByBranch(branchId) <= 0) {
-            throw MiddlewareModuleException.builder()
-                          .devMsg(String.format("Branch with id %s not found!", branchId))
-                          .errorCode(BRANCH_NOT_FOUND)
-                          .build();
-        }
     }
 }

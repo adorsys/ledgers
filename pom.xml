@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.ledgers</groupId>
 	<artifactId>ledgers</artifactId>
-	<version>3.11</version>
+	<version>4.0</version>
 
 	<modules>
 		<module>ledgers-app</module>
@@ -28,7 +28,8 @@
 		<module>ledgers-db</module>
         <module>ledgers-security</module>
 		<module>ledgers-jaxb-api</module>
-	</modules>
+		<module>keycloak</module>
+    </modules>
 
 	<packaging>pom</packaging>
 
@@ -98,18 +99,19 @@
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
 		<dbunit.version>2.5.1</dbunit.version>
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
-		<spring-security.version>5.2.2.RELEASE</spring-security.version>
-		<springfox-swagger2.version>2.8.0</springfox-swagger2.version>
-		<swagger-annotations.version>1.5.17</swagger-annotations.version>
+		<spring-security.version>5.2.7.RELEASE</spring-security.version>
+		<keycloak-adapter-bom.version>11.0.0</keycloak-adapter-bom.version>
+		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
 		<maven.surefire.plugin.version>3.0.0-M4</maven.surefire.plugin.version>
-		<org.mapstruct.version>1.3.0.Final</org.mapstruct.version>
+		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
 		<lombok-plugin.version>1.16.22</lombok-plugin.version>
 		<hamcrest-library.version>1.3</hamcrest-library.version>
-		<javatar-commons.version>0.6</javatar-commons.version>
+		<javatar-commons.version>0.7</javatar-commons.version>
 
-		<junit-jupiter.version>5.5.2</junit-jupiter.version>
+		<junit-jupiter.version>5.6.2</junit-jupiter.version>
 		<mockito.version>3.2.4</mockito.version>
+		<guava.version>29.0-jre</guava.version>
 
 		<powermock.version>2.0.5</powermock.version>
 		<commons-validator.version>1.6</commons-validator.version>
@@ -117,9 +119,10 @@
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<slf4j.version>1.7.25</slf4j.version>
 		<nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
-		<liquibase.version>3.6.2</liquibase.version>
-		<spring-boot-dependencies.version>2.2.4.RELEASE</spring-boot-dependencies.version>
+		<liquibase.version>4.0.0</liquibase.version>
+		<spring-boot-dependencies.version>2.3.1.RELEASE</spring-boot-dependencies.version>
 		<spring-cloud-feign.version>2.1.1.RELEASE</spring-cloud-feign.version>
+		<feign-core.version>10.8</feign-core.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
 		<jackson.version>2.9.10</jackson.version>
 		<lombok.version>1.18.8</lombok.version>
@@ -175,6 +178,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-openfeign</artifactId>
@@ -182,30 +186,38 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>io.github.openfeign</groupId>
+				<artifactId>feign-core</artifactId>
+				<version>${feign-core.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-core</artifactId>
 				<version>${spring-security.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-spring-boot-starter</artifactId>
+				<version>${keycloak-adapter-bom.version}</version>
+			</dependency>
 			<!-- swagger -->
 
 			<dependency>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-annotations</artifactId>
-				<version>${swagger-annotations.version}</version>
+				<groupId>org.springframework.plugin</groupId>
+				<artifactId>spring-plugin-core</artifactId>
+				<version>${spring-plugin.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>io.springfox</groupId>
-				<artifactId>springfox-swagger2</artifactId>
-				<version>${springfox-swagger2.version}</version>
-			</dependency>
+			<!-- swagger -->
 
 			<dependency>
-				<groupId>io.springfox</groupId>
-				<artifactId>springfox-swagger-ui</artifactId>
-				<version>${springfox-swagger2.version}</version>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-ui</artifactId>
+				<version>1.4.3</version>
 			</dependency>
 
 			<!-- logging dependencies -->
@@ -230,8 +242,14 @@
 			</dependency>
 
 			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.mapstruct</groupId>
-				<artifactId>mapstruct-jdk8</artifactId>
+				<artifactId>mapstruct</artifactId>
 				<version>${org.mapstruct.version}</version>
 			</dependency>
 
@@ -375,6 +393,9 @@
 					</rulesets>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
+					<excludes>
+						<exclude>**/*MapperImpl.java</exclude>
+					</excludes>
 					<excludeRoots>
 						<excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
 						</excludeRoot>
@@ -515,28 +536,6 @@
 								<goals>
 									<goal>jar-no-fork</goal>
 								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<configuration>
-						</configuration>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                    </gpgArguments>
-                                </configuration>
 							</execution>
 						</executions>
 					</plugin>

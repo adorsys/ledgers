@@ -19,6 +19,7 @@ package de.adorsys.ledgers.app;
 import de.adorsys.ledgers.app.initiation.BankInitService;
 import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
+import de.adorsys.ledgers.keycloak.client.KeycloakClientConfiguration;
 import de.adorsys.ledgers.middleware.client.rest.AccountRestClient;
 import de.adorsys.ledgers.middleware.impl.EnableLedgersMiddlewareService;
 import de.adorsys.ledgers.middleware.rest.EnableLedgersMiddlewareRest;
@@ -36,6 +37,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -51,6 +53,7 @@ import java.util.Arrays;
 @EnableLedgersMiddlewareRest
 @EnableUtils
 @EnableFeignClients(basePackageClasses = {AccountRestClient.class, ExchangeRateClient.class})
+@Import(KeycloakClientConfiguration.class)
 public class LedgersApplication implements ApplicationListener<ApplicationReadyEvent> {
     private final BankInitService bankInitService;
     private final Environment env;

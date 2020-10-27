@@ -11,8 +11,6 @@ import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 import static de.adorsys.ledgers.util.exception.UserManagementErrorCode.EXPIRED_TOKEN;
 
 @Service
@@ -30,12 +28,10 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         ScaUserDataBO scaUserDataBO = scaUserDataService.findByEmail(email);
         EmailVerificationBO emailVerification;
         try {
-            emailVerification = scaVerificationService.findByScaIdAndStatusNot(scaUserDataBO.getId(), STATUS_VERIFIED);
-            emailVerification.updateToken();
+            emailVerification = scaVerificationService.findByScaIdAndStatusNot(scaUserDataBO.getId(), STATUS_VERIFIED)
+                                        .updateExpiration();
         } catch (UserManagementModuleException e) {
-            emailVerification = new EmailVerificationBO();
-            emailVerification.createToken();
-            emailVerification.setScaUserData(scaUserDataBO);
+            emailVerification = new EmailVerificationBO(scaUserDataBO);
         }
         scaVerificationService.updateEmailVerification(emailVerification);
         return emailVerification.getToken();
@@ -68,9 +64,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         }
 
         ScaUserDataBO scaUserDataBO = scaUserDataService.findByEmail(emailVerification.getScaUserData().getMethodValue());
-        emailVerification.setConfirmedDateTime(LocalDateTime.now());
-        emailVerification.setStatus(EmailVerificationStatusBO.VERIFIED);
         scaUserDataBO.setValid(true);
+        emailVerification.confirmVerification();
         scaVerificationService.updateEmailVerification(emailVerification);
         scaUserDataService.updateScaUserData(scaUserDataBO);
     }

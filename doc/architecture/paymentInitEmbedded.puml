@@ -1,0 +1,275 @@
+@startuml
+actor PSU
+entity TPP
+entity XS2A
+entity CMS
+entity SPI
+entity Core_banking
+entity Keycloak
+
+PSU->TPP: Initiate payment
+activate PSU
+activate TPP
+TPP -> XS2A: REST Call Initiate payment\nPOST "/v1/payments/{payment-product}"
+activate XS2A
+XS2A->SPI: Java Call SPIinitiatePayment
+activate SPI
+|||
+SPI-->XS2A: SpiSinglePaymentInitiationResponse
+deactivate SPI
+|||
+XS2A-->TPP:Payment initiation response
+|||
+TPP->XS2A: REST Call Initiate authorisation\nPOST"/v1/{payment-service }/{payment-product}/\n{paymentId}/authorisations"
+note left
+         in case of Multilevel SCA
+         the authorisation steps
+         should be repeated for other PSU
+end note
+|||
+XS2A->CMS: Create authorisation sub-resource
+XS2A-->TPP:Start authorisation response\n"link_updatePsuWithAuthentication"
+deactivate XS2A
+|||
+TPP-->PSU: Feedback to the customer\n"Please enter your User-id & password"
+|||
+PSU->TPP: PSU provide User-id & password
+deactivate PSU
+|||
+TPP->XS2A: REST Call Update PSU data (Authentication)\n"PUT/v1/{payment-service}/{payment-id}/\n{payment-product}/authorisations/{authorisationId}"
+activate XS2A
+|||
+XS2A->SPI: Java Call PaymentAuthorisationSpi
+activate SPI
+|||
+SPI->Keycloak: AuthorisedPsu (grant_type password)
+activate Keycloak
+|||
+Keycloak-->SPI: AuthorisedPsu Response (login token)
+deactivate Keycloak
+|||
+SPI->Core_banking: Is SCA required? (using login token)
+activate Core_banking
+|||
+group scaExempted = TRUE
+Core_banking->Keycloak: Exchange Token to full_access token
+activate Keycloak
+Keycloak-->Core_banking: full_access token + refresh token
+deactivate Keycloak
+end
+Core_banking-->SPI: scaExempted response (with full_access and refresh tokens if scaExempted)
+deactivate Core_banking
+|||
+SPI->CMS: Push token to ASPSP consent data
+|||
+SPI-->XS2A: SpiPsuAuthorisationResponse\nStatus with scaExempted (TRUE or FALSE)
+|||
+XS2A->SPI: Java Call PaymentAuthorisationSpi
+|||
+SPI-->XS2A: List "SpiAvailableScaMethodsResponse"\nwith scaExempted (TRUE or FALSE)
+deactivate SPI
+|||
+XS2A->CMS: REST Call UpdatePisAuthorisation
+activate CMS
+|||
+CMS-->XS2A: UpdatePisAuthorisation Response
+deactivate CMS
+|||
+XS2A->TPP: UpdatePsuAuthenticationResponse
+deactivate XS2A
+|||
+TPP-->PSU: Feedback to the customer\n"Please select SCA method"
+activate PSU
+|||
+PSU->TPP: SCA Method
+|||
+TPP->XS2A: REST Call Update Psu data(Select Authentication Method)\n"PUT/v1/{payment-service}/{payment-id}/\n{payment-product}/authorisations/{authorisationId}"
+activate XS2A
+|||
+XS2A->SPI: Java Call PaymentAuthorisationSpi
+activate SPI
+|||
+SPI->CMS: Get ASPSP consent data
+activate CMS
+|||
+return ASPSP consent data response
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
+|||
+SPI->Core_banking +: SelectScaMethod using AccessToken
+Core_banking->Keycloak+: Validate Token
+return Validation result
+Core_banking-[#blue]>PSU: ScaAuthenticationData
+|||
+Core_banking-->SPI: SelectScaMethod Response
+deactivate Core_banking
+|||
+SPI-->XS2A: SpiAuthorisationCodeResult\nwith scaExempted (TRUE or FALSE)
+deactivate SPI
+|||
+XS2A->CMS: REST Call UpdatePisAuthorisation
+activate CMS
+|||
+CMS-->XS2A: UpdatePisAuthorisation Response
+deactivate CMS
+|||
+XS2A-->TPP:UpdatePsuAuthenticationResponse
+deactivate XS2A
+|||
+PSU->TPP: Provide Authentication Data
+|||
+TPP->XS2A: REST Call Transaction Authorisation\n"PUT/v1/{payment-service}/{payment-id}/\n{payment-product}/authorisations/{authorisationId}"
+deactivate TPP
+activate XS2A
+|||
+XS2A->SPI: Java Call SinglePaymentSpi
+activate SPI
+|||
+SPI->CMS: Get ASPSP consent data
+activate CMS
+|||
+CMS-->SPI: ASPSP consent data response
+deactivate CMS
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
+|||
+SPI-->Core_banking: Authorised Payment
+activate Core_banking
+|||
+Core_banking->Keycloak +: Validate Token
+return Token validation result
+Core_banking->Keycloak+: Exchange token
+return New full-access token
+|||
+Core_banking-->SPI: Authorised Payment Response
+deactivate Core_banking
+|||
+SPI->CMS: Push token to ASPSP consent data
+|||
+SPI-->XS2A: SpiPaymentExecution Response
+deactivate SPI
+|||
+XS2A->CMS: REST Call UpdatePisAuthorisation
+activate CMS
+|||
+CMS-->XS2A: UpdatePisAuthorisation Response
+deactivate CMS
+|||
+XS2A-->TPP: Transaction Authorisation Response
+deactivate XS2A
+activate TPP
+|||
+TPP-->PSU: Feedback to the customer:\n"Payment Authorised"
+deactivate PSU
+|||
+TPP->XS2A: REST Call get payment status\n"GET/v1/{payment-service}/{paymentId}/status"
+activate XS2A
+XS2A->CMS: REST Call GetPaymentById 
+activate CMS
+|||
+CMS-->XS2A: Payment Object Response
+deactivate CMS
+|||
+XS2A->SPI: Java Call SPI GetPaymentStatusByid
+activate SPI
+|||
+SPI->CMS: Get ASPSP consent data
+activate CMS
+|||
+CMS-->SPI: ASPSP consent data response
+deactivate CMS
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
+|||
+SPI->Core_banking: GetPaymentStatusById with token from ASPSP consent data
+activate Core_banking
+|||
+Core_banking->Keycloak +: Validate token
+return Token validation result
+Core_banking-->SPI: Transaction Status Response
+deactivate Core_banking
+|||
+SPI-->XS2A: Transaction Status Response
+deactivate SPI
+|||
+XS2A->CMS: REST Call UpdateTransactionStatus
+activate CMS
+|||
+CMS-->XS2A: UpdateTransactionStatus Response
+deactivate CMS
+|||
+XS2A-->TPP: Transaction Status Response
+|||
+TPP->XS2A: REST Call Get Payment Request\n"GET/v1/{payment-service}/{paymentId}"
+|||
+XS2A->CMS: REST Call GetPaymentById 
+activate CMS
+|||
+CMS-->XS2A: Payment Object Response
+deactivate CMS
+|||
+XS2A->SPI: Java Call SpiGetPaymentbyId
+activate SPI
+|||
+SPI->CMS: Get ASPSP consent data
+activate CMS
+|||
+CMS-->SPI: ASPSP consent data response
+deactivate CMS
+note right: SPI check AccessToken lifetime
+group if lifetime expired  and refresh token is present in ASPSP consent data
+SPI->Keycloak +: Refresh AccessToken with refresh token from ASPSP consent data
+return new AccessToken
+SPI->CMS: Update ASPSP consent data with new Token
+end
+|||
+SPI->Core_banking: GetPaymentById using token from ASPSP consent data
+activate Core_banking
+Core_banking->Keycloak +: Validate token
+return Token validation result
+Core_banking-->SPI: Payment Object Response
+deactivate Core_banking
+|||
+SPI-->XS2A: SpiSinglePayment /\nSpiPeriodicPayment /\nSpiBulkPayment /\nSpiPaymentInfo            Response
+deactivate SPI
+|||
+XS2A->CMS: REST Call UpdatePayment
+activate CMS
+|||
+CMS-->XS2A: UpdatePayment Response
+deactivate CMS
+|||
+XS2A-->TPP: GetPayment Response
+|||
+TPP->XS2A: REST Call Get Authorisation Sub-resources\n"GET/v1/{payment-service}/{payment-product}\n/{paymentId/authorisations}"
+|||
+XS2A->CMS: GetAuthorisationsByPaymentId
+activate CMS
+|||
+CMS-->XS2A: GetAuthorisationsByPaymentId Response
+deactivate CMS
+XS2A-->TPP: AuthorisationByPaymentIdsList Response
+|||
+TPP->XS2A: REST Call Get Authorisation\n"GET/v1/{payment-service}/{payment-product}/\n{paymentId/authorisations}/{authorisationId}"
+XS2A->CMS: GetAuthorisationScaStatus
+activate CMS
+|||
+CMS-->XS2A: GetAuthorisationScaStatus Response
+deactivate CMS
+|||
+XS2A-->TPP: GetAuthorisationScaStatus Response
+deactivate TPP
+deactivate XS2A
+@enduml

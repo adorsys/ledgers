@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-middleware</artifactId>
-		<version>3.11</version>
+		<version>4.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -61,32 +61,29 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-adapter-core</artifactId>
+			<version>${keycloak-adapter-bom.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-core</artifactId>
+			<version>${keycloak-adapter-bom.version}</version>
+		</dependency>
+
 		<!-- Sprinfox and swagger UI -->
-
 		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-bean-validators</artifactId>
-			<version>2.8.0</version>
-		</dependency>
 		<!-- other dependencies -->
 
 		<dependency>
 			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct-jdk8</artifactId>
+			<artifactId>mapstruct</artifactId>
 		</dependency>
 
 		<dependency>
@@ -194,7 +191,13 @@
             <artifactId>ledgers-middleware-service-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>keycloak-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+	</dependencies>
 
 	<!--build>
 		<plugins>

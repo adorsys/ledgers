@@ -38,31 +38,14 @@ public class ConsentResource implements ConsentRestAPI {
     private final MiddlewareAccountManagementService middlewareAccountService;
 
     @Override
-    public ResponseEntity<SCAConsentResponseTO> startSCA(String consentId, AisConsentTO aisConsent) {
-        return ResponseEntity.ok(middlewareAccountService.startSCA(scaInfoHolder.getScaInfo(), consentId, aisConsent));
-    }
-
-    // TODO: Bearer token must contain autorization id
-    @Override
-    public ResponseEntity<SCAConsentResponseTO> getSCA(String consentId, String authorisationId) {
-        return ResponseEntity.ok(middlewareAccountService.loadSCAForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId));
-    }
-
-    // TODO: Bearer token must contain autorization id
-    @Override
-    public ResponseEntity<SCAConsentResponseTO> selectMethod(String consentId, String authorisationId, String scaMethodId) {
-        return ResponseEntity.ok(middlewareAccountService.selectSCAMethodForAisConsent(scaInfoHolder.getUserId(), consentId, authorisationId, scaMethodId));
-    }
-
-    // TODO: Bearer token must contain autorization id
-    @Override
-    public ResponseEntity<SCAConsentResponseTO> authorizeConsent(String consentId, String authorisationId, String authCode) {
-        return ResponseEntity.ok(middlewareAccountService.authorizeConsent(scaInfoHolder.getScaInfoWithAuthCode(authCode), consentId));
+    @PreAuthorize("hasAnyRole('STAFF','CUSTOMER') and hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
+    public ResponseEntity<SCAConsentResponseTO> initiateAisConsent(String consentId, AisConsentTO aisConsent) {
+        return ResponseEntity.ok(middlewareAccountService.startAisConsent(scaInfoHolder.getScaInfo(), consentId, aisConsent));
     }
 
     @Override
-    @PreAuthorize("tokenUsage('DIRECT_ACCESS') and accountInfoFor(#aisConsent)")
+    @PreAuthorize("hasAnyRole('STAFF','CUSTOMER') and hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
     public ResponseEntity<SCAConsentResponseTO> grantPIISConsent(AisConsentTO aisConsent) {
-        return ResponseEntity.ok(middlewareAccountService.grantAisConsent(scaInfoHolder.getScaInfo(), aisConsent));
+        return ResponseEntity.ok(middlewareAccountService.grantPIISConsent(scaInfoHolder.getScaInfo(), aisConsent));
     }
 }

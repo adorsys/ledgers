@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.account.*;
-import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
@@ -27,7 +26,6 @@ import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +49,6 @@ public class AccountResource implements AccountRestAPI {
     private final MiddlewareAccountManagementService middlewareAccountService;
     private final MiddlewareUserManagementService userManagementService;
 
-
     /**
      * Return the list of accounts linked with the current customer.
      *
@@ -64,34 +61,20 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('CUSTOMER') and tokenUsage('DIRECT_ACCESS')")
-    public ResponseEntity<Void> createDepositAccount(AccountDetailsTO accountDetailsTO) {
-        // create account. It does not exist.
-        String iban = accountDetailsTO.getIban();
-        // Split in prefix and suffix
-        String accountNumberPrefix = StringUtils.substring(iban, 0, iban.length() - 2);
-        String accountNumberSuffix = StringUtils.substringAfter(iban, accountNumberPrefix);
-
-        middlewareAccountService.createDepositAccount(scaInfoHolder.getScaInfo(), accountNumberPrefix, accountNumberSuffix, accountDetailsTO);
-        // TODO: return 201 and link to account.
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasAccessToAccount(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
     }
 
     @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasAccessToAccount(#accountId)")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(String accountId) {
         AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
         return ResponseEntity.ok(accountDetails.getBalances());
     }
 
     @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasAccessToAccount(#accountId)")
     public ResponseEntity<List<TransactionTO>> getTransactionByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) {
         dateChecker(dateFrom, dateTo);
         List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
@@ -99,7 +82,7 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasAccessToAccount(#accountId)")
     public ResponseEntity<CustomPageImpl<TransactionTO>> getTransactionByDatesPaged(String accountId, LocalDate dateFrom, LocalDate dateTo, int page, int size) {
         dateChecker(dateFrom, dateTo);
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
@@ -108,26 +91,15 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("accountInfoById(#accountId)")
+    @PreAuthorize("hasAccessToAccount(#accountId)")
     public ResponseEntity<TransactionTO> getTransactionById(String accountId, String transactionId) {
         return ResponseEntity.ok(middlewareAccountService.getTransactionById(accountId, transactionId));
     }
 
-    /**
-     * @param iban
-     * @return
-     * @deprecated: user request param instead
-     */
     @Override
-    @PreAuthorize("accountInfoByIban(#iban)")
-    public ResponseEntity<AccountDetailsTO> getAccountDetailsByIban(String iban) {
-        return ResponseEntity.ok(middlewareAccountService.getDepositAccountByIban(iban, LocalDateTime.now(), true));
-    }
-
-    @Override
-    @PreAuthorize("accountInfoByIban(#request.psuAccount.iban)")
+    @PreAuthorize("hasAccessToAccountWithIban(#request.psuAccount.iban)")
     public ResponseEntity<Boolean> fundsConfirmation(FundsConfirmationRequestTO request) {
-        if (request.getInstructedAmount().getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (request.getInstructedAmount().getAmount().compareTo(BigDecimal.ZERO) <= 0) { //TODO move to validation filter
             throw MiddlewareModuleException.builder()
                           .errorCode(REQUEST_VALIDATION_FAILURE)
                           .devMsg("Requested amount less or equal zero")
@@ -138,19 +110,12 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
-    public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
-        middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
-        return ResponseEntity.accepted().build();
-    }
-
-    @Override
     @PreAuthorize("accountInfoByIdentifier(#accountIdentifierType, #accountIdentifier)")
     public ResponseEntity<List<AdditionalAccountInformationTO>> getAdditionalAccountInfo(AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier) {
         return ResponseEntity.ok(userManagementService.getAdditionalInformation(scaInfoHolder.getScaInfo(), accountIdentifierType, accountIdentifier));
     }
 
-    private void dateChecker(LocalDate dateFrom, LocalDate dateTo) {
+    private void dateChecker(LocalDate dateFrom, LocalDate dateTo) { //TODO move to validationFilter
         if (!validDate(dateFrom).isEqual(validDate(dateTo))
                     && validDate(dateFrom).isAfter(validDate(dateTo))) {
             throw MiddlewareModuleException.builder()

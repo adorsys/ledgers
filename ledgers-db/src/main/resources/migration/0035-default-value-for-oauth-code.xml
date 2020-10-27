@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="23-09-2020-01">
+        <comment>Add default value for stage in oauth_code table</comment>
+        <addDefaultValue columnName="final_stage"
+                         defaultValueBoolean="false"
+                         tableName="oauth_code" columnDataType="BOOLEAN"/>
+        <addNotNullConstraint columnName="final_stage" defaultNullValue="true" columnDataType="BOOLEAN" tableName="oauth_code"/>
+        <!--update tableName="oauth_code">
+            <column name="final_stage" valueBoolean="true"/>
+        </update-->
+    </changeSet>
+</databaseChangeLog>

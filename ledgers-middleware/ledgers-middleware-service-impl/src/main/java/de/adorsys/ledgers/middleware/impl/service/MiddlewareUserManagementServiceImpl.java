@@ -2,6 +2,8 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
+import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
+import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
@@ -12,6 +14,7 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareRecoveryService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
+import de.adorsys.ledgers.middleware.impl.converter.KeycloakUserMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.um.api.domain.*;
@@ -21,7 +24,6 @@ import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -30,15 +32,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static java.lang.String.format;
 
 @Slf4j
@@ -55,16 +54,36 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     private final PageMapper pageMapper;
     private final AdditionalAccountInformationMapper additionalInfoMapper;
     private final MiddlewareRecoveryService recoveryService;
+    private final KeycloakDataService dataService;
+    private final KeycloakUserMapper keycloakUserMapper;
+    private final KeycloakDataService keycloakDataService;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
+    @Value("${ledgers.sca.final.weight:100}")
+    private int finalWeight;
 
     @Override
+    @Transactional
     public UserTO create(UserTO user) {
         UserBO createdUser = userService.create(userTOMapper.toUserBO(user));
+        try {
+            KeycloakUser keycloakUser = keycloakUserMapper.toKeycloakUser(createdUser);
+            keycloakUser.setPassword(user.getPin());
+
+            dataService.createUser(keycloakUser);
+        } catch (Exception e) {
+            if (createdUser.getRolesAsString().contains("SYSTEM") && createdUser.getLogin().equals("admin")) {
+                log.info("Initial Admin user is already present in IDP");
+            } else {
+                throw MiddlewareModuleException.builder()
+                              .errorCode(INSUFFICIENT_PERMISSION)
+                              .devMsg(format("Could not register user at IDP msg: %s", e.getMessage()))
+                              .build();
+            }
+        }
         if (createdUser.getUserRoles().contains(UserRoleBO.STAFF)) {
-            RecoveryPointTO point = new RecoveryPointTO();
-            point.setDescription(format("Registered %s user", user.getLogin()));
+            RecoveryPointTO point = new RecoveryPointTO(format("Registered %s user", user.getLogin()));
             recoveryService.createRecoveryPoint(createdUser.getBranch(), point);
         }
         return userTOMapper.toUserTO(createdUser);
@@ -88,63 +107,9 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
-        DepositAccountBO account = depositAccountService.getAccountById(access.getAccountId());
-        checkAccountIsEnabled(account);
-        UserTO initiator = findById(scaInfo.getUserId());
-        checkInitiatorIsPermittedToOperateAccount(access, initiator);
         UserTO user = findById(userId);
-        checkUserIsNotABranchAndIsSameBranchAsAccount(user, account);
-        checkInitiatorIsPermittedToOperateUser(scaInfo, initiator, user);
-        AccountAccessBO newAccess = userTOMapper.toAccountAccessBO(access);
-        newAccess.updateAccessFields(account.getIban(), account.getCurrency());
-        accessService.updateAccountAccess(userTOMapper.toUserBO(user), newAccess);
-        if (initiator.getUserRoles().contains(UserRoleTO.SYSTEM) && StringUtils.isNotBlank(user.getBranch())) {
-            UserBO branch = userService.findById(user.getBranch());
-            accessService.updateAccountAccess(branch, newAccess);
-        }
-    }
-
-    private void checkUserIsNotABranchAndIsSameBranchAsAccount(UserTO user, DepositAccountBO account) {
-        String devMsg = null;
-        if (user.getUserRoles().contains(UserRoleTO.STAFF)) {
-            devMsg = format("Requested user: %s is a TPP, thus can not possess access on account that does not belong to one of its users!", user.getLogin());
-        }
-        if (!user.getBranch().equals(account.getBranch())) {
-            devMsg = format("Requested user: %s is from different branch than account: %s!", user.getLogin(), account.getIban());
-        }
-        if (devMsg != null) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(devMsg)
-                          .build();
-        }
-    }
-
-    private void checkInitiatorIsPermittedToOperateUser(ScaInfoTO scaInfo, UserTO initiator, UserTO user) {
-        if (initiator.getUserRoles().contains(UserRoleTO.STAFF) && !initiator.getBranch().equals(user.getBranch())) {
-            log.error("User id: {} with Branch: {} is not from initiator: {}", user.getId(), user.getBranch(), initiator.getLogin());
-
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(format("Requested user: %s is not a part of the initiator: %s", user.getLogin(), scaInfo.getUserLogin()))
-                          .build();
-        }
-    }
-
-    private void checkInitiatorIsPermittedToOperateAccount(AccountAccessTO access, UserTO initiator) {
-        if (initiator.getUserRoles().contains(UserRoleTO.STAFF) && !accessService.userHasAccessToAccount(initiator, access.getIban())) {
-            log.error("Branch: {} has no access to account: {}", initiator.getLogin(), access.getIban());
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg(format("Current Branch does have no access to the requested account: %s", access.getIban()))
-                          .build();
-        }
-    }
-
-    private void checkAccountIsEnabled(DepositAccountBO account) {
-        if (!account.isEnabled()) {
-            throw blockedSupplier(INSUFFICIENT_PERMISSION, account.getIban(), account.isBlocked()).get();
-        }
+        DepositAccountBO account = depositAccountService.getAccountById(access.getAccountId());
+        accessService.updateAccountAccessNewAccount(account, userTOMapper.toUserBO(user), access.getScaWeight());
     }
 
     @Override
@@ -191,9 +156,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
                                                                                     .build());
         if (userService.findById(userId).getBranch().equals(branchId)) {
             UserBO userBO = userTOMapper.toUserBO(user);
+            dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO));
+            updatePassword(userId, userBO.getPin());
             return userTOMapper.toUserTO(userService.updateUser(userBO));
         }
-        throw MiddlewareModuleException.builder()
+        throw MiddlewareModuleException.builder() //TODO Think of this stuff should be rewritten
                       .errorCode(INSUFFICIENT_PERMISSION)
                       .devMsg("User doesn't belong to your branch!")
                       .build();
@@ -202,6 +169,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     @Override
     public void updatePassword(String userId, String password) {
         userService.updatePassword(userId, password);
+        dataService.resetPassword(userService.findById(userId).getLogin(), password);
     }
 
     @Override
@@ -209,16 +177,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         if (!multilevelScaEnable) {
             return false;
         }
-        UserBO user = userService.findByLogin(login);
-
-        if (!user.hasAccessToAccount(iban)) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg("User doesn't have access to the requested account")
-                          .build();
-        }
-
-        return accessService.resolveScaWeightByDebtorAccount(user.getAccountAccesses(), iban) < 100;
+        return userService.findByLogin(login).resolveScaWeightByIban(iban) < finalWeight;
     }
 
     @Override
@@ -227,25 +186,12 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
             return false;
         }
         UserBO user = userService.findByLogin(login);
-
         if (CollectionUtils.isEmpty(references)) {
             return user.getAccountAccesses().stream()
-                           .anyMatch(a -> a.getScaWeight() < 100);
+                           .anyMatch(a -> a.getScaWeight() < finalWeight);
         }
-        boolean allMatch = references.stream()
-                                   .allMatch(r -> Optional.ofNullable(r.getCurrency())
-                                                          .map(c -> user.hasAccessToAccount(r.getIban(), c))
-                                                          .orElse(user.hasAccessToAccount(r.getIban())));
-        if (!allMatch) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg("User doesn't have access to the requested account")
-                          .build();
-        }
-
-        return user.getAccountAccesses().stream()
-                       .filter(a -> contained(a, references))
-                       .anyMatch(a -> a.getScaWeight() < 100);
+        List<AccountAccessBO> accountAccessBOS = userTOMapper.toAccountAccessFromReferenceList(references);
+        return user.resolveMinimalWeightForReferences(accountAccessBOS) < finalWeight;
     }
 
     @Override
@@ -257,35 +203,14 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     @Override
     public boolean changeStatus(String userId, boolean isSystemBlock) {
         UserBO user = userService.findById(userId);
-
-        if (!user.getUserRoles().contains(UserRoleBO.CUSTOMER)) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg("Only customers can be blocked or unblocked.")
-                          .build();
-        }
-
         boolean lockStatusToSet = isSystemBlock ? !user.isSystemBlocked() : !user.isBlocked();
-
         userService.setUserBlockedStatus(userId, isSystemBlock, lockStatusToSet);
-
-        Set<String> depositAccountIdsToChangeStatus = user.getAccountAccesses().stream()
-                                                              .map(AccountAccessBO::getAccountId)
-                                                              .collect(Collectors.toSet());
-
-        depositAccountService.changeAccountsBlockedStatus(depositAccountIdsToChangeStatus, isSystemBlock, lockStatusToSet);
-
+        depositAccountService.changeAccountsBlockedStatus(user.getAccountIds(), isSystemBlock, lockStatusToSet);
         return lockStatusToSet;
     }
 
     @Override
     public void editBasicSelf(String userId, UserTO user) {
-        if (!user.getId().equals(userId)) {
-            throw MiddlewareModuleException.builder()
-                          .errorCode(INSUFFICIENT_PERMISSION)
-                          .devMsg("You are not allowed to perform operations on different users!")
-                          .build();
-        }
         UserBO storedUser = userService.findById(userId);
         storedUser.setLogin(user.getLogin());
         storedUser.setEmail(user.getEmail());
@@ -302,23 +227,26 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         RecoveryPointTO point = recoveryService.getPointById(userId, recoveryPointId);
 
         systemBlockBranch(userId, true);
-        log.info("All branch data is LOCKED in {}seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+        log.info("All branch data is LOCKED in {} seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
 
+        // Delete data in Keycloak.
+        userService.findUsersByBranchAndCreatedAfter(userId, point.getRollBackTime())
+                .forEach(user -> keycloakDataService.deleteUser(user.getLogin()));
+
+        // Delete data in Ledgers.
         depositAccountService.rollBackBranch(userId, point.getRollBackTime());
-
         systemBlockBranch(userId, false);
         log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
+    }
+
+    @Override
+    public void resetPasswordViaEmail(String login) {
+        keycloakDataService.resetPasswordViaEmail(login);
+        log.info("Link for password reset was sent to user [{}] email", login);
     }
 
     private void systemBlockBranch(String branchId, boolean statusToSet) {
         CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(branchId, true, statusToSet), FIXED_THREAD_POOL)
                 .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(branchId, true, statusToSet));
-    }
-
-    private boolean contained(AccountAccessBO access, List<AccountReferenceTO> references) {
-        return references.stream()
-                       .anyMatch(r -> Optional.ofNullable(r.getCurrency())
-                                              .map(c -> access.getCurrency().equals(c) && access.getIban().equalsIgnoreCase(r.getIban()))
-                                              .orElse(access.getIban().equalsIgnoreCase(r.getIban())));
     }
 }

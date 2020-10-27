@@ -1,7 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaDataInfoTO;
@@ -30,8 +28,8 @@ public class ScaResponseConverter {
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
 
-    public GlobalScaResponseTO mapResponse(SCAOperationBO operation, List<ScaUserDataBO> methods, TransactionStatusBO transactionStatus,
-                                           String psuMessage, BearerTokenBO token, int scaWeight, String authConfirmationCode) {
+    public GlobalScaResponseTO mapResponse(SCAOperationBO operation, List<ScaUserDataBO> methods, String psuMessage,
+                                           BearerTokenBO token, int scaWeight, String authConfirmationCode) {
         GlobalScaResponseTO response = new GlobalScaResponseTO();
         response.setOperationObjectId(operation.getOpId());
         response.setAuthorisationId(operation.getId());
@@ -42,7 +40,6 @@ public class ScaResponseConverter {
         response.setExpiresInSeconds(operation.getValiditySeconds());
         response.setTan(operation.getTan());
         mapEnum(operation.getOpType(), OpTypeTO.class, response::setOpType);
-        mapEnum(transactionStatus, TransactionStatusTO.class, response::setTransactionStatus);
         mapEnum(operation.getScaStatus(), ScaStatusTO.class, response::setScaStatus);
 
         if (response.getScaStatus() == ScaStatusTO.SCAMETHODSELECTED) {

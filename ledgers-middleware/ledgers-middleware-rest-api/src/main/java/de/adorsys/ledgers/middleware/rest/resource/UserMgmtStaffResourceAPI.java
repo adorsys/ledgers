@@ -1,17 +1,24 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.general.RevertRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.oauth.AuthoriseForUserTO;
-import de.adorsys.ledgers.middleware.api.domain.sca.SCALoginResponseTO;
-import de.adorsys.ledgers.middleware.api.domain.um.*;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
+import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "LDG010 - User Management (STAFF access)")
+@Tag(name = "LDG010 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
     String BRANCH = "branch";
@@ -29,53 +36,30 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return user object without pin
      */
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Register", notes = "Registers a new user for a given branch.")
+    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Register", description = "Registers a new user for a given branch.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the pin."),
-            @ApiResponse(code = 409, message = "Conflict. A record with the given email or login already exists.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "The user data record without the pin."),
+            @ApiResponse(responseCode = "409", description = "Conflict. A record with the given email or login already exists.")
     })
     @PostMapping("/register")
     ResponseEntity<UserTO> register(@RequestParam(BRANCH) String branch, @RequestBody UserTO branchStaff);
-
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login fo user")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "The user data record without the pin."),
-            @ApiResponse(code = 404, message = "User not found.")
-    })
-    @PostMapping("/admin/authorize/user")
-    ResponseEntity<SCALoginResponseTO> authoriseForUser(@RequestBody AuthoriseForUserTO authorise);
 
     /**
      * Modify a user within a given branch.
      *
      * @return user object without pin
      */
-    @ApiOperation(value = "Modify user",
-            notes = "Modify existing user within the same branch as creator.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Modify user",
+            description = "Modify existing user within the same branch as creator.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Updated user is provided in the response."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Updated user is provided in the response."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
     @PostMapping("/modify")
     ResponseEntity<UserTO> modifyUser(@RequestParam(BRANCH) String branch, @RequestBody UserTO user);
-
-    /**
-     * Authorize returns a bearer token that can be reused by the consuming application.
-     *
-     * @param userCredentials tpp login and tpp pin
-     * @return JWT token and user info
-     */
-    @ApiOperation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, value = "Login",
-            notes = "Initiates the user login process. Returns a login response object describing how to proceed.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, response = SCALoginResponseTO.class, message = "Success. LoginToken contained in the returned response object."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
-    })
-    @PostMapping("/login")
-    ResponseEntity<SCALoginResponseTO> login(@RequestBody UserCredentialsTO userCredentials);
 
     /**
      * Creates new user within the same branch
@@ -83,13 +67,14 @@ public interface UserMgmtStaffResourceAPI {
      * @param user user to be created
      * @return created user
      */
-    @ApiOperation(value = "Create user",
-            notes = "Create new user with the same branch as creator.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Create user",
+            description = "Create new user with the same branch as creator.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Created user in provided in the response."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
 
     @PostMapping
@@ -100,13 +85,14 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return list of users for the branch with roles
      */
-    @ApiOperation(value = "Lists users by branch and role",
-            notes = "Lists users by branch and roles.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Lists users by branch and role",
+            description = "Lists users by branch and roles.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Created user in provided in the response."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
 
     @GetMapping
@@ -121,13 +107,14 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return list of user logins.
      */
-    @ApiOperation(value = "Lists user logins by branch",
-            notes = "Lists user logins by branch.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Lists user logins by branch",
+            description = "Lists user logins by branch.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. List of logins received."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. List of logins received."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
     @GetMapping("/logins")
     ResponseEntity<List<String>> getBranchUserLogins();
@@ -138,13 +125,14 @@ public interface UserMgmtStaffResourceAPI {
      * @param userId user ID
      * @return user
      */
-    @ApiOperation(value = "Gets user by ID if it's within the branch",
-            notes = "Gets user by ID if it's within the branch.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Gets user by ID if it's within the branch",
+            description = "Gets user by ID if it's within the branch.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Created user in provided in the response."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
     @GetMapping("/{userId}")
     ResponseEntity<UserTO> getBranchUserById(@PathVariable(USER_ID) String userId);
@@ -156,13 +144,14 @@ public interface UserMgmtStaffResourceAPI {
      * @param data   user SCA data
      * @return updated user
      */
-    @ApiOperation(value = "Updates SCA Data for user if it's within the branch.",
-            notes = "Updates SCA Data for user if it's within the branch.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Updates SCA Data for user if it's within the branch.",
+            description = "Updates SCA Data for user if it's within the branch.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, response = UserTO.class, message = "Success. Created user in provided in the response."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. Created user in provided in the response."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
     @PostMapping("/{userId}/sca-data")
     ResponseEntity<Void> updateUserScaData(@PathVariable(USER_ID) String userId, @RequestBody List<ScaUserDataTO> data);
@@ -172,26 +161,30 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return nothing
      */
-    @ApiOperation(value = "Grants/Updates Account Access for user.",
-            notes = "Grants/Updates Account Access for user.",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Grants/Updates Account Access for user.",
+            description = "Grants/Updates Account Access for user.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success. Account Access Successfully updated."),
-            @ApiResponse(code = 401, message = "Wrong authentication credential."),
-            @ApiResponse(code = 403, message = "Authenticated but user does not have the requested role.")
+            @ApiResponse(responseCode = "200", description = "Success. Account Access Successfully updated."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
     })
     @PutMapping("/access/{userId}")
     ResponseEntity<Void> updateAccountAccessForUser(@PathVariable(USER_ID) String userId, @RequestBody AccountAccessTO access);
 
-    @ApiOperation(value = "Block/Unblock user",
-            notes = "Changes block state for given user, returns status being set to the block",
-            authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Block/Unblock user",
+            description = "Changes block state for given user, returns status being set to the block")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     @PostMapping("/{userId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(USER_ID) String userId);
 
 
     @PostMapping("/revert")
-    @ApiOperation(value = "Reverts DB state for given user to the given date and time.", authorizations = @Authorization(value = "apiKey"))
+    @Operation(summary = "Reverts DB state for given user to the given date and time.")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
     ResponseEntity<Void> revertDatabase(@RequestBody RevertRequestTO revertRequest);
 
 }
