@@ -10,6 +10,7 @@ env:
   SONAR_ORG: adorsys
   SONAR_HOST: https://sonarcloud.io
   GPG_EXECUTABLE: ${{ secrets.GPG_EXECUTABLE }}
+  GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY}}
   GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
   SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

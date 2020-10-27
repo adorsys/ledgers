@@ -127,7 +127,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     public boolean hasAccessToAccountByScaOperation(StartScaOprTO opr) { //TODO Used
-        return opr.getOpType() == OpTypeTO.PAYMENT
+        return EnumSet.of(OpTypeTO.PAYMENT, OpTypeTO.CANCEL_PAYMENT).contains(opr.getOpType())
                        ? hasAccessToAccountByPaymentId(opr.getOprId())
                        : hasAccessToAccountsWithIbans(accountService.getAccountsFromConsent(opr.getOprId()));
     }
