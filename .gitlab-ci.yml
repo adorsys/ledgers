@@ -296,5 +296,3 @@ Deploy Openshift (modelbank-keycloak-dev):
     DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_MODELBANK_KEYCLOAK_DEV}
   <<: *push_docker_openshift
-
-
