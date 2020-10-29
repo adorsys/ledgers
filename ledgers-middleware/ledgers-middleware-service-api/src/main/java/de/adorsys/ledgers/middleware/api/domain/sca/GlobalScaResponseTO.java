@@ -23,4 +23,11 @@ public class GlobalScaResponseTO {
     private String tan;
     private boolean partiallyAuthorised;
     private BearerTokenTO bearerToken;
+
+    public GlobalScaResponseTO(BearerTokenTO bearerToken) {
+        this.bearerToken = bearerToken;
+    }
+
+    public GlobalScaResponseTO() {
+    }
 }
