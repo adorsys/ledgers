@@ -1,0 +1,32 @@
+div.kc-logo-text {
+    background-image: url(../img/logo.png);
+    background-repeat: no-repeat;
+    height: 63px;
+    width: 414px;
+    margin: 0 auto;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden
+
+}
+
+div.card-pf {
+    max-width: 500px;
+    background: #fff;
+    border-top: 2px solid transparent;
+    box-shadow: 0 1px 1px rgba(3,3,3,.175);
+    margin: 0 auto;
+    margin-top: 0px;
+    margin-right: auto;
+    margin-bottom: 0px;
+    margin-left: auto;
+    padding: 0 20px
+}
+
+.login-pf {
+    background: white
+}
+
+.login-pf body {
+    background: white
+}
