@@ -26,6 +26,7 @@ import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.sca.service.SCASender;
+import de.adorsys.ledgers.sca.service.ScaMessageResolver;
 import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
@@ -69,6 +70,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     private final AuthCodeGenerator authCodeGenerator;
     private final SCAOperationMapper scaOperationMapper;
     private final List<SCASender> sendersList;
+    private final ScaMessageResolver messageResolver;
     private Map<ScaMethodTypeBO, SCASender> senders = new EnumMap<>(ScaMethodTypeBO.class);
     private HashGenerator hashGenerator = new HashGeneratorImpl();
 
@@ -76,9 +78,6 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
     @Value("${ledgers.sca.authCode.validity.seconds:600}")
     private int authCodeValiditySeconds;
-
-    @Value("${ledgers.sca.authCode.email.body}")
-    private String authCodeEmailBody;
 
     @Value("${ledgers.sca.authCode.failed.max:5}")
     private int authCodeFailedMax;
@@ -117,11 +116,8 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
         repository.save(scaOperation);
         if (scaUserData.isEmailValid()) {
-            String userMessageTemplate = StringUtils.isBlank(authCodeEmailBody)
-                                                 ? data.getUserMessage()
-                                                 : authCodeEmailBody;
-            String message = String.format(userMessageTemplate, tan);
-            senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message);
+            String message = messageResolver.resolveMessage(data, tan, scaUserData.getScaMethod());
+            senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message); //TODO Implement a queue to be able to deliver messages failed for some reason! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/837
         }
         SCAOperationBO scaOperationBO = scaOperationMapper.toBO(scaOperation);
         scaOperationBO.setTan(tan);

@@ -16,11 +16,7 @@
 
 package de.adorsys.ledgers.sca.service;
 
-import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
-
-public interface SCASender {
+public interface SCASender extends SCAMethodType{
 
     boolean send(String value, String authCode);
-
-    ScaMethodTypeBO getType();
 }

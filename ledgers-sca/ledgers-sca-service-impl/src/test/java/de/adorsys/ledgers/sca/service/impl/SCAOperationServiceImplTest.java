@@ -10,6 +10,7 @@ import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCASender;
+import de.adorsys.ledgers.sca.service.ScaMessageResolver;
 import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
@@ -78,6 +79,9 @@ class SCAOperationServiceImplTest {
     private SCAOperationMapper scaOperationMapper;
 
     @Mock
+    private ScaMessageResolver messageResolver;
+
+    @Mock
     private Environment env;
 
     private SCAOperationEntity scaOperationEntity;
@@ -122,7 +126,6 @@ class SCAOperationServiceImplTest {
 
         scaOperationService.setSenders(senders);
         scaOperationService.setAuthCodeValiditySeconds(VALIDITY_SECONDS);
-        scaOperationService.setAuthCodeEmailBody("TAN: %s");
 
         scaAuthConfirmationBO = new ScaAuthConfirmationBO(true, OpTypeBO.PAYMENT, OP_ID);
     }
@@ -182,6 +185,7 @@ class SCAOperationServiceImplTest {
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(scaOperationMapper.toBO(scaOperationEntity)).thenReturn(scaOperationBO);
+        when(messageResolver.resolveMessage(any(), any(), any())).thenReturn("");
 
         // When
         SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(codeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
@@ -303,6 +307,7 @@ class SCAOperationServiceImplTest {
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(scaOperationMapper.toBO(scaOperationEntity)).thenReturn(scaOperationBO);
+        when(messageResolver.resolveMessage(any(), any(), any())).thenReturn("TAN: my tan");
 
         codeDataBO.setUserMessage("my tan");
         // When

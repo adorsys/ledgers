@@ -127,6 +127,8 @@ ledgers:
         from: noreply@adorsys.de
       phone:
         subject: "Your TAN from MockBank"
+      push:
+        body: "User: %s initiated an operation : %s requiring TAN confirmation, TAN is: %s"
     multilevel.enabled: true
     authorisation_confirmation_enabled: false
     final.weight: 100
