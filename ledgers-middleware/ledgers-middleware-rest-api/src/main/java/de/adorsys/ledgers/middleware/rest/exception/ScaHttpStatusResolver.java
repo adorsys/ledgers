@@ -22,6 +22,7 @@ public class ScaHttpStatusResolver {
         //400 Block
         container.put(AUTH_CODE_GENERATION_FAILURE, BAD_REQUEST);
         container.put(SCA_OPERATION_VALIDATION_INVALID, BAD_REQUEST);
+        container.put(SCA_SENDER_ERROR, BAD_REQUEST);
 
         //403 Block
         container.put(SCA_OPERATION_USED_OR_STOLEN, FORBIDDEN);
