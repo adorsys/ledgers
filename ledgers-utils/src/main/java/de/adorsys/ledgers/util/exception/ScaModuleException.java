@@ -17,6 +17,10 @@ public class ScaModuleException extends RuntimeException {
                        : resolveNoAttemptsLeft(isLoginOperation);
     }
 
+    public static ScaModuleException buildScaSenderException(String devMessage) {
+        return new ScaModuleException(SCA_SENDER_ERROR, devMessage);
+    }
+
     private static ScaModuleException resolveAttemptsLeft(int attemptsLeft, boolean isLoginOperation) {
         String message = String.format("You have %s attempts to enter valid %s", attemptsLeft, isLoginOperation
                                                                                                        ? "credentials"

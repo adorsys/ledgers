@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-user-management</artifactId>
-		<version>4.0</version>
+		<version>4.0.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 
