@@ -27,28 +27,17 @@ variables: &variables
   # Docker images variables #
   ###########################
 
-  DOCKER_IMAGE_NAME_KEYCLOAK_LEDGERS: "keycloak-ledgers"
+  DOCKER_IMAGE_NAME_LEDGERS: "ledgers"
 
   SONAR_HOST: "https://psd2-quality.cloud.adorsys.de"
 
-  ###########################
-  # Private Dockerhub Images #
-  ###########################
-
-  GITLAB_REGISTRY: "gitlab-registry.adorsys.de"
-  GITLAB_NAMESPACE: "adorsys/xs2a/ledgers"
-
   ############################
-  # Private Openshift Images #
+  # Private Openshift ENV #
   ############################
 
-  OPENSHIFT_NAMESPACE_LEDGERS_DEV: "ledgers-dev"
-  OPENSHIFT_NAMESPACE_SANDBOX_DEV: "adorsys-dynamic-sandbox-dev"
-  OPENSHIFT_NAMESPACE_GATEWAY_DEV: "banking-gateway-dev"
-  OPENSHIFT_NAMESPACE_DXC_SANDBOX_DEV: "dxc-sandbox-dev"
-  OPENSHIFT_NAMESPACE_BEKB_SANDBOX_DEV: "bekb-sandbox-dev"
-  OPENSHIFT_NAMESPACE_DEV_E2E: adorsys-dynamic-sandbox-dev-e2e
-  OPENSHIFT_NAMESPACE_MODELBANK_KEYCLOAK_DEV: adorsys-modelbank-keycloak-dev
+
+  OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV: "adorsys-modelbank-dev"
+  OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_INTEG: "adorsys-modelbank-integ"
 
   ###########################
   # Build variables         #
@@ -207,20 +196,20 @@ Build:Ledgers:
     expire_in: "1 day"
 
 #-------------------------------------------------------------------
-# Test
+# Tests
 #-------------------------------------------------------------------
 
-# Javadoc Check:
-#   stage: "Test"
-#   except:
-#     - schedules
-#   script:
-#     - mvn -Dmaven.test.skip=true package javadoc:javadoc
-#   artifacts:
-#     paths:
-#       - "**/target/site/*"
-#     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
-#     expire_in: "10 day"
+Javadoc Check:
+  stage: "Test"
+  except:
+    - schedules
+  script:
+    - mvn -Dmaven.test.skip=true package javadoc:javadoc
+  artifacts:
+    paths:
+      - "**/target/site/*"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
+    expire_in: "10 day"
 
 Unit Tests:
   stage: "Test"
@@ -234,29 +223,18 @@ Unit Tests:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
     expire_in: "10 day"
 
-# Sonarcube Tests:
-#   stage: "Test"
-#   needs: []
-#   except:
-#     - schedules
-#     - develop
-#   script:
-#     - jabba use system@1.8
-#     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-#     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-#     - mvn -ntp --fail-at-end clean install
-#     - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
-
-# Nexus:Local_deploy:
-#   stage: Nexus
-#   only:
-#     - develop
-#   script:
-#     - jabba use system@1.8
-#     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-#     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-#     - mvn -ntp --settings scripts/mvn-release-settings.xml -Prelease -Dmaven.javadoc.skip=true -DskipTests -U deploy
-
+Sonarcube Tests:
+  stage: "Test"
+  needs: []
+  except:
+    - schedules
+    - develop
+  script:
+    - jabba use system@1.8
+    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+    - mvn -ntp --fail-at-end clean install
+    - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
 
 ###########
 # develop branch #
@@ -272,17 +250,7 @@ Push to DockerHub (develop):
     DOCKER_TAG: develop
   <<: *build_dockerhub_image
 
-# Push to Github keycloak-ledgers:
-#   stage: "Package"
-#   except:
-#     - schedules
-#   only:
-#     - develop
-#   variables:
-#     DOCKER_TAG: dev
-#   <<: *build_github_registry_image
-
-Deploy Openshift (modelbank-keycloak-dev):
+Deploy Image to Openshift (adorsys-modelbank-dev):
   stage: Deploy
   except:
     - schedules
@@ -290,8 +258,32 @@ Deploy Openshift (modelbank-keycloak-dev):
     - develop
   environment:
     name: dev
-    url: https://dev-modelbank-keycloak-ledgers.adorsys.de
+    url: ~
   variables:
     DOCKER_TAG: develop
-    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_MODELBANK_KEYCLOAK_DEV}
+    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV}
   <<: *push_docker_openshift
+
+Deploy image to Openshift (adorsys-modelbank-integ):
+  stage: Deploy
+  only:
+    - schedules
+  environment:
+    name: dev
+    url: ~
+  variables:
+    DOCKER_TAG: develop
+    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_INTEG}
+  <<: *push_docker_openshift
+
+###########
+# Release (tags) #
+###########
+
+Push to DockerHub (Release tags):
+  stage: "Package"
+  only:
+    - tags
+  variables:
+    DOCKER_TAG: $CI_COMMIT_TAG
+  <<: *build_dockerhub_image
