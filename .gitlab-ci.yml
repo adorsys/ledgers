@@ -26,9 +26,7 @@ variables: &variables
   # Private Openshift Images #
   ############################
 
-  OPENSHIFT_NAMESPACE_LEDGERS_DEV: "ledgers-dev"
   OPENSHIFT_NAMESPACE_SANDBOX_DEV: "adorsys-dynamic-sandbox-dev"
-  OPENSHIFT_NAMESPACE_GATEWAY_DEV: "banking-gateway-dev"
   OPENSHIFT_NAMESPACE_DXC_SANDBOX_DEV: "dxc-sandbox-dev"
   OPENSHIFT_NAMESPACE_BEKB_SANDBOX_DEV: "bekb-sandbox-dev"
   OPENSHIFT_NAMESPACE_DEV_E2E: adorsys-dynamic-sandbox-dev-e2e
@@ -316,20 +314,6 @@ Deploy Openshift (sandbox-dev-e2e):
     DOCKER_TAG: support3x
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_DEV_E2E}
   <<: *push_docker_openshift
-
-##########
-# master #
-##########
-
-Push to DockerHub (master):
-  stage: "Package"
-  only:
-    - master-3.x
-  variables:
-    DOCKER_TAG: latest
-  environment:
-    name: demo
-  <<: *build_dockerhub_image
 
 #######
 # tag #
