@@ -287,3 +287,15 @@ Push to DockerHub (Release tags):
   variables:
     DOCKER_TAG: $CI_COMMIT_TAG
   <<: *build_dockerhub_image
+
+##########
+# master #
+##########
+
+Push to DockerHub (master):
+  stage: "Package"
+  only:
+    - master
+  variables:
+    DOCKER_TAG: latest
+  <<: *build_dockerhub_image
