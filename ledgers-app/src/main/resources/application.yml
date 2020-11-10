@@ -116,7 +116,6 @@ ledgers:
 
   sca:
     authCode.failed.max: 3
-    login.failed.max: 3
     authCode:
       validity.seconds: 180
       expiration:
