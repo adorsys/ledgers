@@ -55,6 +55,9 @@ public class SCAOperationEntity {
     @Column(name = "op_id", nullable = false, updatable = false)
     private String opId;
 
+    @Column(name = "external_id")
+    private String externalId;
+
     @Column(name = "validity_seconds", nullable = false, updatable = false)
     private int validitySeconds;
 

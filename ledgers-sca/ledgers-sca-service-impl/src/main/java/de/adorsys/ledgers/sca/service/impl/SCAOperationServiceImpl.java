@@ -23,6 +23,7 @@ import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.domain.ScaStatus;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.domain.*;
+import de.adorsys.ledgers.sca.domain.sca.message.ScaMessage;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.sca.service.SCASender;
@@ -115,9 +116,9 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         updateSCAOperation(scaOperation, hashItem);
 
         repository.save(scaOperation);
-        if (scaUserData.isEmailValid()) {
-            String message = messageResolver.resolveMessage(data, tan, scaUserData.getScaMethod());
-            senders.get(scaUserData.getScaMethod()).send(scaUserData.getMethodValue(), message); //TODO Implement a queue to be able to deliver messages failed for some reason! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/837
+        if (scaUserData.getScaMethod()!= ScaMethodTypeBO.EMAIL|| scaUserData.isEmailValid()) {
+            ScaMessage message = messageResolver.resolveMessage(data,scaUserData, tan);
+            senders.get(scaUserData.getScaMethod()).send(message); //TODO Implement a queue to be able to deliver messages failed for some reason! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/837
         }
         SCAOperationBO scaOperationBO = scaOperationMapper.toBO(scaOperation);
         scaOperationBO.setTan(tan);
@@ -385,6 +386,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         SCAOperationEntity scaOp = new SCAOperationEntity();
         scaOp.setId(authCodeData.getAuthorisationId());
         scaOp.setOpId(authCodeData.getOpId());
+        scaOp.setExternalId(authCodeData.getExternalId());
         scaOp.setOpType(OpType.valueOf(authCodeData.getOpType().name()));
         scaOp.setScaMethodId(authCodeData.getScaUserDataId());
         scaOp.setStatus(INITIATED);

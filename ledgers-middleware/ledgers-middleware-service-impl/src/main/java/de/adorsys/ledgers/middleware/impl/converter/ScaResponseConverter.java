@@ -33,6 +33,7 @@ public class ScaResponseConverter {
         GlobalScaResponseTO response = new GlobalScaResponseTO();
         response.setOperationObjectId(operation.getOpId());
         response.setAuthorisationId(operation.getId());
+        response.setExternalId(operation.getExternalId());
         response.setScaMethods(userMapper.toScaUserDataListTO(methods));
         response.setPsuMessage(psuMessage);
         response.setStatusDate(operation.getStatusTime());
