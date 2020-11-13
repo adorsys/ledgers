@@ -67,7 +67,7 @@ public class PaymentRestInitiationService {
     }
 
     private GlobalScaResponseTO startSca(SCAPaymentResponseTO response) {
-        StartScaOprTO opr = new StartScaOprTO(response.getPaymentId(), Ids.id(), OpTypeTO.PAYMENT);
+        StartScaOprTO opr = new StartScaOprTO(response.getPaymentId(), null, Ids.id(), OpTypeTO.PAYMENT);
         authRequestInterceptor.setAccessToken(response.getBearerToken().getAccess_token());
         return scaRestClient.startSca(opr).getBody();
     }

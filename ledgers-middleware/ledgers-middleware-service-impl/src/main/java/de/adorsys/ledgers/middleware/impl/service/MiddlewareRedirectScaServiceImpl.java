@@ -49,7 +49,7 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
                           .devMsg("Sorry, but do not have any SCA Methods configured!")
                           .build();
         }
-        AuthCodeDataBO codeData = new AuthCodeDataBO(user.getLogin(), null, scaOpr.getOprId(), NO_USER_MESSAGE, authCodeLifetime,
+        AuthCodeDataBO codeData = new AuthCodeDataBO(user.getLogin(), null, scaOpr.getOprId(), scaOpr.getExternalId(), NO_USER_MESSAGE, authCodeLifetime,
                                                      valueOf(scaOpr.getOpType().name()), scaOpr.getAuthorisationId(), finalWeight);
         SCAOperationBO operation = scaOperationService.checkIfExistsOrNew(codeData);
 
@@ -71,11 +71,9 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
     public GlobalScaResponseTO selectMethod(ScaInfoTO scaInfo) {
         SCAOperationBO operation = scaOperationService.loadAuthCode(scaInfo.getAuthorisationId());
         UserBO user = userService.findByLogin(scaInfo.getUserLogin());
-//        String psuMessage = messageResolver.getTemplate(operation);
-        // TODO: create human-readable message (or message service).
         String psuMessage = "";
         int scaWeight = resolveWeightForOperation(operation.getOpType(), operation.getOpId(), user);
-        AuthCodeDataBO data = new AuthCodeDataBO(user.getLogin(), scaInfo.getScaMethodId(), operation.getOpId(), psuMessage, authCodeLifetime, operation.getOpType(), operation.getId(), scaWeight);
+        AuthCodeDataBO data = new AuthCodeDataBO(user.getLogin(), scaInfo.getScaMethodId(), operation.getOpId(), null, psuMessage, authCodeLifetime, operation.getOpType(), operation.getId(), scaWeight);
         operation = scaOperationService.generateAuthCode(data, user, ScaStatusBO.SCAMETHODSELECTED);
         return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(psuMessage, operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), scaWeight, null);
     }

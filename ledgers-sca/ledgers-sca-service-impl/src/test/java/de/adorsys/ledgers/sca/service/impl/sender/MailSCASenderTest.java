@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
-import org.junit.jupiter.api.BeforeEach;
+import de.adorsys.ledgers.sca.domain.sca.message.MailScaMessage;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,21 +32,14 @@ class MailSCASenderTest {
     @Mock
     private JavaMailSender mailSender;
 
-    @BeforeEach
-    void setUp() {
-        sender.setSubject(SUBJECT);
-        sender.setFrom(FROM);
-    }
-
     @Test
     void send() {
         // Given
         ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
 
         doNothing().when(mailSender).send(captor.capture());
-
         // When
-        boolean result = sender.send(EMAIL, AUTH_CODE);
+        boolean result = sender.send(getMailScaMessage());
 
         SimpleMailMessage message = captor.getValue();
 
@@ -60,13 +54,23 @@ class MailSCASenderTest {
         verify(mailSender, times(1)).send(message);
     }
 
+    @NotNull
+    private MailScaMessage getMailScaMessage() {
+        MailScaMessage scaMessage = new MailScaMessage();
+        scaMessage.setSubject(SUBJECT);
+        scaMessage.setTo(EMAIL);
+        scaMessage.setFrom(FROM);
+        scaMessage.setMessage(AUTH_CODE);
+        return scaMessage;
+    }
+
     @Test
     void sendNotSend() {
         // Given
         doThrow(MailSendException.class).when(mailSender).send(any(SimpleMailMessage.class));
 
         // When
-        boolean result = sender.send(EMAIL, AUTH_CODE);
+        boolean result = sender.send(getMailScaMessage());
 
         // Then
         assertThat(result, is(Boolean.FALSE));

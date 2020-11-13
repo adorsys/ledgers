@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class SCAOperationBO {
     private String id;
     private String opId;
+    private String externalId;
     private int validitySeconds;
 
     /*

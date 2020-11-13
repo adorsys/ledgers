@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.sca.service.impl.sender;
 
+import de.adorsys.ledgers.sca.domain.sca.message.MailScaMessage;
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,12 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MailSCASender implements SCASender {
+public class MailSCASender implements SCASender<MailScaMessage> {
     private final EmailSender emailSender;
 
     @Override
-    public boolean send(String value, String authCode) {
-        return emailSender.send(value, authCode);
+    public boolean send(MailScaMessage message) {
+        return emailSender.send(message);
     }
 
     @Override

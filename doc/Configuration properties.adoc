@@ -41,6 +41,9 @@
 |ledgers.sca.authCode.email.from | Sender address of e-mail sent for Sca confirmation | noreply@adorsys.de
 |ledgers.sca.authCode.phone.subject | Sender address of phone sent for Sca confirmation | Your TAN from MockBank
 |ledgers.sca.authCode.push.body | Body of push otp message sent for Sca confirmation | User: %s initiated an operation : %s requiring TAN confirmation, TAN is: %s
+|ledgers.sca.authCode.app_otp.template| Message template from AppOtp notification| "Do you confirm your %s id: %s "
+|ledgers.sca.authCode.app_otp.socket_service.httpMethod| HttpMethod for RestCall to send AppOtp notification to MessageBroker| POST
+|ledgers.sca.authCode.app_otp.socket_service.url| Complete url to send AppOtp notification MessageBroker| *{online banking backEnd base path}*/api/v1/decoupled/message
 |ledgers.sca.multilevel.enabled | Enables/disables multilevel sca support | TRUE
 |ledgers.sca.authorisation_confirmation_enabled | Enables/disables sca confirmation support | FALSE
 |ledgers.sca.final.weight | Sca weight necessary to complete operation | 100

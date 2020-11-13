@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class StartScaOprTO {
     private String oprId;
+    private String externalId;
     private String authorisationId;
     private OpTypeTO opType;
 
@@ -13,9 +14,10 @@ public class StartScaOprTO {
         this.setOpType(opType);
     }
 
-    public StartScaOprTO(String oprId, String authorizationId, OpTypeTO opType) {
+    public StartScaOprTO(String oprId, String externalId, String authorizationId, OpTypeTO opType) {
         this.setOprId(oprId);
+        this.setExternalId(externalId);
         this.setOpType(opType);
-        this.authorisationId=authorizationId;
+        this.authorisationId = authorizationId;
     }
 }
