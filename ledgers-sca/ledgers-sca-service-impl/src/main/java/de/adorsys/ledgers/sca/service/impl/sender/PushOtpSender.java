@@ -36,7 +36,7 @@ public class PushOtpSender implements SCASender<PushScaMessage> {
             return exchange.getStatusCode().is2xxSuccessful();
         } catch (RestClientException e) {
             log.error("Could not deliver PUSH_OTP message, reason: {}", e.getMessage());
-            throw ScaModuleException.buildScaSenderException(String.format(ERROR_REASON_2_MATCHERS, e.getMessage(), "\nWe will try to re-send the message later."));
+            return false;
         }
     }
 
