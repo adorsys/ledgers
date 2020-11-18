@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class PushOtpMessageHandler implements OtpMessageHandler {
+public class PushOtpMessageHandler implements OtpMessageHandler<PushScaMessage> {
     private static final String ERROR_REASON_1_MATCHER = "Could not PUSH TAN for SCA, reason: %s";
     private static final String ERROR_REASON_2_MATCHERS = "Could not PUSH TAN for Sca, reason: %s %s";
     private static final String INVALID_PATTERN_MSG = "Invalid Sca method pattern!\n" +

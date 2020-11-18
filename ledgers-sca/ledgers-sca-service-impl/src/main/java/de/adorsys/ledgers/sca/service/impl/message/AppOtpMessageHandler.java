@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AppOtpMessageHandler implements OtpMessageHandler {
+public class AppOtpMessageHandler implements OtpMessageHandler<AppScaMessage> {
     @Value("${ledgers.sca.authCode.app_otp.template: Do you confirm your %s id: %s }")
     private String messageTemplate;
     @Value("${ledgers.sca.authCode.app_otp.socket_service.httpMethod: POST}")

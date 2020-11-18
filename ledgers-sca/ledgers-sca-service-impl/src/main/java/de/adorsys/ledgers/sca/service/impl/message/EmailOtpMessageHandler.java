@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EmailOtpMessageHandler implements OtpMessageHandler {
+public class EmailOtpMessageHandler implements OtpMessageHandler<MailScaMessage> {
     @Value("${ledgers.sca.authCode.email.body}")
     private String authCodeEmailBody;
 

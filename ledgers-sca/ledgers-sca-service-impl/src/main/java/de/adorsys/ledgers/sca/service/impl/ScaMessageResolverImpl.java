@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ScaMessageResolverImpl implements ScaMessageResolver<ScaMessage> {
-    private final List<OtpMessageHandler<ScaMessage>> otpMessageHandlers;
+    private final List<OtpMessageHandler<? extends ScaMessage>> otpMessageHandlers;
     private final EmailOtpMessageHandler defaultOtpMessageHandler;
 
     @Override
@@ -24,7 +24,7 @@ public class ScaMessageResolverImpl implements ScaMessageResolver<ScaMessage> {
                        .getMessage(data, scaData, tan);
     }
 
-    private OtpMessageHandler<ScaMessage> getOtpMessageHandler(ScaMethodTypeBO methodType) {
+    private OtpMessageHandler<? extends ScaMessage> getOtpMessageHandler(ScaMethodTypeBO methodType) {
         return otpMessageHandlers.stream()
                        .filter(h -> h.getType() == methodType)
                        .findFirst()
