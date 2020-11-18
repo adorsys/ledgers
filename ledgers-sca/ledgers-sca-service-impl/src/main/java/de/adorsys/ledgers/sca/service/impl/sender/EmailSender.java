@@ -1,8 +1,8 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
+import de.adorsys.ledgers.sca.domain.sca.message.MailScaMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,20 +14,14 @@ import org.springframework.stereotype.Service;
 public class EmailSender {
     private final JavaMailSender sender;
 
-    @Value("${ledgers.sca.authCode.email.subject}")
-    private String subject;
-
-    @Value("${ledgers.sca.authCode.email.from}")
-    private String from;
-
-    public boolean send(String value, String authCode) {
+    public boolean send(MailScaMessage scaMessage) {
         log.info("Preparing an email to send auth code");
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(value);
-            message.setSubject(subject);
-            message.setText(authCode);
-            message.setFrom(from);
+            message.setTo(scaMessage.getTo());
+            message.setFrom(scaMessage.getFrom());
+            message.setSubject(scaMessage.getSubject());
+            message.setText(scaMessage.getMessage());
             sender.send(message);
         } catch (MailException e) {
             log.error("Error sending email, No SMTP service configured");
@@ -36,13 +30,5 @@ public class EmailSender {
         }
         log.info("Auth code was successfully sent via email");
         return true;
-    }
-
-    void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    void setFrom(String from) {
-        this.from = from;
     }
 }

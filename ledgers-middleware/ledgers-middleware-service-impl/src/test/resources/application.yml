@@ -51,7 +51,6 @@ spring:
 ledgers:
   sca:
     authCode.failed.max: 3
-    login.failed.max: 3
     authCode:
       validity.seconds: 180
       expiration:
@@ -82,7 +81,7 @@ ledgers:
         This is an automatically generated email – please do not reply to it. If you have any queries regarding your order, please email us at info@tpp.com.
         %s
         Best wishes,
-        Dynamic Sandbox team"
+        ModelBank team"
     ext_base_path: http://localhost:8088
     endpoint: /emails/email
 

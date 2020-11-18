@@ -8,6 +8,7 @@ import de.adorsys.ledgers.sca.db.domain.OpType;
 import de.adorsys.ledgers.sca.db.domain.SCAOperationEntity;
 import de.adorsys.ledgers.sca.db.repository.SCAOperationRepository;
 import de.adorsys.ledgers.sca.domain.*;
+import de.adorsys.ledgers.sca.domain.sca.message.ScaMessage;
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
 import de.adorsys.ledgers.sca.service.SCASender;
 import de.adorsys.ledgers.sca.service.ScaMessageResolver;
@@ -185,7 +186,7 @@ class SCAOperationServiceImplTest {
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(scaOperationMapper.toBO(scaOperationEntity)).thenReturn(scaOperationBO);
-        when(messageResolver.resolveMessage(any(), any(), any())).thenReturn("");
+        when(messageResolver.resolveMessage(any(), any(), any())).thenReturn(new ScaMessage());
 
         // When
         SCAOperationBO scaOperationBO = scaOperationService.generateAuthCode(codeDataBO, userBO, ScaStatusBO.SCAMETHODSELECTED);
@@ -205,7 +206,7 @@ class SCAOperationServiceImplTest {
         verify(authCodeGenerator, times(1)).generate();
         verify(hashGenerator, times(1)).hash(any());
         verify(repository, times(1)).save(entity);
-        verify(emailSender, times(1)).send(anyString(), anyString());
+        verify(emailSender, times(1)).send(any());
     }
 
     @Test
@@ -303,11 +304,11 @@ class SCAOperationServiceImplTest {
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
         when(authCodeGenerator.generate()).thenReturn(TAN);
         when(hashGenerator.hash(any())).thenReturn(AUTH_CODE_HASH);
-        when(emailSender.send(email, "TAN: my tan")).thenReturn(true);
+        when(emailSender.send(any())).thenReturn(true);
         when(repository.save(captor.capture())).thenReturn(mock(SCAOperationEntity.class));
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
         when(scaOperationMapper.toBO(scaOperationEntity)).thenReturn(scaOperationBO);
-        when(messageResolver.resolveMessage(any(), any(), any())).thenReturn("TAN: my tan");
+        when(messageResolver.resolveMessage(any(), any(), any())).thenReturn(new ScaMessage());
 
         codeDataBO.setUserMessage("my tan");
         // When
@@ -328,7 +329,7 @@ class SCAOperationServiceImplTest {
         verify(authCodeGenerator, times(1)).generate();
         verify(hashGenerator, times(1)).hash(any());
         verify(repository, times(1)).save(entity);
-        verify(emailSender, times(1)).send(anyString(), anyString());
+        verify(emailSender, times(1)).send(any());
     }
 
     @Test

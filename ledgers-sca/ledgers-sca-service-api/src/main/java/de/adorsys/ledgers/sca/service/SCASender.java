@@ -16,7 +16,9 @@
 
 package de.adorsys.ledgers.sca.service;
 
-public interface SCASender extends SCAMethodType{
+import de.adorsys.ledgers.sca.domain.sca.message.ScaMessage;
 
-    boolean send(String value, String authCode);
+public interface SCASender<T extends ScaMessage> extends SCAMethodType {
+
+    boolean send(T message);
 }

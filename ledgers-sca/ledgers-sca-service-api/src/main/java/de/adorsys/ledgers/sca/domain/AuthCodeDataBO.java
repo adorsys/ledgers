@@ -27,6 +27,7 @@ public class AuthCodeDataBO {
     private String userLogin;
     private String scaUserDataId;
     private String opId;
+    private String externalId;
     private String userMessage;
     private int validitySeconds;
     private OpTypeBO opType;

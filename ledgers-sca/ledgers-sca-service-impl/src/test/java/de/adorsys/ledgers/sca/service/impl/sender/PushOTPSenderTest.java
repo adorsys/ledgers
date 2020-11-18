@@ -1,7 +1,8 @@
 package de.adorsys.ledgers.sca.service.impl.sender;
 
+import de.adorsys.ledgers.sca.domain.sca.message.PushScaMessage;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
-import org.junit.jupiter.api.BeforeEach;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -11,40 +12,30 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 @ExtendWith(MockitoExtension.class)
 class PushOTPSenderTest {
 
-    private static final String DESTINATION_VALUE = "PUT,http://localhost:8080/push/endpoint";
-    private static final String DESTINATION_VALUE_INVALID_SEPARATION = "PUT: http://localhost:8080/push/endpoint";
-    private static final String DESTINATION_VALUE_INVALID_VALUE = "PUT";
-    private static final String DESTINATION_VALUE_WRONG_METHOD = "PUD,http://localhost:8080/push/endpoint";
-    private static final String DESTINATION_VALUE_INVALID_URI = "PUT,http://localhost:qaaaa/push/endpoint";
+    private static final String DESTINATION_VALUE = "http://localhost:8080/push/endpoint";
     private static final String FROM = "Adorsys Bank";
     private static final String AUTH_CODE = "ThisIsAnAuthCode";
     private static final String SUBJECT = "Your onetime TAN for operation XXX is:";
+    private static final String LOGIN = "anton.brueckner";
 
     @InjectMocks
     private PushOtpSender sender;
 
     @Mock
     private RestTemplate template;
-
-    @BeforeEach
-    void setUp() throws NoSuchFieldException {
-        setField(sender, sender.getClass().getDeclaredField("subject"), SUBJECT);
-        setField(sender, sender.getClass().getDeclaredField("from"), FROM);
-    }
 
     @Test
     void send() {
@@ -54,51 +45,32 @@ class PushOTPSenderTest {
         ArgumentCaptor<HttpEntity<String>> bodyCaptor = ArgumentCaptor.forClass(HttpEntity.class);
 
         when(template.exchange(any(), any(), any(), eq(Void.class))).thenReturn(ResponseEntity.ok().build());
-
         // When
-        boolean result = sender.send(DESTINATION_VALUE, AUTH_CODE);
+        boolean result = sender.send(getPushScaMessage());
 
         // Then
         assertThat(result, is(Boolean.TRUE));
         verify(template, times(1)).exchange(uriCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), eq(Void.class));
         assertEquals("http://localhost:8080/push/endpoint", uriCaptor.getValue().toString());
         assertEquals(HttpMethod.PUT, methodCaptor.getValue());
-        assertEquals(String.format("from: %s, %s %s", FROM, SUBJECT, AUTH_CODE), bodyCaptor.getValue().getBody());
+        assertEquals(SUBJECT, bodyCaptor.getValue().getBody());
     }
 
     @Test
-    void invalidMethod() {
-        // When
-        assertThrows(ScaModuleException.class, () -> sender.send(DESTINATION_VALUE_WRONG_METHOD, AUTH_CODE));
-
-        // Then
-        verify(template, times(0)).exchange(any(), any(), any(), eq(Void.class));
+    void sendFailure() {
+        when(template.exchange(any(URI.class), any(), any(), eq(Void.class))).thenThrow(new RestClientException("Wrong!"));
+        assertFalse(sender.send(getPushScaMessage()));
     }
 
-    @Test
-    void invalidDestinationComposition() {
-        // When
-        assertThrows(ScaModuleException.class, () -> sender.send(DESTINATION_VALUE_INVALID_SEPARATION, AUTH_CODE));
-
-        // Then
-        verify(template, times(0)).exchange(any(), any(), any(), eq(Void.class));
+    @NotNull
+    private PushScaMessage getPushScaMessage() {
+        PushScaMessage scaMessage = new PushScaMessage();
+        scaMessage.setUserLogin(LOGIN);
+        scaMessage.setHttpMethod("PUT");
+        scaMessage.setUrl(URI.create(DESTINATION_VALUE));
+        scaMessage.setMessage(SUBJECT);
+        return scaMessage;
     }
 
-    @Test
-    void invalidDestinationComposition2() {
-        // When
-        assertThrows(ScaModuleException.class, () -> sender.send(DESTINATION_VALUE_INVALID_VALUE, AUTH_CODE));
 
-        // Then
-        verify(template, times(0)).exchange(any(), any(), any(), eq(Void.class));
-    }
-
-    @Test
-    void invalidUri() {
-        // When
-        assertThrows(ScaModuleException.class, () -> sender.send(DESTINATION_VALUE_INVALID_URI, AUTH_CODE));
-
-        // Then
-        verify(template, times(0)).exchange(any(), any(), any(), eq(Void.class));
-    }
 }

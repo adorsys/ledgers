@@ -116,7 +116,6 @@ ledgers:
 
   sca:
     authCode.failed.max: 3
-    login.failed.max: 3
     authCode:
       validity.seconds: 180
       expiration:
@@ -129,13 +128,18 @@ ledgers:
         subject: "Your TAN from MockBank"
       push:
         body: "User: %s initiated an operation : %s requiring TAN confirmation, TAN is: %s"
+      app_otp:
+        template: "Do you confirm your %s id: %s " #Do you confirm your 'Payment/Consent' id: 'XXXX'
+        socket_service:
+          httpMethod: POST
+          url: http://localhost:8090/api/v1/decoupled/message
     multilevel.enabled: true
     authorisation_confirmation_enabled: false
     final.weight: 100
     challenge_data:
       path:
 
-  user-service:
+  user-service: ##TODO Remove as we moved on to Keycloak
     jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
 
   verify:
@@ -150,7 +154,7 @@ ledgers:
         This is an automatically generated email – please do not reply to it. If you have any queries regarding your order, please email us at info@tpp.com.
         \n\n
         Best wishes,\n
-        Dynamic Sandbox team"
+        ModelBank team"
     ext_base_path: http://localhost:8088
     endpoint: /emails/email
 
