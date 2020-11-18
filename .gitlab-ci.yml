@@ -23,9 +23,10 @@ stages:
 
 variables: &variables
 
-  ###########################
-  # Docker images variables #
-  ###########################
+
+  ############################
+  # Private Openshift Images #
+  ############################
 
   DOCKER_IMAGE_NAME_LEDGERS: "ledgers"
 
