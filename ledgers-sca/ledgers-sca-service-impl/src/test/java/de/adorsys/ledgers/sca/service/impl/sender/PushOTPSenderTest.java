@@ -19,8 +19,7 @@ import java.net.URI;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +59,7 @@ class PushOTPSenderTest {
     @Test
     void sendFailure() {
         when(template.exchange(any(URI.class), any(), any(), eq(Void.class))).thenThrow(new RestClientException("Wrong!"));
-        assertThrows(ScaModuleException.class, () -> sender.send(getPushScaMessage()));
+        assertFalse(sender.send(getPushScaMessage()));
     }
 
     @NotNull
