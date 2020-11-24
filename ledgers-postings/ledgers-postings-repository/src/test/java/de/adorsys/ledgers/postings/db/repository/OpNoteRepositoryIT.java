@@ -46,11 +46,11 @@ class OpNoteRepositoryIT {
         Boolean prematureExc = null;
         Boolean repeatedExec = null;
         String execStatus = null;
-        //OpNote.builder().id(Ids.id()).content("Sample content").recId("rec id").build();
         OpNote opNote = new OpNote(id, recId, type, content, recTime, execTime, prematureExc, repeatedExec, execStatus);
 
         // When
-        opNoteRepository.save(opNote);
+        OpNote note = opNoteRepository.save(opNote);
+        assertNotNull(note);
     }
 
     @Test
@@ -74,7 +74,6 @@ class OpNoteRepositoryIT {
         Boolean prematureExc = null;
         Boolean repeatedExec = null;
         String execStatus = null;
-//		OpNote opNote = OpNote.builder().id(Ids.id()).content("Sample content").build();
         OpNote opNote = new OpNote(id, recId, type, content, recTime, execTime, prematureExc, repeatedExec, execStatus);
 
         // Then

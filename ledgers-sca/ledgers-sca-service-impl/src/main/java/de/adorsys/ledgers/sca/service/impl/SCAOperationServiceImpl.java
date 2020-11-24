@@ -70,8 +70,8 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     private final SCAOperationRepository repository;
     private final AuthCodeGenerator authCodeGenerator;
     private final SCAOperationMapper scaOperationMapper;
-    private final List<SCASender> sendersList;
-    private final ScaMessageResolver messageResolver;
+    private final List<SCASender<? extends ScaMessage>> sendersList;
+    private final ScaMessageResolver<?> messageResolver;
     private Map<ScaMethodTypeBO, SCASender> senders = new EnumMap<>(ScaMethodTypeBO.class);
     private HashGenerator hashGenerator = new HashGeneratorImpl();
 

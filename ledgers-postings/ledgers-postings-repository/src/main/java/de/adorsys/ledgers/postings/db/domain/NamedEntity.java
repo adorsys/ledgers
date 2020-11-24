@@ -28,12 +28,12 @@ public abstract class NamedEntity extends BaseEntity {
 	@Column(nullable=false)
 	private String name;
 
-	public NamedEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc, String name) {
+	protected NamedEntity(String id, LocalDateTime created, String user, String shortDesc, String longDesc, String name) {
 		super(id, created, user, shortDesc, longDesc);
 		this.name = name;
 	}
 
-	public NamedEntity() {
+	protected NamedEntity() {
 		super();
 	}
 

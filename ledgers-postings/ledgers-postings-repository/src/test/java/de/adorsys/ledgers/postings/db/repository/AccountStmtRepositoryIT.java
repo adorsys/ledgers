@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Month;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -48,7 +50,8 @@ class AccountStmtRepositoryIT {
         f.setPstTime(pstTime);
         f.setTotalCredit(BigDecimal.ZERO);
         f.setTotalDebit(BigDecimal.ZERO);
-        financialStmtRepository.save(f);
+        AccountStmt stmt = financialStmtRepository.save(f);
+        assertNotNull(stmt);
     }
 
 }

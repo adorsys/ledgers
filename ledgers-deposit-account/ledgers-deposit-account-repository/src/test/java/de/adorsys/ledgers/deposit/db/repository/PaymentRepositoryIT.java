@@ -11,6 +11,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DepositAccountRepositoryApplication.class)
 class PaymentRepositoryIT {
@@ -23,7 +25,7 @@ class PaymentRepositoryIT {
         Payment payment = new Payment();
         payment.setPaymentId(Ids.id());
 
-        payment.setDebtorAccount(newAccount("DE89370400440532013000", "EUR"));
+        payment.setDebtorAccount(newAccount("DE89370400440532013000"));
         payment.setAccountId("accountId");
         payment.setPaymentType(PaymentType.SINGLE);
 
@@ -31,25 +33,26 @@ class PaymentRepositoryIT {
 
         PaymentTarget t = new PaymentTarget();
         t.setPaymentId(Ids.id());
-        t.setInstructedAmount(newAmount(BigDecimal.valueOf(2000), "EUR"));
-        t.setCreditorAccount(newAccount("DE45370400440332013001", "EUR"));
+        t.setInstructedAmount(newAmount(BigDecimal.valueOf(2000)));
+        t.setCreditorAccount(newAccount("DE45370400440332013001"));
         t.setPayment(payment);
         payment.getTargets().add(t);
 
-        paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
+        assertNotNull(savedPayment);
     }
 
-    private Amount newAmount(BigDecimal amount, String currency) {
+    private Amount newAmount(BigDecimal amount) {
         Amount amt = new Amount();
         amt.setAmount(amount);
-        amt.setCurrency(currency);
+        amt.setCurrency("EUR");
         return amt;
     }
 
-    private AccountReference newAccount(String iban, String currency) {
+    private AccountReference newAccount(String iban) {
         AccountReference acc = new AccountReference();
         acc.setIban(iban);
-        acc.setCurrency(currency);
+        acc.setCurrency("EUR");
         return acc;
     }
 

@@ -20,6 +20,8 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import java.time.LocalDateTime;
 import java.time.Month;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = PostingRepositoryApplication.class)
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -46,6 +48,7 @@ class LedgerStmtRepositoryIT {
         f.setPstTime(pstTime);
 
         // When
-        financialStmtRepository.save(f);
+        LedgerStmt stmt = financialStmtRepository.save(f);
+        assertNotNull(stmt);
     }
 }

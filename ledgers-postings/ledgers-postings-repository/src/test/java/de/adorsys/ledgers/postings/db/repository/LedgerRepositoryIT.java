@@ -51,7 +51,8 @@ class LedgerRepositoryIT {
         String longDesc = null;
         String name = "Sample Ledger-2";
         Ledger ledger = new Ledger(id, created, user, shortDesc, longDesc, name, coa);
-        ledgerRepository.save(ledger);
+        Ledger saved = ledgerRepository.save(ledger);
+        assertNotNull(saved);
     }
 
     @Test

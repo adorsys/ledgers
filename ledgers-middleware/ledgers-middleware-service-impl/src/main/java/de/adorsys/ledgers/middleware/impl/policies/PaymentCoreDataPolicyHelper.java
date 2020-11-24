@@ -26,6 +26,9 @@ public class PaymentCoreDataPolicyHelper {
     private static final DecimalFormat decimalFormat = new DecimalFormat("###,###.##");
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    private PaymentCoreDataPolicyHelper() {
+    }
+
     public static PaymentCoreDataTO getPaymentCoreDataInternal(PaymentBO payment) {
         try {
             PaymentCoreDataTO data = new PaymentCoreDataTO();

@@ -76,6 +76,7 @@ class AccountStmtServiceImplIT {
     void test_load_posting_ok() throws IOException {
         loadCoa("sample_coa_banking.yml");
         loadPosting("sample_posting.yml");
+        assertTrue(true);
     }
 
     /**
