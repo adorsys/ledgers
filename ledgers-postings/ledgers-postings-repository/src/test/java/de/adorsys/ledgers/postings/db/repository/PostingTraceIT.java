@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -71,7 +72,8 @@ class PostingTraceIT {
         p.setSrcPstId(id);
 
         // When
-        postingTraceRepository.save(p);
+        PostingTrace saved = postingTraceRepository.save(p);
+        assertNotNull(saved);
     }
 
     @Test

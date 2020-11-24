@@ -14,6 +14,8 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class PaymentRestInitiationService {
@@ -50,8 +52,9 @@ public class PaymentRestInitiationService {
     }
 
     private SCAPaymentResponseTO initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
-        SCAPaymentResponseTO response = paymentRestClient.initiatePayment(paymentType, payment).getBody();
-        log.info("Payment for {} successfully initiated, ScaStatus: {}, transaction status: {}", payment.getDebtorAccount().getIban(), response.getScaStatus(), response.getTransactionStatus());
+        SCAPaymentResponseTO response = Optional.ofNullable(paymentRestClient.initiatePayment(paymentType, payment).getBody()).orElse(new SCAPaymentResponseTO());
+        log.info("Payment for {} successfully initiated, ScaStatus: {}, transaction status: {}", payment.getDebtorAccount().getIban(),
+                 response.getScaStatus(), response.getTransactionStatus());
         authRequestInterceptor.setAccessToken(response.getBearerToken().getAccess_token());
         return response;
     }
@@ -59,9 +62,9 @@ public class PaymentRestInitiationService {
     private void performScaIfRequired(SCAPaymentResponseTO response) {
         //Only executes if Sca is required
         if (response.getScaStatus() != ScaStatusTO.EXEMPTED) {
-            GlobalScaResponseTO startSca = startSca(response);
-            GlobalScaResponseTO selectMethod = scaRestClient.selectMethod(startSca.getAuthorisationId(), startSca.getScaMethods().iterator().next().getId()).getBody();
-            GlobalScaResponseTO scaFinalized = scaRestClient.validateScaCode(selectMethod.getAuthorisationId(), selectMethod.getTan()).getBody();
+            GlobalScaResponseTO startSca = Optional.ofNullable(startSca(response)).orElse(new GlobalScaResponseTO());
+            GlobalScaResponseTO selectMethod = Optional.ofNullable(scaRestClient.selectMethod(startSca.getAuthorisationId(), startSca.getScaMethods().iterator().next().getId()).getBody()).orElse(new GlobalScaResponseTO());
+            GlobalScaResponseTO scaFinalized = Optional.ofNullable(scaRestClient.validateScaCode(selectMethod.getAuthorisationId(), selectMethod.getTan()).getBody()).orElse(new GlobalScaResponseTO());
             authRequestInterceptor.setAccessToken(scaFinalized.getBearerToken().getAccess_token());
         }
     }
@@ -73,7 +76,7 @@ public class PaymentRestInitiationService {
     }
 
     private void confirmPayment(String paymentId) {
-        SCAPaymentResponseTO response = paymentRestClient.executePayment(paymentId).getBody();
+        SCAPaymentResponseTO response = Optional.ofNullable(paymentRestClient.executePayment(paymentId).getBody()).orElse(new SCAPaymentResponseTO());
         log.info("Payment successfully executed! Transaction status: {}", response.getTransactionStatus());
     }
 }

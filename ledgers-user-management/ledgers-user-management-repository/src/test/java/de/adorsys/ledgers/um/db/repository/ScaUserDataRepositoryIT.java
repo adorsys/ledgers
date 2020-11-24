@@ -17,7 +17,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import org.springframework.util.Assert;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UmRepositoryApplication.class)
@@ -55,6 +56,6 @@ class ScaUserDataRepositoryIT {
         ScaUserDataEntity result = scaUserDataRepository.findById(data.getId()).orElse(null);
 
         // Then
-        Assert.notNull(result);
+        assertNotNull(result);
     }
 }

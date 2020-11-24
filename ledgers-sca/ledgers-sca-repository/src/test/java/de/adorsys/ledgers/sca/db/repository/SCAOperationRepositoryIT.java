@@ -12,6 +12,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = SCARepositoryApplication.class)
 class SCAOperationRepositoryIT {
@@ -30,7 +32,8 @@ class SCAOperationRepositoryIT {
         scaOp.setStatus(AuthCodeStatus.SENT);
         scaOp.setStatusTime(LocalDateTime.now());
         scaOp.setValiditySeconds(300);
-        scaRepo.save(scaOp);
+        SCAOperationEntity saved = scaRepo.save(scaOp);
+        assertNotNull(saved);
     }
 
 }

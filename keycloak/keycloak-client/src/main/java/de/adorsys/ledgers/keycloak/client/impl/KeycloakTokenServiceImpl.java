@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.JsonWebToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -53,7 +56,9 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     @Override
     public BearerTokenTO exchangeToken(String oldToken, Integer timeToLive, String scope) {
         AccessTokenResponse response = keycloakTokenRestClient.exchangeToken("Bearer " + oldToken, new TokenConfiguration(timeToLive, scope)).getBody();
-        return validate(response.getToken());
+        return validate(Optional.ofNullable(response)
+                                .map(AccessTokenResponse::getToken)
+                                .orElse(""));
     }
 
     @Override
@@ -67,7 +72,10 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
         if (HttpStatus.OK != statusCode) {
             log.error("Could not validate token"); //todo: throw specific exception
         }
-        if (resp.getBody().getOtherClaims().get("active").equals(false)){
+        Map<String, Object> claimsMap = Optional.ofNullable(resp.getBody())
+                                                .map(JsonWebToken::getOtherClaims)
+                                                .orElse(new HashMap<>());
+        if (claimsMap.get("active").equals(false)) {
             throw new AccessDeniedException("Token Expired!");
         }
         return authMapper.toBearer(resp.getBody(), token);

@@ -16,18 +16,16 @@
 
 package de.adorsys.ledgers.util.hash;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.adorsys.ledgers.util.Base16;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.adorsys.ledgers.util.Base16;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class HashGeneratorImpl implements HashGenerator {
     private static final Logger logger = LoggerFactory.getLogger(HashGeneratorImpl.class);

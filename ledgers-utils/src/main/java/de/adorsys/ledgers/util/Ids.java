@@ -5,6 +5,8 @@ import java.util.Base64;
 import java.util.UUID;
 
 public class Ids {
+    private Ids() {
+    }
 
     @SuppressWarnings("PMD")
     public static String id() {

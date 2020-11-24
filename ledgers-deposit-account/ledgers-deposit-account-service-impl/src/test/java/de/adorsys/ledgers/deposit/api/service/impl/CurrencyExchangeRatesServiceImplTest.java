@@ -103,10 +103,11 @@ class CurrencyExchangeRatesServiceImplTest {
 
     @Test
     void getExchangeRates_currency_not_supported() {
+        //Given
+        Currency uah = Currency.getInstance("UAH");
         // Then
         assertThrows(DepositModuleException.class, () -> {
-            List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, Currency.getInstance("UAH"));
-            assertEquals(Collections.singletonList(getRate(EUR, USD)), result);
+            List<ExchangeRateBO> result = currencyExchangeRatesService.getExchangeRates(EUR, EUR, uah);
         });
     }
 

@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 /**
  * The existence or value of a ledger entity is always considered relative to
  * the posting date.
- * 
+ *
  * When a book is closed, modification on ledger entities must lead to the
  * creation of new entities.
- * 
+ *
  * @author fpo
  *
  */
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
-	
+
 	/* Identifier */
 	@Id
 	private String id;
@@ -36,23 +36,20 @@ public abstract class BaseEntity {
 	@Convert(converter=LocalDateTimeConverter.class)
 	private LocalDateTime created;
 
-//	todo: seems this property should be moved from base class
 	@Column(name = "user_details",nullable=false)
 	private String userDetails;
 
-	//	todo: seems this property should be moved from base class
 	/*The short description of this entity*/
 	private String shortDesc;
 
-	//	todo: seems this property should be moved from base class
 	/*The long description of this entity*/
 	private String longDesc;
 
-	public BaseEntity() {
+	protected BaseEntity() {
 		super();
 	}
 
-	public BaseEntity(String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
+	protected BaseEntity(String id, LocalDateTime created, String userDetails, String shortDesc, String longDesc) {
 		super();
 		this.id = id;
 		this.created = created;

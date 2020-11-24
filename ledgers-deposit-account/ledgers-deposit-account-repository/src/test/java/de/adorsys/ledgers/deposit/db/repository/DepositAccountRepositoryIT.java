@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DepositAccountRepositoryApplication.class)
 class DepositAccountRepositoryIT {
@@ -22,7 +25,8 @@ class DepositAccountRepositoryIT {
         da.setId(Ids.id());
         da.setCurrency("EUR");
         da.setIban("DE89370400440532013000");
-        repo.save(da);
+        DepositAccount account = repo.save(da);
+        assertNotNull(account);
     }
 
 }

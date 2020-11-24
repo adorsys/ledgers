@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmailVerificationServiceImplTest {
@@ -36,7 +36,7 @@ class EmailVerificationServiceImplTest {
     @Mock
     private EmailVerificationProperties emailVerificationProperties;
 
-    private ResourceReader reader = YamlReader.getInstance();
+    private final ResourceReader reader = YamlReader.getInstance();
 
     private static final String EMAIL = "google@gmail.com";
     private static final String VERIFICATION_TOKEN = "Fz-4Kb6vREgj38CpsUAtSI";
@@ -69,6 +69,7 @@ class EmailVerificationServiceImplTest {
 
         // When
         emailVerificationService.sendVerificationEmail(VERIFICATION_TOKEN);
+        verify(scaVerificationService, times(1)).sendMessage(any(), any(), any(), any());
     }
 
     @Test
@@ -79,6 +80,7 @@ class EmailVerificationServiceImplTest {
 
         // When
         emailVerificationService.confirmUser(VERIFICATION_TOKEN);
+        verify(scaUserDataService, times(1)).updateScaUserData(any());
     }
 
     @Test

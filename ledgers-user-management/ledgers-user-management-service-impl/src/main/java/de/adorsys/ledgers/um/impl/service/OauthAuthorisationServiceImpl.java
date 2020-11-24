@@ -16,6 +16,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ public class OauthAuthorisationServiceImpl implements OauthAuthorisationService 
     private OauthCodeResponseBO resolveOauthCode(UserBO user, String accessToken, boolean finalStage) {
         OffsetDateTime expiryTime = OffsetDateTime.now().plusMinutes(oauthConfigProp.getLifeTime().getAuthCode());
 
-        String code = RandomStringUtils.random(24, true, true);
+        String code = RandomStringUtils.random(24, 0, 0, true, true, null, new SecureRandom());
         Optional<OauthCodeEntity> oauthCodeEntity = oauthCodeRepository.findByUserId(user.getId());
 
         if (oauthCodeEntity.isPresent()) {

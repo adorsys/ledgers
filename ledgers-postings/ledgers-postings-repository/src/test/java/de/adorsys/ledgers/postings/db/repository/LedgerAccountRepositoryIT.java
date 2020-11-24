@@ -20,8 +20,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -49,7 +48,8 @@ class LedgerAccountRepositoryIT {
 
         LedgerAccount ledgerAccount = new LedgerAccount(Ids.id(), LocalDateTime.now(), "Sample User", "Long lasting liability",
                                                         "Long lasting liability (from 1 year to 3 years)", "Long lasting liability", ledger, parentAccount, ledger.getCoa(), AccountCategory.LI.getDefaultBs(), AccountCategory.LI);
-        ledgerAccountRepository.save(ledgerAccount);
+        LedgerAccount account = ledgerAccountRepository.save(ledgerAccount);
+        assertNotNull(account);
     }
 
     @Test
