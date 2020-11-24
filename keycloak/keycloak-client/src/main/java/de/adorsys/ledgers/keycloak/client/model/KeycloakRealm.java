@@ -54,9 +54,12 @@ public class KeycloakRealm {
     }
 
     public boolean notPresentRealm(List<RealmRepresentation> allRealms) {
-        return allRealms.stream()
-                       .map(RealmRepresentation::getRealm)
-                       .noneMatch(realm::equals);
+        if (!allRealms.isEmpty()) {
+            return allRealms.stream()
+                           .map(RealmRepresentation::getRealm)
+                           .noneMatch(realm::equals);
+        }
+        return false;
     }
 
     public List<String> getScopesToAdd(List<ClientScopeRepresentation> scopes) {

@@ -74,7 +74,9 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
     }
 
     private void createRealmRoles(KeycloakRealm realm) {
-        RolesResource rolesResource = keycloak.realms().realm(realm.getRealm()).roles();
+        RolesResource rolesResource = keycloak.realms()
+                                              .realm(realm.getRealm())
+                                              .roles();
         realm.getRolesToAdd(rolesResource.list())
                 .forEach(r -> {
                     rolesResource.create(mapper.createRoleRepresentation(r));
