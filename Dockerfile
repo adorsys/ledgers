@@ -1,4 +1,4 @@
-FROM adorsys/java:8
+FROM adorsys/java:11
 LABEL maintainer=https://git.adorsys.de/adorsys/xs2a/ledgers
 
 ENV SERVER_PORT 8088

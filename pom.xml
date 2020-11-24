@@ -91,9 +91,8 @@
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-		<pmd.version>6.5.0</pmd.version>
-		<pmd.plugin.version>3.10.0</pmd.plugin.version>
+		<java.version>11</java.version>
+		<pmd.plugin.version>3.13.0</pmd.plugin.version>
 		<apache.commons.collections>4.3</apache.commons.collections>
 		<apache.commons.io>2.6</apache.commons.io>
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
@@ -411,18 +410,6 @@
 						</excludeRoot>
 					</excludeRoots>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>net.sourceforge.pmd</groupId>
-						<artifactId>pmd-core</artifactId>
-						<version>${pmd.version}</version> <!-- <- Fixed IdenticalCatchBranches-->
-					</dependency>
-					<dependency>
-						<groupId>net.sourceforge.pmd</groupId>
-						<artifactId>pmd-java</artifactId>
-						<version>${pmd.version}</version> <!-- <- Fixed IdenticalCatchBranches-->
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>

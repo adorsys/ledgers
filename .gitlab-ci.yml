@@ -46,7 +46,7 @@ variables: &variables
   # Build variables         #
   ###########################
 
-  JAVA_TOOL_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAM=3G -XX:MaxRAMFraction=3"
+  JAVA_TOOL_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAM=3G -XX:MaxRAMFraction=3"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 # ------------------------------------------------------------------
@@ -99,7 +99,7 @@ variables: &variables
 #-------------------------------------------------------------------
 
 Lint:Docker_compose:
-  image: maven:3.6-jdk-8-slim
+  image: maven:3.6-jdk-11-slim
   stage: "Lint"
   except:
     - schedules
@@ -141,7 +141,7 @@ Lint:Ledgers_yaml_json_xml:
     - docker run --rm -i hadolint/hadolint < Dockerfile
 
 Lint:PMD_CPD_Report:
-  image: maven:3.6-jdk-8-slim
+  image: maven:3.6-jdk-11-slim
   stage: "Lint"
   except:
     - schedules
@@ -170,7 +170,7 @@ Build:Ledgers:
     - schedules
   <<: *build_java
   variables:
-    BUILD_JAVA_VERSION: system@1.8
+    BUILD_JAVA_VERSION: system@1.11
   artifacts:
     paths:
       - "ledgers-app/target/ledgers-app*jar"
@@ -202,11 +202,14 @@ Build:Ledgers:
 # Tests
 #-------------------------------------------------------------------
 
-Javadoc Check:
+Javadoc Check Java11:
   stage: "Test"
   except:
     - schedules
   script:
+    - jabba use "system@1.11"
+    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
     - mvn -Dmaven.test.skip=true package javadoc:javadoc
   artifacts:
     paths:
@@ -214,11 +217,14 @@ Javadoc Check:
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
     expire_in: "10 day"
 
-Unit Tests:
+Unit Tests Java11:
   stage: "Test"
   except:
     - schedules
   script:
+    - jabba use "system@1.11"
+    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
     - mvn --fail-at-end clean install
   artifacts:
     paths:
@@ -233,7 +239,7 @@ Sonarcube Tests:
     - schedules
     - develop
   script:
-    - jabba use system@1.8
+    - jabba use system@1.11
     - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
     - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
     - mvn -ntp --fail-at-end clean install
