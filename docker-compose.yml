@@ -7,6 +7,20 @@ volumes:
   ledgers-data:
 
 services:
+  ledgers-keycloak:
+    image: adorsys/ledgres-keycloak
+    container_name: ledgers-keycloak
+    restart: on-failure
+    build:
+      context: keycloak
+      dockerfile: Dockerfile
+    networks:
+      - ledgers-net
+    ports:
+    - "8080:8080"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
 
   ledgers:
     image: adorsys/ledgers
@@ -19,14 +33,20 @@ services:
       - ledgers-net
     ports:
       - "8088:8088"
+      - "8188:8001"
     depends_on:
       - ledgers-db
     environment:
-      - SPRING_PROFILES_ACTIVE=postgres
+      - SPRING_PROFILES_ACTIVE=postgres,sandbox
+      - SPRING_JPA_SHOW_SQL=false
+      - KEYCLOAK_AUTH_SERVER_URL=http://ledgers-keycloak:8080/auth
       - DB_HOST=ledgers_db
       - DB_DATABASE=ledgers
       - DB_USER=ledgers
       - DB_PASSWORD=ledgers
+      - LIQUIBASE_ENABLED=true
+      - LEDGERS_SCA_MULTILEVEL_ENABLED=false
+      - LEDGERS_SCA_AUTHORISATION_CONFIRMATION_ENABLED=false
 
   ledgers-db:
     image: centos/postgresql-95-centos7

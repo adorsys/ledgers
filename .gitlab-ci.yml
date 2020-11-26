@@ -29,6 +29,7 @@ variables: &variables
   ############################
 
   DOCKER_IMAGE_NAME_LEDGERS: "ledgers"
+  DOCKER_IMAGE_NAME_LEDGERS_KEYCLOAK: "ledgers-keycloak"
 
   SONAR_HOST: "https://psd2-quality.cloud.adorsys.de"
 
@@ -70,8 +71,10 @@ variables: &variables
 .build_dockerhub_image: &build_dockerhub_image
   script:
     - docker login -u $DOCKER_HUB_LOGIN -p $DOCKER_HUB_PASS
-    - docker build -t "adorsys/ledgers:$DOCKER_TAG" .
+    - docker build -t "adorsys/ledgers:$DOCKER_TAG"
+    - docker build -t "adorsys/ledgers-keycloak:$DOCKER_TAG" keycloak
     - docker push "adorsys/ledgers:$DOCKER_TAG"
+    - docker push "adorsys/ledgers-keycloak:$DOCKER_TAG"
     - docker logout
 
 # Build docker images and put them to DOCKER HUB repo
