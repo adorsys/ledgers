@@ -71,7 +71,7 @@ variables: &variables
 .build_dockerhub_image: &build_dockerhub_image
   script:
     - docker login -u $DOCKER_HUB_LOGIN -p $DOCKER_HUB_PASS
-    - docker build -t "adorsys/ledgers:$DOCKER_TAG"
+    - docker build -t "adorsys/ledgers:$DOCKER_TAG" .
     - docker build -t "adorsys/ledgers-keycloak:$DOCKER_TAG" keycloak
     - docker push "adorsys/ledgers:$DOCKER_TAG"
     - docker push "adorsys/ledgers-keycloak:$DOCKER_TAG"
