@@ -62,10 +62,10 @@ public class ScaResponseConverter {
         return response;
     }
 
-    private <T extends Enum, R extends Enum> void mapEnum(R mapped, Class<T> mapTo, Consumer<T> consumer) {
+    private <T extends Enum<T>, R extends Enum<?>> void mapEnum(R mapped, Class<T> mapTo, Consumer<T> consumer) {
         Optional.ofNullable(mapped)
                 .map(Enum::name)
                 .map(n -> Enum.valueOf(mapTo, n))
-                .ifPresent(t -> consumer.accept((T) t));
+                .ifPresent(consumer);
     }
 }

@@ -16,6 +16,7 @@ import de.adorsys.ledgers.sca.service.impl.mapper.SCAOperationMapper;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import de.adorsys.ledgers.util.hash.HashGenerationException;
 import de.adorsys.ledgers.util.hash.HashGenerator;
@@ -84,6 +85,12 @@ class SCAOperationServiceImplTest {
 
     @Mock
     private Environment env;
+
+    @Mock
+    private ScaOperationValidationService validationService;
+
+    @Mock
+    private UserService userService;
 
     private SCAOperationEntity scaOperationEntity;
     private SCAOperationBO scaOperationBO;
@@ -238,6 +245,7 @@ class SCAOperationServiceImplTest {
     void generateAuthCode_tan_withNullStaticTan() throws HashGenerationException {
         // Given
         //usesStaticTan = true / staticTan = null
+        when(userService.decodeStaticTan(any())).thenReturn(TAN);
         String email = "spe@adorsys.com.ua";
         UserBO userBO = mock(UserBO.class);
         ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
@@ -519,7 +527,7 @@ class SCAOperationServiceImplTest {
 
         assertThat(list.size(), is(3));
 
-        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<SCAOperationEntity>> captor = ArgumentCaptor.forClass(List.class);
 
         when(repository.findByStatus(AuthCodeStatus.SENT)).thenReturn(list);
         when(repository.saveAll(captor.capture())).thenReturn(mock(List.class));
@@ -594,6 +602,7 @@ class SCAOperationServiceImplTest {
     @Test
     void authenticationCompleted() {
         // Given
+        when(validationService.isAnyScaCompleted(any())).thenReturn(true);
         scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
 
@@ -619,8 +628,8 @@ class SCAOperationServiceImplTest {
     @Test
     void authenticationCompleted_multilevel() throws NoSuchFieldException {
         // Given
+        when(validationService.isMultiLevelScaCompleted(any(),any())).thenReturn(true);
         FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("finalWeight"), 100);
         scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
 
@@ -635,7 +644,6 @@ class SCAOperationServiceImplTest {
     void authenticationCompleted_multilevel_unfinished_sca() throws NoSuchFieldException {
         // Given
         FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("finalWeight"), 100);
         scaOperationEntity.setScaWeight(80);
         scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
