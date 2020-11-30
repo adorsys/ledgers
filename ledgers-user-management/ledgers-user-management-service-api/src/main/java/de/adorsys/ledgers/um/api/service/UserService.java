@@ -168,4 +168,6 @@ public interface UserService {
     boolean isPresentBranchCode(String bban);
 
     Page<UserBO> getUsersByRoles(List<UserRoleBO> roles, Pageable pageable);
+
+    String decodeStaticTan(String staticTan);
 }

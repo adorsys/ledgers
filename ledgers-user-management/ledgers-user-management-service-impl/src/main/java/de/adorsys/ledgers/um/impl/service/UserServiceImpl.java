@@ -286,7 +286,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @NotNull
-    public UserEntity getUser(String login) {
+    private UserEntity getUser(String login) {
         return userRepository.findFirstByLogin(login)
                        .orElseThrow(getModuleExceptionSupplier(login, USER_NOT_FOUND, USER_WITH_LOGIN_NOT_FOUND));
     }
@@ -300,6 +300,11 @@ public class UserServiceImpl implements UserService {
     private <T extends UserBO> void decodeStaticTanForUser(T user) {
         Optional.ofNullable(user.getScaUserData())
                 .ifPresent(d -> d.forEach(this::decodeStaticTan));
+    }
+
+    @Override
+    public String decodeStaticTan(String staticTan) {
+        return tanEncryptor.decryptTan(staticTan);
     }
 
     private void decodeStaticTan(ScaUserDataBO scaUserData) {
