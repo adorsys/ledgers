@@ -26,7 +26,7 @@ public class BaseHashItem<T> implements HashItem<T> {
 
     @Override
     public String getAlg() {
-        return HashGeneratorImpl.DEFAULT_HASH_ALG;
+        return HashGenerator.DEFAULT_HASH_ALG;
     }
 
     @Override

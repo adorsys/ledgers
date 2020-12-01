@@ -63,7 +63,7 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
         http
-                .csrf().disable()
+                .csrf().disable()//NOSONAR Reason -> we only work with our proprietary backend services
                 .cors().disable()
                 // .and()
                 .authorizeRequests().antMatchers(APP_WHITELIST).permitAll()
