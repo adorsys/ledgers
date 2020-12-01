@@ -19,6 +19,7 @@ package de.adorsys.ledgers.deposit.db.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+@SuppressWarnings("java:S1700")
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum PaymentType {
     SINGLE("payments"),

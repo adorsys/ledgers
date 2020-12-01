@@ -57,7 +57,7 @@ public class PaymentCoreDataPolicyHelper {
         data.setPaymentsSize("" + targets.size());
         data.setCreditorName("Many Recipients");
         // Hash of all receiving Iban
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("MD5"); //NOSONAR
         BigDecimal amt = BigDecimal.ZERO;
         if (currenciesMatch(targets)) {
             data.setCurrency(targets.iterator().next().getInstructedAmount().getCurrency().getCurrencyCode());

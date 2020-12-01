@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.postings.api.domain;
 
 
+@SuppressWarnings("java:S115")
 public enum PostingTypeBO {
 	/*Describes a business transaction involving different accounts and affecting account balances.*/
 	BUSI_TX,
