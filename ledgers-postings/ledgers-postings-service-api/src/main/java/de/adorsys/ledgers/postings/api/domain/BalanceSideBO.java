@@ -7,6 +7,7 @@ package de.adorsys.ledgers.postings.api.domain;
  * @author fpo
  *
  */
+@SuppressWarnings("java:S115")
 public enum BalanceSideBO {
 	Dr,/*Indicates that the balance of this account increases in the debit.*/
 	Cr,/*Indicates that the balance of this account increases in the credit*/

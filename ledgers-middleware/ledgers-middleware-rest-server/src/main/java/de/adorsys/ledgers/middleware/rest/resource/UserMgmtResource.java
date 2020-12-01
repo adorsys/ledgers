@@ -66,7 +66,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasManagerAccessToUser(#userId)") //TODO move to UserMgmgtStaffResource
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<UserTO> getUserById(String userId) {
         return ResponseEntity.ok(middlewareUserService.findById(userId));
     }
@@ -95,31 +95,11 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasManagerAccessToUser(#userId)") //TODO move to UserMgmtStaffResource
-    public ResponseEntity<Void> updateScaDataByUserId(String userId, List<ScaUserDataTO> data) {
-        UserTO userTO = middlewareUserService.findById(userId);
-        UserTO user = middlewareUserService.updateScaData(userTO.getLogin(), data);
-
-        URI uri = UriComponentsBuilder.fromUriString(BASE_PATH + "/" + user.getId())
-                          .build().toUri();
-
-        return ResponseEntity.created(uri).build();
-    }
-
-    @Override
-    @PreAuthorize("hasAnyRole('SYSTEM')") //TODO move to AdminResource
-    public ResponseEntity<List<UserTO>> getAllUsers() {
-        return ResponseEntity.ok(middlewareUserService.listUsers(0, Integer.MAX_VALUE));
-    }
-
-    @Override
-     //TODO To be refactored when Oauth Flow enabled
     public ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(String authorisationId, String authConfirmCode) {
         return ResponseEntity.ok(authConfirmationService.verifyAuthConfirmationCode(authorisationId, authConfirmCode, scaInfoHolder.getScaInfo().getUserLogin()));
     }
 
     @Override
-    //TODO To be refactored when Oauth Flow enabled
     public ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(String authorisationId, boolean authCodeConfirmed) {
         return ResponseEntity.ok(authConfirmationService.completeAuthConfirmation(authorisationId, authCodeConfirmed, scaInfoHolder.getScaInfo().getUserLogin()));
     }

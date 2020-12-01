@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.UNPROTECTED_ENDPOINT;
+
 @Tag(name = "LDG002 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
 public interface UserMgmtRestAPI {
     String BASE_PATH = "/users";
@@ -44,14 +46,14 @@ public interface UserMgmtRestAPI {
     //==========================================================================================================================
 
     @GetMapping("/multilevel")
-    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Check if multilevel SCA required for certain user")
+    @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Check if multilevel SCA required for certain user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)), description = "Boolean representation of requirement for multi-level sca")
     })
     ResponseEntity<Boolean> multilevel(@RequestParam("login") String login, @RequestParam("iban") String iban);
 
     @PostMapping("/multilevel")
-    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Check if multilevel SCA required for certain user")
+    @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Check if multilevel SCA required for certain user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)), description = "Boolean representation of requirement for multi-level sca")
     })
@@ -69,7 +71,7 @@ public interface UserMgmtRestAPI {
      * @return User object with erased pin
      */
     @PostMapping("/register")
-    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Register", description = "Registers a user."
+    @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Register", description = "Registers a user."
                                                                                                             + "<ul>"
                                                                                                             + "<li>A user is always registered as customer and is activated by default.</li>"
                                                                                                             + "<li>A user can only be given another role by an administrating STAFF member.</li>"
@@ -124,21 +126,6 @@ public interface UserMgmtRestAPI {
     })
     ResponseEntity<Void> updateUserScaData(@RequestBody List<ScaUserDataTO> data);
 
-    @PutMapping("/{userId}/sca-data")
-    @Operation(summary = "Updates user SCA", description = "Updates user authentication methods."
-                                                                   + "<lu>"
-                                                                   + "<li>User is implied from the provided access token.</li>"
-                                                                   + "<li>Actor token (delegation token like ais consent token) can not be used to execute this operation</li>"
-                                                                   + "</ul>")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The user data record without the user pin."),
-            @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified."),
-            @ApiResponse(responseCode = "403", description = "Provided bearer token not qualified for this operation."),
-    })
-    ResponseEntity<Void> updateScaDataByUserId(@PathVariable("userId") String userId, @RequestBody List<ScaUserDataTO> data);
-
     //==========================================================================================================================
     //
     //	USER MANAGEMENT OPERATIONS. ACCESS TOKEN FROM STAFF, SYSTEM REQUIRED
@@ -153,16 +140,6 @@ public interface UserMgmtRestAPI {
     @SecurityRequirement(name = "apiKey")
     @SecurityRequirement(name = "oAuth2")
     ResponseEntity<UserTO> getUserById(@PathVariable("userId") String userId);
-
-    @GetMapping
-    @Operation(summary = "Lists users collection", description = "Lists users collection."
-                                                                         + "<lu>"
-                                                                         + "<li>This can only be called by either SYSTEM or STAFF members.</li>"
-                                                                         + "<li>Will be changed to include pagination and moved to a management interface in the future.</li>"
-                                                                         + "</lu>")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<List<UserTO>> getAllUsers();
 
     @PutMapping("/authorisations/{authorisationId}/confirmation/{authConfirmCode}")
     @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code")

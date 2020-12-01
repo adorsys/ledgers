@@ -18,6 +18,7 @@ import java.util.Map;
 @Headers({"Content-Type: application/x-www-form-urlencoded"})
 public interface KeycloakTokenRestClient {
 
+    @SuppressWarnings("java:S1452")
     @PostMapping(value = "/realms/${keycloak.realm}/protocol/openid-connect/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     ResponseEntity<Map<String, ?>> login(MultiValueMap<String, Object> formParams);
 

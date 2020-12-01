@@ -23,14 +23,17 @@ public class ConfigurableTokenResourceProviderFactory implements RealmResourcePr
 
     @Override
     public void init(Config.Scope config) {
+        //This is a generated stub
     }
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
+        //This is a generated stub
     }
 
     @Override
     public void close() {
+        //This is a generated stub
     }
 
     @Override

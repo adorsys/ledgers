@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.UNPROTECTED_ENDPOINT;
+
 @Tag(name = "LDG009 - Email verification", description = "Provides endpoint for sending mail with verification link and email confirmation.")
 public interface ScaVerificationRestAPI {
     String BASE_PATH = "/emails";
@@ -25,7 +27,7 @@ public interface ScaVerificationRestAPI {
     ResponseEntity<Void> sendEmailVerification(@RequestParam("email") String email);
 
     @GetMapping("/email")
-    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Confirm email")
+    @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Confirm email")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email was successfully confirm."),
             @ApiResponse(responseCode = "400", description = "Invalid verification token for email confirmation or email already confirm."),

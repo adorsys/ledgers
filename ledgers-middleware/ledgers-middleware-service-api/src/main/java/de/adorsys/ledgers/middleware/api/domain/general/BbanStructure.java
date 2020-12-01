@@ -1,7 +1,7 @@
 package de.adorsys.ledgers.middleware.api.domain.general;
 
+import de.adorsys.ledgers.util.random.RandomUtils;
 import lombok.Data;
-import org.apache.commons.lang3.RandomStringUtils;
 
 @Data
 public class BbanStructure {
@@ -18,21 +18,21 @@ public class BbanStructure {
 
             @Override
             String bban(int length) {
-                return RandomStringUtils.random(length, false, true);
+                return RandomUtils.randomString(length, false, true);
             }
         },
         A {  // Upper case letters (alphabetic characters A-Z only)
 
             @Override
             String bban(int length) {
-                return RandomStringUtils.random(length, true, false).toUpperCase();
+                return RandomUtils.randomString(length, true, false).toUpperCase();
             }
         },
         C { // upper and lower case alphanumeric characters (A-Z, a-z and 0-9)
 
             @Override
             String bban(int length) {
-                return RandomStringUtils.random(length, true, true).toUpperCase();
+                return RandomUtils.randomString(length, true, true).toUpperCase();
             }
         };
 
