@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "LDG013 - Admin Management (SYSTEM access)")
 public interface AdminResourceAPI {
     String BASE_PATH = "/admin";
@@ -25,6 +27,12 @@ public interface AdminResourceAPI {
     String PAGE = "page";
     String SIZE = "size";
     String PASSWORD = "password";
+
+    @Operation(summary = "Lists all users, un-paged")
+    @SecurityRequirement(name = "apiKey")
+    @SecurityRequirement(name = "oAuth2")
+    @GetMapping("users/all")
+    ResponseEntity<List<UserTO>> getAllUsers();
 
     @Operation(summary = "Get users with filtering",
             description = "Retrieves Page of Users with multiple filters")

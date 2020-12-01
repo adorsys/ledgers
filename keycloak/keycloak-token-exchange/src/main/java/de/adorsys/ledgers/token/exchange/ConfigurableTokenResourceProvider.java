@@ -58,6 +58,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
 
     @Override
     public void close() {
+        //This is a generated stub
     }
 
     @OPTIONS

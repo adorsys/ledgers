@@ -4,6 +4,7 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.general.AddressTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.*;
+import de.adorsys.ledgers.util.random.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.BULK;
 import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.SINGLE;
@@ -84,7 +84,7 @@ public class PaymentGenerationService {
 
     private String generateEndToEndId(String branchId) {
         return String.join("_", branchId,
-                String.valueOf(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) + random.nextInt(9),
-                String.valueOf(ThreadLocalRandom.current().nextLong(10000, 99999)));
+                           String.valueOf(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) + random.nextInt(9),
+                           String.valueOf(RandomUtils.threadRandomLong(10000, 99999)));
     }
 }

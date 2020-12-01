@@ -1,6 +1,7 @@
 package utils;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import org.jetbrains.annotations.NotNull;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -9,6 +10,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+@SuppressWarnings("java:S2187")
 @Testcontainers
 public class KeycloakContainerTest {
 
@@ -19,7 +21,7 @@ public class KeycloakContainerTest {
                                                                       .withEnv("DB_VENDOR", "h2");
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+        public void initialize(@NotNull ConfigurableApplicationContext configurableApplicationContext) {
             if (!keycloakContainer.isRunning()) {
                 keycloakContainer.start();
             }
