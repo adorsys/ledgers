@@ -27,7 +27,7 @@ public interface KeycloakDataMapper {
     }
 
     default UserRepresentation toUpdateUserPresentation(UserRepresentation userRepresentation, KeycloakUser user) {
-        // TODO: add fields to update if needed
+        //NOSONAR TODO: add fields to update if needed
         userRepresentation.setFirstName(user.getFirstName());
         userRepresentation.setLastName(user.getLastName());
         userRepresentation.setEnabled(user.getEnabled());
