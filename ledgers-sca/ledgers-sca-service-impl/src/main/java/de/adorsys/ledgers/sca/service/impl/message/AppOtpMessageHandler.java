@@ -29,8 +29,8 @@ public class AppOtpMessageHandler implements OtpMessageHandler<AppScaMessage> {
         msg.setAddressedUser(data.getUserLogin());
         msg.setAuthorizationId(data.getAuthorisationId());
         msg.setAuthorizationTTL(data.getValiditySeconds());
-        //msg.setConfirmationUrl(null);//Shall be filled by OBA
-        //msg.setHttpMethod(null);//Shall be filled by OBA
+        msg.setConfirmationUrl(null);//Shall be filled by OBA
+        msg.setHttpMethod(null);//Shall be filled by OBA
         msg.setObjId(data.getOpId());
         msg.setOpType(data.getOpType());
         msg.setAuthCode(tan);

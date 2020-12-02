@@ -27,10 +27,12 @@ import org.slf4j.LoggerFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@SuppressWarnings("java:S1130")
 public class HashGeneratorImpl implements HashGenerator {
     private static final Logger logger = LoggerFactory.getLogger(HashGeneratorImpl.class);
     private static final ObjectMapper objectMapper = new ObjectMapper()
                                                              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    public static final String ERROR_MSG = "Can't generate the hash";
 
     @Override
     public <T> String hash(HashItem<T> hashItem) throws HashGenerationException {
@@ -42,9 +44,9 @@ public class HashGeneratorImpl implements HashGenerator {
             String alg = StringUtils.isBlank(hashItem.getAlg()) ? DEFAULT_HASH_ALG : hashItem.getAlg();
             digest = MessageDigest.getInstance(alg);
             valueAsBytes = objectMapper.writeValueAsBytes(hashItem.getItem());
-        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
-            logger.error("Can't generate the hash", e);
-            throw new HashGenerationException("Can't generate the hash", e);
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {//NOSONAR
+            logger.error(ERROR_MSG, e);
+            throw new HashGenerationException(ERROR_MSG, e);
         }
 
         return Base16.encode(digest.digest(valueAsBytes));

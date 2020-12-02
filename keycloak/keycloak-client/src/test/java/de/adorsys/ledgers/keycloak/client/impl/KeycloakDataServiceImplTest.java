@@ -59,6 +59,8 @@ class KeycloakDataServiceImplTest {
 
         service.createDefaultSchema();
         verify(clientResource, times(1)).create(any());
+        verify(scopesResource, times(3)).create(any());
+        verify(rolesResource, times(4)).create(any());
     }
 
     @Test

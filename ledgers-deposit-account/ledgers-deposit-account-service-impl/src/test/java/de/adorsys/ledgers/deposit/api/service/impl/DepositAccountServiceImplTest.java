@@ -56,6 +56,8 @@ class DepositAccountServiceImplTest {
     private static final String SYSTEM = "System";
     private static final String USER_ID = "123";
     private static final LocalDateTime CREATED = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final Currency EUR = Currency.getInstance("EUR");
 
     @Mock
     private DepositAccountRepository depositAccountRepository;
@@ -103,13 +105,9 @@ class DepositAccountServiceImplTest {
     void createDepositAccount_account_already_exist() {
         // Given
         when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false)));
-
+        DepositAccountBO depositAccountBO = getDepositAccountBO();
         // Then
-        assertThrows(DepositModuleException.class, () -> {
-            DepositAccountBO depositAccount = depositAccountService.createNewAccount(getDepositAccountBO(), SYSTEM, "");
-            assertNotNull(depositAccount);
-            assertFalse(depositAccount.getId().isEmpty());
-        });
+        assertThrows(DepositModuleException.class, () -> depositAccountService.createNewAccount(depositAccountBO, SYSTEM, ""));
     }
 
     @Test
@@ -118,7 +116,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
-        DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getAccountDetailsById("id", LocalDateTime.now(), false);
+        DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getAccountDetailsById("id", NOW, false);
         // Then
         assertNotNull(depositAccountDetailsBO);
         assertNotNull(depositAccountDetailsBO.getAccount());
@@ -130,7 +128,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findById("wrong_id")).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountDetailsById("wrong_id", LocalDateTime.now(), false));
+        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountDetailsById("wrong_id", NOW, false));
     }
 
     @Test
@@ -139,7 +137,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
-        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         // Then
         assertNotNull(accountDetailsBO);
         assertNotNull(accountDetailsBO.getAccount());
@@ -151,7 +149,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
-        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
 
         // Then
@@ -166,7 +164,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true)));
 
         // When
-        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
 
         // Then
@@ -181,7 +179,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true)));
 
         // When
-        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", Currency.getInstance("EUR"), LocalDateTime.now(), false);
+        DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
 
         // Then
@@ -254,8 +252,9 @@ class DepositAccountServiceImplTest {
 
     @Test
     void confirmationOfFunds_Failure() {
+        FundsConfirmationRequestBO requestBO = readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml");
         // Then
-        assertThrows(DepositModuleException.class, () -> depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml")));
+        assertThrows(DepositModuleException.class, () -> depositAccountService.confirmationOfFunds(requestBO));
     }
 
     @Test
@@ -271,7 +270,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false)));
 
         // When
-        DepositAccountBO result = depositAccountService.getAccountByIbanAndCurrency("iban", Currency.getInstance("EUR"));
+        DepositAccountBO result = depositAccountService.getAccountByIbanAndCurrency("iban", EUR);
 
         // Then
         assertEquals(getDepositAccountBO(), result);
@@ -283,7 +282,7 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountByIbanAndCurrency("iban", Currency.getInstance("EUR")));
+        assertThrows(DepositModuleException.class, () -> depositAccountService.getAccountByIbanAndCurrency("iban", EUR));
     }
 
     @Test
@@ -315,7 +314,7 @@ class DepositAccountServiceImplTest {
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
 
         // When
-        Page<TransactionDetailsBO> result = depositAccountService.getTransactionsByDatesPaged("accountId", LocalDateTime.now(), LocalDateTime.now(), Pageable.unpaged());
+        Page<TransactionDetailsBO> result = depositAccountService.getTransactionsByDatesPaged("accountId", NOW, NOW, Pageable.unpaged());
 
         // Then
         assertEquals(new PageImpl<>(Collections.singletonList(readFile(TransactionDetailsBO.class, "Transaction.yml"))), result);
@@ -374,7 +373,7 @@ class DepositAccountServiceImplTest {
     private DepositAccountBO getDepositAccountBO() {
         return DepositAccountBO.builder().id("id")
                        .iban("iban").msisdn("msisdn")
-                       .currency(Currency.getInstance("EUR"))
+                       .currency(EUR)
                        .name("name").product("product")
                        .accountType(AccountTypeBO.CASH)
                        .bic("bic")
@@ -402,7 +401,7 @@ class DepositAccountServiceImplTest {
         AccountStmtBO result = new AccountStmtBO();
         LedgerAccountBO ledgerAccountBO2 = readFile(LedgerAccountBO.class, "LedgerAccount.yml");
         result.setAccount(ledgerAccountBO2);
-        result.setPstTime(LocalDateTime.now());
+        result.setPstTime(NOW);
         result.setTotalCredit(BigDecimal.valueOf(amount));
         return result;
     }

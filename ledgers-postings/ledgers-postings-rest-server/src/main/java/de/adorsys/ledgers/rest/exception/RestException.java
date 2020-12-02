@@ -24,9 +24,9 @@ public abstract class RestException extends RuntimeException {
 
     protected String devMessage;
 
-    public RestException() {}
+    protected RestException() {}
 
-    public RestException(String message) {
+    protected RestException(String message) {
         super(message);
     }
 

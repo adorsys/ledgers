@@ -37,9 +37,7 @@ class HashGeneratorImplTest {
     void hashWithException() throws HashGenerationException {
         // Given
         HashGeneratorImpl hashGenerator = new HashGeneratorImpl();
-
-        // Then
-        assertThrows(HashGenerationException.class, () -> hashGenerator.hash(new HashItem<String>() {
+        HashItem<String> hashItem = new HashItem<>() {
             @Override
             public String getAlg() {
                 return "UNKNOWN_ALG";
@@ -49,6 +47,8 @@ class HashGeneratorImplTest {
             public String getItem() {
                 return PLAIN_TEXT;
             }
-        }));
+        };
+        // Then
+        assertThrows(HashGenerationException.class, () -> hashGenerator.hash(hashItem));
     }
 }

@@ -44,7 +44,7 @@ public class ExceptionAdvisor {
     private static final String DATE_TIME = "dateTime";
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map> globalExceptionHandler(Exception ex) {
+    public ResponseEntity<Map<String,String>> globalExceptionHandler(Exception ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         Map<String, String> body = getHandlerContent(status, null, null, "Something went wrong during execution of your request.");
         log.error("INTERNAL SERVER ERROR", ex);
@@ -52,7 +52,7 @@ public class ExceptionAdvisor {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map> accessDeniedExceptionHandler(AccessDeniedException ex) {
+    public ResponseEntity<Map<String,String>> accessDeniedExceptionHandler(AccessDeniedException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         Map<String, String> body = getHandlerContent(status, null, null, "Access Denied! You're trying to access resources you have no permission for.");
         log.error("Access Denied: {}", ex.getMessage());
@@ -60,42 +60,42 @@ public class ExceptionAdvisor {
     }
 
     @ExceptionHandler(MiddlewareModuleException.class)
-    public ResponseEntity<Map> handleMiddlewareModuleException(MiddlewareModuleException ex) {
+    public ResponseEntity<Map<String,String>> handleMiddlewareModuleException(MiddlewareModuleException ex) {
         HttpStatus status = MiddlewareHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(PostingModuleException.class)
-    public ResponseEntity<Map> handlePostingModuleException(PostingModuleException ex) {
+    public ResponseEntity<Map<String,String>> handlePostingModuleException(PostingModuleException ex) {
         HttpStatus status = PostingHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(UserManagementModuleException.class)
-    public ResponseEntity<Map> handleUserManagementModuleException(UserManagementModuleException ex) {
+    public ResponseEntity<Map<String,String>> handleUserManagementModuleException(UserManagementModuleException ex) {
         HttpStatus status = UserManagementHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(ScaModuleException.class)
-    public ResponseEntity<Map> handleScaModuleException(ScaModuleException ex) {
+    public ResponseEntity<Map<String,String>> handleScaModuleException(ScaModuleException ex) {
         HttpStatus status = ScaHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(DepositModuleException.class)
-    public ResponseEntity<Map> handleDepositModuleException(DepositModuleException ex) {
+    public ResponseEntity<Map<String,String>> handleDepositModuleException(DepositModuleException ex) {
         HttpStatus status = DepositHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
     @ExceptionHandler(FeignException.class)
-    public ResponseEntity<Map> handleFeignException(FeignException ex) {
+    public ResponseEntity<Map<String,String>> handleFeignException(FeignException ex) {
         HttpStatus status = HttpStatus.CONFLICT;
         Map<String, String> body = getHandlerContent(status, "Internal Rest Exception!", null, "Something went wrong during server internal interaction. \nPlease consult your bank for details.");
         log.error(ex.contentUTF8());
