@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -69,6 +70,15 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         ClientsResource clientResource = mock(ClientsResource.class);
         when(realmResource.clients()).thenReturn(clientResource);
+
+        boolean exists = service.clientExists();
+        assertFalse(exists);
+    }
+
+    @Test
+    void clientExists_nf() {
+        RealmResource realmResource = mock(RealmResource.class);
+        when(keycloak.realm(any())).thenThrow(NotFoundException.class);
 
         boolean exists = service.clientExists();
         assertFalse(exists);
