@@ -156,7 +156,8 @@
 			**/ledgers-utils/**/*,
 			**/*Provider*.java,
 			**/*Test*.java,
-			**/api/**/*
+			**/api/**/*,
+			**/keycloak/client/model/**/*
 		</sonar.coverage.exclusions>
 		<sonar.moduleName>${project.artifactId}</sonar.moduleName>
 

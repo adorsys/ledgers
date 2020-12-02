@@ -441,6 +441,12 @@ class MiddlewareAccountManagementServiceImplTest {
         verify(keycloakDataService, times(1)).deleteUser(userBO.getLogin());
     }
 
+    @Test
+    void deleteTransactions() {
+        middlewareService.deleteTransactions(USER_ID, UserRoleTO.CUSTOMER, ACCOUNT_ID);
+        verify(depositAccountService, times(1)).deleteTransactions(any());
+    }
+
     private CustomPageImpl<Object> getPageImpl() {
         return new CustomPageImpl<>();
     }
