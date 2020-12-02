@@ -59,7 +59,7 @@ public class KeycloakRealm {
                            .map(RealmRepresentation::getRealm)
                            .noneMatch(realm::equals);
         }
-        return false;
+        return true;
     }
 
     public List<String> getScopesToAdd(List<ClientScopeRepresentation> scopes) {

@@ -30,7 +30,7 @@ class ExceptionAdvisorTest {
                                                    .build();
 
         // When
-        ResponseEntity<Map> result = advisor.handlePostingModuleException(exception);
+        ResponseEntity<Map<String,String>> result = advisor.handlePostingModuleException(exception);
 
         // Then
         assertSame(HttpStatus.NOT_FOUND, result.getStatusCode());

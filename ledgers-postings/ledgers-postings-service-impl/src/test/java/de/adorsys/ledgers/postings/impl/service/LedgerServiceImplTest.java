@@ -94,8 +94,9 @@ class LedgerServiceImplTest {
 
     @Test
     void new_ledgerAccount_ledger_account_name_absent() {
+        LedgerAccountBO ledgerAccountBO = new LedgerAccountBO();
         // Then
-        assertThrows(PostingModuleException.class, () -> ledgerService.newLedgerAccount(new LedgerAccountBO(), USER_NAME));
+        assertThrows(PostingModuleException.class, () -> ledgerService.newLedgerAccount(ledgerAccountBO, USER_NAME));
     }
 
     @Test
@@ -114,9 +115,9 @@ class LedgerServiceImplTest {
     void findLedgerAccountById_nf() {
         // Given
         when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.empty());
-
+        String id = LEDGER_ACCOUNT.getId();
         // Then
-        assertThrows(PostingModuleException.class, () -> ledgerService.findLedgerAccountById(LEDGER_ACCOUNT.getId()));
+        assertThrows(PostingModuleException.class, () -> ledgerService.findLedgerAccountById(id));
     }
 
     @Test
@@ -136,11 +137,9 @@ class LedgerServiceImplTest {
     void findLedgerAccount_nf() {
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString())).thenReturn(Optional.empty());
         when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.of(new Ledger()));
-
-        assertThrows(PostingModuleException.class, () -> {
-            LedgerAccountBO result = ledgerService.findLedgerAccount(new LedgerBO("name", null), LEDGER_ACCOUNT.getName());
-            assertEquals(new LedgerAccountBO(), result);
-        });
+        LedgerBO ledgerBO = new LedgerBO("name", null);
+        String name = LEDGER_ACCOUNT.getName();
+        assertThrows(PostingModuleException.class, () -> ledgerService.findLedgerAccount(ledgerBO, name));
     }
 
     @Test

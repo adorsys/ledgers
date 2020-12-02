@@ -31,14 +31,16 @@ class AccountResourceTest {
 
     @Test
     void fundsConfirmation_zero() {
+        FundsConfirmationRequestTO request = getFundsConfirmationRequest(BigDecimal.ZERO);
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.ZERO)));
+        assertThrows(MiddlewareModuleException.class, () -> accountResource.fundsConfirmation(request));
     }
 
     @Test
     void fundsConfirmation_negative() {
+        FundsConfirmationRequestTO request = getFundsConfirmationRequest(BigDecimal.valueOf(-100));
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> accountResource.fundsConfirmation(getFundsConfirmationRequest(BigDecimal.valueOf(-100))));
+        assertThrows(MiddlewareModuleException.class, () -> accountResource.fundsConfirmation(request));
     }
 
     @Test()

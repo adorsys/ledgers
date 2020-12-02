@@ -67,10 +67,8 @@ class DepositAccountPaymentServiceImplTest {
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(DepositModuleException.class, () -> {
-            paymentService.getPaymentStatusById(PAYMENT_ID);
-            verify(paymentRepository, times(1)).findById(PAYMENT_ID);
-        });
+        assertThrows(DepositModuleException.class, () -> paymentService.getPaymentStatusById(PAYMENT_ID));
+        verify(paymentRepository, times(1)).findById(PAYMENT_ID);
     }
 
     @Test
@@ -81,10 +79,13 @@ class DepositAccountPaymentServiceImplTest {
 
     @Test
     void getPaymentById_not_found() {
-        assertThrows(DepositModuleException.class, () -> {
-            testGetPaymentById(WRONG_PAYMENT_ID, getSinglePayment(), getSinglePaymentBO(), true);
-            testGetPaymentById(WRONG_PAYMENT_ID, getBulkPayment(), getBulkPaymentBO(), true);
-        });
+        Payment singlePayment = getSinglePayment();
+        PaymentBO singlePaymentBO = getSinglePaymentBO();
+        assertThrows(DepositModuleException.class, () -> testGetPaymentById(WRONG_PAYMENT_ID, singlePayment, singlePaymentBO, true));
+
+        Payment bulkPayment = getBulkPayment();
+        PaymentBO bulkPaymentBO = getBulkPaymentBO();
+        assertThrows(DepositModuleException.class, () -> testGetPaymentById(WRONG_PAYMENT_ID, bulkPayment, bulkPaymentBO, true));
     }
 
     @Test
@@ -108,17 +109,18 @@ class DepositAccountPaymentServiceImplTest {
         when(paymentMapper.toPayment(any())).thenReturn(getSinglePayment());
         when(accountService.confirmationOfFunds(any())).thenReturn(false);
 
+        PaymentBO singlePaymentBO = getSinglePaymentBO();
         // Then
-        assertThrows(DepositModuleException.class, () -> paymentService.initiatePayment(getSinglePaymentBO(), TransactionStatusBO.ACTC));
+        assertThrows(DepositModuleException.class, () -> paymentService.initiatePayment(singlePaymentBO, TransactionStatusBO.ACTC));
     }
 
     @Test
     void initiatePayment_payment_already_exists() {
         // Given
         when(paymentRepository.existsById(any())).thenReturn(true);
-
+        PaymentBO singlePaymentBO = getSinglePaymentBO();
         // Then
-        assertThrows(DepositModuleException.class, () -> paymentService.initiatePayment(getSinglePaymentBO(), TransactionStatusBO.ACTC));
+        assertThrows(DepositModuleException.class, () -> paymentService.initiatePayment(singlePaymentBO, TransactionStatusBO.ACTC));
     }
 
     @Test
@@ -144,10 +146,8 @@ class DepositAccountPaymentServiceImplTest {
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(DepositModuleException.class, () -> {
-            paymentService.cancelPayment(PAYMENT_ID);
-            verify(paymentRepository, times(1)).findById(PAYMENT_ID);
-        });
+        assertThrows(DepositModuleException.class, () -> paymentService.cancelPayment(PAYMENT_ID));
+        verify(paymentRepository, times(1)).findById(PAYMENT_ID);
     }
 
     @Test
@@ -156,10 +156,8 @@ class DepositAccountPaymentServiceImplTest {
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(readFile(Payment.class, "PaymentSingleACSC.yml")));
 
         // Then
-        assertThrows(DepositModuleException.class, () -> {
-            paymentService.cancelPayment(PAYMENT_ID);
-            verify(paymentRepository, times(1)).findById(PAYMENT_ID);
-        });
+        assertThrows(DepositModuleException.class, () -> paymentService.cancelPayment(PAYMENT_ID));
+        verify(paymentRepository, times(1)).findById(PAYMENT_ID);
     }
 
     @Test

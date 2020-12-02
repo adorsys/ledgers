@@ -32,7 +32,7 @@ public class ExceptionAdvisor {
     private static final String DATE_TIME = "dateTime";
 
     @ExceptionHandler(RestException.class)
-    public ResponseEntity<Map> handleRestException(RestException ex) {
+    public ResponseEntity<Map<String, String>> handleRestException(RestException ex) {
         Map<String, String> body = getHandlerContent(ex.getCode(), ex.getMessage(), ex.devMessage);
         return new ResponseEntity<>(body, ex.getStatus());
     }

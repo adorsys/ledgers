@@ -16,10 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,9 +76,9 @@ class TransactionServiceImplTest {
     void bookMockTransaction_ledgersNotFound() {
         // Given
         when(depositAccountConfigService.getLedger()).thenReturn("ledger");
-
+        List<MockBookingDetailsBO> detailsBOList = Collections.singletonList(getMockBookingDetailsBO(BigDecimal.TEN));
         // Then
-        assertThrows(IllegalStateException.class, () -> transactionService.bookMockTransaction(Collections.singletonList(getMockBookingDetailsBO(BigDecimal.TEN))));
+        assertThrows(IllegalStateException.class, () -> transactionService.bookMockTransaction(detailsBOList));
     }
 
     private MockBookingDetailsBO getMockBookingDetailsBO(BigDecimal amount) {

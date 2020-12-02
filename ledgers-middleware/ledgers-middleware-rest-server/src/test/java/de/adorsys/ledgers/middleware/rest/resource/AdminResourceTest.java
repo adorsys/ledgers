@@ -113,16 +113,16 @@ class AdminResourceTest {
     void user_diff_in_roles() {
         when(userService.findById(any())).thenReturn(getUserBO(TPP_ID, TPP_ID, UserRoleBO.STAFF));
         ReflectionTestUtils.setField(resource, "userMapper", Mappers.getMapper(UserMapper.class));
-
-        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID, TPP_ID, UserRoleTO.SYSTEM)));
+        UserTO userTO = getUserTO(TPP_ID, TPP_ID, UserRoleTO.SYSTEM);
+        assertThrows(MiddlewareModuleException.class, () -> resource.user(userTO));
     }
 
     @Test
     void user_diff_in_branch() {
         when(userService.findById(any())).thenReturn(getUserBO(TPP_ID, TPP_ID + 1, UserRoleBO.STAFF));
         ReflectionTestUtils.setField(resource, "userMapper", Mappers.getMapper(UserMapper.class));
-
-        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF)));
+        UserTO userTO = getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF);
+        assertThrows(MiddlewareModuleException.class, () -> resource.user(userTO));
     }
 
     @Test
@@ -131,8 +131,8 @@ class AdminResourceTest {
         userFromDb.setBlocked(true);
         when(userService.findById(any())).thenReturn(userFromDb);
         ReflectionTestUtils.setField(resource, "userMapper", Mappers.getMapper(UserMapper.class));
-
-        assertThrows(MiddlewareModuleException.class, () -> resource.user(getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF)));
+        UserTO userTO = getUserTO(TPP_ID, TPP_ID, UserRoleTO.STAFF);
+        assertThrows(MiddlewareModuleException.class, () -> resource.user(userTO));
     }
 
     private UserBO getUserBO(String id, String branch, UserRoleBO role) {

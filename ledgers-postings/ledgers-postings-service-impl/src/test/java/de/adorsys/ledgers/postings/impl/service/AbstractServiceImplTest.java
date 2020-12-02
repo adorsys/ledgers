@@ -69,25 +69,26 @@ class AbstractServiceImplTest {
     @Test
     void loadCoa_no_identifier_present() {
         // Then
-        assertThrows(PostingModuleException.class, () -> service.loadCoa(getCoaBO(null, null)));
+        ChartOfAccountBO coaBO = getCoaBO(null, null);
+        assertThrows(PostingModuleException.class, () -> service.loadCoa(coaBO));
     }
 
     @Test
     void loadCoa_by_id_not_found() {
         // Given
         when(chartOfAccountRepo.findById(anyString())).thenReturn(Optional.empty());
-
+        ChartOfAccountBO coaBO = getCoaBO("id", "name");
         // Then
-        assertThrows(PostingModuleException.class, () -> service.loadCoa(getCoaBO("id", "name")));
+        assertThrows(PostingModuleException.class, () -> service.loadCoa(coaBO));
     }
 
     @Test
     void loadCoa_by_name_not_found() {
         // Given
         when(chartOfAccountRepo.findOptionalByName(anyString())).thenReturn(Optional.empty());
-
+        ChartOfAccountBO coaBO = getCoaBO(null, "name");
         // Then
-        assertThrows(PostingModuleException.class, () -> service.loadCoa(getCoaBO(null, "name")));
+        assertThrows(PostingModuleException.class, () -> service.loadCoa(coaBO));
     }
 
     @Test
@@ -141,12 +142,9 @@ class AbstractServiceImplTest {
     void loadLedgerAccountBO_by_name_n_ledger_insufficient_ledger_info() {
         // Given
         LedgerBO ledger = getLedger(null, null);
-
+        LedgerAccountBO ledgerAccountBO = getLedgerAccountBO(null, ACCOUNT_NAME, ledger);
         // Then
-        assertThrows(PostingModuleException.class, () -> {
-            LedgerAccount result = service.loadLedgerAccountBO(getLedgerAccountBO(null, ACCOUNT_NAME, ledger));
-            assertEquals(new LedgerAccount(), result);
-        });
+        assertThrows(PostingModuleException.class, () -> service.loadLedgerAccountBO(ledgerAccountBO));
     }
 
     @Test
@@ -154,12 +152,9 @@ class AbstractServiceImplTest {
         // Given
         when(ledgerAccountRepository.findById(anyString())).thenReturn(Optional.empty());
         LedgerBO ledger = getLedger(null, null);
-
+        LedgerAccountBO ledgerAccountBO = getLedgerAccountBO(ACCOUNT_ID, ACCOUNT_NAME, ledger);
         // Then
-        assertThrows(PostingModuleException.class, () -> {
-            LedgerAccount result = service.loadLedgerAccountBO(getLedgerAccountBO(ACCOUNT_ID, ACCOUNT_NAME, ledger));
-            assertEquals(new LedgerAccount(), result);
-        });
+        assertThrows(PostingModuleException.class, () -> service.loadLedgerAccountBO(ledgerAccountBO));
     }
 
     @Test
@@ -168,33 +163,24 @@ class AbstractServiceImplTest {
         when(ledgerRepository.findById(anyString())).thenReturn(Optional.of(new Ledger()));
         when(ledgerAccountRepository.findOptionalByLedgerAndName(any(), anyString())).thenReturn(Optional.empty());
         LedgerBO ledger = getLedger(LEDGER_ID, null);
-
+        LedgerAccountBO ledgerAccountBO = getLedgerAccountBO(null, ACCOUNT_NAME, ledger);
         // Then
-        assertThrows(PostingModuleException.class, () -> {
-            LedgerAccount result = service.loadLedgerAccountBO(getLedgerAccountBO(null, ACCOUNT_NAME, ledger));
-            assertEquals(new LedgerAccount(), result);
-        });
+        assertThrows(PostingModuleException.class, () -> service.loadLedgerAccountBO(ledgerAccountBO));
     }
 
     @Test
     void loadLedgerAccountBO_null() {
         // Then
-        assertThrows(PostingModuleException.class, () -> {
-            LedgerAccount result = service.loadLedgerAccountBO(null);
-            assertEquals(new LedgerAccount(), result);
-        });
+        assertThrows(PostingModuleException.class, () -> service.loadLedgerAccountBO(null));
     }
 
     @Test
     void loadLedgerAccountBO_null_info() {
         // Given
         LedgerBO ledger = getLedger(LEDGER_ID, null);
-
+        LedgerAccountBO ledgerAccountBO = getLedgerAccountBO(null, null, ledger);
         // Then
-        assertThrows(PostingModuleException.class, () -> {
-            LedgerAccount result = service.loadLedgerAccountBO(getLedgerAccountBO(null, null, ledger));
-            assertEquals(new LedgerAccount(), result);
-        });
+        assertThrows(PostingModuleException.class, () -> service.loadLedgerAccountBO(ledgerAccountBO));
     }
 
     @Test
@@ -207,18 +193,18 @@ class AbstractServiceImplTest {
     void loadLedger_id_nf() {
         // Given
         when(ledgerRepository.findById(anyString())).thenReturn(Optional.empty());
-
+        LedgerBO ledger = getLedger(LEDGER_ID, LEDGER_NAME);
         // Then
-        assertThrows(PostingModuleException.class, () -> service.loadLedger(getLedger(LEDGER_ID, LEDGER_NAME)));
+        assertThrows(PostingModuleException.class, () -> service.loadLedger(ledger));
     }
 
     @Test
     void loadLedger_name_nf() {
         // Given
         when(ledgerRepository.findOptionalByName(anyString())).thenReturn(Optional.empty());
-
+        LedgerBO ledger = getLedger(null, LEDGER_NAME);
         // Then
-        assertThrows(PostingModuleException.class, () -> service.loadLedger(getLedger(null, LEDGER_NAME)));
+        assertThrows(PostingModuleException.class, () -> service.loadLedger(ledger));
     }
 
     @Test

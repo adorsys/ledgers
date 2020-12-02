@@ -43,7 +43,7 @@ import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.BULK;
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.SINGLE;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSP;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -101,15 +101,16 @@ class DepositAccountTransactionServiceImplTest {
     void depositCash_accountNotFound() {
         // Given
         when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenThrow(DepositModuleException.class);
-
+        AmountBO amountBO = new AmountBO(EUR, BigDecimal.TEN);
         // Then
-        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.TEN), "recordUser"));
+        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, amountBO, "recordUser"));
     }
 
     @Test
     void depositCash_amountLessThanZero() {
+        AmountBO amountBO = new AmountBO(EUR, BigDecimal.valueOf(-123L));
         // Then
-        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.valueOf(-123L)), "recordUser"));
+        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, amountBO, "recordUser"));
     }
 
     @Test
@@ -120,18 +121,18 @@ class DepositAccountTransactionServiceImplTest {
         blockedAccount.setBlocked(true);
         depositAccountDetailsBO.setAccount(blockedAccount);
         when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(depositAccountDetailsBO);
-
+        AmountBO amountBO = new AmountBO(EUR, BigDecimal.valueOf(123L));
         // Then
-        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(EUR, BigDecimal.valueOf(123L)), "recordUser"));
+        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, amountBO, "recordUser"));
     }
 
     @Test
     void depositCash_differentCurrencies() {
         // Given
         when(depositAccountService.getAccountDetailsById(anyString(), any(), anyBoolean())).thenReturn(getDepositAccountBO());
-
+        AmountBO amountBO = new AmountBO(USD, BigDecimal.TEN);
         // Then
-        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, new AmountBO(USD, BigDecimal.TEN), "recordUser"));
+        assertThrows(DepositModuleException.class, () -> transactionService.depositCash(ACCOUNT_ID, amountBO, "recordUser"));
     }
 
     @Test
@@ -470,7 +471,8 @@ class DepositAccountTransactionServiceImplTest {
         List<PostingLineBO> debitLines = lines.stream().filter(l -> l.getDebitAmount().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
         assertThat(creditLines.size()).isEqualTo(4);
         assertThat(debitLines.size()).isEqualTo(3);
-        assertThat(creditLines.stream().map(PostingLineBO::getCreditAmount).reduce(BigDecimal::add).equals(debitLines.stream().map(PostingLineBO::getDebitAmount).reduce(BigDecimal::add))).isTrue();
+        assertEquals(debitLines.stream().map(PostingLineBO::getDebitAmount).reduce(BigDecimal::add),
+                     creditLines.stream().map(PostingLineBO::getCreditAmount).reduce(BigDecimal::add));
 
         lines.forEach(l -> checkLine(l, posting));
     }
