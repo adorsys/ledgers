@@ -17,9 +17,9 @@ import java.util.List;
 
 @Service
 public class AccountStmtServiceImpl extends AbstractServiceImpl implements AccountStmtService {
-    private AccountStmtRepository accountStmtRepository;
-    private PostingLineRepository postingLineRepository;
-    private AccountStmtMapper accountStmtMapper = Mappers.getMapper(AccountStmtMapper.class);
+    private final AccountStmtRepository accountStmtRepository;
+    private final PostingLineRepository postingLineRepository;
+    private final AccountStmtMapper accountStmtMapper = Mappers.getMapper(AccountStmtMapper.class);
 
     public AccountStmtServiceImpl(LedgerAccountRepository ledgerAccountRepository, ChartOfAccountRepository chartOfAccountRepo, LedgerRepository ledgerRepository, AccountStmtRepository accountStmtRepository, PostingLineRepository postingLineRepository) {
         super(ledgerAccountRepository, chartOfAccountRepo, ledgerRepository);
@@ -43,7 +43,7 @@ public class AccountStmtServiceImpl extends AbstractServiceImpl implements Accou
 
     @Override
     public AccountStmtBO closeStmt(AccountStmtBO stmt) {
-        //TODO @fpo Auto-generated method stub
+        //Auto-generated method stub
         return null;
     }
 
