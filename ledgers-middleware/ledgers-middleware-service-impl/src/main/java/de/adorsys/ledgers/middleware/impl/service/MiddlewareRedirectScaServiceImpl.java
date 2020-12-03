@@ -13,6 +13,7 @@ import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseConverter;
 import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,9 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
         SCAOperationBO operation = scaOperationService.checkIfExistsOrNew(codeData);
 
         try {
-            return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(null, operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), 100, null);
+            String message = messageResolver.updateMessage(null, operation);
+            BearerTokenBO bearerToken = bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken());
+            return scaResponseConverter.mapResponse(operation, user.getScaUserData(), message, bearerToken, 100, null);
         } catch (MiddlewareModuleException e) {
             throw scaOperationService.updateFailedCount(operation.getId(), true);
         }

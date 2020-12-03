@@ -42,6 +42,12 @@ public class AdminResource implements AdminResourceAPI {
     private final UserMapper userMapper;
 
     @Override
+    @PreAuthorize("hasAnyRole('SYSTEM')")
+    public ResponseEntity<List<UserTO>> getAllUsers() {
+        return ResponseEntity.ok(middlewareUserService.listUsers(0, Integer.MAX_VALUE));
+    }
+
+    @Override
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<CustomPageImpl<UserExtendedTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);

@@ -1,10 +1,5 @@
 package de.adorsys.ledgers.postings.db.repository;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -31,7 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -42,14 +37,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 @DatabaseSetup("PostingRepositoryIT-db-entries.xml")
 @DatabaseTearDown(value = {"PostingRepositoryIT-db-entries.xml"}, type = DatabaseOperation.DELETE_ALL)
 class PostingRepositoryIT {
-
-    ObjectMapper om = new ObjectMapper().findAndRegisterModules()
-                              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                              .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                              .configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false)
-                              .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-                              .registerModule(new JavaTimeModule());
-
     @Autowired
     private PostingRepository postingRepository;
 
@@ -71,7 +58,8 @@ class PostingRepositoryIT {
         p.setId(Ids.id());
 
         // When
-        postingRepository.save(p);
+        Posting posting = postingRepository.save(p);
+        assertNotNull(posting);
     }
 
     @Test
@@ -80,7 +68,7 @@ class PostingRepositoryIT {
         Optional<Posting> posting = postingRepository.findById("Zd0ND5YwSzGwIfZilhumPg_POSTING");
 
         // Then
-        assumeTrue(posting.isPresent());
+        assertTrue(posting.isPresent());
     }
 
     @Test

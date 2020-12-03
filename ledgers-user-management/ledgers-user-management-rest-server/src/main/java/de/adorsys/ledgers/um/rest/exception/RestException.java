@@ -25,7 +25,7 @@ public abstract class RestException extends RuntimeException {
     protected HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     protected String devMessage;
 
-    public RestException(String message) {
+    protected RestException(String message) {
         super(message);
     }
 

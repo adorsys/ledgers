@@ -93,7 +93,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     private Posting newPosting(Posting posting) {
         LocalDateTime now = LocalDateTime.now();
         // check posting time is not before a closing.
-        //		validatePostingTime(posting);
+        //NOSONAR		validatePostingTime(posting);
         Posting p = createPostingObj(posting, now);
         Ledger ledger = loadLedger(posting.getLedger());
         p.setLedger(ledger);
@@ -125,7 +125,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
 
     private Posting createPostingObj(Posting posting, LocalDateTime now) {
         Posting p = new Posting();
-//		p.setHash(hash);
+//NOSONAR		p.setHash(hash);
         p.setId(Ids.id());
         p.setOprDetails(posting.getOprDetails());
         p.setOprId(posting.getOprId());
@@ -171,7 +171,7 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
      * Validate Double Entry Accounting. Make sure both total of debit an credit of the
      * given posting lines are equal.
      *
-     * @param posting
+     * @param posting posting
      */
     private void validateDoubleEntryAccounting(Posting posting) {
         List<PostingLine> lines = posting.getLines();
@@ -194,9 +194,9 @@ public class PostingServiceImpl extends AbstractServiceImpl implements PostingSe
     /**
      * Checks if this account has a released financial statement by the given posting date.
      *
-     * @param posting
-     * @param ledgerAccount
-     * @return
+     * @param posting posting
+     * @param ledgerAccount ledger account
+     * @return Optional of AccountStatement
      */
     private Optional<AccountStmt> validatePostingTime(Posting posting, LedgerAccount ledgerAccount) {
         // check posting time not null

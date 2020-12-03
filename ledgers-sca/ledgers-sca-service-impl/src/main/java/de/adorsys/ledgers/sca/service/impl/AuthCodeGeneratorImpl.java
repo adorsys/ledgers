@@ -17,15 +17,16 @@
 package de.adorsys.ledgers.sca.service.impl;
 
 import de.adorsys.ledgers.sca.service.AuthCodeGenerator;
-import org.apache.commons.lang3.RandomStringUtils;
+import de.adorsys.ledgers.util.random.RandomUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
 @Profile("!develop")
 public class AuthCodeGeneratorImpl implements AuthCodeGenerator {
+
     @Override
     public String generate() {
-        return RandomStringUtils.random(6, true, true);
+        return RandomUtils.randomString(6, true, true);
     }
 }

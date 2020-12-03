@@ -10,13 +10,13 @@ import java.util.List;
 
 @Data
 public class KeycloakClient {
-    private  String clientId;
-    private  String clientSecret;
-    private  List<String> redirectUrls;
-    private  List<String> scopes;
-    private  List<String> webOrigins;
-    private  boolean publicClient;
-    private   boolean fullScopeAllowed = true;
+    private String clientId;
+    private String clientSecret;
+    private List<String> redirectUrls;
+    private List<String> scopes;
+    private List<String> webOrigins;
+    private boolean publicClient;
+    private boolean fullScopeAllowed = true;
 
     public KeycloakClient(KeycloakClientConfig configuration, List<String> redirectUrls) {
         this.clientId = configuration.getExternalClientId();
@@ -28,8 +28,11 @@ public class KeycloakClient {
     }
 
     public boolean notPresent(List<ClientRepresentation> allClients) {
-        return allClients.stream()
-                       .map(ClientRepresentation::getName)
-                       .noneMatch(clientId::equals);
+        if (!allClients.isEmpty()) {
+            return allClients.stream()
+                           .map(ClientRepresentation::getName)
+                           .noneMatch(clientId::equals);
+        }
+        return true;
     }
 }

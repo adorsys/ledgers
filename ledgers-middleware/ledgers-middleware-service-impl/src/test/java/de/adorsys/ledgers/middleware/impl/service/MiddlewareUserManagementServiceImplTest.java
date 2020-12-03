@@ -7,9 +7,11 @@ import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
+import de.adorsys.ledgers.middleware.api.domain.general.RecoveryPointTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRecoveryService;
 import de.adorsys.ledgers.middleware.impl.converter.AdditionalAccountInformationMapper;
 import de.adorsys.ledgers.middleware.impl.converter.KeycloakUserMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
@@ -71,6 +73,8 @@ class MiddlewareUserManagementServiceImplTest {
     private KeycloakUserMapper keycloakUserMapper;
     @Mock
     private KeycloakDataService dataService;
+    @Mock
+    private MiddlewareRecoveryService recoveryService;
 
     private static UserBO userBO = null;
     private static UserTO userTO = null;
@@ -97,6 +101,33 @@ class MiddlewareUserManagementServiceImplTest {
         assertNotNull(user);
         assertThat(user).isEqualToComparingFieldByField(userTO);
         verify(userService, times(1)).create(userBO);
+    }
+
+    @Test
+    void create_error() {
+        // Given
+        when(keycloakUserMapper.toKeycloakUser(any())).thenThrow(RuntimeException.class);
+        when(userService.create(any())).thenReturn(userBO);
+
+        // When
+        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.create(userTO));
+    }
+
+    @Test
+    void create_staff() {
+        // Given
+        UserBO userBO = new UserBO(USER_LOGIN, "email", "pin");
+        userBO.setUserRoles(List.of(UserRoleBO.STAFF));
+        when(userService.create(any())).thenReturn(userBO);
+        when(keycloakUserMapper.toKeycloakUser(any())).thenReturn(new KeycloakUser());
+
+        // When
+        UserTO user = middlewareUserService.create(userTO);
+
+        // Then
+        assertNotNull(user);
+        verify(userService, times(1)).create(any());
+        verify(recoveryService, times(1)).createRecoveryPoint(any(), any());
     }
 
     @Test
@@ -386,6 +417,22 @@ class MiddlewareUserManagementServiceImplTest {
 
         // Then
         assertEquals(Arrays.asList("anton.brueckner", "max.musterman"), actual);
+    }
+
+    @Test
+    void revertDatabase() {
+        when(recoveryService.getPointById(any(), anyLong())).thenReturn(new RecoveryPointTO());
+        when(userService.findUsersByBranchAndCreatedAfter(any(), any())).thenReturn(List.of(userBO));
+        middlewareUserService.revertDatabase(USER_ID, 1);
+        verify(userService, timeout(1000).times(2)).setBranchBlockedStatus(any(), anyBoolean(), anyBoolean());
+        verify(dataService, times(1)).deleteUser(any());
+        verify(depositAccountService, times(1)).rollBackBranch(any(), any());
+    }
+
+    @Test
+    void resetPasswordViaEmail() {
+        middlewareUserService.resetPasswordViaEmail(USER_LOGIN);
+        verify(dataService, times(1)).resetPasswordViaEmail(any());
     }
 
     private AdditionalAccountInformationTO getAdditionalInfo() {

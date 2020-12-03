@@ -19,7 +19,7 @@ class EmailVerificationMapperTest {
     private static final LocalDateTime EXPIRED_DATE_TIME = LocalDateTime.now().plusWeeks(1);
     private static final LocalDateTime ISSUED_DATE_TIME = LocalDateTime.now();
 
-    private EmailVerificationMapper mapper = Mappers.getMapper(EmailVerificationMapper.class);
+    private final EmailVerificationMapper mapper = Mappers.getMapper(EmailVerificationMapper.class);
 
     @Test
     void toEmailVerificationEntity() {
@@ -51,7 +51,7 @@ class EmailVerificationMapperTest {
         EmailVerificationStatus status = mapper.toEmailVerificationStatus(STATUS_BO_PENDING);
 
         // Then
-        assertSame(status, STATUS_PENDING);
+        assertSame(STATUS_PENDING, status);
     }
 
     private EmailVerificationEntity buildEmailVerificationEntity() {

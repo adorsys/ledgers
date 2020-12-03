@@ -37,10 +37,10 @@ public abstract class NamedBO {
     /*The long description of this entity*/
     private String longDesc;
 
-    public NamedBO() {
+    protected NamedBO() {
     }
 
-    public NamedBO(String name) {
+    protected NamedBO(String name) {
         this.name = name;
     }
 

@@ -63,7 +63,7 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
         http
-                .csrf().disable()
+                .csrf().disable()//NOSONAR Reason -> we only work with our proprietary backend services
                 .cors().disable()
                 // .and()
                 .authorizeRequests().antMatchers(APP_WHITELIST).permitAll()
@@ -86,7 +86,7 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
     public AccessToken getAccessToken() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) request.getUserPrincipal();
-        KeycloakPrincipal principal = (KeycloakPrincipal) token.getPrincipal();
+        KeycloakPrincipal<? extends KeycloakSecurityContext> principal = (KeycloakPrincipal<? extends KeycloakSecurityContext>) token.getPrincipal();
         KeycloakSecurityContext session = principal.getKeycloakSecurityContext();
         return session.getToken();
     }
@@ -116,7 +116,7 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
     /**
      * Return Authentication or empty
      *
-     * @return
+     * @return Authentication or Optional.empty()
      */
     private static Optional<Authentication> auth() {
         return SecurityContextHolder.getContext() == null

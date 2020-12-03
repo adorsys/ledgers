@@ -22,6 +22,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 
+@SuppressWarnings("java:S1700")
 @Data
 @Embeddable
 public class Amount {

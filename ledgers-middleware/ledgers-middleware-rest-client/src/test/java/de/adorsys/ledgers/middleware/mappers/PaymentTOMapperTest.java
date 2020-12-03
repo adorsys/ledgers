@@ -34,6 +34,7 @@ import java.util.List;
 import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class PaymentTOMapperTest {
@@ -115,51 +116,38 @@ class PaymentTOMapperTest {
 
     @Test
     void xmlTest() throws IOException {
-        // Given
-        PaymentMapperTO mapper = configuration.paymentMapperTO();
-        String payment = readPayment("xs2aSingle.xml");
-
-        // When
-        PaymentTO result = mapper.toAbstractPayment(payment, "SINGLE", "sepa-credit-transfers-xml");
-
-        // Then
-        assertEquals(readPaymentTO("SinglePaymentTO.json"), result);
+        test("xs2aSingle.xml", "SINGLE", "SinglePaymentTO.json");
     }
 
     @Test
     void xmlTestBulk() throws IOException {
-        // Given
-        PaymentMapperTO mapper = configuration.paymentMapperTO();
-        String payment = readPayment("xs2aBulk.xml");
-
-        // When
-        PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
-
-        // Then
-        assertEquals(readPaymentTO("BulkPaymentTO.json"), result);
-    }
-
-    @Test
-    void xmlTestListBulk() throws IOException {
-       /* PaymentMapperTO mapper = configuration.paymentMapperTO();
-        String payment = readPayment("xs2aBulkList.xml");
-        PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
-        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("BulkPaymentTO.json"));*/
-
-        //TODO not implemented yet!  see task : https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/589
+        test("xs2aBulk.xml", "BULK", "BulkPaymentTO.json");
     }
 
     @Test
     void multiPartPayment() throws IOException {
-        //Given
+        test("rawMixedPaymentPeriodic.txt", "PERIODIC", "XmlPeriodicPaymentTO.json");
+    }
+
+    void test(String fileToReadPayment, String paymentType, String fileToCompareTo) throws IOException {
         PaymentMapperTO mapper = configuration.paymentMapperTO();
-        String payment = readPayment("rawMixedPaymentPeriodic.txt");
+        String payment = readPayment(fileToReadPayment);
 
         // When
-        PaymentTO result = mapper.toAbstractPayment(payment, "PERIODIC", "sepa-credit-transfers-xml");
+        PaymentTO result = mapper.toAbstractPayment(payment, paymentType, "sepa-credit-transfers-xml");
 
         // Then
-        assertEquals(readPaymentTO("XmlPeriodicPaymentTO.json"), result);
+        assertEquals(readPaymentTO(fileToCompareTo), result);
+    }
+
+    @Test
+    void xmlTestListBulk() {
+       /* PaymentMapperTO mapper = configuration.paymentMapperTO();
+        String payment = readPayment("xs2aBulkList.xml");
+        PaymentTO result = mapper.toAbstractPayment(payment, "BULK", "sepa-credit-transfers-xml");
+        assertThat(result).isEqualToComparingFieldByFieldRecursively(readPaymentTO("BulkPaymentTO.json"));*/
+        assertTrue(true);
+        //TODO not implemented yet!  see task : https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/issues/589
     }
 
     private PaymentTO getSinglePmt() {

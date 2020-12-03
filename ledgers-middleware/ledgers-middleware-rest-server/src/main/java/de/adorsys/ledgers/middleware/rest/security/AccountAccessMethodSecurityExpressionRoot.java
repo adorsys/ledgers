@@ -36,17 +36,17 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
                        || userManagementService.countUsersByBranch(user.getId()) == 0;
     }
 
-    public boolean hasManagerAccessToAccountIban(String iban) { //TODO Used
+    public boolean hasManagerAccessToAccountIban(String iban) {
         UserTO user = user();
         return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasManagerAccessIban(iban, user);
     }
 
-    public boolean hasManagerAccessToAccountId(String accountId) { //TODO Used
+    public boolean hasManagerAccessToAccountId(String accountId) {
         UserTO user = user();
         return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasManagerAccessId(accountId, user);
     }
 
-    public boolean isNewAccountAndCanBeCreatedForUser(AccountDetailsTO account, String userId) { //TODO Used
+    public boolean isNewAccountAndCanBeCreatedForUser(AccountDetailsTO account, String userId) {
         List<AccountDetailsTO> accounts = accountService.getAccountsByIbanAndCurrency(account.getIban(), "");
         return CollectionUtils.isEmpty(accounts) || accounts.stream()
                                                             .map(AccountDetailsTO::getCurrency)
@@ -56,7 +56,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     //-- Manager User checks --//
-    public boolean hasManagerAccessToUser(String userId) { //TODO Used
+    public boolean hasManagerAccessToUser(String userId) {
         UserTO user = user();
         return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasAccessToUser(user, userId);
     }
@@ -71,7 +71,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     //-- General Account checks --//
-    public boolean hasAccessToAccountsWithIbans(Collection<String> ibans) { //TODO Used
+    public boolean hasAccessToAccountsWithIbans(Collection<String> ibans) {
         UserTO user = user();
         return user.getUserRoles().contains(SYSTEM)
                        || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountsWithIbans(ibans)
@@ -79,21 +79,21 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     //System retrieves regardless of status, STAFF & CUSTOMER if has access, CUSTOMER if accountEnabled
-    public boolean hasAccessToAccount(String accountId) { //TODO Used
+    public boolean hasAccessToAccount(String accountId) {
         UserTO user = user();
         return user.getUserRoles().contains(SYSTEM)
                        || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountWithId(accountId)
                        || user.hasAccessToAccountWithId(accountId) && isEnabledAccount(accountId);
     }
 
-    public boolean hasAccessToAccountWithIban(String iban) { //TODO used
+    public boolean hasAccessToAccountWithIban(String iban) {
         UserTO user = user();
         return user.getUserRoles().contains(SYSTEM)
                        || user.getUserRoles().contains(STAFF) && user.hasAccessToAccountWithIban(iban)
                        || user.hasAccessToAccountWithIban(iban) && isEnabledAccountIban(iban);
     }
 
-    public boolean accountInfoByIdentifier(AccountIdentifierTypeTO type, String accountIdentifier) { //TODO used
+    public boolean accountInfoByIdentifier(AccountIdentifierTypeTO type, String accountIdentifier) {
         return type == AccountIdentifierTypeTO.IBAN
                        ? hasAccessToAccountWithIban(accountIdentifier)
                        : hasAccessToAccount(accountIdentifier);
@@ -107,7 +107,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return userManagementService.findByUserLogin(login).hasAccessToAccountWithIban(iban);
     }
 
-    public boolean hasAccessToAccountsByLogin(String login, List<AccountReferenceTO> references) {  //TODO Used
+    public boolean hasAccessToAccountsByLogin(String login, List<AccountReferenceTO> references) {
         Set<String> ibans = references.stream().map(AccountReferenceTO::getIban).collect(Collectors.toSet());
         return userManagementService.findByUserLogin(login).hasAccessToAccountsWithIbans(ibans);
     }
@@ -126,7 +126,7 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return hasAnyScope(SCOPE_PARTIAL_ACCESS, SCOPE_FULL_ACCESS);
     }
 
-    public boolean hasAccessToAccountByScaOperation(StartScaOprTO opr) { //TODO Used
+    public boolean hasAccessToAccountByScaOperation(StartScaOprTO opr) {
         return EnumSet.of(OpTypeTO.PAYMENT, OpTypeTO.CANCEL_PAYMENT).contains(opr.getOpType())
                        ? hasAccessToAccountByPaymentId(opr.getOprId())
                        : hasAccessToAccountsWithIbans(accountService.getAccountsFromConsent(opr.getOprId()));

@@ -21,6 +21,7 @@ import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
+import de.adorsys.ledgers.middleware.impl.sca.AbstractScaChallengeData;
 import de.adorsys.ledgers.middleware.impl.sca.EmailScaChallengeData;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
@@ -51,7 +52,6 @@ import static org.mockito.Mockito.*;
 class MiddlewarePaymentServiceImplTest {
     private static final String PAYMENT_ID = "myPaymentId";
     private static final String SINGLE_BO = "PaymentSingle.yml";
-    private static final String SINGLE_TO = "PaymentSingleTO.yml";
     private static final String WRONG_PAYMENT_ID = "wrong id";
     private static final String USER_ID = "kjk345knkj45";
     private static final String SCA_ID = "scaId";
@@ -89,9 +89,12 @@ class MiddlewarePaymentServiceImplTest {
     @Mock
     private KeycloakTokenService tokenService;
 
-    private ScaResponseResolver localResolver = new ScaResponseResolver(scaUtils, new ScaChallengeDataResolverImpl(Arrays.asList(new EmailScaChallengeData())), Mappers.getMapper(UserMapper.class));
+    private final ScaResponseResolver localResolver = new ScaResponseResolver(scaUtils, new ScaChallengeDataResolverImpl<AbstractScaChallengeData>(Collections.singletonList(new EmailScaChallengeData())), Mappers.getMapper(UserMapper.class));
 
     private final PaymentConverter pmtMapper = Mappers.getMapper(PaymentConverter.class);
+    private static final PaymentTO PAYMENT_TO = readYml(PaymentTO.class, SINGLE_BO);
+    private static final PaymentBO PAYMENT_BO = readYml(PaymentBO.class, SINGLE_BO);
+    private static final ScaInfoTO SCA_INFO_TO = buildScaInfoTO();
 
     @Test
     void getPaymentStatusById() {
@@ -119,8 +122,8 @@ class MiddlewarePaymentServiceImplTest {
     @Test
     void getPaymentById() {
         // Given
-        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(readYml(PaymentBO.class, SINGLE_BO));
-        when(paymentConverter.toPaymentTO(any())).thenReturn(readYml(PaymentTO.class, SINGLE_BO));
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(PAYMENT_BO);
+        when(paymentConverter.toPaymentTO(any())).thenReturn(PAYMENT_TO);
 
         // When
         PaymentTO result = middlewareService.getPaymentById(PAYMENT_ID);
@@ -141,18 +144,12 @@ class MiddlewarePaymentServiceImplTest {
     @Test
     void execute_Payment_For_Any_Type_Of_Sca_Users() {
         // Given
-        UserBO userBO = readYml(UserBO.class, "user1.yml");
-        PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
-
-        when(paymentService.getPaymentById(any()))
-                .thenReturn(paymentBO);
-        when(paymentService.updatePaymentStatus(PAYMENT_ID, ACTC))
-                .thenReturn(ACTC);
-        when(paymentService.executePayment(any(), any()))
-                .thenReturn(ACTC);
+        when(paymentService.getPaymentById(any())).thenReturn(PAYMENT_BO);
+        when(paymentService.updatePaymentStatus(PAYMENT_ID, ACTC)).thenReturn(ACTC);
+        when(paymentService.executePayment(any(), any())).thenReturn(ACTC);
 
         // When
-        SCAPaymentResponseTO response = middlewareService.executePayment(buildScaInfoTO(), PAYMENT_ID);
+        SCAPaymentResponseTO response = middlewareService.executePayment(SCA_INFO_TO, PAYMENT_ID);
 
         // Then
         assertNotNull(response);
@@ -175,7 +172,7 @@ class MiddlewarePaymentServiceImplTest {
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // When
-        Object result = middlewareService.initiatePayment(buildScaInfoTO(), readYml(PaymentTO.class, SINGLE_BO), PaymentTypeTO.SINGLE);
+        Object result = middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO, PaymentTypeTO.SINGLE);
 
         // Then
         assertNotNull(result);
@@ -185,7 +182,6 @@ class MiddlewarePaymentServiceImplTest {
     void initiatePayment_creditor_account_disabled() throws NoSuchFieldException {
         // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
-        UserBO userBO = readYml(UserBO.class, "user1.yml");
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
         when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false, null, null)));
@@ -194,28 +190,21 @@ class MiddlewarePaymentServiceImplTest {
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> {
-            Object result = middlewareService.initiatePayment(buildScaInfoTO(), readYml(PaymentTO.class, SINGLE_BO), PaymentTypeTO.SINGLE);
-            assertNotNull(result);
-        });
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO, PaymentTypeTO.SINGLE));
     }
 
     @Test
     void initiatePayment_invalid_amount() throws NoSuchFieldException {
         // Given
-        PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
-        paymentBO.getTargets().iterator().next().getInstructedAmount().setAmount(BigDecimal.ZERO);
+        PaymentBO pmt = readYml(PaymentBO.class, SINGLE_BO);
+        pmt.getTargets().iterator().next().getInstructedAmount().setAmount(BigDecimal.ZERO);
 
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(pmt);
 
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> {
-            Object result = middlewareService.initiatePayment(buildScaInfoTO(), readYml(PaymentTO.class, SINGLE_BO), PaymentTypeTO.SINGLE);
-            assertNotNull(result);
-
-        });
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO, PaymentTypeTO.SINGLE));
     }
 
     @Test
@@ -229,10 +218,7 @@ class MiddlewarePaymentServiceImplTest {
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> {
-            Object result = middlewareService.initiatePayment(buildScaInfoTO(), readYml(PaymentTO.class, SINGLE_BO), PaymentTypeTO.SINGLE);
-            assertNotNull(result);
-        });
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO, PaymentTypeTO.SINGLE));
     }
 
     @Test
@@ -254,7 +240,7 @@ class MiddlewarePaymentServiceImplTest {
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // When
-        SCAPaymentResponseTO result = middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE);
+        SCAPaymentResponseTO result = middlewareService.initiatePayment(SCA_INFO_TO, paymentTO, PaymentTypeTO.SINGLE);
 
         // Then
         assertNotNull(result);
@@ -274,7 +260,7 @@ class MiddlewarePaymentServiceImplTest {
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(SCA_INFO_TO, paymentTO, PaymentTypeTO.SINGLE));
     }
 
     @Test
@@ -291,7 +277,7 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(SCA_INFO_TO, paymentTO, PaymentTypeTO.SINGLE));
 
     }
 
@@ -309,7 +295,7 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(buildScaInfoTO(), paymentTO, PaymentTypeTO.SINGLE));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePayment(SCA_INFO_TO, paymentTO, PaymentTypeTO.SINGLE));
     }
 
 
@@ -317,7 +303,6 @@ class MiddlewarePaymentServiceImplTest {
     void executePayment_Success() {
         // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
-        BearerTokenBO bearerTokenBO = new BearerTokenBO();
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.TRUE);
@@ -327,7 +312,7 @@ class MiddlewarePaymentServiceImplTest {
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
 
         // When
-        SCAPaymentResponseTO scaPaymentResponseTO = middlewareService.authorizePayment(buildScaInfoTO(), PAYMENT_ID);
+        SCAPaymentResponseTO scaPaymentResponseTO = middlewareService.authorizePayment(SCA_INFO_TO, PAYMENT_ID);
 
         // Then
         assertNotNull(scaPaymentResponseTO);
@@ -344,7 +329,7 @@ class MiddlewarePaymentServiceImplTest {
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
         // When
-        SCAPaymentResponseTO initiatePaymentCancellation = middlewareService.initiatePaymentCancellation(buildScaInfoTO(), PAYMENT_ID);
+        SCAPaymentResponseTO initiatePaymentCancellation = middlewareService.initiatePaymentCancellation(SCA_INFO_TO, PAYMENT_ID);
 
         // Then
         assertNotNull(initiatePaymentCancellation);
@@ -355,7 +340,7 @@ class MiddlewarePaymentServiceImplTest {
         // Given
         when(scaUtils.userBO(USER_LOGIN)).thenThrow(MiddlewareModuleException.class);
 
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePaymentCancellation(buildScaInfoTO(), PAYMENT_ID));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePaymentCancellation(SCA_INFO_TO, PAYMENT_ID));
     }
 
     @Test
@@ -364,7 +349,7 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentById(any())).thenThrow(DepositModuleException.class);
 
         // Then
-        assertThrows(DepositModuleException.class, () -> middlewareService.initiatePaymentCancellation(buildScaInfoTO(), PAYMENT_ID));
+        assertThrows(DepositModuleException.class, () -> middlewareService.initiatePaymentCancellation(SCA_INFO_TO, PAYMENT_ID));
     }
 
     @Test
@@ -373,7 +358,7 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentById(any())).thenThrow(DepositModuleException.class);
 
         // Then
-        assertThrows(DepositModuleException.class, () -> middlewareService.initiatePaymentCancellation(buildScaInfoTO(), PAYMENT_ID));
+        assertThrows(DepositModuleException.class, () -> middlewareService.initiatePaymentCancellation(SCA_INFO_TO, PAYMENT_ID));
 
     }
 
@@ -384,7 +369,7 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentById(any())).thenReturn(payment);
 
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePaymentCancellation(buildScaInfoTO(), PAYMENT_ID));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.initiatePaymentCancellation(SCA_INFO_TO, PAYMENT_ID));
 
     }
 
@@ -396,7 +381,7 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentsByTypeStatusAndDebtor(eq(PaymentTypeBO.PERIODIC), eq(ACSP), anyList())).thenReturn(Collections.singletonList(new PaymentBO()));
 
         // When
-        List<PaymentTO> result = middlewareService.getPendingPeriodicPayments(buildScaInfoTO());
+        List<PaymentTO> result = middlewareService.getPendingPeriodicPayments(SCA_INFO_TO);
 
         // Then
         assertTrue(result.size() > 0);
@@ -411,7 +396,7 @@ class MiddlewarePaymentServiceImplTest {
         return null;
     }
 
-    private ScaInfoTO buildScaInfoTO() {
+    private static ScaInfoTO buildScaInfoTO() {
         ScaInfoTO info = new ScaInfoTO();
         info.setUserId(USER_ID);
         info.setAuthorisationId(AUTHORISATION_ID);

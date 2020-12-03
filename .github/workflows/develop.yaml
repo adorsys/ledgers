@@ -17,16 +17,16 @@ env:
 
 jobs:
   build:
-    name: Build Ledgers (openjdk 1.8)
+    name: Build Ledgers (openjdk 1.11)
     runs-on: ubuntu-latest
     steps:
       - name: Clone ledgers develop repository
         uses: actions/checkout@v2
 
-      - name: Set up JDK 8 for x64
+      - name: Set up JDK 11 for x64
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 1.11
           architecture: x64
 
       - name: Cache Maven packages
@@ -47,10 +47,10 @@ jobs:
       - name: Clone ledgers develop repository
         uses: actions/checkout@v2
 
-      - name: Set up JDK 8 for x64
+      - name: Set up JDK 11 for x64
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 1.11
           architecture: x64
 
       - name: Cache Maven packages
@@ -74,10 +74,10 @@ jobs:
       - name: Clone ledgers develop repository
         uses: actions/checkout@v2
 
-      - name: Set up JDK 8 for x64
+      - name: Set up JDK 11 for x64
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 1.11
           architecture: x64
 
       - name: Cache Maven packages
@@ -101,10 +101,10 @@ jobs:
       - name: Clone ledgers develop repository
         uses: actions/checkout@v2
 
-      - name: Set up JDK 8 for x64
+      - name: Set up JDK 11 for x64
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 1.11
           architecture: x64
 
       - name: Cache Maven packages
@@ -117,42 +117,42 @@ jobs:
       - name: Run UI tests 
         run: mvn -ntp -DskipITs --fail-at-end clean install
 
-  # sonar:
-  #   name: Publish code coverage to Sonar Cloud
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Clone ledgers develop repository
-  #       uses: actions/checkout@v2
+  sonar:
+    name: Publish code coverage to Sonar Cloud
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone ledgers develop repository
+        uses: actions/checkout@v2
 
-  #     - name: Set up JDK 8 for x64
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: 1.8
-  #         architecture: x64
+      - name: Set up JDK 11 for x64
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+          architecture: x64
 
-  #     - name: Cache Maven packages
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: ~/.m2
-  #         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-  #         restore-keys: ${{ runner.os }}-m2
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-  #     - name: Publish to sonarcloud
-  #       run: >
-  #         mvn
-  #         -ntp
-  #         clean
-  #         org.jacoco:jacoco-maven-plugin:prepare-agent
-  #         install
-  #         sonar:sonar
-  #         -Pcoverage
-  #         -Dsonar.host.url=${{ env.SONAR_HOST }}
-  #         -Dsonar.projectKey=${{ env.SONAR_PRJ_KEY }}
-  #         -Dsonar.organization=${{ env.SONAR_ORG }}
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Publish to sonarcloud
+        run: >
+          mvn
+          -ntp
+          clean
+          org.jacoco:jacoco-maven-plugin:prepare-agent
+          install
+          sonar:sonar
+          -Pcoverage
+          -Dsonar.host.url=${{ env.SONAR_HOST }}
+          -Dsonar.projectKey=${{ env.SONAR_PRJ_KEY }}
+          -Dsonar.organization=${{ env.SONAR_ORG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deployMavenCentral:
     name: Publish ledgers artifacts to Maven Central
@@ -162,10 +162,10 @@ jobs:
       - name: Clone ledgers develop repository
         uses: actions/checkout@v2
 
-      - name: Set up JDK 8 for x64
+      - name: Set up JDK 11 for x64
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: 1.11
           architecture: x64
 
       - name: Cache Maven packages

@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.postings.impl.converter;
 
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.domain.PostingStatusBO;
-import de.adorsys.ledgers.postings.api.domain.PostingTypeBO;
+import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.db.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +47,18 @@ class PostingMapperTest {
         assertEquals(postingBO.getDiscardedId(), result.getDiscardedId());
         assertEquals(postingBO.getDiscardedTime(), result.getDiscardedTime());
         assertEquals(postingBO.getDiscardingId(), result.getDiscardingId());
-        assertEquals(postingBO.getLedger().getCoa(), result.getLedger().getCoa());
+
+        //assert Coa mapped
+        ChartOfAccountBO coa = postingBO.getLedger().getCoa();
+        ChartOfAccount resultCoa = result.getLedger().getCoa();
+        if (coa != null && resultCoa != null) {
+            assertEquals(coa.getId(), resultCoa.getId());
+            assertEquals(coa.getCreated(), resultCoa.getCreated());
+            assertEquals(coa.getName(), resultCoa.getName());
+            assertEquals(coa.getLongDesc(), resultCoa.getLongDesc());
+            assertEquals(coa.getShortDesc(), resultCoa.getShortDesc());
+            assertEquals(coa.getUserDetails(), resultCoa.getUserDetails());
+        }
     }
 
     @Test
@@ -77,7 +85,18 @@ class PostingMapperTest {
         assertEquals(posting.getDiscardedId(), result.getDiscardedId());
         assertEquals(posting.getDiscardedTime(), result.getDiscardedTime());
         assertEquals(posting.getDiscardingId(), result.getDiscardingId());
-        assertEquals(posting.getLedger().getCoa(), result.getLedger().getCoa());
+
+        //assert Coa mapped
+        ChartOfAccount coa = posting.getLedger().getCoa();
+        ChartOfAccountBO resultCoa = result.getLedger().getCoa();
+        if (coa != null && resultCoa != null) {
+            assertEquals(coa.getId(), resultCoa.getId());
+            assertEquals(coa.getCreated(), resultCoa.getCreated());
+            assertEquals(coa.getName(), resultCoa.getName());
+            assertEquals(coa.getLongDesc(), resultCoa.getLongDesc());
+            assertEquals(coa.getShortDesc(), resultCoa.getShortDesc());
+            assertEquals(coa.getUserDetails(), resultCoa.getUserDetails());
+        }
     }
 
     @Test

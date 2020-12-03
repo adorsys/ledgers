@@ -19,17 +19,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-/*@SecurityScheme(
-        type = SecuritySchemeType.OAUTH2,
-        scheme = "OAuth2",
-        name = "Authorization",
-        in = SecuritySchemeIn.HEADER,
-        bearerFormat = "Bearer",
-        flows = @OAuthFlows(authorizationCode = @OAuthFlow(
-                authorizationUrl = "${keycloak.auth-server-url}" + "/realms" + "/${keycloak.realm}/" + "protocol/openid-connect/auth",
-                tokenUrl = "${keycloak.auth-server-url}" + "/realms" + "/${keycloak.realm}/" + "protocol/openid-connect/token",
-                scopes = @OAuthScope(name = "openId", description = "accessEverything")
-        )))*/
 public class SwaggerConfig implements WebMvcConfigurer {
     private static final String API_KEY = "apiKey";
     private static final String API_INFO = "api_info.txt";
@@ -42,10 +31,10 @@ public class SwaggerConfig implements WebMvcConfigurer {
     public OpenAPI openAPI() {
         return new OpenAPI()
                        .components(new Components()
-                                           .addSecuritySchemes("apiKey", new SecurityScheme()
-                                                                                 .type(SecurityScheme.Type.APIKEY)
-                                                                                 .in(SecurityScheme.In.HEADER)
-                                                                                 .name("Authorization"))
+                                           .addSecuritySchemes(API_KEY, new SecurityScheme()
+                                                                                .type(SecurityScheme.Type.APIKEY)
+                                                                                .in(SecurityScheme.In.HEADER)
+                                                                                .name("Authorization"))
                                            .addSecuritySchemes("oAuth2", new SecurityScheme()
                                                                                  .type(SecurityScheme.Type.OAUTH2)
                                                                                  .in(SecurityScheme.In.HEADER)
@@ -73,19 +62,4 @@ public class SwaggerConfig implements WebMvcConfigurer {
                                                       .name("Apache License Version 2.0")
                                                       .url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
-
-//    @Bean
-//    public Docket productApi() {
-//        return new Docket(DocumentationType.SWAGGER_2)
-//                       .apis(resolvePredicates())
-//                       .build();
-//    }
-//
-//    private Predicate<RequestHandler> resolvePredicates() {
-//        List<String> profiles = Arrays.asList(env.getActiveProfiles());
-//        return profiles.contains("develop") || profiles.contains("sandbox")
-//                       ? RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class).or(
-//                                       RequestHandlerSelectors.withClassAnnotation(MiddlewareResetResource.class))
-//                       : RequestHandlerSelectors.withClassAnnotation(MiddlewareUserResource.class);
-//    }
 }

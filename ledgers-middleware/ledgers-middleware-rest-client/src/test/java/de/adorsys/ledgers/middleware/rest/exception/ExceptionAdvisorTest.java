@@ -30,11 +30,11 @@ class ExceptionAdvisorTest {
                                                    .build();
 
         // When
-        ResponseEntity<Map> result = advisor.handlePostingModuleException(exception);
+        ResponseEntity<Map<String,String>> result = advisor.handlePostingModuleException(exception);
 
         // Then
-        assertSame(result.getStatusCode(), HttpStatus.NOT_FOUND);
-        assertSame(result.getBody().get("message"), null);
-        assertSame(result.getBody().get("devMessage"), DEV_ERROR_MSG);
+        assertSame(HttpStatus.NOT_FOUND, result.getStatusCode());
+        assertSame(null, result.getBody().get("message"));
+        assertSame(DEV_ERROR_MSG, result.getBody().get("devMessage"));
     }
 }

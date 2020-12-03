@@ -126,8 +126,10 @@ class MiddlewareAccountManagementServiceImplTest {
 
     @Test
     void createDepositAccount_currencyNull() {
+        ScaInfoTO infoTO = buildScaInfoTO();
+        AccountDetailsTO detailsTO = new AccountDetailsTO();
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(CORRECT_USER_ID, buildScaInfoTO(), new AccountDetailsTO()));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(CORRECT_USER_ID, infoTO, detailsTO));
     }
 
     @Test
@@ -135,9 +137,10 @@ class MiddlewareAccountManagementServiceImplTest {
         // Given
         when(userService.findById(any())).thenReturn(buildUserBO());
         when(depositAccountService.getAccountsByIbanAndParamCurrency(any(), any())).thenAnswer(i -> Collections.singletonList(new DepositAccountBO()));
-
+        ScaInfoTO infoTO = buildScaInfoTO();
+        AccountDetailsTO detailsTO = getAccountDetailsTO();
         // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(CORRECT_USER_ID, buildScaInfoTO(), getAccountDetailsTO()));
+        assertThrows(MiddlewareModuleException.class, () -> middlewareService.createDepositAccount(CORRECT_USER_ID, infoTO, detailsTO));
     }
 
     @Test
@@ -436,6 +439,12 @@ class MiddlewareAccountManagementServiceImplTest {
 
         verify(depositAccountService, times(1)).deleteUser(USER_ID);
         verify(keycloakDataService, times(1)).deleteUser(userBO.getLogin());
+    }
+
+    @Test
+    void deleteTransactions() {
+        middlewareService.deleteTransactions(USER_ID, UserRoleTO.CUSTOMER, ACCOUNT_ID);
+        verify(depositAccountService, times(1)).deleteTransactions(any());
     }
 
     private CustomPageImpl<Object> getPageImpl() {

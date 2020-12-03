@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.ledgers</groupId>
 	<artifactId>ledgers</artifactId>
-	<version>4.1</version>
+	<version>4.2</version>
 
 	<modules>
 		<module>ledgers-app</module>
@@ -91,9 +91,8 @@
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-		<pmd.version>6.5.0</pmd.version>
-		<pmd.plugin.version>3.10.0</pmd.plugin.version>
+		<java.version>11</java.version>
+		<pmd.plugin.version>3.13.0</pmd.plugin.version>
 		<apache.commons.collections>4.3</apache.commons.collections>
 		<apache.commons.io>2.6</apache.commons.io>
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
@@ -133,8 +132,32 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
-		<sonar.coverage.exclusions>**/*Entity.java,**/*TO.java,**/*BO.java,**/*PO.java,**/*Application.java,**/*Exception.java,
-			**/*Config.java,pom.xml,**/ledgers-user-management-service-api/**/*,**/ledgers-sca-service-api/**/*,**/ledgers-postings-service-api/**/*,**/ledgers-middleware-service-api/**/*,**/ledgers-deposit-account-service-api/**/*,/ledgers-jaxb-api/**/*,**/ledgers-middleware-rest-api/**/*,/ledgers-security/**/*,/ledgers-app/**/*,**/ledgers-middleware-rest-server/**/*,**/ledgers-deposit-account-repository/**/*,**/ledgers-postings-repository/**/*,**/ledgers-sca-repository/**/*,**/ledgers-user-management-repository/**/*,/ledgers-utils/**/*
+		<sonar.coverage.exclusions>
+			**/*Entity.java,**/*TO.java,
+			**/*BO.java,**/*PO.java,
+			**/*Application.java,
+			**/*Exception.java,
+			**/*Config*.java,
+			**/*.xml,
+			**/ledgers-user-management-service-api/**/*,
+			**/ledgers-sca-service-api/**/*,
+			**/ledgers-postings-service-api/**/*,
+			**/ledgers-middleware-service-api/**/*,
+			**/ledgers-deposit-account-service-api/**/*,
+			**/ledgers-jaxb-api/**/*,
+			**/ledgers-middleware-rest-api/**/*,
+			**/ledgers-security/**/*,
+			**/ledgers-app/**/*,
+			**/ledgers-middleware-rest-server/**/*,
+			**/ledgers-deposit-account-repository/**/*,
+			**/ledgers-postings-repository/**/*,
+			**/ledgers-sca-repository/**/*,
+			**/ledgers-user-management-repository/**/*,
+			**/ledgers-utils/**/*,
+			**/*Provider*.java,
+			**/*Test*.java,
+			**/api/**/*,
+			**/keycloak/client/model/**/*
 		</sonar.coverage.exclusions>
 		<sonar.moduleName>${project.artifactId}</sonar.moduleName>
 
@@ -411,18 +434,6 @@
 						</excludeRoot>
 					</excludeRoots>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>net.sourceforge.pmd</groupId>
-						<artifactId>pmd-core</artifactId>
-						<version>${pmd.version}</version> <!-- <- Fixed IdenticalCatchBranches-->
-					</dependency>
-					<dependency>
-						<groupId>net.sourceforge.pmd</groupId>
-						<artifactId>pmd-java</artifactId>
-						<version>${pmd.version}</version> <!-- <- Fixed IdenticalCatchBranches-->
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>

@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.postings.db.domain;
 
+@SuppressWarnings("java:S115")
 public enum PostingType {
     /*
      * Describes a business transaction involving different accounts and affecting
@@ -23,5 +24,5 @@ public enum PostingType {
 
     BS_STMT,
     /*Document the closing of a ledger.*/
-    LDG_CLSNG;
+    LDG_CLSNG
 }

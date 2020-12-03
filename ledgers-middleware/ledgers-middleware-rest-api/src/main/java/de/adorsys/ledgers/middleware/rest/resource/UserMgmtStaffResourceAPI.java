@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.UNPROTECTED_ENDPOINT;
+
 @Tag(name = "LDG010 - User Management (STAFF access)")
 public interface UserMgmtStaffResourceAPI {
     String BASE_PATH = "/staff-access" + UserMgmtRestAPI.BASE_PATH;
@@ -36,7 +38,7 @@ public interface UserMgmtStaffResourceAPI {
      *
      * @return user object without pin
      */
-    @Operation(tags = UnprotectedEndpoint.UNPROTECTED_ENDPOINT, summary = "Register", description = "Registers a new user for a given branch.")
+    @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Register", description = "Registers a new user for a given branch.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "The user data record without the pin."),
             @ApiResponse(responseCode = "409", description = "Conflict. A record with the given email or login already exists.")

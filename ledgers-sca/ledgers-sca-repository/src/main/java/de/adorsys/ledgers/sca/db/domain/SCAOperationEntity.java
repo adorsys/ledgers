@@ -22,6 +22,9 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDa
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.EnumSet;
+
+import static de.adorsys.ledgers.sca.db.domain.AuthCodeStatus.*;
 
 /**
  * The SCA operation entity. We distinguish among following business operations.
@@ -118,12 +121,76 @@ public class SCAOperationEntity {
     }
 
     public SCAOperationEntity updateStatuses(boolean isCodeConfirmValid) {
-        this.status = AuthCodeStatus.VALIDATED;
+        this.status = VALIDATED;
         this.scaStatus = ScaStatus.FINALISED;
         if (!isCodeConfirmValid) {
-            this.status = AuthCodeStatus.FAILED;
+            this.status = FAILED;
             this.scaStatus = ScaStatus.FAILED;
         }
+        this.statusTime = LocalDateTime.now();
         return this;
+    }
+
+    public boolean isOperationExpired() {
+        boolean hasExpiredStatus = this.status == EXPIRED;
+        return hasExpiredStatus || LocalDateTime.now().isAfter(this.created.plusSeconds(this.validitySeconds));
+    }
+
+    public void validate(ScaStatus scaStatus, int scaWeight) {
+        this.scaStatus = scaStatus;
+        this.scaWeight = scaWeight;
+        updateStatusAndTime(VALIDATED);
+    }
+
+    public void expireOperation() {
+        this.scaStatus = ScaStatus.FAILED;
+        this.scaWeight = 0;
+        updateStatusAndTime(EXPIRED);
+    }
+
+    public boolean isOperationAlreadyUsed() {
+        return EnumSet.of(VALIDATED, EXPIRED, DONE).contains(this.status)
+                       || EnumSet.of(ScaStatus.FAILED, ScaStatus.FINALISED).contains(this.scaStatus);
+    }
+
+    public SCAOperationEntity(String authId, String opId, String externalId, OpType opType, String scaMethodId, int validitySeconds, int authCodeValiditySeconds, ScaStatus scaStatus, int scaWeight) {
+        this.id = authId;
+        this.opId = opId;
+        this.externalId = externalId;
+        this.opType = opType;
+        this.scaMethodId = scaMethodId;
+        this.created = LocalDateTime.now();
+        this.validitySeconds = validitySeconds <= 0
+                                       ? authCodeValiditySeconds
+                                       : validitySeconds;
+        this.scaStatus = scaStatus;
+        this.scaWeight = scaWeight;
+        updateStatusAndTime(INITIATED);
+    }
+
+    public void updateStatusSent(int authCodeValiditySeconds, String authCodeHash, String hashAlg) {
+        this.created = LocalDateTime.now();
+        this.validitySeconds = this.validitySeconds <= 0
+                                       ? authCodeValiditySeconds
+                                       : this.validitySeconds;
+        this.hashAlg = hashAlg;
+        this.authCodeHash = authCodeHash;
+        updateStatusAndTime(SENT);
+    }
+
+    public void fail(boolean isLoginOperation, int loginFailedMax, int authCodeFailedMax) {
+        this.failledCount = this.failledCount + 1;
+        int failedMax = isLoginOperation
+                                ? loginFailedMax
+                                : authCodeFailedMax;
+        if (this.failledCount >= failedMax) {
+            this.scaStatus = ScaStatus.FAILED;
+        }
+        updateStatusAndTime(FAILED);
+    }
+
+    private void updateStatusAndTime(AuthCodeStatus status) {
+        this.statusTime = LocalDateTime.now();
+        this.status = status;
     }
 }

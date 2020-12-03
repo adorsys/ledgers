@@ -35,7 +35,8 @@ class ChartOfAccountRepositoryIT {
     @Test
     void test_create_coa_ok() {
         ChartOfAccount coa = new ChartOfAccount(Ids.id(), null, "francis", null, null, Ids.id());
-        chartOfAccountRepository.save(coa);
+        ChartOfAccount chart = chartOfAccountRepository.save(coa);
+        assertNotNull(chart);
     }
 
     @Test

@@ -34,7 +34,7 @@ public abstract class SCAResponseTO implements AspspConsentDataSerial {
 
 	private String objectType;
 
-	public SCAResponseTO(String objectType) {
+	protected SCAResponseTO(String objectType) {
 		this.objectType = objectType;
 	}
 

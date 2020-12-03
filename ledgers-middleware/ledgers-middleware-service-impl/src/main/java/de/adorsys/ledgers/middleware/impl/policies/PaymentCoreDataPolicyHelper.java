@@ -26,6 +26,9 @@ public class PaymentCoreDataPolicyHelper {
     private static final DecimalFormat decimalFormat = new DecimalFormat("###,###.##");
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    private PaymentCoreDataPolicyHelper() {
+    }
+
     public static PaymentCoreDataTO getPaymentCoreDataInternal(PaymentBO payment) {
         try {
             PaymentCoreDataTO data = new PaymentCoreDataTO();
@@ -54,7 +57,7 @@ public class PaymentCoreDataPolicyHelper {
         data.setPaymentsSize("" + targets.size());
         data.setCreditorName("Many Recipients");
         // Hash of all receiving Iban
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("MD5"); //NOSONAR
         BigDecimal amt = BigDecimal.ZERO;
         if (currenciesMatch(targets)) {
             data.setCurrency(targets.iterator().next().getInstructedAmount().getCurrency().getCurrencyCode());
