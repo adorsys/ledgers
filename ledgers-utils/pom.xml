@@ -14,7 +14,7 @@
 
 	<properties>
 		<ruleset.basedir>..</ruleset.basedir>
-        <guava.version>23.0</guava.version>
+        <guava.version>30.0-jre</guava.version>
     </properties>
 
 	<dependencies>

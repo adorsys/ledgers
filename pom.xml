@@ -119,7 +119,7 @@
 		<nimbus-jose-jwt.version>6.1.1</nimbus-jose-jwt.version>
 		<liquibase.version>3.6.2</liquibase.version>
 		<spring-boot-dependencies.version>2.2.4.RELEASE</spring-boot-dependencies.version>
-		<spring-cloud-feign.version>2.1.1.RELEASE</spring-cloud-feign.version>
+		<spring-cloud-feign.version>2.2.6.RELEASE</spring-cloud-feign.version>
 		<subethasmtp.version>3.1.7</subethasmtp.version>
 		<jackson.version>2.9.10</jackson.version>
 		<lombok.version>1.18.8</lombok.version>
@@ -179,6 +179,12 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-openfeign</artifactId>
 				<version>${spring-cloud-feign.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+				</exclusions>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -200,6 +206,12 @@
 				<groupId>io.springfox</groupId>
 				<artifactId>springfox-swagger2</artifactId>
 				<version>${springfox-swagger2.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -231,7 +243,7 @@
 
 			<dependency>
 				<groupId>org.mapstruct</groupId>
-				<artifactId>mapstruct-jdk8</artifactId>
+				<artifactId>mapstruct</artifactId>
 				<version>${org.mapstruct.version}</version>
 			</dependency>
 
