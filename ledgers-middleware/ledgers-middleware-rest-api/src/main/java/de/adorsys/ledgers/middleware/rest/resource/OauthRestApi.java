@@ -11,23 +11,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
+
 @Tag(name = "LDG06 - Oauth authorisation")
 public interface OauthRestApi { //TODO Shall be removed after final migration to Keycloak
     String BASE_PATH = "/oauth";
 
     @PostMapping("/authorise")
     @Operation(summary = "Get authorisation code")
-    ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("login") String login, @RequestParam("pin") String pin, @RequestParam("redirect_uri") String redirectUri);
+    ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam(LOGIN) String login,
+                                                  @RequestParam(PIN) String pin,
+                                                  @RequestParam(REDIRECT_URI) String redirectUri);
 
     @PostMapping("/authorise/oauth")
     @Operation(summary = "Get authorisation code, with token")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam("redirect_uri") String redirectUri);
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    ResponseEntity<OauthCodeResponseTO> oauthCode(@RequestParam(REDIRECT_URI) String redirectUri);
 
     @PostMapping("/token")
     @Operation(summary = "Get/refresh access token")
-    ResponseEntity<BearerTokenTO> oauthToken(@RequestParam("code") String code);
+    ResponseEntity<BearerTokenTO> oauthToken(@RequestParam(CODE) String code);
 
     @GetMapping("/authorization-server")
     @Operation(summary = "Authorization server metadata request")

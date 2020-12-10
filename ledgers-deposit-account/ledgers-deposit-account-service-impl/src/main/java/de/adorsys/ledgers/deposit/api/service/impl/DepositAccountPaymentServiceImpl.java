@@ -30,12 +30,13 @@ import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 
@@ -113,8 +114,8 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     public TransactionStatusBO executePayment(String paymentId, String userName) {
         return paymentRepository.findByPaymentIdAndTransactionStatus(paymentId, TransactionStatus.ACTC)
                        .map(p -> isInstantPayment(p)
-                                      ? executionService.executePayment(p, userName)
-                                      : executionService.schedulePayment(p))
+                                         ? executionService.executePayment(p, userName)
+                                         : executionService.schedulePayment(p))
                        .orElseThrow(() -> DepositModuleException.builder()
                                                   .errorCode(PAYMENT_PROCESSING_FAILURE)
                                                   .devMsg(String.format(PAYMENT_EXECUTION_FAILED, "Payment not found", paymentId))
@@ -151,14 +152,15 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     }
 
     @Override
-    public List<PaymentBO> getPaymentsByTypeStatusAndDebtor(PaymentTypeBO paymentType, TransactionStatusBO status, List<AccountReferenceBO> referenceList) {
-        List<Payment> payments = referenceList.stream()
-                                         .map(r -> paymentRepository.findAllByDebtorAccount(r.getIban(), r.getCurrency().getCurrencyCode(), PaymentType.valueOf(paymentType.name()), TransactionStatus.valueOf(status.name())))
-                                         .flatMap(List::stream)
-                                         .collect(Collectors.toList());
-
-
+    public List<PaymentBO> getPaymentsByTypeStatusAndDebtor(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds) {
+        List<Payment> payments = paymentRepository.findAllByAccountIdInAndPaymentTypeAndTransactionStatus(accountIds, PaymentType.valueOf(paymentType.name()), TransactionStatus.valueOf(status.name()));
         return paymentMapper.toPaymentBOList(payments);
+    }
+
+    @Override
+    public Page<PaymentBO> getPaymentsByTypeStatusAndDebtorPaged(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds, Pageable pageable) {
+        return paymentRepository.findAllByAccountIdInAndPaymentTypeAndTransactionStatus(accountIds, PaymentType.valueOf(paymentType.name()), TransactionStatus.valueOf(status.name()), pageable)
+                       .map(paymentMapper::toPaymentBO);
     }
 
     private Payment updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {

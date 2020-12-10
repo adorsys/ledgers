@@ -16,12 +16,14 @@
 
 package de.adorsys.ledgers.deposit.api.service;
 
-import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface DepositAccountPaymentService {
 
@@ -39,5 +41,7 @@ public interface DepositAccountPaymentService {
 
     TransactionStatusBO updatePaymentStatus(String paymentId, TransactionStatusBO status);
 
-    List<PaymentBO> getPaymentsByTypeStatusAndDebtor(PaymentTypeBO paymentType, TransactionStatusBO status, List<AccountReferenceBO> referenceList);
+    List<PaymentBO> getPaymentsByTypeStatusAndDebtor(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds);
+
+    Page<PaymentBO> getPaymentsByTypeStatusAndDebtorPaged(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds, Pageable pageable);
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import static de.adorsys.ledgers.middleware.rest.utils.Constants.UNPROTECTED_ENDPOINT;
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
 
 @Tag(name = "LDG009 - Email verification", description = "Provides endpoint for sending mail with verification link and email confirmation.")
 public interface ScaVerificationRestAPI {
@@ -18,13 +18,13 @@ public interface ScaVerificationRestAPI {
 
     @PostMapping("/email-verification")
     @Operation(summary = "Send email for verification")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email was successfully send."),
             @ApiResponse(responseCode = "404", description = "Error sending email: verification token or sca data not found.")
     })
-    ResponseEntity<Void> sendEmailVerification(@RequestParam("email") String email);
+    ResponseEntity<Void> sendEmailVerification(@RequestParam(EMAIL) String email);
 
     @GetMapping("/email")
     @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Confirm email")
@@ -34,5 +34,5 @@ public interface ScaVerificationRestAPI {
             @ApiResponse(responseCode = "403", description = "Verification token is expired for email confirmation."),
             @ApiResponse(responseCode = "404", description = "Error confirmation email: sca data not found.")
     })
-    ResponseEntity<Void> confirmVerificationToken(@RequestParam("verificationToken") String token);
+    ResponseEntity<Void> confirmVerificationToken(@RequestParam(VERIFICATION_TOKEN) String token);
 }
