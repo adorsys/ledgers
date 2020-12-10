@@ -33,16 +33,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
+
 @Tag(name = "LDG003 - Accounts", description = "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")
 public interface AccountRestAPI {
     String BASE_PATH = "/accounts";
-    String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
-    String DATE_TO_QUERY_PARAM = "dateTo";
-    String DATE_FROM_QUERY_PARAM = "dateFrom";
-    String ACCOUNT_ID = "accountId";
-    String TRANSACTION_ID = "transactionId";
-    String PAGE = "page";
-    String SIZE = "size";
 
     /**
      * Return the list of accounts linked with the current customer.
@@ -53,8 +48,8 @@ public interface AccountRestAPI {
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user. "
                                   + "Call only available to role CUSTOMER.")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)),
                     description = "List of accounts accessible to the user.")
@@ -65,42 +60,42 @@ public interface AccountRestAPI {
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "
                                   + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)),
                     description = "Account details.")
     })
-    ResponseEntity<AccountDetailsTO> getAccountDetailsById(@Parameter(name = ACCOUNT_ID) @PathVariable(name = "accountId") String accountId);
+    ResponseEntity<AccountDetailsTO> getAccountDetailsById(@Parameter(name = ACCOUNT_ID) @PathVariable(ACCOUNT_ID) String accountId);
 
     @GetMapping("/{accountId}/balances")
     @Operation(summary = "Read balances",
             description = "Returns balances of the deposit account with the given accountId. "
                                   + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountBalanceTO.class)), description = "List of accounts balances for the given account.")
     })
-    ResponseEntity<List<AccountBalanceTO>> getBalances(@Parameter(name = ACCOUNT_ID) @PathVariable(name = "accountId") String accountId);
+    ResponseEntity<List<AccountBalanceTO>> getBalances(@Parameter(name = ACCOUNT_ID) @PathVariable(ACCOUNT_ID) String accountId);
 
     @GetMapping(path = "/{accountId}/transactions", params = {DATE_FROM_QUERY_PARAM, DATE_TO_QUERY_PARAM})
     @Operation(summary = "Find Transactions By Date", description = "Returns all transactions for the given account id")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<List<TransactionTO>> getTransactionByDates(
             @Parameter(name = ACCOUNT_ID)
-            @PathVariable(name = "accountId") String accountId,
+            @PathVariable(ACCOUNT_ID) String accountId,
             @RequestParam(name = DATE_FROM_QUERY_PARAM, required = false) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
             @RequestParam(name = DATE_TO_QUERY_PARAM) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo);
 
     @GetMapping(path = "/{accountId}/transactions/page", params = {DATE_FROM_QUERY_PARAM, DATE_TO_QUERY_PARAM, PAGE, SIZE})
     @Operation(summary = "Find Transactions By Date", description = "Returns transactions for the given account id for certain dates, paged view")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<CustomPageImpl<TransactionTO>> getTransactionByDatesPaged(
             @Parameter(name = ACCOUNT_ID)
-            @PathVariable(name = "accountId") String accountId,
+            @PathVariable(name = ACCOUNT_ID) String accountId,
             @RequestParam(name = DATE_FROM_QUERY_PARAM, required = false) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateFrom,
             @RequestParam(name = DATE_TO_QUERY_PARAM) @DateTimeFormat(pattern = LOCAL_DATE_YYYY_MM_DD_FORMAT) LocalDate dateTo,
             @RequestParam(PAGE) int page,
@@ -108,28 +103,28 @@ public interface AccountRestAPI {
 
     @GetMapping("/{accountId}/transactions/{transactionId}")
     @Operation(summary = "Load Transaction", description = "Returns the transaction with the given account id and transaction id.")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<TransactionTO> getTransactionById(
             @Parameter(name = ACCOUNT_ID)
-            @PathVariable(name = "accountId") String accountId,
+            @PathVariable(name = ACCOUNT_ID) String accountId,
             @Parameter(name = TRANSACTION_ID)
-            @PathVariable(name = "transactionId") String transactionId);
+            @PathVariable(name = TRANSACTION_ID) String transactionId);
 
     @Operation(summary = "Fund Confirmation", description = "Returns account details information given the account IBAN")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @PostMapping(value = "/funds-confirmation")
     ResponseEntity<Boolean> fundsConfirmation(
             @RequestBody FundsConfirmationRequestTO request);
 
     @GetMapping(path = "/info/{accountIdentifierType}/{accountIdentifier}")
     @Operation(summary = "Load Account Owner Additional information", description = "Returns Additional Account Information by Account Identifier")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<List<AdditionalAccountInformationTO>> getAdditionalAccountInfo(
             @Parameter(description = "Account identifier type i.e. ACCOUNT_ID / IBAN")
-            @PathVariable(name = "accountIdentifierType") AccountIdentifierTypeTO accountIdentifierType,
+            @PathVariable(name = ACCOUNT_IDENTIFIER_TYPE) AccountIdentifierTypeTO accountIdentifierType,
             @Parameter(description = "The IBAN of the requested account: e.g.: DE69760700240340283600", example = "DE69760700240340283600")
-            @PathVariable(name = "accountIdentifier") String accountIdentifier);
+            @PathVariable(name = ACCOUNT_IDENTIFIER) String accountIdentifier);
 }

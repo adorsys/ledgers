@@ -33,25 +33,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
+
 @Tag(name = "LDG011 - Accounts (STAFF access)", description = "Provides access to the deposit account resource for staff members.")
 public interface AccountMgmStaffResourceAPI {
     String BASE_PATH = "/staff-access" + AccountRestAPI.BASE_PATH;
-    String ACCOUNT_ID = "accountId";
-    String USER_ID = "userId";
-    String QUERY_PARAM = "queryParam";
-    String PAGE = "page";
-    String SIZE = "size";
 
     @Operation(summary = "Retrieves account by iban and Currency")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
-            @ApiResponse(responseCode ="200", description = "Account creation successful"),
-            @ApiResponse(responseCode ="404", description = "User with this ID not found"),
-            @ApiResponse(responseCode ="409", description = "Account with given IBAN already exists.")
+            @ApiResponse(responseCode = "200", description = "Account creation successful"),
+            @ApiResponse(responseCode = "404", description = "User with this ID not found"),
+            @ApiResponse(responseCode = "409", description = "Account with given IBAN already exists.")
     })
     @GetMapping("/acc/acc")
-    ResponseEntity<List<AccountDetailsTO>> getAccountsByIbanAndCurrency(@RequestParam(name = "iban") String iban, @RequestParam(name = "currency", required = false, defaultValue = "") String currency);
+    ResponseEntity<List<AccountDetailsTO>> getAccountsByIbanAndCurrency(@RequestParam(name = IBAN) String iban,
+                                                                        @RequestParam(name = CURRENCY, required = false, defaultValue = "") String currency);
 
     /**
      * Creates a new deposit account for a user specified by ID
@@ -63,15 +61,16 @@ public interface AccountMgmStaffResourceAPI {
      */
     @Operation(summary = "Registers a new Deposit Account for a user with specified ID",
             description = "Registers a new deposit account and assigns account access OWNER to the current user.")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
-            @ApiResponse(responseCode ="200", description = "Account creation successful"),
-            @ApiResponse(responseCode ="404", description = "User with this ID not found"),
-            @ApiResponse(responseCode ="409", description = "Account with given IBAN already exists.")
+            @ApiResponse(responseCode = "200", description = "Account creation successful"),
+            @ApiResponse(responseCode = "404", description = "User with this ID not found"),
+            @ApiResponse(responseCode = "409", description = "Account with given IBAN already exists.")
     })
     @PostMapping
-    ResponseEntity<Void> createDepositAccountForUser(@RequestParam(name = USER_ID) String userId, @RequestBody AccountDetailsTO accountDetailsTO);
+    ResponseEntity<Void> createDepositAccountForUser(@RequestParam(name = USER_ID) String userId,
+                                                     @RequestBody AccountDetailsTO accountDetailsTO);
 
     /**
      * Returns the list of accounts that belong to the same branch as STAFF user.
@@ -80,9 +79,9 @@ public interface AccountMgmStaffResourceAPI {
      */
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user. "
-                            + "Call only available to role CUSTOMER.")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+                                  + "Call only available to role CUSTOMER.")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO[].class)), description = "List of accounts accessible to the user.")
     })
@@ -91,9 +90,9 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user, paged view. "
-                            + "Query param represents full or partial IBAN")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+                                  + "Query param represents full or partial IBAN")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO[].class)), description = "List of accounts accessible to the user.")
     })
@@ -104,9 +103,9 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+                                  + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountDetailsTO.class)), description = "Account details.")
     })
@@ -122,8 +121,8 @@ public interface AccountMgmStaffResourceAPI {
      */
     @Operation(summary = "Deposit Cash",
             description = "Operation for staff member to register cash in the deposit account")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Operation was successful")
     })
@@ -132,9 +131,9 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "Load Extended Account Details by AccountId",
             description = "Returns extended account details information for the given account id. "
-                            + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+                                  + "User must have access to the target account. This is also accessible to other token types like tpp token (DELEGATED_ACESS)")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = AccountReportTO.class)),
@@ -145,9 +144,8 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "Block/Unblock account",
             description = "Changes block state for given account, returns status being set to the block")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @PostMapping("/{accountId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(ACCOUNT_ID) String accountId);
-
 }

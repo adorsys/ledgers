@@ -22,7 +22,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
 
 @Tag(name = "LDG005 - Consent", description = "Provide an API to manage consent at the core banking level.")
 public interface ConsentRestAPI {
@@ -30,13 +34,13 @@ public interface ConsentRestAPI {
 
     @PostMapping(value = "/{consentId}")
     @Operation(summary = "Initiate AIS consent", description = "Validates AIS consent and stores consent initiation to DB")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<SCAConsentResponseTO> initiateAisConsent(@PathVariable("consentId") String consentId, @RequestBody AisConsentTO aisConsent);
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    ResponseEntity<SCAConsentResponseTO> initiateAisConsent(@PathVariable(CONSENT_ID) String consentId, @RequestBody AisConsentTO aisConsent);
 
     @PostMapping(value = "/piis")
     @Operation(summary = "Generate a consent token for CiF", description = "Generate a consent token for CiF. There is no sca process need as we assume the caller is fully authenticated.")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<SCAConsentResponseTO> grantPIISConsent(@RequestBody AisConsentTO piisConsent);
 }

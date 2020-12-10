@@ -23,6 +23,8 @@ import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -58,6 +60,13 @@ public class PaymentResource implements PaymentRestAPI {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<PaymentTO>> getPendingPeriodicPayments() {
         return ResponseEntity.ok(paymentService.getPendingPeriodicPayments(scaInfoHolder.getScaInfo()));
+    }
+
+    @Override
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<CustomPageImpl<PaymentTO>> getPendingPeriodicPaymentsPaged(int page, int size) {
+        CustomPageableImpl pageable = new CustomPageableImpl(page, size);
+        return ResponseEntity.ok(paymentService.getPendingPeriodicPaymentsPaged(scaInfoHolder.getScaInfo(), pageable));
     }
 
     @Override
