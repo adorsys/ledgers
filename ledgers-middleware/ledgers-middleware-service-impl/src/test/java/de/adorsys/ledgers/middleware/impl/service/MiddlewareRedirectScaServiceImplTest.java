@@ -64,6 +64,7 @@ class MiddlewareRedirectScaServiceImplTest {
         when(userService.findByLogin(any())).thenReturn(user);
         when(scaOperationService.checkIfExistsOrNew(any())).thenReturn(new SCAOperationBO());
         when(scaResponseConverter.mapResponse(any(), any(), any(), any(), anyInt(), any())).thenReturn(new GlobalScaResponseTO());
+        when(paymentService.getPaymentById(any())).thenReturn(new PaymentBO());
 
         GlobalScaResponseTO result = service.startScaOperation(new StartScaOprTO("1", OpTypeTO.PAYMENT), new ScaInfoTO());
         assertNotNull(result);
