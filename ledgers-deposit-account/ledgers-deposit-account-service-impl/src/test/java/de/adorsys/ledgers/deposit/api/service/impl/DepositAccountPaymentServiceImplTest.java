@@ -1,6 +1,5 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
@@ -33,6 +32,7 @@ class DepositAccountPaymentServiceImplTest {
     private static final String PAYMENT_ID = "myPaymentId";
     private static final String WRONG_PAYMENT_ID = "wrongId";
     private static final String IBAN = "DE91100000000123456789";
+    private static final String ACCOUNT_ID = "accountId";
 
     @InjectMocks
     private DepositAccountPaymentServiceImpl paymentService;
@@ -231,21 +231,15 @@ class DepositAccountPaymentServiceImplTest {
     @Test
     void getPaymentsByTypeStatusAndDebtor() {
         // Given
-        when(paymentRepository.findAllByDebtorAccount(anyString(), anyString(), any(), any())).thenReturn(Collections.singletonList(getSinglePayment()));
+        when(paymentRepository.findAllByAccountIdInAndPaymentTypeAndTransactionStatus(anySet(), any(), any()))
+                .thenReturn(Collections.singletonList(getSinglePayment()));
         when(paymentMapper.toPaymentBOList(any())).thenReturn(Collections.singletonList(getSinglePaymentBO()));
 
         // When
-        List<PaymentBO> result = paymentService.getPaymentsByTypeStatusAndDebtor(PaymentTypeBO.SINGLE, TransactionStatusBO.ACCP, Collections.singletonList(getReference()));
+        List<PaymentBO> result = paymentService.getPaymentsByTypeStatusAndDebtor(PaymentTypeBO.SINGLE, TransactionStatusBO.ACCP, Set.of(ACCOUNT_ID));
 
         // Then
         assertEquals(Collections.singletonList(getSinglePaymentBO()), result);
-    }
-
-    private AccountReferenceBO getReference() {
-        AccountReferenceBO bo = new AccountReferenceBO();
-        bo.setCurrency(Currency.getInstance("EUR"));
-        bo.setIban(IBAN);
-        return bo;
     }
 
     private void testGetPaymentById(String paymentId, Payment persistedPayment, PaymentBO expectedPayment, boolean wrongIdentifier) {

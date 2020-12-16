@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static de.adorsys.ledgers.middleware.rest.utils.Constants.UNPROTECTED_ENDPOINT;
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
 
 @Tag(name = "LDG002 - User Management", description = "Provides endpoint for registering, authorizing and managing users.")
 public interface UserMgmtRestAPI {
@@ -50,14 +50,15 @@ public interface UserMgmtRestAPI {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)), description = "Boolean representation of requirement for multi-level sca")
     })
-    ResponseEntity<Boolean> multilevel(@RequestParam("login") String login, @RequestParam("iban") String iban);
+    ResponseEntity<Boolean> multilevel(@RequestParam(LOGIN) String login,
+                                       @RequestParam(IBAN) String iban);
 
     @PostMapping("/multilevel")
     @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Check if multilevel SCA required for certain user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)), description = "Boolean representation of requirement for multi-level sca")
     })
-    ResponseEntity<Boolean> multilevelAccounts(@RequestParam("login") String login, @RequestBody List<AccountReferenceTO> references);
+    ResponseEntity<Boolean> multilevelAccounts(@RequestParam(LOGIN) String login, @RequestBody List<AccountReferenceTO> references);
 
     /**
      * Registers a new user with the system. Activation is dependent on the user role.
@@ -72,19 +73,19 @@ public interface UserMgmtRestAPI {
      */
     @PostMapping("/register")
     @Operation(tags = UNPROTECTED_ENDPOINT, summary = "Register", description = "Registers a user."
-                                                                                                            + "<ul>"
-                                                                                                            + "<li>A user is always registered as customer and is activated by default.</li>"
-                                                                                                            + "<li>A user can only be given another role by an administrating STAFF member.</li>"
-                                                                                                            + "</ul>")
+                                                                                        + "<ul>"
+                                                                                        + "<li>A user is always registered as customer and is activated by default.</li>"
+                                                                                        + "<li>A user can only be given another role by an administrating STAFF member.</li>"
+                                                                                        + "</ul>")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "The user data record without the user pin."),
             @ApiResponse(responseCode = "409", description = "Conflict. A user with email or login name already exist.")
     })
-    ResponseEntity<UserTO> register(@RequestParam("login") String login,
-                                    @RequestParam("email") String email,
-                                    @RequestParam("pin") String pin,
+    ResponseEntity<UserTO> register(@RequestParam(LOGIN) String login,
+                                    @RequestParam(EMAIL) String email,
+                                    @RequestParam(PIN) String pin,
                                     // TODO remove role parameter.
-                                    @RequestParam(name = "role", defaultValue = "CUSTOMER") UserRoleTO role);
+                                    @RequestParam(name = ROLE, defaultValue = "CUSTOMER") UserRoleTO role);
 
     //==========================================================================================================================
     //
@@ -101,14 +102,14 @@ public interface UserMgmtRestAPI {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "The user data record without the user pin."),
             @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified.")
     })
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<UserTO> getUser();
 
     @PutMapping("/me")
     @Operation(summary = "Edit current User")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     ResponseEntity<Void> editSelf(@RequestBody UserTO user);
 
     @PutMapping("/sca-data")
@@ -117,8 +118,8 @@ public interface UserMgmtRestAPI {
                                                                    + "<li>User is implied from the provided access token.</li>"
                                                                    + "<li>Actor token (delegation token like ais cosent token) can not be used to execute this operation</li>"
                                                                    + "</ul>")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The user data record without the user pin."),
             @ApiResponse(responseCode = "401", description = "Provided bearer token could not be verified."),
@@ -137,23 +138,23 @@ public interface UserMgmtRestAPI {
                                                                        + "<li>This can only be called by either SYSTEM or STAFF members.</li>"
                                                                        + "<li>Will be moved to a management interface in the future.</li>"
                                                                        + "</lu>")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<UserTO> getUserById(@PathVariable("userId") String userId);
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    ResponseEntity<UserTO> getUserById(@PathVariable(USER_ID) String userId);
 
     @PutMapping("/authorisations/{authorisationId}/confirmation/{authConfirmCode}")
     @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(@PathVariable("authorisationId") String authorisationId,
-                                                                  @PathVariable(name = "authConfirmCode") String authConfirmCode);
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    ResponseEntity<AuthConfirmationTO> verifyAuthConfirmationCode(@PathVariable(AUTH_ID) String authorisationId,
+                                                                  @PathVariable(name = AUTH_CONF_CODE) String authConfirmCode);
 
     @PutMapping("/authorisations/{authorisationId}/confirmation")
     @Operation(summary = "Send an authentication confirmation code for validation", description = "Validate an authentication code")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
-    ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(@PathVariable("authorisationId") String authorisationId,
-                                                                @RequestParam(value = "authCodeConfirmed", defaultValue = "false") boolean authCodeConfirmed);
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    ResponseEntity<AuthConfirmationTO> completeAuthConfirmation(@PathVariable(AUTH_ID) String authorisationId,
+                                                                @RequestParam(value = AUTH_CONFIRMED, defaultValue = "false") boolean authCodeConfirmed);
 
     @PostMapping("/reset/password/{login}")
     @Operation(summary = "Reset password via email", description = "Send link for password reset to user email.")
@@ -161,5 +162,5 @@ public interface UserMgmtRestAPI {
             @ApiResponse(responseCode = "204", description = "Send link to user email for password reset."),
             @ApiResponse(responseCode = "404", description = "Conflict. A user with email not found.")
     })
-    ResponseEntity<Void> resetPasswordViaEmail(@PathVariable("login") String login);
+    ResponseEntity<Void> resetPasswordViaEmail(@PathVariable(LOGIN) String login);
 }

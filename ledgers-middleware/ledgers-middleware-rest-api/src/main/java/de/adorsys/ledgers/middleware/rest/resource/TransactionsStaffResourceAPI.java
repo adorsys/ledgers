@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.Map;
 
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.API_KEY;
+import static de.adorsys.ledgers.middleware.rest.utils.Constants.OAUTH2;
+
 @Tag(name = "LDG014 - Transactions Mock Upload (STAFF access)")
 public interface TransactionsStaffResourceAPI {
     String BASE_PATH = "/staff-access/transactions";
@@ -21,8 +24,8 @@ public interface TransactionsStaffResourceAPI {
      * @return user object without pin
      */
     @Operation(summary = "Posts transactions to Ledgers")
-    @SecurityRequirement(name = "apiKey")
-    @SecurityRequirement(name = "oAuth2")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
     @PostMapping
     ResponseEntity<Map<String, String>> transactions(@RequestBody List<MockBookingDetails> data);
 }

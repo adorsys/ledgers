@@ -25,7 +25,6 @@ import de.adorsys.ledgers.middleware.impl.sca.AbstractScaChallengeData;
 import de.adorsys.ledgers.middleware.impl.sca.EmailScaChallengeData;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
-import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.junit.jupiter.api.Test;
@@ -378,7 +377,7 @@ class MiddlewarePaymentServiceImplTest {
         // Given
         when(scaUtils.userBO(anyString())).thenReturn(new UserBO());
         when(paymentConverter.toPaymentTOList(any())).thenReturn(Collections.singletonList(new PaymentTO()));
-        when(paymentService.getPaymentsByTypeStatusAndDebtor(eq(PaymentTypeBO.PERIODIC), eq(ACSP), anyList())).thenReturn(Collections.singletonList(new PaymentBO()));
+        when(paymentService.getPaymentsByTypeStatusAndDebtor(eq(PaymentTypeBO.PERIODIC), eq(ACSP), anySet())).thenReturn(Collections.singletonList(new PaymentBO()));
 
         // When
         List<PaymentTO> result = middlewareService.getPendingPeriodicPayments(SCA_INFO_TO);

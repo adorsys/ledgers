@@ -21,6 +21,8 @@ import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
 import java.util.List;
 
@@ -101,4 +103,6 @@ public interface MiddlewarePaymentService {
     SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId);
 
     List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO);
+
+    CustomPageImpl<PaymentTO> getPendingPeriodicPaymentsPaged(ScaInfoTO scaInfo, CustomPageableImpl pageable);
 }

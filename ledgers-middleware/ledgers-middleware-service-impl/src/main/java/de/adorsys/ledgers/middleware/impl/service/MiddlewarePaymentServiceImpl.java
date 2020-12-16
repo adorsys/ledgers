@@ -19,7 +19,6 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
-import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
@@ -32,7 +31,7 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.impl.config.PaymentProductsConfig;
-import de.adorsys.ledgers.middleware.impl.converter.AccountDetailsMapper;
+import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
@@ -41,20 +40,20 @@ import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.util.Ids;
+import de.adorsys.ledgers.util.domain.CustomPageImpl;
+import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
-import java.util.Currency;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.*;
 import static de.adorsys.ledgers.middleware.api.domain.Constants.SCOPE_FULL_ACCESS;
@@ -78,8 +77,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final AccessService accessService;
     private final ScaResponseResolver scaResponseResolver;
     private final PaymentProductsConfig paymentProductsConfig;
-    private final AccountDetailsMapper detailsMapper;
-    private final KeycloakTokenService tokenService;
+    private final PageMapper pageMapper;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -211,9 +209,17 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     @Override
     public List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO) {
-        List<AccountReferenceBO> referenceList = detailsMapper.toAccountReferenceList(scaUtils.userBO(scaInfoTO.getUserLogin()).getAccountAccesses());
-        List<PaymentBO> payments = paymentService.getPaymentsByTypeStatusAndDebtor(PaymentTypeBO.PERIODIC, ACSP, referenceList);
+        Set<String> accountIds = scaUtils.userBO(scaInfoTO.getUserLogin()).getAccountIds();
+        List<PaymentBO> payments = paymentService.getPaymentsByTypeStatusAndDebtor(PaymentTypeBO.PERIODIC, ACSP, accountIds);
         return paymentConverter.toPaymentTOList(payments);
+    }
+
+    @Override
+    public CustomPageImpl<PaymentTO> getPendingPeriodicPaymentsPaged(ScaInfoTO scaInfo, CustomPageableImpl pageable) {
+        Set<String> accountIds = scaUtils.userBO(scaInfo.getUserLogin()).getAccountIds();
+        return pageMapper.toCustomPageImpl(
+                paymentService.getPaymentsByTypeStatusAndDebtorPaged(PaymentTypeBO.PERIODIC, ACSP, accountIds, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                        .map(paymentConverter::toPaymentTO));
     }
 
     private SCAPaymentResponseTO authorizeOperation(ScaInfoTO scaInfoTO, String paymentId, OpTypeBO opType) {

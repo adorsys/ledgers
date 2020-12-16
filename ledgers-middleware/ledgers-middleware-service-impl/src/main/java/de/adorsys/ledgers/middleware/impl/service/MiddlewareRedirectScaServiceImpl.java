@@ -30,8 +30,6 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
 
     @Value("${ledgers.sca.authCode.validity.seconds:180}")
     private int authCodeLifetime;
-    @Value("${ledgers.sca.final.weight:100}")
-    private int finalWeight;
 
     private final UserService userService;
     private final DepositAccountPaymentService paymentService;
@@ -50,14 +48,18 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
                           .devMsg("Sorry, but do not have any SCA Methods configured!")
                           .build();
         }
+
+        OpTypeBO opType = valueOf(scaOpr.getOpType().name());
+
+        int scaWeight = resolveWeightForOperation(opType, scaOpr.getOprId(), user);
         AuthCodeDataBO codeData = new AuthCodeDataBO(user.getLogin(), null, scaOpr.getOprId(), scaOpr.getExternalId(), NO_USER_MESSAGE, authCodeLifetime,
-                                                     valueOf(scaOpr.getOpType().name()), scaOpr.getAuthorisationId(), finalWeight);
+                                                     opType, scaOpr.getAuthorisationId(), scaWeight);
         SCAOperationBO operation = scaOperationService.checkIfExistsOrNew(codeData);
 
         try {
             String message = messageResolver.updateMessage(null, operation);
             BearerTokenBO bearerToken = bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken());
-            return scaResponseConverter.mapResponse(operation, user.getScaUserData(), message, bearerToken, 100, null);
+            return scaResponseConverter.mapResponse(operation, user.getScaUserData(), message, bearerToken, scaWeight, null);
         } catch (MiddlewareModuleException e) {
             throw scaOperationService.updateFailedCount(operation.getId(), true);
         }

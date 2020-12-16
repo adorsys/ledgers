@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-middleware</artifactId>
-		<version>4.2</version>
+		<version>4.3</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -67,8 +67,8 @@
 
 		<!-- Other dependencies -->
 		<dependency>
-			<groupId>io.github.openfeign</groupId>
-			<artifactId>feign-core</artifactId>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
     </dependencies>
 
