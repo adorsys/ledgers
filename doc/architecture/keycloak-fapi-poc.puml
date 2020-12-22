@@ -1,0 +1,46 @@
+@startuml
+actor PSU
+entity TPP
+entity XS2A
+entity Keycloak
+entity CMS
+entity Ledgers
+
+PSU->TPP+: Initiate payment
+TPP->XS2A +: same
+XS2A->CMS: PUSH requested business object (BO)
+XS2A->Keycloak+: PUSH PAR (example? BO)
+Keycloak<->CMS: Check BO present
+return RAR (example? redirect to IDP???)
+return redirect to IDP
+return redirect to IDP
+
+PSU->Keycloak+: Login credentials + BO id
+Keycloak->Keycloak: Check Login+Password
+Keycloak<->CMS: get BO
+return BO confirmation view
+PSU->Keycloak+: confirm BO
+group NO INFO ON IMPL
+Keycloak->Ledgers+: get ScaMethods
+return ScaMethods List
+return SCA Method selection view
+PSU->Keycloak+: Select method
+end
+Keycloak->Ledgers+: StartSca+SelectMethod+SendScaToPSU
+return 200 OK
+Keycloak->CMS: UPDATE ScaStatus
+return ScaDependantView (Enter TAN, or await decoupled confirmation)
+PSU->Keycloak+: Input TAN
+Keycloak->Ledgers+: Validate TAN
+return OK/NOK
+Keycloak->CMS: UPDATE ScaStatus = FINALIZED
+return redirectToTPP + authCode
+PSU->TPP+: follow redirect link + authCode
+TPP->Keycloak+: Exchange authCode for TOKEN
+return TOKEN
+TPP->XS2A: Execute Payment using TOKEN
+return 200 OK
+
+
+
+@enduml
