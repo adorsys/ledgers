@@ -200,6 +200,7 @@ public class BankInitService {
                 account = depositAccountService.getAccountDetailsByIbanAndCurrency(details.getIban(), details.getCurrency(), LocalDateTime.now(), true);
 
             } catch (DepositModuleException e) {
+                details.setCreditLimit(BigDecimal.ZERO);
                 account = createAccount(details);
             }
             updateBalanceIfRequired(details, account);

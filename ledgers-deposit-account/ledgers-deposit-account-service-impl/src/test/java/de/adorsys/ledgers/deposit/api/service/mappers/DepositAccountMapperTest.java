@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Currency;
 
@@ -45,7 +46,7 @@ class DepositAccountMapperTest {
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic",
-                                  "Some linked account", AccountUsage.PRIV, "details", false, false, CREATED);
+                                  "Some linked account", AccountUsage.PRIV, "details", false, false, CREATED, BigDecimal.ZERO);
     }
 
     private DepositAccountBO getDepositAccountBO() {
@@ -62,6 +63,7 @@ class DepositAccountMapperTest {
         bo.setUsageType(AccountUsageBO.PRIV);
         bo.setDetails("details");
         bo.setCreated(CREATED);
+        bo.setCreditLimit(BigDecimal.ZERO);
         return bo;
     }
 }

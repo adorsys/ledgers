@@ -7,6 +7,7 @@ import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -77,4 +78,6 @@ public interface DepositAccountService {
     Page<DepositAccountBO> findByBranchIdsAndMultipleParams(Collection<String> branchIds, String iban, Boolean blocked, Pageable pageable);
 
     void changeAccountsBlockedStatus(Set<String> accountIds, boolean systemBlock, boolean lockStatusToSet);
+
+    void changeCreditLimit(String accountId, BigDecimal creditLimit);
 }

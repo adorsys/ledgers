@@ -22,6 +22,7 @@ import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
+import de.adorsys.ledgers.util.exception.DepositErrorCode;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
 import org.junit.jupiter.api.Test;
@@ -90,7 +91,7 @@ class DepositAccountServiceImplTest {
         // Given
         when(depositAccountConfigService.getDepositParentAccount()).thenReturn(getLedgerAccountBO().getName());
         when(ledgerService.newLedgerAccount(any(), anyString())).thenReturn(getLedgerAccountBO());
-        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(false));
+        when(depositAccountRepository.save(any())).thenReturn(getDepositAccount(false, null));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
         // When
@@ -104,7 +105,7 @@ class DepositAccountServiceImplTest {
     @Test
     void createDepositAccount_account_already_exist() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false)));
+        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false, null)));
         DepositAccountBO depositAccountBO = getDepositAccountBO();
         // Then
         assertThrows(DepositModuleException.class, () -> depositAccountService.createNewAccount(depositAccountBO, SYSTEM, ""));
@@ -113,8 +114,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getDepositAccountById() {
         // Given
-        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(false)));
-
+        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(getDepositAccount(false, null)));
         // When
         DepositAccountDetailsBO depositAccountDetailsBO = depositAccountService.getAccountDetailsById("id", NOW, false);
         // Then
@@ -134,8 +134,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getDepositAccountByIBANAndCurrency() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
-
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false, null)));
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         // Then
@@ -146,8 +145,7 @@ class DepositAccountServiceImplTest {
     @Test
     void checkAccountStatus_enabled() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
-
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false, null)));
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
@@ -161,8 +159,7 @@ class DepositAccountServiceImplTest {
     @Test
     void checkAccountStatus_blocked() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true)));
-
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true, null)));
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
@@ -176,8 +173,7 @@ class DepositAccountServiceImplTest {
     @Test
     void checkAccountStatus_deleted() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true)));
-
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(true, null)));
         // When
         DepositAccountDetailsBO accountDetailsBO = depositAccountService.getAccountDetailsByIbanAndCurrency("iban", EUR, NOW, false);
         boolean checkAccountStatus = accountDetailsBO.isEnabled();
@@ -191,8 +187,7 @@ class DepositAccountServiceImplTest {
     @Test
     void findDepositAccountsByBranch() {
         // Given
-        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount(false)));
-
+        when(depositAccountRepository.findByBranch(any())).thenReturn(Collections.singletonList(getDepositAccount(false, null)));
         // When
         List<DepositAccountDetailsBO> accounts = depositAccountService.findDetailsByBranch(anyString());
 
@@ -209,7 +204,6 @@ class DepositAccountServiceImplTest {
         when(depositAccountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(readFile(DepositAccount.class, "DepositAccount.yml")));
         when(postingService.findPostingLineById(any(), any())).thenReturn(new PostingLineBO());
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
-
         // When
         TransactionDetailsBO result = depositAccountService.getTransactionById(ACCOUNT_ID, POSTING_ID);
 
@@ -246,8 +240,28 @@ class DepositAccountServiceImplTest {
 
     @Test
     void confirmationOfFunds_more_than_necessary_available() throws NoSuchFieldException {
-        confirmationOfFunds_more_than_necessary_available(100);
-        confirmationOfFunds_more_than_necessary_available(101);
+        confirmationOfFunds_more_than_necessary_available(100, BigDecimal.ZERO);
+        confirmationOfFunds_more_than_necessary_available(101, BigDecimal.ZERO);
+    }
+
+    @Test
+    void confirmationOfFunds_more_than_necessary_available_credit_enabled() throws NoSuchFieldException {
+        confirmationOfFunds_more_than_necessary_available(90, BigDecimal.valueOf(10));
+        confirmationOfFunds_more_than_necessary_available(91, BigDecimal.valueOf(10));
+    }
+
+    @Test
+    void confirmationOfFunds_Failure_credit_enabled() throws NoSuchFieldException {
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false, BigDecimal.TEN)));
+        when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(50));
+        when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
+
+        FieldSetter.setField(depositAccountService, depositAccountService.getClass().getDeclaredField("exchangeRatesService"), new CurrencyExchangeRatesServiceImpl(null, null));
+
+        FundsConfirmationRequestBO requestBO = readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml");
+        // Then
+        boolean result = depositAccountService.confirmationOfFunds(requestBO);
+        assertFalse(result);
     }
 
     @Test
@@ -259,7 +273,7 @@ class DepositAccountServiceImplTest {
 
     @Test
     void getAccountsByIbanAndParamCurrency() {
-        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(false)));
+        when(depositAccountRepository.findAllByIbanAndCurrencyContaining(anyString(), anyString())).thenReturn(Collections.singletonList(getDepositAccount(false, BigDecimal.ZERO)));
         List<DepositAccountBO> result = depositAccountService.getAccountsByIbanAndParamCurrency("iban", "EUR");
         assertEquals(Collections.singletonList(getDepositAccountBO()), result);
     }
@@ -267,8 +281,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getAccountByIbanAndCurrency() {
         // Given
-        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false)));
-
+        when(depositAccountRepository.findByIbanAndCurrency(anyString(), anyString())).thenReturn(Optional.of(getDepositAccount(false, BigDecimal.ZERO)));
         // When
         DepositAccountBO result = depositAccountService.getAccountByIbanAndCurrency("iban", EUR);
 
@@ -288,8 +301,7 @@ class DepositAccountServiceImplTest {
     @Test
     void getAccountById() {
         // Given
-        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(false)));
-
+        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(false, BigDecimal.ZERO)));
         // When
         DepositAccountBO result = depositAccountService.getAccountById("accountId");
 
@@ -309,10 +321,9 @@ class DepositAccountServiceImplTest {
     @Test
     void getTransactionsByDatesPaged() throws JsonProcessingException {
         // Given
-        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(false)));
+        when(depositAccountRepository.findById(anyString())).thenReturn(Optional.of(getDepositAccount(false, null)));
         when(postingService.findPostingsByDatesPaged(any(), any(), any(), any())).thenReturn(new PageImpl<>(Collections.singletonList(newPostingLineBO())));
         when(transactionDetailsMapper.toTransactionSigned(any())).thenReturn(readFile(TransactionDetailsBO.class, "Transaction.yml"));
-
         // When
         Page<TransactionDetailsBO> result = depositAccountService.getTransactionsByDatesPaged("accountId", NOW, NOW, Pageable.unpaged());
 
@@ -323,13 +334,13 @@ class DepositAccountServiceImplTest {
     @Test
     void findDetailsByBranchPaged() {
         // Given
-        when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(false))));
-
+        when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(false, null))));
         // When
         Page<DepositAccountDetailsBO> result = depositAccountService.findDetailsByBranchPaged("branchId", "someParam", Pageable.unpaged());
 
         // Then
-        assertEquals(new PageImpl<>(Collections.singletonList(new DepositAccountDetailsBO(getDepositAccountBO(), Collections.emptyList()))), result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
     }
 
     @Test
@@ -346,8 +357,8 @@ class DepositAccountServiceImplTest {
         assertEquals("DE123456789", result);
     }
 
-    private void confirmationOfFunds_more_than_necessary_available(long amount) throws NoSuchFieldException {
-        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false)));
+    private void confirmationOfFunds_more_than_necessary_available(long amount, BigDecimal creditAmount) throws NoSuchFieldException {
+        when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false, creditAmount)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
@@ -364,10 +375,10 @@ class DepositAccountServiceImplTest {
         return pl;
     }
 
-    private DepositAccount getDepositAccount(boolean status) {
+    private DepositAccount getDepositAccount(boolean status, BigDecimal creditAmount) {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic", "linked",
-                                  AccountUsage.PRIV, "details", status, false, CREATED);
+                                  AccountUsage.PRIV, "details", status, false, CREATED, creditAmount);
     }
 
     private DepositAccountBO getDepositAccountBO() {
@@ -380,6 +391,7 @@ class DepositAccountServiceImplTest {
                        .usageType(AccountUsageBO.PRIV).details("details")
                        .linkedAccounts("linked")
                        .created(CREATED)
+                       .creditLimit(BigDecimal.ZERO)
                        .build();
     }
 
@@ -443,6 +455,14 @@ class DepositAccountServiceImplTest {
 
         // Then
         verify(depositAccountRepository, times(1)).updateBlockedStatus(Collections.singleton(USER_ID), true);
+    }
+
+    @Test
+    void changeCreditLimit() {
+        DepositAccount depositAccount = getDepositAccount(true, BigDecimal.TEN);
+        when(depositAccountRepository.findById(any())).thenReturn(Optional.of(depositAccount));
+        depositAccountService.changeCreditLimit(ACCOUNT_ID, BigDecimal.ONE);
+        assertEquals(0, depositAccount.getCreditLimit().compareTo(BigDecimal.ONE));
     }
 
 }

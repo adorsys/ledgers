@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 
@@ -79,6 +80,8 @@ public class AccountDetailsTO {
 
     private boolean blocked;
     private boolean systemBlocked;
+
+    private BigDecimal creditLimit = BigDecimal.ZERO;
 
     private String branch;
 

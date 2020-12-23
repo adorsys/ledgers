@@ -159,14 +159,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public boolean confirmationOfFunds(FundsConfirmationRequestBO requestBO) {
         DepositAccountDetailsBO account = getAccountDetailsByIbanAndCurrency(requestBO.getPsuAccount().getIban(), requestBO.getPsuAccount().getCurrency(), LocalDateTime.now(), true);
-        Currency accountCurrency = account.getAccount().getCurrency();
         AmountBO instructedAmount = requestBO.getInstructedAmount();
-        BigDecimal appliedRate = exchangeRatesService.applyRate(instructedAmount.getCurrency(), accountCurrency, instructedAmount.getAmount());
-        requestBO.setInstructedAmount(new AmountBO(account.getAccount().getCurrency(), appliedRate));
+        BigDecimal requestedAmountInAccountCurrency = exchangeRatesService.applyRate(instructedAmount.getCurrency(), account.getAccount().getCurrency(), instructedAmount.getAmount());
         return account.getBalances().stream()
                        .filter(b -> b.getBalanceType() == INTERIM_AVAILABLE)
                        .findFirst()
-                       .map(b -> isSufficientAmountAvailable(requestBO, b))
+                       .map(b -> b.isSufficientAmountAvailable(requestedAmountInAccountCurrency, account.getAccount().getCreditLimit()))
                        .orElse(Boolean.FALSE);
     }
 
@@ -266,8 +264,17 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
+    @Transactional
+    public void changeCreditLimit(String accountId, BigDecimal creditLimit) {
+        DepositAccount account = getDepositAccountEntityById(accountId);
+        checkCreditLimitIsCorrect(creditLimit);
+        account.setCreditLimit(creditLimit);
+    }
+
+    @Override
     public DepositAccountBO createNewAccount(DepositAccountBO depositAccountBO, String userName, String branch) {
         checkDepositAccountAlreadyExist(depositAccountBO);
+        checkCreditLimitIsCorrect(depositAccountBO.getCreditLimit());
         DepositAccount depositAccount = depositAccountMapper.toDepositAccount(depositAccountBO);
         depositAccount.setId(Ids.id());
         depositAccount.setName(userName);
@@ -281,6 +288,15 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         Optional.ofNullable(branch).ifPresent(depositAccount::setBranch);
         DepositAccount saved = depositAccountRepository.save(depositAccount);
         return depositAccountMapper.toDepositAccountBO(saved);
+    }
+
+    private void checkCreditLimitIsCorrect(BigDecimal creditLimit) {
+        if (creditLimit.signum() < 0) {
+            throw DepositModuleException.builder()
+                          .errorCode(UNSUPPORTED_CREDIT_LIMIT)
+                          .devMsg("Credit limit value should be positive or zero")
+                          .build();
+        }
     }
 
     private void executeNativeQuery(String queryFilePath, String parameter, String errorMsg) {
@@ -369,12 +385,5 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             balance.setLastChangeDateTime(stmt.getPstTime());
         }
         return balance;
-    }
-
-    private boolean isSufficientAmountAvailable(FundsConfirmationRequestBO request, BalanceBO balance) {
-        AmountBO balanceAmount = balance.getAmount();
-        return Optional.ofNullable(request.getInstructedAmount())
-                       .map(r -> balanceAmount.getAmount().compareTo(r.getAmount()) >= 0)
-                       .orElse(false);
     }
 }

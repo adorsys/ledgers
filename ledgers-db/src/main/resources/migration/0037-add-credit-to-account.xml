@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="dmi@adorsys.com.ua" id="15-12-2020-01">
+        <comment>Add credit related fields to deposit_account table</comment>
+        <addColumn tableName="deposit_account">
+            <column name="credit_limit" type="numeric(19, 2)" defaultValueNumeric="0.00"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

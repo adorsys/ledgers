@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
@@ -148,4 +149,10 @@ public interface AccountMgmStaffResourceAPI {
     @SecurityRequirement(name = OAUTH2)
     @PostMapping("/{accountId}/status")
     ResponseEntity<Boolean> changeStatus(@PathVariable(ACCOUNT_ID) String accountId);
+
+    @Operation(summary = "Update Credit Limit for specific account account")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    @PutMapping("/{accountId}/credit")
+    ResponseEntity<Void> changeCreditLimit(@PathVariable(ACCOUNT_ID) String accountId, @RequestBody BigDecimal creditLimit);
 }

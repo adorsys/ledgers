@@ -43,7 +43,8 @@ import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.BULK;
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.SINGLE;
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.ACSP;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -592,12 +593,12 @@ class DepositAccountTransactionServiceImplTest {
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", IBAN, "msisdn", "EUR",
                                   "name", "product", null, AccountType.CASH, "bic", null,
-                                  AccountUsage.PRIV, "details", false, false, LocalDateTime.now());
+                                  AccountUsage.PRIV, "details", false, false, LocalDateTime.now(), BigDecimal.ZERO);
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null),
+                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO),
                 Collections.emptyList());
     }
 }

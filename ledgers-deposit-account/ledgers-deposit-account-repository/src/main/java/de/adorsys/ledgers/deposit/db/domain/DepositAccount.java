@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -84,6 +85,9 @@ public class DepositAccount {
     @Column
     @CreationTimestamp
     private LocalDateTime created;
+
+    @Column(name = "credit_limit")
+    private BigDecimal creditLimit = BigDecimal.ZERO;
 
     public boolean isEnabled() {
         return !blocked && !systemBlocked;
