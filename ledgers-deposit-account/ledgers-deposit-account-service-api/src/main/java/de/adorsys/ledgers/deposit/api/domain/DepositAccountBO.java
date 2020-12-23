@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Currency;
 
@@ -86,6 +87,8 @@ public class DepositAccountBO {
     private String branch;
 
     private LocalDateTime created;
+
+    private BigDecimal creditLimit = BigDecimal.ZERO;
 
     public boolean isEnabled() {
         return !blocked && !systemBlocked;

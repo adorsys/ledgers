@@ -35,6 +35,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -263,6 +264,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         depositAccountService.changeAccountsBlockedStatus(Collections.singleton(accountId), isSystemBlock, lockStatusToSet);
 
         return lockStatusToSet;
+    }
+
+    @Override
+    public void changeCreditLimit(String accountId, BigDecimal creditLimit) {
+        depositAccountService.changeCreditLimit(accountId, creditLimit);
     }
 
     private void checkPresentAccountsAndOwner(String iban, UserBO user) { //TODO Consider moving to separate place RequestValidationFilter?

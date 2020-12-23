@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -175,6 +176,6 @@ class AccessServiceTest {
     }
 
     private DepositAccountBO getDepostAccountBO() {
-        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch", CREATED);
+        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch", CREATED, BigDecimal.ZERO);
     }
 }

@@ -163,7 +163,7 @@ class MiddlewarePaymentServiceImplTest {
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false, "branch", null)));
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false, "branch", null, BigDecimal.ZERO)));
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
         when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
@@ -183,8 +183,8 @@ class MiddlewarePaymentServiceImplTest {
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
 
         when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
-        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false, null, null)));
-        when(accountService.getAccountsByIbanAndParamCurrency(eq("DE91100000000123456709"), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getTargets().iterator().next().getCreditorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, true, false, null, null)));
+        when(accountService.getAccountsByIbanAndParamCurrency(any(), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getDebtorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, false, false, null, null, BigDecimal.ZERO)));
+        when(accountService.getAccountsByIbanAndParamCurrency(eq("DE91100000000123456709"), any())).thenReturn(Collections.singletonList(new DepositAccountBO("", paymentBO.getTargets().iterator().next().getCreditorAccount().getIban(), null, null, null, null, paymentBO.getDebtorAccount().getCurrency(), null, null, null, null, null, null, null, true, false, null, null, BigDecimal.ZERO)));
 
         FieldSetter.setField(middlewareService, middlewareService.getClass().getDeclaredField("paymentProductsConfig"), getPaymentConfig());
 

@@ -9,6 +9,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -152,4 +153,5 @@ public interface MiddlewareAccountManagementService {
 
     boolean changeStatus(String accountId, boolean systemBlock);
 
+    void changeCreditLimit(String accountId, BigDecimal creditLimit);
 }

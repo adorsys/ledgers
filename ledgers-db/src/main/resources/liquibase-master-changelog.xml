@@ -69,4 +69,5 @@
     <include file="migration/0034-add-stage-to-oauth-code.xml" relativeToChangelogFile="true" />
     <include file="migration/0035-default-value-for-oauth-code.xml" relativeToChangelogFile="true"/>
     <include file="migration/0036-external-id-for-sca-operation-table.xml" relativeToChangelogFile="true"/>
+    <include file="migration/0037-add-credit-to-account.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
