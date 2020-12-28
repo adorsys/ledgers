@@ -41,7 +41,7 @@ variables: &variables
   OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_KEYCLOAK_DEV: "adorsys-modelbank-keycloak-dev"
 
   OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV: "adorsys-modelbank-dev"
-  OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_INTEG: "adorsys-modelbank-integ"
+  OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_E2E: "adorsys-modelbank-e2e"
 
   ###########################
   # Build variables         #
@@ -288,7 +288,7 @@ Deploy Image to Openshift (adorsys-modelbank-dev):
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV}
   <<: *push_docker_openshift
 
-Deploy image to Openshift (adorsys-modelbank-integ):
+Deploy image to Openshift (adorsys-modelbank-e2e):
   stage: Deploy
   only:
     - schedules
@@ -297,7 +297,7 @@ Deploy image to Openshift (adorsys-modelbank-integ):
     url: ~
   variables:
     DOCKER_TAG: develop
-    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_INTEG}
+    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_E2E}
   <<: *push_docker_openshift
 
 ###########
