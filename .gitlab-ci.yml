@@ -93,6 +93,12 @@ variables: &variables
     - docker tag "adorsys/ledgers:${DOCKER_TAG}" "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest"
     - docker push "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers:latest"
 
+.push_docker_keycloak_with_ledgers_plugin: &push_docker_keycloak_with_ledgers_plugin
+  script:
+    - docker pull adorsys/ledgers-keycloak:${DOCKER_TAG}
+    - docker login -u openshift -p $OPENSHIFT_TOKEN $OPENSHIFT_REGISTRY
+    - docker tag "adorsys/ledgers-keycloak:${DOCKER_TAG}" "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers-keycloak:latest"
+    - docker push "${OPENSHIFT_REGISTRY}/${OPENSHIFT_NAMESPACE}/ledgers-keycloak:latest"
 # ------------------------------------------------------------------
 # jobs
 # ------------------------------------------------------------------
@@ -288,6 +294,20 @@ Deploy Image to Openshift (adorsys-modelbank-dev):
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV}
   <<: *push_docker_openshift
 
+Deploy Keycloak to Openshift (adorsys-modelbank-dev):
+  stage: Deploy
+  except:
+    - schedules
+  only:
+    - develop
+  environment:
+    name: dev
+    url: ~
+  variables:
+    DOCKER_TAG: develop
+    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV}
+  <<: *push_docker_keycloak_with_ledgers_plugin
+
 Deploy image to Openshift (adorsys-modelbank-e2e):
   stage: Deploy
   only:
@@ -299,6 +319,18 @@ Deploy image to Openshift (adorsys-modelbank-e2e):
     DOCKER_TAG: develop
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_E2E}
   <<: *push_docker_openshift
+
+Deploy Keycloak to Openshift (adorsys-modelbank-e2e):
+  stage: Deploy
+  only:
+    - schedules
+  environment:
+    name: dev
+    url: ~
+  variables:
+    DOCKER_TAG: develop
+    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_E2E}
+  <<: *push_docker_keycloak_with_ledgers_plugin
 
 ###########
 # Release (tags) #
