@@ -25,7 +25,8 @@ public class DepositHttpStatusResolver {
         container.put(PAYMENT_PROCESSING_FAILURE, BAD_REQUEST);
         container.put(PAYMENT_WITH_ID_EXISTS, BAD_REQUEST);
         container.put(DEPOSIT_OPERATION_FAILURE, BAD_REQUEST);
-        container.put(CURRENCY_NOT_SUPPORTED,BAD_REQUEST);
+        container.put(CURRENCY_NOT_SUPPORTED, BAD_REQUEST);
+        container.put(UNSUPPORTED_CREDIT_LIMIT, BAD_REQUEST);
 
         //417 Block
         container.put(COULD_NOT_EXECUTE_STATEMENT, EXPECTATION_FAILED);

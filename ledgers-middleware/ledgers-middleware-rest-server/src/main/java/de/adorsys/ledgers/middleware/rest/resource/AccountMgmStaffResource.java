@@ -31,6 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -97,5 +98,12 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Boolean> changeStatus(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.changeStatus(accountId, false));
+    }
+
+    @Override
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
+    public ResponseEntity<Void> changeCreditLimit(String accountId, BigDecimal creditLimit) {
+        middlewareAccountService.changeCreditLimit(accountId, creditLimit);
+        return ResponseEntity.accepted().build();
     }
 }

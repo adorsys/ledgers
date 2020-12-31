@@ -52,6 +52,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -259,7 +260,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban, boolean isDebtor, Currency currency) {
         List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
         if (CollectionUtils.isEmpty(accounts) && !isDebtor) {
-            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false, null, null);
+            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false, null, null, BigDecimal.ZERO);
         }
         if (accounts.size() != 1) {
             String msg = CollectionUtils.isEmpty(accounts)
