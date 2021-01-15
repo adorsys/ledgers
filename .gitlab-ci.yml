@@ -26,10 +26,9 @@ variables: &variables
   # Private Openshift Images #
   ############################
 
-  OPENSHIFT_NAMESPACE_SANDBOX_DEV: "adorsys-dynamic-sandbox-dev"
   OPENSHIFT_NAMESPACE_DXC_SANDBOX_DEV: "dxc-sandbox-dev"
   OPENSHIFT_NAMESPACE_BEKB_SANDBOX_DEV: "bekb-sandbox-dev"
-  OPENSHIFT_NAMESPACE_DEV_E2E: adorsys-dynamic-sandbox-dev-e2e
+  OPENSHIFT_NAMESPACE_MODELBANK_SUPPORT4X: adorsys-modelbank-support4x
 
   ###########################
   # Build variables         #
@@ -233,34 +232,6 @@ Push to DockerHub (support-3.x):
     DOCKER_TAG: support3x
   <<: *build_dockerhub_image
 
-# Deploy Openshift (ledgers-dev):
-#   stage: Deploy
-#   except:
-#     - schedules
-#   only:
-#     - support-3.x
-#   environment:
-#     name: dev
-#     url: https://ledgers-dev.cloud.adorsys.de
-#   variables:
-#     DOCKER_TAG: support3x
-#     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_LEDGERS_DEV}
-#   <<: *push_docker_openshift
-
-Deploy Openshift (sandbox-dev):
-  stage: Deploy
-  except:
-    - schedules
-  only:
-    - support-3.x
-  environment:
-    name: dev
-    url: https://dev-dynamicsandbox-ledgers.cloud.adorsys.de
-  variables:
-    DOCKER_TAG: support3x
-    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_SANDBOX_DEV}
-  <<: *push_docker_openshift
-
 #Deploy Openshift (gateway-dev):
 #  stage: Deploy
 #  only:
@@ -301,18 +272,18 @@ Deploy Openshift (bekb-sandbox-dev):
     OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_BEKB_SANDBOX_DEV}
   <<: *push_docker_openshift
 
-Deploy Openshift (sandbox-dev-e2e):
+Deploy Openshift (adorsys-modelbank-support4x):
   stage: Deploy
   except:
     - schedules
   only:
     - support-3.x
   environment:
-    name: dev-e2e
-    url: https://dev-e2e-dynamicsandbox-ledgers.cloud.adorsys.de
+    name: modelbank-support4x
+    url: https://support4x-modelbank-ledgers.cloud.adorsys.de
   variables:
     DOCKER_TAG: support3x
-    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_DEV_E2E}
+    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_MODELBANK_SUPPORT4X}
   <<: *push_docker_openshift
 
 #######
