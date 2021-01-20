@@ -24,6 +24,7 @@ import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +71,6 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         try {
             KeycloakUser keycloakUser = keycloakUserMapper.toKeycloakUser(createdUser);
             keycloakUser.setPassword(user.getPin());
-
             dataService.createUser(keycloakUser);
         } catch (Exception e) {
             if (createdUser.getRolesAsString().contains("SYSTEM") && createdUser.getLogin().equals("admin")) {
@@ -154,10 +154,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
                                                                                     .errorCode(REQUEST_VALIDATION_FAILURE)
                                                                                     .devMsg("User id is not present in request!")
                                                                                     .build());
-        if (userService.findById(userId).getBranch().equals(branchId)) {
+        UserBO userFromLedgers = userService.findById(userId);
+        if (userFromLedgers.getBranch().equals(branchId)) {
             UserBO userBO = userTOMapper.toUserBO(user);
-            dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO));
-            updatePassword(userId, userBO.getPin());
+            dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO), userFromLedgers.getLogin());
+            updatePasswordIfRequired(userFromLedgers.getLogin(), user.getPin());
             return userTOMapper.toUserTO(userService.updateUser(userBO));
         }
         throw MiddlewareModuleException.builder() //TODO Think of this stuff should be rewritten
@@ -167,9 +168,10 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
-    public void updatePassword(String userId, String password) {
-        userService.updatePassword(userId, password);
-        dataService.resetPassword(userService.findById(userId).getLogin(), password);
+    public void updatePasswordIfRequired(String userId, String password) {
+        if (StringUtils.isNotBlank(password)) {
+            dataService.resetPassword(userId, password);
+        }
     }
 
     @Override
@@ -216,6 +218,8 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         storedUser.setEmail(user.getEmail());
         storedUser.setPin(user.getPin());
         userService.updateUser(storedUser);
+        dataService.updateUser(keycloakUserMapper.toKeycloakUser(storedUser), storedUser.getLogin());
+        updatePasswordIfRequired(storedUser.getLogin(), user.getPin());
     }
 
     @Override

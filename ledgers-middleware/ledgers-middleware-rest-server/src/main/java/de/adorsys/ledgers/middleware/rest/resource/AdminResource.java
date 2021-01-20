@@ -72,7 +72,7 @@ public class AdminResource implements AdminResourceAPI {
     @Override
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> updatePassword(String branchId, String password) {
-        middlewareUserService.updatePassword(branchId, password);
+        middlewareUserService.updatePasswordIfRequired(branchId, password);
         return ResponseEntity.accepted().build();
     }
 

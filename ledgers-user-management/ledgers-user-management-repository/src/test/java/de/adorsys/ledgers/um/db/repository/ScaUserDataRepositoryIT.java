@@ -44,7 +44,6 @@ class ScaUserDataRepositoryIT {
 
         UserEntity user = new UserEntity();
         user.setId(Ids.id());
-        user.setPin("1234");
         user.setLogin("test");
         user.setEmail("test@mail.de");
 

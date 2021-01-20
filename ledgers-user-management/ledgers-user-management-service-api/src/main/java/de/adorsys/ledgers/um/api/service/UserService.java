@@ -153,14 +153,6 @@ public interface UserService {
      */
     List<UserBO> findOwnersByAccountId(String accountId);
 
-    /**
-     * Replaces users password
-     *
-     * @param userId   user id
-     * @param password new password
-     */
-    void updatePassword(String userId, String password);
-
     void setBranchBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);
 
     void setUserBlockedStatus(String userId, boolean isSystemBlock, boolean statusToSet);

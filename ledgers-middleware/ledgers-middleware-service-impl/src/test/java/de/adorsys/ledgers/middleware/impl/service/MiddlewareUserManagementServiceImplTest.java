@@ -232,7 +232,7 @@ class MiddlewareUserManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
-        verify(userService, times(2)).findById(USER_ID);
+        verify(userService, times(1)).findById(USER_ID);
     }
 
     @Test
