@@ -123,7 +123,7 @@ class KeycloakDataServiceImplTest {
 
         KeycloakUser user = new KeycloakUser();
         user.setRealmRoles(new ArrayList<>());
-        service.updateUser(user);
+        service.updateUser(user, user.getLogin());
         verify(userResource, times(1)).update(any());
     }
 

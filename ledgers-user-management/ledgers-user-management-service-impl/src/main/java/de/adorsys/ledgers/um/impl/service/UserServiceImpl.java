@@ -25,7 +25,6 @@ import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.util.Ids;
-import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import de.adorsys.ledgers.util.tan.encriptor.TanEncryptor;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +58,6 @@ public class UserServiceImpl implements UserService {
     private final ScaUserDataService scaUserDataService;
     private final AisConsentRepository consentRepository;
     private final UserConverter userConverter;
-    private final PasswordEnc passwordEnc;
     private final TanEncryptor tanEncryptor;
     private final AisConsentMapper aisConsentMapper;
 
@@ -75,7 +73,6 @@ public class UserServiceImpl implements UserService {
             userEntity.setId(Ids.id());
         }
 
-        userEntity.setPin(passwordEnc.encode(userEntity.getId(), user.getPin()));
         hashStaticTan(userEntity);
         UserEntity save = userRepository.save(userEntity);
         return convertToUserBoAndDecodeTan(save);
@@ -194,7 +191,6 @@ public class UserServiceImpl implements UserService {
         checkDuplicateScaMethods(userBO.getScaUserData());
         checkAndResetValidityScaEmail(userBO);
         UserEntity user = userConverter.toUserPO(userBO);
-        checkIfPasswordModifiedAndEncode(user);
         hashStaticTan(user);
         UserEntity save = userRepository.save(user);
         return convertToUserBoAndDecodeTan(save);
@@ -225,14 +221,6 @@ public class UserServiceImpl implements UserService {
                                                         .filter(accountAccess -> accountAccess.getAccountId().equals(accountId))
                                                         .collect(Collectors.toList())));
         return users;
-    }
-
-    @Override
-    public void updatePassword(String userId, String password) {
-        UserEntity user = userRepository.findById(userId)
-                                  .orElseThrow(getModuleExceptionSupplier(userId, USER_NOT_FOUND, USER_WITH_ID_NOT_FOUND));
-        user.setPin(passwordEnc.encode(userId, password));
-        userRepository.save(user);
     }
 
     @Override
@@ -271,13 +259,6 @@ public class UserServiceImpl implements UserService {
                           .devMsg("Duplicating Sca Methods is forbidden!")
                           .errorCode(DUPLICATE_SCA)
                           .build();
-        }
-    }
-
-    private void checkIfPasswordModifiedAndEncode(UserEntity user) {
-        String oldPin = findById(user.getId()).getPin();
-        if (!user.getPin().equals(oldPin)) {
-            user.setPin(passwordEnc.encode(user.getId(), user.getPin()));
         }
     }
 

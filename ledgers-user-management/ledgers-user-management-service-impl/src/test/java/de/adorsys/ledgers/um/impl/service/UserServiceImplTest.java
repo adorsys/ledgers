@@ -11,14 +11,12 @@ import de.adorsys.ledgers.um.db.repository.UserRepository;
 import de.adorsys.ledgers.um.impl.converter.AisConsentMapper;
 import de.adorsys.ledgers.um.impl.converter.UserConverter;
 import de.adorsys.ledgers.um.impl.converter.UserConverterTest;
-import de.adorsys.ledgers.util.PasswordEnc;
 import de.adorsys.ledgers.util.exception.UserManagementModuleException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,7 +40,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+public class UserServiceImplTest {
     private static final List<AccountAccess> accountAccessList = readListYml(AccountAccess.class, "account-access.yml");
     private static final List<AccountAccessBO> accountAccessBOList = readListYml(AccountAccessBO.class, "account-access.yml");
     private static final String USER_ID = "SomeUniqueID";
@@ -67,8 +65,6 @@ class UserServiceImplTest {
     @Mock
     private UserConverter converter;
     @Mock
-    private PasswordEnc passwordEnc;
-    @Mock
     private ScaUserDataService scaUserDataService;
     @Mock
     private AisConsentMapper aisConsentMapper;
@@ -87,7 +83,6 @@ class UserServiceImplTest {
         // Given
         when(repository.findByEmailOrLogin(any(), any())).thenReturn(Optional.empty());
         when(converter.toUserPO(any())).thenReturn(userEntity);
-        when(passwordEnc.encode(any(), any())).thenReturn(USER_PIN);
         when(repository.save(any())).thenReturn(userEntity);
         when(converter.toUserBO(any())).thenReturn(userBO);
 
@@ -128,8 +123,6 @@ class UserServiceImplTest {
         // Given
         when(repository.findById(USER_ID)).thenReturn(Optional.of(userEntity));
         when(converter.toUserBO(any())).thenReturn(userBO);
-        when(passwordEnc.encode(USER_ID, USER_PIN)).thenReturn(THE_ENCODED_VALUE);
-        when(passwordEnc.verify(USER_ID, USER_PIN, THE_ENCODED_VALUE)).thenReturn(true);
 
         // When
         UserBO user = userService.findById(USER_ID);
@@ -138,7 +131,6 @@ class UserServiceImplTest {
         assertThat(user.getId(), is(USER_ID));
         assertThat(user.getEmail(), is(USER_EMAIL));
         assertThat(user.getLogin(), is(USER_LOGIN));
-        assertTrue(passwordEnc.verify(user.getId(), user.getPin(), passwordEnc.encode(USER_ID, USER_PIN)));
         verify(repository, times(1)).findById(USER_ID);
     }
 
@@ -312,7 +304,7 @@ class UserServiceImplTest {
         // Then
         assertNotNull(user);
         assertEquals(userBO, user);
-        verify(repository, times(2)).findById(USER_ID);
+        verify(repository, times(1)).findById(USER_ID);
     }
 
     @Test
@@ -359,22 +351,6 @@ class UserServiceImplTest {
 
         // Then
         assertEquals(Collections.singletonList(getUserBO()), result);
-    }
-
-    @Test
-    void updatePassword() {
-        when(repository.findById(USER_ID)).thenReturn(Optional.of(new UserEntity()));
-        when(passwordEnc.encode(any(), any())).thenReturn("encrypted");
-        userService.updatePassword(USER_ID, "password");
-        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue().getPin(), is("encrypted"));
-    }
-
-    @Test
-    void updatePassword_user_not_found() {
-        when(repository.findById(USER_ID)).thenReturn(Optional.empty());
-        assertThrows(UserManagementModuleException.class, () -> userService.updatePassword(USER_ID, "password"));
     }
 
     @Test

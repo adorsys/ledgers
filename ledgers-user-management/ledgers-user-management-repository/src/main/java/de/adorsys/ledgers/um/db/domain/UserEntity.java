@@ -49,9 +49,6 @@ public class UserEntity {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private String pin;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<ScaUserDataEntity> scaUserData = new ArrayList<>();
@@ -94,7 +91,6 @@ public class UserEntity {
         return Objects.equals(getId(), that.getId()) &&
                        Objects.equals(getLogin(), that.getLogin()) &&
                        Objects.equals(getEmail(), that.getEmail()) &&
-                       Objects.equals(getPin(), that.getPin()) &&
                        Objects.equals(getScaUserData(), that.getScaUserData()) &&
                        Objects.equals(getAccountAccesses(), that.getAccountAccesses()) &&
                        Objects.equals(getUserRoles(), that.getUserRoles()) &&
@@ -105,6 +101,6 @@ public class UserEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLogin(), getEmail(), getPin(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch(), isBlocked(), isSystemBlocked());
+        return Objects.hash(getId(), getLogin(), getEmail(), getScaUserData(), getAccountAccesses(), getUserRoles(), getBranch(), isBlocked(), isSystemBlocked());
     }
 }

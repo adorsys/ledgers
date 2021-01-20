@@ -50,6 +50,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
     public void createDefaultSchema() {
         KeycloakRealm realm = new KeycloakRealm(configuration.getClientRealm(), loginTokenTTL, fullTokenTTL,
                                                 configuration.getSmtpServer());
+        realm.setEditUsernameAllowed(true);
         createRealm(realm);
         createRealmScopes(realm);
         createRealmRoles(realm);
@@ -139,9 +140,9 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
     }
 
     @Override
-    public void updateUser(KeycloakUser user) {
+    public void updateUser(KeycloakUser user, String userIdentifier) {
         UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
-        List<UserRepresentation> search = usersResource.search(user.getLogin());
+        List<UserRepresentation> search = usersResource.search(userIdentifier);
         if (CollectionUtils.isNotEmpty(search)) {
             String userId = search.get(0).getId();
             UserResource userResource = usersResource.get(userId);
