@@ -71,7 +71,7 @@ public class KeycloakDataServiceImplIT extends KeycloakContainerTest {
 
         //update first name in keycloak
         KeycloakUser keycloakUserToUpdate = jsonReader.getObjectFromFile("json/keycloak/update-user.json", KeycloakUser.class);
-        keycloakDataService.updateUser(keycloakUserToUpdate);
+        keycloakDataService.updateUser(keycloakUserToUpdate, keycloakUserToUpdate.getLogin());
 
         //get user by login and check first name
         Optional<KeycloakUser> userOptional = keycloakDataService.getUser(REALM, USERNAME);

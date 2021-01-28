@@ -36,9 +36,6 @@ variables: &variables
   # Private Openshift ENV #
   ############################
 
-  # temporary env
-  OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_KEYCLOAK_DEV: "adorsys-modelbank-keycloak-dev"
-
   OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_DEV: "adorsys-modelbank-dev"
   OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_E2E: "adorsys-modelbank-e2e"
 
@@ -266,18 +263,6 @@ Push to DockerHub (develop):
   variables:
     DOCKER_TAG: develop
   <<: *build_dockerhub_image
-
-Deploy image to Openshift (adorsys-modelbank-keycloak-dev):
-  stage: Deploy
-  only:
-    - develop
-  environment:
-    name: dev
-    url: ~
-  variables:
-    DOCKER_TAG: develop
-    OPENSHIFT_NAMESPACE: ${OPENSHIFT_NAMESPACE_ADORSYS_MODELBANK_KEYCLOAK_DEV}
-  <<: *push_docker_openshift
 
 Deploy Image to Openshift (adorsys-modelbank-dev):
   stage: Deploy

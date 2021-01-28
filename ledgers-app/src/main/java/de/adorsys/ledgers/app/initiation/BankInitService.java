@@ -40,6 +40,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.ProcessingException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -86,7 +87,16 @@ public class BankInitService {
     }
 
     private void configureIDP() {
-        if (!dataService.clientExists()) {
+        boolean clientExists;
+
+        try {
+            clientExists = dataService.clientExists();
+        } catch (ProcessingException e) {
+            log.error("Cannot connect to Keycloak IDP on host: {}. Ledgers is shutting down.", keycloakConfig.getAuthServerUrl());
+            throw e;
+        }
+
+        if (!clientExists) {
             dataService.createDefaultSchema();
             copyUsers();
         }

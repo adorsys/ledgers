@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -162,7 +161,6 @@ public class UserConverterTest {
         assertEquals(USER_ID, bo.getId());
         assertEquals(USER_EMAIL, bo.getEmail());
         assertEquals(USER_LOGIN, bo.getLogin());
-        assertEquals(USER_PIN, bo.getPin());
     }
 
     @Test
@@ -174,7 +172,6 @@ public class UserConverterTest {
         assertEquals(USER_ID, po.getId());
         assertEquals(USER_EMAIL, po.getEmail());
         assertEquals(USER_LOGIN, po.getLogin());
-        assertEquals(USER_PIN, po.getPin());
     }
 
     @Test
@@ -188,7 +185,6 @@ public class UserConverterTest {
         bo.setId(USER_ID);
         bo.setLogin(USER_LOGIN);
         bo.setEmail(USER_EMAIL);
-        bo.setPin(USER_PIN);
         bo.setBranchLogin("BRANCH_LOGIN");
         return bo;
     }
@@ -221,7 +217,6 @@ public class UserConverterTest {
         entity.setId(USER_ID);
         entity.setEmail(USER_EMAIL);
         entity.setLogin(USER_LOGIN);
-        entity.setPin(USER_PIN);
         return entity;
     }
 

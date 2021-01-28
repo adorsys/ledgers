@@ -15,7 +15,7 @@ public interface KeycloakDataService {
 
     void createUser(KeycloakUser user);
 
-    void updateUser(KeycloakUser user);
+    void updateUser(KeycloakUser user, String userIdentifier);
 
     void deleteUser(String login);
 
