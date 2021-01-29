@@ -25,13 +25,6 @@ public interface PaymentMapper {
 
     PaymentOrderDetailsBO toPaymentOrder(PaymentBO payment);
 
-    @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
-    @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
-    @Mapping(target = "creditorId", defaultExpression = "java(null)")
-    @Mapping(target = "mandateId", defaultExpression = "java(null)")
-    @Mapping(target = "entryReference", defaultExpression = "java(null)")
-    @Mapping(target = "checkId", defaultExpression = "java(null)")
-    @Mapping(target = "purposeCode", defaultExpression = "java(null)")
     @Mapping(target = "transactionStatus", source = "paymentTarget.payment.transactionStatus")
     @Mapping(target = "remittanceInformationUnstructured", source = "paymentTarget.remittanceInformationUnstructured")
     @Mapping(target = "remittanceInformationStructured", source = "paymentTarget.remittanceInformationStructured")
@@ -55,22 +48,12 @@ public interface PaymentMapper {
     @Mapping(target = "proprietaryBankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(paymentTarget.getPayment().getPaymentProduct()))")
     PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime, List<ExchangeRateBO> rate, BalanceBO balanceAfterTransaction);
 
-    @Mapping(target = "mandateId", defaultExpression = "java(null)")
-    @Mapping(target = "checkId", defaultExpression = "java(null)")
-    @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
-    @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
-    @Mapping(target = "creditorId", defaultExpression = "java(null)")
-    @Mapping(target = "creditorAddress", defaultExpression = "java(null)")
-    @Mapping(target = "entryReference", defaultExpression = "java(null)")
-    @Mapping(target = "purposeCode", defaultExpression = "java(null)")
-    @Mapping(target = "remittanceInformationStructured", defaultExpression = "java(null)")
     @Mapping(target = "remittanceInformationUnstructured", constant = "Batch booking, no remittance information available")
     @Mapping(target = "transactionStatus", source = "payment.transactionStatus")
     @Mapping(target = "debtorName", source = "payment.debtorName")
     @Mapping(target = "debtorAgent", source = "payment.debtorAgent")
     @Mapping(target = "debtorAccount", source = "payment.debtorAccount")
     @Mapping(target = "paymentType", source = "payment.paymentType")
-    @Mapping(target = "creditorAccount", defaultExpression = "java(null)")
     @Mapping(target = "endToEndId", expression = "java(payment.getTargets().stream().map(PaymentTargetBO::getEndToEndIdentification).reduce(\"\", (accum, s) -> accum + \", \" + s).replaceFirst(\", \",\"\" ))")
     @Mapping(target = "proprietaryBankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(payment.getPaymentProduct()))")
     @Mapping(target = "bankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(payment.getPaymentProduct()))")
@@ -87,16 +70,7 @@ public interface PaymentMapper {
 
     @Mapping(target = "debtorAgent", ignore = true)
     @Mapping(target = "creditorAgent", ignore = true)
-    @Mapping(target = "ultimateDebtor", defaultExpression = "java(null)")
-    @Mapping(target = "ultimateCreditor", defaultExpression = "java(null)")
-    @Mapping(target = "creditorId", defaultExpression = "java(null)")
-    @Mapping(target = "checkId", defaultExpression = "java(null)")
-    @Mapping(target = "mandateId", defaultExpression = "java(null)")
-    @Mapping(target = "entryReference", defaultExpression = "java(null)")
-    @Mapping(target = "remittanceInformationStructured", defaultExpression = "java(null)")
-    @Mapping(target = "purposeCode", defaultExpression = "java(null)")
     @Mapping(target = "remittanceInformationUnstructured", constant = "Cash deposit through Bank ATM")
-    @Mapping(target = "exchangeRate", defaultExpression = "java(null)")
     //TODO In future maybe need to deposit cash in different currency
     @Mapping(target = "debtorName", source = "depositAccount.name")
     @Mapping(target = "debtorAccount", source = "depositAccount.reference")
