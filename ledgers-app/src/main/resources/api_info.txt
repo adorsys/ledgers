@@ -1,30 +1,30 @@
 Implementation of a simple double entry accounting module with a sample deposit account module.
-                        <h2>Preloaded Users</h2>
+                        <h1>Preloaded Users</h2>
+                        <h2>Regular users for simple Sca testing</h2>
+                        <li> All users have a pin: 12345, and a static tan: 123456 if they have some Sca methods</li>
+                        </br>
                         <b>Marion Mueller</b>
                         <li> Login: <b>marion.mueller</b> </li>
-                        <li> PIN: 12345</li>
                         <li> SCA: No SCA Method configured. All operations a retuerned with scaStatus EXEMPTED </li>
                         <li> IBAN: <b>DE69760700240340283600</b> </li>
                         </br>
                         <b>Anton Brueckner</b>
                         <li> Login: <b>anton.brueckner</b> </li>
-                        <li> PIN: 12345 </li>
                         <li> SCA: One single sca method configuered. </li>
                         <li> IBAN: <b>DE80760700240271232400</b> </li>
-                        <li> Login SCA: initiated login process will automatically send the TAN to the configured email and return the scaStatus SCAMETHODSELECTED </li>
-                        <li> Payment and Consent SCA: initiated payment or consent sca will automatically send the TAN to the configured sca method and return the scaStatus SCAMETHODSELECTED </li>
-                        <li> TAN: configured fake TAN generator will always send the TAN 123456 </li>
                         </br>
                         <b>Max Musterman</b>
                         <li> Login: <b>max.musterman</b> </li>
-                        <li> PIN: 12345 </li>
                         <li> SCA: two sca methods configured. </li>
                         <li> IBAN: <b>DE38760700240320465700</b> </li>
-                        <li> Login SCA: initiated login process will return the scaStatus PSUIDENTIFIED and a list of sca methods for selection </li>
-                        <li> Payment and Consent SCA: initiated payment or consent sca will return the scaStatus PSUAUTHENTICATED and a list of sca methods for selection </li>
-                        <li> TAN: configured fake TAN generator will always send the TAN 123456 </li>
-                        </br>
-                        <b>Users for Multi-Level-SCA testing</b> </br>
+                        <h2>Multi account user</h2>
+                        <b>Carl Schwarz</b>
+                        <li> Login: <b>carl.schwarz</b> </li>
+                        <li> SCA: one sca method configured. </li>
+                        <li> IBAN: <b>DE87760320000000000001</b> </li>
+                        <li> IBAN: <b>DE60760320000000000002</b> </li>
+                        <li> IBAN: <b>DE33760320000000000003</b> </li>
+                        <h2>Users for Multi-Level-SCA testing</h2>
                         <b>All following users share access to one account</b>
                         <li> IBAN: <b>DE32760700240271232100</b> </li>
                         </br>
@@ -35,7 +35,8 @@ Implementation of a simple double entry accounting module with a sample deposit 
                         <b>Chief Accountant</b>
                         <li> Login: <b>chief.accountant</b> </li>
                         <li> ScaWeight: 60% </li>
-                        <li> Supply Chain Manager </li>
+                        </br>
+                        <b> Supply Chain Manager </b>
                         <li> Login: <b>sc.manager</b> </li>
                         <li> ScaWeight: 10% </li>
                         </br>
@@ -49,18 +50,10 @@ Implementation of a simple double entry accounting module with a sample deposit 
                         <li> Login SCA: initiated login process will automatically send the TAN to the configured email and return the scaStatus SCAMETHODSELECTED </li>
                         <li> Payment and Consent SCA: initiated payment or consent sca will automatically send the TAN to the configured sca method and return the scaStatus SCAMETHODSELECTED </li>
                         <li> TAN: configured fake TAN generator will always send the TAN 123456 </li> 
-                        </br>
-                        <b>Registration and Login Process</b>
-                        <p>You can use the User Login Endpoint to gain a login token (or an access token in case of exemption).
-                        Then use the access token with the prefix 'Bearer ' to Authorize on this ui before using Select Sca Method and/or Submit Auth Code. </p>
-                        </br>
-                        <b>Endpoints</b>
-                        <li> Register: <b>/users/register</b> </li>
-                        <li> Login: <b>/users/login</b> </li>
-                        <li> Select Sca Method: <b>/users/{scaId}/authorisations/{authorisationId}/scaMethods/{scaMethodId}</b> </li>
-                        <li> Submit Auth Code: <b>/users/{scaId}/authorisations/{authorisationId}/authCode</b> </li>
-                        </br>
-                        <b>Access Token Types</b>
-                        <li> <b>LOGIN</b>: login token are only issued during the multiphase login process and can not be used to access other resources. </li>
-                        <li> <b>DIRECT_ACCESS</b>: access token issued to a user after a successful login (one or two phases). Can be used to access resources </li>
-                        <li> <b>DELEGATED_ACCESS</b>: delegation token are issued as a result of a successful consent grant or payment authorization. A delegation token issued as result of a succesful payment authorisation can be used to access the corresponding transaction. Delegation token are general stored in the consent database and used to authenticate TPP requests with the core banking system. </li> 
+                        <br/>
+                        <b>Access Token Scopes</b>
+                        <li> if there is no additional scope it is considered that the token has an info access, it is also valid for payment/consent initiation. </li>
+                        <li> <b>sca</b>: is received upon payment/consent initiation and extends previous one with ability to perform sca operation. </li>
+                        <li> <b>partial_access</b>: is received upon finalizing sca operation with insufficient sca weight for operation execution, further extends previous token. </li>
+                        <li> <b>full_access</b>: is received upon finalizing sca operation with sufficient sca weight for operation execution, extends previous token with ability to execute operations like payment, for consent adds validity time as
+                        mentioned in requested consent. </li>
