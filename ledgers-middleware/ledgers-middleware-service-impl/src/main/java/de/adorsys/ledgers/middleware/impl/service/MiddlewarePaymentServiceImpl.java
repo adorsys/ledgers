@@ -46,6 +46,7 @@ import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -107,6 +108,9 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
         validatePayment(paymentBO);
+        if (StringUtils.isBlank(paymentBO.getDebtorName())) {
+            paymentBO.setDebtorName(scaInfoTO.getUserLogin());
+        }
         paymentBO.updateDebtorAccountCurrency(getCheckedAccount(paymentBO).getCurrency());
         UserBO user = scaUtils.userBO(scaInfoTO.getUserId());
         TransactionStatusBO status = scaUtils.hasSCA(user)
