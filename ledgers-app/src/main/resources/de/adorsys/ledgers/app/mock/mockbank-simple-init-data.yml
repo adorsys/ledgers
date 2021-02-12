@@ -27,6 +27,27 @@ accounts:
     accountType: CASH
     accountStatus: ENABLED
     usageType: PRIV
+  - iban: DE87760320000000000001
+    currency: EUR
+    name: Carl Schwarz
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE60760320000000000002
+    currency: EUR
+    name: Carl Schwarz
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE33760320000000000003
+    currency: EUR
+    name: Carl Schwarz
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
   - iban: DE32760700240271232100
     currency: EUR
     name: multi-level-access-testing-account
@@ -55,6 +76,15 @@ balances:
   - accNbr: DE32760700240271232100
     currency: EUR
     balance: 1000000.00
+  - accNbr: DE87760320000000000001
+    currency: EUR
+    balance: 100.00
+  - accNbr: DE60760320000000000002
+    currency: EUR
+    balance: 400.00
+  - accNbr: DE33760320000000000003
+    currency: EUR
+    balance: 1600.00
 
 ###############################################
 #
@@ -105,6 +135,28 @@ users:
         staticTan: 123456
     accountAccesses:
       - iban: DE38760700240320465700
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+  # Carl Schwarz has one sca configured. Multi account user
+  - login: carl.schwarz
+    email: carl.schwarz@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: EMAIL
+        methodValue: carl.schwarz@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE87760320000000000001
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+      - iban: DE60760320000000000002
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+      - iban: DE33760320000000000003
         currency: EUR
         accessType: OWNER
         scaWeight: 100
