@@ -98,8 +98,6 @@ public interface MiddlewarePaymentService {
      */
     SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId);
 
-    String iban(String paymentId);
-
     SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId);
 
     List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO);

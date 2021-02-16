@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
+import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import lombok.Data;
@@ -25,12 +26,32 @@ public class GlobalScaResponseTO implements AspspConsentDataSerial {
     private boolean partiallyAuthorised;
     private BearerTokenTO bearerToken;
     private String objectType;
+    private TransactionStatusTO transactionStatus;
 
     public GlobalScaResponseTO(BearerTokenTO bearerToken) {
         this.bearerToken = bearerToken;
     }
 
     public GlobalScaResponseTO() {
+    }
+
+    public GlobalScaResponseTO(OpTypeTO opType, String authorisationId, BearerTokenTO token, ScaStatusTO scaStatus, boolean multilevelScaRequired, List<ScaUserDataTO> scaMethods, String psuMessage) {
+        this.opType = opType;
+        this.authorisationId = authorisationId;
+        this.bearerToken = token;
+        this.scaStatus = scaStatus;
+        this.multilevelScaRequired = multilevelScaRequired;
+        this.scaMethods = scaMethods;
+        this.psuMessage = psuMessage;
+    }
+
+    public GlobalScaResponseTO(OpTypeTO opType, BearerTokenTO token, ScaStatusTO scaStatus, List<ScaUserDataTO> scaMethods, String psuMessage) {
+        this.opType = opType;
+        this.bearerToken = token;
+        this.scaStatus = scaStatus;
+        this.scaMethods = scaMethods;
+        this.psuMessage = psuMessage;
+        this.statusDate = LocalDateTime.now();
     }
 
     @Override

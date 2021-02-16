@@ -11,7 +11,7 @@ import static de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatus
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.PAYMENT_PROCESSING_FAILURE;
 
 public class PaymentCancelPolicy {
-    private static final Set<TransactionStatusTO> FINAL_STATUSES = EnumSet.of(ACSC, RJCT, CANC);
+    private static final Set<TransactionStatusTO> FINAL_STATUSES = EnumSet.of(ACSC, ACCC, RJCT, CANC);
 
     private PaymentCancelPolicy() {
     }
