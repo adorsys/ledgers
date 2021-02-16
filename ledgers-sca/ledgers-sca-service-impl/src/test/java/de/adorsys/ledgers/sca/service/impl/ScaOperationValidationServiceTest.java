@@ -131,13 +131,6 @@ class ScaOperationValidationServiceTest {
     }
 
     @Test
-    void isMultiLevelScaCompleted_failed_login_op() {
-        SCAOperationEntity operation = new SCAOperationEntity(null, "opId", null, null, "scaId", 600, 600, ScaStatus.FINALISED, 100);
-        boolean result = service.isMultiLevelScaCompleted(Collections.singletonList(operation), OpTypeBO.LOGIN);
-        assertFalse(result);
-    }
-
-    @Test
     void isAnyScaCompleted() {
         SCAOperationEntity operation = new SCAOperationEntity(null, "opId", null, null, "scaId", 600, 600, ScaStatus.FINALISED, 0);
         boolean result = service.isAnyScaCompleted(Collections.singletonList(operation));

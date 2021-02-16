@@ -4,7 +4,6 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.LoginKeyDataTO;
 import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.CONSENT;
-import static de.adorsys.ledgers.sca.domain.OpTypeBO.LOGIN;
 import static de.adorsys.ledgers.sca.domain.ScaStatusBO.FINALISED;
 import static de.adorsys.ledgers.sca.domain.ScaStatusBO.SCAMETHODSELECTED;
 
@@ -30,9 +28,7 @@ public class ScaResponseMessageResolver {
         OpTypeBO opType = scaOperation.getOpType();
         String oprId = scaOperation.getOpId();
 
-        return opType == LOGIN
-                       ? LoginKeyDataTO.fromOpId(oprId).messageTemplate()
-                       : resolveOperationMessage(opType, oprId);
+        return resolveOperationMessage(opType, oprId);
     }
 
     private String resolveOperationMessage(OpTypeBO opType, String oprId) {
