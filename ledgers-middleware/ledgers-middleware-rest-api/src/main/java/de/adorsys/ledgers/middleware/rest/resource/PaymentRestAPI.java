@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -61,13 +60,13 @@ public interface PaymentRestAPI {
             @RequestParam(PAGE) int page,
             @RequestParam(SIZE) int size);
 
-    @PostMapping(params = "paymentType")
+    @PostMapping
     @Operation(summary = "Initiates a Payment", description = "Initiates a payment")
     @SecurityRequirement(name = API_KEY)
     @SecurityRequirement(name = OAUTH2)
-    ResponseEntity<SCAPaymentResponseTO> initiatePayment(@RequestParam(PAYMENT_TYPE) PaymentTypeTO paymentType, @RequestBody PaymentTO payment);
+    ResponseEntity<SCAPaymentResponseTO> initiatePayment(@RequestBody PaymentTO payment);
 
-    @PostMapping("/{paymentId}/execution")
+    @PostMapping(value = "/{paymentId}/execution")
     @Operation(summary = "Executes a Payment", description = "Confirms payment execution")
     @SecurityRequirement(name = API_KEY)
     @SecurityRequirement(name = OAUTH2)

@@ -22,7 +22,6 @@ import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.middleware.api.domain.account.ExchangeRateTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -33,9 +32,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface PaymentConverter {
     PaymentBO toPaymentBO(PaymentTO payment);
-
-    @Mapping(target = "paymentType", source = "paymentType")
-    PaymentBO toPaymentBO(PaymentTO payment, PaymentTypeTO paymentType);
 
     List<TransactionTO> toTransactionTOList(List<TransactionDetailsBO> transactions);
 

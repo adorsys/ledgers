@@ -19,7 +19,6 @@ import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTargetTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -43,6 +42,7 @@ import org.springframework.stereotype.Service;
 import javax.ws.rs.ProcessingException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Currency;
@@ -70,6 +70,7 @@ public class BankInitService {
     private final KeycloakUserMapper keycloakUserMapper;
 
     private static final String ADMIN = "admin";
+    private static final String ADMIN_P = "admin123";
     private static final String ACCOUNT_NOT_FOUND_MSG = "Account {} not Found! Should never happen while initiating mock data!";
     private static final String NO_USER_BY_IBAN = "Could not get User By Iban {}! Should never happen while initiating mock data!";
     private static final LocalDateTime START_DATE = LocalDateTime.of(2018, 1, 1, 1, 1);
@@ -106,7 +107,11 @@ public class BankInitService {
         List<UserBO> users = userService.listUsers(0, Integer.MAX_VALUE);
         users.stream()
                 .map(u -> {
-                    u.setPin("12345");
+                    String pin = "12345";
+                    if (u.getLogin().equals(ADMIN)) {
+                        pin = ADMIN_P;
+                    }
+                    u.setPin(pin);
                     return u;
                 })
                 .map(keycloakUserMapper::toKeycloakUser)
@@ -125,7 +130,7 @@ public class BankInitService {
             userService.findByLogin(ADMIN);
             log.info("Admin user is already present. Skipping creation");
         } catch (UserManagementModuleException e) {
-            UserTO admin = new UserTO(ADMIN, "admin@example.com", ADMIN);
+            UserTO admin = new UserTO(ADMIN, "admin@example.com", ADMIN_P);
             admin.setUserRoles(Collections.singleton(UserRoleTO.SYSTEM));
             createUser(admin);
         }
@@ -143,7 +148,7 @@ public class BankInitService {
             try {
                 if (isAbsentTransactionRegular(payment.getDebtorAccount().getIban(), payment.getDebtorAccount().getCurrency(), payment.getTargets().get(0).getEndToEndIdentification())) {
                     UserTO user = getUserByIban(users, payment.getDebtorAccount().getIban());
-                    restInitiationService.executePayment(user, PaymentTypeTO.SINGLE, payment);
+                    restInitiationService.executePayment(user, payment);
                 }
             } catch (DepositModuleException e) {
                 log.error(ACCOUNT_NOT_FOUND_MSG, payment.getDebtorAccount().getIban());
@@ -166,7 +171,7 @@ public class BankInitService {
                 }
                 if (isAbsentTransaction) {
                     UserTO user = getUserByIban(users, debtorAccount.getIban());
-                    restInitiationService.executePayment(user, PaymentTypeTO.BULK, payment);
+                    restInitiationService.executePayment(user, payment);
                 }
             } catch (DepositModuleException e) {
                 log.error(ACCOUNT_NOT_FOUND_MSG, debtorAccount.getIban());
@@ -181,7 +186,8 @@ public class BankInitService {
         List<TransactionDetailsBO> transactions = depositAccountService.getTransactionsByDates(account.getId(), START_DATE, LocalDateTime.now());
         BigDecimal total = BigDecimal.ZERO.subtract(payment.getTargets().stream()
                                                             .map(PaymentTargetTO::getInstructedAmount)
-                                                            .map(AmountTO::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, 5));
+                                                            .map(AmountTO::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
+                                                            .setScale(2, RoundingMode.HALF_UP));
         return transactions.stream()
                        .noneMatch(t -> t.getTransactionAmount().getAmount().equals(total));
     }

@@ -187,6 +187,9 @@ ledgers:
     grant_types_supported:
       - AUTHORISATION_CODE
 
+  payment_validator:
+    allow_past_dates: false
+    allow_same_end_to_end_ids: false
 # Cors configuration
 management:
   endpoints:

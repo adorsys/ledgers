@@ -242,17 +242,6 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void updateUser_branchesNotMatch() {
-        // Given
-        UserTO user = userTO;
-        user.setId(USER_ID);
-        when(userService.findById(any())).thenReturn(userBO);
-
-        // Then
-        assertThrows(MiddlewareModuleException.class, () -> middlewareUserService.updateUser("anotherBranch", user));
-    }
-
-    @Test
     void getSCAMethods() {
         // Given
         String userLogin = "spe@adorsys.com.ua";

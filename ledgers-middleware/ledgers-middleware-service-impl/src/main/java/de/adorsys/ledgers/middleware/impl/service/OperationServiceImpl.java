@@ -14,6 +14,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.OperationService;
+import de.adorsys.ledgers.middleware.impl.config.PaymentValidatorService;
 import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
@@ -23,7 +24,6 @@ import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
-import de.adorsys.ledgers.util.Ids;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,8 +48,8 @@ public class OperationServiceImpl implements OperationService { //TODO Requires 
     private final UserMapper userMapper;
     private final UserService userService;
     private final AisConsentBOMapper aisConsentMapper;
-    private final PaymentSupportService supportService;
     private final SCAOperationService scaOperationService;
+    private final PaymentValidatorService paymentValidator;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -109,10 +109,9 @@ public class OperationServiceImpl implements OperationService { //TODO Requires 
         PaymentBO payment;
         if (PAYMENT == opType) {
             payment = paymentConverter.toPaymentBO(object);
-            supportService.validatePayment(payment);
-            payment.updateDebtorAccountCurrency(supportService.getCheckedAccount(payment).getCurrency());
+            paymentValidator.validate(payment, user);
             TransactionStatusBO status = user.hasSCA() ? ACCP : ACTC;
-            payment = persist(payment, status);
+            payment = paymentService.initiatePayment(payment, status);
         } else {
             payment = paymentService.getPaymentById(opId);
             payment.setRequestedExecutionTime(LocalTime.now().plusMinutes(10));
@@ -133,12 +132,5 @@ public class OperationServiceImpl implements OperationService { //TODO Requires 
                                         : isScaRequired ? ScaStatusTO.PSUAUTHENTICATED : ScaStatusTO.EXEMPTED;
 
         return new GlobalScaResponseTO(opType, token, scaStatus, userMapper.toScaUserDataListTO(user.getScaUserData()), psuMessage);
-    }
-
-    private PaymentBO persist(PaymentBO paymentBO, TransactionStatusBO status) {
-        if (paymentBO.getPaymentId() == null) {
-            paymentBO.setPaymentId(Ids.id());
-        }
-        return paymentService.initiatePayment(paymentBO, status);
     }
 }

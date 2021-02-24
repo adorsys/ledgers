@@ -6,13 +6,13 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.impl.config.PaymentValidatorService;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
@@ -78,7 +78,7 @@ class MiddlewarePaymentServiceImplTest {
     @Mock
     private ScaResponseResolver scaResponseResolver;
     @Mock
-    private PaymentSupportService supportService;
+    private PaymentValidatorService validatorChain;
     @Mock
     private PageMapper pageMapper;
 
@@ -154,17 +154,17 @@ class MiddlewarePaymentServiceImplTest {
         // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
         DepositAccountBO account = getAccountBO(paymentBO);
-        when(supportService.getCheckedAccount(any())).thenReturn(account);
+
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
         when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(accessService.exchangeTokenStartSca(anyBoolean(), any())).thenReturn(new BearerTokenTO());
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
-        when(paymentConverter.toPaymentBO(any(PaymentTO.class), any())).thenReturn(paymentBO);
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
         when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
 
         // When
-        Object result = middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO, PaymentTypeTO.SINGLE);
+        Object result = middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO);
 
         // Then
         assertNotNull(result);

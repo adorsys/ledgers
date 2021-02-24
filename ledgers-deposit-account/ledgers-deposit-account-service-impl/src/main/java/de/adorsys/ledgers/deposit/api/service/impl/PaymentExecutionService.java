@@ -30,6 +30,8 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static de.adorsys.ledgers.deposit.api.domain.ExecutionRules.FOLLOWING;
+import static de.adorsys.ledgers.deposit.api.domain.ExecutionRules.PRECEDING;
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.PAYMENT_PROCESSING_FAILURE;
 
 @Slf4j
@@ -37,8 +39,6 @@ import static de.adorsys.ledgers.util.exception.DepositErrorCode.PAYMENT_PROCESS
 @RequiredArgsConstructor
 public class PaymentExecutionService implements InitializingBean {
     private static final String CALENDAR_NAME = "LEDGERS";
-    private static final String PRECEDING = "preceding";
-    private static final String FOLLOWING = "following";
     private final PaymentRepository paymentRepository;
     private final DepositAccountTransactionService txService;
     private final DepositAccountService accountService;

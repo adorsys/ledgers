@@ -229,6 +229,7 @@ users:
 singlePayments:
   # Payment from Marion Mueller to Max Musterman on 2018-06-01 at 12:25:00
   - singlePayment:
+      paymentType: SINGLE
       targets:
         - {
           endToEndIdentification: 20180601T20180601,
@@ -253,8 +254,6 @@ singlePayments:
             },
           remittanceInformationUnstructured: Payment
         }
-      requestedExecutionDate: 2018-06-01
-      requestedExecutionTime: 12:25:00
       debtorAccount:
         iban: DE69760700240340283600
         currency: EUR
@@ -275,6 +274,7 @@ singlePayments:
 
   # Payment from Anton Brueckner to Max Musterman on 2018-06-01 at 13:10:00
   - singlePayment:
+      paymentType: SINGLE
       targets:
         - {
           endToEndIdentification: 20180601T131000,
@@ -289,10 +289,16 @@ singlePayments:
               currency: EUR
             },
           creditorName: Max Musterman,
+          creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
           remittanceInformationUnstructured: Payment
         }
-      requestedExecutionDate: 2018-06-01
-      requestedExecutionTime: 13:10:00
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
@@ -313,6 +319,7 @@ singlePayments:
 
   # Payment from Anton Brueckner to Bank external Rainer Maier on 2018-06-02 at 10:10:00
   - singlePayment:
+      paymentType: SINGLE
       targets:
         - {
           endToEndIdentification: 20180602T101000,
@@ -327,10 +334,16 @@ singlePayments:
               currency: EUR
             },
           creditorName: Rainer Maier,
+          creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
           remittanceInformationUnstructured: Payment
         }
-      requestedExecutionDate: 2018-06-02
-      requestedExecutionTime: 10:10:00
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
@@ -351,6 +364,7 @@ singlePayments:
 
   # Payment from Marion Mueller to Miriam Krause on 2018-06-02 at 18:23:00
   - singlePayment:
+      paymentType: SINGLE
       targets:
         - {
           endToEndIdentification: 20180602T182300,
@@ -365,10 +379,16 @@ singlePayments:
               currency: EUR
             },
           creditorName: Miriam Krause,
+          creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
           remittanceInformationUnstructured: Payment
         }
-      requestedExecutionDate: 2018-06-02
-      requestedExecutionTime: 18:23:00
       debtorAccount:
         iban: DE69760700240340283600
         currency: EUR
@@ -389,6 +409,7 @@ singlePayments:
 
   # Payment from Max Musterman to Anton Brueckner on 2018-06-14 at 11:00:00
   - singlePayment:
+      paymentType: SINGLE
       targets:
         - {
           endToEndIdentification: 20180614T110000,
@@ -403,10 +424,16 @@ singlePayments:
               currency: EUR
             },
           creditorName: Anton Brueckner,
+          creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
           remittanceInformationUnstructured: Payment
         }
-      requestedExecutionDate: 2018-06-14
-      requestedExecutionTime: 11:00:00
       debtorAccount:
         iban: DE38760700240320465700
         currency: EUR
@@ -427,6 +454,7 @@ singlePayments:
 
   # Payment from Max Musterman to Marion Mueller on 2018-06-17 at 18:10:00
   - singlePayment:
+      paymentType: SINGLE
       targets:
         - {
           endToEndIdentification: 20180617T181000,
@@ -441,10 +469,16 @@ singlePayments:
               currency: EUR
             },
           creditorName: Marion Mueller,
+          creditorAddress:
+            {
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+            },
           remittanceInformationUnstructured: Payment
         }
-      requestedExecutionDate: 2018-06-17
-      requestedExecutionTime: 18:10:00
       debtorAccount:
         iban: DE38760700240320465700
         currency: EUR
@@ -473,8 +507,8 @@ singlePayments:
 bulkPayments:
   # BUlk Payment batch from Anton Brueckner to to 2 children with external bank account on 2018-06-01 at 12:25:00
   - bulkPayment:
+      paymentType: BULK
       batchBookingPreferred: true
-      requestedExecutionDate: 2018-06-23
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
@@ -484,6 +518,12 @@ bulkPayments:
             iban: DE67760700240243265400
             currency: EUR
           creditorName: Maria Brueckner
+          creditorAddress:
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
           remittanceInformationUnstructured: Payment
           endToEndIdentification: 20180623TAAA001
           instructedAmount:
@@ -493,6 +533,12 @@ bulkPayments:
             iban: DE23760700240234367800
             currency: EUR
           creditorName: Patrick Brueckner
+          creditorAddress:
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
           endToEndIdentification: 20180623TAAA002
           remittanceInformationUnstructured: Payment
           instructedAmount:
@@ -514,8 +560,8 @@ bulkPayments:
 
   # BUlk Payment batch with single creditor entry. Payment from Anton Brueckner to Marion Mueller on 2018-06-01 at 12:25:00
   - bulkPayment:
+      paymentType: BULK
       batchBookingPreferred: true
-      requestedExecutionDate: 2018-06-24
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
@@ -525,6 +571,12 @@ bulkPayments:
             iban: DE69760700240340283600
             currency: EUR
           creditorName: Marion Mueller
+          creditorAddress:
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
           endToEndIdentification: 20180624TAAA001
           remittanceInformationUnstructured: Payment
           instructedAmount:
@@ -534,7 +586,13 @@ bulkPayments:
             iban: DE69760700240340283600
             currency: EUR
           creditorName: Marion Mueller
-          endToEndIdentification: 20180624TAAA001
+          creditorAddress:
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
+          endToEndIdentification: 20180624TAAA002
           remittanceInformationUnstructured: Payment
           instructedAmount:
             amount: 300.00
@@ -555,8 +613,8 @@ bulkPayments:
 
   # Bulk Payment no batch from Anton Brueckner to to 2 children with external bank account on 2018-06-25 at 12:25:00
   - bulkPayment:
+      paymentType: BULK
       batchBookingPreferred: false
-      requestedExecutionDate: 2018-06-25
       debtorAccount:
         iban: DE80760700240271232400
         currency: EUR
@@ -566,6 +624,12 @@ bulkPayments:
             iban: DE67760700240243265400
             currency: EUR
           creditorName: Maria Brueckner
+          creditorAddress:
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
           endToEndIdentification: 20180625TAAA001
           remittanceInformationUnstructured: Payment
           instructedAmount:
@@ -575,6 +639,12 @@ bulkPayments:
             iban: DE23760700240234367800
             currency: EUR
           creditorName: Patrick Brueckner
+          creditorAddress:
+              street: SomeStreet,
+              buildingNumber: 666,
+              city: Kiev,
+              postalCode: 04210,
+              country: Ukraine
           endToEndIdentification: 20180625TAAA002
           remittanceInformationUnstructured: Payment
           instructedAmount:
@@ -665,4 +735,3 @@ transactions:
         amount:
           amount: -700.00
         creditorName: Max Musterman
-

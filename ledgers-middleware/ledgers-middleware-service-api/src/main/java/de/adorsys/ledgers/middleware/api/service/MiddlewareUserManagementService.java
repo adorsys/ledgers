@@ -115,4 +115,6 @@ public interface MiddlewareUserManagementService {
     void revertDatabase(String userId, long recoveryPointId);
 
     void resetPasswordViaEmail(String login);
+
+    String findAccountOwner(String accountId);
 }
