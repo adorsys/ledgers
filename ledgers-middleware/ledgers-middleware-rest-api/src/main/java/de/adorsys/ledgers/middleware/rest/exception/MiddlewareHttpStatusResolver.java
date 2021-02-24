@@ -25,6 +25,7 @@ public class MiddlewareHttpStatusResolver {
         container.put(SCA_UNAVAILABLE, BAD_REQUEST);
         container.put(NO_SUCH_ALGORITHM, BAD_REQUEST);
         container.put(UNSUPPORTED_OPERATION, BAD_REQUEST);
+        container.put(PAYMENT_VALIDATION_EXCEPTION, BAD_REQUEST);
 
         //403 Block
         container.put(AUTHENTICATION_FAILURE, FORBIDDEN);

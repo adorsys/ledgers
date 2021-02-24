@@ -16,6 +16,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.impl.config.PaymentValidatorService;
 import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
@@ -57,15 +58,14 @@ class OperationServiceImplTest {
     @Mock
     private AisConsentBOMapper aisConsentMapper;
     @Mock
-    private PaymentSupportService supportService;
-    @Mock
     private SCAOperationService scaOperationService;
+    @Mock
+    private PaymentValidatorService validatorChain;
 
     @Test
     void resolveInitiation_pmt() {
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
         when(paymentConverter.toPaymentBO(any())).thenReturn(getPmtBO());
-        when(supportService.getCheckedAccount(any())).thenReturn(getAccountBO());
         when(accessService.exchangeTokenStartSca(anyBoolean(), any())).thenReturn(new BearerTokenTO());
         when(paymentService.initiatePayment(any(), any())).thenReturn(getPmtBO());
 
@@ -73,8 +73,6 @@ class OperationServiceImplTest {
 
         verify(scaUtils, times(1)).userBO(any());
         verify(accessService, times(1)).exchangeTokenStartSca(anyBoolean(), any());
-        verify(supportService, times(1)).validatePayment(any());
-        verify(supportService, times(1)).getCheckedAccount(any());
         verify(paymentService, times(1)).initiatePayment(any(), any());
 
         assertEquals("id", result.getOperationObjectId());

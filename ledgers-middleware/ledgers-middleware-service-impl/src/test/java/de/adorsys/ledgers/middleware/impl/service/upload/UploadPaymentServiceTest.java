@@ -39,9 +39,9 @@ class UploadPaymentServiceTest {
 
     @Test
     void uploadPayments_no_gen() {
-        when(middlewarePaymentService.initiatePayment(any(), any(), any())).thenReturn(new SCAPaymentResponseTO("pmtId", "ACTC", "SINGLE", null));
+        when(middlewarePaymentService.initiatePayment(any(), any())).thenReturn(new SCAPaymentResponseTO("pmtId", "ACTC", "SINGLE", null));
         service.uploadPayments(getData(false), new ScaInfoTO());
-        verify(middlewarePaymentService, times(1)).initiatePayment(any(), any(), any());
+        verify(middlewarePaymentService, times(1)).initiatePayment(any(), any());
         verify(middlewarePaymentService, times(1)).executePayment(any(), any());
     }
 
@@ -49,7 +49,7 @@ class UploadPaymentServiceTest {
     void uploadPayments_gen() {
         when(paymentGenerationService.generatePayments(any(), any())).thenReturn(Map.of(PaymentTypeTO.SINGLE, new PaymentTO()));
         service.uploadPayments(getData(true), new ScaInfoTO());
-        verify(middlewarePaymentService, times(1)).initiatePayment(any(), any(), any());
+        verify(middlewarePaymentService, times(1)).initiatePayment(any(), any());
     }
 
     private UploadedDataTO getData(boolean generatePmt) {

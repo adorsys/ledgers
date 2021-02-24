@@ -1,4 +1,4 @@
-package de.adorsys.ledgers.middleware.impl.service;
+package de.adorsys.ledgers.middleware.impl.service.validation;
 
 import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
@@ -6,11 +6,12 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
-import de.adorsys.ledgers.middleware.impl.config.PaymentProductsConfig;
+import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,30 +26,37 @@ import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleExcept
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PaymentSupportService {  //TODO move to RequestValidationFilter
-    private final PaymentProductsConfig paymentProductsConfig;
+public class PaymentAccountValidator extends AbstractPaymentValidator {
     private final DepositAccountService accountService;
 
-    public void validatePayment(PaymentBO paymentBO) {
-        String msg = null;
-        if (!paymentBO.isValidAmount()) {
-            msg = "Instructed amount is invalid.";
-        }
+    @Override
+    public void check(PaymentBO payment, UserBO user) {
+        validateAccountsAndFillMissing(payment);
+        fillDebtorNameIfMissing(user, payment);
+        checkNext(payment, user);
+    }
 
-        if (paymentProductsConfig.isNotSupportedPaymentProduct(paymentBO.getPaymentProduct())) {
-            msg = "Payment Product not Supported!";
-        }
-        if (msg != null) {
-            throw MiddlewareModuleException.builder()
-                          .devMsg(String.format("Payment validation failed! %s", msg))
-                          .errorCode(REQUEST_VALIDATION_FAILURE)
-                          .build();
+    /**
+     * Performs check of Debtor account for presence in current Ledger instance, if currency is missing add it to payment
+     * Adds debtorAccount id to payment
+     * Checks if creditor accounts are present and if so checks currency
+     * Checks if accounts are not blocked
+     *
+     * @param payment payment for validation
+     */
+    private void validateAccountsAndFillMissing(PaymentBO payment) {
+        DepositAccountBO account = getCheckedAccount(payment);
+        payment.updateDebtorAccountCurrency(account.getCurrency());
+        payment.setAccountId(account.getId());
+    }
+
+    private void fillDebtorNameIfMissing(UserBO user, PaymentBO payment) {
+        if (StringUtils.isBlank(payment.getDebtorName())) {
+            payment.setDebtorName(user.getLogin());
         }
     }
 
-    public DepositAccountBO getCheckedAccount(PaymentBO paymentBO) {
-        DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount(), true, null);
-        paymentBO.setAccountId(debtorAccount.getId());
+    private DepositAccountBO getCheckedAccount(PaymentBO paymentBO) {
         paymentBO.getTargets()
                 .forEach(t -> {
                     try {
@@ -63,7 +71,7 @@ public class PaymentSupportService {  //TODO move to RequestValidationFilter
                         log.info("Creditor account is located in another ASPSP");
                     }
                 });
-        return debtorAccount;
+        return checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount(), true, null);
     }
 
     private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference, boolean isDebtor, Currency currency) {
@@ -79,14 +87,14 @@ public class PaymentSupportService {  //TODO move to RequestValidationFilter
     private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban, boolean isDebtor, Currency currency) {
         List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
         if (CollectionUtils.isEmpty(accounts) && !isDebtor) {
-            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false, null, null, BigDecimal.ZERO);
+            return DepositAccountBO.builder().iban(iban).currency(currency).creditLimit(BigDecimal.ZERO).build();
         }
         if (accounts.size() != 1) {
             String msg = CollectionUtils.isEmpty(accounts)
                                  ? String.format("Account with IBAN: %s Not Found!", iban)
                                  : String.format("Initiation of payment for Account with IBAN: %s is impossible as it is a Multi-Currency-Account. %nPlease specify currency for sub-account to proceed.", iban);
             MiddlewareErrorCode errorCode = CollectionUtils.isEmpty(accounts)
-                                                    ? PAYMENT_PROCESSING_FAILURE
+                                                    ? PAYMENT_VALIDATION_EXCEPTION
                                                     : CURRENCY_MISMATCH;
             throw MiddlewareModuleException.builder()
                           .errorCode(errorCode)

@@ -22,13 +22,13 @@ import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
+import de.adorsys.ledgers.middleware.impl.config.PaymentValidatorService;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
@@ -37,7 +37,6 @@ import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
@@ -70,7 +69,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final AccessService accessService;
     private final ScaResponseResolver scaResponseResolver;
     private final PageMapper pageMapper;
-    private final PaymentSupportService supportService;
+    private final PaymentValidatorService paymentValidator;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -91,18 +90,14 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @Override
-    public SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType) {
-        return checkPaymentAndPrepareResponse(scaInfoTO, paymentConverter.toPaymentBO(payment, paymentType));
-    }
-
-    private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
-        supportService.validatePayment(paymentBO);
-        paymentBO.updateDebtorAccountCurrency(supportService.getCheckedAccount(paymentBO).getCurrency());
+    public SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment) {
+        PaymentBO paymentBO = paymentConverter.toPaymentBO(payment);
         UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
+        paymentValidator.validate(paymentBO, user);
         TransactionStatusBO status = user.hasSCA()
                                              ? ACCP
                                              : ACTC;
-        return prepareScaAndResolveResponse(scaInfoTO, persist(paymentBO, status), user, PAYMENT);
+        return prepareScaAndResolveResponse(scaInfoTO, paymentService.initiatePayment(paymentBO, status), user, PAYMENT);
     }
 
     @Override
@@ -126,13 +121,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         scaResponseResolver.updateScaResponseFields(user, response, null, psuMessage, token, scaStatus, scaWeight);
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
-    }
-
-    private PaymentBO persist(PaymentBO paymentBO, TransactionStatusBO status) {
-        if (paymentBO.getPaymentId() == null) {
-            paymentBO.setPaymentId(Ids.id());
-        }
-        return paymentService.initiatePayment(paymentBO, status);
     }
 
     @Override

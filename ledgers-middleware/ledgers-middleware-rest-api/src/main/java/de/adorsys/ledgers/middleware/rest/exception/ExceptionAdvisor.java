@@ -63,6 +63,7 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map<String,String>> handleMiddlewareModuleException(MiddlewareModuleException ex) {
         HttpStatus status = MiddlewareHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
+        log.error(ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
@@ -70,6 +71,7 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map<String,String>> handlePostingModuleException(PostingModuleException ex) {
         HttpStatus status = PostingHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
+        log.error(ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
@@ -77,6 +79,7 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map<String,String>> handleUserManagementModuleException(UserManagementModuleException ex) {
         HttpStatus status = UserManagementHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
+        log.error(ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
@@ -84,6 +87,7 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map<String,String>> handleScaModuleException(ScaModuleException ex) {
         HttpStatus status = ScaHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
+        log.error(ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 
@@ -91,6 +95,7 @@ public class ExceptionAdvisor {
     public ResponseEntity<Map<String,String>> handleDepositModuleException(DepositModuleException ex) {
         HttpStatus status = DepositHttpStatusResolver.resolveHttpStatusByCode(ex.getErrorCode());
         Map<String, String> body = getHandlerContent(status, ex.getErrorCode().name(), null, ex.getDevMsg());
+        log.error(ex.getDevMsg());
         return new ResponseEntity<>(body, status);
     }
 

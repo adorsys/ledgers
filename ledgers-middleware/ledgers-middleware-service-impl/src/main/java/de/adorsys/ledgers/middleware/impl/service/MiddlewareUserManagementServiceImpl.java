@@ -155,16 +155,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
                                                                                     .devMsg("User id is not present in request!")
                                                                                     .build());
         UserBO userFromLedgers = userService.findById(userId);
-        if (userFromLedgers.getBranch().equals(branchId)) {
-            UserBO userBO = userTOMapper.toUserBO(user);
-            dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO), userFromLedgers.getLogin());
-            updatePasswordIfRequired(userFromLedgers.getLogin(), user.getPin());
-            return userTOMapper.toUserTO(userService.updateUser(userBO));
-        }
-        throw MiddlewareModuleException.builder() //TODO Think of this stuff should be rewritten
-                      .errorCode(INSUFFICIENT_PERMISSION)
-                      .devMsg("User doesn't belong to your branch!")
-                      .build();
+        UserBO userBO = userTOMapper.toUserBO(user);
+        dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO), userFromLedgers.getLogin());
+        updatePasswordIfRequired(userFromLedgers.getLogin(), user.getPin());
+        return userTOMapper.toUserTO(userService.updateUser(userBO));
+
     }
 
     @Override
@@ -247,6 +242,11 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public void resetPasswordViaEmail(String login) {
         keycloakDataService.resetPasswordViaEmail(login);
         log.info("Link for password reset was sent to user [{}] email", login);
+    }
+
+    @Override
+    public String findAccountOwner(String accountId) {
+        return userService.findOwnersByAccountId(accountId).iterator().next().getLogin();
     }
 
     private void systemBlockBranch(String branchId, boolean statusToSet) {

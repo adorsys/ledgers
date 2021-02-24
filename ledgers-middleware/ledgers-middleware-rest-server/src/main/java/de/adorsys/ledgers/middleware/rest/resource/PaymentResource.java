@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.middleware.rest.resource;
 
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
@@ -71,8 +70,8 @@ public class PaymentResource implements PaymentRestAPI {
 
     @Override
     @PreAuthorize("hasAccessToAccountWithIban(#payment.debtorAccount.iban)")
-    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
-        return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment, paymentType), HttpStatus.CREATED);
+    public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTO payment) {
+        return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment), HttpStatus.CREATED);
     }
 
     @Override
