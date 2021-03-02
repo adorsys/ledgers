@@ -11,11 +11,18 @@ public class EmailVerificationProperties {
     private String extBasePath;
     private String endPoint;
     private EmailTemplate template;
+    private Page page;
 
     @Data
     public static class EmailTemplate {
         private String subject;
         private String from;
         private String message;
+    }
+
+    @Data
+    public static class Page {
+        private String success;
+        private String fail;
     }
 }

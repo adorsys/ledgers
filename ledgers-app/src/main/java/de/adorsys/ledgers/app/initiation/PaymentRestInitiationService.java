@@ -2,7 +2,6 @@ package de.adorsys.ledgers.app.initiation;
 
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.*;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -24,7 +23,6 @@ public class PaymentRestInitiationService {
     private final AuthRequestInterceptor authRequestInterceptor;
     private final KeycloakTokenService tokenService;
 
-
     public PaymentRestInitiationService(PaymentRestClient paymentRestClient, RedirectScaRestClient scaRestClient, AuthRequestInterceptor authRequestInterceptor, KeycloakTokenService tokenService) {
         this.paymentRestClient = paymentRestClient;
         this.scaRestClient = scaRestClient;
@@ -32,10 +30,10 @@ public class PaymentRestInitiationService {
         this.tokenService = tokenService;
     }
 
-    public void executePayment(UserTO user, PaymentTypeTO paymentType, PaymentTO payment) {
+    public void executePayment(UserTO user, PaymentTO payment) {
         try {
             loginUser(user);
-            SCAPaymentResponseTO initiationResponse = initiatePayment(paymentType, payment);
+            SCAPaymentResponseTO initiationResponse = initiatePayment(payment);
             performScaIfRequired(initiationResponse);
             confirmPayment(initiationResponse.getPaymentId());
             authRequestInterceptor.setAccessToken(null);
@@ -51,8 +49,8 @@ public class PaymentRestInitiationService {
         authRequestInterceptor.setAccessToken(login.getAccess_token());
     }
 
-    private SCAPaymentResponseTO initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
-        SCAPaymentResponseTO response = Optional.ofNullable(paymentRestClient.initiatePayment(paymentType, payment).getBody()).orElse(new SCAPaymentResponseTO());
+    private SCAPaymentResponseTO initiatePayment(PaymentTO payment) {
+        SCAPaymentResponseTO response = Optional.ofNullable(paymentRestClient.initiatePayment(payment).getBody()).orElse(new SCAPaymentResponseTO());
         log.info("Payment for {} successfully initiated, ScaStatus: {}, transaction status: {}", payment.getDebtorAccount().getIban(),
                  response.getScaStatus(), response.getTransactionStatus());
         authRequestInterceptor.setAccessToken(response.getBearerToken().getAccess_token());

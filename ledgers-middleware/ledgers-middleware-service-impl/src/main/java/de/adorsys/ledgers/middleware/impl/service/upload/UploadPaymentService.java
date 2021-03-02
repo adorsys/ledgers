@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static de.adorsys.ledgers.middleware.api.domain.Constants.SCOPE_FULL_ACCESS;
-import static de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO.SINGLE;
 import static de.adorsys.ledgers.middleware.impl.service.upload.ExpressionExecutionWrapper.execute;
 
 @Slf4j
@@ -41,7 +40,7 @@ public class UploadPaymentService {
             data.getPayments()
                     .forEach(p -> execute(() -> {
                         try {
-                            SCAPaymentResponseTO payment = middlewarePaymentService.initiatePayment(info, p, SINGLE);
+                            SCAPaymentResponseTO payment = middlewarePaymentService.initiatePayment(info, p);
                             info.setBearerToken(new BearerTokenTO(null, null, 0, null, null, Collections.singleton(SCOPE_FULL_ACCESS)));
                             middlewarePaymentService.executePayment(info, payment.getPaymentId());
                         } catch (Exception e) {
@@ -56,7 +55,7 @@ public class UploadPaymentService {
                                                  .orElseGet(() -> buildAccountBalance(access.getIban(), Currency.getInstance("EUR"), BigDecimal.valueOf(100)));
         Map<PaymentTypeTO, PaymentTO> payments = paymentGenerationService.generatePayments(debtorBalance, data.getBranch());
 
-        payments.forEach((paymentType, payment) -> execute(() -> middlewarePaymentService.initiatePayment(info, payment, paymentType)));
+        payments.forEach((paymentType, payment) -> execute(() -> middlewarePaymentService.initiatePayment(info, payment)));
     }
 
     private AccountBalanceTO buildAccountBalance(String iban, Currency currency, BigDecimal amount) {

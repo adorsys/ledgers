@@ -16,9 +16,12 @@
 
 package de.adorsys.ledgers.deposit.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.Currency;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 public class AccountReferenceBO {
@@ -28,4 +31,9 @@ public class AccountReferenceBO {
     private String maskedPan;
     private String msisdn;
     private Currency currency;
+
+    @JsonIgnore
+    public boolean isInvalidReference() {
+        return Stream.of(this.iban, this.bban, this.pan, this.maskedPan, this.msisdn).collect(Collectors.toSet()).size() < 2;
+    }
 }

@@ -19,4 +19,11 @@ public class MiddlewareModuleException extends RuntimeException {
                              .devMsg(format("Operation is Rejected as account: %s is %s", iban, isRegularBlock ? "BLOCKED" : "TEMPORARILY BLOCKED BY SYSTEM"))
                              .build();
     }
+
+    public static MiddlewareModuleException paymentValidationException(String msg) {
+        return MiddlewareModuleException.builder()
+                       .errorCode(MiddlewareErrorCode.PAYMENT_VALIDATION_EXCEPTION)
+                       .devMsg(msg)
+                       .build();
+    }
 }

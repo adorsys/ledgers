@@ -17,7 +17,6 @@
 package de.adorsys.ledgers.middleware.api.service;
 
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
@@ -35,18 +34,17 @@ public interface MiddlewarePaymentService {
      * <p>
      * This call sets the status RCVD
      *
-     * @param scaInfoTO   : SCA information
-     * @param payment     : the payment object
-     * @param paymentType : the payment type
+     * @param scaInfoTO : SCA information
+     * @param payment   : the payment object
      * @return : the sca response object.
      */
-    SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType);
+    SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment);
 
     /**
      * Executes a payment
      *
-     * @param scaInfoTO   : SCA information
-     * @param paymentId     : payment identifier
+     * @param scaInfoTO : SCA information
+     * @param paymentId : payment identifier
      * @return : the sca response object.
      */
     SCAPaymentResponseTO executePayment(ScaInfoTO scaInfoTO, String paymentId);
@@ -97,8 +95,6 @@ public interface MiddlewarePaymentService {
      * @return : the auth response object.
      */
     SCAPaymentResponseTO initiatePaymentCancellation(ScaInfoTO scaInfoTO, String paymentId);
-
-    String iban(String paymentId);
 
     SCAPaymentResponseTO authorizeCancelPayment(ScaInfoTO scaInfoTO, String paymentId);
 

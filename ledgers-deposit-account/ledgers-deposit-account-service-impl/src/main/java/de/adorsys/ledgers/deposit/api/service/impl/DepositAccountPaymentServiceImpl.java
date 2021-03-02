@@ -26,8 +26,8 @@ import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentType;
 import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
+import de.adorsys.ledgers.deposit.db.repository.PaymentTargetRepository;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
-import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -52,15 +52,17 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     private final PaymentMapper paymentMapper;
     private final PaymentExecutionService executionService;
     private final DepositAccountService accountService;
+    private final PaymentTargetRepository targetRepository;
 
     public DepositAccountPaymentServiceImpl(DepositAccountConfigService depositAccountConfigService,
                                             LedgerService ledgerService, PaymentRepository paymentRepository,
-                                            PaymentMapper paymentMapper, PaymentExecutionService executionService, DepositAccountService accountService) {
+                                            PaymentMapper paymentMapper, PaymentExecutionService executionService, DepositAccountService accountService, PaymentTargetRepository targetRepository) {
         super(depositAccountConfigService, ledgerService);
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.executionService = executionService;
         this.accountService = accountService;
+        this.targetRepository = targetRepository;
     }
 
     @Override
@@ -83,10 +85,7 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
         }
 
         Payment paymentToPersist = paymentMapper.toPayment(payment);
-        paymentToPersist.getTargets().forEach(t -> {
-            t.setPayment(paymentToPersist);
-            t.setPaymentId(Ids.id());
-        });
+        paymentToPersist.getTargets().forEach(t -> t.setPayment(paymentToPersist));
 
         AmountBO amountToVerify = executionService.calculateTotalPaymentAmount(payment);
         boolean confirmationOfFunds = accountService.confirmationOfFunds(new FundsConfirmationRequestBO(null, payment.getDebtorAccount(), amountToVerify, null, null));
@@ -161,6 +160,16 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     public Page<PaymentBO> getPaymentsByTypeStatusAndDebtorPaged(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds, Pageable pageable) {
         return paymentRepository.findAllByAccountIdInAndPaymentTypeAndTransactionStatus(accountIds, PaymentType.valueOf(paymentType.name()), TransactionStatus.valueOf(status.name()), pageable)
                        .map(paymentMapper::toPaymentBO);
+    }
+
+    @Override
+    public boolean existingTargetById(String paymentTargetId) {
+        return targetRepository.existsById(paymentTargetId);
+    }
+
+    @Override
+    public boolean existingPaymentById(String paymentId) {
+        return paymentRepository.existsById(paymentId);
     }
 
     private Payment updatePaymentStatus(Payment payment, TransactionStatus updatedStatus) {

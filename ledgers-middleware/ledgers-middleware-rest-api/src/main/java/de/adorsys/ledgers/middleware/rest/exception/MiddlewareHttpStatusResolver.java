@@ -23,6 +23,9 @@ public class MiddlewareHttpStatusResolver {
         container.put(CAN_NOT_RESOLVE_SCA_CHALLENGE_DATA, BAD_REQUEST);
         container.put(ACCOUNT_DISABLED, BAD_REQUEST);
         container.put(SCA_UNAVAILABLE, BAD_REQUEST);
+        container.put(NO_SUCH_ALGORITHM, BAD_REQUEST);
+        container.put(UNSUPPORTED_OPERATION, BAD_REQUEST);
+        container.put(PAYMENT_VALIDATION_EXCEPTION, BAD_REQUEST);
 
         //403 Block
         container.put(AUTHENTICATION_FAILURE, FORBIDDEN);
@@ -33,7 +36,6 @@ public class MiddlewareHttpStatusResolver {
         container.put(BRANCH_NOT_FOUND, NOT_FOUND);
 
         //500 Block
-        container.put(NO_SUCH_ALGORITHM, BAD_REQUEST);
     }
 
     public static HttpStatus resolveHttpStatusByCode(MiddlewareErrorCode code) {

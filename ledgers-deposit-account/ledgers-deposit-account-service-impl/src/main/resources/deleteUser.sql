@@ -44,7 +44,8 @@ with ibans as (
          delete from posting where id in (select * from postingIds)
      ),
      deleteAccounts as (delete from ledger_account where id in (select * from ledgerAccountIDs)),
-     deleteDepAccounts as (delete from deposit_account where iban in (select * from ibans))
+     deleteDepAccounts as (delete from deposit_account where iban in (select * from ibans)),
+     deleteAccountAccess as( delete from account_accesses where iban in (select * from ibans))
 delete
 from users
 where user_id = ?1

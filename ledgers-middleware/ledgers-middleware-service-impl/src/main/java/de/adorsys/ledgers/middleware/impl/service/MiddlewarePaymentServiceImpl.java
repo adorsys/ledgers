@@ -16,21 +16,19 @@
 
 package de.adorsys.ledgers.middleware.impl.service;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
-import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
-import de.adorsys.ledgers.middleware.impl.config.PaymentProductsConfig;
+import de.adorsys.ledgers.middleware.impl.config.PaymentValidatorService;
 import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
@@ -39,46 +37,39 @@ import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
-import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
-import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 import static de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO.*;
 import static de.adorsys.ledgers.middleware.api.domain.Constants.SCOPE_FULL_ACCESS;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.*;
-import static de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException.blockedSupplier;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.CANCEL_PAYMENT;
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.PAYMENT;
 
 @Slf4j
 @Service
 @Transactional
-@SuppressWarnings({"PMD.TooManyStaticImports", "PMD.TooManyMethods"})
 @RequiredArgsConstructor
 public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final DepositAccountPaymentService paymentService;
     private final SCAOperationService scaOperationService;
-    private final DepositAccountService accountService;
     private final PaymentConverter paymentConverter;
     private final SCAUtils scaUtils;
     private final PaymentCoreDataPolicy coreDataPolicy;
     private final AccessService accessService;
     private final ScaResponseResolver scaResponseResolver;
-    private final PaymentProductsConfig paymentProductsConfig;
     private final PageMapper pageMapper;
+    private final PaymentValidatorService paymentValidator;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -99,18 +90,14 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     }
 
     @Override
-    public SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment, PaymentTypeTO paymentType) {
-        return checkPaymentAndPrepareResponse(scaInfoTO, paymentConverter.toPaymentBO(payment, paymentType));
-    }
-
-    private SCAPaymentResponseTO checkPaymentAndPrepareResponse(ScaInfoTO scaInfoTO, PaymentBO paymentBO) {
-        validatePayment(paymentBO);
-        paymentBO.updateDebtorAccountCurrency(getCheckedAccount(paymentBO).getCurrency());
+    public SCAPaymentResponseTO initiatePayment(ScaInfoTO scaInfoTO, PaymentTO payment) {
+        PaymentBO paymentBO = paymentConverter.toPaymentBO(payment);
         UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
+        paymentValidator.validate(paymentBO, user);
         TransactionStatusBO status = user.hasSCA()
                                              ? ACCP
                                              : ACTC;
-        return prepareScaAndResolveResponse(scaInfoTO, persist(paymentBO, status), user, PAYMENT);
+        return prepareScaAndResolveResponse(scaInfoTO, paymentService.initiatePayment(paymentBO, status), user, PAYMENT);
     }
 
     @Override
@@ -121,43 +108,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
             status = paymentService.executePayment(payment.getPaymentId(), scaInfoTO.getUserLogin());
         }
         return new SCAPaymentResponseTO(payment.getPaymentId(), status.name(), payment.getPaymentType().name(), payment.getPaymentProduct());
-    }
-
-    private DepositAccountBO getCheckedAccount(PaymentBO paymentBO) { //TODO move to RequestValidationFilter
-        DepositAccountBO debtorAccount = checkAccountStatusAndCurrencyMatch(paymentBO.getDebtorAccount(), true, null);
-        paymentBO.setAccountId(debtorAccount.getId());
-        paymentBO.getTargets()
-                .forEach(t -> {
-                    try {
-                        DepositAccountBO acc = checkAccountStatusAndCurrencyMatch(t.getCreditorAccount(), false, t.getInstructedAmount().getCurrency());
-                        t.setCreditorAccount(acc.getReference());
-                    } catch (MiddlewareModuleException e) {
-                        if (EnumSet.of(ACCOUNT_DISABLED, CURRENCY_MISMATCH).contains(e.getErrorCode())) {
-                            log.error(e.getDevMsg());
-                            throw e;
-                        }
-                    } catch (DepositModuleException e) {
-                        log.info("Creditor account is located in another ASPSP");
-                    }
-                });
-        return debtorAccount;
-    }
-
-    private void validatePayment(PaymentBO paymentBO) { //TODO move to RequestValidationFilter
-        String msg = null;
-        if (!paymentBO.isValidAmount()) {
-            msg = "Instructed amount is invalid.";
-        }
-
-        if (paymentProductsConfig.isNotSupportedPaymentProduct(paymentBO.getPaymentProduct())) {
-            msg = "Payment Product not Supported!";
-        }
-        if (msg != null) {
-            throw MiddlewareModuleException.builder()
-                          .devMsg(String.format("Payment validation failed! %s", msg))
-                          .errorCode(REQUEST_VALIDATION_FAILURE)
-                          .build();
-        }
     }
 
     private SCAPaymentResponseTO prepareScaAndResolveResponse(ScaInfoTO scaInfoTO, PaymentBO payment, UserBO user, OpTypeBO opType) {
@@ -173,22 +123,10 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
     }
 
-    private PaymentBO persist(PaymentBO paymentBO, TransactionStatusBO status) {
-        if (paymentBO.getPaymentId() == null) {
-            paymentBO.setPaymentId(Ids.id());
-        }
-        return paymentService.initiatePayment(paymentBO, status);
-    }
-
     @Override
     public PaymentTO getPaymentById(String paymentId) {
         PaymentBO paymentResult = paymentService.getPaymentById(paymentId);
         return paymentConverter.toPaymentTO(paymentResult);
-    }
-
-    @Override
-    public String iban(String paymentId) { //TODO Consider removing!
-        return paymentService.readIbanByPaymentId(paymentId);
     }
 
     /*
@@ -245,35 +183,5 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         } else {
             payment.setTransactionStatus(paymentService.cancelPayment(paymentId));
         }
-    }
-
-    private DepositAccountBO checkAccountStatusAndCurrencyMatch(AccountReferenceBO reference, boolean isDebtor, Currency currency) {//TODO move to ValidationFilter
-        DepositAccountBO account = Optional.ofNullable(reference.getCurrency())
-                                           .map(c -> accountService.getAccountByIbanAndCurrency(reference.getIban(), c))
-                                           .orElseGet(() -> getAccountByIbanAndParamCurrencyErrorIfNotSingle(reference.getIban(), isDebtor, currency));
-        if (!account.isEnabled()) {
-            throw blockedSupplier(ACCOUNT_DISABLED, reference.getIban(), account.isBlocked()).get();
-        }
-        return account;
-    }
-
-    private DepositAccountBO getAccountByIbanAndParamCurrencyErrorIfNotSingle(String iban, boolean isDebtor, Currency currency) {
-        List<DepositAccountBO> accounts = accountService.getAccountsByIbanAndParamCurrency(iban, "");
-        if (CollectionUtils.isEmpty(accounts) && !isDebtor) {
-            return new DepositAccountBO(null, iban, null, null, null, null, currency, null, null, null, null, null, null, null, false, false, null, null, BigDecimal.ZERO);
-        }
-        if (accounts.size() != 1) {
-            String msg = CollectionUtils.isEmpty(accounts)
-                                 ? String.format("Account with IBAN: %s Not Found!", iban)
-                                 : String.format("Initiation of payment for Account with IBAN: %s is impossible as it is a Multi-Currency-Account. %nPlease specify currency for sub-account to proceed.", iban);
-            MiddlewareErrorCode errorCode = CollectionUtils.isEmpty(accounts)
-                                                    ? PAYMENT_PROCESSING_FAILURE
-                                                    : CURRENCY_MISMATCH;
-            throw MiddlewareModuleException.builder()
-                          .errorCode(errorCode)
-                          .devMsg(msg)
-                          .build();
-        }
-        return accounts.iterator().next();
     }
 }

@@ -139,9 +139,6 @@ ledgers:
     challenge_data:
       path:
 
-  user-service: ##TODO Remove as we moved on to Keycloak
-    jwt.hs256.secret: 6VFX8YFQG5DLFKZIMNLGH9P406XR1SY4
-
   verify:
     template:
       subject: "Please verify your email address"
@@ -157,6 +154,9 @@ ledgers:
         ModelBank team"
     ext_base_path: http://localhost:8088
     endpoint: /emails/email
+    page:
+      success: http://localhost:4400/email-confirmation/success
+      fail: http://localhost:4400/email-confirmation/fail
 
 #Supported currencies
   currency:
@@ -187,6 +187,9 @@ ledgers:
     grant_types_supported:
       - AUTHORISATION_CODE
 
+  payment_validator:
+    allow_past_dates: false
+    allow_same_end_to_end_ids: false
 # Cors configuration
 management:
   endpoints:
