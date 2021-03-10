@@ -69,18 +69,13 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public UserTO create(UserTO user) {
         UserBO createdUser = userService.create(userTOMapper.toUserBO(user));
         try {
-            KeycloakUser keycloakUser = keycloakUserMapper.toKeycloakUser(createdUser);
-            keycloakUser.setPassword(user.getPin());
+            KeycloakUser keycloakUser = keycloakUserMapper.toKeycloakUser(createdUser, user.getPin());
             dataService.createUser(keycloakUser);
         } catch (Exception e) {
-            if (createdUser.getRolesAsString().contains("SYSTEM") && createdUser.getLogin().equals("admin")) {
-                log.info("Initial Admin user is already present in IDP");
-            } else {
-                throw MiddlewareModuleException.builder()
-                              .errorCode(INSUFFICIENT_PERMISSION)
-                              .devMsg(format("Could not register user at IDP msg: %s", e.getMessage()))
-                              .build();
-            }
+            throw MiddlewareModuleException.builder()
+                          .errorCode(INSUFFICIENT_PERMISSION)
+                          .devMsg(format("Could not register user at IDP msg: %s", e.getMessage()))
+                          .build();
         }
         if (createdUser.getUserRoles().contains(UserRoleBO.STAFF)) {
             RecoveryPointTO point = new RecoveryPointTO(format("Registered %s user", user.getLogin()));

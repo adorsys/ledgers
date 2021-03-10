@@ -218,6 +218,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         transactionService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
     }
 
+
+    //TODO Create separate clean up service for this purposes - remove after! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/906
     @Override
     public void deleteTransactions(String userId, UserRoleTO userRole, String accountId) {
         log.info("User {} attempting delete postings for account: {}", userId, accountId);

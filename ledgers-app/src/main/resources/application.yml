@@ -86,6 +86,9 @@ logging:
       hibernate: WARN
 
 ledgers:
+  xs2a:
+    funds-confirmation-user-login: admin
+    funds-confirmation-user-password: admin123
   paymentScheduler:
     initialDelay: 3000
     delay: 300000      #300 000 = 5 minutes delay between execution/rescheduling operations

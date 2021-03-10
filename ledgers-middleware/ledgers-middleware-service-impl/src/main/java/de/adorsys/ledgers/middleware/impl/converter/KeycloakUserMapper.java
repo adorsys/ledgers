@@ -17,4 +17,16 @@ public class KeycloakUserMapper {
                                 true, //TODO Consider set this to false
                                 source.getRolesAsString());
     }
+
+    public KeycloakUser toKeycloakUser(UserBO source, String pin) {
+        return new KeycloakUser(null,
+                                source.getLogin(),
+                                pin,
+                                true,
+                                source.getLogin(),
+                                null,
+                                source.getEmail(),
+                                true, //TODO Consider set this to false
+                                source.getRolesAsString());
+    }
 }

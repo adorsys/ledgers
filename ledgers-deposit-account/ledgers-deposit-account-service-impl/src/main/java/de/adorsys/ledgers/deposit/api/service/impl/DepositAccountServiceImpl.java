@@ -205,7 +205,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public void deleteUser(String userId) {
+    public void deleteUser(String userId) { //TODO DepositAccountService should not clean up USERS! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/906
         executeNativeQuery(USER_SQL, userId, DELETE_USER_ERROR_MSG);
     }
 
@@ -320,7 +320,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         if (isExistingAccount) {
             String message = format("Deposit account already exists. IBAN %s. Currency %s",
                                     depositAccountBO.getIban(), depositAccountBO.getCurrency().getCurrencyCode());
-            log.error(message);
             throw DepositModuleException.builder()
                           .errorCode(DEPOSIT_ACCOUNT_EXISTS)
                           .devMsg(message)
