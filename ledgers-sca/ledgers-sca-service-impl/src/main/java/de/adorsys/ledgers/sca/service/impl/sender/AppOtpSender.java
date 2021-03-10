@@ -31,7 +31,7 @@ public class AppOtpSender implements SCASender<AppScaMessage> {
             HttpEntity<AppScaMessage> httpEntity = new HttpEntity<>(message);
             ResponseEntity<Void> exchange = template.exchange(message.getSocketServicePath(), method, httpEntity, Void.class);
             return exchange.getStatusCode().is2xxSuccessful();
-        } catch (RestClientException e){
+        } catch (RestClientException e) {
             log.error("Could not notify TPP-RestServer through REST");
             return false;
         }

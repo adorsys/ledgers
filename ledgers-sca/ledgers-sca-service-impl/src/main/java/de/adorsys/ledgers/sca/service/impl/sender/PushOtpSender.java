@@ -21,8 +21,6 @@ import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.PUSH_OTP;
 @Service
 @RequiredArgsConstructor
 public class PushOtpSender implements SCASender<PushScaMessage> {
-    private static final String ERROR_REASON_2_MATCHERS = "Could not PUSH TAN for Sca, reason: %s %s";
-
     private final RestTemplate template;
 
     @Override

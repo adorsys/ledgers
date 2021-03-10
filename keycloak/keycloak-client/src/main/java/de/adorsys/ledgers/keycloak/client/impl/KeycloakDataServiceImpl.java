@@ -120,11 +120,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
 
     @Override
     public Optional<KeycloakUser> getUser(String realm, String login) {
-        List<UserRepresentation> search = keycloak.realm(realm).users().search(login);
-        if (CollectionUtils.isNotEmpty(search)) {
-            return Optional.of(mapper.toKeycloakUser(search.get(0)));
-        }
-        return Optional.empty();
+        return getUserByIdentifier(login).map(mapper::toKeycloakUser);
     }
 
     @Override
@@ -141,37 +137,25 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
 
     @Override
     public void updateUser(KeycloakUser user, String userIdentifier) {
-        UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
-        List<UserRepresentation> search = usersResource.search(userIdentifier);
-        if (CollectionUtils.isNotEmpty(search)) {
-            String userId = search.get(0).getId();
-            UserResource userResource = usersResource.get(userId);
-            userResource.update(mapper.toUpdateUserPresentation(userResource.toRepresentation(), user));
+        getUserResourceByIdentifier(userIdentifier).ifPresentOrElse(u -> {
+            u.update(mapper.toUpdateUserPresentation(u.toRepresentation(), user));
             log.debug("User[{}] was updated in keycloak.", user.getLogin());
-
-            assignUserRoles(configuration.getClientRealm(), userId, user.getRealmRoles());
-            return;
-        }
-        log.info(USER_NOT_FOUND_IN_KEYCLOAK, user.getLogin());
+            assignUserRoles(configuration.getClientRealm(), u.toRepresentation().getId(), user.getRealmRoles());
+        }, () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, user.getLogin()));
     }
 
     @Override
     public void deleteUser(String login) {
         UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
-        List<UserRepresentation> search = usersResource.search(login);
-        if (CollectionUtils.isNotEmpty(search)) {
-            String userId = search.get(0).getId();
-            usersResource.delete(userId);
+        getUserByIdentifier(login).ifPresentOrElse(u -> {
+            usersResource.delete(u.getId());
             log.info("User[{}] was deleted from keycloak.", login);
-            return;
-        }
-        log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
+        }, () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, login));
     }
 
     @Override
     public boolean userExists(String login) {
-        List<UserRepresentation> search = keycloak.realm(configuration.getClientRealm()).users().search(login);
-        return CollectionUtils.isNotEmpty(search);
+        return getUserByIdentifier(login).isPresent();
     }
 
     @Override
@@ -181,16 +165,10 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
         passwordCred.setType(CredentialRepresentation.PASSWORD);
         passwordCred.setValue(password);
 
-        UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
-        List<UserRepresentation> search = usersResource.search(login);
-        if (CollectionUtils.isNotEmpty(search)) {
-            String userId = search.get(0).getId();
-            UserResource userResource = usersResource.get(userId);
-            userResource.resetPassword(passwordCred);
-
-            log.info("User[{}] was password reset.", login);
-        }
-        log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
+        getUserResourceByIdentifier(login).ifPresentOrElse(u -> {
+            u.resetPassword(passwordCred);
+            log.info("User {} was password reset.", login);
+        }, () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, login));
     }
 
     @Override
@@ -203,37 +181,29 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
                                                         Collections.singletonList(RequiredAction.UPDATE_PASSWORD.name()));
 
             log.info("User[{}] email for updating password was sent", login);
+            return;
         }
         log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
     }
 
     @Override
     public void assignRealmRoleToUser(String login, List<String> realmRoles) {
-        UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
-        List<UserRepresentation> search = usersResource.search(login);
-        if (CollectionUtils.isNotEmpty(search)) {
-            String userId = search.get(0).getId();
-
-            assignUserRoles(configuration.getClientRealm(), userId, realmRoles);
-            log.info("Realm roles {} were assigned to User[realm: {}, login: {}] ", realmRoles, configuration.getClientRealm(), login);
-            return;
-        }
-        log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
+        getUserByIdentifier(login)
+                .ifPresentOrElse(u -> {
+                                     assignUserRoles(configuration.getClientRealm(), u.getId(), realmRoles);
+                                     log.info("Realm roles {} were assigned to User[realm: {}, login: {}] ", realmRoles, configuration.getClientRealm(), login);
+                                 },
+                                 () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, login));
     }
 
     @Override
     public void removeRealmRoleFromUser(String login, List<String> realmRoles) {
-        UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
-        List<UserRepresentation> search = usersResource.search(login);
-        if (CollectionUtils.isNotEmpty(search)) {
-            String userId = search.get(0).getId();
-
-            UserResource userResource = usersResource.get(userId);
-            realmRoles.forEach(r -> userResource.roles().realmLevel().remove(Collections.singletonList(getRealmRole(configuration.getClientRealm(), r))));
-            log.info("Realm roles {} were assigned to User[realm: {}, login: {}] ", realmRoles, configuration.getClientRealm(), login);
-            return;
-        }
-        log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
+        getUserResourceByIdentifier(login)
+                .ifPresentOrElse(u -> {
+                                     realmRoles.forEach(r -> u.roles().realmLevel().remove(Collections.singletonList(getRealmRole(configuration.getClientRealm(), r))));
+                                     log.info("Realm roles {} were assigned to User[realm: {}, login: {}] ", realmRoles, configuration.getClientRealm(), login);
+                                 },
+                                 () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, login));
     }
 
     private RoleRepresentation getRealmRole(String realm, String realmRole) {
@@ -267,5 +237,20 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
         list.add("*");
 
         return list;
+    }
+
+    private Optional<UserRepresentation> getUserByIdentifier(String login) {
+        try {
+            return Optional.of(keycloak.realm(configuration.getClientRealm()).users().search(login, true).get(0));
+        } catch (NotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<UserResource> getUserResourceByIdentifier(String login) {
+        return getUserByIdentifier(login).map(u -> {
+            UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
+            return usersResource.get(u.getId());
+        });
     }
 }

@@ -92,7 +92,7 @@ class MiddlewareUserManagementServiceImplTest {
     void create() {
         // Given
         when(userService.create(any())).thenReturn(userBO);
-        when(keycloakUserMapper.toKeycloakUser(any())).thenReturn(new KeycloakUser());
+        when(keycloakUserMapper.toKeycloakUser(any(), any())).thenReturn(new KeycloakUser());
 
         // When
         UserTO user = middlewareUserService.create(userTO);
@@ -119,7 +119,7 @@ class MiddlewareUserManagementServiceImplTest {
         UserBO userBO = new UserBO(USER_LOGIN, "email", "pin");
         userBO.setUserRoles(List.of(UserRoleBO.STAFF));
         when(userService.create(any())).thenReturn(userBO);
-        when(keycloakUserMapper.toKeycloakUser(any())).thenReturn(new KeycloakUser());
+        when(keycloakUserMapper.toKeycloakUser(any(), any())).thenReturn(new KeycloakUser());
 
         // When
         UserTO user = middlewareUserService.create(userTO);
