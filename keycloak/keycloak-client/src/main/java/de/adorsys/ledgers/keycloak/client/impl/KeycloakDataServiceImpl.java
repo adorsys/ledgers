@@ -241,7 +241,11 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
 
     private Optional<UserRepresentation> getUserByIdentifier(String login) {
         try {
-            return Optional.of(keycloak.realm(configuration.getClientRealm()).users().search(login, true).get(0));
+            List<UserRepresentation> search = keycloak.realm(configuration.getClientRealm()).users().search(login, true);
+            return search.isEmpty()
+                           ? Optional.empty()
+                           : Optional.of(search.iterator().next());
+
         } catch (NotFoundException e) {
             return Optional.empty();
         }
