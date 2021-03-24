@@ -382,7 +382,9 @@ class MiddlewareUserManagementServiceImplTest {
 
     @Test
     void editBasicSelf() {
-        when(userService.findById(USER_ID)).thenReturn(getUser(null, UserRoleBO.CUSTOMER));
+        UserBO user = getUser(null, UserRoleBO.CUSTOMER);
+        user.setId(USER_ID);
+        when(userService.findById(USER_ID)).thenReturn(user);
         UserTO request = new UserTO(USER_LOGIN, "email", "PIN");
         request.setId(USER_ID);
         middlewareUserService.editBasicSelf(USER_ID, request);

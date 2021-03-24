@@ -61,7 +61,7 @@ public interface AdminResourceAPI {
                                                                       @RequestParam(SIZE) int size);
 
     @Operation(summary = "Set password for Branch",
-            description = "Changes password for given Branch")
+            description = "Changes password for Branch")
     @SecurityRequirement(name = API_KEY)
     @SecurityRequirement(name = OAUTH2)
     @PutMapping("/password")
