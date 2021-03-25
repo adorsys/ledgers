@@ -68,7 +68,7 @@ public class IdpConfigurationService {
         } catch (UserManagementModuleException e) {
             log.info("Admin exists in Ledgers");
             if (dataService.userExists(xs2aAdminLogin)) {
-                middlewareUserService.updatePasswordIfRequired(xs2aAdminLogin, xs2aAdminPassword);
+                middlewareUserService.updatePasswordByLogin(xs2aAdminLogin, xs2aAdminPassword);
             } else {
                 createUserInIDP(userMapper.toUserBO(admin));
                 log.info("Created admin in IDP");

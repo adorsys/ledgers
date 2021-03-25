@@ -152,15 +152,20 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         UserBO userFromLedgers = userService.findById(userId);
         UserBO userBO = userTOMapper.toUserBO(user);
         dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO), userFromLedgers.getLogin());
-        updatePasswordIfRequired(userFromLedgers.getId(), user.getPin());
+        updatePasswordByLogin(userFromLedgers.getLogin(), user.getPin());
         return userTOMapper.toUserTO(userService.updateUser(userBO));
 
     }
 
     @Override
-    public void updatePasswordIfRequired(String userId, String password) {
+    public void updatePasswordById(String userId, String password) {
+        String login = userService.findById(userId).getLogin();
+        updatePasswordByLogin(login, password);
+    }
+
+    @Override
+    public void updatePasswordByLogin(String login, String password) {
         if (StringUtils.isNotBlank(password)) {
-            String login = userService.findById(userId).getLogin();
             dataService.resetPassword(login, password);
         }
     }
@@ -210,7 +215,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         storedUser.setPin(user.getPin());
         userService.updateUser(storedUser);
         dataService.updateUser(keycloakUserMapper.toKeycloakUser(storedUser), storedUser.getLogin());
-        updatePasswordIfRequired(storedUser.getId(), user.getPin());
+        updatePasswordByLogin(storedUser.getLogin(), user.getPin());
     }
 
     @Override
