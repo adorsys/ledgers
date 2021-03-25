@@ -30,7 +30,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -424,6 +426,40 @@ class MiddlewareUserManagementServiceImplTest {
     void resetPasswordViaEmail() {
         middlewareUserService.resetPasswordViaEmail(USER_LOGIN);
         verify(dataService, times(1)).resetPasswordViaEmail(any());
+    }
+
+    @Test
+    void getUsersByRoles() {
+        Page<UserBO> page = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 1), 1);
+        when(userService.getUsersByRoles(anyList(), any())).thenReturn(page);
+        CustomPageImpl<Object> customPage = new CustomPageImpl<>(0, 1, 1, 1, 1L, false, true, false, true, List.of(new UserBO()));
+        when(pageMapper.toCustomPageImpl(any())).thenReturn(customPage);
+        CustomPageImpl<UserTO> result = middlewareUserService.getUsersByRoles(List.of(UserRoleTO.CUSTOMER), new CustomPageableImpl(0, 100));
+        assertNotNull(result);
+    }
+
+    @Test
+    void getUsersByBranchAndRolesExtended() {
+        Page<UserExtendedBO> page = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 1), 1);
+        when(userService.findUsersByMultipleParamsPaged(any(), any(), any(), any(), any(), any(), any())).thenReturn(page);
+        CustomPageImpl<Object> customPage = new CustomPageImpl<>(0, 1, 1, 1, 1L, false, true, false, true, List.of(new UserExtendedBO()));
+        when(pageMapper.toCustomPageImpl(any())).thenReturn(customPage);
+        CustomPageImpl<UserExtendedTO> result = middlewareUserService.getUsersByBranchAndRolesExtended(null, null, null, null, null, null, new CustomPageableImpl(0, 1));
+        assertNotNull(result);
+    }
+
+    @Test
+    void updatePasswordById() {
+        when(userService.findById(any())).thenReturn(new UserBO("login", "email", "pin"));
+        middlewareUserService.updatePasswordById(USER_ID, "pwd");
+        verify(dataService, times(1)).resetPassword(any(), any());
+    }
+
+    @Test
+    void findAccountOwner() {
+        when(userService.findOwnersByAccountId(anyString())).thenReturn(List.of(new UserBO("login", "amin", "pin")));
+        String result = middlewareUserService.findAccountOwner(ACCOUNT_ID);
+        assertNotNull(result);
     }
 
     private AdditionalAccountInformationTO getAdditionalInfo() {
