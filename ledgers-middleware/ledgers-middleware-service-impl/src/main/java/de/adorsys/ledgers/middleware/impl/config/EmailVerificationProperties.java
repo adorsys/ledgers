@@ -5,23 +5,23 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 
-@Data //NOSONAR
+@Data
 @Configuration
 @ConfigurationProperties(prefix = "ledgers.verify")
-public class EmailVerificationProperties {
+public class EmailVerificationProperties { //NOSONAR
     private String extBasePath;
     private String endPoint;
     private EmailTemplate template;
     private Page page;
 
-    @Data //NOSONAR
+    @Data
     public static class EmailTemplate {
         private String subject;
         private String from;
         private String message;
     }
 
-    @Data //NOSONAR
+    @Data
     public static class Page {
         private String success;
         private String fail;
