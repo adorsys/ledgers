@@ -27,6 +27,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,8 +129,9 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
 
     @Override
     public CustomPageImpl<UserTO> getUsersByRoles(List<UserRoleTO> roles, CustomPageableImpl pageable) {
-        return pageMapper.toCustomPageImpl(userService.getUsersByRoles(userTOMapper.toUserRoleBO(roles), PageRequest.of(pageable.getPage(), pageable.getSize()))
-                                                   .map(userTOMapper::toUserTO));
+        Page<UserBO> users = userService.getUsersByRoles(userTOMapper.toUserRoleBO(roles), PageRequest.of(pageable.getPage(), pageable.getSize()));
+        Page<UserTO> map = users.map(userTOMapper::toUserTO);
+        return pageMapper.toCustomPageImpl(map);
     }
 
     @Override
@@ -152,15 +154,21 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         UserBO userFromLedgers = userService.findById(userId);
         UserBO userBO = userTOMapper.toUserBO(user);
         dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO), userFromLedgers.getLogin());
-        updatePasswordIfRequired(userFromLedgers.getLogin(), user.getPin());
+        updatePasswordByLogin(userFromLedgers.getLogin(), user.getPin());
         return userTOMapper.toUserTO(userService.updateUser(userBO));
 
     }
 
     @Override
-    public void updatePasswordIfRequired(String userId, String password) {
+    public void updatePasswordById(String userId, String password) {
+        String login = userService.findById(userId).getLogin();
+        updatePasswordByLogin(login, password);
+    }
+
+    @Override
+    public void updatePasswordByLogin(String login, String password) {
         if (StringUtils.isNotBlank(password)) {
-            dataService.resetPassword(userId, password);
+            dataService.resetPassword(login, password);
         }
     }
 
@@ -209,7 +217,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         storedUser.setPin(user.getPin());
         userService.updateUser(storedUser);
         dataService.updateUser(keycloakUserMapper.toKeycloakUser(storedUser), storedUser.getLogin());
-        updatePasswordIfRequired(storedUser.getLogin(), user.getPin());
+        updatePasswordByLogin(storedUser.getLogin(), user.getPin());
     }
 
     @Override

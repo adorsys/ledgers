@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.ledgers</groupId>
 	<artifactId>ledgers</artifactId>
-	<version>4.8</version>
+	<version>4.9</version>
 
 	<modules>
 		<module>ledgers-app</module>
@@ -156,7 +156,8 @@
 			**/*Provider*.java,
 			**/*Test*.java,
 			**/api/**/*,
-			**/keycloak/client/model/**/*
+			**/keycloak/client/model/**/*,
+			**/*Properties*.java
 		</sonar.coverage.exclusions>
 		<sonar.moduleName>${project.artifactId}</sonar.moduleName>
 
