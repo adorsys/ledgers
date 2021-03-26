@@ -157,7 +157,7 @@
 			**/*Test*.java,
 			**/api/**/*,
 			**/keycloak/client/model/**/*,
-			**/*Properties*.java/**/*
+			**/*Properties*.java
 		</sonar.coverage.exclusions>
 		<sonar.moduleName>${project.artifactId}</sonar.moduleName>
 
