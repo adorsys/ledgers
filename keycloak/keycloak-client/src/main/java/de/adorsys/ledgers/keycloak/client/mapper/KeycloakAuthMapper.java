@@ -25,7 +25,7 @@ public interface KeycloakAuthMapper {
     @Mapping(target = "role", expression = "java(getLedgersUserRoles(source.getToken()))")
     @Mapping(target = "sub", source = "source.token.subject")
     @Mapping(target = "scopes", source = "source.token.scope")
-    @Mapping(target = "login", source = "source.token.preferredUsername")
+    @Mapping(target = "login", source = "source.token.name")
     @Mapping(target = "exp", source = "source.token.exp")
     @Mapping(target = "jti", source = "source.token.id")
     @Mapping(target = "accessToken", source = "source.tokenString")

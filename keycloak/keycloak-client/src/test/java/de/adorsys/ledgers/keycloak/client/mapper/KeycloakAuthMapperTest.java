@@ -42,6 +42,7 @@ class KeycloakAuthMapperTest {
     private AccessToken getAccessToken() {
         AccessToken token = new AccessToken();
         token.id("id");
+        token.setName("anton.brueckner");
         token.issuedAt(615586932);
         token.exp(NOW.getTime());
         token.setScope("profile openId");
