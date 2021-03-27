@@ -57,7 +57,7 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
         SCAOperationBO operation = scaOperationService.checkIfExistsOrNew(codeData);
 
         try {
-            String message = messageResolver.updateMessage(null, operation);
+            String message = messageResolver.updateMessage("", operation);
             BearerTokenBO bearerToken = bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken());
             return scaResponseConverter.mapResponse(operation, user.getScaUserData(), message, bearerToken, scaWeight, null);
         } catch (MiddlewareModuleException e) {
@@ -69,7 +69,7 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
     public GlobalScaResponseTO getMethods(String authorizationId, ScaInfoTO scaInfo) {
         UserBO user = userService.findByLogin(scaInfo.getUserLogin());
         SCAOperationBO operation = scaOperationService.loadAuthCode(authorizationId);
-        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(null, operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), 0, null);
+        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage("", operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), 0, null);
     }
 
     @Override
