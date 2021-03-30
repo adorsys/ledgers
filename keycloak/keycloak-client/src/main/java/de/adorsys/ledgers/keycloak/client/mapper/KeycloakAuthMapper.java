@@ -64,7 +64,7 @@ public interface KeycloakAuthMapper {
     @Mapping(target = "accessToken", source = "token")
     @Mapping(target = "scopes", source = "source.scope")
     @Mapping(target = "role", source = "source")
-    @Mapping(target = "login", source = "source.preferredUsername")
+    @Mapping(target = "login", source = "source.name")
     @Mapping(target = "tokenUsage", expression = "java(de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO.DIRECT_ACCESS)")
     AccessTokenTO toTokenTO(AccessToken source, String token);
 
