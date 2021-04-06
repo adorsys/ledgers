@@ -12,4 +12,6 @@ public interface MiddlewareRecoveryService {
     RecoveryPointTO getPointById(String branchId, Long id);
 
     void deleteById(String branchId, Long id);
+
+    void revertDatabase(String userId, long recoveryPointId);
 }

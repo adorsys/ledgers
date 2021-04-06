@@ -63,16 +63,6 @@ public interface DepositAccountService {
 
     Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, Pageable pageable);
 
-    void deleteTransactions(String accountId);
-
-    void deleteBranch(String branchId);
-
-    void deleteUser(String userId);
-
-    void deleteAccount(String accountId);
-
-    void rollBackBranch(String branch, LocalDateTime revertTimestamp);
-
     void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
 
     Page<DepositAccountBO> findByBranchIdsAndMultipleParams(Collection<String> branchIds, String iban, Boolean blocked, Pageable pageable);

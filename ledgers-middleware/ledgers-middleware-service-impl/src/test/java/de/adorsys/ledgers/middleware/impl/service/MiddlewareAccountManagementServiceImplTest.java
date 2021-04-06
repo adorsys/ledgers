@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
-import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
@@ -57,6 +56,7 @@ class MiddlewareAccountManagementServiceImplTest {
     private static final String AUTH_CODE = "123456";
     private static final String AUTHORISATION_ID = "authorisationId";
     private static final String BRANCH = "branch";
+    private static final String CONSENT_ID = "consent-id";
 
     @InjectMocks
     private MiddlewareAccountManagementServiceImpl middlewareService;
@@ -87,8 +87,6 @@ class MiddlewareAccountManagementServiceImplTest {
     private ScaResponseResolver scaResponseResolver;
     @Mock
     private KeycloakTokenService tokenService;
-    @Mock
-    private KeycloakDataService keycloakDataService;
 
     private static final ObjectMapper MAPPER = getObjectMapper();
 
@@ -425,27 +423,21 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    void deleteAccount() {
-        middlewareService.deleteAccount(USER_ID, UserRoleTO.STAFF, ACCOUNT_ID);
+    void getAccountsFromConsent() {
+        AisConsentBO aisConsentBO = new AisConsentBO();
+        AisAccountAccessInfoBO access = new AisAccountAccessInfoBO();
+        access.setAccounts(Collections.singletonList(IBAN));
+        aisConsentBO.setAccess(access);
+        when(userService.loadConsent(CONSENT_ID)).thenReturn(aisConsentBO);
 
-        verify(depositAccountService, times(1)).deleteAccount(ACCOUNT_ID);
+        Set<String> actual = middlewareService.getAccountsFromConsent(CONSENT_ID);
+        assertThat(actual).isEqualTo(Set.of(IBAN));
     }
 
     @Test
-    void deleteUser() {
-        UserBO userBO = getUserBO();
-        userBO.setBranch(BRANCH);
-        when(userService.findById(USER_ID)).thenReturn(userBO);
-        middlewareService.deleteUser(BRANCH, UserRoleTO.STAFF, USER_ID);
-
-        verify(depositAccountService, times(1)).deleteUser(USER_ID);
-        verify(keycloakDataService, times(1)).deleteUser(userBO.getLogin());
-    }
-
-    @Test
-    void deleteTransactions() {
-        middlewareService.deleteTransactions(USER_ID, UserRoleTO.CUSTOMER, ACCOUNT_ID);
-        verify(depositAccountService, times(1)).deleteTransactions(any());
+    void changeCreditLimit() {
+        middlewareService.changeCreditLimit(ACCOUNT_ID, BigDecimal.TEN);
+        verify(depositAccountService, times(1)).changeCreditLimit(ACCOUNT_ID, BigDecimal.TEN);
     }
 
     private CustomPageImpl<Object> getPageImpl() {

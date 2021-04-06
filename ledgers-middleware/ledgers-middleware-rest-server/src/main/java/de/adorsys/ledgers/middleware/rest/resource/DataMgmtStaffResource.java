@@ -3,10 +3,7 @@ package de.adorsys.ledgers.middleware.rest.resource;
 import de.adorsys.ledgers.middleware.api.domain.general.BbanStructure;
 import de.adorsys.ledgers.middleware.api.domain.general.RecoveryPointTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UploadedDataTO;
-import de.adorsys.ledgers.middleware.api.service.AppManagementService;
-import de.adorsys.ledgers.middleware.api.service.CurrencyService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
-import de.adorsys.ledgers.middleware.api.service.MiddlewareRecoveryService;
+import de.adorsys.ledgers.middleware.api.service.*;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareResetResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +23,7 @@ import java.util.Set;
 @RequestMapping(DataMgmtStaffAPI.BASE_PATH)
 public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     private final ScaInfoHolder scaInfoHolder;
-    private final MiddlewareAccountManagementService accountManagementService;
+    private final MiddlewareCleanupService cleanupService;
     private final AppManagementService appManagementService;
     private final CurrencyService currencyService;
     private final MiddlewareRecoveryService recoveryService;
@@ -34,28 +31,28 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     @Override
     @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> account(String accountId) {
-        accountManagementService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
+        cleanupService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> depositAccount(String accountId) {
-        accountManagementService.deleteAccount(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
+        cleanupService.deleteAccount(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<Void> user(String userId) {
-        accountManagementService.deleteUser(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), userId);
+        cleanupService.deleteUser(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), userId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     @PreAuthorize("hasManagerAccessToUser(#branchId)")
     public ResponseEntity<Void> branch(String branchId) {
-        appManagementService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
+        cleanupService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
         return ResponseEntity.ok().build();
     }
 

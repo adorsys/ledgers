@@ -34,9 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.INSUFFICIENT_PERMISSION;
 import static de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode.REQUEST_VALIDATION_FAILURE;
@@ -48,7 +45,6 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManagementService {
     private static final int NANO_TO_SECOND = 1000000000;
-    private static final ExecutorService FIXED_THREAD_POOL = Executors.newFixedThreadPool(20);
     private final UserService userService;
     private final DepositAccountService depositAccountService;
     private final AccessService accessService;
@@ -156,7 +152,6 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         dataService.updateUser(keycloakUserMapper.toKeycloakUser(userBO), userFromLedgers.getLogin());
         updatePasswordByLogin(userFromLedgers.getLogin(), user.getPin());
         return userTOMapper.toUserTO(userService.updateUser(userBO));
-
     }
 
     @Override
@@ -221,27 +216,6 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     }
 
     @Override
-    @SuppressWarnings("PMD:PrematureDeclaration")
-    public void revertDatabase(String userId, long recoveryPointId) {
-        // First, all users for this branch should be technically blocked.
-        long start = System.nanoTime();
-        log.info("Started reverting state for {}", userId);
-        RecoveryPointTO point = recoveryService.getPointById(userId, recoveryPointId);
-
-        systemBlockBranch(userId, true);
-        log.info("All branch data is LOCKED in {} seconds", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
-
-        // Delete data in Keycloak.
-        userService.findUsersByBranchAndCreatedAfter(userId, point.getRollBackTime())
-                .forEach(user -> keycloakDataService.deleteUser(user.getLogin()));
-
-        // Delete data in Ledgers.
-        depositAccountService.rollBackBranch(userId, point.getRollBackTime());
-        systemBlockBranch(userId, false);
-        log.info("Reverted data and unlocked branch in {}s", (double) (System.nanoTime() - start) / NANO_TO_SECOND);
-    }
-
-    @Override
     public void resetPasswordViaEmail(String login) {
         keycloakDataService.resetPasswordViaEmail(login);
         log.info("Link for password reset was sent to user [{}] email", login);
@@ -252,8 +226,4 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
         return userService.findOwnersByAccountId(accountId).iterator().next().getLogin();
     }
 
-    private void systemBlockBranch(String branchId, boolean statusToSet) {
-        CompletableFuture.runAsync(() -> userService.setBranchBlockedStatus(branchId, true, statusToSet), FIXED_THREAD_POOL)
-                .thenRunAsync(() -> depositAccountService.changeAccountsBlockedStatus(branchId, true, statusToSet));
-    }
 }
