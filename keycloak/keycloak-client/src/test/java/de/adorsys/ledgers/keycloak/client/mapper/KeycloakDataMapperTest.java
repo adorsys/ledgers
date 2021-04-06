@@ -28,6 +28,7 @@ class KeycloakDataMapperTest {
         UserRepresentation expected = getUserRepresentation(true);
         assertEquals(expected.getFirstName(), result.getFirstName());
         assertEquals(expected.getLastName(), result.getLastName());
+        assertEquals(expected.getEmail(), result.getEmail());
         assertEquals(expected.isEnabled(), result.isEnabled());
         assertEquals(expected.isEmailVerified(), result.isEmailVerified());
         assertEquals(expected.getRealmRoles(), result.getRealmRoles());
