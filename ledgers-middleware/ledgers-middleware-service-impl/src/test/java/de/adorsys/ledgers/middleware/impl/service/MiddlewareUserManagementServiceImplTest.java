@@ -7,7 +7,6 @@ import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
 import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
-import de.adorsys.ledgers.middleware.api.domain.general.RecoveryPointTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
@@ -410,16 +409,6 @@ class MiddlewareUserManagementServiceImplTest {
 
         // Then
         assertEquals(Arrays.asList("anton.brueckner", "max.musterman"), actual);
-    }
-
-    @Test
-    void revertDatabase() {
-        when(recoveryService.getPointById(any(), anyLong())).thenReturn(new RecoveryPointTO());
-        when(userService.findUsersByBranchAndCreatedAfter(any(), any())).thenReturn(List.of(userBO));
-        middlewareUserService.revertDatabase(USER_ID, 1);
-        verify(userService, timeout(1000).times(2)).setBranchBlockedStatus(any(), anyBoolean(), anyBoolean());
-        verify(dataService, times(1)).deleteUser(any());
-        verify(depositAccountService, times(1)).rollBackBranch(any(), any());
     }
 
     @Test

@@ -5,7 +5,6 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 
@@ -135,19 +134,6 @@ public interface MiddlewareAccountManagementService {
      * @param amount    amount of cash deposited
      */
     void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount);
-
-    /**
-     * Remove all transactions for deposit account
-     *
-     * @param userId    id of the user
-     * @param userRole  role of user initiating operation
-     * @param accountId the account id
-     */
-    void deleteTransactions(String userId, UserRoleTO userRole, String accountId);
-
-    void deleteAccount(String userId, UserRoleTO userRole, String accountId);
-
-    void deleteUser(String userId, UserRoleTO userRole, String userToDeleteId);
 
     AccountReportTO getAccountReport(String accountId);
 

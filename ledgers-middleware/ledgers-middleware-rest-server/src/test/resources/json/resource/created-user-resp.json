@@ -1,0 +1,26 @@
+{
+  "number": 0,
+  "size": 0,
+  "totalPages": 0,
+  "numberOfElements": 0,
+  "totalElements": 0,
+  "previousPage": false,
+  "firstPage": false,
+  "nextPage": false,
+  "lastPage": false,
+  "content": [
+    {
+      "login": "superman",
+      "email": "superman@localhost.net",
+      "pin": "111111",
+      "scaUserData": [],
+      "accountAccesses": [],
+      "userRoles": [
+        "STAFF"
+      ],
+      "branch": "branchId",
+      "blocked": false,
+      "systemBlocked": false
+    }
+  ]
+}

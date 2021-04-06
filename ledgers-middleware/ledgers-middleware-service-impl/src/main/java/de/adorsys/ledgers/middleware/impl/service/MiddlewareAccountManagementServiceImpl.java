@@ -6,7 +6,6 @@ import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
-import de.adorsys.ledgers.keycloak.client.api.KeycloakDataService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.Constants;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
@@ -17,7 +16,6 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
-import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
@@ -69,7 +67,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final PageMapper pageMapper;
     private final ScaResponseResolver scaResponseResolver;
     private final KeycloakTokenService tokenService;
-    private final KeycloakDataService keycloakDataService;
 
     @Value("${ledgers.token.lifetime.seconds.sca:10800}")
     private int scaTokenLifeTime;
@@ -216,35 +213,6 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     @Override
     public void depositCash(ScaInfoTO scaInfoTO, String accountId, AmountTO amount) {
         transactionService.depositCash(accountId, amountMapper.toAmountBO(amount), scaInfoTO.getUserLogin());
-    }
-
-
-    //TODO Create separate clean up service for this purposes - remove after! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/906
-    @Override
-    public void deleteTransactions(String userId, UserRoleTO userRole, String accountId) {
-        log.info("User {} attempting delete postings for account: {}", userId, accountId);
-        long start = System.nanoTime();
-        depositAccountService.deleteTransactions(accountId);
-        log.info("Deleting postings for account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
-    }
-
-    @Override
-    public void deleteAccount(String userId, UserRoleTO userRole, String accountId) {
-        log.info("User {} attempting delete account: {}", userId, accountId);
-        long start = System.nanoTime();
-        depositAccountService.deleteAccount(accountId);
-        log.info("Deleting account: {} Successful, in {} seconds", accountId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
-    }
-
-    @Override
-    @SuppressWarnings("PMD.PrematureDeclaration")
-    public void deleteUser(String userId, UserRoleTO userRole, String userToDeleteId) {
-        log.info("User {} attempting delete user: {}", userId, userToDeleteId);
-        long start = System.nanoTime();
-        String login = userService.findById(userToDeleteId).getLogin();
-        depositAccountService.deleteUser(userToDeleteId);
-        keycloakDataService.deleteUser(login);
-        log.info("Deleting user: {} Successful, in {} seconds", userToDeleteId, (double) (System.nanoTime() - start) / NANO_TO_SECOND);
     }
 
     @Override

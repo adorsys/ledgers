@@ -9,7 +9,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class)
+@ComponentScan(basePackageClasses = DepositAccountServiceBasePackage.class,
+        basePackages = "de.adorsys.ledgers.cleanup")
 @EnableDepositAccountRepository
 public class DepositAccountServiceConfiguration {
 

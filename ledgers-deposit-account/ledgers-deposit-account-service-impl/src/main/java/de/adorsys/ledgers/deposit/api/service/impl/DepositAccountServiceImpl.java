@@ -15,20 +15,13 @@ import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.Ids;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.mapstruct.factory.Mappers;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,20 +36,7 @@ import static java.lang.String.format;
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s and currency %s not found";
     private static final String MSG_ACCOUNT_NOT_FOUND = "Account with id %s not found";
-    private static final String BRANCH_SQL = "classpath:deleteBranch.sql";
-    private static final String ROLL_BACK_BRANCH_SQL = "classpath:rollBackBranch.sql";
-    private static final String POSTING_SQL = "classpath:deletePostings.sql";
-    private static final String USER_SQL = "classpath:deleteUser.sql";
-    private static final String ACCOUNT_SQL = "classpath:deleteAccount.sql";
-    private static final String DELETE_BRANCH_ERROR_MSG = "Something went wrong during deletion of branch: %s, msg: %s";
-    private static final String ROLL_BACK_BRANCH_ERROR_MSG = "Something went wrong during rollback of branch: %s, msg: %s";
-    private static final String DELETE_POSTINGS_ERROR_MSG = "Something went wrong during deletion of postings for iban: %s, msg: %s";
-    private static final String DELETE_USER_ERROR_MSG = "Something went wrong during deletion of user: %s, msg: %s";
-    private static final String DELETE_ACCOUNT_ERROR_MSG = "Something went wrong during deletion of account: %s, msg: %s";
 
-    @PersistenceContext
-    private final EntityManager entityManager;
-    private final ResourceLoader loader;
     private final DepositAccountRepository depositAccountRepository;
     private final DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
     private final AccountStmtService accountStmtService;
@@ -65,12 +45,11 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     private final CurrencyExchangeRatesService exchangeRatesService;
 
     public DepositAccountServiceImpl(DepositAccountConfigService depositAccountConfigService,
-                                     LedgerService ledgerService, EntityManager entityManager, ResourceLoader loader, DepositAccountRepository depositAccountRepository,
+                                     LedgerService ledgerService, DepositAccountRepository depositAccountRepository,
                                      AccountStmtService accountStmtService,
-                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper, CurrencyExchangeRatesService exchangeRatesService) {
+                                     PostingService postingService, TransactionDetailsMapper transactionDetailsMapper,
+                                     CurrencyExchangeRatesService exchangeRatesService) {
         super(depositAccountConfigService, ledgerService);
-        this.entityManager = entityManager;
-        this.loader = loader;
         this.depositAccountRepository = depositAccountRepository;
         this.accountStmtService = accountStmtService;
         this.postingService = postingService;
@@ -192,50 +171,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public void deleteTransactions(String accountId) {
-        DepositAccountBO account = getAccountById(accountId);
-        String linked = account.getLinkedAccounts();
-        LedgerAccountBO ledgerAccount = ledgerService.findLedgerAccountById(linked);
-        executeNativeQuery(POSTING_SQL, ledgerAccount.getId(), DELETE_POSTINGS_ERROR_MSG);
-    }
-
-    @Override
-    public void deleteBranch(String branchId) {
-        executeNativeQuery(BRANCH_SQL, branchId, DELETE_BRANCH_ERROR_MSG);
-    }
-
-    @Override
-    public void deleteUser(String userId) { //TODO DepositAccountService should not clean up USERS! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/906
-        executeNativeQuery(USER_SQL, userId, DELETE_USER_ERROR_MSG);
-    }
-
-    @Override
-    public void deleteAccount(String accountId) {
-        executeNativeQuery(ACCOUNT_SQL, accountId, DELETE_ACCOUNT_ERROR_MSG);
-    }
-
-    @Override
-    public void rollBackBranch(String branch, LocalDateTime revertTimestamp) {
-        executeNativeQuery(ROLL_BACK_BRANCH_SQL, branch, revertTimestamp, ROLL_BACK_BRANCH_ERROR_MSG);
-    }
-
-    private void executeNativeQuery(String queryFilePath, String parameter, LocalDateTime timestampParameter, String errorMsg) {
-        try {
-            InputStream stream = loader.getResource(queryFilePath).getInputStream();
-            String query = IOUtils.toString(stream, StandardCharsets.UTF_8);
-            entityManager.createNativeQuery(query)
-                    .setParameter(1, parameter)
-                    .setParameter(2, timestampParameter)
-                    .executeUpdate();
-        } catch (IOException e) {
-            throw DepositModuleException.builder()
-                          .devMsg(format(errorMsg, parameter, e.getMessage()))
-                          .errorCode(COULD_NOT_EXECUTE_STATEMENT)
-                          .build();
-        }
-    }
-
-    @Override
     @Transactional
     public void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet) {
         if (isSystemBlock) {
@@ -295,21 +230,6 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
             throw DepositModuleException.builder()
                           .errorCode(UNSUPPORTED_CREDIT_LIMIT)
                           .devMsg("Credit limit value should be positive or zero")
-                          .build();
-        }
-    }
-
-    private void executeNativeQuery(String queryFilePath, String parameter, String errorMsg) {
-        try {
-            InputStream stream = loader.getResource(queryFilePath).getInputStream();
-            String query = IOUtils.toString(stream, StandardCharsets.UTF_8);
-            entityManager.createNativeQuery(query)
-                    .setParameter(1, parameter)
-                    .executeUpdate();
-        } catch (IOException e) {
-            throw DepositModuleException.builder()
-                          .devMsg(format(errorMsg, parameter, e.getMessage()))
-                          .errorCode(COULD_NOT_EXECUTE_STATEMENT)
                           .build();
         }
     }

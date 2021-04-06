@@ -6,6 +6,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
 import de.adorsys.ledgers.middleware.api.domain.um.ScaUserDataTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareRecoveryService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.rest.annotation.MiddlewareUserResource;
 import de.adorsys.ledgers.middleware.rest.security.ScaInfoHolder;
@@ -31,6 +32,7 @@ import java.util.List;
 public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     private final MiddlewareUserManagementService middlewareUserService;
     private final ScaInfoHolder scaInfoHolder;
+    private final MiddlewareRecoveryService middlewareRecoveryService;
 
     @Override
     @PreAuthorize("isNewStaffUser(#branchStaff)")
@@ -117,7 +119,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     @Override
     @PreAuthorize("hasAnyRole('STAFF') and isSameUser(#request.branchId)")
     public ResponseEntity<Void> revertDatabase(RevertRequestTO request) {
-        middlewareUserService.revertDatabase(request.getBranchId(), request.getRecoveryPointId());
+        middlewareRecoveryService.revertDatabase(request.getBranchId(), request.getRecoveryPointId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
