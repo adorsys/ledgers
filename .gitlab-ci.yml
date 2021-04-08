@@ -109,7 +109,7 @@ Lint:ledgers_dockerfiles:
     - docker:20.10-dind
   except:
     - schedules
-    - develop
+    - support-3.x
     - master
   script:
     - echo "Run ledgers dockerfile checks"
