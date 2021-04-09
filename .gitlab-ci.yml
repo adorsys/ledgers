@@ -136,13 +136,24 @@ Lint:Ledgers_yaml_json_xml:
     - master
   script:
     - apt-get update && apt-get install jsonlint yamllint libxml2-utils make curl -yq && ln -s /usr/bin/jsonlint-php /usr/bin/jsonlint
-    - curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-    - echo "Run OBA backend lint"
+    - echo "Run Ledgers backend lint"
     - find ./ -type f -name "*.json" -exec jsonlint -q {} \; # lint all json
-# commented cause get many small errors for yaml with spaces empty lines and etc
-#    - find ./ -type f \( -name "*.yml" -o -name "*.yaml" \) -exec yamllint -d "{extends: relaxed, rules: {line-length: {max: 160}}}" {} \;
-# commented cause get error Unsupported version '1.1'
-#	  - find ./ -type f \( -iname "*.xml" ! -iname pom.xml \) -exec xmllint --noout {} \;
+  # commented cause get many small errors for yaml with spaces empty lines and etc
+  #   - find ./ -type f \( -name "*.yml" -o -name "*.yaml" \) -exec yamllint -d "{extends: relaxed, rules: {line-length: {max: 160}}}" {} \;
+  # commented cause get error Unsupported version '1.1'
+  #     - find ./ -type f \( -iname "*.xml" ! -iname pom.xml \) -exec xmllint --noout {} \;
+
+Lint:ledgers_dockerfiles:
+  image: docker:20.10
+  stage: "Lint"
+  services:
+    - docker:20.10-dind
+  except:
+    - schedules
+    - develop
+    - master
+  script:
+    - echo "Run ledgers dockerfile checks"
     - docker run --rm -i hadolint/hadolint < Dockerfile
 
 Lint:PMD_CPD_Report:

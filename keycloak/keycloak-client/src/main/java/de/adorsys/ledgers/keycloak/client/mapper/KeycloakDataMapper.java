@@ -33,6 +33,7 @@ public interface KeycloakDataMapper {
         userRepresentation.setLastName(user.getLastName());
         userRepresentation.setEnabled(user.getEnabled());
         userRepresentation.setEmailVerified(user.getEmailVerified());
+        userRepresentation.setEmail(user.getEmail());
         List<String> realmRoles = user.getRealmRoles();
         userRepresentation.setRealmRoles(CollectionUtils.isNotEmpty(realmRoles) ? realmRoles : Collections.emptyList());
         return userRepresentation;
