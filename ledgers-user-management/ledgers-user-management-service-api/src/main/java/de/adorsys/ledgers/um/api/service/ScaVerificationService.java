@@ -14,4 +14,6 @@ public interface ScaVerificationService {
     void updateEmailVerification(EmailVerificationBO emailVerificationBO);
 
     boolean sendMessage(String subject, String from, String email, String message);
+
+    void deleteByScaId(String scaId);
 }

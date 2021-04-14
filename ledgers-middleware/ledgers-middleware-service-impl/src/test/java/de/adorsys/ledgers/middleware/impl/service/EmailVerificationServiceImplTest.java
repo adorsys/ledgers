@@ -52,12 +52,32 @@ class EmailVerificationServiceImplTest {
     @Test
     void createVerificationToken() {
         // Given
-        when(scaUserDataService.findByEmail(any())).thenReturn(scaUserDataBO);
-        when(scaVerificationService.findByScaIdAndStatusNot(any(), any())).thenReturn(getEmailVerificationBO(date));
+        when(scaUserDataService.findByEmail(EMAIL)).thenReturn(scaUserDataBO);
+        when(scaVerificationService.findByScaIdAndStatusNot(scaUserDataBO.getId(), EmailVerificationStatusBO.VERIFIED))
+                .thenReturn(getEmailVerificationBO(date));
 
         // When
         String token = emailVerificationService.createVerificationToken(EMAIL);
         assertFalse(token.isEmpty());
+
+        verify(scaVerificationService, times(1)).updateEmailVerification(any(EmailVerificationBO.class));
+    }
+
+    @Test
+    void createVerificationToken_emailVerificationExists() {
+        scaUserDataBO.setValid(true);
+        when(scaUserDataService.findByEmail(EMAIL)).thenReturn(scaUserDataBO);
+        when(scaVerificationService.findByScaIdAndStatusNot(scaUserDataBO.getId(), EmailVerificationStatusBO.VERIFIED))
+                .thenThrow(UserManagementModuleException.builder().build());
+
+        // When
+        String token = emailVerificationService.createVerificationToken(EMAIL);
+        assertFalse(token.isEmpty());
+        assertFalse(scaUserDataBO.isValid());
+
+        verify(scaVerificationService, times(1)).deleteByScaId(scaUserDataBO.getId());
+        verify(scaUserDataService, times(1)).updateScaUserData(scaUserDataBO);
+        verify(scaVerificationService, times(1)).updateEmailVerification(any(EmailVerificationBO.class));
     }
 
     @Test
