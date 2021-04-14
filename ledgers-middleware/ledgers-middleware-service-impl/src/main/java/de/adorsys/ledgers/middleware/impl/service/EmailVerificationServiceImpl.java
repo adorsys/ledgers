@@ -31,6 +31,10 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             emailVerification = scaVerificationService.findByScaIdAndStatusNot(scaUserDataBO.getId(), STATUS_VERIFIED)
                                         .updateExpiration();
         } catch (UserManagementModuleException e) {
+            //delete verification if it exists
+            scaVerificationService.deleteByScaId(scaUserDataBO.getId());
+            scaUserDataBO.setValid(false);
+            scaUserDataService.updateScaUserData(scaUserDataBO);
             emailVerification = new EmailVerificationBO(scaUserDataBO);
         }
         scaVerificationService.updateEmailVerification(emailVerification);

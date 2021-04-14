@@ -148,6 +148,12 @@ class ScaVerificationServiceImplTest {
         Assertions.assertTrue(verificationService.sendMessage("subject", "from", "email", "message"));
     }
 
+    @Test
+    void deleteByScaId() {
+        verificationService.deleteByScaId(SCA_ID);
+        verify(emailVerificationRepository, times(1)).deleteByScaId(SCA_ID);
+    }
+
     private EmailVerificationEntity readEmailVerificationEntity() {
         try {
             return reader.getObjectFromResource(getClass(), "email-verification.yml", EmailVerificationEntity.class);

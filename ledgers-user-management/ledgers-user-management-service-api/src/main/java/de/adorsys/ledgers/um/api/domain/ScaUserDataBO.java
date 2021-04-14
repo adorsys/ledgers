@@ -7,10 +7,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Objects;
-
-import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.EMAIL;
 
 @Getter
 @Setter
@@ -66,17 +63,5 @@ public class ScaUserDataBO {
         return StringUtils.isBlank(id)
                        ? null
                        : id;
-    }
-
-    public static void checkAndUpdateValidity(ScaUserDataBO oldScaData, List<ScaUserDataBO> newScaData) {
-        newScaData.stream()
-                .filter(n -> n.getId().equals(oldScaData.getId()))
-                .filter(n -> n.getScaMethod() == EMAIL)
-                .findFirst()
-                .ifPresent(n -> {
-                    if (!n.getMethodValue().equals(oldScaData.getMethodValue())) {
-                        n.setValid(false);
-                    }
-                });
     }
 }

@@ -20,8 +20,7 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +33,7 @@ class ScaUserDataServiceImplTest {
     @Mock
     private UserConverter userConverter;
 
-    private ResourceReader reader = YamlReader.getInstance();
+    private final ResourceReader reader = YamlReader.getInstance();
 
     private static final String EMAIL = "google@gmail.com";
     private static final String SCA_ID = "6DwJm-TpResvxLdX3fHpjc";
@@ -104,6 +103,19 @@ class ScaUserDataServiceImplTest {
 
         // Then
         verify(scaUserDataRepository, times(1)).save(scaUserDataEntity);
+    }
+
+    @Test
+    void ifScaChangedEmailNotValid() {
+        ScaUserDataBO oldScaData = readScaUserDataBO();
+        ScaUserDataBO newScaData = readScaUserDataBO();
+        newScaData.setMethodValue("changed email");
+        newScaData.setValid(true);
+
+        scaUserDataService.ifScaChangedEmailNotValid(Collections.singletonList(oldScaData),
+                                                     Collections.singletonList(newScaData));
+
+        assertFalse(newScaData.isValid());
     }
 
     private ScaUserDataBO readScaUserDataBO() {

@@ -65,4 +65,9 @@ public class ScaVerificationServiceImpl implements ScaVerificationService {
     public boolean sendMessage(String subject, String from, String email, String message) {
         return userMailSender.send(subject, from, email, message);
     }
+
+    @Override
+    public void deleteByScaId(String scaId) {
+        emailVerificationRepository.deleteByScaId(scaId);
+    }
 }
