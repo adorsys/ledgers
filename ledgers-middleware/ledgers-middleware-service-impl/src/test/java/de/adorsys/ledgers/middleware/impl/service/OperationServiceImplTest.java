@@ -216,7 +216,7 @@ class OperationServiceImplTest {
     private UserBO getUserBO() {
         UserBO bo = new UserBO();
         bo.setScaUserData(List.of(new ScaUserDataBO()));
-        bo.setAccountAccesses(List.of(new AccountAccessBO("IBAN", null, "accId", 100)));
+        bo.setAccountAccesses(List.of(new AccountAccessBO("IBAN", null, "accId", 100,AccessTypeBO.OWNER)));
         return bo;
     }
 

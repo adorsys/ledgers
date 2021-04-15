@@ -178,7 +178,7 @@ class MiddlewareUserManagementServiceImplTest {
         middlewareUserService.updateAccountAccess(buildScaInfoTO(), ANOTHER_USER_ID, getAccessTO());
 
         // Then
-        verify(accessService, times(1)).updateAccountAccessNewAccount(any(), any(), any());
+        verify(accessService, times(1)).updateAccountAccessNewAccount(any(), any(), any(),any());
     }
 
     @Test
