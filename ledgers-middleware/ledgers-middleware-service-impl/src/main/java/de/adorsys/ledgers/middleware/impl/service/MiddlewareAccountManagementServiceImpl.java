@@ -14,6 +14,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.AisConsentTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
@@ -92,7 +93,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
 
         checkPresentAccountsAndOwner(depositAccount.getIban(), user);//TODO Consider moving to Filter
         DepositAccountBO createdAccount = depositAccountService.createNewAccount(accountDetailsMapper.toDepositAccountBO(depositAccount), user.getLogin(), user.getBranch());
-        accessService.updateAccountAccessNewAccount(createdAccount, user, finalWeight);
+        accessService.updateAccountAccessNewAccount(createdAccount, user, finalWeight, AccessTypeTO.OWNER);
     }
 
     @Override
