@@ -14,7 +14,6 @@
 
 	<properties>
 		<ruleset.basedir>..</ruleset.basedir>
-        <guava.version>30.0-jre</guava.version>
     </properties>
 
 	<dependencies>
@@ -37,7 +36,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
 		</dependency>
 
 		<dependency>

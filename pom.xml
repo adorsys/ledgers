@@ -106,10 +106,11 @@
 		<org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
 		<lombok-plugin.version>1.16.22</lombok-plugin.version>
 		<hamcrest-library.version>1.3</hamcrest-library.version>
-		<javatar-commons.version>0.6</javatar-commons.version>
+		<javatar-commons.version>0.7</javatar-commons.version>
 
 		<junit-jupiter.version>5.5.2</junit-jupiter.version>
 		<mockito.version>3.2.4</mockito.version>
+		<guava.version>30.1.1-jre</guava.version>
 
 		<powermock.version>2.0.5</powermock.version>
 		<commons-validator.version>1.6</commons-validator.version>
@@ -239,6 +240,12 @@
 				<groupId>commons-validator</groupId>
 				<artifactId>commons-validator</artifactId>
 				<version>${commons-validator.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
 			</dependency>
 
 			<dependency>
@@ -387,6 +394,9 @@
 					</rulesets>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
+					<excludes>
+						<exclude>**/*MapperImpl.java</exclude>
+					</excludes>
 					<excludeRoots>
 						<excludeRoot>../ledgers-deposit-account-service-impl/target/generated-sources/annotations/
 						</excludeRoot>
