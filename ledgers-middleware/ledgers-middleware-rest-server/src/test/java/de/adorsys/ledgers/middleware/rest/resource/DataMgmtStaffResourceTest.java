@@ -35,6 +35,7 @@ import java.util.Currency;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -157,7 +158,7 @@ class DataMgmtStaffResourceTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/staff-access/data/currencies")
                                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[\"USD\"]"));
+                .andExpect(content().string(equalToIgnoringCase("[\"USD\"]")));
     }
 
     @Test

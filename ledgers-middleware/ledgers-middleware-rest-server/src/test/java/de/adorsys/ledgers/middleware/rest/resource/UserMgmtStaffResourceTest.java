@@ -36,8 +36,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -64,7 +63,7 @@ class UserMgmtStaffResourceTest {
     private MiddlewareRecoveryService middlewareRecoveryService;
 
     private MockMvc mockMvc;
-    private ResourceReader jsonReader = JsonReader.getInstance();
+    private final ResourceReader jsonReader = JsonReader.getInstance();
     private final ObjectMapper mapper = new ObjectMapper();
     private ScaInfoTO scaInfoTO;
     private UserTO userTO;
@@ -98,7 +97,8 @@ class UserMgmtStaffResourceTest {
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                                 .content(jsonReader.getStringFromFile("json/resource/user-to.json")))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(userTO)));
+                .andExpect(content().string(equalToIgnoringCase(mapper.writeValueAsString(userTO))));
+
 
         assertNull(userTO.getPin());
         assertEquals(Collections.singletonList(UserRoleTO.STAFF), userTO.getUserRoles());
@@ -113,7 +113,7 @@ class UserMgmtStaffResourceTest {
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                                 .content(jsonReader.getStringFromFile("json/resource/user-to.json")))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(userTO)));
+                .andExpect(content().string(equalToIgnoringCase(mapper.writeValueAsString(userTO))));
     }
 
     @Test
@@ -126,7 +126,7 @@ class UserMgmtStaffResourceTest {
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                                 .content(jsonReader.getStringFromFile("json/resource/user-to.json")))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(userTO)));
+                .andExpect(content().string(equalToCompressingWhiteSpace(mapper.writeValueAsString(userTO))));
     }
 
     @Test
@@ -165,7 +165,20 @@ class UserMgmtStaffResourceTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/staff-access/users/logins")
                                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[\"superman\"]"));
+                .andExpect(content().string(equalToIgnoringCase("[\"superman\"]")));
+    }
+
+    @Test
+    void getBranchUserLoginsByBranchId() throws Exception {
+        when(middlewareUserService.findById(BRANCH)).thenReturn(userTO);
+        when(middlewareUserService.getBranchUserLogins(BRANCH)).thenReturn(Collections.singletonList("superman"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/staff-access/users/logins/{branchId}", BRANCH)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalToIgnoringCase("[\"superman\"]")));
+
+        verifyNoInteractions(scaInfoHolder);
     }
 
     @Test
@@ -175,7 +188,7 @@ class UserMgmtStaffResourceTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/staff-access/users/{userId}", USER_ID)
                                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(content().json(jsonReader.getStringFromFile("json/resource/user-to.json")));
+                .andExpect(content().string(equalToIgnoringCase(mapper.writeValueAsString(userTO))));
     }
 
     @Test
