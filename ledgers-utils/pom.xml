@@ -5,7 +5,7 @@
     <parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers</artifactId>
-		<version>4.10</version>
+		<version>4.11</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -14,7 +14,6 @@
 
 	<properties>
 		<ruleset.basedir>..</ruleset.basedir>
-        <guava.version>29.0-jre</guava.version>
     </properties>
 
 	<dependencies>

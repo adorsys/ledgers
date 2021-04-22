@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.EMAIL;
-import static de.adorsys.ledgers.um.api.domain.ScaUserDataBO.checkAndUpdateValidity;
 
 @Slf4j
 @Service
@@ -53,8 +52,14 @@ public class ScaUserDataServiceImpl implements ScaUserDataService {
 
     @Override
     public void ifScaChangedEmailNotValid(List<ScaUserDataBO> oldScaData, List<ScaUserDataBO> newScaData) {
-        oldScaData.stream()
-                .filter(e -> e.getScaMethod() == EMAIL)
-                .forEach(o -> checkAndUpdateValidity(o, newScaData));
+        oldScaData.forEach(scaData -> newScaData.stream()
+                                              .filter(n -> n.getScaMethod() == EMAIL)
+                                              .filter(n -> n.getId().equals(scaData.getId()))
+                                              .findFirst()
+                                              .ifPresent(n -> {
+                                                  if (!n.getMethodValue().equals(scaData.getMethodValue())) {
+                                                      n.setValid(false);
+                                                  }
+                                              }));
     }
 }

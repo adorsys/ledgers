@@ -101,7 +101,7 @@ public class MiddlewareUserManagementServiceImpl implements MiddlewareUserManage
     public void updateAccountAccess(ScaInfoTO scaInfo, String userId, AccountAccessTO access) {
         UserTO user = findById(userId);
         DepositAccountBO account = depositAccountService.getAccountById(access.getAccountId());
-        accessService.updateAccountAccessNewAccount(account, userTOMapper.toUserBO(user), access.getScaWeight());
+        accessService.updateAccountAccessNewAccount(account, userTOMapper.toUserBO(user), access.getScaWeight(),access.getAccessType());
     }
 
     @Override

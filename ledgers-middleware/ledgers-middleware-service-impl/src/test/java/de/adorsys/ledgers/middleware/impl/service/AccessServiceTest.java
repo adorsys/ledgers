@@ -5,6 +5,7 @@ import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
@@ -57,7 +58,7 @@ class AccessServiceTest {
         UserBO initialUser = getUserBO(new ArrayList<>(), USER_LOGIN, null);
 
         // When
-        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100);
+        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100, AccessTypeTO.OWNER);
 
         ArgumentCaptor<List<AccountAccessBO>> captor = ArgumentCaptor.forClass(List.class);
         verify(userService, times(1)).updateAccountAccess(any(), captor.capture());
@@ -74,7 +75,7 @@ class AccessServiceTest {
         UserBO initialUser = getUserBO(new ArrayList<>(singletonList(getAccessBO(ACCOUNT_ID, IBAN, EUR, 50))), USER_LOGIN, null);
 
         // When
-        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100);
+        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100,AccessTypeTO.DISPOSE);
 
         ArgumentCaptor<List<AccountAccessBO>> captor = ArgumentCaptor.forClass(List.class);
 
@@ -82,7 +83,9 @@ class AccessServiceTest {
         verify(userService, times(1)).updateAccountAccess(any(), captor.capture());
         List<List<AccountAccessBO>> values = captor.getAllValues();
         assertEquals(1, values.iterator().next().size());
-        assertThat(captor.getValue()).containsExactlyInAnyOrder(getAccessBO(ACCOUNT_ID, IBAN, EUR, 100));
+        AccountAccessBO accessBO = getAccessBO(ACCOUNT_ID, IBAN, EUR, 100);
+        accessBO.setAccessType(AccessTypeBO.DISPOSE);
+        assertThat(captor.getValue()).containsExactlyInAnyOrder(accessBO);
     }
 
     @Test
@@ -94,7 +97,7 @@ class AccessServiceTest {
         when(userService.findById(eq(TPP_LOGIN))).thenReturn(tppUser);
 
         // When
-        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100);
+        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100,AccessTypeTO.OWNER);
 
         ArgumentCaptor<List<AccountAccessBO>> captor = ArgumentCaptor.forClass(List.class);
         verify(userService, times(2)).updateAccountAccess(any(), captor.capture());

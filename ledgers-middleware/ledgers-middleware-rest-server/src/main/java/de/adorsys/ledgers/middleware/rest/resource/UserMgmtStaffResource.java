@@ -86,6 +86,14 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
+    @PreAuthorize("hasRole('SYSTEM')")
+    public ResponseEntity<List<String>> getBranchUserLoginsByBranchId(String branchId) {
+        UserTO branchStaff = middlewareUserService.findById(branchId);
+        List<String> users = middlewareUserService.getBranchUserLogins(branchStaff.getBranch());
+        return ResponseEntity.ok(users);
+    }
+
+    @Override
     @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<UserTO> getBranchUserById(String userId) {
         UserTO user = middlewareUserService.findById(userId);

@@ -10,8 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import java.time.LocalDateTime;
 import java.util.Currency;
 
-import static de.adorsys.ledgers.um.api.domain.AccessTypeBO.OWNER;
-
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -30,8 +28,8 @@ public class AccountAccessBO {
         this.accessType = accessType;
     }
 
-    public AccountAccessBO(String accNbr, Currency currency, String accountId, int scaWeight) {
-        this.accessType = OWNER;
+    public AccountAccessBO(String accNbr, Currency currency, String accountId, int scaWeight, @NotNull AccessTypeBO accessType) {
+        this.accessType = accessType;
         this.iban = accNbr;
         this.currency = currency;
         this.accountId = accountId;

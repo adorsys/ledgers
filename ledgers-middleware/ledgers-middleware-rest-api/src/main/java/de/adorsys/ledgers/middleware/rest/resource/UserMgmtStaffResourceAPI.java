@@ -113,6 +113,23 @@ public interface UserMgmtStaffResourceAPI {
     ResponseEntity<List<String>> getBranchUserLogins();
 
     /**
+     * Get list of user logins for the given branch.
+     *
+     * @return list of user logins.
+     */
+    @Operation(summary = "List user logins by branchId",
+            description = "List user logins by branchId.")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserTO.class)), description = "Success. List of logins received."),
+            @ApiResponse(responseCode = "401", description = "Wrong authentication credential."),
+            @ApiResponse(responseCode = "403", description = "Authenticated but user does not have the requested role.")
+    })
+    @GetMapping("/logins/{branchId}")
+    ResponseEntity<List<String>> getBranchUserLoginsByBranchId(@PathVariable(BRANCH_ID) String branchId);
+
+    /**
      * Gets user by ID if it's within the branch
      *
      * @param userId user ID

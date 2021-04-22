@@ -2,7 +2,9 @@ package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
+import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -32,9 +34,10 @@ public class AccessService {
     private boolean multilevelScaEnable;
 
     @SuppressWarnings("PMD.AvoidReassigningParameters")
-    public void updateAccountAccessNewAccount(DepositAccountBO createdAccount, UserBO user, Integer scaWeight) {
+    public void updateAccountAccessNewAccount(DepositAccountBO createdAccount, UserBO user, Integer scaWeight, AccessTypeTO accessType) {
+        accessType = Optional.ofNullable(accessType).orElse(AccessTypeTO.OWNER);
         scaWeight = Optional.ofNullable(scaWeight).orElse(finalWeight);
-        AccountAccessBO accountAccess = new AccountAccessBO(createdAccount.getIban(), createdAccount.getCurrency(), createdAccount.getId(), scaWeight);
+        AccountAccessBO accountAccess = new AccountAccessBO(createdAccount.getIban(), createdAccount.getCurrency(), createdAccount.getId(), scaWeight, AccessTypeBO.valueOf(accessType.name()));
         updateAccountAccess(user, accountAccess);
         //Check account is created for a User who is part of a Branch and if so add access to the branch
         if (StringUtils.isNotBlank(user.getBranch())) {
