@@ -95,7 +95,7 @@
 		<java.version>11</java.version>
 		<pmd.plugin.version>3.13.0</pmd.plugin.version>
 		<apache.commons.collections>4.3</apache.commons.collections>
-		<apache.commons.io>2.6</apache.commons.io>
+		<apache.commons.io>2.7</apache.commons.io>
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
 		<dbunit.version>2.5.1</dbunit.version>
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
