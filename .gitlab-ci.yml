@@ -124,7 +124,7 @@ Lint:Ledgers_yaml_json_xml:
     - master
   script:
     - apt-get update && apt-get install jsonlint yamllint libxml2-utils make curl -yq && ln -s /usr/bin/jsonlint-php /usr/bin/jsonlint
-    - echo "Run OBA backend lint"
+    - echo "Run Ledgers backend lint"
     - find ./ -type f -name "*.json" -exec jsonlint -q {} \; # lint all json
 # commented cause get many small errors for yaml with spaces empty lines and etc
 #    - find ./ -type f \( -name "*.yml" -o -name "*.yaml" \) -exec yamllint -d "{extends: relaxed, rules: {line-length: {max: 160}}}" {} \;
