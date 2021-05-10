@@ -16,7 +16,12 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.middleware.api.domain.account.*;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountBalanceTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AccountIdentifierTypeTO;
+import de.adorsys.ledgers.middleware.api.domain.account.AdditionalAccountInformationTO;
+import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
+import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,7 +37,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import static de.adorsys.ledgers.middleware.rest.utils.Constants.*;
 
 @Tag(name = "LDG003 - Accounts", description = "Provides access to a deposit account. This interface does not provide any endpoint to list all accounts.")

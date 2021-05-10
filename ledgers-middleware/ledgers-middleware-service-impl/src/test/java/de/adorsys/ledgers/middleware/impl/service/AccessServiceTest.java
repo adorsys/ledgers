@@ -93,25 +93,21 @@ class AccessServiceTest {
         // Given
         FieldSetter.setField(service, service.getClass().getDeclaredField("finalWeight"), 100);
         UserBO initialUser = getUserBO(new ArrayList<>(), USER_LOGIN, TPP_LOGIN);
-        UserBO tppUser = getUserBO(new ArrayList<>(singletonList(getAccessBO("1", IBAN, USD, 100))), TPP_LOGIN, null);
-        when(userService.findById(eq(TPP_LOGIN))).thenReturn(tppUser);
 
         // When
         service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100,AccessTypeTO.OWNER);
 
         ArgumentCaptor<List<AccountAccessBO>> captor = ArgumentCaptor.forClass(List.class);
-        verify(userService, times(2)).updateAccountAccess(any(), captor.capture());
+        verify(userService, times(1)).updateAccountAccess(any(), captor.capture());
         List<List<AccountAccessBO>> values = captor.getAllValues();
 
         // Then
-        assertEquals(2, values.size());
+        assertEquals(1, values.size());
 
         assertEquals(1, values.get(0).size());
         assertThat(values.get(0)).containsExactlyInAnyOrder(getAccessBO(ACCOUNT_ID, IBAN, EUR, 100));
 
-        assertEquals(2, values.get(1).size());
-        assertThat(values.get(1)).containsExactlyInAnyOrder(getAccessBO(ACCOUNT_ID, IBAN, EUR, 100), getAccessBO("1", IBAN, USD, 100));
-    }
+           }
 
     @Test
     void exchangeTokenStartSca_required() {
