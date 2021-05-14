@@ -1,0 +1,14 @@
+{
+  "userId": "kjk345knkj45",
+  "tppId": "DFGFHGJKJ-SADF-324",
+  "frequencyPerDay": 4,
+  "validUntil": "2025-12-12",
+  "recurringIndicator": false,
+  "access": {
+    "iban": "DE91100000000123456789",
+    "currency": "UAH",
+    "accessType": "OWNER",
+    "scaWeight": "90",
+    "accountId": "account-id"
+  }
+}
