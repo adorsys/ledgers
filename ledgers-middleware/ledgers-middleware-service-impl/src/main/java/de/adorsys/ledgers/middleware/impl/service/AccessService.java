@@ -9,6 +9,7 @@ import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,11 @@ public class AccessService {
         scaWeight = Optional.ofNullable(scaWeight).orElse(finalWeight);
         AccountAccessBO accountAccess = new AccountAccessBO(createdAccount.getIban(), createdAccount.getCurrency(), createdAccount.getId(), scaWeight, AccessTypeBO.valueOf(accessType.name()));
         updateAccountAccess(user, accountAccess);
-
+        //Check account is created for a User who is part of a Branch and if so add access to the branch
+        if (StringUtils.isNotBlank(user.getBranch())) {
+            UserBO branch = userService.findById(user.getBranch());
+            updateAccountAccess(branch, accountAccess.setWeight(finalWeight));
+        }
     }
 
     private void updateAccountAccess(UserBO user, AccountAccessBO access) {
