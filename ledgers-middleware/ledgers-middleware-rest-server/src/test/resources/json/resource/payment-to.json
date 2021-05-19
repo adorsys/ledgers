@@ -1,0 +1,13 @@
+{
+  "debtorAccount": {
+    "iban": "DE91100000000123456789",
+    "bban": "bban",
+    "pan": "pan",
+    "maskedPan": "maskedPan",
+    "msisdn": "msisdn",
+    "currency": "EUR"
+  },
+  "paymentProduct": "SEPA",
+  "requestedExecutionDate": "2018-12-12T00:00:00.000Z",
+  "requestedExecutionTime": "12:00:00"
+}

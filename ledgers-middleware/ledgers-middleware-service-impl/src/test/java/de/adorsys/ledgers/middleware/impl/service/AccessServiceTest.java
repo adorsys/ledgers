@@ -75,7 +75,7 @@ class AccessServiceTest {
         UserBO initialUser = getUserBO(new ArrayList<>(singletonList(getAccessBO(ACCOUNT_ID, IBAN, EUR, 50))), USER_LOGIN, null);
 
         // When
-        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100,AccessTypeTO.DISPOSE);
+        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100, AccessTypeTO.DISPOSE);
 
         ArgumentCaptor<List<AccountAccessBO>> captor = ArgumentCaptor.forClass(List.class);
 
@@ -97,7 +97,7 @@ class AccessServiceTest {
         when(userService.findById(eq(TPP_LOGIN))).thenReturn(tppUser);
 
         // When
-        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100,AccessTypeTO.OWNER);
+        service.updateAccountAccessNewAccount(getDepostAccountBO(), initialUser, 100, AccessTypeTO.OWNER);
 
         ArgumentCaptor<List<AccountAccessBO>> captor = ArgumentCaptor.forClass(List.class);
         verify(userService, times(2)).updateAccountAccess(any(), captor.capture());

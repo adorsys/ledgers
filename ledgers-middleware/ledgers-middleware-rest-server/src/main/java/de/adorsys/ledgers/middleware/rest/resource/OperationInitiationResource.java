@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @MiddlewareUserResource
 @RequiredArgsConstructor
-@RequestMapping(PaymentRestAPI.BASE_PATH)
+@RequestMapping(OperationInitiationRestApi.BASE_PATH)
 public class OperationInitiationResource implements OperationInitiationRestApi {
     private final OperationService operationService;
     private final ScaInfoHolder scaInfoHolder;
