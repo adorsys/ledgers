@@ -13,4 +13,5 @@ import java.util.List;
 public class AccountReportTO {
     private AccountDetailsTO details;
     private List<UserTO> usersAccessingAccount;
+    private boolean multilevelScaEnabled;
 }

@@ -78,6 +78,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private int fullTokenLifeTime;
     @Value("${ledgers.sca.final.weight:100}")
     private int finalWeight;
+    @Value("${ledgers.sca.multilevel.enabled:false}")
+    private boolean multilevelScaEnable;
 
     @Override
     public List<AccountDetailsTO> getAccountsByIbanAndCurrency(String iban, String currency) {
@@ -227,7 +229,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         start = System.nanoTime();
         List<UserTO> users = userMapper.toUserTOList(userService.findUsersByIban(details.getIban()));
         log.info("Loaded users in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
-        return new AccountReportTO(details, users);
+        return new AccountReportTO(details, users, multilevelScaEnable);
     }
 
     @Override
