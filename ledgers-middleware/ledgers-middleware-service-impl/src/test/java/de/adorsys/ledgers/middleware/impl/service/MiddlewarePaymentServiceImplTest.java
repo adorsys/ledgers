@@ -17,10 +17,9 @@ import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
-import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicyHelper;
 import de.adorsys.ledgers.middleware.impl.sca.AbstractScaChallengeData;
 import de.adorsys.ledgers.middleware.impl.sca.EmailScaChallengeData;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -72,8 +71,6 @@ class MiddlewarePaymentServiceImplTest {
     @Mock
     private SCAUtils scaUtils;
     @Mock
-    private PaymentCoreDataPolicy coreDataPolicy;
-    @Mock
     private AccessService accessService;
     @Mock
     private ScaResponseResolver scaResponseResolver;
@@ -81,10 +78,11 @@ class MiddlewarePaymentServiceImplTest {
     private PaymentValidatorService validatorChain;
     @Mock
     private PageMapper pageMapper;
+    @Mock
+    private PsuMessageResolver messageResolver;
 
     private final ScaResponseResolver localResolver = new ScaResponseResolver(scaUtils, new ScaChallengeDataResolverImpl<AbstractScaChallengeData>(Collections.singletonList(new EmailScaChallengeData())), Mappers.getMapper(UserMapper.class));
 
-    private final PaymentConverter pmtMapper = Mappers.getMapper(PaymentConverter.class);
     private static final PaymentTO PAYMENT_TO = readYml(PaymentTO.class, SINGLE_BO);
     private static final PaymentBO PAYMENT_BO = readYml(PaymentBO.class, SINGLE_BO);
     private static final ScaInfoTO SCA_INFO_TO = buildScaInfoTO();
@@ -156,12 +154,32 @@ class MiddlewarePaymentServiceImplTest {
         DepositAccountBO account = getAccountBO(paymentBO);
 
         UserBO userBO = readYml(UserBO.class, "user1.yml");
+        userBO.setScaUserData(Collections.emptyList());
         when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
-        when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(accessService.exchangeTokenStartSca(anyBoolean(), any())).thenReturn(new BearerTokenTO());
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
         when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
-        when(paymentService.initiatePayment(any(), any())).thenReturn(paymentBO);
+        when(paymentService.initiatePayment(paymentBO, TransactionStatusBO.ACTC)).thenReturn(paymentBO);
+
+        // When
+        Object result = middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO);
+
+        // Then
+        assertNotNull(result);
+    }
+
+    @Test
+    void initiatePayment_hasSca() {
+        // Given
+        PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+        DepositAccountBO account = getAccountBO(paymentBO);
+
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
+        when(accessService.exchangeTokenStartSca(anyBoolean(), any())).thenReturn(new BearerTokenTO());
+        when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
+        when(paymentConverter.toPaymentBO(any(PaymentTO.class))).thenReturn(paymentBO);
+        when(paymentService.initiatePayment(paymentBO, TransactionStatusBO.ACCP)).thenReturn(paymentBO);
 
         // When
         Object result = middlewareService.initiatePayment(SCA_INFO_TO, PAYMENT_TO);
@@ -182,7 +200,6 @@ class MiddlewarePaymentServiceImplTest {
         // Given
         PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
-        when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
         when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.PAYMENT)).thenReturn(Boolean.TRUE);
         UserBO userBO = readYml(UserBO.class, "user1.yml");
         when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
@@ -197,6 +214,24 @@ class MiddlewarePaymentServiceImplTest {
     }
 
     @Test
+    void executePaymentCancellation_Success() {
+        // Given
+        PaymentBO paymentBO = readYml(PaymentBO.class, SINGLE_BO);
+        when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentBO);
+        when(operationService.authenticationCompleted(PAYMENT_ID, OpTypeBO.CANCEL_PAYMENT)).thenReturn(Boolean.TRUE);
+        UserBO userBO = readYml(UserBO.class, "user1.yml");
+        when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
+        when(paymentService.cancelPayment(PAYMENT_ID)).thenReturn(TransactionStatusBO.CANC);
+        when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
+
+        // When
+        SCAPaymentResponseTO scaPaymentResponseTO = middlewareService.authorizeCancelPayment(SCA_INFO_TO, PAYMENT_ID);
+
+        // Then
+        assertNotNull(scaPaymentResponseTO);
+    }
+
+    @Test
     void initiatePaymentCancellation() {
         // Given
         UserBO userBO = readYml(UserBO.class, "user1.yml");
@@ -204,7 +239,6 @@ class MiddlewarePaymentServiceImplTest {
         when(paymentService.getPaymentById(any())).thenReturn(paymentBO);
         when(scaUtils.userBO(USER_LOGIN)).thenReturn(userBO);
         when(scaResponseResolver.updatePaymentRelatedResponseFields(any(), any())).thenAnswer(i -> localResolver.updatePaymentRelatedResponseFields((SCAPaymentResponseTO) i.getArguments()[0], (PaymentBO) i.getArguments()[1]));
-        when(coreDataPolicy.getPaymentCoreData(any(), eq(paymentBO))).thenReturn(PaymentCoreDataPolicyHelper.getPaymentCoreDataInternal(paymentBO));
 
         // When
         SCAPaymentResponseTO initiatePaymentCancellation = middlewareService.initiatePaymentCancellation(SCA_INFO_TO, PAYMENT_ID);

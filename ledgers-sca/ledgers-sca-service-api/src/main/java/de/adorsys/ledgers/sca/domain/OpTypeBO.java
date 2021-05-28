@@ -1,5 +1,5 @@
 package de.adorsys.ledgers.sca.domain;
 
 public enum OpTypeBO {
-    CONSENT, PAYMENT, CANCEL_PAYMENT;
+    CONSENT, PAYMENT, CANCEL_PAYMENT, PIIS_CONSENT
 }

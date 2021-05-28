@@ -20,6 +20,7 @@ import de.adorsys.ledgers.middleware.impl.config.PaymentValidatorService;
 import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -61,6 +62,8 @@ class OperationServiceImplTest {
     private SCAOperationService scaOperationService;
     @Mock
     private PaymentValidatorService validatorChain;
+    @Mock
+    private PsuMessageResolver messageResolver;
 
     @Test
     void resolveInitiation_pmt() {

@@ -68,7 +68,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
     private final AuthCodeGenerator authCodeGenerator;
     private final SCAOperationMapper scaOperationMapper;
     private final List<SCASender<? extends ScaMessage>> sendersList;
-    private final ScaMessageResolver<?> messageResolver;
+    private final ScaMessageResolver<?> otpMessageResolver;
     private final ScaOperationValidationService validationService;
     private Map<ScaMethodTypeBO, SCASender> senders = new EnumMap<>(ScaMethodTypeBO.class);
     private HashGenerator hashGenerator = new HashGeneratorImpl();
@@ -111,8 +111,8 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
 
         repository.save(scaOperation);
         if (scaUserData.getScaMethod() != ScaMethodTypeBO.EMAIL || scaUserData.isEmailValid()) {
-            ScaMessage message = messageResolver.resolveMessage(data, scaUserData, tan);
-            senders.get(scaUserData.getScaMethod()).send(message);
+            ScaMessage userMessage = otpMessageResolver.resolveMessage(data, scaUserData, tan);
+            senders.get(scaUserData.getScaMethod()).send(userMessage);
             //TODO Implement a queue to be able to deliver messages failed for some reason! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/837
         }
         SCAOperationBO scaOperationBO = scaOperationMapper.toBO(scaOperation);

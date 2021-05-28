@@ -42,5 +42,5 @@ public interface ConsentRestAPI {
     @Operation(summary = "Generate a consent token for CiF", description = "Generate a consent token for CiF. There is no sca process need as we assume the caller is fully authenticated.")
     @SecurityRequirement(name = API_KEY)
     @SecurityRequirement(name = OAUTH2)
-    ResponseEntity<SCAConsentResponseTO> grantPIISConsent(@RequestBody AisConsentTO piisConsent);
+    ResponseEntity<SCAConsentResponseTO> initiatePiisConsent(@RequestBody AisConsentTO piisConsent);
 }
