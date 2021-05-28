@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
@@ -426,6 +427,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void getAccountReport() {
         // Given
+        ReflectionTestUtils.setField(middlewareService, "multilevelScaEnable", true);
         when(userMapper.toUserTOList(any())).thenReturn(Collections.singletonList(buildUserTO()));
         when(userService.findUsersByIban(any())).thenReturn(Collections.singletonList(buildUserBO()));
         when(depositAccountService.getAccountDetailsById(any(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
@@ -436,6 +438,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
+        assertThat(result.isMultilevelScaEnabled()).isEqualTo(true);
         verify(userMapper, times(1)).toUserTOList(Collections.singletonList(buildUserBO()));
         verify(accountDetailsMapper, times(1)).toAccountDetailsTO(getDepositAccountDetailsBO());
 
