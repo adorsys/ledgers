@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.impl.service;
 
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.middleware.api.domain.general.StepOperation;
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
@@ -11,6 +12,7 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseConverter;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.domain.*;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.BearerTokenBO;
@@ -35,9 +37,9 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
     private final DepositAccountPaymentService paymentService;
     private final SCAOperationService scaOperationService;
     private final ScaResponseConverter scaResponseConverter;
-    private final ScaResponseMessageResolver messageResolver;
     private final AccessService accessService;
     private final BearerTokenMapper bearerTokenMapper;
+    private final PsuMessageResolver messageResolver;
 
     @Override
     public GlobalScaResponseTO startScaOperation(StartScaOprTO scaOpr, ScaInfoTO scaInfo) {
@@ -56,31 +58,29 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
                                                      opType, scaOpr.getAuthorisationId(), scaWeight);
         SCAOperationBO operation = scaOperationService.checkIfExistsOrNew(codeData);
 
-        try {
-            String message = messageResolver.updateMessage("", operation);
-            BearerTokenBO bearerToken = bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken());
-            return scaResponseConverter.mapResponse(operation, user.getScaUserData(), message, bearerToken, scaWeight, null);
-        } catch (MiddlewareModuleException e) {
-            throw scaOperationService.updateFailedCount(operation.getId(), true);
-        }
+        String psuMessage = messageResolver.message(StepOperation.START_SCA, operation);
+        BearerTokenBO bearerToken = bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken());
+        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), psuMessage, bearerToken, scaWeight, null);
     }
 
     @Override
     public GlobalScaResponseTO getMethods(String authorizationId, ScaInfoTO scaInfo) {
         UserBO user = userService.findByLogin(scaInfo.getUserLogin());
         SCAOperationBO operation = scaOperationService.loadAuthCode(authorizationId);
-        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage("", operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), 0, null);
+        String psuMessage = messageResolver.message(StepOperation.GET_SCA_METHODS, operation);
+        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), psuMessage, bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), 0, null);
     }
 
     @Override
     public GlobalScaResponseTO selectMethod(ScaInfoTO scaInfo) {
         SCAOperationBO operation = scaOperationService.loadAuthCode(scaInfo.getAuthorisationId());
         UserBO user = userService.findByLogin(scaInfo.getUserLogin());
-        String psuMessage = "";
         int scaWeight = resolveWeightForOperation(operation.getOpType(), operation.getOpId(), user);
-        AuthCodeDataBO data = new AuthCodeDataBO(user.getLogin(), scaInfo.getScaMethodId(), operation.getOpId(), null, psuMessage, authCodeLifetime, operation.getOpType(), operation.getId(), scaWeight);
+        AuthCodeDataBO data = new AuthCodeDataBO(user.getLogin(), scaInfo.getScaMethodId(), operation.getOpId(),
+                                                 null, "", authCodeLifetime, operation.getOpType(), operation.getId(), scaWeight);
         operation = scaOperationService.generateAuthCode(data, user, ScaStatusBO.SCAMETHODSELECTED);
-        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(psuMessage, operation), bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), scaWeight, null);
+        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.message(StepOperation.SELECT_SCA_METHOD, operation),
+                                                bearerTokenMapper.toBearerTokenBO(scaInfo.getBearerToken()), scaWeight, null);
     }
 
     @Override
@@ -89,13 +89,13 @@ public class MiddlewareRedirectScaServiceImpl implements MiddlewareRedirectScaSe
         UserBO user = userService.findByLogin(scaInfo.getUserLogin());
 
         int scaWeight = resolveWeightForOperation(operation.getOpType(), operation.getOpId(), user);
-        String psuMessage = messageResolver.getTemplate(operation);
         ScaValidationBO scaValidation = scaOperationService.validateAuthCode(scaInfo.getAuthorisationId(), operation.getOpId(), scaInfo.getAuthCode(), scaWeight);
         operation.setScaStatus(scaValidation.getScaStatus());
         boolean authenticationCompleted = scaOperationService.authenticationCompleted(operation.getOpId(), operation.getOpType());
 
+        String psuMessage = messageResolver.message(StepOperation.CONFIRM_AUTH_CODE, operation);
         BearerTokenTO exchangeToken = accessService.exchangeTokenEndSca(authenticationCompleted, scaInfo.getAccessToken());
-        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), messageResolver.updateMessage(psuMessage, operation), bearerTokenMapper.toBearerTokenBO(exchangeToken), scaWeight, scaValidation.getAuthConfirmationCode());
+        return scaResponseConverter.mapResponse(operation, user.getScaUserData(), psuMessage, bearerTokenMapper.toBearerTokenBO(exchangeToken), scaWeight, scaValidation.getAuthConfirmationCode());
     }
 
     @Override

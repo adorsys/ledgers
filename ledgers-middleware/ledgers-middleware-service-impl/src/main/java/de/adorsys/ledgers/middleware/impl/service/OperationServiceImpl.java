@@ -3,6 +3,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
+import de.adorsys.ledgers.middleware.api.domain.general.StepOperation;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
@@ -19,7 +20,9 @@ import de.adorsys.ledgers.middleware.impl.converter.AisConsentBOMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
+import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -40,7 +43,7 @@ import static de.adorsys.ledgers.middleware.api.domain.sca.OpTypeTO.PAYMENT;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class OperationServiceImpl implements OperationService { //TODO Requires a new messageResolver https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/893
+public class OperationServiceImpl implements OperationService {
     private final DepositAccountPaymentService paymentService;
     private final PaymentConverter paymentConverter;
     private final SCAUtils scaUtils;
@@ -50,6 +53,7 @@ public class OperationServiceImpl implements OperationService { //TODO Requires 
     private final AisConsentBOMapper aisConsentMapper;
     private final SCAOperationService scaOperationService;
     private final PaymentValidatorService paymentValidator;
+    private final PsuMessageResolver messageResolver;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -122,15 +126,14 @@ public class OperationServiceImpl implements OperationService { //TODO Requires 
         return user.resolveWeightForAccount(payment.getAccountId());
     }
 
-    @SuppressWarnings("java:S3358")
     private GlobalScaResponseTO resolveBasicResponse(boolean isFinal, OpTypeTO opType, UserBO user, ScaInfoTO scaInfo) {
-        boolean isScaRequired = !isFinal && user.hasSCA();
-        String psuMessage = null; //TODO new messageResolver
-        BearerTokenTO token = isFinal ? null
-                                      : accessService.exchangeTokenStartSca(isScaRequired, scaInfo.getAccessToken());
-        ScaStatusTO scaStatus = isFinal ? ScaStatusTO.FINALISED
-                                        : isScaRequired ? ScaStatusTO.PSUAUTHENTICATED : ScaStatusTO.EXEMPTED;
-
+        String psuMessage = messageResolver.message(StepOperation.INITIATION, new SCAOperationBO());
+        if (isFinal) {
+            return new GlobalScaResponseTO(opType, null, ScaStatusTO.FINALISED, userMapper.toScaUserDataListTO(user.getScaUserData()), psuMessage);
+        }
+        boolean isScaRequired = user.hasSCA();
+        BearerTokenTO token = accessService.exchangeTokenStartSca(isScaRequired, scaInfo.getAccessToken());
+        ScaStatusTO scaStatus = isScaRequired ? ScaStatusTO.PSUAUTHENTICATED : ScaStatusTO.EXEMPTED;
         return new GlobalScaResponseTO(opType, token, scaStatus, userMapper.toScaUserDataListTO(user.getScaUserData()), psuMessage);
     }
 }
