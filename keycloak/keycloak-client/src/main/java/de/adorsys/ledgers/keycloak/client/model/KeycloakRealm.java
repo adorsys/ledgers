@@ -35,7 +35,7 @@ public class KeycloakRealm {
     private boolean loginWithEmailAllowed = true;
     private boolean duplicateEmailsAllowed = false;
     private boolean resetPasswordAllowed = true;
-    private boolean editUsernameAllowed = false;
+    private boolean editUsernameAllowed = true;
 
     private Map<String, String> smtpServer;
 
