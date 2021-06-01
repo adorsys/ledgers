@@ -8,8 +8,11 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
+import de.adorsys.ledgers.middleware.api.domain.um.AccountAccessTO;
+import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.CurrencyService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,23 +33,43 @@ public class TestDataAccountService {
     private final DepositAccountTransactionService transactionService;
     private final CurrencyService currencyService;
     private final MiddlewareAccountManagementService accountManagementService;
-
+    private final MiddlewareUserManagementService middlewareUserService;
     public void createAccounts() {
         for (AccountDetailsTO details : mockbankInitData.getAccounts()) {
             if (!currencyService.isCurrencyValid(details.getCurrency())) {
                 throw new IllegalArgumentException("Currency is not supported: " + details.getCurrency());
             }
-            DepositAccountDetailsBO account;
+            String userId = mockbankInitData.getUserIdByIban(details.getIban());
+            ScaInfoTO scaInfoTO = new ScaInfoTO();
             try {
-                String userId = mockbankInitData.getUserIdByIban(details.getIban());
                 details.setCreditLimit(BigDecimal.ZERO);
-                accountManagementService.createDepositAccount(userId, new ScaInfoTO(), details);
-            } catch (DepositModuleException e) {
+                accountManagementService.createDepositAccount(userId, scaInfoTO, details);
+
+            } catch (DepositModuleException | MiddlewareModuleException e) {
                 log.info("Account {} already exists, skip creation", details.getIban());
+            } finally {
+                DepositAccountDetailsBO account = depositAccountService.getAccountDetailsByIbanAndCurrency(details.getIban(), details.getCurrency(), LocalDateTime.now(), true);
+                mockbankInitData.getUserIdByIban(details.getIban(), userId)
+                        .forEach(id -> {
+                            mockbankInitData.getAccountAccess(details.getIban(), id)
+                                    .ifPresent(accountAccessTO -> {
+                                        updateAccountAccess(accountAccessTO, scaInfoTO, account, id);
+                                    });
+                        });
+                updateBalanceIfRequired(details, account);
             }
-            account = depositAccountService.getAccountDetailsByIbanAndCurrency(details.getIban(), details.getCurrency(), LocalDateTime.now(), true);
-            updateBalanceIfRequired(details, account);
         }
+    }
+
+    private void updateAccountAccess(AccountAccessTO accessTO, ScaInfoTO scaInfoTO, DepositAccountDetailsBO account, String id) {
+        try {
+            accessTO.setAccountId(account.getAccount().getId());
+            log.info("update access {} for userId {}", accessTO, id);
+            middlewareUserService.updateAccountAccess(scaInfoTO, id, accessTO);
+        } catch (DepositModuleException | MiddlewareModuleException e) {
+            log.error(e.getMessage());
+        }
+
     }
 
     private void updateBalanceIfRequired(AccountDetailsTO details, DepositAccountDetailsBO account) {
