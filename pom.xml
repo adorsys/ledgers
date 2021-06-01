@@ -113,7 +113,7 @@
 		<guava.version>30.1.1-jre</guava.version>
 
 		<powermock.version>2.0.5</powermock.version>
-		<commons-validator.version>1.6</commons-validator.version>
+		<commons-validator.version>1.7</commons-validator.version>
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<slf4j.version>1.7.25</slf4j.version>
