@@ -60,7 +60,7 @@ public class MockbankInitData extends BalancesData {
     @JsonIgnore
     public Optional<AccountAccessTO> getAccountAccess(String iban, String userId) {
         return users.stream()
-                .filter(u -> !u.getId().equals(userId))
+                .filter(u -> u.getId().equals(userId))
                 .filter(u -> u.hasAccessToAccountWithIban(iban))
                 .flatMap(u -> u.getAccountAccesses().stream())
                 .filter(a -> a.getIban().equals(iban))
