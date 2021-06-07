@@ -33,30 +33,4 @@ public class PaymentCoreDataTO {
     private boolean cancellation;
 
     private String paymentProduct;
-
-    public String getTanTemplate() {
-        return getTemplate(false);
-    }
-
-    public String getExemptedTemplate() {
-        return getTemplate(true);
-    }
-
-    private String getTemplate(boolean isExempted) {
-        String paymentTyp = cancellation
-                                    ? ""
-                                    : paymentType;
-        String operationType = cancellation
-                                       ? "Payment Cancellation"
-                                       : "Payment";
-        return isExempted
-                       ? String.format(EXEMPTED_MESSAGE_TEMPLATE, paymentTyp, operationType, paymentId)
-                       : String.format(TAN_MESSAGE_TEMPLATE, paymentTyp, operationType, paymentId) + "%s";
-    }
-
-    public String resolveMessage(boolean isScaRequired) {
-        return isScaRequired
-                       ? this.getTanTemplate()
-                       : this.getExemptedTemplate();
-    }
 }

@@ -113,14 +113,14 @@ public interface MiddlewareAccountManagementService {
     SCAConsentResponseTO startAisConsent(ScaInfoTO scaInfoTO, String consentId, AisConsentTO aisConsent);
 
     /**
-     * Provide a third party provider with necessary permission to read accounts and
+     * Provides a third party provider with necessary permission to read accounts and
      * transaction information for the specified account.
      *
      * @param scaInfoTO  : SCA information
      * @param aisConsent : the consent details
      * @return the corresponding access token describing the account access
      */
-    SCAConsentResponseTO grantPIISConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent);
+    SCAConsentResponseTO startPiisConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent);
 
     Set<String> getAccountsFromConsent(String consentId);
 

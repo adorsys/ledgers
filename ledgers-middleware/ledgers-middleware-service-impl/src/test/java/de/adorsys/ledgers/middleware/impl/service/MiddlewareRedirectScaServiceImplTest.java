@@ -10,11 +10,13 @@ import de.adorsys.ledgers.middleware.api.exception.MiddlewareErrorCode;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.BearerTokenMapper;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseConverter;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.domain.SCAOperationBO;
 import de.adorsys.ledgers.sca.domain.ScaStatusBO;
 import de.adorsys.ledgers.sca.domain.ScaValidationBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.AisConsentBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -25,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,11 +48,11 @@ class MiddlewareRedirectScaServiceImplTest {
     @Mock
     private ScaResponseConverter scaResponseConverter;
     @Mock
-    private ScaResponseMessageResolver messageResolver;
-    @Mock
     private AccessService accessService;
     @Mock
     private BearerTokenMapper bearerTokenMapper;
+    @Mock
+    private PsuMessageResolver messageResolver;
 
     private final UserBO user = getUser();
 
@@ -102,6 +105,28 @@ class MiddlewareRedirectScaServiceImplTest {
         assertNotNull(result);
         verify(scaOperationService, times(1)).loadAuthCode(any());
         verify(paymentService, times(1)).getPaymentById(any());
+        verify(scaOperationService, times(1)).generateAuthCode(any(), any(), eq(ScaStatusBO.SCAMETHODSELECTED));
+        verify(scaResponseConverter, times(1)).mapResponse(any(), any(), any(), any(), anyInt(), any());
+    }
+
+    @Test
+    void selectMethod_consent() {
+        SCAOperationBO scaOperationBO = new SCAOperationBO();
+        scaOperationBO.setOpType(OpTypeBO.CONSENT);
+        when(scaOperationService.loadAuthCode(any())).thenReturn(scaOperationBO);
+        when(userService.findByLogin(any())).thenReturn(user);
+        AisConsentBO aisConsentBO = new AisConsentBO() {
+            @Override
+            public Set<String> getUniqueIbans() {
+                return Set.of("123456789");
+            }
+        };
+        when(userService.loadConsent(any())).thenReturn(aisConsentBO);
+        when(scaResponseConverter.mapResponse(any(), any(), any(), any(), anyInt(), any())).thenReturn(new GlobalScaResponseTO());
+
+        GlobalScaResponseTO result = service.selectMethod(new ScaInfoTO());
+        assertNotNull(result);
+        verify(scaOperationService, times(1)).loadAuthCode(any());
         verify(scaOperationService, times(1)).generateAuthCode(any(), any(), eq(ScaStatusBO.SCAMETHODSELECTED));
         verify(scaResponseConverter, times(1)).mapResponse(any(), any(), any(), any(), anyInt(), any());
     }

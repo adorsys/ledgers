@@ -9,4 +9,6 @@ public interface KeycloakTokenService {
     BearerTokenTO exchangeToken(String oldToken, Integer timeToLive, String scope);
 
     BearerTokenTO validate(String token);
+
+    BearerTokenTO refreshToken(String refreshToken);
 }

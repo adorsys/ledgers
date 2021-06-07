@@ -20,7 +20,7 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountPaymentService;
-import de.adorsys.ledgers.middleware.api.domain.payment.PaymentCoreDataTO;
+import de.adorsys.ledgers.middleware.api.domain.general.StepOperation;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAPaymentResponseTO;
@@ -33,7 +33,7 @@ import de.adorsys.ledgers.middleware.impl.converter.PageMapper;
 import de.adorsys.ledgers.middleware.impl.converter.PaymentConverter;
 import de.adorsys.ledgers.middleware.impl.converter.ScaResponseResolver;
 import de.adorsys.ledgers.middleware.impl.policies.PaymentCancelPolicy;
-import de.adorsys.ledgers.middleware.impl.policies.PaymentCoreDataPolicy;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.sca.service.SCAOperationService;
 import de.adorsys.ledgers.um.api.domain.UserBO;
@@ -65,11 +65,11 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
     private final SCAOperationService scaOperationService;
     private final PaymentConverter paymentConverter;
     private final SCAUtils scaUtils;
-    private final PaymentCoreDataPolicy coreDataPolicy;
     private final AccessService accessService;
     private final ScaResponseResolver scaResponseResolver;
     private final PageMapper pageMapper;
     private final PaymentValidatorService paymentValidator;
+    private final PsuMessageResolver messageResolver;
 
     @Value("${ledgers.sca.multilevel.enabled:false}")
     private boolean multilevelScaEnable;
@@ -112,7 +112,7 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     private SCAPaymentResponseTO prepareScaAndResolveResponse(ScaInfoTO scaInfoTO, PaymentBO payment, UserBO user, OpTypeBO opType) {
         boolean isScaRequired = user.hasSCA();
-        String psuMessage = coreDataPolicy.getPaymentCoreData(opType, payment).resolveMessage(isScaRequired);
+        String psuMessage = messageResolver.message(StepOperation.INITIATE_OPERATION_OBJECT, opType, isScaRequired, payment);
         BearerTokenTO token = accessService.exchangeTokenStartSca(isScaRequired, scaInfoTO.getAccessToken());
         ScaStatusTO scaStatus = isScaRequired
                                         ? ScaStatusTO.PSUAUTHENTICATED
@@ -163,7 +163,6 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
 
     private SCAPaymentResponseTO authorizeOperation(ScaInfoTO scaInfoTO, String paymentId, OpTypeBO opType) {
         PaymentBO payment = paymentService.getPaymentById(paymentId);
-        PaymentCoreDataTO paymentKeyData = coreDataPolicy.getPaymentCoreData(opType, payment);
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
             performExecuteOrCancelOperation(scaInfoTO, paymentId, opType, payment);
         } else if (multilevelScaEnable) {
@@ -172,7 +171,9 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
         UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
         SCAPaymentResponseTO response = new SCAPaymentResponseTO();
         int scaWeight = user.resolveWeightForAccount(payment.getAccountId());
-        scaResponseResolver.updateScaResponseFields(user, response, null, paymentKeyData.getTanTemplate(), null, ScaStatusTO.FINALISED, scaWeight);
+        String psuMessage = messageResolver.message(StepOperation.AUTHORIZE, opType, true, payment);
+        scaResponseResolver.updateScaResponseFields(user, new SCAPaymentResponseTO(), null, psuMessage,
+                                                    null, ScaStatusTO.FINALISED, scaWeight);
         return scaResponseResolver.updatePaymentRelatedResponseFields(response, payment);
     }
 

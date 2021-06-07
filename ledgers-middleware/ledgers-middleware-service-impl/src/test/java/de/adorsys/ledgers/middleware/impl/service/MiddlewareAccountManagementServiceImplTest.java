@@ -8,6 +8,7 @@ import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
+import de.adorsys.ledgers.middleware.api.domain.Constants;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
@@ -15,8 +16,10 @@ import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.impl.converter.*;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
+import de.adorsys.ledgers.util.DateTimeUtils;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
 import de.adorsys.ledgers.util.domain.CustomPageableImpl;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
@@ -27,6 +30,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,6 +92,8 @@ class MiddlewareAccountManagementServiceImplTest {
     private ScaResponseResolver scaResponseResolver;
     @Mock
     private KeycloakTokenService tokenService;
+    @Mock
+    private PsuMessageResolver messageResolver;
 
     private static final ObjectMapper MAPPER = getObjectMapper();
 
@@ -214,6 +221,21 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
+    void getTransactionsByDates_dateFromAndDateToAreNull() {
+        // Given
+        LocalDate today = LocalDate.now();
+        when(depositAccountService.getTransactionsByDates("ACCOUNT_ID", today.atStartOfDay(), DateTimeUtils.getTimeAtEndOfTheDay(today))).thenAnswer(i -> Collections.singletonList(readYml(TransactionDetailsBO.class, "TransactionBO.yml")));
+        when(paymentConverter.toTransactionTOList(any())).thenReturn(Collections.singletonList(readYml(TransactionTO.class, "TransactionTO.yml")));
+
+        // When
+        List<TransactionTO> result = middlewareService.getTransactionsByDates("ACCOUNT_ID", null, null);
+
+        // Then
+        assertNotNull(result);
+        assertThat(result.get(0)).isEqualToComparingFieldByFieldRecursively(readYml(TransactionTO.class, "TransactionTO.yml"));
+    }
+
+    @Test
     void getTransactionsByDatesPaged() {
         // Given
         when(depositAccountService.getTransactionsByDatesPaged(any(), any(), any(), any())).thenReturn(Page.empty());
@@ -221,6 +243,23 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // When
         CustomPageImpl<TransactionTO> result = middlewareService.getTransactionsByDatesPaged("ACCOUNT_ID", LocalDate.now().minusDays(1), LocalDate.now(), getCustomPageableImpl());
+
+        // Then
+        assertNotNull(result);
+        verify(pageMapper, times(1)).toCustomPageImpl(Page.empty());
+    }
+
+    @Test
+    void getTransactionsByDatesPaged_dateFromAndDateToAreNull() {
+        // Given
+        LocalDate today = LocalDate.now();
+        CustomPageableImpl pageable = getCustomPageableImpl();
+        when(depositAccountService.getTransactionsByDatesPaged("ACCOUNT_ID", today.atStartOfDay(), DateTimeUtils.getTimeAtEndOfTheDay(today), PageRequest.of(pageable.getPage(), pageable.getSize())))
+                .thenReturn(Page.empty());
+        when(pageMapper.toCustomPageImpl(any())).thenReturn(new CustomPageImpl<>());
+
+        // When
+        CustomPageImpl<TransactionTO> result = middlewareService.getTransactionsByDatesPaged("ACCOUNT_ID", null, null, pageable);
 
         // Then
         assertNotNull(result);
@@ -326,7 +365,25 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
-        verify(aisConsentMapper, times(2)).toAisConsentBO(getAisConsentTO());
+        verify(aisConsentMapper, times(3)).toAisConsentBO(getAisConsentTO());
+    }
+
+    @Test
+    void initAisConsent_scaRequired() {
+        // Given
+        ScaInfoTO scaInfoTO = buildScaInfoTO();
+        UserBO userBO = buildUserBO();
+        userBO.setScaUserData(List.of(new ScaUserDataBO()));
+        when(scaUtils.userBO(userBO.getLogin())).thenReturn(userBO);
+        when(tokenService.exchangeToken(scaInfoTO.getAccessToken(), 0, Constants.SCOPE_SCA)).thenReturn(getBearerTokenTO());
+        when(aisConsentMapper.toAisConsentBO(any())).thenReturn(getAisConsentBO());
+
+        // When
+        SCAConsentResponseTO result = middlewareService.startAisConsent(scaInfoTO, "consentId", getAisConsentTO());
+
+        // Then
+        assertNotNull(result);
+        verify(aisConsentMapper, times(3)).toAisConsentBO(getAisConsentTO());
     }
 
     @Test
@@ -341,7 +398,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
-        verify(aisConsentMapper, times(2)).toAisConsentBO(getAisConsentTO());
+        verify(aisConsentMapper, times(3)).toAisConsentBO(getAisConsentTO());
     }
 
     @Test
@@ -349,7 +406,7 @@ class MiddlewareAccountManagementServiceImplTest {
         // Given
 
         // When
-        SCAConsentResponseTO result = middlewareService.grantPIISConsent(buildScaInfoTO(), getAisConsentTO());
+        SCAConsentResponseTO result = middlewareService.startPiisConsent(buildScaInfoTO(), getAisConsentTO());
 
         // Then
         assertNotNull(result);
@@ -370,6 +427,7 @@ class MiddlewareAccountManagementServiceImplTest {
     @Test
     void getAccountReport() {
         // Given
+        ReflectionTestUtils.setField(middlewareService, "multilevelScaEnable", true);
         when(userMapper.toUserTOList(any())).thenReturn(Collections.singletonList(buildUserTO()));
         when(userService.findUsersByIban(any())).thenReturn(Collections.singletonList(buildUserBO()));
         when(depositAccountService.getAccountDetailsById(any(), any(LocalDateTime.class), anyBoolean())).thenReturn(getDepositAccountDetailsBO());
@@ -380,6 +438,7 @@ class MiddlewareAccountManagementServiceImplTest {
 
         // Then
         assertNotNull(result);
+        assertThat(result.isMultilevelScaEnabled()).isEqualTo(true);
         verify(userMapper, times(1)).toUserTOList(Collections.singletonList(buildUserBO()));
         verify(accountDetailsMapper, times(1)).toAccountDetailsTO(getDepositAccountDetailsBO());
 

@@ -41,6 +41,7 @@ class KeycloakDataMapperTest {
         assertEquals("name", result.getRealm());
         assertEquals(100, result.getAccessTokenLifespan());
         assertEquals(100, result.getOfflineSessionMaxLifespan());
+        assertTrue(result.isEditUsernameAllowed());
     }
 
     @Test

@@ -9,8 +9,8 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.Constants;
 import de.adorsys.ledgers.middleware.api.domain.account.*;
+import de.adorsys.ledgers.middleware.api.domain.general.StepOperation;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
-import de.adorsys.ledgers.middleware.api.domain.payment.ConsentKeyDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaStatusTO;
@@ -21,6 +21,8 @@ import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
+import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
+import de.adorsys.ledgers.sca.domain.OpTypeBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -68,6 +70,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final PageMapper pageMapper;
     private final ScaResponseResolver scaResponseResolver;
     private final KeycloakTokenService tokenService;
+    private final PsuMessageResolver messageResolver;
 
     @Value("${ledgers.token.lifetime.seconds.sca:10800}")
     private int scaTokenLifeTime;
@@ -75,6 +78,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private int fullTokenLifeTime;
     @Value("${ledgers.sca.final.weight:100}")
     private int finalWeight;
+    @Value("${ledgers.sca.multilevel.enabled:false}")
+    private boolean multilevelScaEnable;
 
     @Override
     public List<AccountDetailsTO> getAccountsByIbanAndCurrency(String iban, String currency) {
@@ -184,7 +189,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         UserBO user = scaUtils.userBO(scaInfoTO.getUserLogin());
 
         boolean isScaRequired = user.hasSCA();
-        String psuMessage = new ConsentKeyDataTO(aisConsent).template();
+        String psuMessage = messageResolver.message(StepOperation.INITIATE_OPERATION_OBJECT, OpTypeBO.CONSENT, isScaRequired, aisConsentMapper.toAisConsentBO(aisConsent));
         BearerTokenTO token = isScaRequired
                                       ? tokenService.exchangeToken(scaInfoTO.getAccessToken(), scaTokenLifeTime, Constants.SCOPE_SCA)
                                       : tokenService.exchangeToken(scaInfoTO.getAccessToken(), fullTokenLifeTime, Constants.SCOPE_FULL_ACCESS);
@@ -204,11 +209,11 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public SCAConsentResponseTO grantPIISConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent) {
+    public SCAConsentResponseTO startPiisConsent(ScaInfoTO scaInfoTO, AisConsentTO aisConsent) {
         aisConsent.cleanupForPIIS();
-        ConsentKeyDataTO consentKeyData = new ConsentKeyDataTO(aisConsent);
+        String psuMessage = messageResolver.message(StepOperation.INITIATE_OPERATION_OBJECT, OpTypeBO.PIIS_CONSENT, false, aisConsentMapper.toAisConsentBO(aisConsent));
         BearerTokenTO consentToken = tokenService.exchangeToken(scaInfoTO.getAccessToken(), fullTokenLifeTime, Constants.SCOPE_PARTIAL_ACCESS);
-        return new SCAConsentResponseTO(consentToken, aisConsent.getId(), consentKeyData.exemptedTemplate());
+        return new SCAConsentResponseTO(consentToken, aisConsent.getId(), psuMessage);
     }
 
     @Override
@@ -224,7 +229,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         start = System.nanoTime();
         List<UserTO> users = userMapper.toUserTOList(userService.findUsersByIban(details.getIban()));
         log.info("Loaded users in {} seconds", TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
-        return new AccountReportTO(details, users);
+        return new AccountReportTO(details, users, multilevelScaEnable);
     }
 
     @Override

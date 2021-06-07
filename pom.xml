@@ -15,7 +15,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.ledgers</groupId>
 	<artifactId>ledgers</artifactId>
-	<version>4.12</version>
+	<version>4.13</version>
 
 	<modules>
 		<module>ledgers-app</module>
@@ -95,7 +95,7 @@
 		<java.version>11</java.version>
 		<pmd.plugin.version>3.13.0</pmd.plugin.version>
 		<apache.commons.collections>4.3</apache.commons.collections>
-		<apache.commons.io>2.6</apache.commons.io>
+		<apache.commons.io>2.8.0</apache.commons.io>
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
 		<dbunit.version>2.5.1</dbunit.version>
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
@@ -114,7 +114,7 @@
 		<guava.version>30.1.1-jre</guava.version>
 
 		<powermock.version>2.0.5</powermock.version>
-		<commons-validator.version>1.6</commons-validator.version>
+		<commons-validator.version>1.7</commons-validator.version>
 		<!-- automatically run annotation processors within the incremental compilation -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<slf4j.version>1.7.25</slf4j.version>
