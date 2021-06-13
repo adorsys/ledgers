@@ -327,12 +327,12 @@ class MiddlewareAccountManagementServiceImplTest {
     void listDepositAccountsByBranchPaged() {
         // Given
         when(userService.findById(any())).thenReturn(buildUserBO());
-        when(depositAccountService.findDetailsByBranchPaged(any(), any(), any())).thenReturn(getPage());
+        when(depositAccountService.findDetailsByBranchPaged(any(), any(), eq(false), any())).thenReturn(getPage());
         when(accountDetailsMapper.toAccountDetailsTO(any(DepositAccountDetailsBO.class))).thenReturn(getAccountDetailsTO());
         when(pageMapper.toCustomPageImpl(any())).thenReturn(getPageImpl());
 
         // When
-        CustomPageImpl<AccountDetailsTO> result = middlewareService.listDepositAccountsByBranchPaged("ACCOUNT_ID", "queryParam", getCustomPageableImpl());
+        CustomPageImpl<AccountDetailsTO> result = middlewareService.listDepositAccountsByBranchPaged("ACCOUNT_ID", "queryParam", false, getCustomPageableImpl());
 
         // Then
         assertNotNull(result);

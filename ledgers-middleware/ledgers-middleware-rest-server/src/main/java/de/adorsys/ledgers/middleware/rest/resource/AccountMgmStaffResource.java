@@ -66,9 +66,9 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
 
     @Override
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(String queryParam, int page, int size) {
+    public ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(String queryParam, int page, int size, boolean withBalance) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
-        CustomPageImpl<AccountDetailsTO> details = middlewareAccountService.listDepositAccountsByBranchPaged(scaInfoHolder.getUserId(), queryParam, pageable);
+        CustomPageImpl<AccountDetailsTO> details = middlewareAccountService.listDepositAccountsByBranchPaged(scaInfoHolder.getUserId(), queryParam, withBalance, pageable);
         return ResponseEntity.ok(details);
     }
 

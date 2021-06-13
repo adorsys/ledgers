@@ -61,7 +61,7 @@ public interface DepositAccountService {
 
     List<DepositAccountDetailsBO> findDetailsByBranch(String branch);
 
-    Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, Pageable pageable);
+    Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, boolean withBalance, Pageable pageable);
 
     void changeAccountsBlockedStatus(String userId, boolean isSystemBlock, boolean lockStatusToSet);
 
