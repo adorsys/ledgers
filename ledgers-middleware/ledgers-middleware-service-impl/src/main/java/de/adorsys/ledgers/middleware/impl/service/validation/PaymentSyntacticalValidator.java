@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO.BULK;
@@ -83,8 +84,9 @@ public class PaymentSyntacticalValidator extends AbstractPaymentValidator {
         shouldBePresent(target::getCreditorName, "CreditorName");
         shouldNotExceed(target::getCreditorName, 70, "CreditorName");
         errorIf(target.getCreditorAccount().isInvalidReference(), "Malformed creditorAccount for " + target.getEndToEndIdentification());
-
-        validateAddress(target.getCreditorAddress());
+        if (Objects.nonNull(target.getCreditorAddress())) { // Make CreditorAddress validation optional
+            validateAddress(target.getCreditorAddress());
+        }
         shouldNotExceed(target::getRemittanceInformationUnstructured, 140, "RemittanceInformationUnstructured");
 
         //target.getCreditorAgent(); target.getChargeBearer(); target.getPurposeCode(); target.getRemittanceInformationStructured(); N/A
