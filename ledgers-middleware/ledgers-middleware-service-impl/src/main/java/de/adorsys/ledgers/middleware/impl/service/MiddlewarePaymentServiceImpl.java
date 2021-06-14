@@ -161,6 +161,17 @@ public class MiddlewarePaymentServiceImpl implements MiddlewarePaymentService {
                         .map(paymentConverter::toPaymentTO));
     }
 
+    @Override
+    public CustomPageImpl<PaymentTO> getAllPaymentsPaged(ScaInfoTO scaInfo, CustomPageableImpl pageable) {
+        Set<PaymentTypeBO> paymentType = Set.of(PaymentTypeBO.PERIODIC, PaymentTypeBO.SINGLE,PaymentTypeBO.BULK);
+        Set<TransactionStatusBO> status = Set.of(values());
+        Set<String> accountIds = scaUtils.userBO(scaInfo.getUserLogin()).getAccountIds();
+        return pageMapper.toCustomPageImpl(
+                paymentService.getPaymentsByTypeStatusAndDebtorInPaged(paymentType, status, accountIds, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                        .map(paymentConverter::toPaymentTO));
+    }
+
+
     private SCAPaymentResponseTO authorizeOperation(ScaInfoTO scaInfoTO, String paymentId, OpTypeBO opType) {
         PaymentBO payment = paymentService.getPaymentById(paymentId);
         if (scaOperationService.authenticationCompleted(paymentId, opType)) {
