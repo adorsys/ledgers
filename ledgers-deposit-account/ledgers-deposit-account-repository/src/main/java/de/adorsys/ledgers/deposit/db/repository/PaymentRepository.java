@@ -22,6 +22,6 @@ public interface PaymentRepository extends PagingAndSortingRepository<Payment, S
 
     Page<Payment> findAllByAccountIdInAndPaymentTypeAndTransactionStatus(Set<String> accountId, PaymentType type, TransactionStatus status, Pageable pageable);
 
-    Page<Payment> findAllByAccountIdInAndPaymentTypeInAndTransactionStatusIn(Set<String> accountId, Set<PaymentType> type, Set<TransactionStatus> status, Pageable pageable);
+    Page<Payment> findAllByAccountIdInAndPaymentTypeInAndTransactionStatusInOrderByUpdatedDesc(Set<String> accountId, Set<PaymentType> type, Set<TransactionStatus> status, Pageable pageable);
 
 }

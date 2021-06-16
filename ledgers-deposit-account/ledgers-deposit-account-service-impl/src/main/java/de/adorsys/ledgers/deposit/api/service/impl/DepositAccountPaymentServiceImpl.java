@@ -167,7 +167,7 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     public Page<PaymentBO> getPaymentsByTypeStatusAndDebtorInPaged(Set<PaymentTypeBO> paymentType, Set<TransactionStatusBO> status, Set<String> accountIds, Pageable pageable) {
         Set<PaymentType> types = paymentType.stream().map(t -> PaymentType.valueOf(t.name())).collect(Collectors.toSet());
         Set<TransactionStatus> statuses = status.stream().map(s -> TransactionStatus.valueOf(s.name())).collect(Collectors.toSet());
-        return paymentRepository.findAllByAccountIdInAndPaymentTypeInAndTransactionStatusIn(accountIds, types, statuses, pageable)
+        return paymentRepository.findAllByAccountIdInAndPaymentTypeInAndTransactionStatusInOrderByUpdatedDesc(accountIds, types, statuses, pageable)
                 .map(paymentMapper::toPaymentBO);
     }
 
