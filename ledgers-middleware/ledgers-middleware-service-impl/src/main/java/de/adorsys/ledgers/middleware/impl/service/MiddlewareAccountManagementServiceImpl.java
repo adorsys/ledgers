@@ -163,10 +163,10 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, CustomPageableImpl pageable) {
+    public CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, boolean withBalance, CustomPageableImpl pageable) {
         UserBO user = userService.findById(userId);
-        return pageMapper.toCustomPageImpl(depositAccountService.findDetailsByBranchPaged(user.getBranch(), queryParam, PageRequest.of(pageable.getPage(), pageable.getSize()))
-                                                   .map(accountDetailsMapper::toAccountDetailsTO));
+        return pageMapper.toCustomPageImpl(depositAccountService.findDetailsByBranchPaged(user.getBranch(), queryParam, withBalance, PageRequest.of(pageable.getPage(), pageable.getSize()))
+                .map(accountDetailsMapper::toAccountDetailsTO));
     }
 
     @Override

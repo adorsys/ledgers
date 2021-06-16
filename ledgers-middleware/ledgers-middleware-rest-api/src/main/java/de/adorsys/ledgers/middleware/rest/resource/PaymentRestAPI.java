@@ -60,6 +60,14 @@ public interface PaymentRestAPI {
             @RequestParam(PAGE) int page,
             @RequestParam(SIZE) int size);
 
+    @GetMapping(value = "/paged")
+    @Operation(summary = "Load All Payments Payments paged view", description = "Returns a page of  payments")
+    @SecurityRequirement(name = API_KEY)
+    @SecurityRequirement(name = OAUTH2)
+    ResponseEntity<CustomPageImpl<PaymentTO>> getAllPaymentsPaged(
+            @RequestParam(PAGE) int page,
+            @RequestParam(SIZE) int size);
+
     @PostMapping
     @Operation(summary = "Initiates a Payment", description = "Initiates a payment")
     @SecurityRequirement(name = API_KEY)

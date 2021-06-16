@@ -91,7 +91,7 @@ public interface AccountMgmStaffResourceAPI {
 
     @Operation(summary = "List fo Accessible Accounts",
             description = "Returns the list of all accounts linked to the connected user, paged view. "
-                                  + "Query param represents full or partial IBAN")
+                    + "Query param represents full or partial IBAN")
     @SecurityRequirement(name = API_KEY)
     @SecurityRequirement(name = OAUTH2)
     @ApiResponses(value = {
@@ -100,7 +100,7 @@ public interface AccountMgmStaffResourceAPI {
     @GetMapping(path = "/page")
     ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(
             @RequestParam(value = QUERY_PARAM, defaultValue = "", required = false) String queryParam,
-            @RequestParam(PAGE) int page, @RequestParam(SIZE) int size);
+            @RequestParam(PAGE) int page, @RequestParam(SIZE) int size, @RequestParam(WITH_BALANCE_QUERY_PARAM) boolean withBalance);
 
     @Operation(summary = "Load Account by AccountId",
             description = "Returns account details information for the given account id. "

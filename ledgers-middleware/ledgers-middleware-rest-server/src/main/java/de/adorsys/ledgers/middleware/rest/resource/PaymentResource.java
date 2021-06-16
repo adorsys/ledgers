@@ -69,6 +69,13 @@ public class PaymentResource implements PaymentRestAPI {
     }
 
     @Override
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<CustomPageImpl<PaymentTO>> getAllPaymentsPaged(int page, int size) {
+        CustomPageableImpl pageable = new CustomPageableImpl(page, size);
+        return ResponseEntity.ok(paymentService.getAllPaymentsPaged(scaInfoHolder.getScaInfo(), pageable));
+    }
+
+    @Override
     @PreAuthorize("hasAccessToAccountWithIban(#payment.debtorAccount.iban)")
     public ResponseEntity<SCAPaymentResponseTO> initiatePayment(PaymentTO payment) {
         return new ResponseEntity<>(paymentService.initiatePayment(scaInfoHolder.getScaInfo(), payment), HttpStatus.CREATED);

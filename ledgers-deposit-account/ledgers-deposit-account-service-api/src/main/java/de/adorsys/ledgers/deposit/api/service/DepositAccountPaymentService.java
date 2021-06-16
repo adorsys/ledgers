@@ -45,6 +45,8 @@ public interface DepositAccountPaymentService {
 
     Page<PaymentBO> getPaymentsByTypeStatusAndDebtorPaged(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds, Pageable pageable);
 
+    Page<PaymentBO> getPaymentsByTypeStatusAndDebtorInPaged(Set<PaymentTypeBO> paymentType, Set<TransactionStatusBO> status, Set<String> accountIds, Pageable pageable);
+
     boolean existingTargetById(String paymentTargetId);
 
     boolean existingPaymentById(String paymentId);
