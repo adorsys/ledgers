@@ -45,7 +45,7 @@ public interface MiddlewareAccountManagementService {
      */
     List<AccountDetailsTO> listDepositAccountsByBranch(String userId);
 
-    CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, CustomPageableImpl pageable);
+    CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, boolean withBalance, CustomPageableImpl pageable);
 
     CustomPageImpl<AccountDetailsExtendedTO> getAccountsByBranchAndMultipleParams(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, CustomPageableImpl pageable);
 

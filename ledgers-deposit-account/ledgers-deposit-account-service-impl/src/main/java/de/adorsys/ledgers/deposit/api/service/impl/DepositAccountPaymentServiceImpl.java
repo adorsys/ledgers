@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.*;
 
@@ -159,7 +160,15 @@ public class DepositAccountPaymentServiceImpl extends AbstractServiceImpl implem
     @Override
     public Page<PaymentBO> getPaymentsByTypeStatusAndDebtorPaged(PaymentTypeBO paymentType, TransactionStatusBO status, Set<String> accountIds, Pageable pageable) {
         return paymentRepository.findAllByAccountIdInAndPaymentTypeAndTransactionStatus(accountIds, PaymentType.valueOf(paymentType.name()), TransactionStatus.valueOf(status.name()), pageable)
-                       .map(paymentMapper::toPaymentBO);
+                .map(paymentMapper::toPaymentBO);
+    }
+
+    @Override
+    public Page<PaymentBO> getPaymentsByTypeStatusAndDebtorInPaged(Set<PaymentTypeBO> paymentType, Set<TransactionStatusBO> status, Set<String> accountIds, Pageable pageable) {
+        Set<PaymentType> types = paymentType.stream().map(t -> PaymentType.valueOf(t.name())).collect(Collectors.toSet());
+        Set<TransactionStatus> statuses = status.stream().map(s -> TransactionStatus.valueOf(s.name())).collect(Collectors.toSet());
+        return paymentRepository.findAllByAccountIdInAndPaymentTypeInAndTransactionStatusInOrderByUpdatedDesc(accountIds, types, statuses, pageable)
+                .map(paymentMapper::toPaymentBO);
     }
 
     @Override

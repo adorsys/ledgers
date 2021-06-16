@@ -336,7 +336,7 @@ class DepositAccountServiceImplTest {
         // Given
         when(depositAccountRepository.findByBranchAndIbanContaining(anyString(), anyString(), any())).thenReturn(new PageImpl<>(Collections.singletonList(getDepositAccount(false, null))));
         // When
-        Page<DepositAccountDetailsBO> result = depositAccountService.findDetailsByBranchPaged("branchId", "someParam", Pageable.unpaged());
+        Page<DepositAccountDetailsBO> result = depositAccountService.findDetailsByBranchPaged("branchId", "someParam", false, Pageable.unpaged());
 
         // Then
         assertEquals(1, result.getTotalElements());

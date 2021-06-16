@@ -164,11 +164,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     }
 
     @Override
-    public Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, Pageable pageable) {
+    public Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, boolean withBalance, Pageable pageable) {
         return depositAccountRepository.findByBranchAndIbanContaining(branch, queryParam, pageable)
-                       .map(depositAccountMapper::toDepositAccountBO)
-                       .map(d -> new DepositAccountDetailsBO(d, Collections.emptyList()));
+                .map(depositAccountMapper::toDepositAccountBO)
+                .map(d -> new DepositAccountDetailsBO(d, getBalancesList(d, withBalance, LocalDateTime.now())));
     }
+
 
     @Override
     @Transactional

@@ -50,6 +50,7 @@ public abstract class Constants {
     public static final String LOCAL_DATE_YYYY_MM_DD_FORMAT = "yyyy-MM-dd";
     public static final String DATE_TO_QUERY_PARAM = "dateTo";
     public static final String DATE_FROM_QUERY_PARAM = "dateFrom";
+    public static final String WITH_BALANCE_QUERY_PARAM = "withBalance";
 
     private Constants() {
     }

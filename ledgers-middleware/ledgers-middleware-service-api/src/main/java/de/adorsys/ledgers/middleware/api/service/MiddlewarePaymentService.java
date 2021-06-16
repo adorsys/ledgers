@@ -101,4 +101,8 @@ public interface MiddlewarePaymentService {
     List<PaymentTO> getPendingPeriodicPayments(ScaInfoTO scaInfoTO);
 
     CustomPageImpl<PaymentTO> getPendingPeriodicPaymentsPaged(ScaInfoTO scaInfo, CustomPageableImpl pageable);
+
+    CustomPageImpl<PaymentTO> getAllPaymentsPaged(ScaInfoTO scaInfo, CustomPageableImpl pageable);
+
+
 }
