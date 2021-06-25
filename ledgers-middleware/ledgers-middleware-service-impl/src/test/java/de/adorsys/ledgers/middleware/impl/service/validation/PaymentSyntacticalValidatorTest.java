@@ -31,6 +31,8 @@ class PaymentSyntacticalValidatorTest {
         PaymentBO testPmt = getSinglePmt();
 
         assertDoesNotThrow(() -> service.check(testPmt, null));
+        testPmt.getTargets().forEach(t->t.setCreditorAddress(null));
+        assertDoesNotThrow(() -> service.check(testPmt, null));
     }
 
     private void test(PaymentBO payment, boolean valid, boolean allowed) {
@@ -41,7 +43,7 @@ class PaymentSyntacticalValidatorTest {
     @Test
     void check_periodic() {
         PaymentBO testPmt = getPeriodicPmt();
-
+        testPmt.getTargets().forEach(t->t.setCreditorAddress(null));
         assertDoesNotThrow(() -> service.check(testPmt, null));
     }
 
@@ -56,7 +58,7 @@ class PaymentSyntacticalValidatorTest {
     @Test
     void check_bulk() {
         PaymentBO testPmt = getBulkPmt();
-
+        testPmt.getTargets().forEach(t->t.setCreditorAddress(null));
         assertDoesNotThrow(() -> service.check(testPmt, null));
     }
 
