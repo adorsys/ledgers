@@ -99,7 +99,7 @@
 		<jetbrains.annotations.version>15.0</jetbrains.annotations.version>
 		<dbunit.version>2.5.1</dbunit.version>
 		<spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
-		<spring-security.version>5.2.7.RELEASE</spring-security.version>
+		<spring-security.version>5.2.11.RELEASE</spring-security.version>
 		<keycloak-adapter-bom.version>11.0.0</keycloak-adapter-bom.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
