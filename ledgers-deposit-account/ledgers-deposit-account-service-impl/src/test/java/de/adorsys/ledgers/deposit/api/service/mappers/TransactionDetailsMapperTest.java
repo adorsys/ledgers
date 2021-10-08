@@ -55,8 +55,8 @@ class TransactionDetailsMapperTest {
 
     private TransactionDetailsBO getExpected(boolean isPayment) {
         return new TransactionDetailsBO("trId", "entryRef", "endToEndId", "mandateId", "checkId",
-                                        isPayment ? null : "creditorId", DATE, DATE, getAmount(isPayment), null, isPayment ? "debtorName" : "CrName", isPayment ? "debtorAgent" : "CrAgent", getAccount(!isPayment), isPayment ? "ultDebtor" : "ultCreditor",
-                                        isPayment ? "CrName" : "debtorName", isPayment ? "CrAgent" : "debtorAgent", getAccount(isPayment), isPayment ? "ultCreditor" : "ultDebtor", null, null, PurposeCodeBO.ACCT,
+                                        "creditorId", DATE, DATE, getAmount(isPayment), null, "CrName", "CrAgent", getAccount(), "ultCreditor",
+                                        "debtorName", "debtorAgent", getAccount(), "ultDebtor", null, null, PurposeCodeBO.ACCT,
                                         "transactionCode", "proprietaryCode", null);
     }
 
@@ -100,11 +100,11 @@ class TransactionDetailsMapperTest {
         bo.setExchangeRate(null);
         bo.setCreditorName("CrName");
         bo.setCreditorAgent("CrAgent");
-        bo.setCreditorAccount(getAccount(true));
+        bo.setCreditorAccount(getAccount());
         bo.setUltimateCreditor("ultCreditor");
         bo.setDebtorName("debtorName");
         bo.setDebtorAgent("debtorAgent");
-        bo.setDebtorAccount(getAccount(false));
+        bo.setDebtorAccount(getAccount());
         bo.setUltimateDebtor("ultDebtor");
         bo.setRemittanceInformationStructured(null);
         bo.setRemittanceInformationUnstructured(null);
@@ -112,7 +112,7 @@ class TransactionDetailsMapperTest {
         bo.setBankTransactionCode("transactionCode");
         bo.setProprietaryBankTransactionCode("proprietaryCode");
         bo.setBalanceAfterTransaction(null);
-        bo.setCreditorAddress(getAddress(true));
+        bo.setCreditorAddress(getAddress());
         bo.setPaymentOrderId("paymentId");
         bo.setPaymentType(PaymentTypeBO.SINGLE);
         bo.setPaymentProduct("sepa");
@@ -121,16 +121,16 @@ class TransactionDetailsMapperTest {
         return bo;
     }
 
-    private AddressBO getAddress(boolean isCreditor) {
+    private AddressBO getAddress() {
         AddressBO bo = new AddressBO();
-        bo.setCountry(isCreditor ? "CreditorCountry" : "DebtorCountry");
+        bo.setCountry("CreditorCountry");
         return bo;
     }
 
-    private AccountReferenceBO getAccount(boolean isCreditor) {
+    private AccountReferenceBO getAccount() {
         AccountReferenceBO bo = new AccountReferenceBO();
         bo.setCurrency(Currency.getInstance("EUR"));
-        bo.setIban(isCreditor ? "CreditorIBAN" : "DebtorIBAN");
+        bo.setIban("DebtorIBAN");
         return bo;
     }
 
