@@ -31,8 +31,6 @@ variables: &variables
   DOCKER_IMAGE_NAME_LEDGERS: "ledgers"
   DOCKER_IMAGE_NAME_LEDGERS_KEYCLOAK: "ledgers-keycloak"
 
-  SONAR_HOST: "https://psd2-quality.cloud.adorsys.de"
-
   ############################
   # Private Openshift ENV #
   ############################
@@ -248,19 +246,6 @@ Unit Tests Java11:
       - "**/target/surefire-reports/*"
     name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
     expire_in: "10 day"
-
-Sonarcube Tests:
-  stage: "Test"
-  needs: []
-  except:
-    - schedules
-    - develop
-  script:
-    - jabba use system@1.11
-    - cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-    - mvn -ntp --fail-at-end clean install
-    - mvn sonar:sonar -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_TOKEN}
 
 ###########
 # develop branch #
