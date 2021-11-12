@@ -129,7 +129,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
         try (Response response = usersResource.create(mapper.createUserRepresentation(user))) {
             if (HttpStatus.CREATED.value() == response.getStatus()) {
                 String userId = CreatedResponseUtil.getCreatedId(response);
-                log.info("User[{}] is created with id: {}", user.getLogin(), userId);
+                log.info("User [{}] is created with id: {}", user.getLogin(), userId);
                 assignUserRoles(configuration.getClientRealm(), userId, user.getRealmRoles());
             }
         }
@@ -139,7 +139,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
     public void updateUser(KeycloakUser user, String userIdentifier) {
         getUserResourceByIdentifier(userIdentifier).ifPresentOrElse(u -> {
             u.update(mapper.toUpdateUserPresentation(u.toRepresentation(), user));
-            log.debug("User[{}] was updated in keycloak.", user.getLogin());
+            log.debug("User [{}] was updated in keycloak.", user.getLogin());
             assignUserRoles(configuration.getClientRealm(), u.toRepresentation().getId(), user.getRealmRoles());
         }, () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, user.getLogin()));
     }
@@ -149,7 +149,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
         UsersResource usersResource = keycloak.realm(configuration.getClientRealm()).users();
         getUserByIdentifier(login).ifPresentOrElse(u -> {
             usersResource.delete(u.getId());
-            log.info("User[{}] was deleted from keycloak.", login);
+            log.info("User [{}] was deleted from keycloak.", login);
         }, () -> log.info(USER_NOT_FOUND_IN_KEYCLOAK, login));
     }
 
@@ -180,7 +180,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
                                                         user.get().getId(),
                                                         Collections.singletonList(RequiredAction.UPDATE_PASSWORD.name()));
 
-            log.info("User[{}] email for updating password was sent", login);
+            log.info("User [{}], email for updating password was sent.", login);
             return;
         }
         log.info(USER_NOT_FOUND_IN_KEYCLOAK, login);
