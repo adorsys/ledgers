@@ -34,7 +34,10 @@ public class TestDataAccountService {
     private final CurrencyService currencyService;
     private final MiddlewareAccountManagementService accountManagementService;
     private final MiddlewareUserManagementService middlewareUserService;
+
     public void createAccounts() {
+        log.info("Creating accounts for test users");
+
         for (AccountDetailsTO details : mockbankInitData.getAccounts()) {
             if (!currencyService.isCurrencyValid(details.getCurrency())) {
                 throw new IllegalArgumentException("Currency is not supported: " + details.getCurrency());

@@ -28,6 +28,8 @@ public class TestDataUserService {
     private final UserMapper userMapper;
 
     public void createUsers() {
+        log.info("Creating Ledgers test users");
+
         for (UserTO user : mockbankInitData.getUsers()) {
             String id;
             try {
@@ -38,6 +40,8 @@ public class TestDataUserService {
             }
             user.setId(id);
             if (!keycloakDataService.userExists(user.getLogin())) {
+                log.info("Creating test user [{}] in Keycloak", user.getLogin());
+
                 UserBO userBO = userMapper.toUserBO(user);
                 keycloakDataService.createUser(keycloakUserMapper.toKeycloakUser(userBO));
             }

@@ -39,21 +39,24 @@ public class IdpConfigurationService {
 
     public void configureIDP() {
         boolean clientExists;
-
+        log.info("Keycloak IDP URL is loaded: [{}]", keycloakConfig.getAuthServerUrl());
         try {
             clientExists = dataService.clientExists();
         } catch (ProcessingException e) {
-            log.error("Cannot connect to Keycloak IDP on host: {}. Ledgers is shutting down.", keycloakConfig.getAuthServerUrl());
+            log.error("Cannot connect to Keycloak IDP on host: [{}]. Ledgers is shutting down.", keycloakConfig.getAuthServerUrl());
             throw e;
         }
 
         if (!clientExists) {
+            log.info("Client does not exist in Keycloak, creating.");
             dataService.createDefaultSchema();
             migrateUsers();
         }
     }
 
     public void migrateUsers() {
+        log.info("Migrating users from Ledgers to Keycloak");
+
         List<UserBO> users = userService.listUsers(0, Integer.MAX_VALUE);
         users.stream().filter(u -> !u.getLogin().equals(xs2aAdminLogin))
                 .forEach(this::createUserInIDP);
