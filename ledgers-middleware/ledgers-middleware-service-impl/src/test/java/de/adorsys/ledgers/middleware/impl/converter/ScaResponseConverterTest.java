@@ -1,7 +1,5 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
-import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
-import de.adorsys.ledgers.middleware.api.domain.payment.TransactionStatusTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ChallengeDataTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.GlobalScaResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
@@ -40,7 +38,7 @@ class ScaResponseConverterTest {
     private static final String AUTH_CODE = "123456";
     private static final String ADDITIONAL_INFORMATION = "Additional info";
     private static final String SCA_ID = "SCA ID";
-    private static final String CHALLENGE_DATA_TYPE = "EMAIL";
+    private static final String CHALLENGE_DATA_TYPE = "SMTP_OTP";
     private static final LocalDateTime STATUS_DATE = LocalDateTime.of(2020, 1, 1, 12, 12, 12);
     private static final int EXPIRES_IN_SECONDS = 600;
     private static final String USER_EMAIL = "test@mail.de";
@@ -127,7 +125,7 @@ class ScaResponseConverterTest {
         datasMap.put(CHALLENGE_DATA_TYPE, challengeDataTO);
         FieldSetter.setField(data, data.getClass().getSuperclass().getDeclaredField("challengeDatas"), datasMap);
 
-        when(scaChallengeDataResolver.resolveScaChallengeData(ScaMethodTypeTO.EMAIL))
+        when(scaChallengeDataResolver.resolveScaChallengeData(ScaMethodTypeTO.SMTP_OTP))
                 .thenReturn(data);
 
         // When
@@ -197,7 +195,7 @@ class ScaResponseConverterTest {
         datasMap.put(CHALLENGE_DATA_TYPE, challengeDataTO);
         FieldSetter.setField(data, data.getClass().getSuperclass().getDeclaredField("challengeDatas"), datasMap);
 
-        when(scaChallengeDataResolver.resolveScaChallengeData(ScaMethodTypeTO.EMAIL))
+        when(scaChallengeDataResolver.resolveScaChallengeData(ScaMethodTypeTO.SMTP_OTP))
                 .thenReturn(data);
 
         // When
@@ -241,11 +239,11 @@ class ScaResponseConverterTest {
     }
 
     private ScaUserDataBO getScaUserDataBO() {
-        return new ScaUserDataBO("3", ScaMethodTypeBO.EMAIL, USER_EMAIL, false, AUTH_CODE, true);
+        return new ScaUserDataBO("3", ScaMethodTypeBO.SMTP_OTP, USER_EMAIL, false, AUTH_CODE, true);
     }
 
     private ScaUserDataTO getScaUserDataTO() {
-        return new ScaUserDataTO("3", ScaMethodTypeTO.EMAIL, USER_EMAIL, new UserTO(), false, AUTH_CODE, false, true);
+        return new ScaUserDataTO("3", ScaMethodTypeTO.SMTP_OTP, USER_EMAIL, new UserTO(), false, AUTH_CODE, false, true);
     }
 
     private BearerTokenBO getBearerTokenBO() {

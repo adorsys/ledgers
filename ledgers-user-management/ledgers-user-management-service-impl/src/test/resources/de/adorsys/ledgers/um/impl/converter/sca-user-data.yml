@@ -1,4 +1,4 @@
-- scaMethod: EMAIL
+- scaMethod: SMTP_OTP
   methodValue: vne@adorsys.de
   usesStaticTan: false
   staticTan:

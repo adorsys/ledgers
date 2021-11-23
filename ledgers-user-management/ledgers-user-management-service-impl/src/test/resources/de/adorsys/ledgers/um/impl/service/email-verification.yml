@@ -4,5 +4,5 @@ status: PENDING
 scaUserData:
     id: 6DwJm-TpResvxLdX3fHpjc
     methodValue: test@mail.de
-    scaMethod: EMAIL
+    scaMethod: SMTP_OTP
     valid: false

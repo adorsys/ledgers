@@ -4,7 +4,7 @@ login: test
 scaUserData:
   - id: 1
     methodValue: test@mail.de
-    scaMethod: EMAIL
+    scaMethod: SMTP_OTP
   - id: 2
     methodValue: 3737463673647
     scaMethod: MOBILE

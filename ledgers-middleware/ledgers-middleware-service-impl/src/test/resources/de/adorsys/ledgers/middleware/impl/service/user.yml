@@ -4,7 +4,7 @@ pin: pin
 branch: Nuremberg
 scaUserData:
   - id: 1
-    scaMethod: EMAIL
+    scaMethod: SMTP_OTP
     methodValue: spe@adorsys.com.ua
   - id: 2
     scaMethod: MOBILE

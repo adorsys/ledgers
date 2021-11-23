@@ -1,5 +1,5 @@
 id: 6DwJm-TpResvxLdX3fHpjc
-scaMethod: EMAIL
+scaMethod: SMTP_OTP
 methodValue: google@gmail.com
 usesStaticTan: false
 staticTan:
