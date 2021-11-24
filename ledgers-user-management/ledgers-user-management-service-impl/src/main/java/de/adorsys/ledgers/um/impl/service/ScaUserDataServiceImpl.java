@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.EMAIL;
+import static de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO.SMTP_OTP;
 
 @Slf4j
 @Service
@@ -53,7 +53,7 @@ public class ScaUserDataServiceImpl implements ScaUserDataService {
     @Override
     public void ifScaChangedEmailNotValid(List<ScaUserDataBO> oldScaData, List<ScaUserDataBO> newScaData) {
         oldScaData.forEach(scaData -> newScaData.stream()
-                                              .filter(n -> n.getScaMethod() == EMAIL)
+                                              .filter(n -> n.getScaMethod() == SMTP_OTP)
                                               .filter(n -> n.getId().equals(scaData.getId()))
                                               .findFirst()
                                               .ifPresent(n -> {

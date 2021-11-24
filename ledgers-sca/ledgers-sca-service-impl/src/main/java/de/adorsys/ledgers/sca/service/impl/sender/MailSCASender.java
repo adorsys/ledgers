@@ -36,6 +36,6 @@ public class MailSCASender implements SCASender<MailScaMessage> {
 
     @Override
     public ScaMethodTypeBO getType() {
-        return ScaMethodTypeBO.EMAIL;
+        return ScaMethodTypeBO.SMTP_OTP;
     }
 }

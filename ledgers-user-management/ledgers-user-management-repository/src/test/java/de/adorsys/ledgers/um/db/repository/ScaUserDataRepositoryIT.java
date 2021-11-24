@@ -39,7 +39,7 @@ class ScaUserDataRepositoryIT {
     void test_create_ok() {
         // Given
         ScaUserDataEntity data = new ScaUserDataEntity();
-        data.setScaMethod(ScaMethodType.EMAIL);
+        data.setScaMethod(ScaMethodType.SMTP_OTP);
         data.setMethodValue("test@mail.de");
 
         UserEntity user = new UserEntity();

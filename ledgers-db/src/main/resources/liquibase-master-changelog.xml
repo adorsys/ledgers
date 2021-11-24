@@ -71,4 +71,5 @@
     <include file="migration/0036-external-id-for-sca-operation-table.xml" relativeToChangelogFile="true"/>
     <include file="migration/0037-add-credit-to-account.xml" relativeToChangelogFile="true"/>
     <include file="migration/0038-delete-pin-column-user-table.xml" relativeToChangelogFile="true"/>
+    <include file="migration/0039-rename-sca-method.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

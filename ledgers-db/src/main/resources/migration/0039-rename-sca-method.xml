@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="hhe@adorsys.com.ua" id="2021-11-23-1">
+        <comment>Rename 'EMAIL' SCA method to 'SMTP_OTP'</comment>
+
+        <sql>
+            UPDATE sca_data
+            SET sca_method = 'SMTP_OTP'
+            WHERE sca_method = 'EMAIL'
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>
+

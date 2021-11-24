@@ -421,7 +421,7 @@ public class UserServiceImplTest {
     }
 
     private ScaUserDataBO getScaUserDataBO() {
-        return new ScaUserDataBO("3", ScaMethodTypeBO.EMAIL, "test@mail.de", false, "staticTan", true);
+        return new ScaUserDataBO("3", ScaMethodTypeBO.SMTP_OTP, "test@mail.de", false, "staticTan", true);
     }
 
     @Test

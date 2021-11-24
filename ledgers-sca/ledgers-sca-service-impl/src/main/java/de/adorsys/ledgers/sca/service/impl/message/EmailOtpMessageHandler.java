@@ -21,7 +21,7 @@ public class EmailOtpMessageHandler implements OtpMessageHandler<MailScaMessage>
 
     @Override
     public ScaMethodTypeBO getType() {
-        return ScaMethodTypeBO.EMAIL;
+        return ScaMethodTypeBO.SMTP_OTP;
     }
 
     @Override

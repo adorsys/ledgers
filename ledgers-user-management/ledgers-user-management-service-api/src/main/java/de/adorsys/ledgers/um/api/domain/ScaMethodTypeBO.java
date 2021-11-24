@@ -1,7 +1,7 @@
 package de.adorsys.ledgers.um.api.domain;
 
 public enum ScaMethodTypeBO {
-    EMAIL(false),
+    SMTP_OTP(false),
     MOBILE(false),
     CHIP_OTP(false),
     PHOTO_OTP(false),

@@ -99,7 +99,7 @@ users:
     email: marion.mueller@mail.de
     pin: 12345
     #    scaUserData:
-    #      - scaMethod: EMAIL
+    #      - scaMethod: SMTP_OTP
     #        methodValue: marion.mueller@mail.de
     accountAccesses:
       - iban: DE69760700240340283600
@@ -111,7 +111,7 @@ users:
     email: anton.brueckner@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: anton.brueckner@mail.de
         usesStaticTan: true
         staticTan: 123456
@@ -125,11 +125,11 @@ users:
     email: max.musterman@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: max.musterman@mail.de
         usesStaticTan: true
         staticTan: 123456
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: max.musterman2@mail.de
         usesStaticTan: true
         staticTan: 123456
@@ -143,7 +143,7 @@ users:
     email: carl.schwarz@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: carl.schwarz@mail.de
         usesStaticTan: true
         staticTan: 123456
@@ -166,7 +166,7 @@ users:
     email: accountant@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: accountant@mail.de
         usesStaticTan: true
         staticTan: 123456
@@ -180,7 +180,7 @@ users:
     email: chief.accountant@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: chief.accountant@mail.de
         usesStaticTan: true
         staticTan: 123456
@@ -194,7 +194,7 @@ users:
     email: sc.manager@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: sc.manager@mail.de
         usesStaticTan: true
         staticTan: 123456
@@ -208,7 +208,7 @@ users:
     email: g.manager@mail.de
     pin: 12345
     scaUserData:
-      - scaMethod: EMAIL
+      - scaMethod: SMTP_OTP
         methodValue: g.manager@mail.de
         usesStaticTan: true
         staticTan: 123456

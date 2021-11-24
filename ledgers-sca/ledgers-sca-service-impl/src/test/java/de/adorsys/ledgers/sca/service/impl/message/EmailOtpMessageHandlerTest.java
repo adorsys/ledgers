@@ -17,7 +17,7 @@ class EmailOtpMessageHandlerTest {
         FieldSetter.setField(handler, handler.getClass().getDeclaredField("authCodeEmailBody"), MAIL_MSG_PATTERN);
         FieldSetter.setField(handler, handler.getClass().getDeclaredField("subject"), "subj");
         FieldSetter.setField(handler, handler.getClass().getDeclaredField("from"), "from");
-        MailScaMessage result = handler.getMessage(getAuthData(), getScaData(ScaMethodTypeBO.EMAIL, true), "TAN");
+        MailScaMessage result = handler.getMessage(getAuthData(), getScaData(ScaMethodTypeBO.SMTP_OTP, true), "TAN");
         assertNotNull(result);
         assertEquals("Your TAN is: TAN", result.getMessage());
         assertEquals("from", result.getFrom());
