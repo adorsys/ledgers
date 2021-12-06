@@ -1,6 +1,6 @@
 [
   {
-    "scaMethod": "EMAIL",
+    "scaMethod": "SMTP_OTP",
     "methodValue": "superman@localhost.net"
   }
 ]

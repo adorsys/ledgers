@@ -49,7 +49,8 @@ public class PaymentSyntacticalValidator extends AbstractPaymentValidator {
         errorIf(payment.getDebtorAccount() == null, "DebtorAccount should be present!");
         errorIf(payment.getDebtorAccount().isInvalidReference(), "Malformed debtorAccount!");
         errorIf(!isValidAmount(payment), "Amount can not be negative!");
-        payment.getTargets().forEach(t -> shouldBePresent(t::getEndToEndIdentification, "EndToEndIdentification"));
+        // This validation can be configured in XS2A.
+//        payment.getTargets().forEach(t -> shouldBePresent(t::getEndToEndIdentification, "EndToEndIdentification"));
         errorIf(isInvalidEndToEndIds(payment, allowSameEndToEndIds), "EndToEndIdentification's should be unique!");
         //payment.getDebtorAgent(); N/A
     }

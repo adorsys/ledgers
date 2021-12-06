@@ -7,7 +7,7 @@
     "otpFormat": "integer",
     "additionalInformation": "SCA method MOBILE: tan is %s . sent email to %s."
   },
-  "EMAIL": {
+  "SMTP_OTP": {
     "image": null,
     "data": [],
     "imageLink": null,

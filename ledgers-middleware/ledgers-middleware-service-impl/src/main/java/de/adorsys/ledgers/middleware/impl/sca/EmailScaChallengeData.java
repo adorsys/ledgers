@@ -10,6 +10,6 @@ public class EmailScaChallengeData extends AbstractScaChallengeData {
 
     @Override
     public ScaMethodTypeTO getScaMethodType() {
-        return ScaMethodTypeTO.EMAIL;
+        return ScaMethodTypeTO.SMTP_OTP;
     }
 }

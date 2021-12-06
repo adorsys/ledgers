@@ -48,7 +48,7 @@ class SCAUtilsTest {
     }
 
     private ScaUserDataTO getScaUserDataTO() {
-        return new ScaUserDataTO("id", ScaMethodTypeTO.EMAIL, "anton.brueckner@de.de", null, false, "staticTan", false, true);
+        return new ScaUserDataTO("id", ScaMethodTypeTO.SMTP_OTP, "anton.brueckner@de.de", null, false, "staticTan", false, true);
     }
 
     @Test

@@ -129,7 +129,7 @@ class SCAOperationServiceImplTest {
         HashMap<ScaMethodTypeBO, SCASender> senders = new HashMap<>();
         emailSender = mock(SCASender.class);
         SCASender mobileSender = mock(SCASender.class);
-        senders.put(ScaMethodTypeBO.EMAIL, emailSender);
+        senders.put(ScaMethodTypeBO.SMTP_OTP, emailSender);
         senders.put(ScaMethodTypeBO.MOBILE, mobileSender);
 
         scaOperationService.setSenders(senders);
@@ -147,7 +147,7 @@ class SCAOperationServiceImplTest {
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
 
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
         when(userBO.getScaUserData()).thenReturn(Collections.singletonList(method));
@@ -183,7 +183,7 @@ class SCAOperationServiceImplTest {
         String email = "spe@adorsys.com.ua";
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         method.setValid(true);
         when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
@@ -223,7 +223,7 @@ class SCAOperationServiceImplTest {
 
         String email = "spe@adorsys.com.ua";
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         method.setValid(true);
         method.setUsesStaticTan(false);
@@ -248,7 +248,7 @@ class SCAOperationServiceImplTest {
         when(userService.decodeStaticTan(any())).thenReturn(TAN);
         String email = "spe@adorsys.com.ua";
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         method.setValid(true);
         method.setUsesStaticTan(true);
@@ -305,7 +305,7 @@ class SCAOperationServiceImplTest {
         String email = "spe@adorsys.com.ua";
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         method.setValid(true);
         when(env.getActiveProfiles()).thenReturn(new String[]{"develop"});
@@ -344,7 +344,7 @@ class SCAOperationServiceImplTest {
     void generateAuthCodeWithException() throws HashGenerationException {
         // Given
         String email = "spe@adorsys.com.ua";
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         UserBO userBO = mock(UserBO.class);
 
@@ -362,7 +362,7 @@ class SCAOperationServiceImplTest {
     void scaDataNotFound() {
         // Given
         String email = "spe@adorsys.com.ua";
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId("not existing id");
         UserBO userBO = mock(UserBO.class);
 
@@ -740,7 +740,7 @@ class SCAOperationServiceImplTest {
         String email = "spe@adorsys.com.ua";
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(methodSupported ? ScaMethodTypeBO.EMAIL : ScaMethodTypeBO.APP_OTP, email);
+        ScaUserDataBO method = new ScaUserDataBO(methodSupported ? ScaMethodTypeBO.SMTP_OTP : ScaMethodTypeBO.APP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         codeDataBO.setScaUserDataId(methodIdPresent ? SCA_USER_DATA_ID : null);
         method.setValid(true);
@@ -770,7 +770,7 @@ class SCAOperationServiceImplTest {
     private void callGenerateAuthCodeCode_scaUserDataIsNull() {
         String email = "spe@adorsys.com.ua";
         UserBO userBO = mock(UserBO.class);
-        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.EMAIL, email);
+        ScaUserDataBO method = new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, email);
         method.setId(SCA_USER_DATA_ID);
         codeDataBO.setScaUserDataId(null);
         method.setValid(true);

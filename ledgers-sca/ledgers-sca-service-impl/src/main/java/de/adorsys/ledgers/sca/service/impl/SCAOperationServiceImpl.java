@@ -110,7 +110,7 @@ public class SCAOperationServiceImpl implements SCAOperationService, Initializin
         scaOperation.updateStatusSent(authCodeValiditySeconds, hash, HashGenerator.DEFAULT_HASH_ALG);
 
         repository.save(scaOperation);
-        if (scaUserData.getScaMethod() != ScaMethodTypeBO.EMAIL || scaUserData.isEmailValid()) {
+        if (scaUserData.getScaMethod() != ScaMethodTypeBO.SMTP_OTP || scaUserData.isEmailValid()) {
             ScaMessage userMessage = otpMessageResolver.resolveMessage(data, scaUserData, tan);
             senders.get(scaUserData.getScaMethod()).send(userMessage);
             //TODO Implement a queue to be able to deliver messages failed for some reason! https://git.adorsys.de/adorsys/xs2a/psd2-dynamic-sandbox/-/issues/837
