@@ -56,6 +56,359 @@ accounts:
     accountStatus: ENABLED
     usageType: ORGA
 
+  # Test users' accounts:
+
+  - iban: DE36100100100000000001
+    currency: EUR
+    name: user_01
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE09100100100000000002
+    currency: EUR
+    name: user_02
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE79100100100000000003
+    currency: EUR
+    name: user_03
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE52100100100000000004
+    currency: EUR
+    name: user_04
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE25100100100000000005
+    currency: EUR
+    name: user_05
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE95100100100000000006
+    currency: EUR
+    name: user_06
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE68100100100000000007
+    currency: EUR
+    name: user_07
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE41100100100000000008
+    currency: EUR
+    name: user_08
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE14100100100000000009
+    currency: EUR
+    name: user_09
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE84100100100000000010
+    currency: EUR
+    name: user_10
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE57100100100000000011
+    currency: EUR
+    name: user_11
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE30100100100000000012
+    currency: EUR
+    name: user_12
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE03100100100000000013
+    currency: EUR
+    name: user_13
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE73100100100000000014
+    currency: EUR
+    name: user_14
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE46100100100000000015
+    currency: EUR
+    name: user_15
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE19100100100000000016
+    currency: EUR
+    name: user_16
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE89100100100000000017
+    currency: EUR
+    name: user_17
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE62100100100000000018
+    currency: EUR
+    name: user_18
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE35100100100000000019
+    currency: EUR
+    name: user_19
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE08100100100000000020
+    currency: EUR
+    name: user_20
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE78100100100000000021
+    currency: EUR
+    name: user_21
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE51100100100000000022
+    currency: EUR
+    name: user_22
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE24100100100000000023
+    currency: EUR
+    name: user_23
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE94100100100000000024
+    currency: EUR
+    name: user_24
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE67100100100000000025
+    currency: EUR
+    name: user_25
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE40100100100000000026
+    currency: EUR
+    name: user_26
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE13100100100000000027
+    currency: EUR
+    name: user_27
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE83100100100000000028
+    currency: EUR
+    name: user_28
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE56100100100000000029
+    currency: EUR
+    name: user_29
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE29100100100000000030
+    currency: EUR
+    name: user_30
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE02100100100000000031
+    currency: EUR
+    name: user_31
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE72100100100000000032
+    currency: EUR
+    name: user_32
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE45100100100000000033
+    currency: EUR
+    name: user_33
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE18100100100000000034
+    currency: EUR
+    name: user_34
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE88100100100000000035
+    currency: EUR
+    name: user_35
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE61100100100000000036
+    currency: EUR
+    name: user_36
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE34100100100000000037
+    currency: EUR
+    name: user_37
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE07100100100000000038
+    currency: EUR
+    name: user_38
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE77100100100000000039
+    currency: EUR
+    name: user_39
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE50100100100000000040
+    currency: EUR
+    name: user_40
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE23100100100000000041
+    currency: EUR
+    name: user_41
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE93100100100000000042
+    currency: EUR
+    name: user_42
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE66100100100000000043
+    currency: EUR
+    name: user_43
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE39100100100000000044
+    currency: EUR
+    name: user_44
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE12100100100000000045
+    currency: EUR
+    name: user_45
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE82100100100000000046
+    currency: EUR
+    name: user_46
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE55100100100000000047
+    currency: EUR
+    name: user_47
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE28100100100000000048
+    currency: EUR
+    name: user_48
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE98100100100000000049
+    currency: EUR
+    name: user_49
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+  - iban: DE71100100100000000050
+    currency: EUR
+    name: user_50
+    product: Cash24
+    accountType: CASH
+    accountStatus: ENABLED
+    usageType: PRIV
+
 ###############################################
 #
 # Balances :
@@ -85,6 +438,160 @@ balances:
   - accNbr: DE33760320000000000003
     currency: EUR
     balance: 1600.00
+
+  # Test users' balances:
+
+  - accNbr: DE36100100100000000001
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE09100100100000000002
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE79100100100000000003
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE52100100100000000004
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE25100100100000000005
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE95100100100000000006
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE68100100100000000007
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE41100100100000000008
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE14100100100000000009
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE84100100100000000010
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE57100100100000000011
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE30100100100000000012
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE03100100100000000013
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE73100100100000000014
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE46100100100000000015
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE19100100100000000016
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE89100100100000000017
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE62100100100000000018
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE35100100100000000019
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE08100100100000000020
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE78100100100000000021
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE51100100100000000022
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE24100100100000000023
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE94100100100000000024
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE67100100100000000025
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE40100100100000000026
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE13100100100000000027
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE83100100100000000028
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE56100100100000000029
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE29100100100000000030
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE02100100100000000031
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE72100100100000000032
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE45100100100000000033
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE18100100100000000034
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE88100100100000000035
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE61100100100000000036
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE34100100100000000037
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE07100100100000000038
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE77100100100000000039
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE50100100100000000040
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE23100100100000000041
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE93100100100000000042
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE66100100100000000043
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE39100100100000000044
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE12100100100000000045
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE82100100100000000046
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE55100100100000000047
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE28100100100000000048
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE98100100100000000049
+    currency: EUR
+    balance: 100000.00
+  - accNbr: DE71100100100000000050
+    currency: EUR
+    balance: 100000.00
+
 
 ###############################################
 #
@@ -218,6 +725,707 @@ users:
         accessType: OWNER
         scaWeight: 90
 
+  # Test users with mocked names are provided to test the performance of ledgers with connector-examples:
+
+  - login: user_01
+    email: user_01@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_01@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE36100100100000000001
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_02
+    email: user_02@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_02@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE09100100100000000002
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_03
+    email: user_03@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_03@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE79100100100000000003
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_04
+    email: user_04@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_04@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE52100100100000000004
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_05
+    email: user_05@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_05@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE25100100100000000005
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_06
+    email: user_06@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_06@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE95100100100000000006
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_07
+    email: user_07@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_07@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE68100100100000000007
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_08
+    email: user_08@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_08@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE41100100100000000008
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_09
+    email: user_09@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_09@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE14100100100000000009
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_10
+    email: user_10@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_10@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE84100100100000000010
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_11
+    email: user_11@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_11@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE57100100100000000011
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_12
+    email: user_12@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_12@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE30100100100000000012
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_13
+    email: user_13@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_13@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE03100100100000000013
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_14
+    email: user_14@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_14@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE73100100100000000014
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_15
+    email: user_15@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_15@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE46100100100000000015
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_16
+    email: user_16@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_16@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE19100100100000000016
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_17
+    email: user_17@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_17@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE89100100100000000017
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_18
+    email: user_18@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_18@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE62100100100000000018
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_19
+    email: user_19@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_19@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE35100100100000000019
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_20
+    email: user_20@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_20@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE08100100100000000020
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_21
+    email: user_21@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_21@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE78100100100000000021
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_22
+    email: user_22@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_22@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE51100100100000000022
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_23
+    email: user_23@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_23@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE24100100100000000023
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_24
+    email: user_24@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_24@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE94100100100000000024
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_25
+    email: user_25@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_25@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE67100100100000000025
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_26
+    email: user_26@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_26@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE40100100100000000026
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_27
+    email: user_27@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_27@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE13100100100000000027
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_28
+    email: user_28@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_28@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE83100100100000000028
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_29
+    email: user_29@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_29@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE56100100100000000029
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_30
+    email: user_30@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_30@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE29100100100000000030
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_31
+    email: user_31@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_31@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE02100100100000000031
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_32
+    email: user_32@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_32@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE72100100100000000032
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_33
+    email: user_33@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_33@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE45100100100000000033
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_34
+    email: user_34@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_34@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE18100100100000000034
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_35
+    email: user_35@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_35@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE88100100100000000035
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_36
+    email: user_36@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_36@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE61100100100000000036
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_37
+    email: user_37@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_37@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE34100100100000000037
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_38
+    email: user_38@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_38@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE07100100100000000038
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_39
+    email: user_39@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_39@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE77100100100000000039
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_40
+    email: user_40@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_40@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE50100100100000000040
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_41
+    email: user_41@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_41@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE23100100100000000041
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_42
+    email: user_42@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_42@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE93100100100000000042
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_43
+    email: user_43@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_43@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE66100100100000000043
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_44
+    email: user_44@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_44@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE39100100100000000044
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_45
+    email: user_45@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_45@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE12100100100000000045
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_46
+    email: user_46@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_46@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE82100100100000000046
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_47
+    email: user_47@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_47@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE55100100100000000047
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_48
+    email: user_48@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_48@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE28100100100000000048
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_49
+    email: user_49@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_49@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE98100100100000000049
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
+
+  - login: user_50
+    email: user_50@mail.de
+    pin: 12345
+    scaUserData:
+      - scaMethod: SMTP_OTP
+        methodValue: user_50@mail.de
+        usesStaticTan: true
+        staticTan: 123456
+    accountAccesses:
+      - iban: DE71100100100000000050
+        currency: EUR
+        accessType: OWNER
+        scaWeight: 100
 
 ###############################################
 #
