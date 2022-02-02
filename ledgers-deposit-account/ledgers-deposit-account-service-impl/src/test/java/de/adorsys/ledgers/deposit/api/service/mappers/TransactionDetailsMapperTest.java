@@ -56,7 +56,7 @@ class TransactionDetailsMapperTest {
     private TransactionDetailsBO getExpected(boolean isPayment) {
         return new TransactionDetailsBO("trId", "entryRef", "endToEndId", "mandateId", "checkId",
                                         "creditorId", DATE, DATE, getAmount(isPayment), null, "CrName", "CrAgent", getAccount(), "ultCreditor",
-                                        "debtorName", "debtorAgent", getAccount(), "ultDebtor", null, null, PurposeCodeBO.ACCT,
+                                        "debtorName", "debtorAgent", getAccount(), "ultDebtor", "additional info", null, null, PurposeCodeBO.ACCT,
                                         "transactionCode", "proprietaryCode", null);
     }
 
@@ -72,6 +72,7 @@ class TransactionDetailsMapperTest {
         bo.setSubOprSrcId("pmtTargetId");
         bo.setRecordTime(DATE_TIME);
         bo.setOprId("oprId");
+        bo.setAdditionalInformation("additional info");
         bo.setOprSrc("pmtId");
         bo.setPstTime(DATE_TIME);
         bo.setPstType(PostingTypeBO.BUSI_TX);
@@ -98,6 +99,7 @@ class TransactionDetailsMapperTest {
         bo.setValueDate(DATE);
         bo.setTransactionAmount(getAmount(false));
         bo.setExchangeRate(null);
+        bo.setAdditionalInformation("additional info");
         bo.setCreditorName("CrName");
         bo.setCreditorAgent("CrAgent");
         bo.setCreditorAccount(getAccount());
@@ -106,8 +108,8 @@ class TransactionDetailsMapperTest {
         bo.setDebtorAgent("debtorAgent");
         bo.setDebtorAccount(getAccount());
         bo.setUltimateDebtor("ultDebtor");
-        bo.setRemittanceInformationStructured(null);
-        bo.setRemittanceInformationUnstructured(null);
+        bo.setRemittanceInformationStructuredArray(null);
+        bo.setRemittanceInformationUnstructuredArray(null);
         bo.setPurposeCode(PurposeCodeBO.ACCT);
         bo.setBankTransactionCode("transactionCode");
         bo.setProprietaryBankTransactionCode("proprietaryCode");

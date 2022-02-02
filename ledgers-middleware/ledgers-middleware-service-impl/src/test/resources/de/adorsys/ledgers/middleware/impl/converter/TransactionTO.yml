@@ -27,8 +27,12 @@ debtorAccount:
      currency: EUR
 
 ultimateDebtor: Self CrushTestDummy
-remittanceInformationStructured:
-remittanceInformationUnstructured: z
+remittanceInformationStructuredArray:
+  - reference: reference
+    referenceType: reference type
+    referenceIssuer: reference issuer
+remittanceInformationUnstructuredArray:
+  - remittance
 purposeCode: BKDF
 bankTransactionCode: posting_ID
 proprietaryBankTransactionCode: NA

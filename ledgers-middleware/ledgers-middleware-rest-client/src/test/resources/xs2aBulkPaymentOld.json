@@ -25,7 +25,14 @@
         "postCode": "90543",
         "streetName": "WBG Straße"
       },
-      "remittanceInformationUnstructured": "Ref. Number WBG-1222"
+      "remittanceInformationUnstructuredArray": ["Ref. Number WBG-1222"],
+      "remittanceInformationStructuredArray": [
+        {
+          "reference": "Ref. Number WBG-1222",
+          "referenceType": "referenceType",
+          "referenceIssuer": "referenceIssuer"
+        }
+      ]
     },
     {
       "endToEndIdentification": "RI-234567890",
@@ -46,7 +53,14 @@
         "postCode": "01067",
         "streetName": "Kaisergasse"
       },
-      "remittanceInformationUnstructured": "Ref. Number GRUENSTROM-2444"
+      "remittanceInformationUnstructuredArray": ["Ref. Number GRUENSTROM-2444"],
+      "remittanceInformationStructuredArray": [
+        {
+          "reference": "Ref. Number WBG-1222",
+          "referenceType": "referenceType",
+          "referenceIssuer": "referenceIssuer"
+        }
+      ]
     }
   ]
 }

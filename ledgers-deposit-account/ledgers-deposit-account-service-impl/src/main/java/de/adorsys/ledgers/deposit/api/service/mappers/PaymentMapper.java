@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.mappers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
 import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
@@ -8,6 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -23,11 +26,13 @@ public interface PaymentMapper {
     @Mapping(ignore = true, target = "payment")
     PaymentTargetBO toPaymentTargetBO(PaymentTarget target);
 
+    PaymentTarget toPaymentTarget(PaymentTargetBO targetBO);
+
     PaymentOrderDetailsBO toPaymentOrder(PaymentBO payment);
 
     @Mapping(target = "transactionStatus", source = "paymentTarget.payment.transactionStatus")
-    @Mapping(target = "remittanceInformationUnstructured", source = "paymentTarget.remittanceInformationUnstructured")
-    @Mapping(target = "remittanceInformationStructured", source = "paymentTarget.remittanceInformationStructured")
+    @Mapping(target = "remittanceInformationUnstructuredArray", source = "paymentTarget.remittanceInformationUnstructuredArray")
+    @Mapping(target = "remittanceInformationStructuredArray", source = "paymentTarget.remittanceInformationStructuredArray")
     @Mapping(target = "debtorName", source = "paymentTarget.payment.debtorName")
     @Mapping(target = "debtorAgent", source = "paymentTarget.payment.debtorAgent")
     @Mapping(target = "creditorName", source = "paymentTarget.creditorName")
@@ -48,7 +53,7 @@ public interface PaymentMapper {
     @Mapping(target = "proprietaryBankTransactionCode", expression = "java(de.adorsys.ledgers.deposit.api.domain.BankTransactionCode.getByPaymentProduct(paymentTarget.getPayment().getPaymentProduct()))")
     PaymentTargetDetailsBO toPaymentTargetDetails(String id, PaymentTargetBO paymentTarget, LocalDate postingTime, List<ExchangeRateBO> rate, BalanceBO balanceAfterTransaction);
 
-    @Mapping(target = "remittanceInformationUnstructured", constant = "Batch booking, no remittance information available")
+    @Mapping(target = "remittanceInformationUnstructuredArray", expression = "java(convertStringToRemittanceInformationUnstructuredByteArray(\"Batch booking, no remittance information available\", objectMapper))")
     @Mapping(target = "transactionStatus", source = "payment.transactionStatus")
     @Mapping(target = "debtorName", source = "payment.debtorName")
     @Mapping(target = "debtorAgent", source = "payment.debtorAgent")
@@ -66,9 +71,9 @@ public interface PaymentMapper {
     @Mapping(constant = "multiple", target = "creditorAgent")
     @Mapping(constant = "multiple", target = "creditorName")
     @Mapping(source = "rate", target = "exchangeRate")
-    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime, List<ExchangeRateBO> rate, BalanceBO balanceAfterTransaction);
+    PaymentTargetDetailsBO toPaymentTargetDetailsBatch(String id, PaymentBO payment, AmountBO amount, LocalDate postingTime, List<ExchangeRateBO> rate, BalanceBO balanceAfterTransaction, ObjectMapper objectMapper);
 
-    @Mapping(target = "remittanceInformationUnstructured", constant = "Cash deposit through Bank ATM")
+    @Mapping(target = "remittanceInformationUnstructuredArray", expression = "java(convertStringToRemittanceInformationUnstructuredByteArray(\"Cash deposit through Bank ATM\", objectMapper))")
     @Mapping(target = "debtorName", source = "depositAccount.name")
     @Mapping(target = "debtorAccount", source = "depositAccount.reference")
     @Mapping(target = "creditorName", source = "depositAccount.name")
@@ -79,7 +84,15 @@ public interface PaymentMapper {
     @Mapping(target = "bookingDate", source = "postingDate")
     @Mapping(target = "valueDate", source = "postingDate")
     @Mapping(target = "transactionAmount", source = "amount")
-    TransactionDetailsBO toDepositTransactionDetails(AmountBO amount, DepositAccountBO depositAccount, AccountReferenceBO creditorAccount, LocalDate postingDate, String postingLineId, BalanceBO balanceAfterTransaction);
+    TransactionDetailsBO toDepositTransactionDetails(AmountBO amount, DepositAccountBO depositAccount, AccountReferenceBO creditorAccount, LocalDate postingDate, String postingLineId, BalanceBO balanceAfterTransaction, ObjectMapper objectMapper);
 
     List<PaymentBO> toPaymentBOList(List<Payment> payments);
+
+    default byte[] convertStringToRemittanceInformationUnstructuredByteArray(String value, ObjectMapper objectMapper) {
+        try {
+            return objectMapper.writeValueAsBytes(Collections.singletonList(value));
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 }

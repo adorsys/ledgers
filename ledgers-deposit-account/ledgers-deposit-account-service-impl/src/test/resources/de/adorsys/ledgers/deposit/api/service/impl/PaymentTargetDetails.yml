@@ -37,7 +37,6 @@ creditorAddress:
     postalCode: 04210,
     country: Ukraine
   }
-remittanceInformationUnstructured: remittance
 paymentProduct: sepa-credit-transfers
 transactionStatus: RCVD
 bankTransactionCode: PMNT-ICDT-STDO

@@ -89,6 +89,11 @@ public class PostingLineBO {
 	private PostingStatusBO pstStatus = PostingStatusBO.POSTED;
 
     private String hash;
+
+    /*
+     * Some additional information about transaction could be provided by ASPSP
+     */
+    private String additionalInformation;
     
     /*
      * The record time of the discarding posting 

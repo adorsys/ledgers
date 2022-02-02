@@ -9,8 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 
@@ -89,7 +91,7 @@ class PaymentSyntacticalValidatorTest {
     }
 
     private PaymentTargetBO getTrg(String endToEndId) {
-        return new PaymentTargetBO(null, endToEndId, new AmountBO(Currency.getInstance("EUR"), BigDecimal.ONE), getRef(), null, "anton.brueckner", getAddress(), null, "remitance", null, null, null);
+        return new PaymentTargetBO(null, endToEndId, new AmountBO(Currency.getInstance("EUR"), BigDecimal.ONE), getRef(), null, "anton.brueckner", getAddress(), null, Collections.singletonList("remitance").toString().getBytes(StandardCharsets.UTF_8), null, null, null);
     }
 
     private AddressBO getAddress() {

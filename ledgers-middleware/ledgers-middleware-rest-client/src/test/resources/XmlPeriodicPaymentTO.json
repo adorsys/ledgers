@@ -23,8 +23,7 @@
       "creditorAccount": {
         "iban": "DE80760700240271232400"
       },
-      "creditorName": "Merchant123",
-      "remittanceInformationUnstructured": "Ref. Number Merchant-123456"
+      "creditorName": "Merchant123"
     }
   ]
 }

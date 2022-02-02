@@ -1,5 +1,15 @@
 paymentId: myPaymentId
-endToEndIdentification: 123456789
+batchBookingPreferred:
+requestedExecutionDate: 2018-12-12
+requestedExecutionTime: 12:00:00
+paymentType: SINGLE
+paymentProduct: "sepa-credit-transfers"
+startDate:
+endDate:
+executionRule:
+frequency:
+dayOfExecution:
+accountId: 123
 debtorAccount:
   {
     iban: DE91100000000123456789,
@@ -9,32 +19,37 @@ debtorAccount:
     msisdn: msisdn,
     currency: EUR
   }
-instructedAmount:
-  {
-    currency: EUR,
-    amount: 100
+transactionStatus: RCVD
+targets:
+  - {
+    paymentId: myPaymentId,
+    endToEndIdentification: 123456789,
+    instructedAmount:
+      {
+        currency: EUR,
+        amount: 100
+      },
+    creditorAccount:
+      {
+        iban: DE91100000000123456709,
+        bban: bban,
+        pan: pan,
+        maskedPan: maskedPan,
+        msisdn: msisdn,
+        currency: EUR
+      },
+    creditorAgent: agent,
+    creditorName: Rozetka.ua,
+    creditorAddress:
+      {
+        street: SomeStreet,
+        buildingNumber: 666,
+        city: Kiev,
+        postalCode: 04210,
+        country: Ukraine
+      },
+    remittanceInformationUnstructuredArray:
+      [
+          remittance
+      ]
   }
-creditorAccount:
-  {
-    iban: DE91100000000123456709,
-    bban: bban,
-    pan: pan,
-    maskedPan: maskedPan,
-    msisdn: msisdn,
-    currency: EUR
-  }
-creditorAgent: agent
-creditorName: Rozetka.ua
-creditorAddress:
-    {
-      street: SomeStreet,
-      buildingNumber: 666,
-      city: Kiev,
-      postalCode: 04210,
-      country: Ukraine
-    }
-remittanceInformationUnstructured: remittance
-paymentStatus: RCVD
-paymentProduct: SEPA
-requestedExecutionDate: 2018-12-12
-requestedExecutionTime: 12:00:00

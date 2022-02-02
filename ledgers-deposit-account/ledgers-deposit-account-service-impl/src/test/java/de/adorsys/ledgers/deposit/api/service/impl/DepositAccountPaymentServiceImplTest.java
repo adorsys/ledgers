@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentTypeBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionStatusBO;
@@ -19,7 +21,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,6 +41,7 @@ class DepositAccountPaymentServiceImplTest {
     private static final String WRONG_PAYMENT_ID = "wrongId";
     private static final String IBAN = "DE91100000000123456789";
     private static final String ACCOUNT_ID = "accountId";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
     private DepositAccountPaymentServiceImpl paymentService;
@@ -260,19 +269,50 @@ class DepositAccountPaymentServiceImplTest {
 
     private Payment getSinglePayment() {
         Payment payment = readFile(Payment.class, "PaymentSingle.yml");
-        payment.getTargets().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> {
+            t.setPayment(payment);
+            t.setRemittanceInformationUnstructuredArray(getRemittanceInfoUnstructured());
+            t.setRemittanceInformationStructuredArray(getRemittanceInfoStructured());
+        });
         return payment;
     }
 
     private PaymentBO getSinglePaymentBO() {
         PaymentBO payment = readFile(PaymentBO.class, "PaymentSingle.yml");
-        payment.getTargets().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> {
+            t.setPayment(payment);
+            t.setRemittanceInformationUnstructuredArray(getRemittanceInfoUnstructured());
+            t.setRemittanceInformationStructuredArray(getRemittanceInfoStructured());
+        });
         return payment;
+    }
+
+    private byte[] getRemittanceInfoUnstructured() {
+        List<String> remittanceUnstructuredList = Collections.singletonList("remittance");
+        try {
+            return objectMapper.writeValueAsBytes(remittanceUnstructuredList);
+        } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
+            throw new IllegalStateException("Resource file not found", ex);
+        }
+    }
+
+    private byte[] getRemittanceInfoStructured() {
+        try {
+            return Files.readAllBytes(Path.of("src/test/resources/de/adorsys/ledgers/deposit/api/service/impl/RemittanceInfoStructured.yml"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new IllegalStateException("Resource file not found", ex);
+        }
     }
 
     private Payment getBulkPayment() {
         Payment payment = readFile(Payment.class, "PaymentBulk.yml");
-        payment.getTargets().forEach(t -> t.setPayment(payment));
+        payment.getTargets().forEach(t -> {
+            t.setPayment(payment);
+            t.setRemittanceInformationUnstructuredArray(getRemittanceInfoUnstructured());
+            t.setRemittanceInformationStructuredArray(getRemittanceInfoStructured());
+        });
         return payment;
     }
 

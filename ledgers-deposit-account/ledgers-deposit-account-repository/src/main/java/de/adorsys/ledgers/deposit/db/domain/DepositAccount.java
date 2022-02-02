@@ -38,6 +38,7 @@ public class DepositAccount {
     private String currency;
 
     private String name;
+    private String displayName;
     private String product;
     private String branch;
 

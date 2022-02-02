@@ -48,6 +48,5 @@ targets:
           postalCode: 04210,
           country: Ukraine
       },
-      remittanceInformationUnstructured: remittance,
       payment:
   }

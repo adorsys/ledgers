@@ -1,6 +1,10 @@
 package de.adorsys.ledgers.deposit.api.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Currency;
 import java.util.Optional;
@@ -19,8 +23,8 @@ public class PaymentTargetBO {
     private String creditorName;
     private AddressBO creditorAddress;
     private PurposeCodeBO purposeCode;
-    private String remittanceInformationUnstructured;
-    private RemittanceInformationStructuredBO remittanceInformationStructured;
+    private byte[] remittanceInformationUnstructuredArray;
+    private byte[] remittanceInformationStructuredArray;
     private ChargeBearerBO chargeBearer;
     private PaymentBO payment;
 

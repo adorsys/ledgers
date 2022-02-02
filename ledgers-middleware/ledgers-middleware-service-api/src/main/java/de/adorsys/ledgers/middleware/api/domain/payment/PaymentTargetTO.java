@@ -5,6 +5,7 @@ import de.adorsys.ledgers.middleware.api.domain.general.AddressTO;
 import lombok.Data;
 
 import java.util.Currency;
+import java.util.List;
 
 @Data
 public class PaymentTargetTO {
@@ -17,7 +18,7 @@ public class PaymentTargetTO {
     private String creditorName;
     private AddressTO creditorAddress;
     private PurposeCodeTO purposeCode;
-    private String remittanceInformationUnstructured;
-    private RemittanceInformationStructuredTO remittanceInformationStructured;
+    private List<String> remittanceInformationUnstructuredArray;
+    private List<RemittanceInformationStructuredTO> remittanceInformationStructuredArray;
     private ChargeBearerTO chargeBearerTO;
 }

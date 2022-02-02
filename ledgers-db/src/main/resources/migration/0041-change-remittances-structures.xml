@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+
+    <changeSet author="sse@adorsys.com.ua" id="21-01-2022-01">
+        <comment>Add columns remittance_unstructured and remittance_structured in payment_target table</comment>
+        <addColumn tableName="payment_target">
+            <column name="remittance_unstructured" type="blob"/>
+            <column name="remittance_structured" type="blob"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="sse@adorsys.com.ua" id="21-01-2022-02">
+        <comment>Drop columns remittance_information_unstructured, reference, reference_type, reference_issuer in payment_target table</comment>
+        <dropColumn tableName="payment_target">
+            <column name="remittance_information_unstructured"/>
+            <column name="reference"/>
+            <column name="reference_type"/>
+            <column name="reference_issuer"/>
+        </dropColumn>
+    </changeSet>
+</databaseChangeLog>

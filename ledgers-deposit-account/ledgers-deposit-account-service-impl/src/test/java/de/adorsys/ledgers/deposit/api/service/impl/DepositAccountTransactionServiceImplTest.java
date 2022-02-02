@@ -18,7 +18,11 @@ import de.adorsys.ledgers.deposit.api.service.mappers.SerializeService;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
-import de.adorsys.ledgers.postings.api.domain.*;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.domain.PostingStatusBO;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
@@ -74,6 +78,8 @@ class DepositAccountTransactionServiceImplTest {
     private SerializeService serializeService;
     @Mock
     private PaymentMapper paymentMapper;
+    @Mock
+    private ObjectMapper objectMapper;
 
     private final PaymentMapper localPaymentMapper = Mappers.getMapper(PaymentMapper.class);
     @Mock
@@ -146,7 +152,7 @@ class DepositAccountTransactionServiceImplTest {
         when(ledgerService.findLedgerAccount(any(), anyString())).thenReturn(new LedgerAccountBO());
         when(ledgerService.findLedgerAccountById(any())).thenReturn(new LedgerAccountBO());
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
-        when(paymentMapper.toDepositTransactionDetails(any(), any(), any(), any(), anyString(), any())).thenAnswer(i -> localPaymentMapper.toDepositTransactionDetails(i.getArgument(0), i.getArgument(1), i.getArgument(2), (LocalDate) i.getArgument(3), (String) i.getArgument(4), i.getArgument(5)));
+        when(paymentMapper.toDepositTransactionDetails(any(), any(), any(), any(), anyString(), any(), any())).thenAnswer(i -> localPaymentMapper.toDepositTransactionDetails(i.getArgument(0), i.getArgument(1), i.getArgument(2), (LocalDate) i.getArgument(3), (String) i.getArgument(4), i.getArgument(5), i.getArgument(6)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
         AmountBO amount = new AmountBO(EUR, BigDecimal.TEN);
@@ -592,13 +598,13 @@ class DepositAccountTransactionServiceImplTest {
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", IBAN, "msisdn", "EUR",
-                                  "name", "product", null, AccountType.CASH, "bic", null,
+                                  "name","displayName", "product", null, AccountType.CASH, "bic", null,
                                   AccountUsage.PRIV, "details", false, false, LocalDateTime.now(), BigDecimal.ZERO);
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO),
+                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "displayName","product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO),
                 Collections.emptyList());
     }
 }

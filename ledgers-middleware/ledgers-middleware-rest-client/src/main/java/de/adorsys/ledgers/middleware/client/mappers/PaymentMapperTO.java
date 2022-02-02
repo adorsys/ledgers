@@ -1,6 +1,7 @@
 package de.adorsys.ledgers.middleware.client.mappers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -20,7 +21,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -152,8 +158,8 @@ public class PaymentMapperTO {
         mapProperties(creditorPart, "creditorAgent", node, target::setCreditorAgent, String.class);
         mapProperties(creditorPart, "creditorName", node, target::setCreditorName, String.class);
         mapProperties(creditorPart, "purposeCode", node, target::setPurposeCode, PurposeCodeTO.class);
-        mapProperties(creditorPart, "remittanceInformationUnstructured", node, target::setRemittanceInformationUnstructured, String.class);
-        mapProperties(creditorPart, "remittanceInformationStructured", node, target::setRemittanceInformationStructured, RemittanceInformationStructuredTO.class);
+        mapProperties(creditorPart, "remittanceInformationUnstructuredArray", node, target::setRemittanceInformationUnstructuredArray, List.class);
+        mapProperties(creditorPart, "remittanceInformationStructuredArray", node, target::setRemittanceInformationStructuredArray, new TypeReference<>() {});
         mapProperties(creditorPart, "chargeBearer", node, target::setChargeBearerTO, ChargeBearerTO.class);
 
         fillEmbeddedProperty(creditorPart, "creditorAccount", node, this::mapReference, target::setCreditorAccount);
@@ -205,6 +211,31 @@ public class PaymentMapperTO {
         Optional.ofNullable(map.get(property))
                 .ifPresent(pr -> pr.forEach(p -> mapProperty(node, consumer, clazz, p)));
     }
+
+    private <T> void mapProperties(Map<String, List<String>> map, String property, JsonNode node, Consumer<T> consumer, TypeReference<T> typeReference) {
+        Optional.ofNullable(map.get(property))
+                .ifPresent(pr -> pr.forEach(p -> mapProperty(node, consumer, typeReference, p)));
+    }
+
+    private <T> void mapProperty(JsonNode node, Consumer<T> consumer, TypeReference<T> typeReference, String property) {
+        Optional.ofNullable(node.findValue(property))
+                .map(n -> mapObject(n, typeReference))
+                .ifPresent(consumer);
+    }
+
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    private <T> T mapObject(JsonNode node, TypeReference<T> typeReference) {
+        try {
+            while (node.fields().hasNext()) {
+                node = node.fields().next().getValue();
+            }
+            return mapper.readValue(node.toString(), typeReference);
+        } catch (IOException e) {
+            log.error("Parse value exception {}", e.getMessage());
+        }
+        return null;
+    }
+
 
     private <T> void mapProperty(JsonNode node, Consumer<T> consumer, Class<T> clazz, String property) {
         Optional.ofNullable(node.findValue(property))

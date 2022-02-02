@@ -27,8 +27,6 @@ debtorAccount:
      currency: EUR
 
 ultimateDebtor: Self CrushTestDummy
-remittanceInformationStructured:
-remittanceInformationUnstructured: z
 purposeCode: BKDF
 bankTransactionCode: posting_ID
 proprietaryBankTransactionCode: NA

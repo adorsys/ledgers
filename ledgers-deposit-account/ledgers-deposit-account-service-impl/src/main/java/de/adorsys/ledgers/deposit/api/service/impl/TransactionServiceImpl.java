@@ -1,6 +1,11 @@
 package de.adorsys.ledgers.deposit.api.service.impl;
 
-import de.adorsys.ledgers.deposit.api.domain.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.adorsys.ledgers.deposit.api.domain.AccountReferenceBO;
+import de.adorsys.ledgers.deposit.api.domain.AmountBO;
+import de.adorsys.ledgers.deposit.api.domain.MockBookingDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentOrderDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.TransactionService;
 import de.adorsys.ledgers.deposit.api.service.mappers.SerializeService;
@@ -36,6 +41,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final PostingMockService postingService;
     private final LedgerService ledgerService;
     private final DepositAccountConfigService depositAccountConfigService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public Map<String, String> bookMockTransaction(List<MockBookingDetailsBO> trDetails) {
@@ -199,7 +205,8 @@ public class TransactionServiceImpl implements TransactionService {
         lineDetails.setCreditorAccount(creditor);
         AccountReferenceBO debtor = getCrDrReference(details, !details.isPaymentTransaction());
         lineDetails.setDebtorAccount(debtor);
-        lineDetails.setRemittanceInformationUnstructured(details.getRemittance());
+        lineDetails.setRemittanceInformationUnstructuredArray(serializeService.serializeObjectToBytes(Collections.singletonList(details.getRemittance())));
+
         return serializeService.serializeOprDetails(lineDetails);
     }
 

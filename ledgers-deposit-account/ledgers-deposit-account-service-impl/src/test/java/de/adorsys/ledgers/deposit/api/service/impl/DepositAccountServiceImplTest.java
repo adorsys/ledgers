@@ -8,7 +8,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import de.adorsys.ledgers.deposit.api.domain.*;
+import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
+import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
+import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
+import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
@@ -22,7 +27,6 @@ import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
-import de.adorsys.ledgers.util.exception.DepositErrorCode;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
 import org.junit.jupiter.api.Test;
@@ -377,7 +381,7 @@ class DepositAccountServiceImplTest {
 
     private DepositAccount getDepositAccount(boolean status, BigDecimal creditAmount) {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                                  "name", "product", null, AccountType.CASH, "bic", "linked",
+                                  "name", "displayName", "product", null, AccountType.CASH, "bic", "linked",
                                   AccountUsage.PRIV, "details", status, false, CREATED, creditAmount);
     }
 
@@ -390,6 +394,7 @@ class DepositAccountServiceImplTest {
                        .bic("bic")
                        .usageType(AccountUsageBO.PRIV).details("details")
                        .linkedAccounts("linked")
+                       .displayName("displayName")
                        .created(CREATED)
                        .creditLimit(BigDecimal.ZERO)
                        .build();

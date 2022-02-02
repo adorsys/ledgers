@@ -9,6 +9,7 @@ accounts:
   - iban: DE69760700240340283600
     currency: EUR
     name: Marion Mueller
+    displayName: DE69760700240340283600 - EUR
     product: Cash24
     accountType: CASH
     accountStatus: ENABLED
@@ -16,6 +17,7 @@ accounts:
   - iban: DE80760700240271232400
     currency: EUR
     name: Anton Brueckner
+    displayName: DE80760700240271232400 - EUR
     product: Cash24
     accountType: CASH
     accountStatus: ENABLED
@@ -23,6 +25,7 @@ accounts:
   - iban: DE38760700240320465700
     currency: EUR
     name: Max Musterman
+    displayName: DE38760700240320465700 - EUR
     product: Cash24
     accountType: CASH
     accountStatus: ENABLED
@@ -596,7 +599,7 @@ balances:
 ###############################################
 #
 # Users :
-# 
+#
 # Online banking users to be created by the test system
 #
 ###############################################
@@ -1430,7 +1433,7 @@ users:
 ###############################################
 #
 # Single Payments :
-# 
+#
 # Single Payments to bank internal and bank external accounts
 #
 ###############################################
@@ -1459,8 +1462,7 @@ singlePayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-            },
-          remittanceInformationUnstructured: Payment
+            }
         }
       debtorAccount:
         iban: DE69760700240340283600
@@ -1504,8 +1506,7 @@ singlePayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-            },
-          remittanceInformationUnstructured: Payment
+            }
         }
       debtorAccount:
         iban: DE80760700240271232400
@@ -1549,8 +1550,7 @@ singlePayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-            },
-          remittanceInformationUnstructured: Payment
+            }
         }
       debtorAccount:
         iban: DE80760700240271232400
@@ -1594,8 +1594,7 @@ singlePayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-            },
-          remittanceInformationUnstructured: Payment
+            }
         }
       debtorAccount:
         iban: DE69760700240340283600
@@ -1639,8 +1638,7 @@ singlePayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-            },
-          remittanceInformationUnstructured: Payment
+            }
         }
       debtorAccount:
         iban: DE38760700240320465700
@@ -1684,8 +1682,7 @@ singlePayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-            },
-          remittanceInformationUnstructured: Payment
+            }
         }
       debtorAccount:
         iban: DE38760700240320465700
@@ -1708,7 +1705,7 @@ singlePayments:
 ###############################################
 #
 # Bulk Payments :
-# 
+#
 # Bulk payments with and without batch
 #
 ###############################################
@@ -1732,7 +1729,6 @@ bulkPayments:
               city: Kiev,
               postalCode: 04210,
               country: Ukraine
-          remittanceInformationUnstructured: Payment
           endToEndIdentification: 20180623TAAA001
           instructedAmount:
             amount: 150
@@ -1748,7 +1744,6 @@ bulkPayments:
               postalCode: 04210,
               country: Ukraine
           endToEndIdentification: 20180623TAAA002
-          remittanceInformationUnstructured: Payment
           instructedAmount:
             amount: 100
             currency: EUR
@@ -1786,7 +1781,6 @@ bulkPayments:
               postalCode: 04210,
               country: Ukraine
           endToEndIdentification: 20180624TAAA001
-          remittanceInformationUnstructured: Payment
           instructedAmount:
             amount: 2000.00
             currency: EUR
@@ -1801,7 +1795,6 @@ bulkPayments:
               postalCode: 04210,
               country: Ukraine
           endToEndIdentification: 20180624TAAA002
-          remittanceInformationUnstructured: Payment
           instructedAmount:
             amount: 300.00
             currency: EUR
@@ -1839,7 +1832,6 @@ bulkPayments:
               postalCode: 04210,
               country: Ukraine
           endToEndIdentification: 20180625TAAA001
-          remittanceInformationUnstructured: Payment
           instructedAmount:
             amount: 150
             currency: EUR
@@ -1854,7 +1846,6 @@ bulkPayments:
               postalCode: 04210,
               country: Ukraine
           endToEndIdentification: 20180625TAAA002
-          remittanceInformationUnstructured: Payment
           instructedAmount:
             amount: 100
             currency: EUR

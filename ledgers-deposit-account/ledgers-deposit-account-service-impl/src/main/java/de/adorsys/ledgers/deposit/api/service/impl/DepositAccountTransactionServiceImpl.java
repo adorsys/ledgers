@@ -16,6 +16,7 @@
 
 package de.adorsys.ledgers.deposit.api.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
@@ -36,7 +37,12 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.List;
+import java.util.Optional;
 
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.DEPOSIT_ACCOUNT_NOT_FOUND;
 import static de.adorsys.ledgers.util.exception.DepositErrorCode.DEPOSIT_OPERATION_FAILURE;
@@ -50,8 +56,9 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
     private final SerializeService serializeService;
     private final DepositAccountService depositAccountService;
     private final CurrencyExchangeRatesService exchangeRatesService;
+    private final ObjectMapper objectMapper;
 
-    public DepositAccountTransactionServiceImpl(PostingService postingService, LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService, PaymentMapper paymentMapper, PostingMapper postingMapper, SerializeService serializeService, DepositAccountService depositAccountService, CurrencyExchangeRatesService exchangeRatesService) {
+    public DepositAccountTransactionServiceImpl(PostingService postingService, LedgerService ledgerService, DepositAccountConfigService depositAccountConfigService, PaymentMapper paymentMapper, PostingMapper postingMapper, SerializeService serializeService, DepositAccountService depositAccountService, CurrencyExchangeRatesService exchangeRatesService, ObjectMapper objectMapper) {
         super(depositAccountConfigService, ledgerService);
         this.postingService = postingService;
         this.paymentMapper = paymentMapper;
@@ -59,6 +66,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         this.serializeService = serializeService;
         this.depositAccountService = depositAccountService;
         this.exchangeRatesService = exchangeRatesService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -135,7 +143,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
 
         String lineId = Ids.id();
         AccountReferenceBO creditor = account.getReference();
-        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, account, creditor, postingDateTime.toLocalDate(), lineId, balanceAfterTransaction));
+        String debitTransactionDetails = serializeService.serializeOprDetails(paymentMapper.toDepositTransactionDetails(amount, account, creditor, postingDateTime.toLocalDate(), lineId, balanceAfterTransaction, objectMapper));
         return postingMapper.buildPostingLine(debitTransactionDetails, ledgerAccount, debitAmount, creditAmount, "ATM transfer", lineId);
     }
 
@@ -188,7 +196,7 @@ public class DepositAccountTransactionServiceImpl extends AbstractServiceImpl im
         String id = Ids.id();
         BalanceBO balanceAfterTransaction = resolveBalanceAfterTransaction(true, depositAccountService.getAccountDetailsById(payment.getAccountId(), LocalDateTime.now(), true), batchAmount);
         ratesForDebitLine = ratesForDebitLine.isEmpty() ? null : ratesForDebitLine;
-        String debitLineDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate(), ratesForDebitLine, balanceAfterTransaction));
+        String debitLineDetails = serializeService.serializeOprDetails(paymentMapper.toPaymentTargetDetailsBatch(id, payment, amount, pstTime.toLocalDate(), ratesForDebitLine, balanceAfterTransaction, objectMapper));
         LedgerAccountBO debtorLedgerAccount = getLedgerAccount(ledger, payment.getPaymentProduct(), payment.getDebtorAccount(), true, true, false);
         PostingLineBO debitLine = postingMapper.buildPostingLine(debitLineDetails, debtorLedgerAccount, amount.getAmount(), BigDecimal.ZERO, payment.getPaymentId(), id);
         posting.getLines().add(debitLine);
