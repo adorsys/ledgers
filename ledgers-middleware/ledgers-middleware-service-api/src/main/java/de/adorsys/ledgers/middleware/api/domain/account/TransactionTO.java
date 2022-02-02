@@ -55,8 +55,9 @@ public class TransactionTO {
     private AccountReferenceTO debtorAccount;
     private String debtorAgent;
     private String ultimateDebtor;
-    private String remittanceInformationUnstructured;
-    private RemittanceInformationStructuredTO remittanceInformationStructured;
+    private String additionalInformation;
+    private List<String> remittanceInformationUnstructuredArray;
+    private List<RemittanceInformationStructuredTO> remittanceInformationStructuredArray;
     private String purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;

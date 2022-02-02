@@ -13,6 +13,7 @@ import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.FrequencyCodeTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTargetTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.RemittanceInformationStructuredTO;
 import de.adorsys.ledgers.middleware.client.mappers.PaymentMapperConfiguration;
 import de.adorsys.ledgers.middleware.client.mappers.PaymentMapperTO;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 
@@ -170,7 +172,7 @@ class PaymentTOMapperTest {
         payment.setFrequency(FrequencyCodeTO.MONTHLY);
         payment.setDayOfExecution(14);
         payment.setDebtorAccount(new AccountReferenceTO("DE40500105178578796457", null, null, null, null, Currency.getInstance("EUR")));
-        payment.setTargets(getTargets());
+        payment.setTargets(getTargetsTwoRemittanceElements());
         return payment;
     }
 
@@ -182,10 +184,34 @@ class PaymentTOMapperTest {
         target.setCreditorAgent("AAAADEBBXXX");
         target.setCreditorAddress(new AddressTO("WBG Straße", "56", "Nürnberg", "90543", "DE", null, null));
         target.setCreditorName("WBG");
-        target.setRemittanceInformationUnstructured("Ref. Number WBG-1222");
+        target.setRemittanceInformationUnstructuredArray(Collections.singletonList("Ref. Number WBG-1222"));
+        target.setRemittanceInformationStructuredArray(Collections.singletonList(getRemittanceStructuredTO()));
         ArrayList<PaymentTargetTO> targets = new ArrayList<>();
         targets.add(target);
         return targets;
+    }
+
+    private List<PaymentTargetTO> getTargetsTwoRemittanceElements() {
+        PaymentTargetTO target = new PaymentTargetTO();
+        target.setEndToEndIdentification("WBG-123456789");
+        target.setInstructedAmount(new AmountTO(Currency.getInstance("CHF"), new BigDecimal("1.00")));
+        target.setCreditorAccount(new AccountReferenceTO("DE40500105178578796457", null, null, null, null, Currency.getInstance("EUR")));
+        target.setCreditorAgent("AAAADEBBXXX");
+        target.setCreditorAddress(new AddressTO("WBG Straße", "56", "Nürnberg", "90543", "DE", null, null));
+        target.setCreditorName("WBG");
+        target.setRemittanceInformationUnstructuredArray(List.of("Ref. Number WBG-1222", "Ref. Number WBG-6666"));
+        target.setRemittanceInformationStructuredArray(List.of(getRemittanceStructuredTO(), getRemittanceStructuredTO()));
+        ArrayList<PaymentTargetTO> targets = new ArrayList<>();
+        targets.add(target);
+        return targets;
+    }
+
+    private RemittanceInformationStructuredTO getRemittanceStructuredTO() {
+        RemittanceInformationStructuredTO remittance = new RemittanceInformationStructuredTO();
+        remittance.setReference("Ref. Number WBG-1222");
+        remittance.setReferenceType("referenceType");
+        remittance.setReferenceIssuer("referenceIssuer");
+        return remittance;
     }
 
     private String readPayment(String file) throws IOException {
@@ -216,7 +242,8 @@ class PaymentTOMapperTest {
         target.setCreditorAgent("AAAADEBBXXX");
         target.setCreditorAddress(new AddressTO("Kaisergasse", "74", "Dresden", "01067", "DE", null, null));
         target.setCreditorName("Grünstrom");
-        target.setRemittanceInformationUnstructured("Ref. Number GRUENSTROM-2444");
+        target.setRemittanceInformationUnstructuredArray(Collections.singletonList("Ref. Number GRUENSTROM-2444"));
+        target.setRemittanceInformationStructuredArray(Collections.singletonList(getRemittanceStructuredTO()));
         payment.getTargets().add(target);
         return payment;
     }

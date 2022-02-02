@@ -1,6 +1,8 @@
 package de.adorsys.ledgers.deposit.api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import de.adorsys.ledgers.deposit.api.service.util.BytesToStringDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,8 +33,13 @@ public class TransactionDetailsBO {
     private String debtorAgent;
     private AccountReferenceBO debtorAccount;
     private String ultimateDebtor;
-    private RemittanceInformationStructuredBO remittanceInformationStructured;
-    private String remittanceInformationUnstructured;
+    private String additionalInformation;
+
+    @JsonDeserialize(using = BytesToStringDeserializer.class)
+    private byte[] remittanceInformationStructuredArray;
+
+    @JsonDeserialize(using = BytesToStringDeserializer.class)
+    private byte[] remittanceInformationUnstructuredArray;
     private PurposeCodeBO purposeCode;
     private String bankTransactionCode;
     private String proprietaryBankTransactionCode;

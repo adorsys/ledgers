@@ -1,5 +1,7 @@
 package de.adorsys.ledgers.deposit.api.service.mappers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.impl.DepositAccountServiceImpl;
 import de.adorsys.ledgers.deposit.db.domain.Payment;
@@ -14,6 +16,7 @@ import pro.javatar.commons.reader.YamlReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +36,7 @@ class PaymentMapperTest {
     private final PaymentBO SINGLE_PMT_BO = readYml(PaymentBO.class, SINGLE_PATH);
     private final Payment BULK_PMT = readYml(Payment.class, BULK_PATH);
     private final PaymentBO BULK_PMT_BO = readYml(PaymentBO.class, BULK_PATH);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
     private PaymentMapper mapper = Mappers.getMapper(PaymentMapper.class);
@@ -105,7 +109,7 @@ class PaymentMapperTest {
         LocalDate date = LocalDate.of(2018, 12, 12);
 
         // When
-        PaymentTargetDetailsBO result = mapper.toPaymentTargetDetailsBatch(TRANSACTION_ID, payment, amount, date, null, null);
+        PaymentTargetDetailsBO result = mapper.toPaymentTargetDetailsBatch(TRANSACTION_ID, payment, amount, date, null, null, objectMapper);
 
         // Then
         assertNotNull(result);
@@ -113,9 +117,9 @@ class PaymentMapperTest {
     }
 
     @Test
-    void trDetailsForDepositOperation() {
+    void trDetailsForDepositOperation() throws JsonProcessingException {
         // When
-        TransactionDetailsBO result = mapper.toDepositTransactionDetails(new AmountBO(EUR, BigDecimal.TEN), getDepositAccount(), new AccountReferenceBO(), POSTING_DATE, LINE_ID, null);
+        TransactionDetailsBO result = mapper.toDepositTransactionDetails(new AmountBO(EUR, BigDecimal.TEN), getDepositAccount(), new AccountReferenceBO(), POSTING_DATE, LINE_ID, null, objectMapper);
 
         TransactionDetailsBO expected = getDepositTrDetails();
         expected.setTransactionId(result.getTransactionId());
@@ -127,10 +131,10 @@ class PaymentMapperTest {
     }
 
     private DepositAccountBO getDepositAccount() {
-        return new DepositAccountBO("id", "IBAN", null, null, null, null, EUR, "Anton Brueckner", null, null, null, null, null, null, false, false, "branch", null, BigDecimal.ZERO);
+        return new DepositAccountBO("id", "IBAN", null, null, null, null, EUR, "Anton Brueckner", null, null, null, null, null, null, null, false, false, "branch", null, BigDecimal.ZERO);
     }
 
-    private TransactionDetailsBO getDepositTrDetails() {
+    private TransactionDetailsBO getDepositTrDetails() throws JsonProcessingException {
         TransactionDetailsBO t = new TransactionDetailsBO();
         t.setTransactionId(Ids.id());
         t.setEndToEndId(LINE_ID);
@@ -143,7 +147,7 @@ class PaymentMapperTest {
         t.setDebtorAccount(getDepositAccount().getReference());
         t.setBankTransactionCode("PMNT-MCOP-OTHR");
         t.setProprietaryBankTransactionCode("PMNT-MCOP-OTHR");
-        t.setRemittanceInformationUnstructured("Cash deposit through Bank ATM");
+        t.setRemittanceInformationUnstructuredArray(objectMapper.writeValueAsBytes(Collections.singletonList("Cash deposit through Bank ATM")));
         return t;
     }
 

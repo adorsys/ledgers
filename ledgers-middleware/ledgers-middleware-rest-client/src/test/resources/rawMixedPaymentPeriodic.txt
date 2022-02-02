@@ -30,7 +30,6 @@ Content-Type: application/xml
 <Amt><InstdAmt Ccy="EUR">123</InstdAmt></Amt>
 <Cdtr><Nm>Merchant123</Nm></Cdtr>
 <CdtrAcct><Id><IBAN>DE80760700240271232400</IBAN></Id></CdtrAcct>
-<RmtInf><Ustrd>Ref. Number Merchant-123456</Ustrd></RmtInf>
 
 </CdtTrfTxInf>
 </PmtInf>

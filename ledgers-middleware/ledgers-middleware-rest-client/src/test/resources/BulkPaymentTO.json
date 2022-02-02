@@ -24,8 +24,7 @@
       "creditorAddress":{
         "line1":"Some address here"
       },
-      "purposeCode":"CDCD",
-      "remittanceInformationUnstructured":"Some unstructured info on the first payment..."
+      "purposeCode":"CDCD"
     },
     {
       "endToEndIdentification":"SECOND-PAYMENT",
@@ -43,8 +42,7 @@
         "city":"Nurnberg",
         "postalCode":"123456",
         "country":"DE"
-      },
-      "remittanceInformationUnstructured":"Some unstructured info on the second payment..."
+      }
     }
   ]
 }

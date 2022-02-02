@@ -1,5 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.converter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -7,16 +8,20 @@ import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.RemittanceInformationStructuredTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {PaymentConverterImpl.class, RemittanceMapper.class, ObjectMapper.class})
 class PaymentConverterTest {
     private static final String PATH_SINGLE_BO = "PaymentSingle.yml";
     private static final String PATH_SINGLE_TO = "PaymentSingleTO.yml";
@@ -25,33 +30,51 @@ class PaymentConverterTest {
     private static final String PATH_BULK_BO = "PaymentBulk.yml";
     private static final String PATH_BULK_TO = "PaymentBulkTO.yml";
 
-    @InjectMocks
-    private PaymentConverterImpl converter;
+    @Autowired
+    private PaymentConverter converter;
 
     private static ObjectMapper mapper = getObjectMapper();
 
+    private final ObjectMapper defaultMapper = new ObjectMapper();
+
     @Test
-    void toPaymentTO() {
-        PaymentTO result = converter.toPaymentTO(readYml(PaymentBO.class, PATH_SINGLE_BO));
-        assertEquals(readYml(PaymentTO.class, PATH_SINGLE_BO), result);
+    void toPaymentTO() throws JsonProcessingException {
+        PaymentBO paymentBO = readYml(PaymentBO.class, PATH_SINGLE_BO);
+        paymentBO.getTargets().get(0).setRemittanceInformationUnstructuredArray(defaultMapper.writeValueAsBytes(Collections.singletonList("remittance")));
+        PaymentTO result = converter.toPaymentTO(paymentBO);
+        assertEquals(readYml(PaymentTO.class, PATH_SINGLE_TO), result);
     }
 
     @Test
-    void toTransactionTO() {
+    void toTransactionTO() throws JsonProcessingException {
+        TransactionDetailsBO transactionDetailsBO = readYml(TransactionDetailsBO.class, "TransactionBO.yml");
+        RemittanceInformationStructuredTO remittanceInformationStructuredTO = new RemittanceInformationStructuredTO();
+        remittanceInformationStructuredTO.setReference("reference");
+        remittanceInformationStructuredTO.setReferenceType("reference type");
+        remittanceInformationStructuredTO.setReferenceIssuer("reference issuer");
+        transactionDetailsBO.setRemittanceInformationUnstructuredArray(defaultMapper.writeValueAsBytes(Collections.singletonList("remittance")));
+        transactionDetailsBO.setRemittanceInformationStructuredArray(defaultMapper.writeValueAsBytes(Collections.singletonList(remittanceInformationStructuredTO)));
         // When
-        TransactionTO result = converter.toTransactionTO(readYml(TransactionDetailsBO.class, "TransactionBO.yml"));
+        TransactionTO result = converter.toTransactionTO(transactionDetailsBO);
 
         // Then
         assertEquals(readYml(TransactionTO.class, "TransactionTO.yml"), result);
     }
 
     @Test
-    void toTransactionDetailsBO() {
+    void toTransactionDetailsBO() throws JsonProcessingException {
+        TransactionDetailsBO transactionDetailsBO = readYml(TransactionDetailsBO.class, "TransactionBO.yml");
+        RemittanceInformationStructuredTO remittanceInformationStructuredTO = new RemittanceInformationStructuredTO();
+        remittanceInformationStructuredTO.setReference("reference");
+        remittanceInformationStructuredTO.setReferenceType("reference type");
+        remittanceInformationStructuredTO.setReferenceIssuer("reference issuer");
+        transactionDetailsBO.setRemittanceInformationUnstructuredArray(defaultMapper.writeValueAsBytes(Collections.singletonList("remittance")));
+        transactionDetailsBO.setRemittanceInformationStructuredArray(defaultMapper.writeValueAsBytes(Collections.singletonList(remittanceInformationStructuredTO)));
         // When
         TransactionDetailsBO result = converter.toTransactionDetailsBO(readYml(TransactionTO.class, "TransactionTO.yml"));
 
         // Then
-        assertEquals(readYml(TransactionDetailsBO.class, "TransactionBO.yml"), result);
+        assertEquals(transactionDetailsBO, result);
     }
 
     private static <T> T readYml(Class<T> aClass, String file) {

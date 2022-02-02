@@ -62,6 +62,7 @@ public class AccountDetailsTO {
     private String msisdn;
     private Currency currency;
     private String name;
+    private String displayName;
     private String product;
     private AccountTypeTO accountType;
     private AccountStatusTO accountStatus;

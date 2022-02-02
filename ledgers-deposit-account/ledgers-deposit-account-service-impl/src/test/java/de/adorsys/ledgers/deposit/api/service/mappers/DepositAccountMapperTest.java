@@ -45,7 +45,7 @@ class DepositAccountMapperTest {
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                                  "name", "product", null, AccountType.CASH, "bic",
+                                  "name","displayName", "product", null, AccountType.CASH, "bic",
                                   "Some linked account", AccountUsage.PRIV, "details", false, false, CREATED, BigDecimal.ZERO);
     }
 
@@ -59,6 +59,7 @@ class DepositAccountMapperTest {
         bo.setProduct("product");
         bo.setAccountType(AccountTypeBO.CASH);
         bo.setBic("bic");
+        bo.setDisplayName("displayName");
         bo.setLinkedAccounts("Some linked account");
         bo.setUsageType(AccountUsageBO.PRIV);
         bo.setDetails("details");

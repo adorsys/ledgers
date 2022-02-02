@@ -50,6 +50,7 @@ public class DepositAccountBO {
 
     private Currency currency;
     private String name;
+    private String displayName;
     private String product;
 
     private AccountTypeBO accountType;

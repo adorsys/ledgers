@@ -23,4 +23,15 @@ public class SerializeService {
                           .build();
         }
     }
+
+    public byte[] serializeObjectToBytes(Object object) {
+        try {
+            return objectMapper.writeValueAsBytes(object);
+        } catch (JsonProcessingException ex) {
+            throw DepositModuleException.builder()
+                          .errorCode(PAYMENT_PROCESSING_FAILURE)
+                          .devMsg(String.format("Object can't be serialized, error message: %s", ex.getMessage()))
+                          .build();
+        }
+    }
 }

@@ -18,10 +18,12 @@ package de.adorsys.ledgers.middleware.impl.converter;
 
 import de.adorsys.ledgers.deposit.api.domain.ExchangeRateBO;
 import de.adorsys.ledgers.deposit.api.domain.PaymentBO;
+import de.adorsys.ledgers.deposit.api.domain.PaymentTargetBO;
 import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
 import de.adorsys.ledgers.middleware.api.domain.account.ExchangeRateTO;
 import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
 import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTO;
+import de.adorsys.ledgers.middleware.api.domain.payment.PaymentTargetTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -29,8 +31,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("PMD")
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {RemittanceMapper.class})
 public interface PaymentConverter {
+
+    PaymentTargetBO toPaymentTargetBO(PaymentTargetTO paymentTargetTO);
+
+    PaymentTargetTO toPaymentTargetTO(PaymentTargetBO paymentTargetBO);
+
     PaymentBO toPaymentBO(PaymentTO payment);
 
     List<TransactionTO> toTransactionTOList(List<TransactionDetailsBO> transactions);

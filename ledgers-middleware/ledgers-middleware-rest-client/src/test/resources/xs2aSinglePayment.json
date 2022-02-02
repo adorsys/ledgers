@@ -22,5 +22,12 @@
     "postCode": "90543",
     "streetName": "WBG Straße"
   },
-  "remittanceInformationUnstructured": "Ref. Number WBG-1222"
+  "remittanceInformationUnstructuredArray": ["Ref. Number WBG-1222"],
+  "remittanceInformationStructuredArray": [
+    {
+      "reference": "Ref. Number WBG-1222",
+      "referenceType": "referenceType",
+      "referenceIssuer": "referenceIssuer"
+    }
+  ]
 }

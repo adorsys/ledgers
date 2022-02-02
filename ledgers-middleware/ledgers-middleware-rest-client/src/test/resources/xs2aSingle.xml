@@ -63,9 +63,6 @@
                 <Purp>
                     <Cd>CDCD</Cd>
                 </Purp>
-                <RmtInf>
-                    <Ustrd>Some unstructured info on the first payment...</Ustrd>
-                </RmtInf>
             </CdtTrfTxInf>
         </PmtInf>
     </CstmrCdtTrfInitn>

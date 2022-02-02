@@ -88,7 +88,8 @@ public class PaymentSyntacticalValidator extends AbstractPaymentValidator {
         if (Objects.nonNull(target.getCreditorAddress())) { // Make CreditorAddress validation optional
             validateAddress(target.getCreditorAddress());
         }
-        shouldNotExceed(target::getRemittanceInformationUnstructured, 140, "RemittanceInformationUnstructured");
+//        This validation can be configured in XS2A.
+//        target.getRemittanceInformationUnstructuredArray().forEach(r -> shouldNotExceed(r::toString , 140, "RemittanceInformationUnstructuredArray element"));
 
         //target.getCreditorAgent(); target.getChargeBearer(); target.getPurposeCode(); target.getRemittanceInformationStructured(); N/A
     }

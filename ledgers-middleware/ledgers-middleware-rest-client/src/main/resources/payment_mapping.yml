@@ -55,11 +55,11 @@ creditorPart:
   purposeCode:
     - purposeCode
     - Purp
-  remittanceInformationUnstructured:
-    - remittanceInformationUnstructured
+  remittanceInformationUnstructuredArray:
+    - remittanceInformationUnstructuredArray
     - Ustrd
-  remittanceInformationStructured:
-    - remittanceInformationStructured
+  remittanceInformationStructuredArray:
+    - remittanceInformationStructuredArray
   chargeBearer:
     - chargeBearer
     - ChrgBr

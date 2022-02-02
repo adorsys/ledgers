@@ -47,6 +47,5 @@ targets:
           city: Kiev,
           postalCode: 04210,
           country: Ukraine
-      },
-      remittanceInformationUnstructured: remittance
+      }
   }

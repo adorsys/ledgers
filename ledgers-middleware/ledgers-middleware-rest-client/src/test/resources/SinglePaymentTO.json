@@ -23,8 +23,7 @@
       "creditorAddress":{
         "line1":"Some address here"
       },
-      "purposeCode":"CDCD",
-      "remittanceInformationUnstructured":"Some unstructured info on the first payment..."
+      "purposeCode":"CDCD"
     }
   ]
 }

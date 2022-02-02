@@ -8,7 +8,11 @@ import de.adorsys.ledgers.deposit.api.service.mappers.DepositAccountMapper;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
 import de.adorsys.ledgers.deposit.db.repository.DepositAccountRepository;
-import de.adorsys.ledgers.postings.api.domain.*;
+import de.adorsys.ledgers.postings.api.domain.AccountStmtBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
+import de.adorsys.ledgers.postings.api.domain.LedgerBO;
+import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
+import de.adorsys.ledgers.postings.api.domain.PostingTraceBO;
 import de.adorsys.ledgers.postings.api.service.AccountStmtService;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
@@ -36,6 +40,7 @@ import static java.lang.String.format;
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s and currency %s not found";
     private static final String MSG_ACCOUNT_NOT_FOUND = "Account with id %s not found";
+    private static final String ADDITIONAL_INFO_MESSAGE = "Transaction was posted in Ledgers, creditorName:%s, debtorName:%s, valueDate:%s";
 
     private final DepositAccountRepository depositAccountRepository;
     private final DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
@@ -113,7 +118,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         DepositAccountBO account = getDepositAccountById(accountId);
         LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccountById(account.getLinkedAccounts());
         PostingLineBO line = postingService.findPostingLineById(ledgerAccountBO, transactionId);
-        return transactionDetailsMapper.toTransactionSigned(line);
+        return enrichAdditionalInformation(transactionDetailsMapper.toTransactionSigned(line));
     }
 
     @Override
@@ -123,6 +128,7 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         return postingService.findPostingsByDates(ledgerAccountBO, dateFrom, dateTo)
                        .stream()
                        .map(transactionDetailsMapper::toTransactionSigned)
+                       .map(this::enrichAdditionalInformation)
                        .collect(Collectors.toList());
     }
 
@@ -132,7 +138,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         LedgerAccountBO ledgerAccountBO = ledgerService.findLedgerAccountById(account.getLinkedAccounts());
 
         return postingService.findPostingsByDatesPaged(ledgerAccountBO, dateFrom, dateTo, pageable)
-                       .map(transactionDetailsMapper::toTransactionSigned);
+                       .map(transactionDetailsMapper::toTransactionSigned)
+                       .map(this::enrichAdditionalInformation);
     }
 
     @Override
@@ -166,8 +173,8 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
     @Override
     public Page<DepositAccountDetailsBO> findDetailsByBranchPaged(String branch, String queryParam, boolean withBalance, Pageable pageable) {
         return depositAccountRepository.findByBranchAndIbanContaining(branch, queryParam, pageable)
-                .map(depositAccountMapper::toDepositAccountBO)
-                .map(d -> new DepositAccountDetailsBO(d, getBalancesList(d, withBalance, LocalDateTime.now())));
+                       .map(depositAccountMapper::toDepositAccountBO)
+                       .map(d -> new DepositAccountDetailsBO(d, getBalancesList(d, withBalance, LocalDateTime.now())));
     }
 
 
@@ -224,6 +231,12 @@ public class DepositAccountServiceImpl extends AbstractServiceImpl implements De
         Optional.ofNullable(branch).ifPresent(depositAccount::setBranch);
         DepositAccount saved = depositAccountRepository.save(depositAccount);
         return depositAccountMapper.toDepositAccountBO(saved);
+    }
+
+    private TransactionDetailsBO enrichAdditionalInformation(TransactionDetailsBO transactionDetailsBO) {
+        String additionalInfo = format(ADDITIONAL_INFO_MESSAGE, transactionDetailsBO.getDebtorName(), transactionDetailsBO.getCreditorName(), transactionDetailsBO.getValueDate());
+        transactionDetailsBO.setAdditionalInformation(additionalInfo);
+        return transactionDetailsBO;
     }
 
     private void checkCreditLimitIsCorrect(BigDecimal creditLimit) {

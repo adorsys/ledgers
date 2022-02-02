@@ -4,7 +4,11 @@ import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.CurrencyExchangeRatesService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
-import de.adorsys.ledgers.deposit.db.domain.*;
+import de.adorsys.ledgers.deposit.db.domain.AccountType;
+import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
+import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
+import de.adorsys.ledgers.deposit.db.domain.Payment;
+import de.adorsys.ledgers.deposit.db.domain.TransactionStatus;
 import de.adorsys.ledgers.deposit.db.repository.PaymentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +21,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -273,12 +281,12 @@ class PaymentExecutionServiceTest {
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", "iban", "msisdn", "EUR",
-                                  "name", "product", null, AccountType.CASH, "bic", null,
+                                  "name", "displayName", "product", null, AccountType.CASH, "bic", null,
                                   AccountUsage.PRIV, "details", false, false, LocalDateTime.now(), BigDecimal.ZERO);
     }
 
     private DepositAccountBO getDepositAccountBO(Currency currency) {
-        return new DepositAccountBO("id", "iban", "bban", "pan", "maskedPan", "msisdn", currency, "name", "product", AccountTypeBO.CASH, "bic", null, AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO);
+        return new DepositAccountBO("id", "iban", "bban", "pan", "maskedPan", "msisdn", currency, "name", "displayName", "product", AccountTypeBO.CASH, "bic", null, AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO);
     }
 
     private DepositAccountDetailsBO getDepositAccountDetailsBO(Currency currency) {

@@ -65,9 +65,14 @@ public class PaymentTarget {
     @Enumerated(EnumType.STRING)
     private ChargeBearer chargeBearer;
 
-    private String remittanceInformationUnstructured;
-    @Embedded
-    private RemittanceInformationStructured remittanceInformationStructured;
+    @Lob
+    @Column(name = "remittance_unstructured")
+    private byte[] remittanceInformationUnstructuredArray;
+
+    @Lob
+    @Column(name = "remittance_structured")
+    private byte[] remittanceInformationStructuredArray;
+
 
     @ManyToOne(optional = false)
     private Payment payment;
