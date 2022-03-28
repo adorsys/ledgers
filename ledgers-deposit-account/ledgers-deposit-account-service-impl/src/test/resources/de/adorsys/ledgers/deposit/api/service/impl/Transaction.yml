@@ -6,7 +6,7 @@ checkId: check_ID
 creditorId: CrushTestDummy
 bookingDate: 2018-01-01
 valueDate: 2018-01-01
-additionalInformation: Transaction was posted in Ledgers, creditorName:Self CrushTestDummy, debtorName:CrushTestDummy, valueDate:2018-01-01
+additionalInformation: Transaction was posted in Ledgers, debtorName:Self CrushTestDummy, creditorName:CrushTestDummy, valueDate:2018-01-01
 transactionAmount:
    currency: EUR
    amount: 100

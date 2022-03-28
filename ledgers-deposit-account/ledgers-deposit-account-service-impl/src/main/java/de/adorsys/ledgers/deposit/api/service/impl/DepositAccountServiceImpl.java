@@ -40,7 +40,7 @@ import static java.lang.String.format;
 public class DepositAccountServiceImpl extends AbstractServiceImpl implements DepositAccountService {
     private static final String MSG_IBAN_NOT_FOUND = "Accounts with iban %s and currency %s not found";
     private static final String MSG_ACCOUNT_NOT_FOUND = "Account with id %s not found";
-    private static final String ADDITIONAL_INFO_MESSAGE = "Transaction was posted in Ledgers, creditorName:%s, debtorName:%s, valueDate:%s";
+    private static final String ADDITIONAL_INFO_MESSAGE = "Transaction was posted in Ledgers, debtorName:%s, creditorName:%s, valueDate:%s";
 
     private final DepositAccountRepository depositAccountRepository;
     private final DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
