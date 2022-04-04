@@ -2,7 +2,6 @@ package de.adorsys.ledgers.token.exchange;
 
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.HttpRequest;
-import org.keycloak.OAuthErrorException;
 import org.keycloak.TokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.crypto.SignatureProvider;
@@ -107,13 +106,13 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
             SignatureVerifierContext verifierContext = session.getProvider(SignatureProvider.class, verifier.getHeader().getAlgorithm().name()).verifier(verifier.getHeader().getKeyId());
             verifier.verifierContext(verifierContext);
             AccessToken accessToken = verifier.verify().getToken();
-            if (!tokenManager.checkTokenValidForIntrospection(session, realm, accessToken)) {
+            if (!tokenManager.checkTokenValidForIntrospection(session, realm, accessToken, false)) {
                 throw new VerificationException("introspection_failed");
             }
             return accessToken;
         } catch (ConfigurableTokenException e) {
             throw e;
-        } catch (VerificationException | OAuthErrorException e) {
+        } catch (VerificationException e) {
             LOG.warn("Keycloak-ConfigurableToken: introspection of token failed", e);
             throw new ConfigurableTokenException("access_token_introspection_failed: " + e.getMessage());
         }
@@ -134,8 +133,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
     }
 
     private UserSessionModel findSession() throws ConfigurableTokenException {
-        RealmModel realm = session.getContext().getRealm();
-        AuthenticationManager.AuthResult authenticated = new AppAuthManager().authenticateBearerToken(session, realm);
+        AuthenticationManager.AuthResult authenticated = new AppAuthManager.BearerTokenAuthenticator(session).authenticate();
 
         if (authenticated == null) {
             LOG.warn("Keycloak-ConfigurableToken: user not authenticated");

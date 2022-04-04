@@ -57,6 +57,8 @@ public interface KeycloakDataMapper {
         clientRepresentation.setWebOrigins(client.getWebOrigins());
         clientRepresentation.setPublicClient(client.isPublicClient());
         clientRepresentation.setFullScopeAllowed(client.isFullScopeAllowed());
+        clientRepresentation.setAuthorizationServicesEnabled(Boolean.TRUE);
+        clientRepresentation.setServiceAccountsEnabled(Boolean.TRUE);
 
         List<String> redirectUrls = client.getRedirectUrls();
         clientRepresentation.setRedirectUris(CollectionUtils.isNotEmpty(redirectUrls) ? redirectUrls : Collections.emptyList());

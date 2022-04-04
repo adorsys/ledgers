@@ -229,7 +229,7 @@ public class KeycloakDataServiceImpl implements KeycloakDataService {
         List<String> list = new ArrayList<>();
         try {
             String host = InetAddress.getLocalHost().getHostAddress();
-            list.add(host + ":" + port);
+            list.add("http://" + host + ":" + port);
         } catch (UnknownHostException e) {
             log.error("Could not retrieve host! Fallback to http://localhost:8088 setup!");
         }
