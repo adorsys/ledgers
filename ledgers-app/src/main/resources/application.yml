@@ -21,7 +21,7 @@ springdoc.swagger-ui.oauth.clientId: ${keycloak.resource}
 springdoc.swagger-ui.oauth.clientSecret: ${keycloak.credentials.secret}
 
 keycloak:
-  auth-server-url: http://localhost:8080/auth
+  auth-server-url: http://localhost:8080
   realm: ledgers
   resource: ledgers-client
   public-client: false
