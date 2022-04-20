@@ -39,7 +39,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=postgres,sandbox
       - SPRING_JPA_SHOW_SQL=false
-      - KEYCLOAK_AUTH_SERVER_URL=http://ledgers-keycloak:8080/auth
+      - KEYCLOAK_AUTH_SERVER_URL=http://ledgers-keycloak:8080
       - DB_HOST=ledgers_db
       - DB_DATABASE=ledgers
       - DB_USER=ledgers
