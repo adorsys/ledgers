@@ -5,7 +5,7 @@
 |===
 |Property |Description |Default value
 
-|keycloak.auth-server-url | Link to IDP | http://localhost:8080/auth
+|keycloak.auth-server-url | Link to IDP | http://localhost:8080
 |keycloak.realm | Realm in IDP | ledgers
 |keycloak.resource | Client name | ledgers-client
 |keycloak.public-client | Flag describes if client public | FALSE
