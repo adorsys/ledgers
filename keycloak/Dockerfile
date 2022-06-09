@@ -6,6 +6,4 @@ COPY ./keycloak-token-exchange/target/keycloak-token-exchange.jar /opt/keycloak/
 EXPOSE 8080
 EXPOSE 8443
 
-ENTRYPOINT [ "/opt/keycloak/bin/kc.sh", "start" ]
-
-CMD ["-b", "0.0.0.0"]
+ENTRYPOINT [ "/opt/keycloak/bin/kc.sh", "start-dev" ]
