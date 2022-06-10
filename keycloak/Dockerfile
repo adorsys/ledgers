@@ -2,6 +2,7 @@ FROM quay.io/keycloak/keycloak:17.0.0
 LABEL maintainer=https://git.adorsys.de/adorsys/xs2a/ledgers
 
 COPY ./keycloak-token-exchange/target/keycloak-token-exchange.jar /opt/keycloak/providers/keycloak-token-exchange.jar
+RUN mkdir -p /opt/keycloak/data && chmod 777 /opt/keycloak/data
 
 EXPOSE 8080
 EXPOSE 8443
