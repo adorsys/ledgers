@@ -2,7 +2,7 @@ FROM adorsys/java:11
 LABEL maintainer=https://git.adorsys.de/adorsys/xs2a/ledgers
 
 ENV SERVER_PORT 8088
-ENV JAVA_OPTS -Xmx1024m
+ENV JAVA_OPTS -Xmx2048m
 ENV JAVA_TOOL_OPTIONS -Xmx1024m
 
 WORKDIR /opt/ledgers
