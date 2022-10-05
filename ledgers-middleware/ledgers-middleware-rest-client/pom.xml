@@ -6,7 +6,7 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-middleware</artifactId>
 		<version>4.20-SNAPSHOT</version>
-		<relativePath>..</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>ledgers-middleware-rest-client</artifactId>
@@ -87,7 +87,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>${json.version}</version>
 		</dependency>
 
 	</dependencies>

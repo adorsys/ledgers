@@ -6,7 +6,7 @@
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-user-management</artifactId>
 		<version>4.20-SNAPSHOT</version>
-		<relativePath>..</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
     <artifactId>ledgers-user-management-rest-server</artifactId>

@@ -6,14 +6,12 @@
         <artifactId>keycloak</artifactId>
         <groupId>de.adorsys.ledgers</groupId>
         <version>4.20-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
         <ruleset.basedir>../..</ruleset.basedir>
-        <feign-slf4j.version>10.7.4</feign-slf4j.version>
-        <testcontainers.version>1.14.3</testcontainers.version>
-        <testcontainers-keycloak.version>1.3.3</testcontainers-keycloak.version>
     </properties>
 
     <artifactId>keycloak-client</artifactId>
