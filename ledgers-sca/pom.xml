@@ -17,7 +17,7 @@
         <groupId>de.adorsys.ledgers</groupId>
         <artifactId>ledgers</artifactId>
         <version>4.20-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <packaging>pom</packaging>

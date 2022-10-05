@@ -22,7 +22,7 @@
         <groupId>de.adorsys.ledgers</groupId>
         <artifactId>ledgers-deposit-account</artifactId>
         <version>4.20-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <properties>
@@ -72,13 +72,13 @@
         <dependency>
             <groupId>net.objectlab.kit</groupId>
             <artifactId>datecalc-common</artifactId>
-            <version>1.4.0</version>
+            <version>${datecalc-common.version}</version>
         </dependency>
 
         <dependency>
             <groupId>net.objectlab.kit</groupId>
             <artifactId>datecalc-jdk8</artifactId>
-            <version>1.4.0</version>
+            <version>${datecalc-jdk8.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -120,7 +120,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20190722</version>
+            <version>${json.version}</version>
             <scope>compile</scope>
         </dependency>
 

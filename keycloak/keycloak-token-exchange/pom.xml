@@ -6,6 +6,7 @@
         <artifactId>keycloak</artifactId>
         <groupId>de.adorsys.ledgers</groupId>
         <version>4.20-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,7 +20,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.10.2</version>
+            <version>${jackson-annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
@@ -45,12 +46,12 @@
         <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-            <version>1.0.1.Final</version>
+            <version>${jboss-jaxrs-api_2.0_spec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
-            <version>3.3.1.Final</version>
+            <version>${jboss-logging.version}</version>
         </dependency>
 
     </dependencies>
