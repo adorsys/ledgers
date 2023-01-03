@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.Currency;
@@ -148,12 +148,12 @@ class OperationServiceImplTest {
     }
 
     @Test
-    void execute_pmt_patc() throws NoSuchFieldException {
+    void execute_pmt_patc() {
         when(paymentService.getPaymentById(any())).thenReturn(getPmtBO());
         when(scaOperationService.authenticationCompleted(any(), any())).thenReturn(false);
         when(paymentService.updatePaymentStatus(any(), any())).thenReturn(TransactionStatusBO.PATC);
         when(scaUtils.userBO(any())).thenReturn(getUserBO());
-        FieldSetter.setField(service, service.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(service, "multilevelScaEnable", true);
         GlobalScaResponseTO result = service.execute(OpTypeTO.PAYMENT, "id", getScaInfo());
 
         verify(scaOperationService, times(1)).authenticationCompleted(any(), any());
@@ -219,7 +219,7 @@ class OperationServiceImplTest {
     private UserBO getUserBO() {
         UserBO bo = new UserBO();
         bo.setScaUserData(List.of(new ScaUserDataBO()));
-        bo.setAccountAccesses(List.of(new AccountAccessBO("IBAN", null, "accId", 100,AccessTypeBO.OWNER)));
+        bo.setAccountAccesses(List.of(new AccountAccessBO("IBAN", null, "accId", 100, AccessTypeBO.OWNER)));
         return bo;
     }
 

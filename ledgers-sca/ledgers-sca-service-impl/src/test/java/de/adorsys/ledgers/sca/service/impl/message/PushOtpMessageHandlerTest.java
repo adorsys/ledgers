@@ -5,7 +5,7 @@ import de.adorsys.ledgers.sca.domain.sca.message.PushScaMessage;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.util.exception.ScaModuleException;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.util.reflection.FieldSetter;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,8 +19,8 @@ class PushOtpMessageHandlerTest {
     private final PushOtpMessageHandler handler = new PushOtpMessageHandler();
 
     @Test
-    void getMessage() throws NoSuchFieldException, URISyntaxException {
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("authCodePushBody"), PUSH_MSG_PATTERN);
+    void getMessage() throws URISyntaxException {
+        ReflectionTestUtils.setField(handler, "authCodePushBody", PUSH_MSG_PATTERN);
         PushScaMessage result = handler.getMessage(getAuthData(), getScaData(PUSH_OTP, true), "TAN");
         assertNotNull(result);
         assertEquals("User: login initiated an operation : opId requiring TAN confirmation, TAN is: TAN", result.getMessage());
@@ -30,8 +30,8 @@ class PushOtpMessageHandlerTest {
     }
 
     @Test
-    void getMessage_wrong_method_value() throws NoSuchFieldException {
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("authCodePushBody"), PUSH_MSG_PATTERN);
+    void getMessage_wrong_method_value() {
+        ReflectionTestUtils.setField(handler, "authCodePushBody", PUSH_MSG_PATTERN);
         AuthCodeDataBO authData = getAuthData();
         ScaUserDataBO scaData = getScaData(PUSH_OTP, false);
         ScaModuleException exception = assertThrows(ScaModuleException.class, () -> handler.getMessage(authData, scaData, "TAN"));
@@ -40,8 +40,8 @@ class PushOtpMessageHandlerTest {
     }
 
     @Test
-    void getMessage_invalid_uri_in_method_value() throws NoSuchFieldException {
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("authCodePushBody"), PUSH_MSG_PATTERN);
+    void getMessage_invalid_uri_in_method_value() {
+        ReflectionTestUtils.setField(handler, "authCodePushBody", PUSH_MSG_PATTERN);
         AuthCodeDataBO authData = getAuthData();
         ScaUserDataBO scaData = getScaData(PUSH_OTP, false);
         scaData.setMethodValue("POST,htttP:///ssssss.com");
@@ -51,8 +51,8 @@ class PushOtpMessageHandlerTest {
     }
 
     @Test
-    void getMessage_invalid_http_method_in_method_value() throws NoSuchFieldException {
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("authCodePushBody"), PUSH_MSG_PATTERN);
+    void getMessage_invalid_http_method_in_method_value() {
+        ReflectionTestUtils.setField(handler, "authCodePushBody", PUSH_MSG_PATTERN);
         AuthCodeDataBO authData = getAuthData();
         ScaUserDataBO scaData = getScaData(PUSH_OTP, false);
         scaData.setMethodValue("POZT,http://localhost:8088");

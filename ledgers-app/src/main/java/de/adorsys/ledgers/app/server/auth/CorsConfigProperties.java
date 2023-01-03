@@ -11,7 +11,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "management.endpoints.web.cors")
 public class CorsConfigProperties {
     private Boolean allowCredentials;
-    private List<String> allowedOrigins;
+    private List<String> allowedOriginPatterns;
     private List<String> allowedMethods;
     private List<String> allowedHeaders;
     private long maxAge;

@@ -30,6 +30,7 @@ public class OauthCodeEntity {
     private boolean used;
 
     @Lob
+    @org.hibernate.annotations.Type( type = "text" )
     @Column(name = "token", nullable = false)
     private String token;
 

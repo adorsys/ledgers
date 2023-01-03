@@ -18,11 +18,7 @@ import de.adorsys.ledgers.deposit.api.service.mappers.SerializeService;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
 import de.adorsys.ledgers.deposit.db.domain.AccountUsage;
 import de.adorsys.ledgers.deposit.db.domain.DepositAccount;
-import de.adorsys.ledgers.postings.api.domain.LedgerAccountBO;
-import de.adorsys.ledgers.postings.api.domain.LedgerBO;
-import de.adorsys.ledgers.postings.api.domain.PostingBO;
-import de.adorsys.ledgers.postings.api.domain.PostingLineBO;
-import de.adorsys.ledgers.postings.api.domain.PostingStatusBO;
+import de.adorsys.ledgers.postings.api.domain.*;
 import de.adorsys.ledgers.postings.api.service.LedgerService;
 import de.adorsys.ledgers.postings.api.service.PostingService;
 import de.adorsys.ledgers.util.exception.DepositModuleException;
@@ -32,8 +28,8 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -282,7 +278,6 @@ class DepositAccountTransactionServiceImplTest {
         PaymentBO payment = getPayment(SINGLE, EUR, USD, USD, null, false);
 
         when(paymentMapper.toPaymentOrder(any())).thenAnswer(i -> localPaymentMapper.toPaymentOrder((PaymentBO) i.getArguments()[0]));
-//        when(paymentMapper.toPaymentTargetDetails(anyString(), any(), any(), any(),any())).thenAnswer(i -> localPaymentMapper.toPaymentTargetDetails((String) i.getArguments()[0], (PaymentTargetBO) i.getArguments()[1], (LocalDate) i.getArguments()[2], (List<ExchangeRateBO>) i.getArguments()[3],i.getArgument(4)));
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(serializeService.serializeOprDetails(any())).thenAnswer(i -> STATIC_MAPPER.writeValueAsString(i.getArguments()[0]));
 
@@ -354,12 +349,12 @@ class DepositAccountTransactionServiceImplTest {
     }
 
     @Test
-    void bookPayment_bulk_same_currency_batchBookingPreferredTrue() throws IOException, NoSuchFieldException {
+    void bookPayment_bulk_same_currency_batchBookingPreferredTrue() throws IOException {
         // Given
         PaymentBO payment = getPayment(BULK, EUR, EUR, EUR, null, true);
 
 
-        FieldSetter.setField(transactionService, transactionService.getClass().getDeclaredField("paymentMapper"), Mappers.getMapper(PaymentMapper.class));
+        ReflectionTestUtils.setField(transactionService, "paymentMapper", Mappers.getMapper(PaymentMapper.class));
 
 
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
@@ -443,11 +438,11 @@ class DepositAccountTransactionServiceImplTest {
     }
 
     @Test
-    void bookPayment_bulk_two_different_currency() throws IOException, NoSuchFieldException {
+    void bookPayment_bulk_two_different_currency() {
         // Given
         PaymentBO payment = getPayment(BULK, EUR, USD, USD, CHF, true);
 
-        FieldSetter.setField(transactionService, transactionService.getClass().getDeclaredField("paymentMapper"), Mappers.getMapper(PaymentMapper.class));
+        ReflectionTestUtils.setField(transactionService, "paymentMapper", Mappers.getMapper(PaymentMapper.class));
 
         when(postingMapper.buildPosting(any(), anyString(), anyString(), any(), anyString())).thenAnswer(i -> localPostingMapper.buildPosting((LocalDateTime) i.getArguments()[0], (String) i.getArguments()[1], (String) i.getArguments()[2], (LedgerBO) i.getArguments()[3], (String) i.getArguments()[4]));
         when(postingMapper.buildPostingLine(anyString(), any(), any(), any(), anyString(), anyString())).thenAnswer(i -> localPostingMapper.buildPostingLine((String) i.getArguments()[0], (LedgerAccountBO) i.getArguments()[1], (BigDecimal) i.getArguments()[2], (BigDecimal) i.getArguments()[3], (String) i.getArguments()[4], (String) i.getArguments()[5]));
@@ -598,13 +593,13 @@ class DepositAccountTransactionServiceImplTest {
 
     private DepositAccount getDepositAccount() {
         return new DepositAccount("id", IBAN, "msisdn", "EUR",
-                                  "name","displayName", "product", null, AccountType.CASH, "bic", null,
+                                  "name", "displayName", "product", null, AccountType.CASH, "bic", null,
                                   AccountUsage.PRIV, "details", false, false, LocalDateTime.now(), BigDecimal.ZERO);
     }
 
     private DepositAccountDetailsBO getDepositAccountBO() {
         return new DepositAccountDetailsBO(
-                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "displayName","product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO),
+                new DepositAccountBO("id", IBAN, null, null, null, "msisdn", EUR, "name", "displayName", "product", AccountTypeBO.CASH, "bic", "linkedAccounts", AccountUsageBO.PRIV, "details", false, false, "branch", null, BigDecimal.ZERO),
                 Collections.emptyList());
     }
 }

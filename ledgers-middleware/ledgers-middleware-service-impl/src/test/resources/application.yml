@@ -91,7 +91,6 @@ ledgers:
       masterPassword: $VoL973@sd
       encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
 
-logging.level.org.hibernate: WARN
 
 ---
 spring:
@@ -108,6 +107,9 @@ db:
 ---
 spring:
   profiles: dev
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 
 logging.level.org.postgresql: INFO
 logging.level.org.hibernate.SQL: DEBUG
@@ -116,3 +118,4 @@ logging.level.org.springframework: TRACE
 
 management.endpoints.web.exposure.include: "*"
 management.endpoints.web.exposure.exclude: env,beans
+

@@ -28,9 +28,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
+import org.springframework.test.util.ReflectionTestUtils;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -398,9 +398,9 @@ class SCAOperationServiceImplTest {
     }
 
     @Test
-    void validateAuthCode_authConfirmationEnabled() throws HashGenerationException, NoSuchFieldException {
+    void validateAuthCode_authConfirmationEnabled() throws HashGenerationException {
         // Given
-        FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("authConfirmationEnabled"), true);
+        ReflectionTestUtils.setField(scaOperationService, "authConfirmationEnabled", true);
         ArgumentCaptor<SCAOperationEntity> captor = ArgumentCaptor.forClass(SCAOperationEntity.class);
 
         when(repository.findById(AUTH_ID)).thenReturn(Optional.of(scaOperationEntity));
@@ -626,10 +626,10 @@ class SCAOperationServiceImplTest {
     }
 
     @Test
-    void authenticationCompleted_multilevel() throws NoSuchFieldException {
+    void authenticationCompleted_multilevel() {
         // Given
-        when(validationService.isMultiLevelScaCompleted(any(),any())).thenReturn(true);
-        FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        when(validationService.isMultiLevelScaCompleted(any(), any())).thenReturn(true);
+        ReflectionTestUtils.setField(scaOperationService, "multilevelScaEnable", true);
         scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));
 
@@ -641,9 +641,9 @@ class SCAOperationServiceImplTest {
     }
 
     @Test
-    void authenticationCompleted_multilevel_unfinished_sca() throws NoSuchFieldException {
+    void authenticationCompleted_multilevel_unfinished_sca() {
         // Given
-        FieldSetter.setField(scaOperationService, scaOperationService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(scaOperationService, "multilevelScaEnable", true);
         scaOperationEntity.setScaWeight(80);
         scaOperationEntity.setScaStatus(FINALISED);
         when(repository.findByOpIdAndOpType(anyString(), any())).thenReturn(Collections.singletonList(scaOperationEntity));

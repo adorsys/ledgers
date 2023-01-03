@@ -27,11 +27,11 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -178,7 +178,7 @@ class MiddlewareUserManagementServiceImplTest {
         middlewareUserService.updateAccountAccess(buildScaInfoTO(), ANOTHER_USER_ID, getAccessTO());
 
         // Then
-        verify(accessService, times(1)).updateAccountAccessNewAccount(any(), any(), any(),any());
+        verify(accessService, times(1)).updateAccountAccessNewAccount(any(), any(), any(), any());
     }
 
     @Test
@@ -261,9 +261,9 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_multilevelNotEnabled() throws NoSuchFieldException {
+    void checkMultilevelScaRequired_multilevelNotEnabled() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), false);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", false);
 
         // When
         boolean result = middlewareUserService.checkMultilevelScaRequired(USER_LOGIN, USER_IBAN);
@@ -273,9 +273,9 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired() throws NoSuchFieldException {
+    void checkMultilevelScaRequired() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
         when(userService.findByLogin(any())).thenReturn(userBO);
 
         // When
@@ -286,9 +286,9 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_no_multilevel() throws NoSuchFieldException {
+    void checkMultilevelScaRequired_no_multilevel() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -299,10 +299,10 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_empty_list() throws NoSuchFieldException {
+    void checkMultilevelScaRequired_empty_list() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("finalWeight"), 100);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
+        ReflectionTestUtils.setField(middlewareUserService, "finalWeight", 100);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -313,10 +313,10 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_2_acc_with_mlsca() throws NoSuchFieldException {
+    void checkMultilevelScaRequired_2_acc_with_mlsca() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("finalWeight"), 100);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
+        ReflectionTestUtils.setField(middlewareUserService, "finalWeight", 100);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -327,10 +327,10 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_1_acc_no_curr_with_mlsca() throws NoSuchFieldException {
+    void checkMultilevelScaRequired_1_acc_no_curr_with_mlsca() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("finalWeight"), 100);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
+        ReflectionTestUtils.setField(middlewareUserService, "finalWeight", 100);
         when(userService.findByLogin(any())).thenReturn(getUser(null, UserRoleBO.STAFF));
 
         // When
@@ -341,9 +341,9 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void checkMultilevelScaRequired_multilevel_false() throws NoSuchFieldException {
+    void checkMultilevelScaRequired_multilevel_false() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), false);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", false);
 
         // When
         boolean response = middlewareUserService.checkMultilevelScaRequired("some_login", getReferences("1", "2"));
@@ -353,8 +353,8 @@ class MiddlewareUserManagementServiceImplTest {
     }
 
     @Test
-    void getAdditionalInformation() throws NoSuchFieldException {
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("additionalInfoMapper"), Mappers.getMapper(AdditionalAccountInformationMapper.class));
+    void getAdditionalInformation() {
+        ReflectionTestUtils.setField(middlewareUserService, "additionalInfoMapper", Mappers.getMapper(AdditionalAccountInformationMapper.class));
         when(userService.findOwnersByIban(anyString())).thenReturn(Collections.singletonList(getUser(null, UserRoleBO.STAFF)));
         List<AdditionalAccountInformationTO> result = middlewareUserService.getAdditionalInformation(new ScaInfoTO(), AccountIdentifierTypeTO.IBAN, ACCOUNT_ID);
         assertThat(result).isEqualTo(Collections.singletonList(getAdditionalInfo()));

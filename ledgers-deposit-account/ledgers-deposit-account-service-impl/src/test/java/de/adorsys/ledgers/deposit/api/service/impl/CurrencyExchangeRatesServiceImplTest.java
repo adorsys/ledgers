@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 @ExtendWith(MockitoExtension.class)
 class CurrencyExchangeRatesServiceImplTest {
@@ -121,8 +121,8 @@ class CurrencyExchangeRatesServiceImplTest {
     }
 
     @Test
-    void applyRate_2() throws NoSuchFieldException {
-        setField(currencyExchangeRatesService, currencyExchangeRatesService.getClass().getDeclaredField("rates"), INTERNAL_TEST_RATES);
+    void applyRate_2() {
+        ReflectionTestUtils.setField(currencyExchangeRatesService, "rates", INTERNAL_TEST_RATES);
         // When
         BigDecimal result = currencyExchangeRatesService.applyRate(EUR, USD, BigDecimal.TEN);
 

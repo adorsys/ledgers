@@ -11,15 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -125,8 +125,8 @@ class OauthAuthorisationServiceImplTest {
     }
 
     @Test
-    void oauthServerInfo() throws NoSuchFieldException {
-        FieldSetter.setField(service, service.getClass().getDeclaredField("oauthConfigProp"), getProps());
+    void oauthServerInfo() {
+        ReflectionTestUtils.setField(service, "oauthConfigProp", getProps());
         OauthServerInfoBO result = service.oauthServerInfo();
 
         // Then

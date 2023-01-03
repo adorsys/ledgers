@@ -19,6 +19,7 @@ public class OperationDetails {
     @Id
     private String id;
     @Lob
+    @org.hibernate.annotations.Type( type = "text" )
     private String opDetails;
 
     public OperationDetails(String opDetails) {

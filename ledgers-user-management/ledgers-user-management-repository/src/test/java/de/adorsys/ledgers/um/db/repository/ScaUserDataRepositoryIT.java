@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.um.db.repository;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.um.db.domain.ScaMethodType;
 import de.adorsys.ledgers.um.db.domain.ScaUserDataEntity;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
@@ -25,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
-@DatabaseSetup("ScaUserDataRepositoryIT-db-entries.xml")
-@DatabaseTearDown(value = {"db-delete-all.xml"}, type = DatabaseOperation.DELETE_ALL)
 class ScaUserDataRepositoryIT {
 
     @Autowired
@@ -38,6 +33,8 @@ class ScaUserDataRepositoryIT {
     @Test
     void test_create_ok() {
         // Given
+        userRepository.deleteAll();
+
         ScaUserDataEntity data = new ScaUserDataEntity();
         data.setScaMethod(ScaMethodType.SMTP_OTP);
         data.setMethodValue("test@mail.de");
