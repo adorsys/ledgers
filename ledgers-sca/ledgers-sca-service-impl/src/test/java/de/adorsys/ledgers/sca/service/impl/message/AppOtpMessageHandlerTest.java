@@ -3,7 +3,7 @@ package de.adorsys.ledgers.sca.service.impl.message;
 import de.adorsys.ledgers.sca.domain.sca.message.AppScaMessage;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.util.reflection.FieldSetter;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static de.adorsys.ledgers.sca.domain.OpTypeBO.PAYMENT;
 import static de.adorsys.ledgers.sca.service.impl.message.OtpHandlerHelper.*;
@@ -14,10 +14,10 @@ class AppOtpMessageHandlerTest {
     private final AppOtpMessageHandler handler = new AppOtpMessageHandler();
 
     @Test
-    void getMessage() throws NoSuchFieldException {
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("messageTemplate"), APP_MSG_PATTERN);
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("socketServiceHttpMethod"), "POST");
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("socketServiceUrl"), APP_URL);
+    void getMessage() {
+        ReflectionTestUtils.setField(handler, "messageTemplate", APP_MSG_PATTERN);
+        ReflectionTestUtils.setField(handler, "socketServiceHttpMethod", "POST");
+        ReflectionTestUtils.setField(handler, "socketServiceUrl", APP_URL);
 
         AppScaMessage result = handler.getMessage(OtpHandlerHelper.getAuthData(), OtpHandlerHelper.getScaData(ScaMethodTypeBO.APP_OTP, true), "TAN");
         assertNotNull(result);

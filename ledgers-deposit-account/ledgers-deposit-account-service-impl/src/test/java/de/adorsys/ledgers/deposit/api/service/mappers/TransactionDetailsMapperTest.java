@@ -7,8 +7,8 @@ import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.postings.api.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -37,7 +37,7 @@ class TransactionDetailsMapperTest {
 
     @Test
     void toTransactionSigned_payment() throws IOException {
-        when(objectMapper.readValue(any(String.class), Matchers.eq(TransactionDetailsBO.class))).thenAnswer(a -> LOCAL_MAPPER.readValue((String) a.getArgument(0), TransactionDetailsBO.class));
+        when(objectMapper.readValue(any(String.class), ArgumentMatchers.eq(TransactionDetailsBO.class))).thenAnswer(a -> LOCAL_MAPPER.readValue((String) a.getArgument(0), TransactionDetailsBO.class));
         TransactionDetailsBO expected = getExpected(true);
         PostingLineBO given = getPostingLine(true);
         TransactionDetailsBO result = mapper.toTransactionSigned(given);
@@ -46,7 +46,7 @@ class TransactionDetailsMapperTest {
 
     @Test
     void toTransactionSigned_other() throws IOException {
-        when(objectMapper.readValue(any(String.class), Matchers.eq(TransactionDetailsBO.class))).thenAnswer(a -> LOCAL_MAPPER.readValue((String) a.getArgument(0), TransactionDetailsBO.class));
+        when(objectMapper.readValue(any(String.class), ArgumentMatchers.eq(TransactionDetailsBO.class))).thenAnswer(a -> LOCAL_MAPPER.readValue((String) a.getArgument(0), TransactionDetailsBO.class));
         TransactionDetailsBO expected = getExpected(false);
         PostingLineBO given = getPostingLine(false);
         TransactionDetailsBO result = mapper.toTransactionSigned(given);

@@ -8,12 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import de.adorsys.ledgers.deposit.api.domain.AccountTypeBO;
-import de.adorsys.ledgers.deposit.api.domain.AccountUsageBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountBO;
-import de.adorsys.ledgers.deposit.api.domain.DepositAccountDetailsBO;
-import de.adorsys.ledgers.deposit.api.domain.FundsConfirmationRequestBO;
-import de.adorsys.ledgers.deposit.api.domain.TransactionDetailsBO;
+import de.adorsys.ledgers.deposit.api.domain.*;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountConfigService;
 import de.adorsys.ledgers.deposit.api.service.mappers.TransactionDetailsMapper;
 import de.adorsys.ledgers.deposit.db.domain.AccountType;
@@ -33,11 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
@@ -255,12 +250,12 @@ class DepositAccountServiceImplTest {
     }
 
     @Test
-    void confirmationOfFunds_Failure_credit_enabled() throws NoSuchFieldException {
+    void confirmationOfFunds_Failure_credit_enabled() {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false, BigDecimal.TEN)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(50));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
-        FieldSetter.setField(depositAccountService, depositAccountService.getClass().getDeclaredField("exchangeRatesService"), new CurrencyExchangeRatesServiceImpl(null, null));
+        ReflectionTestUtils.setField(depositAccountService, "exchangeRatesService", new CurrencyExchangeRatesServiceImpl(null, null));
 
         FundsConfirmationRequestBO requestBO = readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml");
         // Then
@@ -361,12 +356,12 @@ class DepositAccountServiceImplTest {
         assertEquals("DE123456789", result);
     }
 
-    private void confirmationOfFunds_more_than_necessary_available(long amount, BigDecimal creditAmount) throws NoSuchFieldException {
+    private void confirmationOfFunds_more_than_necessary_available(long amount, BigDecimal creditAmount) {
         when(depositAccountRepository.findByIbanAndCurrency(any(), any())).thenReturn(Optional.of(getDepositAccount(false, creditAmount)));
         when(accountStmtService.readStmt(any(), any())).thenReturn(newAccountStmtBO(amount));
         when(ledgerService.findLedgerByName(any())).thenReturn(Optional.of(getLedger()));
 
-        FieldSetter.setField(depositAccountService, depositAccountService.getClass().getDeclaredField("exchangeRatesService"), new CurrencyExchangeRatesServiceImpl(null, null));
+        ReflectionTestUtils.setField(depositAccountService, "exchangeRatesService", new CurrencyExchangeRatesServiceImpl(null, null));
 
         boolean response = depositAccountService.confirmationOfFunds(readFile(FundsConfirmationRequestBO.class, "FundsConfirmationRequest.yml"));
         assertTrue(response);

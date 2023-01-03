@@ -90,14 +90,15 @@ ledgers:
       encryptorAlgorithm: PBEWITHSHA1ANDDESEDE
 
 
-logging.level.org.hibernate: WARN
-
 ---
 spring:
   profiles: h2
   h2:
     console:
       enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 
 db:
   url: jdbc:h2:mem:ledgers;DB_CLOSE_DELAY=-1

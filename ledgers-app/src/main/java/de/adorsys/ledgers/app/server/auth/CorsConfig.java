@@ -15,7 +15,7 @@ public class CorsConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues(); //NOSONAR
-        configuration.setAllowedOrigins(corsConfigProperties.getAllowedOrigins());
+        configuration.setAllowedOriginPatterns(corsConfigProperties.getAllowedOriginPatterns());
         configuration.setAllowedMethods(corsConfigProperties.getAllowedMethods());
         configuration.setAllowedHeaders(corsConfigProperties.getAllowedHeaders());
         configuration.setAllowCredentials(corsConfigProperties.getAllowCredentials());

@@ -1,9 +1,6 @@
 package de.adorsys.ledgers.um.db.repository;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.um.db.domain.AccessType;
 import de.adorsys.ledgers.um.db.domain.AccountAccess;
 import de.adorsys.ledgers.um.db.domain.UserEntity;
@@ -25,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
-@DatabaseSetup("AccountAccessRepositoryIT-db-entries.xml")
-@DatabaseTearDown(value = {"db-delete-all.xml"}, type = DatabaseOperation.DELETE_ALL)
 class AccountAccessRepositoryIT {
 
     @Autowired
@@ -38,6 +33,9 @@ class AccountAccessRepositoryIT {
     @Test
     void test_create_ok() {
         // Given
+        accountAccessRepository.deleteAll();
+        userRepository.deleteAll();
+
         AccountAccess accountAccess = new AccountAccess();
         accountAccess.setIban("FakeIban");
         accountAccess.setCurrency("EUR");

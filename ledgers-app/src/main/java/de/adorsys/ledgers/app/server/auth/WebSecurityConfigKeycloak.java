@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -40,11 +39,6 @@ import static de.adorsys.ledgers.app.server.auth.PermittedResources.*;
 public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdapter {
     private final KeycloakAuthMapper authMapper;
     private final Environment environment;
-
-    @Bean
-    public KeycloakSpringBootConfigResolver getResolver() {
-        return new KeycloakSpringBootConfigResolver();
-    }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) {
@@ -129,8 +123,8 @@ public class WebSecurityConfigKeycloak extends KeycloakWebSecurityConfigurerAdap
         return authMapper.toAccessToken(credentials);
     }
 
-    private BearerTokenTO extractBearerToken(Authentication authentication){
+    private BearerTokenTO extractBearerToken(Authentication authentication) {
         RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
-        return authMapper.toBearer(credentials.getToken(),credentials.getTokenString());
+        return authMapper.toBearer(credentials.getToken(), credentials.getTokenString());
     }
 }

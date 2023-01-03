@@ -9,7 +9,7 @@ import de.adorsys.ledgers.sca.service.impl.message.PushOtpMessageHandler;
 import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.util.reflection.FieldSetter;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -21,22 +21,22 @@ class ScaMessageResolverImplTest {
     private final EmailOtpMessageHandler handler = new EmailOtpMessageHandler();
 
     @Test
-    void resolveMessage_handler_present() throws NoSuchFieldException {
+    void resolveMessage_handler_present() {
         PushOtpMessageHandler pushOtpMessageHandler = new PushOtpMessageHandler();
         ScaMessageResolverImpl service = new ScaMessageResolverImpl(List.of(pushOtpMessageHandler), handler);
-        FieldSetter.setField(pushOtpMessageHandler,
-                             pushOtpMessageHandler.getClass().getDeclaredField("authCodePushBody"), "User: %s initiated an operation : %s requiring TAN confirmation, TAN is: %s");
+        ReflectionTestUtils.setField(pushOtpMessageHandler,
+                                     "authCodePushBody", "User: %s initiated an operation : %s requiring TAN confirmation, TAN is: %s");
         ScaMessage result = service.resolveMessage(new AuthCodeDataBO(), new ScaUserDataBO(ScaMethodTypeBO.PUSH_OTP, "POST,http://localhost:8080"), "tan");
         assertNotNull(result);
         assertEquals(PushScaMessage.class, result.getClass());
     }
 
     @Test
-    void resolveMessage_handler_default() throws NoSuchFieldException {
+    void resolveMessage_handler_default() {
         ScaMessageResolverImpl service = new ScaMessageResolverImpl(List.of(handler), handler);
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("authCodeEmailBody"), MAIL_MSG_PATTERN);
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("subject"), "subj");
-        FieldSetter.setField(handler, handler.getClass().getDeclaredField("from"), "from");
+        ReflectionTestUtils.setField(handler, "authCodeEmailBody", MAIL_MSG_PATTERN);
+        ReflectionTestUtils.setField(handler, "subject", "subj");
+        ReflectionTestUtils.setField(handler, "from", "from");
         ScaMessage result = service.resolveMessage(new AuthCodeDataBO(), new ScaUserDataBO(ScaMethodTypeBO.PUSH_OTP, "POST,http://localhost:8080"), "tan");
         assertNotNull(result);
         assertEquals(MailScaMessage.class, result.getClass());

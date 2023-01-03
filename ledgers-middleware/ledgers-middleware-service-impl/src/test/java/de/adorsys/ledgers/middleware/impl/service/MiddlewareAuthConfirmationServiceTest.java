@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -103,9 +102,9 @@ class MiddlewareAuthConfirmationServiceTest {
     }
 
     @Test
-    void verifyAuthConfirmationCode_Consent_Multilevel() throws NoSuchFieldException {
+    void verifyAuthConfirmationCode_Consent_Multilevel() {
         // Given
-        FieldSetter.setField(middlewareUserService, middlewareUserService.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(middlewareUserService, "multilevelScaEnable", true);
 
         AuthConfirmationTO expected = new AuthConfirmationTO()
                                               .success(true)

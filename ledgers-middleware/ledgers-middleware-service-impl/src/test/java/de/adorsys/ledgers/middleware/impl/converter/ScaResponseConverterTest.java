@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -70,9 +70,9 @@ class ScaResponseConverterTest {
     }
 
     @Test
-    void mapResponse_consent_notMultilevel() throws NoSuchFieldException {
+    void mapResponse_consent_notMultilevel() {
         // Given
-        FieldSetter.setField(converter, converter.getClass().getDeclaredField("multilevelScaEnable"), false);
+        ReflectionTestUtils.setField(converter, "multilevelScaEnable", false);
 
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
@@ -87,11 +87,11 @@ class ScaResponseConverterTest {
     }
 
     @Test
-    void mapResponse_consent_multilevel() throws NoSuchFieldException {
+    void mapResponse_consent_multilevel() {
         // Given
         when(scaOperationService.authenticationCompleted(any(), any()))
                 .thenReturn(true);
-        FieldSetter.setField(converter, converter.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(converter, "multilevelScaEnable", true);
 
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
@@ -108,14 +108,14 @@ class ScaResponseConverterTest {
 
 
     @Test
-    void mapResponse_consent_notMultilevel_scaMethodSelected() throws NoSuchFieldException {
+    void mapResponse_consent_notMultilevel_scaMethodSelected() {
         // Given
         when(userMapper.toScaUserDataTO(any()))
                 .thenReturn(scaUserDataTO);
 
         scaChallengeDataResolver.afterPropertiesSet();
 
-        FieldSetter.setField(converter, converter.getClass().getDeclaredField("multilevelScaEnable"), false);
+        ReflectionTestUtils.setField(converter, "multilevelScaEnable", false);
 
         EmailScaChallengeData data = new EmailScaChallengeData();
         Map<String, ChallengeDataTO> datasMap = new HashMap<>();
@@ -123,7 +123,7 @@ class ScaResponseConverterTest {
         ChallengeDataTO challengeDataTO = getChallengeDataTO();
 
         datasMap.put(CHALLENGE_DATA_TYPE, challengeDataTO);
-        FieldSetter.setField(data, data.getClass().getSuperclass().getDeclaredField("challengeDatas"), datasMap);
+        ReflectionTestUtils.setField(data, "challengeDatas", datasMap);
 
         when(scaChallengeDataResolver.resolveScaChallengeData(ScaMethodTypeTO.SMTP_OTP))
                 .thenReturn(data);
@@ -141,9 +141,9 @@ class ScaResponseConverterTest {
     }
 
     @Test
-    void mapResponse_payment_notMultilevel() throws NoSuchFieldException {
+    void mapResponse_payment_notMultilevel() {
         // Given
-        FieldSetter.setField(converter, converter.getClass().getDeclaredField("multilevelScaEnable"), false);
+        ReflectionTestUtils.setField(converter, "multilevelScaEnable", false);
 
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
@@ -158,11 +158,11 @@ class ScaResponseConverterTest {
     }
 
     @Test
-    void mapResponse_payment_multilevel() throws NoSuchFieldException {
+    void mapResponse_payment_multilevel() {
         // Given
         when(scaOperationService.authenticationCompleted(any(), any()))
                 .thenReturn(true);
-        FieldSetter.setField(converter, converter.getClass().getDeclaredField("multilevelScaEnable"), true);
+        ReflectionTestUtils.setField(converter, "multilevelScaEnable", true);
 
         // When
         GlobalScaResponseTO response = converter.mapResponse(getOperation(ScaStatusBO.RECEIVED),
@@ -178,14 +178,14 @@ class ScaResponseConverterTest {
     }
 
     @Test
-    void mapResponse_payment_notMultilevel_scaMethodSelected() throws NoSuchFieldException {
+    void mapResponse_payment_notMultilevel_scaMethodSelected() {
         // Given
         when(userMapper.toScaUserDataTO(any()))
                 .thenReturn(scaUserDataTO);
 
         scaChallengeDataResolver.afterPropertiesSet();
 
-        FieldSetter.setField(converter, converter.getClass().getDeclaredField("multilevelScaEnable"), false);
+        ReflectionTestUtils.setField(converter, "multilevelScaEnable", false);
 
         EmailScaChallengeData data = new EmailScaChallengeData();
         Map<String, ChallengeDataTO> datasMap = new HashMap<>();
@@ -193,7 +193,7 @@ class ScaResponseConverterTest {
         ChallengeDataTO challengeDataTO = getChallengeDataTO();
 
         datasMap.put(CHALLENGE_DATA_TYPE, challengeDataTO);
-        FieldSetter.setField(data, data.getClass().getSuperclass().getDeclaredField("challengeDatas"), datasMap);
+        ReflectionTestUtils.setField(data, "challengeDatas", datasMap);
 
         when(scaChallengeDataResolver.resolveScaChallengeData(ScaMethodTypeTO.SMTP_OTP))
                 .thenReturn(data);

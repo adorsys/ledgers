@@ -16,18 +16,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import pro.javatar.commons.reader.YamlReader;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -170,9 +166,9 @@ class DepositAccountPaymentServiceImplTest {
     }
 
     @Test
-    void executePayment_instant() throws NoSuchFieldException {
+    void executePayment_instant() {
         // Given
-        FieldSetter.setField(paymentService, paymentService.getClass().getDeclaredField("instantPayments"), getInstants());
+        ReflectionTestUtils.setField(paymentService, "instantPayments", getInstants());
 
         when(paymentRepository.findByPaymentIdAndTransactionStatus(anyString(), any())).thenReturn(Optional.of(getSinglePayment()));
         when(executionService.executePayment(any(), anyString())).thenReturn(TransactionStatusBO.ACSC);

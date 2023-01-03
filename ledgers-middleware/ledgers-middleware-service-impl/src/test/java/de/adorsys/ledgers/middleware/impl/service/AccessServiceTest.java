@@ -9,7 +9,6 @@ import de.adorsys.ledgers.middleware.api.domain.um.AccessTypeTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
 import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -17,20 +16,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 
 import static de.adorsys.ledgers.middleware.api.domain.Constants.*;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,9 +87,9 @@ class AccessServiceTest {
     }
 
     @Test
-    void updateAccountAccessNewAccount_new_access_tpp_add() throws NoSuchFieldException {
+    void updateAccountAccessNewAccount_new_access_tpp_add() {
         // Given
-        FieldSetter.setField(service, service.getClass().getDeclaredField("finalWeight"), 100);
+        ReflectionTestUtils.setField(service, "finalWeight", 100);
         UserBO initialUser = getUserBO(new ArrayList<>(), USER_LOGIN, TPP_LOGIN);
         UserBO tppUser = getUserBO(new ArrayList<>(singletonList(getAccessBO("1", IBAN, USD, 100))), TPP_LOGIN, null);
         when(userService.findById(eq(TPP_LOGIN))).thenReturn(tppUser);
@@ -129,8 +128,8 @@ class AccessServiceTest {
     }
 
     @Test
-    void exchangeTokenEndSca_ms_enabled_not_complete() throws NoSuchFieldException {
-        FieldSetter.setField(service, service.getClass().getDeclaredField("multilevelScaEnable"), true);
+    void exchangeTokenEndSca_ms_enabled_not_complete() {
+        ReflectionTestUtils.setField(service, "multilevelScaEnable", true);
         when(tokenService.exchangeToken(any(), any(), any())).thenReturn(new BearerTokenTO());
         BearerTokenTO result = service.exchangeTokenEndSca(false, "token");
         assertNotNull(result);
@@ -147,19 +146,11 @@ class AccessServiceTest {
         verify(tokenService, times(3)).exchangeToken(any(), any(), eq(SCOPE_FULL_ACCESS));
     }
 
-    private void exchangeTokenTest(boolean multiLevel, boolean authCompleted, String expectedScope) throws NoSuchFieldException {
-        FieldSetter.setField(service, service.getClass().getDeclaredField("multilevelScaEnable"), multiLevel);
+    private void exchangeTokenTest(boolean multiLevel, boolean authCompleted, String expectedScope) {
+        ReflectionTestUtils.setField(service, "multilevelScaEnable", multiLevel);
         when(tokenService.exchangeToken(any(), any(), any())).thenReturn(new BearerTokenTO());
         BearerTokenTO result = service.exchangeTokenEndSca(authCompleted, "token");
         assertNotNull(result);
-    }
-
-    private AisAccountAccessInfoBO getAisAccess(List<String> ibans) {
-        AisAccountAccessInfoBO ais = new AisAccountAccessInfoBO();
-        ais.setAccounts(ibans);
-        ais.setBalances(Collections.emptyList());
-        ais.setTransactions(Collections.emptyList());
-        return ais;
     }
 
     private UserBO getUserBO(List<AccountAccessBO> accesses, String login, String branch) {
@@ -178,6 +169,6 @@ class AccessServiceTest {
     }
 
     private DepositAccountBO getDepostAccountBO() {
-        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "displayName","product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch", CREATED, BigDecimal.ZERO);
+        return new DepositAccountBO(ACCOUNT_ID, IBAN, null, null, null, null, EUR, "name", "displayName", "product", AccountTypeBO.CACC, null, null, AccountUsageBO.PRIV, "details", false, false, "branch", CREATED, BigDecimal.ZERO);
     }
 }

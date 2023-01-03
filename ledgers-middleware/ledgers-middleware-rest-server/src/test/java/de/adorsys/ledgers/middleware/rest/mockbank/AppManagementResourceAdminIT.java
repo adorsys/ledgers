@@ -1,8 +1,6 @@
 package de.adorsys.ledgers.middleware.rest.mockbank;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.middleware.LedgersMiddlewareRestApplication;
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
@@ -42,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @ActiveProfiles("h2")
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class, TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
-@DatabaseTearDown(value = {"MiddlewareServiceImplIT-db-delete.xml"}, type = DatabaseOperation.DELETE_ALL)
 class AppManagementResourceAdminIT {
 
     private MockMvc mockMvc;
@@ -97,7 +94,7 @@ class AppManagementResourceAdminIT {
     void givenPingURI_whenMockMVC_thenReturnsPong() throws Exception {
         // When
         this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/management/app/ping"))
+                        MockMvcRequestBuilders.get("/management/app/ping"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.content().string("pong"));
     }

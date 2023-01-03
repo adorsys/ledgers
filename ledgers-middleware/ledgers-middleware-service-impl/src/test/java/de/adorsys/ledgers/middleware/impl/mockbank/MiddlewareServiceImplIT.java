@@ -1,8 +1,6 @@
 package de.adorsys.ledgers.middleware.impl.mockbank;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
 import de.adorsys.ledgers.keycloak.client.impl.KeycloakDataServiceImpl;
 import de.adorsys.ledgers.keycloak.client.impl.KeycloakTokenServiceImpl;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakAuthMapperImpl;
@@ -28,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class, TransactionalTestExecutionListener.class,
         DbUnitTestExecutionListener.class})
 @ActiveProfiles("h2")
-@DatabaseTearDown(value = {"MiddlewareServiceImplIT-db-delete.xml"}, type = DatabaseOperation.DELETE_ALL)
 class MiddlewareServiceImplIT {
 
     @Autowired
