@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * All rights are reserved.
+ */
+
 import { Component, OnInit } from '@angular/core';
 import {AccountService} from "../../services/account.service";
 

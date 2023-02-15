@@ -1,4 +1,9 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+  ~ All rights are reserved.
+  -->
+
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
     <changeSet context="test" author="fpo (generated)" id="1546818352235-23">
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="src/main/resources/migration/0005-initial-data-v2/users.csv" quotchar="&quot;" separator="," tableName="users">
