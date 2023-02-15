@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * All rights are reserved.
+ */
+
 /**
  * This file includes polyfills needed by Angular and is loaded before the app.
  * You can add your own extra polyfills to this file.

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * All rights are reserved.
+ */
+
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RegisterComponent } from './register.component';

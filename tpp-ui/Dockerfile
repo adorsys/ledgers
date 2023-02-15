@@ -1,6 +1,6 @@
 # Stage SERVE
 FROM nginx:1.15.5
-MAINTAINER https://github.com/adorsys/xs2a
+LABEL maintainer="https://git.adorsys.de/adorsys/xs2a/ledgers"
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY entry.sh /opt/entry.sh

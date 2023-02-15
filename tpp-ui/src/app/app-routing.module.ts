@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * All rights are reserved.
+ */
+
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import {DashboardComponent} from "./components/dashboard/dashboard.component";

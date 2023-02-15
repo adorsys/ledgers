@@ -87,7 +87,7 @@ Ledgers is heavily dependents on spring for now. We are still working on a more 
 ### Building and Running
 
 ```
-	> git clone https://github.com/adorsys/ledgers.git
+	> git clone https://git.adorsys.de/adorsys/xs2a/ledgers.git
 	> cd ledgers
 	> mvn clean install
 	> cd ledgers-app
@@ -179,7 +179,3 @@ Please read [CONTRIBUTING](doc/CONTRIBUTING.md) for details on our code of condu
 * **[Francis Pouatcha](mailto:fpo@adorsys.de)** - *Initial work* - [adorsys](https://www.adorsys.de)
 
 See also the list of [contributors](doc/contributors.md) who participated in this project.
-
-## License
-
-This project is licensed under the Apache License version 2.0 - see the [LICENSE.md](LICENSE.md) file for details

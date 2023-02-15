@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * All rights are reserved.
+ */
+
 with postingIds as (
     SELECT posting_id
     from posting_line

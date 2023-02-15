@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * All rights are reserved.
+ */
+
 import { TestBed, inject } from '@angular/core/testing';
 
 import { UserService } from './user.service';
