@@ -118,11 +118,11 @@
         <pmd.plugin.version>3.13.0</pmd.plugin.version>
 
         <!-- Spring-related versions -->
-        <spring-boot-dependencies.version>2.7.0</spring-boot-dependencies.version>
-        <spring-cloud-starter-openfeign.version>3.1.5</spring-cloud-starter-openfeign.version>
-        <spring-security.version>5.7.5</spring-security.version>
-        <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-        <spring-test.version>5.3.19</spring-test.version>
+        <spring-boot-dependencies.version>2.7.10</spring-boot-dependencies.version>
+        <spring-cloud-starter-openfeign.version>3.1.6</spring-cloud-starter-openfeign.version>
+        <spring-security.version>5.7.7</spring-security.version>
+        <spring-plugin.version>3.0.0</spring-plugin.version>
+        <spring-test.version>5.3.26</spring-test.version>
 
         <!-- Other versions -->
         <springdoc-openapi-ui.version>1.5.12</springdoc-openapi-ui.version>
