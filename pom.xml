@@ -127,10 +127,10 @@
         <!-- Other versions -->
         <springdoc-openapi-ui.version>1.5.12</springdoc-openapi-ui.version>
         <apache.commons.collections.version>4.3</apache.commons.collections.version>
-        <apache.commons.io.version>2.8.0</apache.commons.io.version>
+        <commons.io.version>2.8.0</commons.io.version>
         <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
         <dbunit.version>2.6.0</dbunit.version>
-        <keycloak-adapter-bom.version>17.0.0</keycloak-adapter-bom.version>
+        <keycloak.version>17.0.0</keycloak.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
         <lombok-plugin.version>1.16.22</lombok-plugin.version>
         <javatar-commons.version>0.7</javatar-commons.version>
@@ -149,10 +149,9 @@
         <classgraph.version>4.8.139</classgraph.version>
 
         <!-- Test versions -->
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <junit-jupiter-api.version>5.8.2</junit-jupiter-api.version>
         <mockito.version>3.11.2</mockito.version>
         <guava.version>30.1.1-jre</guava.version>
-        <powermock.version>2.0.5</powermock.version>
         <hamcrest-library.version>1.3</hamcrest-library.version>
         <spring-test-dbunit.version>1.3.0</spring-test-dbunit.version>
 
@@ -220,29 +219,6 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- bom overrides -->
-
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-xml</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson-annotations.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
             <!-- spring dependencies -->
 
             <dependency>
@@ -265,16 +241,41 @@
                 <version>${spring-security.version}</version>
             </dependency>
 
+            <!-- jackson -->
+
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson-annotations.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- keycloak-->
+
             <dependency>
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-spring-boot-starter</artifactId>
-                <version>${keycloak-adapter-bom.version}</version>
+                <version>${keycloak.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-adapter-core</artifactId>
-                <version>${keycloak-adapter-bom.version}</version>
+                <version>${keycloak.version}</version>
             </dependency>
 
             <dependency>
@@ -371,8 +372,10 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>${apache.commons.io.version}</version>
+                <version>${commons.io.version}</version>
             </dependency>
+
+            <!-- test dependencies -->
 
             <dependency>
                 <groupId>org.dbunit</groupId>
@@ -425,7 +428,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>${junit-jupiter.version}</version>
+                <version>${junit-jupiter-api.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -451,11 +454,10 @@
 
         <!-- test dependencies -->
 
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter.version}</version>
+            <version>${junit-jupiter-api.version}</version>
             <scope>test</scope>
         </dependency>
 

@@ -46,21 +46,17 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-		<!-- Sprinfox and swagger UI-->
+		<!-- other dependencies -->
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 		</dependency>
 
-		<!-- other dependencies -->
-
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 		</dependency>
-
-		<!-- test dependencies -->
 
 	</dependencies>
 

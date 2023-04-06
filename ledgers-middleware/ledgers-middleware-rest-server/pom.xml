@@ -48,7 +48,13 @@
 			<artifactId>ledgers-utils</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>keycloak-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- spring dependencies -->
 
 		<dependency>
@@ -66,6 +72,8 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- Keycloak dependencies-->
+
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-adapter-core</artifactId>
@@ -74,13 +82,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-core</artifactId>
-			<version>${keycloak-adapter-bom.version}</version>
-		</dependency>
-
-		<!-- Sprinfox and swagger UI -->
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>${keycloak.version}</version>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -88,6 +90,11 @@
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
 		</dependency>
 
 		<dependency>
@@ -99,6 +106,7 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
+
 		<!-- test dependencies -->
 
 		<dependency>
@@ -190,42 +198,7 @@
             <artifactId>commons-validator</artifactId>
         </dependency>
 
-		<dependency>
-			<groupId>de.adorsys.ledgers</groupId>
-			<artifactId>keycloak-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
 	</dependencies>
-
-	<!--build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>${maven-enforcer-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>enforce-banned-dependencies</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<bannedDependencies>
-									<excludes>
-										<exclude>de.adorsys.ledgers:ledgers-middleware-service-impl:*:*:compile</exclude>
-										<exclude>de.adorsys.ledgers:ledgers-middleware-service-impl:*:*:provided</exclude>
-									</excludes>
-								</bannedDependencies>
-							</rules>
-							<fail>true</fail>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build--> <!--//TODO restore after refactoring of AuthTOKEN-->
 
 </project>
 
