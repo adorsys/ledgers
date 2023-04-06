@@ -24,6 +24,7 @@
 	<dependencies>
 
 		<!-- project dependencies -->
+
 		<dependency>
 			<groupId>de.adorsys.ledgers</groupId>
 			<artifactId>ledgers-security</artifactId>
@@ -37,19 +38,20 @@
 		</dependency>
 
 		<!-- spring dependencies -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+
+		<!-- other dependencies -->
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
-		<!-- other dependencies -->
-
-        <dependency>
+		<dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>

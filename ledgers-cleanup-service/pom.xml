@@ -30,6 +30,7 @@
         </dependency>
 
         <!-- other dependencies -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -41,6 +42,7 @@
         </dependency>
 
         <!-- test dependencies -->
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>

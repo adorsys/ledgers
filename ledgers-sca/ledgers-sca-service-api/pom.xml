@@ -28,16 +28,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- spring dependencies -->
-
 		<!-- other dependencies -->
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
-
-		<!-- test dependencies -->
 
 	</dependencies>
 

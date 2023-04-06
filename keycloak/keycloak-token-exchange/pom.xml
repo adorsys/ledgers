@@ -27,25 +27,29 @@
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson-annotations.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
-            <version>${keycloak-adapter-bom.version}</version>
+            <version>${keycloak.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi</artifactId>
-            <version>${keycloak-adapter-bom.version}</version>
+            <version>${keycloak.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi-private</artifactId>
-            <version>${keycloak-adapter-bom.version}</version>
+            <version>${keycloak.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-services</artifactId>
-            <version>${keycloak-adapter-bom.version}</version>
+            <version>${keycloak.version}</version>
         </dependency>
 
         <dependency>
@@ -53,6 +57,7 @@
             <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
             <version>${jboss-jaxrs-api_2.0_spec.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>

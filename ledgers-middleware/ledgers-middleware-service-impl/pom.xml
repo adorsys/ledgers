@@ -60,6 +60,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>de.adorsys.ledgers</groupId>
+			<artifactId>keycloak-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- spring dependencies -->
 
 		<dependency>
@@ -166,12 +172,6 @@
             <artifactId>ledgers-postings-service-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>de.adorsys.ledgers</groupId>
-            <artifactId>keycloak-client</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
     </dependencies>
