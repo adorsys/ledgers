@@ -120,22 +120,34 @@ Lint (YAML, JSON, XML):
   # commented cause get error Unsupported version '1.1'
   #     - find ./ -type f \( -iname "*.xml" ! -iname pom.xml \) -exec xmllint --noout {} \;
 
+# Lint (Dockerfiles):
+#   image: docker
+#   stage: "Lint"
+#   services:
+#     - docker:dind
+#   variables:
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#     DOCKER_DRIVER: overlay2
+#   except:
+#     - schedules
+#     - develop
+#     - master
+#   script:
+#     - echo "Run ledgers dockerfile checks"
+#     - docker run --rm -i hadolint/hadolint < Dockerfile
+
 Lint (Dockerfiles):
-  image: docker
+  image: singapore/lint-cond
   stage: "Lint"
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_DRIVER: overlay2
   except:
     - schedules
     - develop
     - master
   script:
     - echo "Run ledgers dockerfile checks"
-    - docker run --rm -i hadolint/hadolint < Dockerfile
+    - docker run -v $(pwd):/app --rm singapore/lint-condo hadolint /app/Dockerfile
+
 
 Lint (PMD check):
   image: maven:3.6-jdk-11-slim
