@@ -60,7 +60,7 @@ spring:
     hibernate:
       ddl-auto: validate
     properties:
-      hibrenate.globally_quoted_identifiers: true
+      hibernate.globally_quoted_identifiers: true
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       hibernate.jdbc.batch_size: 100
@@ -73,16 +73,20 @@ spring:
       write_dates_as_timestamps: false
   mail:
     default-encoding: UTF-8
-    host: localhost
-    port: 2500
-    username: login
-    password: pass
+    host: smtp.gmail.com
+    port: 465
+    username: modelbank.mail@gmail.com
+    password: password
     properties:
-      mail:
-        smtp:
-          auth: false
-          ssl: true
-          from: changeme
+      smtp:
+        auth: true
+        ssl: true
+        start-tls: false
+        from: modelbank.mail@gmail.com
+        from-display-name: Ledgers
+        envelope-from: modelbank.mail@gmail.com
+        reply-to: modelbank.mail@gmail.com
+        reply-to-display-name: Ledgers support
 
 logging:
   level:
@@ -279,10 +283,13 @@ db:
 spring:
   profiles: dev
 
-logging.level.org.postgresql: INFO
-logging.level.org.hibernate.SQL: DEBUG
-logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-logging.level.org.springframework: TRACE
+logging:
+  level:
+    org:
+      postgresql: INFO
+      hibernate.SQL: DEBUG
+      hibernate.type.descriptor.sql.BasicBinder: TRACE
+      springframework: TRACE
 
 management.endpoints.web.exposure.include: "*"
 management.endpoints.web.exposure.exclude: env,beans

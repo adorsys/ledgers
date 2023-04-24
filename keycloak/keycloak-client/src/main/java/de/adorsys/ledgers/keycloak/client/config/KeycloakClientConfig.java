@@ -50,23 +50,35 @@ public class KeycloakClientConfig {
     @Value("${spring.mail.port:}")
     private String emailPort;
 
-    @Value("${spring.mail.properties.mail.ssl:false}")
-    private String emailSsl;
-
-    @Value("${spring.mail.properties.mail.auth:false}")
-    private String emailAuth;
-
     @Value("${spring.mail.username:}")
     private String emailUser;
 
     @Value("${spring.mail.password:}")
     private String emailPassword;
 
-    @Value("${spring.mail.properties.mail.from:}")
+    @Value("${spring.mail.properties.smtp.auth:false}")
+    private String emailAuth;
+
+    @Value("${spring.mail.properties.smtp.ssl:false}")
+    private String emailSsl;
+
+    @Value("${spring.mail.properties.smtp.start-tls:false}")
+    private String startTls;
+
+    @Value("${spring.mail.properties.smtp.from:}")
     private String emailFrom;
 
-    @Value("${spring.mail.properties.mail.fromDisplayName:}")
+    @Value("${spring.mail.properties.smtp.envelope-from:}")
+    private String envelopeFrom;
+
+    @Value("${spring.mail.properties.smtp.from-display-name:}")
     private String emailFromDisplayName;
+
+    @Value("${spring.mail.properties.smtp.reply-to:}")
+    private String replyTo;
+
+    @Value("${spring.mail.properties.smtp.reply-to-display-name:}")
+    private String replyToDisplayName;
 
     @Getter
     private Map<String, String> smtpServer = new HashMap<>();
@@ -75,11 +87,15 @@ public class KeycloakClientConfig {
     public void doInit() {
         smtpServer.put("host", emailHost);
         smtpServer.put("port", emailPort);
-        smtpServer.put("auth", emailAuth);
-        smtpServer.put("ssl", emailSsl);
-        smtpServer.put("from", emailFrom);
-        smtpServer.put("fromDisplayName", emailFromDisplayName);
         smtpServer.put("user", emailUser);
         smtpServer.put("password", emailPassword);
+        smtpServer.put("auth", emailAuth);
+        smtpServer.put("ssl", emailSsl);
+        smtpServer.put("starttls", startTls);
+        smtpServer.put("from", emailFrom);
+        smtpServer.put("fromDisplayName", emailFromDisplayName);
+        smtpServer.put("envelopeFrom", envelopeFrom);
+        smtpServer.put("replyTo", replyTo);
+        smtpServer.put("replyToDisplayName", replyToDisplayName);
     }
 }
