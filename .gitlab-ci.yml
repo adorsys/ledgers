@@ -87,6 +87,8 @@ Lint (Docker compose):
     - schedules
     - develop
     - master
+  tags:
+    - aws
   script:
     - apt update && apt install yamllint docker-compose make -yq
     - echo "Run Docker compose lint"
@@ -120,33 +122,24 @@ Lint (YAML, JSON, XML):
   # commented cause get error Unsupported version '1.1'
   #     - find ./ -type f \( -iname "*.xml" ! -iname pom.xml \) -exec xmllint --noout {} \;
 
-# Lint (Dockerfiles):
-#   image: docker
-#   stage: "Lint"
-#   services:
-#     - docker:dind
-#   variables:
-#     DOCKER_HOST: tcp://docker:2375
-#     DOCKER_TLS_CERTDIR: ""
-#     DOCKER_DRIVER: overlay2
-#   except:
-#     - schedules
-#     - develop
-#     - master
-#   script:
-#     - echo "Run ledgers dockerfile checks"
-#     - docker run --rm -i hadolint/hadolint < Dockerfile
-
 Lint (Dockerfiles):
-  image: singapore/lint-cond
+  image: docker
   stage: "Lint"
+  services:
+    - docker:dind
+  tags:
+    - aws
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
   except:
     - schedules
     - develop
     - master
   script:
     - echo "Run ledgers dockerfile checks"
-    - docker run -v $(pwd):/app --rm singapore/lint-condo hadolint /app/Dockerfile
+    - docker run --rm -i hadolint/hadolint < Dockerfile
 
 
 Lint (PMD check):

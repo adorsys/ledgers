@@ -14,6 +14,7 @@ import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.EnumSet;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -24,6 +25,7 @@ public abstract class AccountDetailsMapper {
 
     public abstract AccountDetailsExtendedTO toAccountDetailsExtendedTO(DepositAccountBO source, String branchLogin);
 
+    @Mapping(target = "blocked", expression = "java(resolveBlockedStatus(source))")
     public abstract DepositAccountBO toDepositAccountBO(AccountDetailsTO source);
 
     public AccountDetailsTO toAccountDetailsTO(DepositAccountDetailsBO source) {
@@ -42,5 +44,9 @@ public abstract class AccountDetailsMapper {
         return details.isEnabled()
                        ? AccountStatusTO.ENABLED
                        : AccountStatusTO.BLOCKED;
+    }
+
+    protected boolean resolveBlockedStatus(AccountDetailsTO accountDetails) {
+        return accountDetails.isBlocked() || EnumSet.of(AccountStatusTO.BLOCKED, AccountStatusTO.DELETED).contains(accountDetails.getAccountStatus());
     }
 }

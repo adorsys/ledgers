@@ -8,7 +8,7 @@ volumes:
 
 services:
   ledgers-keycloak:
-    image: adorsys/ledgres-keycloak
+    image: adorsys/ledgers-keycloak
     container_name: ledgers-keycloak
     restart: on-failure
     build:
@@ -19,8 +19,9 @@ services:
     ports:
     - "8080:8080"
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_PROXY=edge
 
   ledgers:
     image: adorsys/ledgers
@@ -36,6 +37,7 @@ services:
       - "8188:8001"
     depends_on:
       - ledgers-db
+      - ledgers-keycloak
     environment:
       - SPRING_PROFILES_ACTIVE=postgres,sandbox
       - SPRING_JPA_SHOW_SQL=false
@@ -47,9 +49,21 @@ services:
       - LIQUIBASE_ENABLED=true
       - LEDGERS_SCA_MULTILEVEL_ENABLED=false
       - LEDGERS_SCA_AUTHORISATION_CONFIRMATION_ENABLED=false
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=465
+      - SPRING_MAIL_USERNAME=modelbank.mail@gmail.com
+      - SPRING_MAIL_PASSWORD=password
+      - SPRING_MAIL_PROPERTIES_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_SMTP_SSL=true
+      - SPRING_MAIL_PROPERTIES_SMTP_START_TLS=false
+      - SPRING_MAIL_PROPERTIES_SMTP_FROM=modelbank.mail@gmail.com
+      - SPRING_MAIL_PROPERTIES_SMTP_FROM_DISPLAY_NAME=Ledgers
+      - SPRING_MAIL_PROPERTIES_SMTP_ENVELOPE_FROM=modelbank.mail@gmail.com
+      - SPRING_MAIL_PROPERTIES_SMTP_REPLY_TO=modelbank.mail@gmail.com
+      - SPRING_MAIL_PROPERTIES_SMTP_REPLY_TO_DISPLAY_NAME=Ledgers support
 
   ledgers-db:
-    image: centos/postgresql-95-centos7
+    image: centos/postgresql-12-centos7
     container_name: ledgers_db
     restart: on-failure
     volumes:
