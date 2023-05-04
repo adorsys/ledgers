@@ -236,28 +236,49 @@ Test (Unit Tests):
 
 Build and push images to private repo (develop):
   stage: "Package"
-  except:
-    - schedules
+  services:
+    - docker:dind
+  tags:
+    - aws
   only:
     - develop
+  except:
+    - schedules
   variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
     DOCKER_TAG: develop
   <<: *build_and_push_dockerhub_images_private
 
 
 Build and push images to private repo (tags):
   stage: "Package"
+  services:
+    - docker:dind
+  tags:
+    - aws
   only:
     - tags
   variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
     DOCKER_TAG: $CI_COMMIT_TAG
   <<: *build_and_push_dockerhub_images_private
 
 Build and push images to private repo (master):
   stage: "Package"
+  services:
+    - docker:dind
+  tags:
+    - aws
   only:
     - master
   variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
     DOCKER_TAG: latest
   <<: *build_and_push_dockerhub_images_private
 
