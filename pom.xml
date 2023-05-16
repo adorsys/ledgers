@@ -139,7 +139,7 @@
         <datecalc-common.version>1.4.0</datecalc-common.version>
         <datecalc-jdk8.version>1.4.0</datecalc-jdk8.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
-        <json.version>20190722</json.version>
+        <json.version>20230227</json.version>
         <jackson-annotations.version>2.13.2</jackson-annotations.version>
         <feign-slf4j.version>10.7.4</feign-slf4j.version>
         <testcontainers.version>1.15.1</testcontainers.version>
