@@ -79,7 +79,8 @@ variables: &variables
   script:
     - git config --global user.name ${GITHUB_USERNAME}
     - git remote add github https://$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
-    - git push github $GITHUB_CLONE_BRANCH --force
+    - git checkout ${GITHUB_CLONE_BRANCH}
+    - git push github ${GITHUB_CLONE_BRANCH} --force
 
 # ------------------------------------------------------------------
 # jobs
