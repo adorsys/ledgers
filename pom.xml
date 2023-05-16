@@ -120,7 +120,7 @@
         <!-- Spring-related versions -->
         <spring-boot-dependencies.version>2.7.10</spring-boot-dependencies.version>
         <spring-cloud-starter-openfeign.version>3.1.6</spring-cloud-starter-openfeign.version>
-        <spring-security.version>5.7.7</spring-security.version>
+        <spring-security.version>5.7.8</spring-security.version>
         <spring-plugin.version>3.0.0</spring-plugin.version>
         <spring-test.version>5.3.26</spring-test.version>
 
