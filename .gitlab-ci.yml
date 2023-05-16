@@ -78,7 +78,7 @@ variables: &variables
   image: alpine/git
   script:
     - git config --global user.name ${GITHUB_USERNAME}
-    - git remote add github https://$GITHUB_TOKEN_EVGENIY@github.com/$GITHUB_REPOSITORY.git
+    - git remote add github https://$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
     - git push github $GITHUB_CLONE_BRANCH --force
 
 # ------------------------------------------------------------------
