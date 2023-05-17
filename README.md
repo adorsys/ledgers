@@ -1,7 +1,4 @@
 # Ledgers
-[![Build Status](https://travis-ci.com/adorsys/xs2a.svg?branch=develop)](https://travis-ci.com/adorsys/ledgers)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=adorsys_ledgers&metric=alert_status)](https://sonarcloud.io/dashboard?id=adorsys_ledgers)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=adorsys_ledgers&metric=coverage)](https://sonarcloud.io/dashboard?id=adorsys_ledgers)
 
 Banking Booking System kept simple!
 
@@ -73,7 +70,7 @@ This is a sample test data file for the deposit account [Sample Test Data](ledge
 [adorsys](https://adorsys.de/en/index.html) is a company who works ever since the very beginning of PSD2 with its requirements and implicit tasks.
 We help banks to be PSD2 complaint (technical and legal terms). To speed up the process we provide this open source XS2A interface, specified by Berlin Group,
 that can be connected to your middleware system.
-You can check your readiness for PSD2 Compliance and other information via [our Web-site](https://adorsys.de/en/psd2.html).
+You can check your readiness for PSD2 Compliance and other information via [our Web-site](https://adorsys.com/en).
 
 
 ## Getting Started
@@ -158,7 +155,7 @@ More details see in [instruction](doc/deployment.md)
 
 ## Built With
 
-* [Java, version 1.11](http://java.oracle.com) - The main language of implementation
+* [Java, version 11](http://java.oracle.com) - The main language of implementation
 * [Maven, version 3.0](https://maven.apache.org/) - Dependency Management
 * [Spring Boot](https://projects.spring.io/spring-boot/) - Spring boot as core Java framework
 
@@ -176,6 +173,6 @@ Please read [CONTRIBUTING](doc/CONTRIBUTING.md) for details on our code of condu
 
 ## Authors
 
-* **[Francis Pouatcha](mailto:fpo@adorsys.de)** - *Initial work* - [adorsys](https://www.adorsys.de)
+* **[Francis Pouatcha](mailto:fpo@adorsys.de)** - *Initial work* - [adorsys](https://www.adorsys.com)
 
 See also the list of [contributors](doc/contributors.md) who participated in this project.
