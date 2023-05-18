@@ -120,7 +120,7 @@
         <!-- Spring-related versions -->
         <spring-boot-dependencies.version>2.7.10</spring-boot-dependencies.version>
         <spring-cloud-starter-openfeign.version>3.1.6</spring-cloud-starter-openfeign.version>
-        <spring-security.version>5.7.7</spring-security.version>
+        <spring-security.version>5.7.8</spring-security.version>
         <spring-plugin.version>3.0.0</spring-plugin.version>
         <spring-test.version>5.3.26</spring-test.version>
 
@@ -139,7 +139,7 @@
         <datecalc-common.version>1.4.0</datecalc-common.version>
         <datecalc-jdk8.version>1.4.0</datecalc-jdk8.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
-        <json.version>20190722</json.version>
+        <json.version>20230227</json.version>
         <jackson-annotations.version>2.13.2</jackson-annotations.version>
         <feign-slf4j.version>10.7.4</feign-slf4j.version>
         <testcontainers.version>1.15.1</testcontainers.version>

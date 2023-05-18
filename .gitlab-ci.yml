@@ -15,7 +15,7 @@ stages:
   - "Test"         # run tests and code quality checks
   - "Package"      # dockerize jar and push to docker registry
   - "Release"      # release
-  - "Clone to github" 
+  - "Clone to github"
 
 # ------------------------------------------------------------------
 # variables
