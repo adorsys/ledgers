@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-postings</artifactId>
-		<version>4.23-SNAPSHOT</version>
+		<version>4.22-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>ledgers-postings-rest-server</artifactId>

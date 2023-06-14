@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-sca</artifactId>
-		<version>4.23-SNAPSHOT</version>
+		<version>4.22-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>ledgers-sca-service-impl</artifactId>
