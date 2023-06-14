@@ -25,6 +25,7 @@ import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementService;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
 import de.adorsys.ledgers.sca.domain.OpTypeBO;
@@ -76,6 +77,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     private final ScaResponseResolver scaResponseResolver;
     private final KeycloakTokenService tokenService;
     private final PsuMessageResolver messageResolver;
+    private final MiddlewareUserManagementService userManagementService;
 
     @Value("${ledgers.token.lifetime.seconds.sca:10800}")
     private int scaTokenLifeTime;
@@ -92,7 +94,13 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     }
 
     @Override
-    public void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
+    public boolean createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount) {
+        boolean canBeCreated = isNewAccountAndCanBeCreatedForUser(depositAccount, userId);
+
+        if (!canBeCreated) {
+            return false;
+        }
+
         if (depositAccount.getCurrency() == null) {
             throw MiddlewareModuleException.builder()
                           .errorCode(ACCOUNT_CREATION_VALIDATION_FAILURE)
@@ -104,6 +112,8 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
         checkPresentAccountsAndOwner(depositAccount.getIban(), user);//TODO Consider moving to Filter
         DepositAccountBO createdAccount = depositAccountService.createNewAccount(accountDetailsMapper.toDepositAccountBO(depositAccount), user.getLogin(), user.getBranch());
         accessService.updateAccountAccessNewAccount(createdAccount, user, finalWeight, AccessTypeTO.OWNER);
+
+        return true;
     }
 
     @Override
@@ -171,7 +181,7 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
     public CustomPageImpl<AccountDetailsTO> listDepositAccountsByBranchPaged(String userId, String queryParam, boolean withBalance, CustomPageableImpl pageable) {
         UserBO user = userService.findById(userId);
         return pageMapper.toCustomPageImpl(depositAccountService.findDetailsByBranchPaged(user.getBranch(), queryParam, withBalance, PageRequest.of(pageable.getPage(), pageable.getSize()))
-                .map(accountDetailsMapper::toAccountDetailsTO));
+                                                   .map(accountDetailsMapper::toAccountDetailsTO));
     }
 
     @Override
@@ -262,4 +272,14 @@ public class MiddlewareAccountManagementServiceImpl implements MiddlewareAccount
                           .build();
         }
     }
+
+    private boolean isNewAccountAndCanBeCreatedForUser(AccountDetailsTO account, String userId) {
+        List<AccountDetailsTO> accounts = getAccountsByIbanAndCurrency(account.getIban(), "");
+        return CollectionUtils.isEmpty(accounts) || accounts.stream()
+                                                            .map(AccountDetailsTO::getCurrency)
+                                                            .noneMatch(c -> account.getCurrency() == c)
+                                                            && userManagementService.findById(userId)
+                                                                       .hasAccessToAccountWithIban(account.getIban());
+    }
+
 }

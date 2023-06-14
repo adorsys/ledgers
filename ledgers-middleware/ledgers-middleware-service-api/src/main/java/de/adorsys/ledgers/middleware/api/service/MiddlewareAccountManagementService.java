@@ -32,7 +32,7 @@ public interface MiddlewareAccountManagementService {
      * @param scaInfoTO      : SCA information
      * @param depositAccount : the deposit account to be crated.
      */
-    void createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount);
+    boolean createDepositAccount(String userId, ScaInfoTO scaInfoTO, AccountDetailsTO depositAccount);
 
     /**
      * Retrieve the list of account viewable by the connected user.

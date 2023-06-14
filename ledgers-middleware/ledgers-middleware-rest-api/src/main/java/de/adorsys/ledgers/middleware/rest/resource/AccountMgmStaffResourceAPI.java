@@ -59,7 +59,7 @@ public interface AccountMgmStaffResourceAPI {
             @ApiResponse(responseCode = "409", description = "Account with given IBAN already exists.")
     })
     @PostMapping
-    ResponseEntity<Void> createDepositAccountForUser(@RequestParam(name = USER_ID) String userId,
+    ResponseEntity<Boolean> createDepositAccountForUser(@RequestParam(name = USER_ID) String userId,
                                                      @RequestBody AccountDetailsTO accountDetailsTO);
 
     /**

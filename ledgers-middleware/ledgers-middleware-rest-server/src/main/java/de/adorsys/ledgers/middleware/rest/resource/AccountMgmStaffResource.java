@@ -41,10 +41,10 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasManagerAccessToUser(#userId)  and isNewAccountAndCanBeCreatedForUser(#accountDetailsTO, #userId)")
-    public ResponseEntity<Void> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
-        middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
-        return ResponseEntity.ok().build();
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
+    public ResponseEntity<Boolean> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
+        boolean created = middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
+        return ResponseEntity.ok(created);
     }
 
     @Override
