@@ -14,25 +14,16 @@ import de.adorsys.ledgers.deposit.api.service.DepositAccountService;
 import de.adorsys.ledgers.deposit.api.service.DepositAccountTransactionService;
 import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.Constants;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsExtendedTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountDetailsTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountReferenceTO;
-import de.adorsys.ledgers.middleware.api.domain.account.AccountReportTO;
-import de.adorsys.ledgers.middleware.api.domain.account.FundsConfirmationRequestTO;
-import de.adorsys.ledgers.middleware.api.domain.account.TransactionTO;
+import de.adorsys.ledgers.middleware.api.domain.account.*;
 import de.adorsys.ledgers.middleware.api.domain.payment.AmountTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.SCAConsentResponseTO;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
+import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import de.adorsys.ledgers.middleware.impl.converter.*;
 import de.adorsys.ledgers.middleware.impl.service.message.PsuMessageResolver;
-import de.adorsys.ledgers.um.api.domain.AccessTypeBO;
-import de.adorsys.ledgers.um.api.domain.AccountAccessBO;
-import de.adorsys.ledgers.um.api.domain.AisAccountAccessInfoBO;
-import de.adorsys.ledgers.um.api.domain.AisConsentBO;
-import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
-import de.adorsys.ledgers.um.api.domain.UserBO;
+import de.adorsys.ledgers.um.api.domain.*;
 import de.adorsys.ledgers.um.api.service.UserService;
 import de.adorsys.ledgers.util.DateTimeUtils;
 import de.adorsys.ledgers.util.domain.CustomPageImpl;
@@ -109,6 +100,8 @@ class MiddlewareAccountManagementServiceImplTest {
     private KeycloakTokenService tokenService;
     @Mock
     private PsuMessageResolver messageResolver;
+    @Mock
+    private MiddlewareUserManagementService userManagementService;
 
     private static final ObjectMapper MAPPER = getObjectMapper();
 
@@ -129,7 +122,7 @@ class MiddlewareAccountManagementServiceImplTest {
     }
 
     @Test
-    void createDepositAccount() {
+    void createDepositAccount_success() {
         // Given
         when(userService.findById(any())).thenReturn(buildUserBO());
         when(accountDetailsMapper.toDepositAccountBO(any())).thenReturn(getDepositAccountBO());
@@ -137,12 +130,31 @@ class MiddlewareAccountManagementServiceImplTest {
         when(depositAccountService.getAccountsByIbanAndParamCurrency(any(), any())).thenAnswer(i -> Collections.singletonList(getDepositAccountBO()));
 
         // When
-        middlewareService.createDepositAccount(CORRECT_USER_ID, buildScaInfoTO(), getAccountDetailsTO());
+        boolean created = middlewareService.createDepositAccount(CORRECT_USER_ID, buildScaInfoTO(), getAccountDetailsTO());
 
         // Then
+        assertTrue(created);
         verify(depositAccountService, times(1)).createNewAccount(getDepositAccountBO(), USER_LOGIN, null);
         verify(accountDetailsMapper, times(1)).toDepositAccountBO(getAccountDetailsTO());
         verify(userService, times(1)).findById(CORRECT_USER_ID);
+    }
+
+    @Test
+    void createDepositAccount_existed() {
+        // Given
+        List<DepositAccountBO> accountBOList = Collections.singletonList(getDepositAccountBO());
+        AccountDetailsTO accountDetailsTO = getAccountDetailsTO();
+        accountDetailsTO.setIban(IBAN);
+        when(depositAccountService.getAccountsByIbanAndParamCurrency(IBAN, "")).thenReturn(accountBOList);
+        when(accountDetailsMapper.toAccountDetailsList(accountBOList)).thenReturn(Collections.singletonList(accountDetailsTO));
+
+        // When
+        boolean created = middlewareService.createDepositAccount(CORRECT_USER_ID, buildScaInfoTO(), accountDetailsTO);
+
+        // Then
+        assertFalse(created);
+        verifyNoMoreInteractions(accountDetailsMapper);
+        verifyNoMoreInteractions(depositAccountService);
     }
 
     @Test
