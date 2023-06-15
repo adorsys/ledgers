@@ -4,7 +4,7 @@
 ### Building and Running
 
 ```
-	> git clone https://git.adorsys.de/adorsys/xs2a/ledgers.git
+	> git clone https://github.com/adorsys/ledgers.git
 	> cd ledgers
 	> mvn clean install
 	> cd ledgers-app

@@ -11,7 +11,7 @@ We offer two options: h2 with an external file at ~/ledgersdbs/ledgers-app and p
 ## Building
 
 ```
-	> git clone https://git.adorsys.de/adorsys/xs2a/ledgers.git
+	> git clone https://github.com/adorsys/ledgers.git
 	> cd ledgers
 	> mvn clean install
 ```
