@@ -94,6 +94,8 @@ logging:
       hibernate: WARN
 
 ledgers:
+  users:
+    default-migration-pin: 12345
   xs2a:
     funds-confirmation-user-login: admin
     funds-confirmation-user-password: admin123

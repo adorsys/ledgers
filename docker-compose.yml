@@ -8,7 +8,7 @@ volumes:
 
 services:
   ledgers-keycloak:
-    image: adorsys/ledgers-keycloak
+    image: gitlab-registry.adorsys.de/adorsys/xs2a/ledgers/keycloak-and-ledgers-plugin:${LEDGERS_VERSION}
     container_name: ledgers-keycloak
     restart: on-failure
     build:
@@ -24,7 +24,7 @@ services:
       - KC_PROXY=edge
 
   ledgers:
-    image: adorsys/ledgers
+    image: gitlab-registry.adorsys.de/adorsys/xs2a/ledgers/ledgers:${LEDGERS_VERSION}
     container_name: ledgers
     restart: on-failure
     build:
@@ -70,6 +70,8 @@ services:
       - ledgers-data:/var/lib/pgsql/data
     expose:
       - 5432
+    ports:
+      - "5433:5432"
     networks:
       - ledgers-net
     environment:
