@@ -130,7 +130,7 @@
         <commons.io.version>2.8.0</commons.io.version>
         <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
         <dbunit.version>2.6.0</dbunit.version>
-        <keycloak.version>17.0.0</keycloak.version>
+        <keycloak.version>20.0.5</keycloak.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
         <lombok-plugin.version>1.16.22</lombok-plugin.version>
         <javatar-commons.version>0.7</javatar-commons.version>

@@ -41,6 +41,8 @@ public class IdpConfigurationService {
     private String xs2aAdminLogin;
     @Value("${ledgers.xs2a.funds-confirmation-user-password: admin123}")
     private String xs2aAdminPassword;
+    @Value("${ledgers.users.default-migration-pin: 12345}")
+    private String defaultUserPin;
 
     public void configureIDP() {
         boolean clientExists;
@@ -64,8 +66,8 @@ public class IdpConfigurationService {
 
         List<UserBO> users = userService.listUsers(0, Integer.MAX_VALUE);
         users.stream().filter(u -> !u.getLogin().equals(xs2aAdminLogin))
-                .forEach(this::createUserInIDP);
-        log.info("All users passwords are RESET to 12345 due to migration to new IDP");
+                .forEach(u -> createUserInIDP(u, defaultUserPin));
+        log.info(String.format("All users passwords were RESET to %s due to migration to new IDP", defaultUserPin));
     }
 
     public void createUpdateXs2aAdmin() {
@@ -74,19 +76,19 @@ public class IdpConfigurationService {
         try {
             middlewareUserService.create(admin);
         } catch (UserManagementModuleException e) {
-            log.info("Admin exists in Ledgers");
+            log.info("COF user exists in Ledgers");
             if (dataService.userExists(xs2aAdminLogin)) {
                 middlewareUserService.updatePasswordByLogin(xs2aAdminLogin, xs2aAdminPassword);
             } else {
-                createUserInIDP(userMapper.toUserBO(admin));
-                log.info("Created admin in IDP");
+                createUserInIDP(userMapper.toUserBO(admin), xs2aAdminPassword);
+                log.info("COF user was created in IDP");
             }
         }
     }
 
-    private void createUserInIDP(UserBO user) {
+    private void createUserInIDP(UserBO user, String pin) {
         if (!dataService.userExists(user.getLogin())) {
-            user.setPin("12345");
+            user.setPin(pin);
             dataService.createUser(keycloakUserMapper.toKeycloakUser(user));
         }
     }
