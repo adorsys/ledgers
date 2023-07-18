@@ -151,7 +151,7 @@
         <!-- Test versions -->
         <junit-jupiter-api.version>5.8.2</junit-jupiter-api.version>
         <mockito.version>3.11.2</mockito.version>
-        <guava.version>30.1.1-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
         <hamcrest-library.version>1.3</hamcrest-library.version>
         <spring-test-dbunit.version>1.3.0</spring-test-dbunit.version>
 
