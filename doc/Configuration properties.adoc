@@ -23,10 +23,14 @@
 |spring.mail.port | Mail server port |
 |spring.mail.username | Mail server login |
 |spring.mail.password | Mail server user password |
-|spring.mail.properties.mail.ssl | Mail server ssl enables/disables | FALSE
-|spring.mail.properties.mail.auth | Mail server auth enables/disables | FALSE
-|spring.mail.properties.mail.from | Mail from address |
-|spring.mail.properties.mail.fromDisplayName | Mail from display name |
+|spring.mail.properties.smtp.auth | Mail server auth enabled/disabled | TRUE
+|spring.mail.properties.smtp.ssl | Mail server ssl enables/disables | TRUE
+|spring.mail.properties.smtp.start-tls | Mail server start tls enabled/disabled | FALSE
+|spring.mail.properties.smtp.from | Mail from address |
+|spring.mail.properties.smtp.from-display-name | Mail from display name |
+|spring.mail.properties.smtp.envelope-from | Mail envelope-from address |
+|spring.mail.properties.smtp.reply-to | Mail reply-to address |
+|spring.mail.properties.smtp.reply-to-display-name | Mail reply-to display name |
 
 |ledgers.paymentScheduler.initialDelay | Payments scheduler start delay after application initializes in ms | 3 000
 |ledgers.paymentScheduler.delay | Payments scheduler repeated execution delay in ms | 300 000
