@@ -325,7 +325,9 @@ Release artifacts to private repo (tags):
 Clone to github:
   stage: "Clone to github"
   <<: *sync_changes_github
-  image: alpine/git:latest
+  image:
+    name: alpine/git:latest
+    entrypoint: [ "" ]
   only:
     - develop
     - /^release-4\..*/
