@@ -330,10 +330,10 @@ Clone to github:
     entrypoint: [ "" ]
   only:
     - develop
-    - /^release-4\..*/
+    - /^release-5\..*/
   except:
     - schedules
   variables:
     GITHUB_USERNAME: adorsys
     GITHUB_REPOSITORY: adorsys/ledgers
-    GITHUB_PROJECT_CLONE_VERSION: "4"
+    GITHUB_PROJECT_CLONE_VERSION: "5"
