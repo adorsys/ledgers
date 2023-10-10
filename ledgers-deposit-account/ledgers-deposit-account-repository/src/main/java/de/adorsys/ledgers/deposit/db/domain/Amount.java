@@ -5,10 +5,10 @@
 
 package de.adorsys.ledgers.deposit.db.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 
 @SuppressWarnings("java:S1700")

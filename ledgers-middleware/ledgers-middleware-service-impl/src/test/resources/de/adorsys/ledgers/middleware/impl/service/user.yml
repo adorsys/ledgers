@@ -13,7 +13,10 @@ accountAccesses:
   - id: 1
     accessType: OWNER
     iban: 1234567
+    currency: EUR
+    accountId: qwerty
   - id: 2
     accessType: READ
     iban: 7777777
-    
+    currency: EUR
+    accountId: qwerty

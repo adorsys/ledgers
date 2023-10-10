@@ -10,7 +10,7 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewareAccountManagementServ
 import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
-import de.adorsys.ledgers.middleware.rest.security.AccountAccessMethodSecurityExpressionHandler;
+import de.adorsys.ledgers.middleware.rest.security.AccountAccessSecurityFilterHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
@@ -29,6 +29,6 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
     @Override
     protected MethodSecurityExpressionHandler createExpressionHandler() {
-        return new AccountAccessMethodSecurityExpressionHandler(middlewareAccountService, middlewareService, userManagementService, authMapper, scaService);
+        return new AccountAccessSecurityFilterHandler(middlewareAccountService, middlewareService, userManagementService, authMapper, scaService);
     }
 }

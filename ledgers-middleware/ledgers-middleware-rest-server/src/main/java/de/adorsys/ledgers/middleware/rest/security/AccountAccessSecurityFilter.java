@@ -18,8 +18,9 @@ import de.adorsys.ledgers.middleware.api.service.MiddlewarePaymentService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareRedirectScaService;
 import de.adorsys.ledgers.middleware.api.service.MiddlewareUserManagementService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,9 +30,14 @@ import static de.adorsys.ledgers.middleware.api.domain.Constants.*;
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.STAFF;
 import static de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO.SYSTEM;
 
-public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressionAdapter {
+@Component
+@SuppressWarnings("PMD.TooManyMethods")
+public class AccountAccessSecurityFilter extends SecurityExpressionAdapter {
 
-    public AccountAccessMethodSecurityExpressionRoot(Authentication authentication, MiddlewareAccountManagementService accountService, MiddlewarePaymentService paymentService, KeycloakAuthMapper authMapper, MiddlewareUserManagementService userManagementService, MiddlewareRedirectScaService scaService) {
+    public AccountAccessSecurityFilter(Authentication authentication, MiddlewareAccountManagementService accountService,
+                                       MiddlewarePaymentService paymentService, KeycloakAuthMapper authMapper,
+                                       MiddlewareUserManagementService userManagementService,
+                                       MiddlewareRedirectScaService scaService) {
         super(authentication, accountService, paymentService, userManagementService, authMapper, scaService);
     }
 
@@ -51,27 +57,18 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
         return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasManagerAccessId(accountId, user);
     }
 
-    public boolean isNewAccountAndCanBeCreatedForUser(AccountDetailsTO account, String userId) {
-        List<AccountDetailsTO> accounts = accountService.getAccountsByIbanAndCurrency(account.getIban(), "");
-        return CollectionUtils.isEmpty(accounts) || accounts.stream()
-                                                            .map(AccountDetailsTO::getCurrency)
-                                                            .noneMatch(c -> account.getCurrency() == c)
-                                                            && userManagementService.findById(userId)
-                                                                       .hasAccessToAccountWithIban(account.getIban());
-    }
-
     //-- Manager User checks --//
     public boolean hasManagerAccessToUser(String userId) {
         UserTO user = user();
         return hasAnyRole(SYSTEM.name(), STAFF.name()) && user.isEnabled() && hasAccessToUser(user, userId);
     }
 
-    public boolean isSameUser(String userId) { //TODO Used
+    public boolean isSameUser(String userId) {
         return user().getId().equals(userId);
     }
 
     //--General Payment checks --//
-    public boolean hasAccessToAccountByPaymentId(String paymentId) { //TODO Used
+    public boolean hasAccessToAccountByPaymentId(String paymentId) {
         return hasAccessToAccount(getAccountIdFromPayment(paymentId));
     }
 
@@ -104,11 +101,11 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
                        : hasAccessToAccount(accountIdentifier);
     }
 
-    public boolean isEnabledAccount(String accountId) { //TODO Used
+    public boolean isEnabledAccount(String accountId) {
         return accountService.getDepositAccountById(accountId, LocalDateTime.now(), false).isEnabled();
     }
 
-    public boolean hasAccessToAccountByLogin(String login, String iban) { //TODO Used
+    public boolean hasAccessToAccountByLogin(String login, String iban) {
         return userManagementService.findByUserLogin(login).hasAccessToAccountWithIban(iban);
     }
 
@@ -137,14 +134,13 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
                        : hasAccessToAccountsWithIbans(accountService.getAccountsFromConsent(opr.getOprId()));
     }
 
-    public boolean hasAccessToAccountByAuthorizationId(String authorizationId) { //TODO Used
+    public boolean hasAccessToAccountByAuthorizationId(String authorizationId) {
         return hasAccessToAccountByScaOperation(scaService.loadScaInformation(authorizationId));
     }
 
-    //-- -- --//
     private AccessTokenTO getAccessTokenTO() {
-        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
-        return authMapper.toAccessToken(credentials);
+        Jwt credentials = (Jwt) getAuthentication().getCredentials();
+        return authMapper.toAccessTokenFromJwt(credentials);
     }
 
     private UserTO user() {
@@ -158,10 +154,8 @@ public class AccountAccessMethodSecurityExpressionRoot extends SecurityExpressio
     }
 
     private Set<String> getScopes() {
-        RefreshableKeycloakSecurityContext credentials = (RefreshableKeycloakSecurityContext) authentication.getCredentials();
-        return new HashSet<>(Arrays.asList(credentials.getToken()
-                                                   .getScope()
-                                                   .split(" ")));
+        Jwt credentials = (Jwt) getAuthentication().getCredentials();
+        return new HashSet(Arrays.asList(credentials.getClaimAsString("scope").split(" ")));
     }
 
     private boolean isEnabledAccountIban(String iban) {

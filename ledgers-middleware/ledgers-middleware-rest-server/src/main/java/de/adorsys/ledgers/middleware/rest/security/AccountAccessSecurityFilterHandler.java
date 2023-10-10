@@ -19,7 +19,7 @@ import org.springframework.security.authentication.AuthenticationTrustResolverIm
 import org.springframework.security.core.Authentication;
 
 @RequiredArgsConstructor
-public class AccountAccessMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
+public class AccountAccessSecurityFilterHandler extends DefaultMethodSecurityExpressionHandler {
 
     private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
     private final MiddlewareAccountManagementService middlewareAccountService;
@@ -30,7 +30,7 @@ public class AccountAccessMethodSecurityExpressionHandler extends DefaultMethodS
 
     @Override
     protected MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, MethodInvocation invocation) {
-        AccountAccessMethodSecurityExpressionRoot root = new AccountAccessMethodSecurityExpressionRoot(authentication, middlewareAccountService, middlewareService, authMapper, userManagementService, scaService);
+        AccountAccessSecurityFilter root = new AccountAccessSecurityFilter(authentication, middlewareAccountService, middlewareService, authMapper, userManagementService, scaService);
         root.setPermissionEvaluator(getPermissionEvaluator());
         root.setTrustResolver(this.trustResolver);
         root.setRoleHierarchy(getRoleHierarchy());

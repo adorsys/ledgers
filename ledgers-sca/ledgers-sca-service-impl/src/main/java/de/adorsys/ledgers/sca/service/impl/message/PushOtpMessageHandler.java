@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -81,10 +82,11 @@ public class PushOtpMessageHandler implements OtpMessageHandler<PushScaMessage> 
     }
 
     private HttpMethod getHttpMethod(List<String> split) {
-        try {
-            return HttpMethod.valueOf(split.get(0));
-        } catch (IllegalArgumentException e) {
-            throw ScaModuleException.buildScaSenderException(String.format(ERROR_REASON_2_MATCHERS, "Inappropriate HttpMethod", split.get(0)));
-        }
+        // Such funny validation is required because they don't throw an exception on invalid HTTP method name in Spring 6.
+        Optional<HttpMethod> optionalMethod = Arrays.stream(HttpMethod.values())
+                                                      .filter(v -> v.name().equalsIgnoreCase(split.get(0)))
+                                                      .findFirst();
+        return Optional.of(optionalMethod).get()
+                       .orElseThrow(() -> ScaModuleException.buildScaSenderException(String.format(ERROR_REASON_2_MATCHERS, "Inappropriate HttpMethod", split.get(0))));
     }
 }

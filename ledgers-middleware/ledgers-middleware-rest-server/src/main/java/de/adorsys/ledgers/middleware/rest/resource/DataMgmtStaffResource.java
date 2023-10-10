@@ -34,42 +34,42 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     private final MiddlewareRecoveryService recoveryService;
 
     @Override
-    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> account(String accountId) {
         cleanupService.deleteTransactions(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> depositAccount(String accountId) {
         cleanupService.deleteAccount(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), accountId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasManagerAccessToUser(#userId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#userId)")
     public ResponseEntity<Void> user(String userId) {
         cleanupService.deleteUser(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), userId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasManagerAccessToUser(#branchId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#branchId)")
     public ResponseEntity<Void> branch(String branchId) {
         cleanupService.removeBranch(scaInfoHolder.getUserId(), scaInfoHolder.getScaInfo().getUserRole(), branchId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Void> uploadData(UploadedDataTO data) {
         appManagementService.uploadData(data, scaInfoHolder.getScaInfo());
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF','SYSTEM')")
     public ResponseEntity<Set<Currency>> currencies() {
         return ResponseEntity.ok(currencyService.getSupportedCurrencies());
     }
@@ -80,26 +80,26 @@ public class DataMgmtStaffResource implements DataMgmtStaffAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
     public ResponseEntity<Void> createPoint(RecoveryPointTO recoveryPoint) {
         recoveryService.createRecoveryPoint(scaInfoHolder.getUserId(), recoveryPoint);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
     public ResponseEntity<List<RecoveryPointTO>> getAllPoints() {
         return ResponseEntity.ok(recoveryService.getAll(scaInfoHolder.getUserId()));
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
     public ResponseEntity<RecoveryPointTO> getPoint(Long id) {
         return ResponseEntity.ok(recoveryService.getPointById(scaInfoHolder.getUserId(), id));
     }
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
     public ResponseEntity<Void> deletePoint(Long id) {
         recoveryService.deleteById(scaInfoHolder.getUserId(), id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

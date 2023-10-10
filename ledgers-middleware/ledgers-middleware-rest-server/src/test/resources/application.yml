@@ -92,7 +92,9 @@ ledgers:
 
 ---
 spring:
-  profiles: h2
+  config:
+    activate:
+      on-profile: h2
   h2:
     console:
       enabled: true
@@ -107,7 +109,9 @@ db:
 
 ---
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: dev
 
 logging.level.org.postgresql: INFO
 logging.level.org.hibernate.SQL: DEBUG

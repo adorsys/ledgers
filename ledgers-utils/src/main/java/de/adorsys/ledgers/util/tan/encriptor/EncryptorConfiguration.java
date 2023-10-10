@@ -23,7 +23,7 @@ public class EncryptorConfiguration {
     public StandardPBEStringEncryptor stringEncryptor() {
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
         log.info("Algorithm: {}", encryptorAlgorithm);
-        log.info("masterPass: {}", masterPassword);
+        log.debug("masterPass: {}", masterPassword);
         encryptor.setPassword(masterPassword);
         encryptor.setAlgorithm(encryptorAlgorithm);
         return encryptor;

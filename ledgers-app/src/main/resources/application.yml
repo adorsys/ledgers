@@ -41,6 +41,11 @@ springdoc:
     path: /swagger-ui.html
 
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.auth-server-url}/realms/ledgers
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -91,7 +96,7 @@ spring:
 logging:
   level:
     org:
-      hibernate: WARN
+      springframework: INFO
 
 ledgers:
   users:
@@ -224,7 +229,9 @@ management:
       enabled: false
 ---
 spring:
-  profiles: h2
+  config:
+    activate:
+      on-profile: h2
   h2:
     console:
       enabled: true
@@ -238,7 +245,9 @@ db:
   url: jdbc:h2:~/ledgersdbs/ledgers-app;DB_CLOSE_DELAY=-1
 ---
 spring:
-  profiles: postgres
+  config:
+    activate:
+      on-profile: postgres
   datasource:
     url: ${db.url}
     username: ${db.user}
@@ -265,8 +274,11 @@ db:
 #       -> use the config docker-compose-postgres-5433.yml to start postgres on port 5433.
 #       -> Start db with: $ docker-compose -f docker-compose-postgres-5433.yml up
 #       -> make sure the existing volume is deleted if one.
+
 spring:
-  profiles: hibernate-ddl
+  config:
+    activate:
+      on-profile: hibernate-ddl
   jpa:
     show-sql: false
     generate-ddl: true
@@ -283,15 +295,9 @@ db:
 # ledgers.url: http://localhost:${server.port}
 ---
 spring:
-  profiles: dev
-
-logging:
-  level:
-    org:
-      postgresql: INFO
-      hibernate.SQL: DEBUG
-      hibernate.type.descriptor.sql.BasicBinder: TRACE
-      springframework: TRACE
+  config:
+    activate:
+      on-profile: dev
 
 management.endpoints.web.exposure.include: "*"
 management.endpoints.web.exposure.exclude: env,beans

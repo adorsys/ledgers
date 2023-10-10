@@ -9,6 +9,8 @@ import de.adorsys.ledgers.keycloak.client.config.KeycloakClientConfig;
 import de.adorsys.ledgers.keycloak.client.mapper.KeycloakDataMapper;
 import de.adorsys.ledgers.keycloak.client.model.KeycloakUser;
 import de.adorsys.ledgers.keycloak.client.rest.KeycloakTokenRestClient;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
@@ -20,8 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
-        when(usersResource.search(any(),eq(true))).thenReturn(List.of(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(List.of(new UserRepresentation()));
 
         Optional<KeycloakUser> user = service.getUser("testRealm", "login");
         assertTrue(user.isEmpty());
@@ -124,7 +124,7 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
-        when(usersResource.search(any(),eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
         UserResource userResource = mock(UserResource.class);
         when(usersResource.get(any())).thenReturn(userResource);
         when(userResource.toRepresentation()).thenReturn(new UserRepresentation());
@@ -141,7 +141,7 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
-        when(usersResource.search(any(),eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
 
         service.deleteUser("login");
         verify(usersResource, times(1)).delete(any());
@@ -154,7 +154,7 @@ class KeycloakDataServiceImplTest {
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
         UserResource userResource = mock(UserResource.class);
-        when(usersResource.search(any(),eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
 
         boolean exists = service.userExists("login");
         assertTrue(exists);
@@ -166,7 +166,7 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
-        when(usersResource.search(any(),eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
         UserResource userResource = mock(UserResource.class);
         when(usersResource.get(any())).thenReturn(userResource);
 
@@ -196,7 +196,7 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
-        when(usersResource.search(any(),eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
         UserResource userResource = mock(UserResource.class);
         when(usersResource.get(any())).thenReturn(userResource);
         RoleMappingResource roleMappingResource = mock(RoleMappingResource.class);
@@ -218,7 +218,7 @@ class KeycloakDataServiceImplTest {
         when(keycloak.realm(any())).thenReturn(realmResource);
         UsersResource usersResource = mock(UsersResource.class);
         when(realmResource.users()).thenReturn(usersResource);
-        when(usersResource.search(any(),eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
+        when(usersResource.search(any(), eq(true))).thenReturn(Collections.singletonList(new UserRepresentation()));
         UserResource userResource = mock(UserResource.class);
         when(usersResource.get(any())).thenReturn(userResource);
         RoleMappingResource roleMappingResource = mock(RoleMappingResource.class);

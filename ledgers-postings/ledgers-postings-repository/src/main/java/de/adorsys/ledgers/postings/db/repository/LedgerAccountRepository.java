@@ -8,12 +8,13 @@ package de.adorsys.ledgers.postings.db.repository;
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerAccount;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface LedgerAccountRepository extends NamedEntityRepository<LedgerAccount> {
+public interface LedgerAccountRepository extends NamedEntityRepository<LedgerAccount>, CrudRepository<LedgerAccount, String> {
 
     Optional<LedgerAccount> findOptionalByLedgerAndName(Ledger ledger, String name);
 

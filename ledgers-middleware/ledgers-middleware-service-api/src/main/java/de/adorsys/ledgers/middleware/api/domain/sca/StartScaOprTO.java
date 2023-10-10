@@ -6,8 +6,10 @@
 package de.adorsys.ledgers.middleware.api.domain.sca;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class StartScaOprTO {
     private String oprId;
     private String externalId;

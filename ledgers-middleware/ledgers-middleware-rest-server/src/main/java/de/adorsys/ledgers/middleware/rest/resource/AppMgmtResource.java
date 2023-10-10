@@ -5,7 +5,6 @@
 
 package de.adorsys.ledgers.middleware.rest.resource;
 
-import de.adorsys.ledgers.keycloak.client.api.KeycloakTokenService;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserTO;
 import de.adorsys.ledgers.middleware.api.exception.MiddlewareModuleException;
@@ -35,7 +34,6 @@ public class AppMgmtResource implements AppMgmtRestAPI {
 
     private final AppManagementService appManagementService;
     private final MiddlewareUserManagementService userManagementService;
-    private final KeycloakTokenService tokenService;
 
     @Override
     public ResponseEntity<String> ping() {
@@ -43,7 +41,7 @@ public class AppMgmtResource implements AppMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<Void> initApp() {
         appManagementService.initApp();
         return ResponseEntity.ok().build();

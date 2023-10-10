@@ -8,13 +8,14 @@ package de.adorsys.ledgers.postings.db.repository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import de.adorsys.ledgers.postings.db.domain.Ledger;
 import de.adorsys.ledgers.postings.db.domain.LedgerStmt;
 import de.adorsys.ledgers.postings.db.domain.StmtStatus;
 
-public interface LedgerStmtRepository extends PagingAndSortingRepository<LedgerStmt, String> {
+public interface LedgerStmtRepository extends PagingAndSortingRepository<LedgerStmt, String>, CrudRepository<LedgerStmt, String> {
 	
 	/**
 	 * Select the latest statement for the given reference time.

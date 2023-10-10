@@ -5,7 +5,7 @@
 |===
 |Property |Description |Default value
 
-|keycloak.auth-server-url | Link to IDP | http://localhost:8080
+|keycloak.auth-server-url | Link to IDP (Keycloak) | http://localhost:8080
 |keycloak.realm | Realm in IDP | ledgers
 |keycloak.resource | Client name | ledgers-client
 |keycloak.public-client | Flag describes if client public | FALSE
@@ -19,6 +19,7 @@
 |db.user | Ledgers datasource connection username | cms
 |db.password | Ledgers datasource connection user password | cms
 
+|spring.security.oauth2.resourceserver.jwt.issuer-uri | IDP URL to a configured realm | http://localhost:8080/realms/ledgers
 |spring.mail.host | Mail server host |
 |spring.mail.port | Mail server port |
 |spring.mail.username | Mail server login |

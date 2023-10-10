@@ -5,6 +5,7 @@ networks:
 
 volumes:
   ledgers-data:
+  keycloak-data:
 
 services:
   ledgers-keycloak:
@@ -14,11 +15,14 @@ services:
     build:
       context: keycloak
       dockerfile: Dockerfile
+    volumes:
+      - keycloak-data:/opt/keycloak/data
     networks:
       - ledgers-net
     ports:
     - "8080:8080"
     environment:
+      - KC_HOSTNAME=ledgers-keycloak:8080
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - KC_PROXY=edge
@@ -47,7 +51,7 @@ services:
       - DB_USER=ledgers
       - DB_PASSWORD=ledgers
       - LIQUIBASE_ENABLED=true
-      - LEDGERS_SCA_MULTILEVEL_ENABLED=false
+      - LEDGERS_SCA_MULTILEVEL_ENABLED=true
       - LEDGERS_SCA_AUTHORISATION_CONFIRMATION_ENABLED=false
       - SPRING_MAIL_HOST=smtp.gmail.com
       - SPRING_MAIL_PORT=465

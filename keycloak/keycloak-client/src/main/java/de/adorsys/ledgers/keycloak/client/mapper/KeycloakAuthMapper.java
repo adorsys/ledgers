@@ -7,14 +7,14 @@ package de.adorsys.ledgers.keycloak.client.mapper;
 
 import de.adorsys.ledgers.middleware.api.domain.um.AccessTokenTO;
 import de.adorsys.ledgers.middleware.api.domain.um.BearerTokenTO;
+import de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO;
 import de.adorsys.ledgers.middleware.api.domain.um.UserRoleTO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessTokenResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,29 +22,27 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface KeycloakAuthMapper {
 
-    @Mapping(target = "act", ignore = true)
-    @Mapping(target = "scaId", ignore = true)
-    @Mapping(target = "consent", ignore = true)
-    @Mapping(target = "authorisationId", ignore = true)
-    @Mapping(target = "iat", source = "source.token.issuedAt")
-    @Mapping(target = "role", expression = "java(getLedgersUserRoles(source.getToken()))")
-    @Mapping(target = "sub", source = "source.token.subject")
-    @Mapping(target = "scopes", source = "source.token.scope")
-    @Mapping(target = "login", source = "source.token.name")
-    @Mapping(target = "exp", source = "source.token.exp")
-    @Mapping(target = "jti", source = "source.token.id")
-    @Mapping(target = "accessToken", source = "source.tokenString")
-    @Mapping(target = "tokenUsage", expression = "java(de.adorsys.ledgers.middleware.api.domain.um.TokenUsageTO.DIRECT_ACCESS)")
-//TODO This is a stub!!!
-    AccessTokenTO toAccessToken(RefreshableKeycloakSecurityContext source);
+    default AccessTokenTO toAccessTokenFromJwt(Jwt source) {
+        AccessTokenTO token = new AccessTokenTO();
+        token.setIat(Date.from(source.getIssuedAt()));
+        token.setRole(getLedgersUserRolesFromJwt(source));
+        token.setSub(source.getClaimAsString("sub"));
+        token.setScopes(new HashSet(Arrays.asList(source.getClaimAsString("scope").split(" "))));
+        token.setLogin(source.getClaimAsString("name"));
+        token.setExp(Date.from(source.getExpiresAt()));
+        token.setJti(source.getClaimAsString("jti"));
+        token.setAccessToken(source.getTokenValue());
+        token.setTokenUsage(TokenUsageTO.DIRECT_ACCESS);
 
-    @Mapping(target = "accessTokenObject", ignore = true)
-    @Mapping(target = "scopes", source = "source.scope")
-    @Mapping(target = "access_token", source = "token")
-    @Mapping(target = "expires_in", source = "expiresIn")
-    @Mapping(target = "refresh_token", source = "refreshToken")
-    @Mapping(target = "token_type", source = "tokenType")
-    BearerTokenTO toBearerTokenTO(AccessTokenResponse source);
+        return token;
+    }
+
+    default BearerTokenTO toBearerTokenFromJwt(Jwt source) {
+        AccessTokenTO to = toAccessTokenFromJwt(source);
+        long ttl = (to.getExp().getTime() - new Date().getTime()) / DateUtils.MILLIS_PER_SECOND;
+
+        return new BearerTokenTO(source.getTokenValue(), "Bearer", (int) ttl, null, to, to.getScopes());
+    }
 
     default Set<String> toScopes(String scope) {
         return Optional.ofNullable(scope)
@@ -95,4 +93,22 @@ public interface KeycloakAuthMapper {
                        : UserRoleTO.getByValue(roles.iterator().next().toString()).orElse(null);
 
     }
+
+    default UserRoleTO getLedgersUserRolesFromJwt(Jwt token) {
+        List<String> tokenizedRoles = (ArrayList) token.getClaimAsMap("realm_access").get("roles");
+
+        Collection<UserRoleTO> roles = CollectionUtils.intersection(
+                tokenizedRoles
+                        .stream()
+                        .map(UserRoleTO::getByValue)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .toList(), Arrays.asList(UserRoleTO.values())
+        );
+
+        return roles.isEmpty()
+                       ? null
+                       : UserRoleTO.getByValue(roles.iterator().next().toString()).orElse(null);
+    }
+
 }

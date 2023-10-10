@@ -6,16 +6,18 @@
 package de.adorsys.ledgers.um.db.domain;
 
 import de.adorsys.ledgers.util.Ids;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 //Todo clarify unique constrains iban & access_type
 @Entity
 @Data
+@NoArgsConstructor(force = true)
 @Table(name = "account_accesses")
 public class AccountAccess {
 
