@@ -8,9 +8,9 @@ package de.adorsys.ledgers.cleanup.repository;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ResourceLoader;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

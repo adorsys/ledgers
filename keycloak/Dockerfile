@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:20.0.5
+FROM keycloak/keycloak:22.0.3
 LABEL maintainer=https://git.adorsys.de/adorsys/xs2a/ledgers
 
 COPY ./keycloak-token-exchange/target/keycloak-token-exchange.jar /opt/keycloak/providers/keycloak-token-exchange.jar

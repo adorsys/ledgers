@@ -5,13 +5,14 @@
 
 package de.adorsys.ledgers.postings.db.repository;
 
+import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
+import de.adorsys.ledgers.postings.db.domain.Ledger;
+import org.springframework.data.repository.CrudRepository;
+
 import java.util.List;
 import java.util.Optional;
 
-import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
-import de.adorsys.ledgers.postings.db.domain.Ledger;
-
-public interface LedgerRepository extends NamedEntityRepository<Ledger> {
+public interface LedgerRepository extends NamedEntityRepository<Ledger>, CrudRepository<Ledger, String> {
 	/**
 	 * Find a ledger with this name.
 	 * 

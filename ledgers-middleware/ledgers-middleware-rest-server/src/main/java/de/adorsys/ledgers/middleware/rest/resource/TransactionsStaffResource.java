@@ -29,7 +29,7 @@ public class TransactionsStaffResource implements TransactionsStaffResourceAPI {
     private final MockTransactionMapper transactionMapper;
 
     @Override
-    @PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
     public ResponseEntity<Map<String, String>> transactions(List<MockBookingDetails> data) {
         List<MockBookingDetailsBO> dataBO = transactionMapper.toMockTransactionDetailsBO(data);
         return new ResponseEntity<>(transactionService.bookMockTransaction(dataBO), HttpStatus.CREATED);

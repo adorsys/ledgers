@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.adorsys.ledgers</groupId>
     <artifactId>ledgers</artifactId>
-    <version>5.1-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
 
     <modules>
         <module>ledgers-app</module>
@@ -96,7 +96,7 @@
 
     <properties>
         <!-- Common properties -->
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <ruleset.basedir>${project.basedir}</ruleset.basedir>
@@ -105,52 +105,53 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Maven plugins-->
-        <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
-        <maven.surefire.plugin.version>3.0.0-M6</maven.surefire.plugin.version>
-        <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
-        <spring-boot-maven-plugin.version>2.1.1.RELEASE</spring-boot-maven-plugin.version>
+        <maven-enforcer-plugin.version>3.4.0</maven-enforcer-plugin.version>
+        <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+        <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+        <spring-boot-maven-plugin.version>3.0.7</spring-boot-maven-plugin.version>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0-M6</maven-failsafe-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
+        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-        <pmd.plugin.version>3.13.0</pmd.plugin.version>
+        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+        <maven-pmd-plugin.version>3.21.0</maven-pmd-plugin.version>
 
         <!-- Spring-related versions -->
-        <spring-boot-dependencies.version>2.7.10</spring-boot-dependencies.version>
-        <spring-cloud-starter-openfeign.version>3.1.6</spring-cloud-starter-openfeign.version>
-        <spring-security.version>5.7.8</spring-security.version>
+        <spring-boot-dependencies.version>3.0.7</spring-boot-dependencies.version>
+        <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
+        <spring-security.version>6.0.5</spring-security.version>
         <spring-plugin.version>3.0.0</spring-plugin.version>
-        <spring-test.version>5.3.26</spring-test.version>
+        <spring-test.version>6.0.7</spring-test.version>
 
         <!-- Other versions -->
-        <springdoc-openapi-ui.version>1.5.12</springdoc-openapi-ui.version>
+        <springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
         <apache.commons.collections.version>4.3</apache.commons.collections.version>
         <commons.io.version>2.8.0</commons.io.version>
         <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
         <dbunit.version>2.6.0</dbunit.version>
-        <keycloak.version>20.0.5</keycloak.version>
-        <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <lombok-plugin.version>1.16.22</lombok-plugin.version>
+        <keycloak.version>22.0.3</keycloak.version>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <javatar-commons.version>0.7</javatar-commons.version>
-        <h2database.version>2.1.214</h2database.version>
-        <postgresql.version>42.3.3</postgresql.version>
+        <h2database.version>2.2.220</h2database.version>
+        <postgresql.version>42.3.8</postgresql.version>
         <datecalc-common.version>1.4.0</datecalc-common.version>
         <datecalc-jdk8.version>1.4.0</datecalc-jdk8.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
         <json.version>20230227</json.version>
         <jackson-annotations.version>2.13.2</jackson-annotations.version>
+        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <feign-slf4j.version>10.7.4</feign-slf4j.version>
-        <testcontainers.version>1.15.1</testcontainers.version>
+        <testcontainers.version>1.17.3</testcontainers.version>
         <testcontainers-keycloak.version>1.3.3</testcontainers-keycloak.version>
         <jboss-jaxrs-api_2.0_spec.version>1.0.1.Final</jboss-jaxrs-api_2.0_spec.version>
         <jboss-logging.version>3.3.1.Final</jboss-logging.version>
         <classgraph.version>4.8.139</classgraph.version>
 
         <!-- Test versions -->
-        <junit-jupiter-api.version>5.8.2</junit-jupiter-api.version>
-        <mockito.version>3.11.2</mockito.version>
+        <junit-jupiter-api.version>5.9.3</junit-jupiter-api.version>
+        <mockito.version>5.2.0</mockito.version>
         <guava.version>32.0.0-jre</guava.version>
         <hamcrest-library.version>1.3</hamcrest-library.version>
         <spring-test-dbunit.version>1.3.0</spring-test-dbunit.version>
@@ -158,12 +159,12 @@
         <commons-validator.version>1.7</commons-validator.version>
         <!-- automatically run annotation processors within the incremental compilation -->
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-        <slf4j.version>1.7.25</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <nimbus-jose-jwt.version>7.9</nimbus-jose-jwt.version>
         <liquibase.version>4.9.0</liquibase.version>
         <subethasmtp.version>3.1.7</subethasmtp.version>
         <jackson.version>2.13.2</jackson.version>
-        <lombok.version>1.18.8</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
         <jasypt.version>1.9.3</jasypt.version>
 
         <!--Sonar -->
@@ -209,7 +210,7 @@
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
-            <url>http://repo.spring.io/milestone</url>
+            <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -239,6 +240,30 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-core</artifactId>
                 <version>${spring-security.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-oauth2-client</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.plugin</groupId>
+                <artifactId>spring-plugin-core</artifactId>
+                <version>${spring-plugin.version}</version>
             </dependency>
 
             <!-- jackson -->
@@ -278,17 +303,11 @@
                 <version>${keycloak.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework.plugin</groupId>
-                <artifactId>spring-plugin-core</artifactId>
-                <version>${spring-plugin.version}</version>
-            </dependency>
-
             <!-- swagger -->
 
             <dependency>
                 <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-ui</artifactId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi-ui.version}</version>
             </dependency>
 
@@ -312,6 +331,12 @@
                 <groupId>commons-validator</groupId>
                 <artifactId>commons-validator</artifactId>
                 <version>${commons-validator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
             </dependency>
 
             <dependency>
@@ -496,9 +521,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>${pmd.plugin.version}</version>
+                <version>${maven-pmd-plugin.version}</version>
                 <configuration>
-                    <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <minimumTokens>100</minimumTokens>
                     <targetJdk>${java.version}</targetJdk>
                     <analysisCache>true</analysisCache>
@@ -539,12 +563,17 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>${lombok-plugin.version}</version>
+                            <version>${lombok.version}</version>
                         </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${org.mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${lombok-mapstruct-binding.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

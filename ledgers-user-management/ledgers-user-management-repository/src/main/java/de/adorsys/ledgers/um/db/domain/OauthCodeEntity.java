@@ -5,11 +5,13 @@
 
 package de.adorsys.ledgers.um.db.domain;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.*;
 import java.time.OffsetDateTime;
 
 @Setter
@@ -35,7 +37,7 @@ public class OauthCodeEntity {
     private boolean used;
 
     @Lob
-    @org.hibernate.annotations.Type( type = "text" )
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "token", nullable = false)
     private String token;
 

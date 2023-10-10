@@ -6,14 +6,15 @@
 package de.adorsys.ledgers.postings.db.domain;
 
 import de.adorsys.ledgers.util.Ids;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -24,7 +25,7 @@ public class OperationDetails {
     @Id
     private String id;
     @Lob
-    @org.hibernate.annotations.Type( type = "text" )
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     private String opDetails;
 
     public OperationDetails(String opDetails) {

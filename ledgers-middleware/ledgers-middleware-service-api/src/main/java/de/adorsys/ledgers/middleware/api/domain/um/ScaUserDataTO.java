@@ -6,13 +6,13 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(value = {"user"}, allowSetters = true)
 public class ScaUserDataTO {

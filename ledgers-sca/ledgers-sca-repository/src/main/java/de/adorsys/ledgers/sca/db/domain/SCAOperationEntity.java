@@ -5,11 +5,12 @@
 
 package de.adorsys.ledgers.sca.db.domain;
 
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.LocalDateTimeConverter;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 
@@ -32,6 +33,7 @@ import static de.adorsys.ledgers.sca.db.domain.AuthCodeStatus.*;
 @Entity
 @Data
 @Table(name = "sca_operation")
+@NoArgsConstructor
 public class SCAOperationEntity {
 
     /**

@@ -44,26 +44,26 @@ public class AccountResource implements AccountRestAPI {
      * @return : the list of accounts linked with the current customer.
      */
     @Override
-    @PreAuthorize("hasAnyRole('CUSTOMER','SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('CUSTOMER','SYSTEM')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listDepositAccounts(scaInfoHolder.getUserId()));
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccount(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccount(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccount(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccount(#accountId)")
     public ResponseEntity<List<AccountBalanceTO>> getBalances(String accountId) {
         AccountDetailsTO accountDetails = middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true);
         return ResponseEntity.ok(accountDetails.getBalances());
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccount(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccount(#accountId)")
     public ResponseEntity<List<TransactionTO>> getTransactionByDates(String accountId, LocalDate dateFrom, LocalDate dateTo) {
         dateChecker(dateFrom, dateTo);
         List<TransactionTO> transactions = middlewareAccountService.getTransactionsByDates(accountId, validDate(dateFrom), validDate(dateTo));
@@ -71,7 +71,7 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccount(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccount(#accountId)")
     public ResponseEntity<CustomPageImpl<TransactionTO>> getTransactionByDatesPaged(String accountId, LocalDate dateFrom, LocalDate dateTo, int page, int size) {
         dateChecker(dateFrom, dateTo);
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
@@ -80,13 +80,13 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccount(#accountId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccount(#accountId)")
     public ResponseEntity<TransactionTO> getTransactionById(String accountId, String transactionId) {
         return ResponseEntity.ok(middlewareAccountService.getTransactionById(accountId, transactionId));
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccountWithIban(#request.psuAccount.iban)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccountWithIban(#request.psuAccount.iban)")
     public ResponseEntity<Boolean> fundsConfirmation(FundsConfirmationRequestTO request) {
         if (request.getInstructedAmount().getAmount().compareTo(BigDecimal.ZERO) <= 0) { //TODO move to validation filter
             throw MiddlewareModuleException.builder()
@@ -99,7 +99,7 @@ public class AccountResource implements AccountRestAPI {
     }
 
     @Override
-    @PreAuthorize("accountInfoByIdentifier(#accountIdentifierType, #accountIdentifier)")
+    @PreAuthorize("@accountAccessSecurityFilter.accountInfoByIdentifier(#accountIdentifierType, #accountIdentifier)")
     public ResponseEntity<List<AdditionalAccountInformationTO>> getAdditionalAccountInfo(AccountIdentifierTypeTO accountIdentifierType, String accountIdentifier) {
         return ResponseEntity.ok(userManagementService.getAdditionalInformation(scaInfoHolder.getScaInfo(), accountIdentifierType, accountIdentifier));
     }

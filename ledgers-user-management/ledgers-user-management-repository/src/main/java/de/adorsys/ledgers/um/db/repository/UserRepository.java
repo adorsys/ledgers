@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends PagingAndSortingRepository<UserEntity, String> {
+public interface UserRepository extends PagingAndSortingRepository<UserEntity, String>, CrudRepository<UserEntity, String> {
 
     /**
      * Finds user by its login if exists

@@ -85,7 +85,7 @@ ledgers:
     ext_base_path: http://localhost:8088
     endpoint: /emails/email
 
-#TanEncryption
+  #TanEncryption
   application:
     security:
       masterPassword: $VoL973@sd
@@ -94,7 +94,9 @@ ledgers:
 
 ---
 spring:
-  profiles: h2
+  config:
+    activate:
+      on-profile: h2
   h2:
     console:
       enabled: true
@@ -106,7 +108,9 @@ db:
 
 ---
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: dev
   jpa:
     hibernate:
       ddl-auto: create-drop

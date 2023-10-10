@@ -19,6 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -32,7 +34,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
+import org.springframework.web.context.annotation.RequestScope;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -72,6 +77,17 @@ class AppManagementResourceAdminIT {
             return new RestTemplate();
         }
 
+        @Bean
+        @RequestScope
+        public Authentication getAuthentication() {
+            return auth().orElse(null);
+        }
+
+        static Optional<Authentication> auth() {
+            return SecurityContextHolder.getContext() == null
+                           ? Optional.empty()
+                           : Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+        }
     }
 
     @Autowired

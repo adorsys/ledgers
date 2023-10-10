@@ -6,10 +6,10 @@
 package de.adorsys.ledgers.middleware.api.domain.um;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Currency;
 import java.util.EnumSet;
@@ -17,7 +17,7 @@ import java.util.EnumSet;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
 public class AccountAccessTO {
     private String id;

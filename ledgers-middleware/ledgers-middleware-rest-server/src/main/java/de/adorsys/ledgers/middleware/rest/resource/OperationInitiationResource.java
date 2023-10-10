@@ -31,25 +31,25 @@ public class OperationInitiationResource implements OperationInitiationRestApi {
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
-    @PreAuthorize("hasAccessToAccountWithIban(#payment.debtorAccount.iban)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccountWithIban(#payment.debtorAccount.iban)")
     public ResponseEntity<GlobalScaResponseTO> initiatePayment(PaymentTypeTO paymentType, PaymentTO payment) {
         return new ResponseEntity<>(operationService.resolveInitiation(OpTypeTO.PAYMENT, null, payment, scaInfoHolder.getScaInfo()), HttpStatus.CREATED);
     }
 
     @Override
-    @PreAuthorize("hasAccessToAccountByPaymentId(#opId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccountByPaymentId(#opId)")
     public ResponseEntity<GlobalScaResponseTO> initiatePmtCancellation(String opId) {
         return new ResponseEntity<>(operationService.resolveInitiation(OpTypeTO.CANCEL_PAYMENT, opId, null, scaInfoHolder.getScaInfo()), HttpStatus.CREATED);
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STAFF','CUSTOMER') and hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF','CUSTOMER') and @accountAccessSecurityFilter.hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
     public ResponseEntity<GlobalScaResponseTO> initiateAisConsent(AisConsentTO aisConsent) {
         return new ResponseEntity<>(operationService.resolveInitiation(OpTypeTO.CONSENT, null, aisConsent, scaInfoHolder.getScaInfo()), HttpStatus.CREATED);
     }
 
     @Override
-    @PreAuthorize("hasPartialScope() and hasAccessToAccountByPaymentId(#opId)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasPartialScope() and @accountAccessSecurityFilter.hasAccessToAccountByPaymentId(#opId)")
     public ResponseEntity<GlobalScaResponseTO> execution(OpTypeTO opType, String opId) {
         return ResponseEntity.ok(operationService.execute(opType, opId, scaInfoHolder.getScaInfo()));
     }

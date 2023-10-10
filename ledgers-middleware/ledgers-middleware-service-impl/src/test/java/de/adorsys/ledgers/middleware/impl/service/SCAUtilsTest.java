@@ -8,7 +8,7 @@ package de.adorsys.ledgers.middleware.impl.service;
 import de.adorsys.ledgers.middleware.api.domain.sca.ScaInfoTO;
 import de.adorsys.ledgers.middleware.api.domain.um.*;
 import de.adorsys.ledgers.middleware.impl.converter.UserMapper;
-import de.adorsys.ledgers.sca.service.SCAOperationService;
+import de.adorsys.ledgers.um.api.domain.ScaMethodTypeBO;
 import de.adorsys.ledgers.um.api.domain.ScaUserDataBO;
 import de.adorsys.ledgers.um.api.domain.UserBO;
 import de.adorsys.ledgers.um.api.service.UserService;
@@ -28,32 +28,36 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SCAUtilsTest {
+
+    private static final String ID = "id";
+    private static final String LOGIN = "login";
+    private static final String EMAIL = "email";
+    private static final String PIN = "pin";
+
     @InjectMocks
     private SCAUtils utils;
 
     @Mock
     private UserService userService;
     @Mock
-    private SCAOperationService scaOperationService;
-    @Mock
     private UserMapper userMapper;
 
     @Test
     void getScaMethod_TO() {
-        ScaUserDataTO result = utils.getScaMethod(getUserTO(), "id");
+        ScaUserDataTO result = utils.getScaMethod(getUserTO(), ID);
         assertThat(result).isEqualTo(getScaUserDataTO());
     }
 
     private UserTO getUserTO() {
-        return new UserTO("id", "login", "email", "pin", Collections.singletonList(getScaUserDataTO()), Collections.singletonList(getAccess()), Collections.singletonList(UserRoleTO.CUSTOMER), "branch", false, false);
+        return new UserTO(ID, LOGIN, EMAIL, PIN, Collections.singletonList(getScaUserDataTO()), Collections.singletonList(getAccess()), Collections.singletonList(UserRoleTO.CUSTOMER), "branch", false, false);
     }
 
     private AccountAccessTO getAccess() {
-        return new AccountAccessTO("id", "DE123", Currency.getInstance("EUR"), AccessTypeTO.OWNER, 100, "id");
+        return new AccountAccessTO(ID, "DE123", Currency.getInstance("EUR"), AccessTypeTO.OWNER, 100, ID);
     }
 
     private ScaUserDataTO getScaUserDataTO() {
-        return new ScaUserDataTO("id", ScaMethodTypeTO.SMTP_OTP, "anton.brueckner@de.de", null, false, "staticTan", false, true);
+        return new ScaUserDataTO(ID, ScaMethodTypeTO.SMTP_OTP, "anton.brueckner@de.de", new UserTO(LOGIN, EMAIL, PIN), false, "staticTan", false, true);
     }
 
     @Test
@@ -64,9 +68,9 @@ class SCAUtilsTest {
 
     @Test
     void user() {
-        when(userService.findByLogin(anyString())).thenReturn(new UserBO());
+        when(userService.findByLogin(anyString())).thenReturn(getUserBO());
         when(userMapper.toUserTO(any())).thenReturn(getUserTO());
-        UserTO result = utils.user("id");
+        UserTO result = utils.user(ID);
         assertThat(result).isEqualToComparingFieldByFieldRecursively(getUserTO());
     }
 
@@ -76,19 +80,19 @@ class SCAUtilsTest {
         assertThat(result).isTrue();
     }
 
-    private UserBO getUserBO() {
-        UserBO bo = new UserBO("login", "email", "pin");
-        bo.setScaUserData(Collections.singletonList(new ScaUserDataBO()));
-        return bo;
-    }
-
     @Test
     void authorisationId() {
         String result = utils.authorisationId(getScaInfo());
         assertThat(result).isEqualTo("authId");
     }
 
+    private UserBO getUserBO() {
+        UserBO bo = new UserBO(LOGIN, EMAIL, PIN);
+        bo.setScaUserData(Collections.singletonList(new ScaUserDataBO(ScaMethodTypeBO.SMTP_OTP, "anton.brueckner@de.de")));
+        return bo;
+    }
+
     private ScaInfoTO getScaInfo() {
-        return new ScaInfoTO("userId", "scaId", "authId", UserRoleTO.CUSTOMER, "methodId", "authCode", TokenUsageTO.LOGIN, "login", null, null);
+        return new ScaInfoTO("userId", "scaId", "authId", UserRoleTO.CUSTOMER, "methodId", "authCode", TokenUsageTO.LOGIN, LOGIN, null, null);
     }
 }

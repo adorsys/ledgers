@@ -7,7 +7,7 @@ package de.adorsys.ledgers.deposit.db.domain;
 
 import lombok.Data;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Data
 @Embeddable

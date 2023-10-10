@@ -5,11 +5,12 @@
 
 package de.adorsys.ledgers.postings.db.repository;
 
+import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
+import org.springframework.data.repository.CrudRepository;
+
 import java.util.Optional;
 
-import de.adorsys.ledgers.postings.db.domain.ChartOfAccount;
-
-public interface ChartOfAccountRepository extends NamedEntityRepository<ChartOfAccount> {
+public interface ChartOfAccountRepository extends NamedEntityRepository<ChartOfAccount>, CrudRepository<ChartOfAccount, String> {
 	/**
 	 * Find a chart of account with this name.
 	 * 

@@ -7,12 +7,11 @@ package de.adorsys.ledgers.postings.db.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.adorsys.ledgers.util.hash.HashItem;
+import jakarta.persistence.MappedSuperclass;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.MappedSuperclass;
 
 @Getter
 @Setter

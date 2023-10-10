@@ -47,13 +47,13 @@ public class AdminResource implements AdminResourceAPI {
     private final UserMapper userMapper;
 
     @Override
-    @PreAuthorize("hasAnyRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('SYSTEM')")
     public ResponseEntity<List<UserTO>> getAllUsers() {
         return ResponseEntity.ok(middlewareUserService.listUsers(0, Integer.MAX_VALUE));
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<CustomPageImpl<UserExtendedTO>> users(String countryCode, String branchId, String branchLogin, String userLogin, UserRoleTO role, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         List<UserRoleTO> roles = Optional.ofNullable(role).map(Collections::singletonList).orElseGet(() -> Arrays.asList(STAFF, CUSTOMER));
@@ -61,34 +61,34 @@ public class AdminResource implements AdminResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<CustomPageImpl<UserTO>> admins(int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         return ResponseEntity.ok(middlewareUserService.getUsersByRoles(Collections.singletonList(SYSTEM), pageable));
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<CustomPageImpl<AccountDetailsExtendedTO>> accounts(String countryCode, String branchId, String branchLogin, String iban, Boolean blocked, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         return ResponseEntity.ok(accountManagementService.getAccountsByBranchAndMultipleParams(countryCode, branchId, branchLogin, iban, blocked, pageable));
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<Void> updatePassword(String branchId, String password) {
         middlewareUserService.updatePasswordById(branchId, password);
         return ResponseEntity.accepted().build();
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<Boolean> changeStatus(String userId) {
         return ResponseEntity.ok(appManagementService.changeBlockedStatus(userId, false));
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM')")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
     public ResponseEntity<UserTO> register(UserTO user) {
         UserTO createdUser = middlewareUserService.create(user);
         createdUser.setPin(null);
@@ -96,7 +96,7 @@ public class AdminResource implements AdminResourceAPI {
     }
 
     @Override
-    @PreAuthorize("hasRole('SYSTEM') and isEnabledUser(#user.id)")
+    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM') and @accountAccessSecurityFilter.isEnabledUser(#user.id)")
     public ResponseEntity<Void> user(UserTO user) {
         checkUpdateData(user);
         middlewareUserService.updateUser(user.getBranch(), user);

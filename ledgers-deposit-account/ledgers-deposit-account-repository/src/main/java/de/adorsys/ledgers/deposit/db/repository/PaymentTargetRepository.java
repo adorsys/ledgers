@@ -6,7 +6,8 @@
 package de.adorsys.ledgers.deposit.db.repository;
 
 import de.adorsys.ledgers.deposit.db.domain.PaymentTarget;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface PaymentTargetRepository extends PagingAndSortingRepository<PaymentTarget, String> {
+public interface PaymentTargetRepository extends PagingAndSortingRepository<PaymentTarget, String>, CrudRepository<PaymentTarget, String> {
 }

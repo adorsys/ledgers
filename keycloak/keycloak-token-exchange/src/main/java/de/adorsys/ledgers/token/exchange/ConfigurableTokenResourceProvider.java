@@ -5,35 +5,32 @@
 
 package de.adorsys.ledgers.token.exchange;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.OPTIONS;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.TokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.crypto.SignatureProvider;
 import org.keycloak.crypto.SignatureVerifierContext;
 import org.keycloak.events.EventBuilder;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resources.Cors;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.keycloak.services.resources.Cors.ACCESS_CONTROL_ALLOW_METHODS;
 import static org.keycloak.services.resources.Cors.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static org.keycloak.services.util.DefaultClientSessionContext.fromClientSessionScopeParameter;
@@ -66,22 +63,30 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
     }
 
     @OPTIONS
-    public Response preflight(@Context HttpRequest request) {
-        return Cors.add(request, Response.ok()).auth().preflight().allowedMethods("POST", "OPTIONS").build();
+    public Response preflight() {
+        KeycloakContext context = session.getContext();
+        return Cors.add(context.getHttpRequest(), Response.ok())
+                       .auth()
+                       .preflight()
+                       .allowedMethods("POST", "OPTIONS")
+                       .build();
     }
 
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public Response createToken(TokenConfiguration tokenConfiguration, @Context HttpRequest request) {
+    public Response createToken(TokenConfiguration tokenConfiguration) {
         try {
+            KeycloakContext context = session.getContext();
+            HttpRequest request = context.getHttpRequest();
             AccessToken accessToken = validateTokenAndUpdateSession(request);
             UserSessionModel userSession = this.findSession();
             AccessTokenResponse response = this.createAccessToken(userSession, accessToken, tokenConfiguration);
+
             return this.buildCorsResponse(request, response);
         } catch (ConfigurableTokenException e) {
             LOG.error("An error occurred when fetching an access token", e);
-            return ErrorResponse.error(e.getMessage(), BAD_REQUEST);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
 
@@ -124,7 +129,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
     }
 
     private String readAccessTokenFrom(HttpRequest request) throws ConfigurableTokenException {
-        String authorization = request.getHttpHeaders().getHeaderString(AUTHORIZATION);
+        String authorization = request.getHttpHeaders().getHeaderString(HttpHeaders.AUTHORIZATION);
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             LOG.warn("Keycloak-ConfigurableToken: no authorization header with bearer token");
             throw new ConfigurableTokenException("bearer_token_missing_in_authorization_header");
@@ -173,7 +178,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
                             .auth()
                             .exposedHeaders(ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN)
                             .allowAllOrigins();
-        return cors.builder(Response.ok(response).type(APPLICATION_JSON_TYPE)).build();
+        return cors.builder(Response.ok(response).type(MediaType.APPLICATION_JSON_TYPE)).build();
     }
 
 
