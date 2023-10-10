@@ -155,7 +155,7 @@ More details see in [instruction](doc/deployment.md)
 
 ## Built With
 
-* [Java, version 11](http://java.oracle.com) - The main language of implementation
+* [Java, version 17](http://java.oracle.com) - The main language of implementation
 * [Maven, version 3.0](https://maven.apache.org/) - Dependency Management
 * [Spring Boot](https://projects.spring.io/spring-boot/) - Spring boot as core Java framework
 
