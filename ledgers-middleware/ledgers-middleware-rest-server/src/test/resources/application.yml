@@ -20,6 +20,8 @@ db:
 
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application.name: ledgers
   #  profiles: default. This will prevent from running the h2 profile.
   datasource:

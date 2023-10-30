@@ -36,13 +36,13 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccountByLogin(#login, #iban)")
+    @PreAuthorize("hasAccessToAccountByLogin(#login, #iban)")
     public ResponseEntity<Boolean> multilevel(String login, String iban) {
         return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, iban));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasAccessToAccountsByLogin(#login, #references)")
+    @PreAuthorize("hasAccessToAccountsByLogin(#login, #references)")
     public ResponseEntity<Boolean> multilevelAccounts(String login, List<AccountReferenceTO> references) {
         return ResponseEntity.ok(middlewareUserService.checkMultilevelScaRequired(login, references));
     }
@@ -55,7 +55,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#userId)")
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<UserTO> getUserById(String userId) {
         return ResponseEntity.ok(middlewareUserService.findById(userId));
     }
@@ -66,7 +66,7 @@ public class UserMgmtResource implements UserMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.isSameUser(#user.id)")
+    @PreAuthorize("isSameUser(#user.id)")
     public ResponseEntity<Void> editSelf(UserTO user) {
         middlewareUserService.editBasicSelf(scaInfoHolder.getUserId(), user);
         return ResponseEntity.accepted().build();

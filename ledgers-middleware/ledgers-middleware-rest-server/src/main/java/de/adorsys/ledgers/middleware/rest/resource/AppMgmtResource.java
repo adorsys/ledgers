@@ -41,7 +41,7 @@ public class AppMgmtResource implements AppMgmtRestAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> initApp() {
         appManagementService.initApp();
         return ResponseEntity.ok().build();

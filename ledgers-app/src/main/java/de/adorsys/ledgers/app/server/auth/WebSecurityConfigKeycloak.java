@@ -18,11 +18,11 @@ import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -51,6 +52,7 @@ import static de.adorsys.ledgers.app.server.auth.PermittedResources.*;
 public class WebSecurityConfigKeycloak {
 
     private final KeycloakAuthMapper authMapper;
+    private final Environment environment;
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) {
@@ -63,11 +65,6 @@ public class WebSecurityConfigKeycloak {
     @Bean
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-
         http
                 .authorizeHttpRequests()
                 .requestMatchers(INDEX_WHITELIST).permitAll()
@@ -77,13 +74,15 @@ public class WebSecurityConfigKeycloak {
                 .requestMatchers(APP_WHITELIST).permitAll()
                 .anyRequest()
                 .authenticated()
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().oauth2ResourceServer()
+                .and()
+                .oauth2ResourceServer()
                 .jwt().jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter()).and()
-                .and().cors().disable() // by default uses a Bean by the name of corsConfigurationSource
+                .and()
+                .cors().disable() // by default uses a Bean by the name of corsConfigurationSource
                 .csrf().disable()
                 .formLogin().disable()
-                .httpBasic().disable();
+                .httpBasic().disable()
+                .addFilterBefore(new DisableEndpointFilter(environment), BasicAuthenticationFilter.class);
 
         return http.build();
     }
