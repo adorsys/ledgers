@@ -27,13 +27,13 @@ public class ConsentResource implements ConsentRestAPI {
     private final MiddlewareAccountManagementService middlewareAccountService;
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF','CUSTOMER') and @accountAccessSecurityFilter.hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
+    @PreAuthorize("hasAnyRole('STAFF','CUSTOMER') and hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
     public ResponseEntity<SCAConsentResponseTO> initiateAisConsent(String consentId, AisConsentTO aisConsent) {
         return ResponseEntity.ok(middlewareAccountService.startAisConsent(scaInfoHolder.getScaInfo(), consentId, aisConsent));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF','CUSTOMER') and @accountAccessSecurityFilter.hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
+    @PreAuthorize("hasAnyRole('STAFF','CUSTOMER') and hasAccessToAccountsWithIbans(#aisConsent.access.listedAccountsIbans)")
     public ResponseEntity<SCAConsentResponseTO> initiatePiisConsent(AisConsentTO aisConsent) {
         return ResponseEntity.ok(middlewareAccountService.startPiisConsent(scaInfoHolder.getScaInfo(), aisConsent));
     }

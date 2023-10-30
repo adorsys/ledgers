@@ -40,7 +40,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     private final MiddlewareRecoveryService middlewareRecoveryService;
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.isNewStaffUser(#branchStaff)")
+    @PreAuthorize("isNewStaffUser(#branchStaff)")
     public ResponseEntity<UserTO> register(String branch, UserTO branchStaff) {
         branchStaff.setBranch(branch);
         branchStaff.setUserRoles(Collections.singletonList(UserRoleTO.STAFF));
@@ -51,13 +51,13 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#user.id)")
+    @PreAuthorize("hasManagerAccessToUser(#user.id)")
     public ResponseEntity<UserTO> modifyUser(String branch, UserTO user) {
         return ResponseEntity.ok(middlewareUserService.updateUser(branch, user));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<UserTO> createUser(UserTO user) {
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getScaInfo().getUserId());
 
@@ -74,7 +74,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<CustomPageImpl<UserTO>> getBranchUsersByRoles(List<UserRoleTO> roles, String queryParam, Boolean blockedParam, int page, int size) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getUserId());
@@ -83,7 +83,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<String>> getBranchUserLogins() {
         UserTO branchStaff = middlewareUserService.findById(scaInfoHolder.getUserId());
         List<String> users = middlewareUserService.getBranchUserLogins(branchStaff.getBranch());
@@ -91,7 +91,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('SYSTEM')")
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<List<String>> getBranchUserLoginsByBranchId(String branchId) {
         UserTO branchStaff = middlewareUserService.findById(branchId);
         List<String> users = middlewareUserService.getBranchUserLogins(branchStaff.getBranch());
@@ -99,14 +99,14 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#userId)")
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<UserTO> getBranchUserById(String userId) {
         UserTO user = middlewareUserService.findById(userId);
         return ResponseEntity.ok(user);
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#userId)")
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<Void> updateUserScaData(String userId, List<ScaUserDataTO> data) {
         UserTO userWithUpdatedSca = middlewareUserService.updateScaData(middlewareUserService.findById(userId).getLogin(), data);
         URI uri = UriComponentsBuilder.fromUriString("/staff-access" + UserMgmtRestAPI.BASE_PATH + "/" + userWithUpdatedSca.getId())
@@ -115,7 +115,7 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF','SYSTEM')")
+    @PreAuthorize("hasAnyRole('STAFF','SYSTEM')")
     //TODO Check Account enabled, check initiator has accessTo Account, Check Same Branch as User/Check user is not a branch!!!, AccountExists
     public ResponseEntity<Void> updateAccountAccessForUser(String userId, AccountAccessTO access) {
         ScaInfoTO scaInfo = scaInfoHolder.getScaInfo();
@@ -124,13 +124,13 @@ public class UserMgmtStaffResource implements UserMgmtStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#userId)")
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<Boolean> changeStatus(String userId) {
         return ResponseEntity.ok(middlewareUserService.changeStatus(userId, false));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasAnyRole('STAFF') and @accountAccessSecurityFilter.isSameUser(#request.branchId)")
+    @PreAuthorize("hasAnyRole('STAFF') and isSameUser(#request.branchId)")
     public ResponseEntity<Void> revertDatabase(RevertRequestTO request) {
         middlewareRecoveryService.revertDatabase(request.getBranchId(), request.getRecoveryPointId());
         return new ResponseEntity<>(HttpStatus.OK);

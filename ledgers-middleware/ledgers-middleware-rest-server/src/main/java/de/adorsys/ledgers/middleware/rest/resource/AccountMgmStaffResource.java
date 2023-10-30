@@ -35,26 +35,26 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     private final ScaInfoHolder scaInfoHolder;
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountIban(#iban)")
+    @PreAuthorize("hasManagerAccessToAccountIban(#iban)")
     public ResponseEntity<List<AccountDetailsTO>> getAccountsByIbanAndCurrency(String iban, String currency) {
         return ResponseEntity.ok(middlewareAccountService.getAccountsByIbanAndCurrency(iban, currency));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToUser(#userId)")
+    @PreAuthorize("hasManagerAccessToUser(#userId)")
     public ResponseEntity<Boolean> createDepositAccountForUser(String userId, AccountDetailsTO accountDetailsTO) {
         boolean created = middlewareAccountService.createDepositAccount(userId, scaInfoHolder.getScaInfo(), accountDetailsTO);
         return ResponseEntity.ok(created);
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<AccountDetailsTO>> getListOfAccounts() {
         return ResponseEntity.ok(middlewareAccountService.listDepositAccountsByBranch(scaInfoHolder.getUserId()));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<CustomPageImpl<AccountDetailsTO>> getListOfAccountsPaged(String queryParam, int page, int size, boolean withBalance) {
         CustomPageableImpl pageable = new CustomPageableImpl(page, size);
         CustomPageImpl<AccountDetailsTO> details = middlewareAccountService.listDepositAccountsByBranchPaged(scaInfoHolder.getUserId(), queryParam, withBalance, pageable);
@@ -62,20 +62,20 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<AccountDetailsTO> getAccountDetailsById(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.getDepositAccountById(accountId, LocalDateTime.now(), true));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId) && @accountAccessSecurityFilter.isEnabledAccount(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId) && isEnabledAccount(#accountId)")
     public ResponseEntity<Void> depositCash(String accountId, AmountTO amount) {
         middlewareAccountService.depositCash(scaInfoHolder.getScaInfo(), accountId, amount);
         return ResponseEntity.accepted().build();
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<AccountReportTO> getExtendedAccountDetailsById(String accountId) {
         long start = System.nanoTime();
         AccountReportTO accountReport = middlewareAccountService.getAccountReport(accountId);
@@ -84,13 +84,13 @@ public class AccountMgmStaffResource implements AccountMgmStaffResourceAPI {
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Boolean> changeStatus(String accountId) {
         return ResponseEntity.ok(middlewareAccountService.changeStatus(accountId, false));
     }
 
     @Override
-    @PreAuthorize("@accountAccessSecurityFilter.hasManagerAccessToAccountId(#accountId)")
+    @PreAuthorize("hasManagerAccessToAccountId(#accountId)")
     public ResponseEntity<Void> changeCreditLimit(String accountId, BigDecimal creditLimit) {
         middlewareAccountService.changeCreditLimit(accountId, creditLimit);
         return ResponseEntity.accepted().build();

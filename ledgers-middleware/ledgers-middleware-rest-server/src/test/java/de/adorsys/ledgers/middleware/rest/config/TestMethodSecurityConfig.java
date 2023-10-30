@@ -20,7 +20,7 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 @Configuration
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+public class TestMethodSecurityConfig extends GlobalMethodSecurityConfiguration {
     private final MiddlewareAccountManagementService middlewareAccountService;
     private final MiddlewarePaymentService middlewareService;
     private final KeycloakAuthMapper authMapper;
