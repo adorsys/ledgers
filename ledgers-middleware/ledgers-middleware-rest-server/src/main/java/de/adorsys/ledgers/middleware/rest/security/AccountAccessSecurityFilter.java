@@ -155,7 +155,7 @@ public class AccountAccessSecurityFilter extends SecurityExpressionAdapter {
 
     private Set<String> getScopes() {
         Jwt credentials = (Jwt) getAuthentication().getCredentials();
-        return new HashSet(Arrays.asList(credentials.getClaimAsString("scope").split(" ")));
+        return new HashSet<>(Arrays.asList(credentials.getClaimAsString("scope").split(" ")));
     }
 
     private boolean isEnabledAccountIban(String iban) {

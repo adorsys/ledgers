@@ -27,7 +27,7 @@ public interface KeycloakAuthMapper {
         token.setIat(Date.from(source.getIssuedAt()));
         token.setRole(getLedgersUserRolesFromJwt(source));
         token.setSub(source.getClaimAsString("sub"));
-        token.setScopes(new HashSet(Arrays.asList(source.getClaimAsString("scope").split(" "))));
+        token.setScopes(new HashSet<>(Arrays.asList(source.getClaimAsString("scope").split(" "))));
         token.setLogin(source.getClaimAsString("name"));
         token.setExp(Date.from(source.getExpiresAt()));
         token.setJti(source.getClaimAsString("jti"));

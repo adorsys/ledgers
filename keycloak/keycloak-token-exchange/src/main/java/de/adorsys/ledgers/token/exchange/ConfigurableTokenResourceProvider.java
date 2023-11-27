@@ -195,7 +195,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
     }
 
     private void updateTokenExpiration(AccessToken token, TokenConfiguration tokenConfiguration) {
-        token.expiration(tokenConfiguration.computeTokenExpiration(token.getExpiration(), true));
+        token.expiration(tokenConfiguration.computeTokenExpiration(token.getExp().intValue(), true));
     }
 
     private void updateScope(AccessToken token, TokenConfiguration tokenConfiguration) {

@@ -44,17 +44,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
     private static final List<AccountAccess> accountAccessList = readListYml(AccountAccess.class, "account-access.yml");
     private static final List<AccountAccessBO> accountAccessBOList = readListYml(AccountAccessBO.class, "account-access.yml");
     private static final String USER_ID = "SomeUniqueID";
     private static final String CONSENT_ID = "consentId";
     private static final String USER_EMAIL = "test@mail.de";
     private static final String USER_LOGIN = "test";
-    private static final String USER_PIN = "12345678";
     private static final String USER_BRANCH = "userBranch";
     private static final String USER_IBAN = "DE12345678";
-    private static final String THE_ENCODED_VALUE = "25d55ad283aa400af464c76d713c07ad";
 
     private static final ResourceReader reader = YamlReader.getInstance();
     private static final UserConverter LOCAL_CONVERTER = Mappers.getMapper(UserConverter.class);

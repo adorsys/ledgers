@@ -68,7 +68,7 @@ class ScaUserDataServiceImplTest {
     @Test
     void findByEmail_scaNotFound() {
         // Given
-        when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Collections.EMPTY_LIST);
+        when(scaUserDataRepository.findByMethodValue(any())).thenReturn(Collections.emptyList());
 
         // Then
         assertThrows(ScaModuleException.class, () -> scaUserDataService.findByEmail(EMAIL));
