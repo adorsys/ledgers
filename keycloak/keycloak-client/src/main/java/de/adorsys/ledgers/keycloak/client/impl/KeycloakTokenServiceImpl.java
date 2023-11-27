@@ -32,6 +32,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class KeycloakTokenServiceImpl implements KeycloakTokenService {
+    private static final String CLIENT_ID_KEY = "client_id";
+    private static final String CLIENT_SECRET_KEY = "client_secret";
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+    private static final String REFRESH_TOKEN_KEY = "refresh_token";
+    private static final String GRANT_TYPE_KEY = "grant_type";
+    private static final String PASSWORD_KEY = "password";
+
     @Value("${keycloak.resource:}")
     private String clientId;
     @Value("${keycloak.credentials.secret:}")
@@ -42,20 +49,20 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     @Override
     public BearerTokenTO login(String username, String password) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-        formParams.add("grant_type", "password");
+        formParams.add(GRANT_TYPE_KEY, "password");
         formParams.add("username", username);
-        formParams.add("password", password);
-        formParams.add("client_id", clientId);
-        formParams.add("client_secret", clientSecret);
+        formParams.add(PASSWORD_KEY, password);
+        formParams.add(CLIENT_ID_KEY, clientId);
+        formParams.add(CLIENT_SECRET_KEY, clientSecret);
         ResponseEntity<Map<String, ?>> resp = keycloakTokenRestClient.login(formParams);
         HttpStatus statusCode = (HttpStatus) resp.getStatusCode();
         if (HttpStatus.OK != statusCode) {
-            log.error("Could not obtain token by user credentials [{}]", username); //todo: throw specific exception
+            log.error("Could not obtain token by user credentials [{}]", username);
         }
         Map<String, ?> body = Objects.requireNonNull(resp).getBody();
         BearerTokenTO bearerTokenTO = new BearerTokenTO();
-        bearerTokenTO.setAccess_token((String) Objects.requireNonNull(body).get("access_token"));
-        bearerTokenTO.setRefresh_token((String) Objects.requireNonNull(body).get("refresh_token"));
+        bearerTokenTO.setAccess_token((String) Objects.requireNonNull(body).get(ACCESS_TOKEN_KEY));
+        bearerTokenTO.setRefresh_token((String) Objects.requireNonNull(body).get(REFRESH_TOKEN_KEY));
         return bearerTokenTO;
     }
 
@@ -71,12 +78,12 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     public BearerTokenTO validate(String token) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
         formParams.add("token", token);
-        formParams.add("client_id", clientId);
-        formParams.add("client_secret", clientSecret);
+        formParams.add(CLIENT_ID_KEY, clientId);
+        formParams.add(CLIENT_SECRET_KEY, clientSecret);
         ResponseEntity<AccessToken> resp = keycloakTokenRestClient.validate(formParams);
         HttpStatus statusCode = (HttpStatus) resp.getStatusCode();
         if (HttpStatus.OK != statusCode) {
-            log.error("Could not validate token"); //todo: throw specific exception
+            log.error("Could not validate token");
         }
         Map<String, Object> claimsMap = Optional.ofNullable(resp.getBody())
                 .map(JsonWebToken::getOtherClaims)
@@ -90,10 +97,10 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
     @Override
     public BearerTokenTO refreshToken(String refreshToken) {
         MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-        formParams.add("grant_type", "refresh_token");
-        formParams.add("client_id", clientId);
-        formParams.add("client_secret", clientSecret);
-        formParams.add("refresh_token", refreshToken);
+        formParams.add(GRANT_TYPE_KEY, "refresh_token");
+        formParams.add(CLIENT_ID_KEY, clientId);
+        formParams.add(CLIENT_SECRET_KEY, clientSecret);
+        formParams.add(REFRESH_TOKEN_KEY, refreshToken);
         ResponseEntity<Map<String, ?>> resp = keycloakTokenRestClient.login(formParams);
         HttpStatus statusCode = (HttpStatus) resp.getStatusCode();
         if (HttpStatus.OK != statusCode) {
@@ -102,8 +109,8 @@ public class KeycloakTokenServiceImpl implements KeycloakTokenService {
         }
         Map<String, ?> body = Objects.requireNonNull(resp).getBody();
         BearerTokenTO bearerTokenTO = new BearerTokenTO();
-        bearerTokenTO.setAccess_token((String) Objects.requireNonNull(body).get("access_token"));
-        bearerTokenTO.setRefresh_token((String) Objects.requireNonNull(body).get("refresh_token"));
+        bearerTokenTO.setAccess_token((String) Objects.requireNonNull(body).get(ACCESS_TOKEN_KEY));
+        bearerTokenTO.setRefresh_token((String) Objects.requireNonNull(body).get(REFRESH_TOKEN_KEY));
 
         return bearerTokenTO;
     }

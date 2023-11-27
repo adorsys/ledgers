@@ -76,6 +76,4 @@ class PushOTPSenderTest {
         scaMessage.setMessage(SUBJECT);
         return scaMessage;
     }
-
-
 }

@@ -31,14 +31,11 @@ public abstract class NamedBO {
 
     private LocalDateTime created;
 
-    //	todo: seems this property should be moved from base class
     private String userDetails;
 
-    //	todo: seems this property should be moved from base class
     /*The short description of this entity*/
     private String shortDesc;
 
-    //	todo: seems this property should be moved from base class
     /*The long description of this entity*/
     private String longDesc;
 

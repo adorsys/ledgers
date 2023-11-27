@@ -91,7 +91,7 @@ class DepositAccountTransactionServiceImplTest {
 
     private static final ObjectMapper STATIC_MAPPER;
 
-    private DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
+    private final DepositAccountMapper depositAccountMapper = Mappers.getMapper(DepositAccountMapper.class);
 
     static {
         STATIC_MAPPER = new ObjectMapper()
@@ -172,8 +172,8 @@ class DepositAccountTransactionServiceImplTest {
             assertThat(transactionDetails.getEndToEndId()).isEqualTo(line.getId());
             assertThat(transactionDetails.getTransactionId()).isNotBlank();
             assertThat(transactionDetails.getBookingDate()).isEqualTo(transactionDetails.getValueDate());
-            assertThat(transactionDetails.getCreditorAccount()).isEqualToComparingFieldByField(depositAccountMapper.toAccountReferenceBO(getDepositAccount()));
-            assertThat(transactionDetails.getTransactionAmount()).isEqualToComparingFieldByField(amount);
+            assertThat(transactionDetails.getCreditorAccount()).usingRecursiveComparison().isEqualTo(depositAccountMapper.toAccountReferenceBO(getDepositAccount()));
+            assertThat(transactionDetails.getTransactionAmount()).usingRecursiveComparison().isEqualTo(amount);
         }
     }
 
@@ -206,7 +206,7 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(2);
+        assertThat(lines).hasSize(2);
         assertThat(dcAmountOk(lines)).isTrue();
 
         PostingLineBO line1 = lines.get(0);
@@ -249,7 +249,7 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(4);
+        assertThat(lines).hasSize(4);
         assertThat(dcAmountOk(lines)).isTrue();
 
         PostingLineBO line1 = lines.get(0);
@@ -325,7 +325,7 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(4);
+        assertThat(lines).hasSize(4);
         assertThat(dcAmountOk(lines)).isTrue();
 
         PostingLineBO line1 = lines.get(0);
@@ -384,7 +384,7 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(2);
+        assertThat(lines).hasSize(2);
         assertThat(dcAmountOk(lines)).isTrue();
 
         PostingLineBO line1 = lines.get(0);
@@ -428,7 +428,7 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(2);
+        assertThat(lines).hasSize(2);
         assertThat(dcAmountOk(lines)).isTrue();
 
         PostingLineBO line1 = lines.get(0);
@@ -473,11 +473,11 @@ class DepositAccountTransactionServiceImplTest {
 
         PostingBO posting = postingCaptor.getValue();
         List<PostingLineBO> lines = posting.getLines();
-        assertThat(lines.size()).isEqualTo(7);
+        assertThat(lines).hasSize(7);
         List<PostingLineBO> creditLines = lines.stream().filter(l -> l.getCreditAmount().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
         List<PostingLineBO> debitLines = lines.stream().filter(l -> l.getDebitAmount().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
-        assertThat(creditLines.size()).isEqualTo(4);
-        assertThat(debitLines.size()).isEqualTo(3);
+        assertThat(creditLines).hasSize(4);
+        assertThat(debitLines).hasSize(3);
         assertEquals(debitLines.stream().map(PostingLineBO::getDebitAmount).reduce(BigDecimal::add),
                      creditLines.stream().map(PostingLineBO::getCreditAmount).reduce(BigDecimal::add));
 

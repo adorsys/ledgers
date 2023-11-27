@@ -14,7 +14,7 @@ public enum UsageTypeTO {
     PRIV("PRIV"),
     ORGA("ORGA");
 
-    private final static Map<String, UsageTypeTO> container = new HashMap<>();
+    private static final Map<String, UsageTypeTO> container = new HashMap<>();
 
     static {
         for (UsageTypeTO usageType : values()) {
@@ -22,7 +22,7 @@ public enum UsageTypeTO {
         }
     }
 
-    private String value;
+    private final String value;
 
 
     UsageTypeTO(String value) {

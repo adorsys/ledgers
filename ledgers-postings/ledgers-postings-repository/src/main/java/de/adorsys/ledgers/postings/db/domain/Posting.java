@@ -140,7 +140,6 @@ public class Posting extends HashRecord {
     @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime valTime;
 
-    //    todo: add description to this field
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "posting_id")
     private List<PostingLine> lines = new ArrayList<>();
@@ -162,7 +161,7 @@ public class Posting extends HashRecord {
     private String discardingId;
 
     public Posting hash() {
-        // Skipp computation if a hash exists. Original value
+        // Skip computation if a hash exists. Original value
         // shall not be overriden.
         if (hash != null) {
             return this;

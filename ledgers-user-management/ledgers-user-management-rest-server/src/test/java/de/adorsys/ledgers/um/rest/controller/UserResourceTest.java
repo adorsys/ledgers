@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-public class UserResourceTest {
+class UserResourceTest {
 
     private static final String USER_LOGIN = "vne";
     private static final String USER_ID = "SomeUniqueID";
@@ -53,7 +53,7 @@ public class UserResourceTest {
         when(userService.create(userBO)).thenReturn(userBO);
 
         // When
-        ResponseEntity actual = userResource.createUser(userBO);
+        ResponseEntity<Void> actual = userResource.createUser(userBO);
 
         // Then
         assertEquals("/users/vne_ua", actual.getHeaders().get("Location").get(0));
@@ -67,9 +67,9 @@ public class UserResourceTest {
         when(userService.findByLogin(USER_LOGIN)).thenReturn(userBO);
 
         // When
-        ResponseEntity actual = userResource.getUserByLogin(USER_LOGIN);
+        ResponseEntity<UserBO> actual = userResource.getUserByLogin(USER_LOGIN);
 
-        UserBO user = (UserBO) actual.getBody();
+        UserBO user = actual.getBody();
 
         // Then
         assertNotNull(user);
@@ -84,9 +84,9 @@ public class UserResourceTest {
         when(userService.findById(USER_ID)).thenReturn(userBO);
 
         // When
-        ResponseEntity actual = userResource.getUserById(USER_ID);
+        ResponseEntity<UserBO> actual = userResource.getUserById(USER_ID);
 
-        UserBO user = (UserBO) actual.getBody();
+        UserBO user = actual.getBody();
 
         // Then
         assertNotNull(user);
