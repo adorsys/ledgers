@@ -118,7 +118,7 @@
         <maven-pmd-plugin.version>3.21.0</maven-pmd-plugin.version>
 
         <!-- Spring-related versions -->
-        <spring-boot-dependencies.version>3.0.7</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.0.13</spring-boot-dependencies.version>
         <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
         <spring-security.version>6.0.5</spring-security.version>
         <spring-plugin.version>3.0.0</spring-plugin.version>
@@ -126,8 +126,8 @@
 
         <!-- Other versions -->
         <springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
-        <apache.commons.collections.version>4.3</apache.commons.collections.version>
-        <commons.io.version>2.8.0</commons.io.version>
+        <commons-collections4.version>4.3</commons-collections4.version>
+        <commons-io.version>2.8.0</commons-io.version>
         <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
         <dbunit.version>2.6.0</dbunit.version>
         <keycloak.version>22.0.3</keycloak.version>
@@ -139,7 +139,7 @@
         <datecalc-common.version>1.4.0</datecalc-common.version>
         <datecalc-jdk8.version>1.4.0</datecalc-jdk8.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
-        <json.version>20230227</json.version>
+        <json.version>20231013</json.version>
         <jackson-annotations.version>2.13.2</jackson-annotations.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <feign-slf4j.version>10.7.4</feign-slf4j.version>
@@ -379,7 +379,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
-                <version>${apache.commons.collections.version}</version>
+                <version>${commons-collections4.version}</version>
             </dependency>
 
             <dependency>
@@ -397,7 +397,7 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>${commons.io.version}</version>
+                <version>${commons-io.version}</version>
             </dependency>
 
             <!-- test dependencies -->
