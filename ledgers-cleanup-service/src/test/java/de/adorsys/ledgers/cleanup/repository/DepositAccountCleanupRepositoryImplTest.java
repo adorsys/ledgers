@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * Copyright (c) 2018-2024 adorsys GmbH and Co. KG
  * All rights are reserved.
  */
 
 package de.adorsys.ledgers.cleanup.repository;
 
 import de.adorsys.ledgers.cleanup.exception.CleanupModuleException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,14 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -143,7 +144,8 @@ class DepositAccountCleanupRepositoryImplTest {
     void rollBackBranch() throws CleanupModuleException, IOException {
         LocalDateTime now = LocalDateTime.now();
         ArgumentCaptor<Integer> paramKeyCaptor = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<LocalDateTime> paramValueCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+        ArgumentCaptor<LocalDateTime> dateTimeParamValueCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+        ArgumentCaptor<String> stringParamValueCaptor = ArgumentCaptor.forClass(String.class);
 
         when(resourceLoader.getResource("classpath:sql/rollBackBranch.sql")).thenReturn(resource);
         when(resource.getInputStream()).thenReturn(targetStream);
@@ -151,14 +153,16 @@ class DepositAccountCleanupRepositoryImplTest {
 
         repository.rollBackBranch(BRANCH, now);
 
-        verify(nativeQuery, times(2)).setParameter(paramKeyCaptor.capture(), paramValueCaptor.capture());
+        verify(nativeQuery, times(1)).setParameter(paramKeyCaptor.capture(), dateTimeParamValueCaptor.capture());
+        verify(nativeQuery, times(1)).setParameter(paramKeyCaptor.capture(), stringParamValueCaptor.capture());
+
         verify(nativeQuery, times(1)).executeUpdate();
 
         assertTrue(paramKeyCaptor.getAllValues().contains(1));
         assertTrue(paramKeyCaptor.getAllValues().contains(2));
 
-        assertTrue(paramValueCaptor.getAllValues().contains(BRANCH));
-        assertTrue(paramValueCaptor.getAllValues().contains(now));
+        assertTrue(dateTimeParamValueCaptor.getAllValues().contains(now));
+        assertTrue(stringParamValueCaptor.getAllValues().contains(BRANCH));
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * Copyright (c) 2018-2024 adorsys GmbH and Co. KG
  * All rights are reserved.
  */
 
@@ -33,7 +33,7 @@ public class PushOtpSender implements SCASender<PushScaMessage> {
 
         try {
             HttpEntity<String> httpEntity = new HttpEntity<>(message.getMessage());
-            HttpMethod httpMethod = Optional.ofNullable(HttpMethod.resolve(message.getHttpMethod()))
+            HttpMethod httpMethod = Optional.of(HttpMethod.valueOf(message.getHttpMethod()))
                                             .orElseThrow(() -> ScaModuleException.buildScaSenderException("Could not resolve HttpMethod for PsuhOTP Sender " + message.getHttpMethod()));
             ResponseEntity<Void> exchange = template.exchange(message.getUrl(), httpMethod, httpEntity, Void.class);
             return exchange.getStatusCode().is2xxSuccessful();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+ * Copyright (c) 2018-2024 adorsys GmbH and Co. KG
  * All rights are reserved.
  */
 
@@ -49,6 +49,7 @@ public class Payment {
      * Is used for regular payments when User is eager to have them executed at certain time (not before)
      */
     //@Convert(converter = LocalTimeConverter.class)
+    @Column(columnDefinition = "TIME")
     private LocalTime requestedExecutionTime;
 
     @Enumerated(EnumType.STRING)

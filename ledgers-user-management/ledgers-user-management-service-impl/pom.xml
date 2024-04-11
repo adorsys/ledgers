@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+  ~ Copyright (c) 2018-2024 adorsys GmbH and Co. KG
   ~ All rights are reserved.
   -->
 
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>de.adorsys.ledgers</groupId>
 		<artifactId>ledgers-user-management</artifactId>
-        <version>5.1-SNAPSHOT</version>
+        <version>5.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

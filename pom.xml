@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018-2023 adorsys GmbH and Co. KG
+  ~ Copyright (c) 2018-2024 adorsys GmbH and Co. KG
   ~ All rights are reserved.
   -->
 
@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.adorsys.ledgers</groupId>
     <artifactId>ledgers</artifactId>
-    <version>5.1-SNAPSHOT</version>
+    <version>5.1</version>
 
     <modules>
         <module>ledgers-app</module>
@@ -105,27 +105,27 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Maven plugins-->
-        <maven-enforcer-plugin.version>3.4.0</maven-enforcer-plugin.version>
-        <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
         <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
-        <spring-boot-maven-plugin.version>3.0.7</spring-boot-maven-plugin.version>
+        <spring-boot-maven-plugin.version>3.2.0</spring-boot-maven-plugin.version>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
-        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
         <maven-pmd-plugin.version>3.21.0</maven-pmd-plugin.version>
 
         <!-- Spring-related versions -->
-        <spring-boot-dependencies.version>3.0.13</spring-boot-dependencies.version>
-        <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
-        <spring-security.version>6.0.5</spring-security.version>
+        <spring-boot-dependencies.version>3.2.0</spring-boot-dependencies.version>
+        <spring-cloud-starter-openfeign.version>4.1.0</spring-cloud-starter-openfeign.version>
+        <spring-security.version>6.1.3</spring-security.version>
         <spring-plugin.version>3.0.0</spring-plugin.version>
-        <spring-test.version>6.0.7</spring-test.version>
+        <spring-test.version>6.1.3</spring-test.version>
 
         <!-- Other versions -->
-        <springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
+        <springdoc-openapi-ui.version>2.3.0</springdoc-openapi-ui.version>
         <commons-collections4.version>4.3</commons-collections4.version>
         <commons-io.version>2.8.0</commons-io.version>
         <jetbrains.annotations.version>15.0</jetbrains.annotations.version>
@@ -140,17 +140,17 @@
         <datecalc-jdk8.version>1.4.0</datecalc-jdk8.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
         <json.version>20231013</json.version>
-        <jackson-annotations.version>2.13.2</jackson-annotations.version>
+        <jackson-annotations.version>2.15.3</jackson-annotations.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <feign-slf4j.version>10.7.4</feign-slf4j.version>
-        <testcontainers.version>1.17.3</testcontainers.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
         <testcontainers-keycloak.version>1.3.3</testcontainers-keycloak.version>
         <jboss-jaxrs-api_2.0_spec.version>1.0.1.Final</jboss-jaxrs-api_2.0_spec.version>
         <jboss-logging.version>3.3.1.Final</jboss-logging.version>
         <classgraph.version>4.8.139</classgraph.version>
 
         <!-- Test versions -->
-        <junit-jupiter-api.version>5.9.3</junit-jupiter-api.version>
+        <junit-jupiter-api.version>5.10.2</junit-jupiter-api.version>
         <mockito.version>5.2.0</mockito.version>
         <guava.version>32.0.0-jre</guava.version>
         <hamcrest-library.version>1.3</hamcrest-library.version>
@@ -160,11 +160,11 @@
         <!-- automatically run annotation processors within the incremental compilation -->
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
         <slf4j.version>2.0.9</slf4j.version>
-        <nimbus-jose-jwt.version>7.9</nimbus-jose-jwt.version>
-        <liquibase.version>4.9.0</liquibase.version>
+        <nimbus-jose-jwt.version>9.25.6</nimbus-jose-jwt.version>
+        <liquibase.version>4.25.1</liquibase.version>
         <subethasmtp.version>3.1.7</subethasmtp.version>
-        <jackson.version>2.13.2</jackson.version>
-        <lombok.version>1.18.24</lombok.version>
+        <jackson.version>2.15.3</jackson.version>
+        <lombok.version>1.18.30</lombok.version>
         <jasypt.version>1.9.3</jasypt.version>
 
         <!--Sonar -->
@@ -557,6 +557,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
+                    <parameters>true</parameters>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <annotationProcessorPaths>

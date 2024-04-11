@@ -68,7 +68,7 @@ spring:
     hibernate:
       ddl-auto: validate
     properties:
-      hibernate.globally_quoted_identifiers: true
+      hibernate.globally_quoted_identifiers: false
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       hibernate.jdbc.batch_size: 100
