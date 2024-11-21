@@ -71,12 +71,14 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+			<version>6.1.14</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<scope>provided</scope>
+			<version>6.1.14</version>
 		</dependency>
 		
 		<dependency>
@@ -142,7 +144,15 @@
 					<artifactId>junit</artifactId>
 					<groupId>junit</groupId>
 				</exclusion>
+				<exclusion>
+					<groupId>commons-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<dependency>

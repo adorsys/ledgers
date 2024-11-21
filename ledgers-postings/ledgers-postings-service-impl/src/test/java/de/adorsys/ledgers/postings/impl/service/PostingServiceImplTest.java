@@ -10,7 +10,7 @@ import de.adorsys.ledgers.postings.db.domain.*;
 import de.adorsys.ledgers.postings.db.repository.*;
 import de.adorsys.ledgers.util.exception.PostingErrorCode;
 import de.adorsys.ledgers.util.exception.PostingModuleException;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
