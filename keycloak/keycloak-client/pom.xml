@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-adapter-core</artifactId>
-            <version>${keycloak.version}</version>
+            <version>${keycloak-adapter-core.version}</version>
         </dependency>
 
         <dependency>

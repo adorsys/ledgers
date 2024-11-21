@@ -26,14 +26,14 @@ import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.services.Urls;
-import org.keycloak.services.cors.Cors;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.keycloak.services.cors.Cors.ACCESS_CONTROL_ALLOW_METHODS;
-import static org.keycloak.services.cors.Cors.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static org.keycloak.services.resources.Cors.ACCESS_CONTROL_ALLOW_METHODS;
+import static org.keycloak.services.resources.Cors.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static org.keycloak.services.util.DefaultClientSessionContext.fromClientSessionScopeParameter;
 
 /**
@@ -119,7 +119,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
             SignatureVerifierContext verifierContext = session.getProvider(SignatureProvider.class, verifier.getHeader().getAlgorithm().name()).verifier(verifier.getHeader().getKeyId());
             verifier.verifierContext(verifierContext);
             AccessToken accessToken = verifier.verify().getToken();
-            if (!tokenManager.checkTokenValidForIntrospection(session, realm, accessToken, false, eventBuilder)) {
+            if (!tokenManager.checkTokenValidForIntrospection(session, realm, accessToken, false)) {
                 throw new VerificationException("introspection_failed");
             }
             return accessToken;
