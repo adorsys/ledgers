@@ -26,10 +26,10 @@ import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.services.Urls;
+import org.keycloak.services.cors.Cors;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.*;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.keycloak.services.cors.Cors.ACCESS_CONTROL_ALLOW_METHODS;
@@ -66,12 +66,11 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
 
     @OPTIONS
     public Response preflight() {
-        KeycloakContext context = session.getContext();
-        return Cors.add(context.getHttpRequest(), Response.ok())
+        return Cors.builder()
                        .auth()
                        .preflight()
                        .allowedMethods("POST", "OPTIONS")
-                       .build();
+                       .add(Response.ok());
     }
 
     @POST
@@ -119,7 +118,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
             SignatureVerifierContext verifierContext = session.getProvider(SignatureProvider.class, verifier.getHeader().getAlgorithm().name()).verifier(verifier.getHeader().getKeyId());
             verifier.verifierContext(verifierContext);
             AccessToken accessToken = verifier.verify().getToken();
-            if (!tokenManager.checkTokenValidForIntrospection(session, realm, accessToken, false)) {
+            if (tokenManager.checkTokenValidForIntrospection(session, realm, accessToken, eventBuilder) == null) {
                 throw new VerificationException("introspection_failed");
             }
             return accessToken;
@@ -175,13 +174,13 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
 
 
     private Response buildCorsResponse(@Context HttpRequest request, AccessTokenResponse response) {
-        Cors cors = Cors.add(request)
+        Cors cors = Cors.builder()
                             .auth()
                             .allowedMethods("POST")
                             .auth()
                             .exposedHeaders(ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN)
                             .allowAllOrigins();
-        return cors.builder(Response.ok(response).type(MediaType.APPLICATION_JSON_TYPE)).build();
+        return cors.add(Response.ok(response).type(MediaType.APPLICATION_JSON_TYPE));
     }
 
 
@@ -198,7 +197,7 @@ public class ConfigurableTokenResourceProvider implements RealmResourceProvider 
     }
 
     private void updateTokenExpiration(AccessToken token, TokenConfiguration tokenConfiguration) {
-        token.expiration(tokenConfiguration.computeTokenExpiration(token.getExp().intValue(), true));
+        token.exp(((long) tokenConfiguration.computeTokenExpiration(token.getExp().intValue(), true)));
     }
 
     private void updateScope(AccessToken token, TokenConfiguration tokenConfiguration) {
