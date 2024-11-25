@@ -29,11 +29,11 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.;
+import org.keycloak.services.resources.*;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.keycloak.services.resources.Cors.ACCESS_CONTROL_ALLOW_METHODS;
-import static org.keycloak.services.resources.Cors.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static org.keycloak.services.cors.Cors.ACCESS_CONTROL_ALLOW_METHODS;
+import static org.keycloak.services.cors.Cors.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static org.keycloak.services.util.DefaultClientSessionContext.fromClientSessionScopeParameter;
 
 /**
