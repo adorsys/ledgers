@@ -118,11 +118,11 @@
         <maven-pmd-plugin.version>3.21.0</maven-pmd-plugin.version>
 
         <!-- Spring-related versions -->
-        <spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.2.7</spring-boot-dependencies.version>
         <spring-cloud-starter-openfeign.version>4.1.3</spring-cloud-starter-openfeign.version>
         <spring-security.version>6.3.4</spring-security.version>
         <spring-plugin.version>3.0.0</spring-plugin.version>
-        <spring-test.version>6.1.14</spring-test.version>
+        <spring-test.version>6.1.3</spring-test.version>
 
         <!-- Other versions -->
         <springdoc-openapi-ui.version>2.6.0</springdoc-openapi-ui.version>
@@ -137,7 +137,7 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <javatar-commons.version>0.7</javatar-commons.version>
         <h2database.version>2.2.220</h2database.version>
-        <postgresql.version>42.7.3</postgresql.version>
+        <postgresql.version>42.3.10</postgresql.version>
         <datecalc-common.version>1.4.0</datecalc-common.version>
         <datecalc-jdk8.version>1.4.0</datecalc-jdk8.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
@@ -145,8 +145,8 @@
         <jackson-annotations.version>2.15.3</jackson-annotations.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <feign-slf4j.version>10.7.4</feign-slf4j.version>
-        <testcontainers.version>1.20.2</testcontainers.version>
-        <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
+        <testcontainers.version>1.20.3</testcontainers.version>
+        <testcontainers-keycloak.version>1.3.3</testcontainers-keycloak.version>
         <jgiven-spring-junit5.version>1.2.5</jgiven-spring-junit5.version>
         <jboss-jaxrs-api_2.0_spec.version>1.0.1.Final</jboss-jaxrs-api_2.0_spec.version>
         <jboss-logging.version>3.3.1.Final</jboss-logging.version>
@@ -163,7 +163,7 @@
         <commons-validator.version>1.7</commons-validator.version>
         <!-- automatically run annotation processors within the incremental compilation -->
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-        <slf4j.version>2.0.16</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <nimbus-jose-jwt.version>9.25.6</nimbus-jose-jwt.version>
         <liquibase.version>4.25.1</liquibase.version>
         <subethasmtp.version>3.1.7</subethasmtp.version>
