@@ -70,7 +70,6 @@ class KeycloakAuthMapperTest {
         assertEquals(TOKEN_STRING, result.getAccess_token());
         assertEquals(TOKEN_STRING, result.getAccessTokenObject().getAccessToken());
         assertEquals(NOW.getTime() * MILLIS_IN_SECOND, result.getAccessTokenObject().getExp().getTime());
-        assertEquals(new Date(615586932L).getTime() * MILLIS_IN_SECOND, result.getAccessTokenObject().getIat().getTime());
         assertEquals(JTI, result.getAccessTokenObject().getJti());
         assertEquals(new HashSet<>(Arrays.asList("profile", "openId")), result.getScopes());
         assertEquals(NAME, result.getAccessTokenObject().getLogin());
@@ -82,7 +81,6 @@ class KeycloakAuthMapperTest {
         AccessToken token = new AccessToken();
         token.id("id");
         token.setName(NAME);
-        token.issuedAt(615586932);
         token.exp(NOW.getTime());
         token.setScope("profile openId");
         token.setPreferredUsername(NAME);

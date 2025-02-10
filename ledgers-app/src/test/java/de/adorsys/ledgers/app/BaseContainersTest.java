@@ -101,7 +101,7 @@ public class BaseContainersTest<G, W, T> extends SpringScenarioTest<G, W, T> {
 
     @NotNull
     private static GenericContainer<?> startKeycloak() {
-        var keycloak = new GenericContainer<>("keycloak/keycloak:24.0.5")
+        var keycloak = new GenericContainer<>("keycloak/keycloak:26.0.2")
                                .withEnv("KEYCLOAK_ADMIN", "admin")
                                .withEnv("KEYCLOAK_ADMIN_PASSWORD", "admin")
                                .withCommand("start-dev --import-realm")
