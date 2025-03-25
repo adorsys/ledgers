@@ -47,7 +47,7 @@ variables: &variables
   ###########################
 
   GITHUB_REPOSITORY: "adorsys/ledgers"
-  GITHUB_DEPLOY_KEY: $GITHUB_DEPLOY_KEY  # Private SSH key variable
+  GITHUB_DEPLOY_KEY_FILE: $GITHUB_DEPLOY_KEY_FILE  # File-type variable
   GITHUB_USERNAME: $GITHUB_USERNAME  # Git username
   GITHUB_EMAIL: $GITHUB_EMAIL  # Git username
   GITHUB_SSH_SERVER_FINGERPRINT: $GITHUB_SSH_SERVER_FINGERPRINT
@@ -92,7 +92,7 @@ variables: &variables
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     # Write key with proper newlines
-    - echo "$GITHUB_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+    - cp $GITHUB_DEPLOY_KEY_FILE ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
     # Configure SSH
     - eval $(ssh-agent -s)
