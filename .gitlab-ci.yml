@@ -90,6 +90,8 @@ variables: &variables
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
+    - echo "All variables:"; printenv
+    - echo "Key file content:"; cat "$GITHUB_DEPLOY_KEY"
     # Write key with strict formatting
     - echo "$GITHUB_DEPLOY_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
