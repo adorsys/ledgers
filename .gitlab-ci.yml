@@ -49,6 +49,7 @@ variables: &variables
   GITHUB_REPOSITORY: "adorsys/ledgers"
   GITHUB_USERNAME: $GITHUB_USERNAME  # Git username
   GITHUB_EMAIL: $GITHUB_EMAIL  # Git username
+  GITHUB_DEPLOY_KEY: $GITHUB_DEPLOY_KEY  # Git username
   GITHUB_SSH_SERVER_FINGERPRINT: $GITHUB_SSH_SERVER_FINGERPRINT
 
 # ------------------------------------------------------------------
