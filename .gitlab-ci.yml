@@ -91,7 +91,9 @@ variables: &variables
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     # Debug: Verify variable exists
-    - echo "Deploy key path, ${GITHUB_DEPLOY_KEY_FILE}"
+    - echo "All variables:"; printenv
+    - echo "Key file content:"; cat "${GITHUB_DEPLOY_KEY_FILE}"
+    - echo "Deploy key path"; cat "${GITHUB_DEPLOY_KEY_FILE}"
     - ls -la "${GITHUB_DEPLOY_KEY_FILE}"
     # Copy the key
     - cp "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_ed25519
