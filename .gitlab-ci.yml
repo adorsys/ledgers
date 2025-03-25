@@ -87,17 +87,26 @@ variables: &variables
   image: alpine/git
   before_script:
     - apk add --no-cache openssh-client
-    - eval $(ssh-agent -s)
-    - echo "$GITHUB_DEPLOY_KEY" | ssh-add -
     - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # Write the key to a file with proper permissions
+    - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # Configure SSH
+    - eval $(ssh-agent -s)
+    - ssh-add ~/.ssh/id_ed25519
     - echo "$GITHUB_SSH_SERVER_FINGERPRINT" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
     - git config --global user.name "$GITHUB_USERNME"
-    - git remote add github git@github.com:$GITHUB_REPOSITORY.git
-    - for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
+    - git config --global user.email "ci-bot@adorsys.com"
+    - git remote add github git@github.com:$GITHUB_REPOSITORY.git || true
+    - for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do |
       branch=${branch#origin/};
       git checkout $branch;
       git push github $branch;
+      echo "DRY RUN:Would push $branch to Github";
+      # git push github $branch; UNCOMMENT AFTER TESTING
       done
 
 # ------------------------------------------------------------------
@@ -477,5 +486,5 @@ Clone to github:
   <<: *sync_changes_github
   stage: "Clone to github"
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $TEST_MODE == "true"'
+    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
       when: always
