@@ -90,14 +90,14 @@ variables: &variables
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    # Write key manually
-    - echo "$GITHUB_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+    # Write key with strict formatting
+    - echo "$GITHUB_DEPLOY_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
     # Verify key
     - echo "Key content:"; cat ~/.ssh/id_ed25519
-    # Configure SSH
+    # Force SSH to use the key type
     - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_ed25519
+    - ssh-add -t ed25519 ~/.ssh/id_ed25519  # Add key type flag
     - echo "$GITHUB_SSH_SERVER_FINGERPRINT" >> ~/.ssh/known_hosts
   script:
     - git config --global user.name "$GITHUB_USERNAME"
