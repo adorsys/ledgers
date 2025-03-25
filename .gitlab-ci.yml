@@ -473,7 +473,7 @@ variables: &variables
 # Clone to GITHUB #
 ###########
 
-Clone_to_github:
+clone_to_github:
   <<: *sync_changes_github
   stage: "Clone to github"
   rules:
