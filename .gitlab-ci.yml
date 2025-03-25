@@ -477,12 +477,5 @@ Clone to github:
   <<: *sync_changes_github
   stage: "Clone to github"
   rules:
-    # TESTING RULE - Runs every 5 minutes
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $TEST_MODE == "true"'
       when: always
-    # PRODUCTION RULE (keep this for later)
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($MONTH == "06" || $MONTH == "12")'
-      when: always
-    - when: never
-  only:
-    - /^support-.*\.x$/
