@@ -90,13 +90,11 @@ variables: &variables
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    # Debug: Verify variable existence
-    - echo "Deploy key path: ${GITHUB_DEPLOY_KEY_FILE}"
-    - ls -la "${GITHUB_DEPLOY_KEY_FILE}"
-    # Copy the key
-    - cp "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_ed25519
+    - echo "Deploy key path: $GITHUB_DEPLOY_KEY_FILE"
+    - ls -la "$GITHUB_DEPLOY_KEY_FILE"
+    - cp "$GITHUB_DEPLOY_KEY_FILE" ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    - eval $(ssh-agent -s)
+    - eval '$(ssh-agent -s)'
     - ssh-add ~/.ssh/id_ed25519
     - echo "$GITHUB_SSH_SERVER_FINGERPRINT" >> ~/.ssh/known_hosts
   script:
