@@ -48,7 +48,9 @@ variables: &variables
 
   GITHUB_REPOSITORY: "adorsys/ledgers"
   GITHUB_DEPLOY_KEY: $GITHUB_DEPLOY_KEY  # Private SSH key variable
-  GITHUB_USERNME: "gitlab-ci-bot"   # Git username
+  GITHUB_USERNAME: $GITHUB_USERNAME  # Git username
+  GITHUB_EMAIL: $GITHUB_EMAIL  # Git username
+  GITHUB_SSH_SERVER_FINGERPRINT: $GITHUB_SSH_SERVER_FINGERPRINT
 
 # ------------------------------------------------------------------
 # reusable yaml anchors
@@ -98,13 +100,13 @@ variables: &variables
     - echo "$GITHUB_SSH_SERVER_FINGERPRINT" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - git config --global user.name "$GITHUB_USERNME"
-    - git config --global user.email "ci-bot@adorsys.com"
+    - git config --global user.name "$GITHUB_USERNAME"
+    - git config --global user.email "$GITHUB_EMAIL"
     - git remote add github git@github.com:$GITHUB_REPOSITORY.git || true
     - for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
       branch=${branch#origin/};
       git checkout $branch;
-      echo "DRY RUN:Would push $branch to GitHub";
+      echo "Would push $branch to GitHub";
       # git push github $branch;  # UNCOMMENT AFTER TESTING
       done
 
@@ -472,6 +474,12 @@ Release artifacts to private repo (tags):
 ###########
 
 Clone_to_github:
+  <<: *sync_changes_github
+  stage: "Clone to github"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
+      when: always
+
 #  <<: *sync_changes_github
 #  stage: "Clone to github"
 #  rules:
@@ -482,8 +490,3 @@ Clone_to_github:
 #    - /^support-.*\.x$/
 #  except:
 #    - schedules
-  <<: *sync_changes_github
-  stage: "Clone to github"
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
-      when: always
