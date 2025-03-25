@@ -47,7 +47,6 @@ variables: &variables
   ###########################
 
   GITHUB_REPOSITORY: "adorsys/ledgers"
-  GITHUB_DEPLOY_KEY_FILE: $GITHUB_DEPLOY_KEY_FILE  # File-type variable
   GITHUB_USERNAME: $GITHUB_USERNAME  # Git username
   GITHUB_EMAIL: $GITHUB_EMAIL  # Git username
   GITHUB_SSH_SERVER_FINGERPRINT: $GITHUB_SSH_SERVER_FINGERPRINT
@@ -88,13 +87,16 @@ variables: &variables
 .sync_changes_github: &sync_changes_github
   image: alpine/git
   before_script:
+    - echo "Deploy key path $GITHUB_DEPLOY_KEY_FILE"
+    - ls -la "$GITHUB_DEPLOY_KEY_FILE"
+    - echo "Key content:"
+    - cat "$GITHUB_DEPLOY_KEY_FILE"
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    # Write key with proper newlines
-    - cp $GITHUB_DEPLOY_KEY_FILE ~/.ssh/id_ed25519
+    # Use the file-type variable directly
+    - cp "$GITHUB_DEPLOY_KEY_FILE" ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    # Configure SSH
     - eval $(ssh-agent -s)
     - ssh-add ~/.ssh/id_ed25519
     - echo "$GITHUB_SSH_SERVER_FINGERPRINT" >> ~/.ssh/known_hosts
