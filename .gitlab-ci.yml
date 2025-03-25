@@ -102,12 +102,13 @@ variables: &variables
   script:
     - git config --global user.name "$GITHUB_USERNAME"
     - git config --global user.email "$GITHUB_EMAIL"
-    - git remote add github git@github.com:$GITHUB_REPOSITORY.git || true
-    - for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
-      branch=${branch#origin/};
-      git checkout $branch;
-      echo "Would push $branch to GitHub";
-      # git push github $branch;  # UNCOMMENT AFTER TESTING
+    - git remote add github git@github.com/$GITHUB_REPOSITORY.git || true
+    - |
+      for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
+        branch=${branch#origin/};
+        git checkout $branch;
+        echo "DRY RUN: Would push $branch to GitHub";
+        # git push github $branch;  # UNCOMMENT AFTER TESTING
       done
 
 # ------------------------------------------------------------------
