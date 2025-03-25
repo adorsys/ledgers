@@ -101,7 +101,7 @@ variables: &variables
     - git config --global user.name "$GITHUB_USERNME"
     - git config --global user.email "ci-bot@adorsys.com"
     - git remote add github git@github.com:$GITHUB_REPOSITORY.git || true
-    - for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do |
+    - for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
       branch=${branch#origin/};
       git checkout $branch;
       git push github $branch;
