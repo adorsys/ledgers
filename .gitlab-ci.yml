@@ -47,10 +47,10 @@ variables: &variables
   ###########################
 
   GITHUB_REPOSITORY: "adorsys/ledgers"
-  GITHUB_USERNAME: $GITHUB_USERNAME  # Git username
-  GITHUB_EMAIL: $GITHUB_EMAIL  # Git username
-  GITHUB_DEPLOY_KEY: $GITHUB_DEPLOY_KEY  # Git username
+  GITHUB_USERNAME: $GITHUB_USERNAME
+  GITHUB_EMAIL: $GITHUB_EMAIL
   GITHUB_SSH_SERVER_FINGERPRINT: $GITHUB_SSH_SERVER_FINGERPRINT
+  GITHUB_DEPLOY_KEY: $GITHUB_DEPLOY_KEY  # Contains raw key content
 
 # ------------------------------------------------------------------
 # reusable yaml anchors
@@ -91,16 +91,14 @@ variables: &variables
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "All variables:"; printenv
-    - echo "Key file content:"; cat "$GITHUB_DEPLOY_KEY"
-    # Write key with strict formatting
-    - echo "$GITHUB_DEPLOY_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
+    # Write key content to file
+    - echo "$GITHUB_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
     # Verify key
     - echo "Key content:"; cat ~/.ssh/id_ed25519
-    # Force SSH to use the key type
+    # Configure SSH
     - eval $(ssh-agent -s)
-    - ssh-add -t ed25519 ~/.ssh/id_ed25519  # Add key type flag
+    - ssh-add ~/.ssh/id_ed25519
     - echo "$GITHUB_SSH_SERVER_FINGERPRINT" >> ~/.ssh/known_hosts
   script:
     - git config --global user.name "$GITHUB_USERNAME"
