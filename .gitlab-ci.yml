@@ -16,7 +16,7 @@ stages:
   - "Test"         # run tests and code quality checks
   - "Package"      # dockerize jar and push to docker registry
   - "Release"      # release
-  - "Clone to github" # sync GITHUB with GITLAB
+  - "Clone to github"
 
 # ------------------------------------------------------------------
 # variables
@@ -485,11 +485,11 @@ Release artifacts to private repo (tags):
 ###########
 
 clone_to_github:
-#  <<: *sync_changes_github
-#  stage: "Clone to github"
-#  rules:
-#    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
-#      when: always
+  #  <<: *sync_changes_github
+  #  stage: "Clone to github"
+  #  rules:
+  #    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
+  #      when: always
   <<: *sync_changes_github
   stage: "Clone to github"
   rules:
