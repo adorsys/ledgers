@@ -103,11 +103,22 @@ variables: &variables
     - git config --global user.email "$GITHUB_EMAIL"
     - git remote add github git@github.com:$GITHUB_REPOSITORY.git || true
     - |
-      for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
+      # Get existing GitHub branches
+      git fetch github --prune
+      GITHUB_BRANCHES=$(git ls-remote --heads github | awk -F'/' '{print $3}')
+      
+      # Process all support/v2support branches
+      for branch in $(git branch -r | grep -E "origin/(v2)?support-.*\.x"); do
         branch=${branch#origin/}
-        git checkout $branch
-        echo "DRY RUN: Would push $branch to GitHub"
-        git push github $branch 
+      
+        # Check if branch exists on GitHub
+        if ! echo "$GITHUB_BRANCHES" | grep -qxF "$branch"; then
+          echo "Pushing new branch: $branch to GitHub"
+          git checkout -b "$branch" "origin/$branch"
+          git push -u github "$branch"
+        else
+          echo "Branch $branch already exists on GitHub - skipping"
+        fi
       done
 
 # ------------------------------------------------------------------
@@ -478,16 +489,15 @@ clone_to_github:
   <<: *sync_changes_github
   stage: "Clone to github"
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($MONTH == "06" || $MONTH == "12")'
       when: always
-
+    - when: never
+  only:
+    - /^support-.*\.x$/
+  except:
+    - schedules
 #  <<: *sync_changes_github
 #  stage: "Clone to github"
 #  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($MONTH == "06" || $MONTH == "12")'
+#    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
 #      when: always
-#    - when: never
-#  only:
-#    - /^support-.*\.x$/
-#  except:
-#    - schedules
