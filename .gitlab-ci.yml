@@ -50,7 +50,7 @@ variables: &variables
   GITHUB_USERNAME: $GITHUB_USERNAME
   GITHUB_EMAIL: $GITHUB_EMAIL
   GITHUB_SSH_SERVER_FINGERPRINT: $GITHUB_SSH_SERVER_FINGERPRINT
-  GITHUB_DEPLOY_KEY: $GITHUB_DEPLOY_KEY  # Contains raw key content
+  GITHUB_DEPLOY_KEY_BASE64: $GITHUB_DEPLOY_KEY_BASE64  # Base64-encoded key
 
 # ------------------------------------------------------------------
 # reusable yaml anchors
@@ -91,8 +91,8 @@ variables: &variables
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    # Write key content to file
-    - echo "$GITHUB_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+    # Decode Base64 to SSH key
+    - echo "$GITHUB_DEPLOY_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
     # Verify key
     - echo "Key content:"; cat ~/.ssh/id_ed25519
