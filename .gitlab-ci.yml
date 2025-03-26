@@ -94,8 +94,6 @@ variables: &variables
     # Decode Base64 to SSH key
     - echo "$GITHUB_DEPLOY_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    # Verify key
-    - echo "Key content:"; cat ~/.ssh/id_ed25519
     # Configure SSH
     - eval $(ssh-agent -s)
     - ssh-add ~/.ssh/id_ed25519
@@ -103,7 +101,7 @@ variables: &variables
   script:
     - git config --global user.name "$GITHUB_USERNAME"
     - git config --global user.email "$GITHUB_EMAIL"
-    - git remote add github git@github.com/$GITHUB_REPOSITORY.git || true
+    - git remote add github git@github.com:$GITHUB_REPOSITORY.git || true
     - |
       for branch in $(git branch -r | grep -E "origin/support-.*\.x"); do
         branch=${branch#origin/}
