@@ -106,11 +106,9 @@ variables: &variables
       # Get existing GitHub branches
       git fetch github --prune
       GITHUB_BRANCHES=$(git ls-remote --heads github | awk -F'/' '{print $3}')
-      
       # Process all support/v2support branches
       for branch in $(git branch -r | grep -E "origin/(v2)?support-.*\.x"); do
         branch=${branch#origin/}
-      
         # Check if branch exists on GitHub
         if ! echo "$GITHUB_BRANCHES" | grep -qxF "$branch"; then
           echo "Pushing new branch: $branch to GitHub"
@@ -243,7 +241,7 @@ Lint (Docker compose):
     - echo "Run Docker compose lint"
     - docker-compose -f docker-compose.yml config  -q
 
-Lint (Ci file):
+Lint (CI file):
   image: debian:stable-slim
   stage: "Lint"
   except:
@@ -252,7 +250,7 @@ Lint (Ci file):
     - master
   script:
     - apt-get update && apt-get install yamllint python3-pkg-resources -yq
-    - echo "Run Gitlab ci file lint"
+    - echo "Run Gitlab CI file lint"
     - yamllint -d relaxed .gitlab-ci.yml
 
 Lint (YAML, JSON, XML):
