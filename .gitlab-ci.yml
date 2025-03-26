@@ -229,275 +229,272 @@ variables: &variables
 # lint
 #-------------------------------------------------------------------
 
-#Lint (Docker compose):
-#  image: maven:3.6.3-openjdk-17-slim
-#  stage: "Lint"
-#  except:
-#    - schedules
-#    - develop
-#    - master
-#  tags:
-#    - aws
-#  script:
-#    - apt update && apt install yamllint docker-compose make -yq
-#    - echo "Run Docker compose lint"
-#    - docker-compose -f docker-compose.yml config  -q
+Lint (Docker compose):
+  image: maven:3.6.3-openjdk-17-slim
+  stage: "Lint"
+  except:
+    - schedules
+    - develop
+    - master
+  tags:
+    - aws
+  script:
+    - apt update && apt install yamllint docker-compose make -yq
+    - echo "Run Docker compose lint"
+    - docker-compose -f docker-compose.yml config  -q
 
-#Lint (Ci file):
-#  image: debian:stable-slim
-#  stage: "Lint"
-#  except:
-#    - schedules
-#    - develop
-#    - master
-#  script:
-#    - apt-get update && apt-get install yamllint python3-pkg-resources -yq
-#    - echo "Run Gitlab ci file lint"
-#    - yamllint -d relaxed .gitlab-ci.yml
+Lint (Ci file):
+  image: debian:stable-slim
+  stage: "Lint"
+  except:
+    - schedules
+    - develop
+    - master
+  script:
+    - apt-get update && apt-get install yamllint python3-pkg-resources -yq
+    - echo "Run Gitlab ci file lint"
+    - yamllint -d relaxed .gitlab-ci.yml
 
-#Lint (YAML, JSON, XML):
-#  image: debian:stable-slim
-#  stage: "Lint"
-#  except:
-#    - schedules
-#    - develop
-#    - master
-#  script:
-#    - apt-get update && apt-get install jsonlint yamllint libxml2-utils make curl -yq && ln -s /usr/bin/jsonlint-php /usr/bin/jsonlint
-#    - echo "Run Ledgers backend lint"
-#    - find ./ -type f -name "*.json" -exec jsonlint -q {} \; # lint all json
-# comments below already existed.
+Lint (YAML, JSON, XML):
+  image: debian:stable-slim
+  stage: "Lint"
+  except:
+    - schedules
+    - develop
+    - master
+  script:
+    - apt-get update && apt-get install jsonlint yamllint libxml2-utils make curl -yq && ln -s /usr/bin/jsonlint-php /usr/bin/jsonlint
+    - echo "Run Ledgers backend lint"
+    - find ./ -type f -name "*.json" -exec jsonlint -q {} \; # lint all json
   # commented cause get many small errors for yaml with spaces empty lines and etc
   #   - find ./ -type f \( -name "*.yml" -o -name "*.yaml" \) -exec yamllint -d "{extends: relaxed, rules: {line-length: {max: 160}}}" {} \;
   # commented cause get error Unsupported version '1.1'
   #     - find ./ -type f \( -iname "*.xml" ! -iname pom.xml \) -exec xmllint --noout {} \;
 
-#Lint (Dockerfiles):
-#  image: docker
-#  stage: "Lint"
-#  services:
-#    - docker:dind
-#  tags:
-#    - aws
-#  variables:
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_TLS_CERTDIR: ""
-#    DOCKER_DRIVER: overlay2
-#  except:
-#    - schedules
-#    - develop
-#    - master
-#  script:
-#    - echo "Run ledgers dockerfile checks"
-#    - docker run --rm -i hadolint/hadolint < Dockerfile
+Lint (Dockerfiles):
+  image: docker
+  stage: "Lint"
+  services:
+    - docker:dind
+  tags:
+    - aws
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+  except:
+    - schedules
+    - develop
+    - master
+  script:
+    - echo "Run ledgers dockerfile checks"
+    - docker run --rm -i hadolint/hadolint < Dockerfile
 
 
-#Lint (PMD check):
-#  image: maven:3.6.3-openjdk-17-slim
-#  stage: "Lint"
-#  except:
-#    - schedules
-#    - develop
-#    - master
-#  script:
-#    - apt update && apt install make -yq
-#    - echo "Test java code for PMD and CPD"
-#    - mvn -ntp -Dmaven.test.skip=true package pmd:check pmd:cpd-check
-#  cache: {}
-#  artifacts:
-#    paths:
-#      - "qa/pmd/pmd-ruleset.xml"
-#      - "**/**/*/pmd.html"
-#      - "**/*/pmd.xml"
-#    name: "${CI_PROJECT_NAME}-${CI_BUILD_REF_NAME#*v}-pmd"
-#    expire_in: "10 day"
+Lint (PMD check):
+  image: maven:3.6.3-openjdk-17-slim
+  stage: "Lint"
+  except:
+    - schedules
+    - develop
+    - master
+  script:
+    - apt update && apt install make -yq
+    - echo "Test java code for PMD and CPD"
+    - mvn -ntp -Dmaven.test.skip=true package pmd:check pmd:cpd-check
+  cache: {}
+  artifacts:
+    paths:
+      - "qa/pmd/pmd-ruleset.xml"
+      - "**/**/*/pmd.html"
+      - "**/*/pmd.xml"
+    name: "${CI_PROJECT_NAME}-${CI_BUILD_REF_NAME#*v}-pmd"
+    expire_in: "10 day"
 
 #-------------------------------------------------------------------
 # Compile
 #-------------------------------------------------------------------
 
-#Build Java (Ledgers):
-#  stage: "Compile"
-#  tags:
-#    - aws
-#  except:
-#    - schedules
-#  <<: *build_java
-#  artifacts:
-#    paths:
-#      - "ledgers-app/target/ledgers-app*jar"
-#      - "ledgers-deposit-account/ledgers-deposit-account-repository/target/ledgers-deposit-account-repository*jar"
-#      - "ledgers-deposit-account/ledgers-deposit-account-service-api/target/ledgers-deposit-account-service-api*jar"
-#      - "ledgers-deposit-account/ledgers-deposit-account-service-impl/target/ledgers-deposit-account-service-impl*jar"
-#      - "ledgers-middleware/ledgers-middleware-rest-server/target/ledgers-middleware-rest-server*jar"
-#      - "ledgers-middleware/ledgers-middleware-service-api/target/ledgers-middleware-service-api*jar"
-#      - "ledgers-middleware/ledgers-middleware-service-impl/target/ledgers-middleware-service-impl*jar"
-#      - "ledgers-mockbank/ledgers-mockbank-simple/target/ledgers-mockbank-simple*jar"
-#      - "ledgers-mockbank/ledgers-mockbank-simple-data-test/target/ledgers-mockbank-simple-data-test*jar"
-#      - "ledgers-postings/ledgers-postings-repository/target/ledgers-postings-repository*jar"
-#      - "ledgers-postings/ledgers-postings-rest-server/target/ledgers-postings-rest-server*jar"
-#      - "ledgers-postings/ledgers-postings-service-api/target/ledgers-postings-service-api*jar"
-#      - "ledgers-postings/ledgers-postings-service-impl/target/ledgers-postings-service-impl*jar"
-#      - "ledgers-sca/ledgers-sca-repository/target/ledgers-sca-repository*jar"
-#      - "ledgers-sca/ledgers-sca-service-api/target/ledgers-sca-service-api*jar"
-#      - "ledgers-sca/ledgers-sca-service-impl/target/ledgers-sca-service-impl*jar"
-#      - "ledgers-user-management/ledgers-user-management-repository/target/ledgers-user-management-repository*jar"
-#      - "ledgers-user-management/ledgers-user-management-rest-server/target/ledgers-user-management-rest-server*jar"
-#      - "ledgers-user-management/ledgers-user-management-service-api/target/ledgers-user-management-service-api*jar"
-#      - "ledgers-user-management/ledgers-user-management-service-impl/target/ledgers-user-management-service-impl*jar"
-#      - "ledgers-utils/target/ledgers-utils*jar"
-#      - "keycloak/keycloak-token-exchange/target/keycloak-token-exchange*.jar"
-#    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
-#    expire_in: "1 day"
+Build Java (Ledgers):
+  stage: "Compile"
+  tags:
+    - aws
+  except:
+    - schedules
+  <<: *build_java
+  artifacts:
+    paths:
+      - "ledgers-app/target/ledgers-app*jar"
+      - "ledgers-deposit-account/ledgers-deposit-account-repository/target/ledgers-deposit-account-repository*jar"
+      - "ledgers-deposit-account/ledgers-deposit-account-service-api/target/ledgers-deposit-account-service-api*jar"
+      - "ledgers-deposit-account/ledgers-deposit-account-service-impl/target/ledgers-deposit-account-service-impl*jar"
+      - "ledgers-middleware/ledgers-middleware-rest-server/target/ledgers-middleware-rest-server*jar"
+      - "ledgers-middleware/ledgers-middleware-service-api/target/ledgers-middleware-service-api*jar"
+      - "ledgers-middleware/ledgers-middleware-service-impl/target/ledgers-middleware-service-impl*jar"
+      - "ledgers-mockbank/ledgers-mockbank-simple/target/ledgers-mockbank-simple*jar"
+      - "ledgers-mockbank/ledgers-mockbank-simple-data-test/target/ledgers-mockbank-simple-data-test*jar"
+      - "ledgers-postings/ledgers-postings-repository/target/ledgers-postings-repository*jar"
+      - "ledgers-postings/ledgers-postings-rest-server/target/ledgers-postings-rest-server*jar"
+      - "ledgers-postings/ledgers-postings-service-api/target/ledgers-postings-service-api*jar"
+      - "ledgers-postings/ledgers-postings-service-impl/target/ledgers-postings-service-impl*jar"
+      - "ledgers-sca/ledgers-sca-repository/target/ledgers-sca-repository*jar"
+      - "ledgers-sca/ledgers-sca-service-api/target/ledgers-sca-service-api*jar"
+      - "ledgers-sca/ledgers-sca-service-impl/target/ledgers-sca-service-impl*jar"
+      - "ledgers-user-management/ledgers-user-management-repository/target/ledgers-user-management-repository*jar"
+      - "ledgers-user-management/ledgers-user-management-rest-server/target/ledgers-user-management-rest-server*jar"
+      - "ledgers-user-management/ledgers-user-management-service-api/target/ledgers-user-management-service-api*jar"
+      - "ledgers-user-management/ledgers-user-management-service-impl/target/ledgers-user-management-service-impl*jar"
+      - "ledgers-utils/target/ledgers-utils*jar"
+      - "keycloak/keycloak-token-exchange/target/keycloak-token-exchange*.jar"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}"
+    expire_in: "1 day"
 
 #-------------------------------------------------------------------
 # Tests
 #-------------------------------------------------------------------
 
-#Test (Javadoc Check):
-#  stage: "Test"
-#  except:
-#    - schedules
-#  script:
-#    - jabba use $BUILD_JAVA_VERSION
-#    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-#    - mvn -Dmaven.test.skip=true package javadoc:javadoc
-#  artifacts:
-#    paths:
-#      - "**/target/site/*"
-#    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
-#    expire_in: "10 day"
-#
-#Test (Unit Tests):
-#  stage: "Test"
-#  tags:
-#    - aws
-#  except:
-#    - schedules
-#  script:
-#    - jabba use $BUILD_JAVA_VERSION
-#    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-#    - mvn --fail-at-end -DskipITs clean install
-#  artifacts:
-#    paths:
-#      - "**/target/surefire-reports/*"
-#    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
-#    expire_in: "10 day"
-#
-#Test (Integration Tests):
-#  image: "maven:3.9.1-sapmachine-17"
-#  stage: "Test"
-#  tags:
-#    - aws
-#  except:
-#    - schedules
-#  script:
-#    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
-#    - mvn -ntp clean test-compile failsafe:integration-test failsafe:verify --fail-at-end --errors
-#    - echo $?
-#  artifacts:
-#    paths:
-#      - "**/target/failsafe-reports/*"
-#    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
-#    expire_in: "10 day"
-#  variables:
-#    TESTCONTAINERS_RYUK_DISABLED: 'true'
+Test (Javadoc Check):
+  stage: "Test"
+  except:
+    - schedules
+  script:
+    - jabba use $BUILD_JAVA_VERSION
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+    - mvn -Dmaven.test.skip=true package javadoc:javadoc
+  artifacts:
+    paths:
+      - "**/target/site/*"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-javadoc"
+    expire_in: "10 day"
+
+Test (Unit Tests):
+  stage: "Test"
+  tags:
+    - aws
+  except:
+    - schedules
+  script:
+    - jabba use $BUILD_JAVA_VERSION
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+    - mvn --fail-at-end -DskipITs clean install
+  artifacts:
+    paths:
+      - "**/target/surefire-reports/*"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
+    expire_in: "10 day"
+
+Test (Integration Tests):
+  image: "maven:3.9.1-sapmachine-17"
+  stage: "Test"
+  tags:
+    - aws
+  except:
+    - schedules
+  script:
+    - java -XX:+PrintFlagsFinal -version | grep -Ei "maxheapsize|maxram"
+    - mvn -ntp clean test-compile failsafe:integration-test failsafe:verify --fail-at-end --errors
+    - echo $?
+  artifacts:
+    paths:
+      - "**/target/failsafe-reports/*"
+    name: "$CI_PROJECT_NAME-${CI_BUILD_REF_NAME#*v}-*"
+    expire_in: "10 day"
+  variables:
+    TESTCONTAINERS_RYUK_DISABLED: 'true'
 
 ###########
 # Package
 ###########
 
-#Build and push images to private repo (develop):
-#  stage: "Package"
-#  services:
-#    - docker:dind
-#  tags:
-#    - aws
-#  only:
-#    - develop
-#  except:
-#    - schedules
-#  variables:
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_TLS_CERTDIR: ""
-#    DOCKER_DRIVER: overlay2
-#    DOCKER_TAG: develop
-#  <<: *build_and_push_dockerhub_images_private
-#
-#
-#Build and push images to private repo (tags):
-#  stage: "Package"
-#  services:
-#    - docker:dind
-#  tags:
-#    - aws
-#  only:
-#    - tags
-#  variables:
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_TLS_CERTDIR: ""
-#    DOCKER_DRIVER: overlay2
-#    DOCKER_TAG: $CI_COMMIT_TAG
-#  <<: *build_and_push_dockerhub_images_private
-#
-#Build and push images to private repo (master):
-#  stage: "Package"
-#  services:
-#    - docker:dind
-#  tags:
-#    - aws
-#  only:
-#    - master
-#  variables:
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_TLS_CERTDIR: ""
-#    DOCKER_DRIVER: overlay2
-#    DOCKER_TAG: latest
-#  <<: *build_and_push_dockerhub_images_private
+Build and push images to private repo (develop):
+  stage: "Package"
+  services:
+    - docker:dind
+  tags:
+    - aws
+  only:
+    - develop
+  except:
+    - schedules
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+    DOCKER_TAG: develop
+  <<: *build_and_push_dockerhub_images_private
+
+
+Build and push images to private repo (tags):
+  stage: "Package"
+  services:
+    - docker:dind
+  tags:
+    - aws
+  only:
+    - tags
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+    DOCKER_TAG: $CI_COMMIT_TAG
+  <<: *build_and_push_dockerhub_images_private
+
+Build and push images to private repo (master):
+  stage: "Package"
+  services:
+    - docker:dind
+  tags:
+    - aws
+  only:
+    - master
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+    DOCKER_TAG: latest
+  <<: *build_and_push_dockerhub_images_private
 
 ###########
 # Release (tags) #
 ###########
 
-#Release artifacts to private repo (snapshots):
-#  stage: "Release"
-#  only:
-#    - develop
-#  except:
-#    - schedules
-#  cache: {}
-#  variables:
-#    JAVA_TOOL_OPTIONS: "-Djavax.net.ssl.trustStorePassword=changeit -XX:MaxRAM=3G"
-#  <<: *release_java_private
-#
-#Release artifacts to private repo (tags):
-#  stage: "Release"
-#  only:
-#    - tags
-#  except:
-#    - schedules
-#  cache: {}
-#  variables:
-#    JAVA_TOOL_OPTIONS: "-Djavax.net.ssl.trustStorePassword=changeit -XX:MaxRAM=3G"
-#  <<: *release_java_private
+Release artifacts to private repo (snapshots):
+  stage: "Release"
+  only:
+    - develop
+  except:
+    - schedules
+  cache: {}
+  variables:
+    JAVA_TOOL_OPTIONS: "-Djavax.net.ssl.trustStorePassword=changeit -XX:MaxRAM=3G"
+  <<: *release_java_private
+
+Release artifacts to private repo (tags):
+  stage: "Release"
+  only:
+    - tags
+  except:
+    - schedules
+  cache: {}
+  variables:
+    JAVA_TOOL_OPTIONS: "-Djavax.net.ssl.trustStorePassword=changeit -XX:MaxRAM=3G"
+  <<: *release_java_private
 
 ###########
 # Clone to GITHUB #
 ###########
 
 clone_to_github:
-  <<: *sync_changes_github
-  stage: "Clone to github"
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
-      when: always
 #  <<: *sync_changes_github
 #  stage: "Clone to github"
 #  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($MONTH == "06" || $MONTH == "12")'
+#    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
 #      when: always
-#    - when: never
-#  only:
-#    - /^support-.*\.x$/
-#  except:
-#    - schedules
+  <<: *sync_changes_github
+  stage: "Clone to github"
+  rules:
+    - if: |
+        $CI_PIPELINE_SOURCE == "schedule" &&
+        ($MONTH == "06" || $MONTH == "12") &&
+        ($CI_COMMIT_REF_NAME =~ /^(v2)?support-.*\.x$/ || $CI_COMMIT_REF_NAME == "develop")
+      when: always
