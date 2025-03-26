@@ -489,15 +489,15 @@ clone_to_github:
   <<: *sync_changes_github
   stage: "Clone to github"
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($MONTH == "06" || $MONTH == "12")'
+    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
       when: always
-    - when: never
-  only:
-    - /^support-.*\.x$/
-  except:
-    - schedules
 #  <<: *sync_changes_github
 #  stage: "Clone to github"
 #  rules:
-#    - if: '$CI_COMMIT_REF_NAME == "ci/issue-1984-sync-github"'
+#    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($MONTH == "06" || $MONTH == "12")'
 #      when: always
+#    - when: never
+#  only:
+#    - /^support-.*\.x$/
+#  except:
+#    - schedules
