@@ -1,0 +1,98 @@
+name: Mythos-Aware Code Review
+
+# Runs the Uniqus Mythos engine over the files changed in this PR (or
+# pushed to main). Posts a markdown summary as a sticky PR comment and
+# fails the build when 'critical' findings are detected.
+#
+# Reuse: drop this file into .github/workflows/ of ANY repo. The scan
+# script lives in this repo (portal-deploy-with-backend/ci/mythos-scan.js).
+# In a foreign repo, replace the `node ci/mythos-scan.js` line with a
+# `curl | node` invocation against the raw GitHub URL of mythos-scan.js,
+# OR vendor the file directly under ./ci/ in the target repo.
+
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      scan_all:
+        description: "Scan ALL code files (ignore diff)"
+        required: false
+        default: "0"
+      industry:
+        description: "Industry library (banking|pharma|healthcare|energy)"
+        required: false
+        default: "banking"
+
+permissions:
+  contents: read
+  pull-requests: write   # for sticky PR comments
+  issues: write          # GH treats PR comments as issue comments
+
+concurrency:
+  group: mythos-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Scan with Uniqus Mythos
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Public demo backend. For private deployments, override with a
+      # repo-level secret named MYTHOS_API_URL.
+      MYTHOS_API_URL: ${{ secrets.MYTHOS_API_URL || 'https://mythos-aware-assessment.onrender.com' }}
+      MYTHOS_INDUSTRY: ${{ github.event.inputs.industry || vars.MYTHOS_INDUSTRY || 'banking' }}
+      # Optional shared secret. Required only if backend's CI_REPORT_SECRET is set.
+      CI_REPORT_SECRET: ${{ secrets.MYTHOS_CI_SECRET }}
+      # Fail the build on this severity or higher. Override via repo var.
+      FAIL_ON: ${{ vars.MYTHOS_FAIL_ON || 'critical' }}
+      MAX_FILES: ${{ vars.MYTHOS_MAX_FILES || '25' }}
+      SCAN_ALL: ${{ github.event.inputs.scan_all || '0' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need full history for diff against base
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Mythos scan
+        id: scan
+        # `set +e` so we capture the exit code without aborting before
+        # we've had a chance to post the PR comment + upload artifacts.
+        run: |
+          set +e
+          node ci/mythos-scan.js
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Upload report artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythos-report
+          path: |
+            mythos-report.md
+            mythos-report.json
+          if-no-files-found: ignore
+
+      - name: Post / update PR comment
+        if: github.event_name == 'pull_request' && always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: mythos-review
+          path: mythos-report.md
+
+      - name: Fail build if scan failed
+        if: steps.scan.outputs.exit_code != '0'
+        run: |
+          echo "Mythos scan returned non-zero exit ${{ steps.scan.outputs.exit_code }} — failing build."
+          exit 1
