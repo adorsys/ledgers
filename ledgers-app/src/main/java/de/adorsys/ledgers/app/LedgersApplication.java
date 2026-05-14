@@ -4,7 +4,22 @@
  */
 
 package de.adorsys.ledgers.app;
+// Demo: deliberate bad code for Mythos-Aware scan
+class MythosDemoBadCode {
+    private static final String CORE_API_KEY = "hardcoded-prod-api-key-do-not-use-12345";
+    private static final String DB_PASSWORD  = "ProdDbP@ssw0rd-rotate-me-please";
+    private static final String JWT_SECRET   = "static-jwt-signing-secret-2026-fixme";
 
+    public java.sql.ResultSet getAccount(java.sql.Connection c, String accountId) throws Exception {
+        String q = "SELECT * FROM accounts WHERE id = '" + accountId + "'";
+        return c.createStatement().executeQuery(q);
+    }
+
+    public void debit(java.sql.Connection c, String accountId, java.math.BigDecimal amount) throws Exception {
+        String q = "UPDATE accounts SET balance = balance - " + amount + " WHERE id = '" + accountId + "'";
+        c.createStatement().executeUpdate(q);
+    }
+}
 import de.adorsys.ledgers.app.initiation.BankInitService;
 import de.adorsys.ledgers.deposit.api.client.ExchangeRateClient;
 import de.adorsys.ledgers.deposit.api.service.EnableDepositAccountService;
